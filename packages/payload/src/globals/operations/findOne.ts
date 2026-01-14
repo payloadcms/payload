@@ -1,3 +1,5 @@
+import { ar } from '@payloadcms/translations/languages/ar'
+
 import type { AccessResult } from '../../config/types.js'
 import type {
   JsonObject,
@@ -13,6 +15,7 @@ import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -41,10 +44,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const {
     slug,
     depth,
-    draft: draftEnabled = false,
+    draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
-    includeLockStatus,
+    includeLockStatus: includeLockStatusFromArgs,
     overrideAccess = false,
     populate,
     req: { fallbackLocale, locale },
@@ -52,6 +55,9 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     select: incomingSelect,
     showHiddenFields,
   } = args
+
+  const includeLockStatus =
+    includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
   try {
     // /////////////////////////////////////
@@ -164,7 +170,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Replace document with draft if available
     // /////////////////////////////////////
 
-    if (globalConfig.versions?.drafts && draftEnabled) {
+    if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
       doc = await replaceWithDraftIfAvailable({
         accessResult,
         doc,
@@ -214,7 +220,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
       context: req.context,
       depth: depth!,
       doc,
-      draft: draftEnabled,
+      draft: replaceWithVersion,
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: globalConfig,

@@ -79,6 +79,11 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  dashboard: {
+    addWidget: 'Vidjet əlavə et',
+    deleteWidget: 'Vidgeti silin {{id}}',
+    searchWidgets: 'Widgetləri axtarın...',
+  },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
     autosaving: 'Bu sənədin avto yadda saxlanılması zamanı problem yarandı.',
@@ -340,6 +345,7 @@ export const azTranslations: DefaultTranslationsObject = {
     loading: 'Yüklənir',
     locale: 'Lokal',
     locales: 'Dillər',
+    lock: 'Kilid',
     menu: 'Menyu',
     moreOptions: 'Daha çox seçimlər',
     move: 'Hərəkət et',
@@ -430,6 +436,7 @@ export const azTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unlock: 'Açın',
     unsavedChanges:
       'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:

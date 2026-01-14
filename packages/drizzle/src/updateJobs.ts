@@ -38,6 +38,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const result = await upsertRow({
       id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data,
       db,
       fields: collection.flattenedFields,
@@ -81,6 +82,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const result = await upsertRow({
       id: job.id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data: updateData,
       db,
       fields: collection.flattenedFields,

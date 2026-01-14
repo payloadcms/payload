@@ -80,6 +80,11 @@ export const trTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
+  dashboard: {
+    addWidget: 'Widget Ekle',
+    deleteWidget: "Widget'i sil {{id}}",
+    searchWidgets: "Arama widget'ları...",
+  },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',
     autosaving: 'Otomatik kaydetme başarısız oldu',
@@ -341,6 +346,7 @@ export const trTranslations: DefaultTranslationsObject = {
     loading: 'Yükleniyor',
     locale: 'Yerel ayar',
     locales: 'Diller',
+    lock: 'Kilitle',
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
     move: 'Hareket et',
@@ -432,6 +438,7 @@ export const trTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} çöp kutusuna taşındı.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
+    unlock: 'Kilidi Aç',
     unsavedChanges: 'Kaydedilmemiş değişiklikleriniz var. Devam etmeden önce kaydedin veya atın.',
     unsavedChangesDuplicate:
       'Kaydedilmemiş değişiklikler var. Çoğaltma işlemine devam etmek istiyor musunuz?',

@@ -78,6 +78,11 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  dashboard: {
+    addWidget: 'اضافه کردن ویجت',
+    deleteWidget: 'حذف ابزارک {{id}}',
+    searchWidgets: 'جستجوی ابزارک‌ها...',
+  },
   error: {
     accountAlreadyActivated: 'این حساب کاربری قبلاً فعال شده است.',
     autosaving: 'هنگام ذخیره خودکار این صفحه، خطایی رخ داد.',
@@ -331,6 +336,7 @@ export const faTranslations: DefaultTranslationsObject = {
     loading: 'در حال بارگذاری...',
     locale: 'زبان',
     locales: 'زبان‌ها',
+    lock: 'قفل',
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'انتقال',
@@ -419,6 +425,7 @@ export const faTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
     true: 'بله',
     unauthorized: 'غیرمجاز',
+    unlock: 'باز کردن',
     unsavedChanges: 'تغییرات ذخیره نشده‌ای دارید. قبل از ادامه، آن‌ها را ذخیره یا لغو کنید.',
     unsavedChangesDuplicate:
       'شما تغییرات ذخیره نشده‌ای دارید. آیا می‌خواهید بدون ذخیره، کپی ایجاد کنید؟',

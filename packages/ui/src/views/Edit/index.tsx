@@ -2,9 +2,8 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -39,8 +38,8 @@ import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
-import './index.scss'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
+import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -61,6 +60,7 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -122,6 +122,7 @@ export function DefaultEditView({
     config: {
       admin: { user: userSlug },
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -170,10 +171,7 @@ export function DefaultEditView({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
+  const autosaveEnabled = hasAutosaveEnabled(docConfig)
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -357,6 +355,12 @@ export function DefaultEditView({
           skipValidation: true,
         })
 
+        // For upload collections, clear the file field from the returned state
+        // to prevent the File object from persisting in form state after save
+        if (upload && state) {
+          delete state.file
+        }
+
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
@@ -394,21 +398,16 @@ export function DefaultEditView({
       }
     },
     [
-      reportUpdate,
-      id,
-      entitySlug,
       user,
-      drawerSlug,
       collectionSlug,
       userSlug,
+      id,
       setLastUpdateTime,
       setData,
       onSaveFromContext,
       isEditing,
       depth,
       redirectAfterCreate,
-      setLivePreviewURL,
-      setPreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -423,11 +422,17 @@ export function DefaultEditView({
       docPermissions,
       operation,
       isLivePreviewEnabled,
-      isPreviewEnabled,
       typeofLivePreviewURL,
+      isPreviewEnabled,
       schemaPathSegments,
+      upload,
       isLockingEnabled,
+      reportUpdate,
+      drawerSlug,
+      entitySlug,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -556,7 +561,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router, serverURL })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -582,7 +587,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router, serverURL })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -617,6 +622,7 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}

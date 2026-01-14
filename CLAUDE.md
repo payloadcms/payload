@@ -52,12 +52,26 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ## Development
 
+### Coding Patterns and Best Practices
+
+- Prefer single object parameters (improves backwards-compatibility)
+- Prefer types over interfaces (except when extending external types)
+- Prefer functions over classes (classes only for errors/adapters)
+- Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.
+- Organize functions top-down: exports before helpers
+- Use JSDoc for complex functions; add tags only when justified beyond type signature
+- Use `import type` for types, regular `import` for values, separate statements even from same module
+- Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Commenting Guidelines
+  - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
+  - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
+  - Type definitions: Property/interface documentation is always acceptable.
+
 ### Running Dev Server
 
 - `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
-- `pnpm run dev:memorydb` - Run dev server with in-memory MongoDB
 
 ### Development Environment
 
@@ -67,6 +81,47 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
 
 ## Testing
+
+### Writing Tests - Required Practices
+
+**Tests MUST be self-contained and clean up after themselves:**
+
+- If you create a database record in a test, you MUST delete it before the test completes
+- For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
+- Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+
+**Example pattern:**
+
+```typescript
+describe('My Feature', () => {
+  const createdIDs: number[] = []
+
+  afterEach(async () => {
+    for (const id of createdIDs) {
+      await payload.delete({ collection: 'my-collection', id })
+    }
+    createdIDs.length = 0
+  })
+
+  it('should create a record', async () => {
+    const id = 123
+    createdIDs.push(id)
+
+    await payload.create({ collection: 'my-collection', data: { id, title: 'Test' } })
+    // assertions...
+  })
+})
+```
+
+**Additional test guidelines:**
+
+- Use descriptive test names starting with "should" (e.g., "should create document with custom ID")
+- Add blank lines after variable declarations to improve readability
+- Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
+- One test should verify one behavior - keep tests focused
+- When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
+
+### How to run tests
 
 - `pnpm run test` - Run all tests (integration + components + e2e)
 - `pnpm run test:int` - Integration tests (MongoDB, recommended)
@@ -82,7 +137,7 @@ Each test directory in `test/` follows this pattern:
 ```
 test/<feature-name>/
 ├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Jest)
+├── int.spec.ts      # Integration tests (Vitest)
 ├── e2e.spec.ts      # End-to-end tests (Playwright)
 └── payload-types.ts # Generated types
 ```
@@ -133,4 +188,4 @@ Examples:
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
-- pnpm version: ^9.7.0
+- pnpm version: ^10.27.0

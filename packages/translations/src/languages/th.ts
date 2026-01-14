@@ -78,6 +78,11 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  dashboard: {
+    addWidget: 'เพิ่มวิดเจ็ต',
+    deleteWidget: 'ลบวิดเจ็ต {{id}}',
+    searchWidgets: 'ค้นหาวิดเจ็ต...',
+  },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',
     autosaving: 'เกิดปัญหาระหว่างการบันทึกเอกสารอัตโนมัติ',
@@ -331,6 +336,7 @@ export const thTranslations: DefaultTranslationsObject = {
     loading: 'กำลังโหลด',
     locale: 'ตำแหน่งที่ตั้ง',
     locales: 'ภาษา',
+    lock: 'ล็อค',
     menu: 'เมนู',
     moreOptions: 'ตัวเลือกเพิ่มเติม',
     move: 'ย้าย',
@@ -420,6 +426,7 @@ export const thTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ถูกย้ายไปยังถังขยะ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',
+    unlock: 'ปลดล็อค',
     unsavedChanges: 'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก บันทึกหรือทิ้งก่อนที่จะดำเนินการต่อ',
     unsavedChangesDuplicate: 'คุณมีการแก้ไขที่ยังไม่ถูกบันทึก คุณต้องการทำสำเนาต่อหรือไม่?',
     untitled: 'ไม่มีชื่อ',

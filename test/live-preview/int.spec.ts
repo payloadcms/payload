@@ -8,6 +8,7 @@ import {
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
@@ -900,12 +901,10 @@ describe('Collections - Live Preview', () => {
     expect(merge2[fieldName].root.children[3].value).toMatchObject(media)
   }
 
-  // eslint-disable-next-line jest/expect-expect
   it('— relationships - populates within Lexical rich text editor', async () => {
     await lexicalTest('richTextLexical')
   })
 
-  // eslint-disable-next-line jest/expect-expect
   it('— relationships - populates within Localized Lexical rich text editor', async () => {
     await lexicalTest('richTextLexicalLocalized')
   })

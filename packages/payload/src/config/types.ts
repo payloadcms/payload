@@ -346,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
@@ -699,7 +699,16 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+export type ErrorResult = {
+  data?: any
+  errors: {
+    data?: Record<string, unknown>
+    field?: string
+    message?: string
+    name?: string
+  }[]
+  stack?: string
+}
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
@@ -735,6 +744,53 @@ export type ImportMapGenerators = Array<
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
+
+export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
+
+export type Widget = {
+  ComponentPath: string
+  /**
+   * Human-friendly label for the widget.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the label will be auto-generated from the slug.
+   */
+  label?: LabelFunction | StaticLabel
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
+  // TODO: Add fields
+  // fields?: Field[]
+  // Maybe:
+  // ImageURL?: string // similar to Block
+}
+
+/**
+ * Client-side widget type with resolved label (no functions).
+ */
+export type ClientWidget = {
+  label?: StaticLabel
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
+}
+
+export type WidgetInstance = {
+  // TODO: should be inferred from Widget Fields
+  // data: Record<string, any>
+  widgetSlug: string
+  width?: WidgetWidth
+}
+
+export type DashboardConfig = {
+  defaultLayout?:
+    | ((args: { req: PayloadRequest }) => Array<WidgetInstance> | Promise<Array<WidgetInstance>>)
+    | Array<WidgetInstance>
+  widgets: Array<Widget>
+}
+
+export type SanitizedDashboardConfig = {
+  widgets: Array<Omit<Widget, 'ComponentPath'>>
+}
 
 /**
  * This is the central configuration
@@ -859,6 +915,11 @@ export type Config = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Customize the dashboard widgets
+     * @experimental This prop is subject to change in future releases.
+     */
+    dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
@@ -1346,6 +1407,14 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
+
+    /**
+     * Enable strict type safety for draft mode queries.
+     * When enabled, find operations with draft: true will type required fields as optional.
+     * @default false
+     * @todo Remove in v4. Strict draft types will become the default behavior.
+     */
+    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

@@ -7,6 +7,8 @@ import type { TypedUser } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { VerifyConfig } from './types.js'
 
+import { formatAdminURL } from '../utilities/formatAdminURL.js'
+
 type Args = {
   collection: Collection
   config: SanitizedConfig
@@ -36,7 +38,11 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
         ? config.serverURL
         : `${protocol}//${req.headers.get('host')}`
 
-    const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`
+    const verificationURL = formatAdminURL({
+      adminRoute: config.routes.admin,
+      path: `/${collectionConfig.slug}/verify/${token}`,
+      serverURL,
+    })
 
     let html = `${req.t('authentication:newAccountCreated', {
       serverURL: config.serverURL,

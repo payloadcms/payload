@@ -1,10 +1,12 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
 import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -80,7 +82,7 @@ describe('relationship', () => {
     await loadCreatePage()
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
     const textField = page.locator('.drawer__content #field-text')
     await expect(textField).toBeEnabled()
@@ -92,6 +94,32 @@ describe('relationship', () => {
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should save correct relationTo when creating doc in second collection (bug #14728)', async () => {
+    await loadCreatePage()
+
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+
+    // Select the SECOND collection (array-fields) instead of the first (text-fields)
+    await page
+      .locator('.popup__content .relationship-add-new__relation-button--array-fields')
+      .click()
+
+    await page.locator('[id^=doc-drawer_array-fields_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.locator('[id^=close-drawer__doc-drawer_array-fields_1_]').click()
+
+    const relationshipValue = page.locator('#field-relationship .relationship--single-value__text')
+    await expect(relationshipValue).toBeVisible()
+    await expect(async () => {
+      const valueText = await relationshipValue.textContent()
+      expect(valueText).not.toContain('Another text document')
+      expect(valueText).not.toContain('Untitled')
+    }).toPass()
+
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
@@ -303,7 +331,7 @@ describe('relationship', () => {
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
 
     await page.locator('.drawer__content #field-text').fill('something')
@@ -463,8 +491,8 @@ describe('relationship', () => {
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-create').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
       await drawer1Content.locator('#field-text').fill(title)
@@ -523,8 +551,8 @@ describe('relationship', () => {
       const originalText = 'Text'
       await drawer1Content.locator('#field-text').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-duplicate').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-duplicate').click()
       const duplicateID = drawer1Content.locator('.id-label')
       await expect(duplicateID).not.toHaveText(originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
@@ -580,8 +608,8 @@ describe('relationship', () => {
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-delete').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-delete').click()
 
       await page
         .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
@@ -959,6 +987,53 @@ describe('relationship', () => {
     await expect(
       page.locator('#field-relationshipDrawer .relationship--single-value__text'),
     ).toHaveText('new text')
+  })
+
+  describe('A11y', () => {
+    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-id a').nth(0)
+      await firstItem.click()
+
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Relationship fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })
 

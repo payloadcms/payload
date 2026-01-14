@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.64.0",
+  "version": "3.71.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
       "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./src/withPayload.js",
-      "default": "./src/withPayload.js"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
@@ -85,17 +85,19 @@
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
-    "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:cjs": "node ./bundleWithPayload.js",
+    "build:debug": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles:debug && pnpm build:types && pnpm build:cjs && node createStubScss.js",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
     "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles:debug": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
@@ -106,7 +108,9 @@
     ]
   },
   "dependencies": {
-    "@dnd-kit/core": "6.0.8",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
+    "@dnd-kit/sortable": "10.0.0",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -130,18 +134,18 @@
     "@next/eslint-plugin-next": "15.4.7",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "4.0.4"
+    "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.2.3",
+    "next": "^15.4.10",
     "payload": "workspace:*"
   },
   "engines": {
@@ -154,9 +158,9 @@
         "default": "./dist/prod/styles.css"
       },
       "./withPayload": {
-        "import": "./dist/withPayload.js",
+        "import": "./dist/withPayload/withPayload.js",
         "require": "./dist/cjs/withPayload.cjs",
-        "default": "./dist/withPayload.js"
+        "default": "./dist/withPayload/withPayload.js"
       },
       "./layouts": {
         "import": "./dist/exports/layouts.js",

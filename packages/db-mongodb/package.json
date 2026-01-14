@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.64.0",
+  "version": "3.71.1",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -44,12 +44,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "mongoose": "8.15.1",

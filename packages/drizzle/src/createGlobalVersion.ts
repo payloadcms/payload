@@ -2,6 +2,7 @@ import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from 'paylo
 
 import { sql } from 'drizzle-orm'
 import { buildVersionGlobalFields } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -43,6 +44,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     },
     db,
     fields: buildVersionGlobalFields(this.payload.config, global, true),
+    globalSlug,
     ignoreResult: returning === false ? 'idOnly' : false,
     operation: 'create',
     req,
@@ -51,7 +53,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   })
 
   const table = this.tables[tableName]
-  if (global.versions.drafts) {
+  if (hasDraftsEnabled(global)) {
     await this.execute({
       db,
       sql: sql`

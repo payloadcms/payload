@@ -80,6 +80,11 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  dashboard: {
+    addWidget: 'Bæta við smáforriti',
+    deleteWidget: 'Eyða græju {{id}}',
+    searchWidgets: 'Leita að græjum...',
+  },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
     autosaving: 'Villa kom upp við sjálfvirka vistun á færslu.',
@@ -336,6 +341,7 @@ export const isTranslations: DefaultTranslationsObject = {
     loading: 'Hleð',
     locale: 'Staðfærsla',
     locales: 'Staðfærslur',
+    lock: 'Lás',
     menu: 'Valmynd',
     moreOptions: 'Fleiri valkostir',
     move: 'Færa',
@@ -425,6 +431,7 @@ export const isTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} færð í rusl.',
     true: 'Satt',
     unauthorized: 'Óheimilt',
+    unlock: 'Opnaðu',
     unsavedChanges:
       'Þú ert með óvistaðar breytingar. Vistaðu eða hættu við áður en þú heldur áfram.',
     unsavedChangesDuplicate: 'Þú ert með óvistaðar breytingar. Viltu halda áfram við að tvöfalda?',

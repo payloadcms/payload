@@ -16,6 +16,7 @@ import React from 'react'
 
 import type { Theme } from '../Theme/index.js'
 
+import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
@@ -101,6 +102,7 @@ export const RootProvider: React.FC<Props> = ({
                     <ScrollInfoProvider>
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
+                          <CloseModalOnRouteChange />
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
                               <ThemeProvider theme={theme}>

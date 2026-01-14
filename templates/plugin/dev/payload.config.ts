@@ -26,7 +26,7 @@ const buildConfigWithMemoryDB = async () => {
       },
     })
 
-    process.env.DATABASE_URI = `${memoryDB.getUri()}&retryWrites=true`
+    process.env.DATABASE_URL = `${memoryDB.getUri()}&retryWrites=true`
   }
 
   return buildConfig({
@@ -50,7 +50,7 @@ const buildConfigWithMemoryDB = async () => {
     ],
     db: mongooseAdapter({
       ensureIndexes: true,
-      url: process.env.DATABASE_URI || '',
+      url: process.env.DATABASE_URL || '',
     }),
     editor: lexicalEditor(),
     email: testEmailAdapter,

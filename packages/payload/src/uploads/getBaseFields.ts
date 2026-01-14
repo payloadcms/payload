@@ -3,19 +3,8 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
+import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-
-type GenerateURLArgs = {
-  collectionSlug: string
-  config: Config
-  filename?: string
-}
-const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
-  if (filename) {
-    return `${config.serverURL || ''}${config.routes?.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
-  }
-  return undefined
-}
 
 type Options = {
   collection: CollectionConfig
@@ -44,7 +33,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     hooks: {
       afterRead: [
-        ({ originalDoc }) => {
+        ({ originalDoc, req, value }) => {
           const adminThumbnail =
             typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
 
@@ -52,20 +41,29 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             return adminThumbnail({ doc: originalDoc })
           }
 
-          if (
-            typeof adminThumbnail === 'string' &&
-            'sizes' in originalDoc &&
-            originalDoc.sizes?.[adminThumbnail]?.filename
-          ) {
-            return generateURL({
-              collectionSlug: collection.slug,
-              config,
-              filename: originalDoc.sizes?.[adminThumbnail].filename as string,
-            })
-          }
-
-          return null
+          return generateFilePathOrURL({
+            collectionSlug: collection.slug,
+            config,
+            filename:
+              typeof adminThumbnail === 'string'
+                ? (originalDoc.sizes?.[adminThumbnail].filename as string)
+                : undefined,
+            relative: false,
+            serverURL: req.payload.config.serverURL,
+            urlOrPath: value,
+          })
         },
+      ],
+      beforeChange: [
+        ({ collection, data, originalDoc, req, value }) =>
+          generateFilePathOrURL({
+            collectionSlug: collection?.slug as string,
+            config,
+            filename: data?.filename || originalDoc?.filename,
+            relative: true,
+            serverURL: req.payload.config.serverURL,
+            urlOrPath: value,
+          }),
       ],
     },
     label: 'Thumbnail URL',
@@ -136,17 +134,26 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       ...url,
       hooks: {
         afterRead: [
-          ({ data, value }) => {
-            if (value && !data?.filename) {
-              return value
-            }
-
-            return generateURL({
+          ({ data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
               collectionSlug: collection.slug,
               config,
-              filename: data?.filename,
-            })
-          },
+              filename: data?.filename || originalDoc?.filename,
+              relative: false,
+              serverURL: req.payload.config.serverURL,
+              urlOrPath: value,
+            }),
+        ],
+        beforeChange: [
+          ({ collection, data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
+              collectionSlug: collection?.slug as string,
+              config,
+              filename: data?.filename || originalDoc?.filename,
+              relative: true,
+              serverURL: req.payload.config.serverURL,
+              urlOrPath: value,
+            }),
         ],
       },
     },
@@ -215,19 +222,28 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               },
               hooks: {
                 afterRead: [
-                  ({ data, value }) => {
-                    if (value && size.height && size.width && !data?.filename) {
-                      return value
-                    }
-
-                    const sizeFilename = data?.sizes?.[size.name]?.filename
-
-                    if (sizeFilename) {
-                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${encodeURIComponent(sizeFilename)}`
-                    }
-
-                    return null
-                  },
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
+                      collectionSlug: collection?.slug as string,
+                      config,
+                      filename:
+                        data?.sizes?.[size.name]?.filename ||
+                        originalDoc?.sizes?.[size.name]?.filename,
+                      relative: false,
+                      serverURL: req.payload.config.serverURL,
+                      urlOrPath: value,
+                    }),
+                ],
+                beforeChange: [
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
+                      collectionSlug: collection?.slug as string,
+                      config,
+                      filename: data?.filename || originalDoc?.filename,
+                      relative: true,
+                      serverURL: req.payload.config.serverURL,
+                      urlOrPath: value,
+                    }),
                 ],
               },
             },

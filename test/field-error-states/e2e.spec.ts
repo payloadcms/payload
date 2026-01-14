@@ -4,10 +4,15 @@ import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait  } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
@@ -25,6 +30,7 @@ describe('Field Error States', () => {
   let prevValue: AdminUrlUtil
   let prevValueRelation: AdminUrlUtil
   let errorFieldsURL: AdminUrlUtil
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -38,6 +44,11 @@ describe('Field Error States', () => {
     prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue!)
     prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation!)
     errorFieldsURL = new AdminUrlUtil(serverURL, collectionSlugs.errorFields!)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -46,7 +57,9 @@ describe('Field Error States', () => {
   })
 
   test('Remove row should remove error states from parent fields', async () => {
-    await page.goto(`${serverURL}/admin/collections/error-fields/create`)
+    await page.goto(
+      formatAdminURL({ adminRoute, path: '/collections/error-fields/create', serverURL }),
+    )
 
     // add parent array
     await addArrayRow(page, { fieldName: 'parentArray' })

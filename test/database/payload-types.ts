@@ -88,6 +88,7 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -116,6 +117,7 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -124,6 +126,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
     header: Header;
     global: Global;
@@ -138,7 +141,7 @@ export interface Config {
     'global-3': Global3Select<false> | Global3Select<true>;
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'uk';
   user: User & {
     collection: 'users';
   };
@@ -260,6 +263,7 @@ export interface Post {
   localized?: string | null;
   text?: string | null;
   number?: number | null;
+  numberDefault?: number | null;
   blocks?:
     | {
         nested?:
@@ -678,6 +682,23 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -904,6 +925,7 @@ export interface PostsSelect<T extends boolean = true> {
   localized?: T;
   text?: T;
   number?: T;
+  numberDefault?: T;
   blocks?:
     | T
     | {
@@ -1280,6 +1302,14 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1490,6 +1520,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

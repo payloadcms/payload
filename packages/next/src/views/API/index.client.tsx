@@ -18,6 +18,7 @@ import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'
@@ -37,7 +38,6 @@ export const APIViewClient: React.FC = () => {
       defaultDepth,
       localization,
       routes: { api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -50,15 +50,15 @@ export const APIViewClient: React.FC = () => {
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   let draftsEnabled: boolean = false
-  let docEndpoint: string = ''
+  let docEndpoint: `/${string}` = undefined
 
   if (collectionConfig) {
-    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(collectionConfig)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
   if (globalConfig) {
-    draftsEnabled = Boolean(globalConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(globalConfig)
     docEndpoint = `/globals/${globalSlug}`
   }
 
@@ -80,7 +80,10 @@ export const APIViewClient: React.FC = () => {
     trash: trashParam ? 'true' : 'false',
   }).toString()
 
-  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?${params}`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: `${docEndpoint}?${params}`,
+  })
 
   React.useEffect(() => {
     const fetchData = async () => {

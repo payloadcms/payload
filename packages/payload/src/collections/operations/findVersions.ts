@@ -15,6 +15,8 @@ import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.j
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -35,25 +37,35 @@ export type Arguments = {
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
 ): Promise<PaginatedDocs<TData>> => {
-  const {
-    collection: { config: collectionConfig },
-    depth,
-    limit,
-    overrideAccess,
-    page,
-    pagination = true,
-    populate,
-    select: incomingSelect,
-    showHiddenFields,
-    sort,
-    trash = false,
-    where,
-  } = args
-
-  const req = args.req!
-  const { fallbackLocale, locale, payload } = req
-
   try {
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'findVersions',
+    })
+
+    const {
+      collection: { config: collectionConfig },
+      depth,
+      limit,
+      overrideAccess,
+      page,
+      pagination = true,
+      populate,
+      select: incomingSelect,
+      showHiddenFields,
+      sort,
+      trash = false,
+      where,
+    } = args
+
+    const req = args.req!
+    const { fallbackLocale, locale, payload } = req
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -116,7 +128,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////
-    const result: PaginatedDocs<TData> = paginatedDocs as unknown as PaginatedDocs<TData>
+    let result: PaginatedDocs<TData> = paginatedDocs as unknown as PaginatedDocs<TData>
     result.docs = (await Promise.all(
       paginatedDocs.docs.map(async (doc) => {
         const docRef = doc
@@ -199,9 +211,20 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // /////////////////////////////////////
     result.docs = result.docs.map((doc) => sanitizeInternalFields<TData>(doc))
 
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersions',
+      result,
+    })
+
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req!)
     throw error
   }
 }

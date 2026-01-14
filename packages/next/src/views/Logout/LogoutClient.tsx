@@ -4,6 +4,7 @@ import {
   LoadingOverlay,
   toast,
   useAuth,
+  useConfig,
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
@@ -33,6 +34,7 @@ export const LogoutClient: React.FC<{
   const { adminRoute, inactivity, redirect } = props
 
   const { logOut, user } = useAuth()
+  const { config } = useConfig()
 
   const { startRouteTransition } = useRouteTransition()
 
@@ -45,10 +47,11 @@ export const LogoutClient: React.FC<{
   const [loginRoute] = React.useState(() =>
     formatAdminURL({
       adminRoute,
-      path: `/login${inactivity && redirect && redirect.length > 0
+      path: `/login${
+        inactivity && redirect && redirect.length > 0
           ? `?redirect=${encodeURIComponent(redirect)}`
           : ''
-        }`,
+      }`,
     }),
   )
 

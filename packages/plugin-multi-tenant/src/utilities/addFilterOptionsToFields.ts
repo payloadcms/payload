@@ -36,6 +36,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   for (const field of fields) {
     let newField: Field = { ...field }
     if (newField.type === 'relationship') {
+      let hasTenantRelationsips = false
       /**
        * Adjusts relationship fields to filter by tenant
        * and ensures relationTo cannot be a tenant global collection
@@ -47,15 +48,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           )
         }
         if (tenantEnabledCollectionSlugs.includes(newField.relationTo)) {
-          newField = addFilter({
-            field: newField,
-            tenantEnabledCollectionSlugs,
-            tenantFieldName,
-            tenantsArrayFieldName,
-            tenantsArrayTenantFieldName,
-            tenantsCollectionSlug,
-            userHasAccessToAllTenants,
-          })
+          hasTenantRelationsips = true
         }
       } else {
         for (const relationTo of newField.relationTo) {
@@ -65,17 +58,21 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
             )
           }
           if (tenantEnabledCollectionSlugs.includes(relationTo)) {
-            newField = addFilter({
-              field: newField as RelationshipField,
-              tenantEnabledCollectionSlugs,
-              tenantFieldName,
-              tenantsArrayFieldName,
-              tenantsArrayTenantFieldName,
-              tenantsCollectionSlug,
-              userHasAccessToAllTenants,
-            })
+            hasTenantRelationsips = true
           }
         }
+      }
+
+      if (hasTenantRelationsips) {
+        newField = addRelationshipFilter({
+          field: newField as RelationshipField,
+          tenantEnabledCollectionSlugs,
+          tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          tenantsCollectionSlug,
+          userHasAccessToAllTenants,
+        })
       }
     }
 
@@ -175,7 +172,7 @@ type AddFilterArgs<ConfigType = unknown> = {
     MultiTenantPluginConfig<ConfigType>
   >['userHasAccessToAllTenants']
 }
-function addFilter<ConfigType = unknown>({
+function addRelationshipFilter<ConfigType = unknown>({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,

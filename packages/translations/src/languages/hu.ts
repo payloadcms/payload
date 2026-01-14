@@ -81,6 +81,11 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  dashboard: {
+    addWidget: 'Adjon hozzá widgetet',
+    deleteWidget: 'Törölje a(z) {{id}} widgetet',
+    searchWidgets: 'Keresés widgetek...',
+  },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',
     autosaving: 'Hiba történt a dokumentum automatikus mentése közben.',
@@ -342,6 +347,7 @@ export const huTranslations: DefaultTranslationsObject = {
     loading: 'Betöltés',
     locale: 'Nyelv',
     locales: 'Nyelvek',
+    lock: 'Zár',
     menu: 'Menü',
     moreOptions: 'Több opció',
     move: 'Mozdulj',
@@ -432,6 +438,7 @@ export const huTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} átkerült a szemeteskukába.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
+    unlock: 'Feloldás',
     unsavedChanges: 'Vannak mentetlen változtatásai. Mentsen vagy dobja el mielőtt folytatja.',
     unsavedChangesDuplicate: 'Nem mentett módosításai vannak. Szeretné folytatni a duplikációt?',
     untitled: 'Névtelen',

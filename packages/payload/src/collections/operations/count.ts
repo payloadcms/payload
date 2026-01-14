@@ -9,7 +9,8 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -31,18 +32,11 @@ export const countOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req!.context,
-            operation: 'count',
-            req: args.req!,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'count',
+    })
 
     const {
       collection: { config: collectionConfig },

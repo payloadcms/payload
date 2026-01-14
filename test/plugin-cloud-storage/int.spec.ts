@@ -1,20 +1,47 @@
 import type { Payload } from 'payload'
+import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
 import path from 'path'
+import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { describeIfInCIOrHasLocalstack } from '../helpers.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithPrefixSlug,
+  prefix,
+  restrictedMediaSlug,
+  testMetadataSlug,
+} from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
+
+// needs to be here as it imports vitest functions and conflicts with playwright that uses jest
+export function describeIfInCIOrHasLocalstack(): SuiteAPI | SuiteAPI['skip'] {
+  if (process.env.CI) {
+    return describe
+  }
+
+  // Check that localstack is running
+  const { code } = shelljs.exec(`docker ps | grep localstack`)
+
+  if (code !== 0) {
+    console.warn('Localstack is not running. Skipping test suite.')
+    return describe.skip
+  }
+
+  console.log('Localstack is running. Running test suite.')
+
+  return describe
+}
 
 describe('@payloadcms/plugin-cloud-storage', () => {
   let TEST_BUCKET: string
@@ -82,6 +109,149 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           prefix,
         })
         expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+      })
+
+      it('should not upload to S3 when mimeType validation fails', async () => {
+        // Get initial bucket contents
+        const listBefore = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
+        const fileCountBefore = listBefore.Contents?.length || 0
+
+        // Try to upload a JSON file to a collection that only accepts PNG
+        await expect(
+          payload.create({
+            collection: restrictedMediaSlug,
+            data: {},
+            filePath: path.resolve(dirname, './test.json'),
+          }),
+        ).rejects.toThrow()
+
+        // Verify no new files were uploaded to S3
+        const listAfter = await client.send(new AWS.ListObjectsV2Command({ Bucket: TEST_BUCKET }))
+        const fileCountAfter = listAfter.Contents?.length || 0
+
+        expect(fileCountAfter).toBe(fileCountBefore)
+      })
+
+      it('should upload to S3 when mimeType validation passes', async () => {
+        // Upload a valid PNG file
+        const upload = await payload.create({
+          collection: restrictedMediaSlug,
+          data: {},
+          filePath: path.resolve(dirname, './image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        // Verify the file was uploaded to S3
+        const { $metadata } = await client.send(
+          new AWS.HeadObjectCommand({
+            Bucket: TEST_BUCKET,
+            Key: upload.filename,
+          }),
+        )
+
+        expect($metadata.httpStatusCode).toBe(200)
+      })
+    })
+  })
+
+  describe('External data persistence', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        try {
+          await payload.delete({ collection: testMetadataSlug, id })
+        } catch (e) {
+          // Ignore
+        }
+      }
+      createdIDs.length = 0
+    })
+
+    it('should automatically persist metadata returned by custom adapters', async () => {
+      const upload = await payload.create({
+        collection: testMetadataSlug,
+        data: {
+          testNote: 'Testing automatic metadata persistence',
+        },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      createdIDs.push(upload.id)
+
+      expect(upload.id).toBeTruthy()
+      expect(upload.filename).toBeTruthy()
+      expect(upload.testNote).toBe('Testing automatic metadata persistence')
+
+      // Our afterChange hook should automatically persist whatever metadata the adapter returns
+      expect(upload.customStorageId).toBeTruthy()
+      expect(upload.customStorageId).toContain('storage-')
+      expect(upload.uploadTimestamp).toBeTruthy()
+      expect(upload.storageProvider).toBe('test-adapter')
+      expect(upload.bucketName).toBe('test-bucket')
+      expect(upload.objectKey).toBe(upload.filename)
+      expect(upload.processingStatus).toBe('completed')
+      expect(upload.uploadVersion).toBe('1.0.0')
+
+      console.log('Test adapter metadata automatically persisted:', {
+        customStorageId: upload.customStorageId,
+        uploadTimestamp: upload.uploadTimestamp,
+        storageProvider: upload.storageProvider,
+        bucketName: upload.bucketName,
+        objectKey: upload.objectKey,
+        processingStatus: upload.processingStatus,
+        uploadVersion: upload.uploadVersion,
+      })
+    })
+
+    it('should persist metadata on update operations', async () => {
+      const upload = await payload.create({
+        collection: testMetadataSlug,
+        data: {
+          testNote: 'Testing update metadata persistence',
+        },
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      createdIDs.push(upload.id)
+
+      const initialStorageId = upload.customStorageId
+      const initialTimestamp = upload.uploadTimestamp
+
+      const updatedUpload = await payload.update({
+        collection: testMetadataSlug,
+        id: upload.id,
+        data: {
+          testNote: 'Updated test note',
+        },
+        filePath: path.resolve(dirname, './image.png'),
+      })
+
+      expect(updatedUpload.testNote).toBe('Updated test note')
+
+      // Test that metadata persistence works on updates too
+      expect(updatedUpload.customStorageId).toBeTruthy()
+      expect(updatedUpload.uploadTimestamp).toBeTruthy()
+      expect(updatedUpload.storageProvider).toBe('test-adapter')
+      expect(updatedUpload.bucketName).toBe('test-bucket')
+      expect(updatedUpload.objectKey).toBe(updatedUpload.filename)
+      expect(updatedUpload.processingStatus).toBe('completed')
+      expect(updatedUpload.uploadVersion).toBe('1.0.0')
+
+      const filenamesAreDifferent = upload.filename !== updatedUpload.filename
+      const storageIdsAreDifferent = updatedUpload.customStorageId !== initialStorageId
+      const timestampsAreDifferent = updatedUpload.uploadTimestamp !== initialTimestamp
+
+      // If filename changed, storage ID and timestamp should also change (new upload)
+      expect(filenamesAreDifferent).toBe(storageIdsAreDifferent)
+      expect(filenamesAreDifferent).toBe(timestampsAreDifferent)
+
+      console.log('Update test adapter metadata persistence:', {
+        filenameChanged: filenamesAreDifferent,
+        storageIdChanged: storageIdsAreDifferent,
+        timestampChanged: timestampsAreDifferent,
+        newStorageId: updatedUpload.customStorageId,
       })
     })
   })

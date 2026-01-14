@@ -79,6 +79,11 @@ export const itTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
+  dashboard: {
+    addWidget: 'Aggiungi Widget',
+    deleteWidget: 'Elimina widget {{id}}',
+    searchWidgets: 'Cerca widget...',
+  },
   error: {
     accountAlreadyActivated: 'Questo account è già stato attivato.',
     autosaving:
@@ -341,6 +346,7 @@ export const itTranslations: DefaultTranslationsObject = {
     loading: 'Caricamento',
     locale: 'Locale',
     locales: 'Localizzazioni',
+    lock: 'Serratura',
     menu: 'Menù',
     moreOptions: 'Più opzioni',
     move: 'Muoviti',
@@ -432,6 +438,7 @@ export const itTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} spostati nel cestino.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
+    unlock: 'Sblocca',
     unsavedChanges: 'Hai delle modifiche non salvate. Salva o scarta prima di continuare.',
     unsavedChangesDuplicate: 'Sono presenti modifiche non salvate. Vuoi continuare a duplicare?',
     untitled: 'Senza titolo',
