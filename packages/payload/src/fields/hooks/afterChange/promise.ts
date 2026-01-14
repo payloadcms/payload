@@ -265,7 +265,7 @@ export const promise = async ({
 
     case 'richText': {
       if (!field?.editor) {
-        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+        throw new MissingEditorProp({ fieldName: field.name }) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
       if (typeof field.editor === 'function') {

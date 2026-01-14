@@ -56,7 +56,7 @@ type Args = {
   /**
    *  Keep track of the path to this field so we can log the full field path on errors
    */
-  pathToField: string[]
+  pathToField?: string[]
   polymorphicJoins?: SanitizedJoin[]
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -302,7 +302,7 @@ export const sanitizeFields = async ({
             // config.editor should be sanitized at this point
             field.editor = _config.editor
           } else {
-            throw new MissingEditorProp(pathToFieldString) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+            throw new MissingEditorProp({ fieldPath: pathToFieldString }) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
           }
         }
 

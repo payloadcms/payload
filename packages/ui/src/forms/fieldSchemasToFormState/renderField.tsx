@@ -242,7 +242,7 @@ export const renderField: RenderFieldMethod = ({
   switch (fieldConfig.type) {
     case 'richText': {
       if (!fieldConfig?.editor) {
-        throw new MissingEditorProp(fieldConfig) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+        throw new MissingEditorProp({ fieldName: fieldConfig.name }) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
       if (typeof fieldConfig?.editor === 'function') {
