@@ -99,13 +99,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {
     'site-settings': SiteSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user:
     | (User & {
         collection: 'users';
@@ -343,6 +344,14 @@ export interface PayloadMcpApiKey {
      * Allow clients to create posts.
      */
     create?: boolean | null;
+    /**
+     * Allow clients to update posts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts.
+     */
+    delete?: boolean | null;
   };
   media?: {
     /**
@@ -385,74 +394,6 @@ export interface PayloadMcpApiKey {
      * Creates a prompt to process a message
      */
     echo?: boolean | null;
-  };
-  collections?: {
-    /**
-     * Allow LLMs to find and list Payload collections with optional content and document counts.
-     */
-    find?: boolean | null;
-    /**
-     * Allow LLMs to create new Payload collections with specified fields and configuration.
-     */
-    create?: boolean | null;
-    /**
-     * Allow LLMs to update existing Payload collections with new fields, modifications, or configuration changes.
-     */
-    update?: boolean | null;
-    /**
-     * Allow LLMs to delete Payload collections and optionally update the configuration.
-     */
-    delete?: boolean | null;
-  };
-  jobs?: {
-    /**
-     * Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.
-     */
-    create?: boolean | null;
-    /**
-     * Allow LLMs to execute Payload jobs with custom input data and queue options.
-     */
-    run?: boolean | null;
-    /**
-     * Allow LLMs to update existing Payload jobs with new schemas, configuration, or handler code.
-     */
-    update?: boolean | null;
-  };
-  config?: {
-    /**
-     * Allow LLMs to read and display a Payload configuration file.
-     */
-    find?: boolean | null;
-    /**
-     * Allow LLMs to update a Payload configuration file with various modifications.
-     */
-    update?: boolean | null;
-  };
-  auth?: {
-    /**
-     * Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
-     */
-    auth?: boolean | null;
-    /**
-     * Allow LLMs to authenticate a user with email and password.
-     */
-    login?: boolean | null;
-    /**
-     * Allow LLMs to verify a user email with a verification token.
-     */
-    verify?: boolean | null;
-    /**
-     * Allow LLMs to reset a user password with a reset token.
-     */
-    resetPassword?: boolean | null;
-    /**
-     * Allow LLMs to send a password reset email to a user.
-     */
-    forgotPassword?: boolean | null;
-    /**
-     * Allow LLMs to unlock a user account that has been locked due to failed login attempts.
-     */
-    unlock?: boolean | null;
   };
   /**
    * This field added by overrideApiKeyCollection
@@ -691,6 +632,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | {
         find?: T;
         create?: T;
+        update?: T;
+        delete?: T;
       };
   media?:
     | T
@@ -719,37 +662,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | T
     | {
         echo?: T;
-      };
-  collections?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  jobs?:
-    | T
-    | {
-        create?: T;
-        run?: T;
-        update?: T;
-      };
-  config?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  auth?:
-    | T
-    | {
-        auth?: T;
-        login?: T;
-        verify?: T;
-        resetPassword?: T;
-        forgotPassword?: T;
-        unlock?: T;
       };
   override?: T;
   updatedAt?: T;
