@@ -15,21 +15,6 @@ else
     echo "enterprise-plugins found."
 fi
 
-# Fix missing uuid dependency in figma package if needed
-FIGMA_PKG_JSON="$ENTERPRISE_DIR/packages/figma/package.json"
-if [ -f "$FIGMA_PKG_JSON" ]; then
-    if ! grep -q '"uuid":' "$FIGMA_PKG_JSON"; then
-        echo "Adding missing uuid dependency to figma package..."
-        # Use sed to insert uuid dependency. Assuming "ts-morph" is the last one based on previous reads,
-        # but safely inserting into dependencies block is better.
-        # Simple hack: replace the last dependency line we know exists or just add it.
-        # Safer: use pnpm add in that directory.
-        cd "$ENTERPRISE_DIR/packages/figma"
-        pnpm add uuid@^10.0.0
-        cd "$REPO_ROOT"
-    fi
-fi
-
 # Install dependencies in enterprise-plugins
 echo "Installing dependencies in enterprise-plugins..."
 cd "$ENTERPRISE_DIR"
