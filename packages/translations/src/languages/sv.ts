@@ -80,9 +80,9 @@ export const svTranslations: DefaultTranslationsObject = {
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
   dashboard: {
-    addWidget: 'Lägg till Widget',
+    addWidget: 'Lägg till widget',
     deleteWidget: 'Radera widget {{id}}',
-    searchWidgets: 'Sök widgetar...',
+    searchWidgets: 'Sök efter widget...',
   },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
@@ -163,7 +163,7 @@ export const svTranslations: DefaultTranslationsObject = {
     editRelationship: 'Redigera relation',
     enterURL: 'Ange en URL',
     internalLink: 'Intern länk',
-    itemsAndMore: '{{items}} och {{count}} mer',
+    itemsAndMore: '{{items}} och {{count}} till',
     labelRelationship: '{{label}}-relation',
     latitude: 'Latitud',
     linkedTo: 'Länkad till <0>{{label}}</0>',
@@ -423,7 +423,7 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} skapades',
     successfullyDuplicated: '{{label}} duplicerades',
     successfullyReindexed:
-      'Lyckades med att omin­dexera {{count}} av {{total}} dokument från {{collections}}, och {{skips}} utkast hoppades över.',
+      'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     takeOver: 'Ta över',
     thisLanguage: 'Svenska',
     time: 'Tid',
@@ -464,9 +464,9 @@ export const svTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiera till',
     copyToLocale: 'Kopiera till språk',
     localeToPublish: 'Publicera språk',
-    selectedLocales: 'Valda språkinställningar',
+    selectedLocales: 'Valda språk',
     selectLocaleToCopy: 'Välj språk att kopiera',
-    selectLocaleToDuplicate: 'Välj platser att duplicera',
+    selectLocaleToDuplicate: 'Välj språk att duplicera',
   },
   operators: {
     contains: 'innehåller',
