@@ -239,7 +239,11 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                     generateFilePathOrURL({
                       collectionSlug: collection?.slug as string,
                       config,
-                      filename: data?.filename || originalDoc?.filename,
+                      filename:
+                        data?.sizes?.[size.name]?.filename ||
+                        originalDoc?.sizes?.[size.name]?.filename ||
+                        data?.filename ||
+                        originalDoc?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,
