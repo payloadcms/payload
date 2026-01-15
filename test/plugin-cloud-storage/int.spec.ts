@@ -152,6 +152,80 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         expect($metadata.httpStatusCode).toBe(200)
       })
+
+      it('should store correct URLs for sized images', async () => {
+        const upload = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        const apiResponse = await payload.findByID({
+          collection: mediaSlug,
+          id: upload.id,
+        })
+        expect(apiResponse.sizes).toBeTruthy()
+
+        const apiSizeKeys = Object.keys(apiResponse.sizes || {})
+        for (const sizeKey of apiSizeKeys) {
+          const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
+          if (!size) {
+            continue
+          }
+
+          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+        }
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: upload.id } },
+        })
+        expect(rawDbData).toBeTruthy()
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string; url: string }>
+          url: string
+        }
+        type SizeData = { filename: string; url: string }
+
+        const sizeKeys = Object.keys(dbRecord.sizes)
+        expect(sizeKeys.length).toBeGreaterThan(0)
+
+        for (const sizeKey of sizeKeys) {
+          const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
+          expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
+          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+        }
+      })
+
+      it('should handle collections without imageSizes correctly', async () => {
+        const upload = await payload.create({
+          collection: mediaWithPrefixSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.filename).toBeTruthy()
+        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect((upload as any).sizes).toBeFalsy()
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaWithPrefixSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        expect(rawDbData).toBeTruthy()
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          url: string
+        }
+
+        expect(dbRecord.filename).toEqual(upload.filename)
+        expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect((rawDbData as any)?.sizes).toBeFalsy()
+      })
     })
   })
 
