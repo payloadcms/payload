@@ -24,7 +24,7 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 **YOU MUST EXECUTE THESE COMMANDS. Reading code or analyzing logs does NOT count as reproduction.**
 
 1. **Extract** suite name, test name, and error from CI logs
-2. **EXECUTE**: Kill ports 3000 and 3001 to avoid conflicts
+2. **EXECUTE**: Kill port 3000 to avoid conflicts
 3. **EXECUTE**: `pnpm dev $SUITE_NAME` (use run_in_background=true)
 4. **EXECUTE**: Wait for server to be ready (check with curl or sleep)
 5. **EXECUTE**: Run the specific failing test with Playwright directly (npx playwright test test/TEST_SUITE_NAME/e2e.spec.ts:31:3 --headed -g "TEST_DESCRIPTION_TARGET_GOES_HERE")
@@ -138,7 +138,6 @@ If test passed with dev code, the issue is likely in bundled/production code.
 # STEP 3A: STOP ALL SERVERS (INCLUDING DEV SERVER FROM STEP 2)
 # ========================================
 lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-lsof -ti:3001 | xargs kill -9 2>/dev/null || echo "Port 3001 clear"
 
 # ========================================
 # STEP 3B: BUILD AND PACK FOR PROD
@@ -320,7 +319,6 @@ Agent:
 2. Executing reproduction workflow:
    [Uses Bash tool to kill ports]
    $ lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-   $ lsof -ti:3001 | xargs kill -9 2>/dev/null || echo "Port 3001 clear"
 
    [Uses Bash tool with run_in_background=true]
    $ pnpm dev i18n
