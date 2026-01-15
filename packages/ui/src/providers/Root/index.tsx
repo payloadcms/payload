@@ -115,6 +115,7 @@ export const RootProvider: React.FC<Props> = ({
                                             <UploadHandlersProvider>
                                               <DndContext
                                                 collisionDetection={pointerWithin}
+                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
                                                 id={dndContextID}
                                               >
                                                 {children}

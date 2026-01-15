@@ -60,7 +60,7 @@ export const getGenerateSignedURLHandler = ({
 
     const fileKey = path.posix.join(prefix, filename)
 
-    const signableHeaders = new Set()
+    const signableHeaders = new Set<string>()
 
     if (filesizeLimit) {
       if (filesize > filesizeLimit) {
@@ -75,7 +75,6 @@ export const getGenerateSignedURLHandler = ({
     }
 
     const url = await getSignedUrl(
-      // @ts-expect-error mismatch versions or something
       getStorageClient(),
       new AWS.PutObjectCommand({
         ACL: acl,
