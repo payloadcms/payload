@@ -264,6 +264,7 @@ export interface Post {
   text?: string | null;
   number?: number | null;
   numberDefault?: number | null;
+  numbersHasMany?: number[] | null;
   blocks?:
     | {
         nested?:
@@ -926,6 +927,7 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
   numberDefault?: T;
+  numbersHasMany?: T;
   blocks?:
     | T
     | {
@@ -1520,6 +1522,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

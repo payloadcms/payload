@@ -2801,61 +2801,60 @@ describe('database', () => {
   })
 
   describe('Schema generation', { db: 'drizzle' }, () => {
-    if (
-      process.env.PAYLOAD_DATABASE.includes('postgres') ||
-      process.env.PAYLOAD_DATABASE === 'supabase'
-    ) {
-      it('should generate Drizzle Postgres schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+    it('should generate Drizzle Postgres schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
-
-        const module = await import(outputFile)
-
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
-
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
-
-        // Confirm that module exports every enum
-        for (const enumName in payload.db.enums) {
-          expect(module).toHaveProperty(enumName)
-        }
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
 
-    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
-      it('should generate Drizzle SQLite schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      const module = await import(outputFile)
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
 
-        const module = await import(outputFile)
+      // Confirm that module exports every enum
+      for (const enumName in payload.db.enums) {
+        expect(module).toHaveProperty(enumName)
+      }
+    })
 
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
+    it('should generate Drizzle SQLite schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('sqlite')) {
+        return
+      }
 
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
+
+      const module = await import(outputFile)
+
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
+
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
+    })
   })
 
   describe('drizzle: schema hooks', () => {
@@ -3566,6 +3565,19 @@ describe('database', () => {
     })
 
     expect(result.text).toStrictEqual('1')
+  })
+
+  it('should convert strings to numbers in hasMany number fields', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-numbers-hasMany',
+        // @ts-expect-error passing strings when numbers are expected
+        numbersHasMany: ['10', '20', '30'],
+      },
+    })
+
+    expect(result.numbersHasMany).toEqual([10, 20, 30])
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
