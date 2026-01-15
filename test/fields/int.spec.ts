@@ -1,8 +1,9 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
-import type { Payload, reload, ValidationError } from 'payload'
+import type { Payload, ValidationError } from 'payload'
 
 import path from 'path'
+import { reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
