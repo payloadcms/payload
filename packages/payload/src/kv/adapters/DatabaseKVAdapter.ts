@@ -83,6 +83,7 @@ export class DatabaseKVAdapter implements KVAdapter {
       key: string
     }>({
       collection: this.collectionSlug,
+      joins: false,
       limit: 0,
       pagination: false,
       req,
@@ -92,7 +93,7 @@ export class DatabaseKVAdapter implements KVAdapter {
       },
       where: {
         key: {
-          in: [...keys],
+          in: keys,
         },
       },
     })
