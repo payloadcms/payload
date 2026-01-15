@@ -30,6 +30,13 @@ export class InMemoryKVAdapter implements KVAdapter {
     return Array.from(this.store.keys())
   }
 
+  async mget<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>> {
+    return keys.map((key) => {
+      const value = this.store.get(key) as T | undefined
+      return typeof value === 'undefined' ? null : value
+    })
+  }
+
   async set(key: string, value: KVStoreValue): Promise<void> {
     this.store.set(key, value)
   }
