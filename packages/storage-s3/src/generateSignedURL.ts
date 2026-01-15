@@ -60,7 +60,7 @@ export const getGenerateSignedURLHandler = ({
 
     const fileKey = path.posix.join(prefix, filename)
 
-    const signableHeaders = new Set()
+    const signableHeaders = new Set<string>()
 
     if (filesizeLimit) {
       if (filesize > filesizeLimit) {
