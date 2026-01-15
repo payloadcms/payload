@@ -25,15 +25,8 @@ export const createFolderCollection = ({
   const { collectionOptions, collectionSlugs } = folderEnabledCollections.reduce(
     (acc, collection: CollectionConfig) => {
       acc.collectionSlugs.push(collection.slug)
-
-      const labelValue = collection.labels?.plural
-      const label =
-        typeof labelValue === 'function' || typeof labelValue === 'undefined'
-          ? collection.slug
-          : labelValue
-
       acc.collectionOptions.push({
-        label,
+        label: collection.labels?.plural || collection.slug,
         value: collection.slug,
       })
 
@@ -93,9 +86,6 @@ export const createFolderCollection = ({
               admin: {
                 components: {
                   Field: {
-                    clientProps: {
-                      options: collectionOptions,
-                    },
                     path: '@payloadcms/ui#FolderTypeField',
                   },
                 },

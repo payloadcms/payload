@@ -119,9 +119,8 @@ test.describe('Folders', () => {
       // Should be able to open the select menu without errors
       await openSelectMenu({ selectLocator })
 
-      // The TranslatedLabels collection has translation function labels, so it should appear with its slug
       const translatedLabelsOption = page.locator('.rs__option', {
-        hasText: 'translated-labels',
+        hasText: 'Documents',
       })
       await expect(translatedLabelsOption).toBeVisible()
     })
