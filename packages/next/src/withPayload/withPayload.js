@@ -34,6 +34,22 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  const consoleWarn = console.warn
+  const sassWarningText = "SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary"
+  console.warn = (...args) => {
+    if (
+      (typeof args[1] === 'string' && args[1].includes(sassWarningText)) ||
+      (typeof args[0] === 'string' && args[0].includes(sassWarningText))
+    ) {
+      // This warning is a lie - without silencing import deprecation warnings, sass will spam the console with deprecation warnings
+      return
+    }
+
+    consoleWarn(...args)
+  }
+}
+
+
   /** @type {import('next').NextConfig} */
   const baseConfig = {
     ...nextConfig,
