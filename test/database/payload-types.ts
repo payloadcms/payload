@@ -265,6 +265,7 @@ export interface Post {
   number?: number | null;
   numberDefault?: number | null;
   numbersHasMany?: number[] | null;
+  publishDate?: string | null;
   blocks?:
     | {
         nested?:
@@ -928,6 +929,7 @@ export interface PostsSelect<T extends boolean = true> {
   number?: T;
   numberDefault?: T;
   numbersHasMany?: T;
+  publishDate?: T;
   blocks?:
     | T
     | {

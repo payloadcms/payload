@@ -211,6 +211,10 @@ export const getConfig: () => Partial<Config> = () => ({
           hasMany: true,
         },
         {
+          name: 'publishDate',
+          type: 'date',
+        },
+        {
           type: 'blocks',
           name: 'blocks',
           blocks: [
