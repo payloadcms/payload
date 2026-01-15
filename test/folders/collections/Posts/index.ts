@@ -7,6 +7,10 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  labels: {
+    singular: ({ t }) => t('authentication:account'),
+    plural: ({ t }) => t('authentication:account'),
+  },
   folders: true,
   trash: true,
   fields: [
