@@ -1032,6 +1032,17 @@ export const reload = async (
     })
   }
 
+  // Generate import map
+  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
+    // We don't want to throw an error in this case, as it would break the user's frontend.
+    // => just skip it => ignoreResolveError: true
+    await generateImportMap(config, {
+      ignoreResolveError: true,
+      log: true,
+    })
+  }
+
   if (payload.db?.init) {
     await payload.db.init()
   }
@@ -1046,25 +1057,6 @@ export const reload = async (
   ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
   ;(global as any)._payload_doNotCacheSchemaMap = true
   ;(global as any)._payload_doNotCacheClientSchemaMap = true
-
-  // Generate import map
-  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
-    // We need to run import map generation in the background, using setTimeout + a floating promise.
-    // Otherwise, in Next.js 16 and turbopack, the console will be spammed with errors that look like this:
-    // Error: Could not find the module "[project]/node_modules/.pnpm/[path-to-importmap-entry]" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
-    // This will happen when running HMR for multiple getPayload calls, e.g. getPayload from admin panel and frontend.
-    // This usually happens for live-preview enabled collections.
-    // Once the generateImportMap accesses the import map file using fs, these errors will be thrown.
-    setTimeout(() => {
-      void generateImportMap(config, {
-        // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
-        // We don't want to throw an error in this case, as it would break the user's frontend.
-        // => just skip it => ignoreResolveError: true
-        ignoreResolveError: true,
-        log: true,
-      })
-    }, 0)
-  }
 }
 
 let _cached: Map<
