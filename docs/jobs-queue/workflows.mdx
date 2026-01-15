@@ -56,6 +56,7 @@ To define a JS-based workflow, simply add a workflow to the `jobs.workflows` arr
 | `label`         | Define a human-friendly label for this workflow.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `queue`         | Optionally, define the queue name that this workflow should be tied to. Defaults to "default".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | `retries`       | You can define `retries` on the workflow level, which will enforce that the workflow can only fail up to that number of retries. If a task does not have retries specified, it will inherit the retry count as specified on the workflow. You can specify `0` as `workflow` retries, which will disregard all `task` retry specifications and fail the entire workflow on any task failure. You can leave `workflow` retries as undefined, in which case, the workflow will respect what each task dictates as their own retry count. By default this is undefined, meaning workflows retries are defined by their tasks |
+| `concurrency`   | Control how jobs with the same concurrency key are handled. Jobs with the same key will run exclusively (one at a time). Requires `jobs.enableConcurrencyControl: true` to be set. See [Concurrency Controls](#concurrency-controls) below for details.                                                                                                                                                                                                                                                                                                                                                                  |
 
 Example:
 
@@ -341,3 +342,189 @@ handler: async ({ input, req }) => {
   }
 }
 ```
+
+### Concurrency Controls
+
+When multiple jobs operate on the same resource, race conditions can occur. For example, if a user creates a document and then quickly updates it, two jobs might be queued that both try to process the same document simultaneously, leading to unexpected results.
+
+The `concurrency` option allows you to prevent this by ensuring that jobs with the same "key" run exclusively (one at a time).
+
+<Banner type="warning">
+  **Important:** To use concurrency controls, you must first enable them in your
+  Payload config by setting `jobs.enableConcurrencyControl: true`. This adds an
+  indexed `concurrencyKey` field to your jobs collection schema and may require
+  a database migration depending on your database adapter.
+</Banner>
+
+#### Enabling Concurrency Controls
+
+First, enable the feature in your Payload config:
+
+```ts
+export default buildConfig({
+  jobs: {
+    enableConcurrencyControl: true,
+    // ... your tasks and workflows
+  },
+})
+```
+
+Then add the `concurrency` option to your workflow configuration:
+
+```ts
+export default buildConfig({
+  jobs: {
+    workflows: [
+      {
+        slug: 'syncDocument',
+        inputSchema: [{ name: 'documentId', type: 'text', required: true }],
+        // Jobs with the same concurrency key run one at a time
+        concurrency: ({ input }) => `sync:${input.documentId}`,
+        handler: async ({ job, inlineTask }) => {
+          await inlineTask('fetch-and-update', {
+            task: async ({ req }) => {
+              // This runs exclusively - no other job for the same
+              // documentId can run at the same time
+              const doc = await req.payload.findByID({
+                collection: 'posts',
+                id: job.input.documentId,
+              })
+
+              await req.payload.update({
+                collection: 'posts',
+                id: job.input.documentId,
+                data: { syncedAt: new Date().toISOString() },
+              })
+
+              return { output: { synced: true } }
+            },
+          })
+        },
+      },
+    ],
+  },
+})
+```
+
+#### How It Works
+
+When you define a `concurrency` key:
+
+1. **When queuing:** The concurrency key is computed from the job's input and stored on the job document.
+
+2. **When running:** The job runner enforces exclusive execution through two mechanisms:
+
+   - It first checks which concurrency keys are currently being processed and excludes pending jobs with those keys from the query
+   - If multiple pending jobs with the same key are picked up in the same batch, only the first one (by creation order) runs - the others are released back to `processing: false` and will be picked up on subsequent runs
+
+3. **Result:** Jobs with the same concurrency key are guaranteed to run sequentially, never in parallel. All jobs are preserved and will eventually complete - they just wait their turn.
+
+#### Concurrency Configuration Options
+
+The `concurrency` option accepts either a function (shorthand) or an object with more options:
+
+**Shorthand (function only):**
+
+```ts
+// Exclusive defaults to true, supersedes defaults to false
+concurrency: ({ input }) => `my-key:${input.resourceId}`
+```
+
+**Full configuration:**
+
+```ts
+concurrency: {
+  // Function that returns a key to group related jobs
+  // The queue name is provided to allow for queue-specific keys if needed
+  key: ({ input, queue }) => `my-key:${input.resourceId}`,
+
+  // Only one job with this key can run at a time
+  // @default true
+  exclusive: true,
+
+  // Delete older pending jobs when a new job is queued
+  // @default false
+  supersedes: false,
+}
+```
+
+#### Common Patterns
+
+**1. Exclusive only (preserve all jobs):**
+
+```ts
+concurrency: {
+  key: ({ input }) => `process:${input.documentId}`,
+  exclusive: true,
+  supersedes: false, // All jobs run, just not in parallel
+}
+```
+
+Use when every job represents unique work that must complete (e.g., processing distinct versions of a document).
+
+**2. Exclusive + Supersedes (last queued wins):**
+
+```ts
+concurrency: {
+  key: ({ input }) => `generate:${input.documentId}`,
+  exclusive: true,
+  supersedes: true, // Only latest job runs
+}
+```
+
+Use when only the latest state matters (e.g., regenerating embeddings after rapid edits - intermediate states can be skipped).
+
+**3. Queue-specific concurrency:**
+
+```ts
+concurrency: {
+  key: ({ input, queue }) => `${queue}:sync:${input.resourceId}`,
+}
+```
+
+Include the queue name to allow the same resource to be processed concurrently in different queues.
+
+#### Supersedes Behavior
+
+When `supersedes: true` is set, newly queued jobs will automatically delete older pending (not yet running) jobs with the same concurrency key:
+
+**Example scenario:**
+
+```
+1. Job A queued → pending
+2. Job B queued → A deleted, B pending
+3. Job C queued → B deleted, C pending
+4. Only Job C runs
+```
+
+**Configuration:**
+
+```ts
+concurrency: {
+  key: ({ input }) => `generate:${input.documentId}`,
+  exclusive: true,  // Still enforced
+  supersedes: true, // Delete older pending jobs
+}
+```
+
+**When to use:**
+
+- Data regeneration (embeddings, thumbnails) after rapid edits
+- Report generation where only the latest parameters matter
+- Any scenario where intermediate pending jobs are made obsolete by newer ones
+
+**Important notes:**
+
+- Only **pending** jobs (not yet running) are deleted
+- If a job is already **running**, it completes normally and the new job waits
+- Without `exclusive: true`, supersedes still deletes pending jobs but won't prevent parallel execution
+
+#### Important Considerations
+
+- **Key uniqueness:** The concurrency key should uniquely identify the resource being operated on. Include all relevant identifiers (collection slug, document ID, locale, etc.).
+
+- **Global by default:** By default, concurrency is global across all queues. A job with key `sync:doc1` in the `default` queue will block a job with the same key in the `emails` queue. Include the queue name in your key if you want queue-specific concurrency.
+
+- **No concurrency key = no restrictions:** Jobs without a concurrency configuration run in parallel as before.
+
+- **Pending jobs wait:** Jobs that can't run due to concurrency constraints remain in the queue with `processing: false` and will be picked up on subsequent runs.

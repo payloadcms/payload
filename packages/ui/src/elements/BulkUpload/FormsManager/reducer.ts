@@ -111,7 +111,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     case 'UPDATE_FORM': {
@@ -134,7 +134,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms: updatedForms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: updatedForms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     default: {

@@ -13,6 +13,8 @@ const mongooseAdapterArgs = `
       'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
+export const defaultPostgresUrl = 'postgres://payload:payload@127.0.0.1:5433/payload'
+
 export const allDatabaseAdapters = {
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
@@ -63,7 +65,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
   })`,
   'postgres-custom-schema': `
@@ -71,7 +73,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
     schemaName: 'custom',
   })`,
@@ -81,7 +83,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
   })`,
   'postgres-read-replica': `
@@ -120,7 +122,7 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -157,4 +159,14 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
 
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
+}
+
+export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
+
+export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
+  if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
+    return dbAdapter
+  }
+  return 'mongodb'
 }
