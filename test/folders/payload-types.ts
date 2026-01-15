@@ -72,6 +72,7 @@ export interface Config {
     drafts: Draft;
     autosave: Autosave;
     'omitted-from-browse-by': OmittedFromBrowseBy;
+    'translated-labels': TranslatedLabel;
     'payload-kv': PayloadKv;
     users: User;
     'payload-folders': FolderInterface;
@@ -81,7 +82,14 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by';
+      documentsAndFolders:
+        | 'payload-folders'
+        | 'posts'
+        | 'media'
+        | 'drafts'
+        | 'autosave'
+        | 'omitted-from-browse-by'
+        | 'translated-labels';
     };
   };
   collectionsSelect: {
@@ -90,6 +98,7 @@ export interface Config {
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
+    'translated-labels': TranslatedLabelsSelect<false> | TranslatedLabelsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -202,11 +211,15 @@ export interface FolderInterface {
           relationTo?: 'omitted-from-browse-by';
           value: string | OmittedFromBrowseBy;
         }
+      | {
+          relationTo?: 'translated-labels';
+          value: string | TranslatedLabel;
+        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by')[] | null;
+  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by' | 'translated-labels')[] | null;
   folderSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -240,6 +253,17 @@ export interface Autosave {
  * via the `definition` "omitted-from-browse-by".
  */
 export interface OmittedFromBrowseBy {
+  id: string;
+  title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translated-labels".
+ */
+export interface TranslatedLabel {
   id: string;
   title?: string | null;
   folder?: (string | null) | FolderInterface;
@@ -313,6 +337,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'omitted-from-browse-by';
         value: string | OmittedFromBrowseBy;
+      } | null)
+    | ({
+        relationTo: 'translated-labels';
+        value: string | TranslatedLabel;
       } | null)
     | ({
         relationTo: 'users';
@@ -423,6 +451,16 @@ export interface AutosaveSelect<T extends boolean = true> {
  * via the `definition` "omitted-from-browse-by_select".
  */
 export interface OmittedFromBrowseBySelect<T extends boolean = true> {
+  title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translated-labels_select".
+ */
+export interface TranslatedLabelsSelect<T extends boolean = true> {
   title?: T;
   folder?: T;
   updatedAt?: T;
