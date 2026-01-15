@@ -792,6 +792,25 @@ export type SanitizedDashboardConfig = {
   widgets: Array<Omit<Widget, 'ComponentPath'>>
 }
 
+export type SidebarTab = {
+  /** Component to render as tab content */
+  component: CustomComponent
+  /** Disable this tab */
+  disabled?: boolean
+  /** Component to render as tab icon */
+  icon: CustomComponent
+  /** Make this tab active by default */
+  isDefaultActive?: boolean
+  /**
+   * Label for accessibility and tab display.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the slug will be used as fallback.
+   */
+  label?: LabelFunction | StaticLabel
+  /** Unique identifier for override/disable */
+  slug: string
+}
+
 /**
  * This is the central configuration
  *
@@ -1010,6 +1029,11 @@ export type Config = {
        * @default '/unauthorized'
        */
       unauthorized?: `/${string}`
+    }
+    /** Sidebar configuration */
+    sidebar?: {
+      /** Extensible tab system */
+      tabs?: SidebarTab[]
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
