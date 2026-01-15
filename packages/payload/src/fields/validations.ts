@@ -984,7 +984,7 @@ export const select: SelectFieldValidation = (
   }
 
   // Check for duplicate values when hasMany is true
-  if (hasMany && Array.isArray(value) && value.length > 0) {
+  if (hasMany && Array.isArray(value) && value.length > 1) {
     const counts = new Map<unknown, number>()
 
     for (const item of value) {
