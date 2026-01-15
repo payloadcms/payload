@@ -76,7 +76,7 @@
     "@testing-library/react": "16.3.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "22.5.4",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@vercel/git-hooks": "^1.0.0",
     "@vitejs/plugin-react": "4.5.2",
