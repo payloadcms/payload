@@ -38,6 +38,27 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const baseConfig = {
     ...nextConfig,
     env,
+    sassOptions: {
+      ...(nextConfig.sassOptions || {}),
+      /**
+       * This prevents scss warning spam during pnpm dev that looks like this:
+       * ⚠ ./test/admin/components/views/CustomMinimal/index.scss
+       * Issue while running loader
+       * SassWarning: Deprecation Warning on line 8, column 8 of file:///Users/alessio/Documents/GitHub/ payload/packages/ui/src/scss/styles.scss:8:8:
+       * Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+       *
+       * More info and automated migrator: https://sass-lang.com/d/import
+       *
+       * 8 | @import 'queries';
+       *
+       *
+       * packages/ui/src/scss/styles.scss 9:9                      @import
+       * test/admin/components/views/CustomMinimal/index.scss 1:9  root stylesheet
+       *
+       * @todo: update all outdated scss imports to use @use instead of @import. Then, we can remove this.
+       */
+      silenceDeprecations: [...(nextConfig.sassOptions?.silenceDeprecations || []), 'import'],
+    },
     outputFileTracingExcludes: {
       ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [
