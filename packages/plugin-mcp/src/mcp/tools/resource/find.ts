@@ -202,7 +202,7 @@ Page: ${result.page} of ${result.totalPages}
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, draft, depth, fallbackLocale, limit, locale, page, sort, where }) => {
+      async ({ id, depth, draft, fallbackLocale, limit, locale, page, sort, where }) => {
         return await tool(id, limit, page, sort, where, depth, locale, fallbackLocale, draft)
       },
     )

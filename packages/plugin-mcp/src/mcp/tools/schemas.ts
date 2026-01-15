@@ -34,12 +34,6 @@ export const toolSchemas = {
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
         ),
-      draft: z
-        .boolean()
-        .optional()
-        .describe(
-          'Optional: Whether the document should be queried from the versions table/collection or not.',
-        ),
       depth: z
         .number()
         .int()
@@ -48,6 +42,12 @@ export const toolSchemas = {
         .optional()
         .default(0)
         .describe('How many levels deep to populate relationships (default: 0)'),
+      draft: z
+        .boolean()
+        .optional()
+        .describe(
+          'Optional: Whether the document should be queried from the versions table/collection or not.',
+        ),
       fallbackLocale: z
         .string()
         .optional()
