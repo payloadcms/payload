@@ -1,8 +1,8 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
+import type { Payload, reload, ValidationError } from 'payload'
 
 import path from 'path'
-import { type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
@@ -1013,6 +1013,25 @@ describe('Fields', () => {
       })
 
       expect(result).toBeTruthy()
+    })
+
+    it('should throw field error when duplicate values in hasMany select field', async () => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: 'select-fields',
+          data: {
+            selectHasMany: ['one', 'two', 'one', 'two', 'one'],
+          },
+        })
+      } catch (e) {
+        error = e as ValidationError
+      }
+
+      expect(error.data.errors[0].message).toBe(
+        'This field has the following invalid selections: "one", "one", "one", "two", "two"',
+      )
     })
   })
 
