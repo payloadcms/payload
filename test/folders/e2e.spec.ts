@@ -101,12 +101,8 @@ test.describe('Folders', () => {
     })
 
     test('should create folder with collection that has translation function labels', async () => {
-      // This test verifies the fix for the bug where collections with translation function labels
-      // (like `singular: ({ t }) => t('authentication:account')`) would cause a React error:
-      // "Functions cannot be passed directly to Client Components"
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
 
-      // Click create folder button - this should not throw an error
       const createButton = page
         .locator('.list-header__title-and-actions .create-new-doc-in-folder__button')
         .filter({ hasText: 'Create folder' })
@@ -117,14 +113,12 @@ test.describe('Folders', () => {
       const drawer = page.locator('dialog .collection-edit--payload-folders')
       await expect(drawer).toBeVisible()
 
-      // Verify the folderType select field is present and functional
       const selectLocator = drawer.locator('#field-folderType')
       await expect(selectLocator).toBeVisible()
 
       // Should be able to open the select menu without errors
       await openSelectMenu({ selectLocator })
 
-      // The Posts collection has translation function labels, so it should appear in the options
       const postsOption = page.locator('.rs__option', { hasText: 'posts' })
       await expect(postsOption).toBeVisible()
     })

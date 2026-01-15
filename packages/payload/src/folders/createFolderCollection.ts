@@ -26,7 +26,6 @@ export const createFolderCollection = ({
     (acc, collection: CollectionConfig) => {
       acc.collectionSlugs.push(collection.slug)
 
-      // Determine the label - if it's a function, use the slug instead to avoid serialization issues
       const labelValue = collection.labels?.plural
       const label =
         typeof labelValue === 'function' || typeof labelValue === 'undefined'
