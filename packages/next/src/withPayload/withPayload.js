@@ -35,7 +35,8 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   }
 
   const consoleWarn = console.warn
-  const sassWarningText = "SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary"
+  const sassWarningText =
+    'SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary'
   console.warn = (...args) => {
     if (
       (typeof args[1] === 'string' && args[1].includes(sassWarningText)) ||
@@ -47,8 +48,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
     consoleWarn(...args)
   }
-}
-
 
   /** @type {import('next').NextConfig} */
   const baseConfig = {
