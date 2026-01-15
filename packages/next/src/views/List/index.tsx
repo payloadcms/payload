@@ -16,6 +16,7 @@ import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloa
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
+import { docAccessOperation } from 'payload'
 import {
   appendUploadSelectFields,
   combineWhereConstraints,
@@ -349,7 +350,49 @@ export const renderListView = async (
     })
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
-    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
+
+    // For trash-enabled collections, compute separate permissions for trash vs permanent delete
+    // This follows the same pattern as document-level permissions in getDocumentPermissions
+    let hasTrashPermission = false
+    let hasDeletePermission = false
+
+    if (collectionConfig.trash) {
+      // Check if user can trash (soft delete) - by checking delete access with deletedAt set
+      try {
+        hasTrashPermission = (
+          await docAccessOperation({
+            collection: {
+              config: collectionConfig,
+            },
+            data: {
+              deletedAt: new Date().toISOString(),
+            },
+            req,
+          })
+        ).delete
+      } catch {
+        hasTrashPermission = false
+      }
+
+      // Check if user can permanently delete - by checking delete access without deletedAt
+      try {
+        hasDeletePermission = (
+          await docAccessOperation({
+            collection: {
+              config: collectionConfig,
+            },
+            data: {},
+            req,
+          })
+        ).delete
+      } catch {
+        hasDeletePermission = false
+      }
+    } else {
+      // When trash is not enabled, use the standard collection-level delete permission
+      hasDeletePermission = Boolean(permissions?.collections?.[collectionSlug]?.delete)
+      hasTrashPermission = false
+    }
 
     // Check if there's a notFound query parameter (document ID that wasn't found)
     const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -374,6 +417,7 @@ export const renderListView = async (
         collectionSlug,
         hasCreatePermission,
         hasDeletePermission,
+        hasTrashPermission,
         newDocumentURL,
       },
       collectionConfig,
@@ -411,6 +455,7 @@ export const renderListView = async (
                 enableRowSelections,
                 hasCreatePermission,
                 hasDeletePermission,
+                hasTrashPermission,
                 listPreferences: collectionPreferences,
                 newDocumentURL,
                 queryPreset,

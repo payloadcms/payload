@@ -26,6 +26,16 @@ import './index.scss'
 export type Props = {
   collection: ClientCollectionConfig
   /**
+   * Whether the user has permission to permanently delete documents.
+   * If provided, uses this instead of reading from auth context.
+   */
+  hasDeletePermission?: boolean
+  /**
+   * Whether the user has permission to trash (soft delete) documents.
+   * If provided, uses this instead of reading from auth context.
+   */
+  hasTrashPermission?: boolean
+  /**
    * When multiple DeleteMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
@@ -38,7 +48,12 @@ export type Props = {
 
 export const DeleteMany: React.FC<Props> = (props) => {
   const { viewType } = props
-  const { collection: { slug, trash } = {}, modalPrefix } = props
+  const {
+    collection: { slug, trash } = {},
+    hasDeletePermission: hasDeletePermissionFromProps,
+    hasTrashPermission: hasTrashPermissionFromProps,
+    modalPrefix,
+  } = props
 
   const { permissions } = useAuth()
   const { count, selectAll, selectedIDs, toggleAll } = useSelection()
@@ -47,13 +62,32 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasDeletePermission = collectionPermissions?.delete
+
+  // Use props if provided, otherwise fall back to auth context
+  // For hasTrashPermission, if props are not provided, assume same as hasDeletePermission from context
+  // (for backwards compatibility when trash permission is not separately computed)
+  const hasDeletePermission =
+    hasDeletePermissionFromProps !== undefined
+      ? hasDeletePermissionFromProps
+      : Boolean(collectionPermissions?.delete)
+  const hasTrashPermission =
+    hasTrashPermissionFromProps !== undefined
+      ? hasTrashPermissionFromProps
+      : Boolean(collectionPermissions?.delete)
 
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
 
   const ids = selectingAll ? [] : selectedIDs
 
-  if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
+  // Determine if we should show the delete button based on view type and permissions:
+  // - In trash view: Only show if user can permanently delete (since delete = permanent delete)
+  // - In regular view: Show if user can trash OR permanently delete
+  const isTrashView = viewType === 'trash'
+  const canShowDeleteButton = isTrashView
+    ? hasDeletePermission
+    : hasDeletePermission || hasTrashPermission
+
+  if (selectAll === SelectAllStatus.None || !canShowDeleteButton) {
     return null
   }
 
@@ -87,6 +121,8 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
           clearRouteCache()
         }}
+        hasDeletePermission={hasDeletePermission}
+        hasTrashPermission={hasTrashPermission}
         modalPrefix={modalPrefix}
         search={parseSearchParams(searchParams)?.search as string}
         selections={{

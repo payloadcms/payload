@@ -2099,6 +2099,274 @@ describe('Access Control', () => {
         })
       })
     })
+
+    describe('list view bulk delete', () => {
+      describe('differentiated trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            await payload.delete({
+              collection: differentiatedTrashSlug,
+              id,
+              trash: true,
+            })
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc 1', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should be visible in bulk actions
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view (user can trash)', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc Regular User', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should be visible because user can trash (even if they can't permanently delete)
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeVisible()
+          })
+
+          test('should hide delete permanently checkbox in bulk delete modal', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc Regular User 2', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Click delete button
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await deleteButton.click()
+
+            // The delete permanently checkbox should be hidden for regular users
+            await expect(page.locator('#delete-forever')).toBeHidden()
+          })
+        })
+      })
+
+      describe('restricted trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            await payload.delete({
+              collection: restrictedTrashSlug,
+              id,
+              trash: true,
+            })
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view', async () => {
+            const doc = await payload.create({
+              collection: restrictedTrashSlug,
+              data: { title: 'Restricted Bulk Test Doc', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(restrictedTrashUrl.list)
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should be visible for admin
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should not show delete button when selecting docs in list view (user cannot trash or delete)', async () => {
+            const doc = await payload.create({
+              collection: restrictedTrashSlug,
+              data: { title: 'Restricted Bulk Test Doc Regular User', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(restrictedTrashUrl.list)
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should NOT be visible because user cannot trash or permanently delete
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeHidden()
+          })
+        })
+      })
+    })
+
+    describe('trash view bulk delete (permanent delete only)', () => {
+      describe('differentiated trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            try {
+              await payload.delete({
+                collection: differentiatedTrashSlug,
+                id,
+                trash: true,
+              })
+            } catch (_e) {
+              // Document may already be deleted
+            }
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in trash view', async () => {
+            // Create a trashed document
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: {
+                title: 'Trash View Bulk Test Admin',
+                _status: 'published',
+                deletedAt: new Date().toISOString(),
+              },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(`${differentiatedTrashUrl.list}/trash`)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should be visible for admin (they can permanently delete)
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should NOT show delete button when selecting docs in trash view (user can only trash, not permanently delete)', async () => {
+            // Create a trashed document
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: {
+                title: 'Trash View Bulk Test Regular',
+                _status: 'published',
+                deletedAt: new Date().toISOString(),
+              },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(`${differentiatedTrashUrl.list}/trash`)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
+            await checkbox.click()
+
+            // Delete button should NOT be visible in trash view because
+            // regular users can only trash (soft delete), not permanently delete
+            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeHidden()
+          })
+        })
+      })
+    })
   })
 })
 
