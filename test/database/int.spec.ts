@@ -3636,10 +3636,13 @@ describe('database', () => {
   it('should not allow document creation with relationship data to an invalid document ID', async () => {
     let invalidDoc
 
+    // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)
+    const invalidId = payload.db.name === 'content_api' ? 1 : 'not-real-id'
+
     try {
       invalidDoc = await payload.create({
         collection: 'relation-b',
-        data: { relationship: 'not-real-id', title: 'invalid' },
+        data: { relationship: invalidId, title: 'invalid' },
       })
     } catch (error) {
       // instanceof checks don't work with libsql
