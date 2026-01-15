@@ -39,7 +39,12 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
-import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
+import {
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fieldsPersistanceSlug,
+  postsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1720,7 +1725,6 @@ describe('database', () => {
       await payload.db.collections['relationships-migration'].deleteMany({})
       await payload.db.versions['relationships-migration'].deleteMany({})
     })
-
   })
 
   describe('schema', () => {
@@ -2077,6 +2081,52 @@ describe('database', () => {
       expect(updateResult.docs[0].title).toStrictEqual('world')
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
+    })
+
+    it('should bulk update with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'test1' } }),
+          payload.create({ collection, data: { title: 'test2' } }),
+          payload.create({ collection, data: { title: 'test3' } }),
+        ])
+
+        const result = await payload.update({
+          collection,
+          data: { title: 'updated' },
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(3)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalValue
+      }
+    })
+
+    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'toDelete1' } }),
+          payload.create({ collection, data: { title: 'toDelete2' } }),
+        ])
+
+        const result = await payload.delete({
+          collection,
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalValue
+      }
     })
 
     it('should CRUD point field', async () => {
@@ -3587,6 +3637,79 @@ describe('database', () => {
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
   })
 
+  it('should apply default values on upsert insert but not on update', async () => {
+    // TODO: remove this as soon as It's fixed in the other database adapters
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+    // First upsert (INSERT): should apply defaults
+    const inserted = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        // Don't pass defaultValue field - should be auto-applied
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Defaults should be applied on insert
+    expect(inserted.defaultValue).toBe('default value from database')
+    expect(inserted.select).toBe('default')
+    expect(inserted.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Second upsert (UPDATE): should NOT overwrite existing values with defaults
+    const updated = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        defaultValue: 'custom value', // Explicitly set a different value
+        select: 'option0', // Change from default
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(updated.id)
+
+    // Custom values should be preserved, not overwritten with defaults
+    expect(updated.defaultValue).toBe('custom value')
+    expect(updated.select).toBe('option0')
+    expect(updated.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Third upsert (UPDATE) with partial data: should NOT apply defaults to missing fields
+    const partialUpdate = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test-updated',
+        // Don't pass defaultValue or select - should NOT reset to defaults
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(partialUpdate.id)
+
+    // Previous values should be preserved (not reset to defaults)
+    expect(partialUpdate.defaultValue).toBe('custom value')
+    expect(partialUpdate.select).toBe('option0')
+    expect(partialUpdate.title).toBe('upsert-test-updated')
+  })
+
   it('should enforce unique ids on db level even after delete', async () => {
     const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     await payload.delete({ id, collection: postsSlug })
@@ -3868,7 +3991,41 @@ describe('database', () => {
         },
       })
     } catch (e) {
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
+    }
+  })
+
+  it('should throw unique constraint errors in optimized update path', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-2',
+      },
+    })
+
+    // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
+    // because it's a simple field update with an existing ID
+    try {
+      await payload.update({
+        collection: 'unique-fields',
+        id: doc2.id,
+        data: {
+          slugField: 'optimized-unique-1', // Try to set to doc1's unique value
+        },
+      })
+    } catch (e) {
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
     }
   })
 

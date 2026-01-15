@@ -66,6 +66,7 @@ export const fetchAndResave = async ({
             await upsertRow({
               id: doc.id,
               adapter,
+              collectionSlug,
               data: doc,
               db,
               fields,
@@ -115,6 +116,7 @@ export const fetchAndResave = async ({
             await upsertRow({
               id: doc.id,
               adapter,
+              collectionSlug,
               data: doc,
               db,
               fields,
@@ -174,6 +176,7 @@ export const fetchAndResave = async ({
                 data: doc,
                 db,
                 fields,
+                globalSlug,
                 ignoreResult: true,
                 operation: 'update',
                 req,
@@ -214,6 +217,7 @@ export const fetchAndResave = async ({
               data: doc,
               db,
               fields,
+              globalSlug,
               ignoreResult: true,
               operation: 'update',
               req,

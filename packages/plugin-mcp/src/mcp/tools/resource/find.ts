@@ -23,6 +23,7 @@ export const findResourceTool = (
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
+    draft?: boolean,
   ): Promise<{
     content: Array<{
       text: string
@@ -73,6 +74,7 @@ export const findResourceTool = (
             user,
             ...(locale && { locale }),
             ...(fallbackLocale && { fallbackLocale }),
+            ...(draft !== undefined && { draft }),
           })
 
           if (verboseLogs) {
@@ -129,6 +131,7 @@ ${JSON.stringify(doc, null, 2)}`,
         user,
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
+        ...(draft !== undefined && { draft }),
       }
 
       if (sort) {
@@ -199,8 +202,8 @@ Page: ${result.page} of ${result.totalPages}
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, depth, fallbackLocale, limit, locale, page, sort, where }) => {
-        return await tool(id, limit, page, sort, where, depth, locale, fallbackLocale)
+      async ({ id, draft, depth, fallbackLocale, limit, locale, page, sort, where }) => {
+        return await tool(id, limit, page, sort, where, depth, locale, fallbackLocale, draft)
       },
     )
   }

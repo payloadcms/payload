@@ -31,7 +31,6 @@ export const findMany = async function find({
   pagination,
   req,
   select,
-  skip,
   sort,
   tableName,
   versions,
@@ -43,7 +42,7 @@ export const findMany = async function find({
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
-  const offset = skip || (page - 1) * limit
+  const offset = (page - 1) * limit
 
   if (limit === 0) {
     pagination = false
