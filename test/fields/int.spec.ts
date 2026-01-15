@@ -3596,6 +3596,277 @@ describe('Fields', () => {
 
       expect(query.docs).toBeDefined()
     })
+
+    describe('querying', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ collection: 'relationship-fields', id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should query non-polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text1.id, text2.id]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text1.id] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text-fields:text1, array-fields:array1]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text-fields:text1] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [{ relationTo: 'text-fields', value: text1.id }],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query non-polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const text3 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 3' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text3.id],
+            relationship: { relationTo: 'text-fields', value: text3.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text1.id, text2.id] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text3.id] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text3.id],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+
+      it('should query polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: text2.id }],
+            relationship: { relationTo: 'text-fields', value: text2.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text-fields:text1, array-fields:array1] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text-fields:text2] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [{ relationTo: 'text-fields', value: text2.id }],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+    })
   })
 
   describe('clearable fields - exists', () => {
