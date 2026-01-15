@@ -14,7 +14,7 @@ const baseClass = 'nav-group'
 type Props = {
   children: React.ReactNode
   isOpen?: boolean
-  label: string
+  label: string | React.ReactNode
 }
 
 const preferencesKey = 'nav'
