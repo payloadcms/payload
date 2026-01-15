@@ -765,12 +765,6 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
-      // Delete post
-      await payload.delete({
-        collection: 'posts',
-        id: post.id,
-      })
-
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
       expect(json.result.content).toHaveLength(2)
@@ -815,12 +809,6 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const json = await parseStreamResponse(response)
-
-      // Delete post
-      await payload.delete({
-        collection: 'posts',
-        id: post.id,
-      })
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
@@ -1211,12 +1199,6 @@ describe('@payloadcms/plugin-mcp', () => {
 
       const json = await parseStreamResponse(response)
 
-      // Delete post
-      await payload.delete({
-        collection: 'posts',
-        id: post.id,
-      })
-
       expect(json.result).toBeDefined()
       const responseText = json.result.content[0].text
 
@@ -1262,12 +1244,6 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const json = await parseStreamResponse(response)
-
-      // Delete post
-      await payload.delete({
-        collection: 'posts',
-        id: post.id,
-      })
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
