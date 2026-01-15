@@ -38,6 +38,13 @@ export interface KVAdapter {
   keys(): Promise<string[]>
 
   /**
+   * Retrieves multiple values from the store by their keys.
+   * Order of results MUST match order of keys.
+   * Missing keys MUST resolve to null.
+   */
+  mget?<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>>
+
+  /**
    * Sets a value in the store with the given key.
    * @param key - The key to associate with the value.
    * @param value - The value to store.
