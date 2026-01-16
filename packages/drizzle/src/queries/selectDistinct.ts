@@ -41,10 +41,14 @@ export const selectDistinct = ({
     let query: SQLiteSelect
     const table = adapter.tables[tableName]
 
+    // With hasAggregate we use groupBy so we don't need to use selectDistinct in that case
     // @ts-expect-error - Drizzle types are not accurate here
-    const selectFunc: TransactionSQLite['selectDistinct'] = hasAggregates
+    let selectFunc: TransactionSQLite['selectDistinct'] = hasAggregates
       ? db.select
       : db.selectDistinct
+
+    // bind this otherwise we get TypeError: Cannot read properties of undefined (reading 'session')
+    selectFunc = selectFunc.bind(db)
 
     query = selectFunc(selectFields as Record<string, SQLiteColumn>)
       .from(table)
