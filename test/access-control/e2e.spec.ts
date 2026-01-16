@@ -1891,6 +1891,43 @@ describe('Access Control', () => {
             `Differentiated Trash "Test Doc For Perma Delete" successfully deleted.`,
           )
         })
+
+        test('should show permanently delete button and allow permanently deleting when viewing trashed doc', async () => {
+          // Create a trashed document
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: {
+              title: 'Admin Trashed Doc View Test',
+              _status: 'published',
+              deletedAt: new Date().toISOString(),
+            },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          // Navigate to the trashed document edit view
+          await page.goto(differentiatedTrashUrl.trashEdit(doc.id))
+
+          // Admin should see the permanently delete button
+          const permanentlyDeleteButton = page.locator('#action-permanently-delete')
+          await expect(permanentlyDeleteButton).toBeVisible()
+
+          // Restore button should also be visible
+          const restoreButton = page.locator('#action-restore')
+          await expect(restoreButton).toBeVisible()
+
+          // Click permanently delete and confirm
+          await permanentlyDeleteButton.click()
+          await expect(page.locator(`#perma-delete-${doc.id}`)).toBeVisible()
+          await page.locator(`#perma-delete-${doc.id} #confirm-action`).click()
+
+          // Verify success toast
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Admin Trashed Doc View Test" successfully deleted.`,
+          )
+
+          // Verify URL changed to trash list view
+          await expect(page).toHaveURL(new RegExp(`${differentiatedTrashUrl.trash}(\\?|$)`))
+        })
       })
 
       describe('as regular user', () => {
@@ -1964,6 +2001,43 @@ describe('Access Control', () => {
           await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
             `Differentiated Trash "Test Doc For Trash" moved to trash.`,
           )
+        })
+
+        test('should hide permanently delete button but show restore button when viewing trashed doc', async () => {
+          // Create a trashed document
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: {
+              title: 'Trashed Doc View Test',
+              _status: 'published',
+              deletedAt: new Date().toISOString(),
+            },
+          })
+          createdDocIds.push(doc.id)
+
+          // Navigate to the trashed document edit view
+          await page.goto(differentiatedTrashUrl.trashEdit(doc.id))
+
+          // Permanently delete button should NOT be visible (user can only trash, not permanently delete)
+          const permanentlyDeleteButton = page.locator('#action-permanently-delete')
+          await expect(permanentlyDeleteButton).toBeHidden()
+
+          // Restore button SHOULD be visible (user has save/update permission)
+          const restoreButton = page.locator('#action-restore')
+          await expect(restoreButton).toBeVisible()
+
+          // Click restore and confirm
+          await restoreButton.click()
+          await expect(page.locator(`#restore-${doc.id}`)).toBeVisible()
+          await page.locator(`#restore-${doc.id} #confirm-action`).click()
+
+          // Verify success toast
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Trashed Doc View Test" successfully restored.`,
+          )
+
+          // Verify URL changed to regular edit view (not trash view)
+          await expect(page).toHaveURL(differentiatedTrashUrl.edit(doc.id))
         })
       })
     })
