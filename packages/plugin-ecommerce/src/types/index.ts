@@ -617,6 +617,7 @@ export type ProductsValidation = (args: {
 /**
  * A map of collection slugs used by the Ecommerce plugin.
  * Provides an easy way to track the slugs of collections even when they are overridden.
+ * Variant-related slugs are only present when variants are enabled.
  */
 export type CollectionSlugMap = {
   addresses: string
@@ -625,9 +626,9 @@ export type CollectionSlugMap = {
   orders: string
   products: string
   transactions: string
-  variantOptions: string
-  variants: string
-  variantTypes: string
+  variantOptions?: string
+  variants?: string
+  variantTypes?: string
 }
 
 /**
