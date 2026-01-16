@@ -90,6 +90,7 @@ export interface Config {
     'edit-menu-items': EditMenuItem;
     'format-doc-url': FormatDocUrl;
     'base-list-filters': BaseListFilter;
+    'list-selection-items': ListSelectionItem;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
     placeholder: Placeholder;
@@ -130,6 +131,7 @@ export interface Config {
     'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
     'format-doc-url': FormatDocUrlSelect<false> | FormatDocUrlSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
+    'list-selection-items': ListSelectionItemsSelect<false> | ListSelectionItemsSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
     placeholder: PlaceholderSelect<false> | PlaceholderSelect<true>;
@@ -561,6 +563,16 @@ export interface BaseListFilter {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-selection-items".
+ */
+export interface ListSelectionItem {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "with300documents".
  */
 export interface With300Document {
@@ -784,6 +796,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
+      } | null)
+    | ({
+        relationTo: 'list-selection-items';
+        value: string | ListSelectionItem;
       } | null)
     | ({
         relationTo: 'with300documents';
@@ -1205,6 +1221,15 @@ export interface BaseListFiltersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-selection-items_select".
+ */
+export interface ListSelectionItemsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "with300documents_select".
  */
 export interface With300DocumentsSelect<T extends boolean = true> {
@@ -1559,6 +1584,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
