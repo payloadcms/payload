@@ -303,7 +303,7 @@ export const DocumentControls: React.FC<{
                 )}
               </Fragment>
             )}
-            {hasDeletePermission && isTrashed && (
+            {docHasDeletePermission && isTrashed && (
               <PermanentlyDeleteButton
                 buttonId="action-permanently-delete"
                 collectionSlug={collectionConfig?.slug}

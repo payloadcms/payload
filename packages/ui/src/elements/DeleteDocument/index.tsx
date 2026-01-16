@@ -18,6 +18,7 @@ import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
+import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
@@ -75,19 +76,18 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const handleDelete = useCallback(async () => {
     setModified(false)
 
-    // Determine whether to permanently delete or trash based on permissions:
-    // - If trash is disabled, always permanently delete
-    // - If user only has trash permission (no delete), always trash
-    // - If user has delete permission, respect the deletePermanently checkbox
-    const shouldPermanentlyDelete =
-      !collectionConfig.trash || !hasTrashPermission || (hasDeletePermission && deletePermanently)
+    const permanentlyDelete = shouldPermanentlyDelete({
+      deletePermanently,
+      hasDeletePermission,
+      hasTrashPermission,
+    })
 
     try {
       const url = formatAdminURL({
         apiRoute: api,
         path: `/${collectionSlug}/${id}`,
       })
-      const res = shouldPermanentlyDelete
+      const res = permanentlyDelete
         ? await requests.delete(url, {
             headers: {
               'Accept-Language': i18n.language,
@@ -108,7 +108,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
       if (res.status < 400) {
         toast.success(
-          t(shouldPermanentlyDelete ? 'general:titleDeleted' : 'general:titleTrashed', {
+          t(permanentlyDelete ? 'general:titleDeleted' : 'general:titleTrashed', {
             label: getTranslation(singularLabel, i18n),
             title,
           }) || json.message,

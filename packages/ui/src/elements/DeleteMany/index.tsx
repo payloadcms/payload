@@ -18,6 +18,7 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
@@ -294,18 +295,14 @@ export function DeleteMany_v4({
           )}`,
         })
 
-        // Determine whether to permanently delete or trash based on permissions:
-        // - If in trash view, always permanently delete
-        // - If trash is disabled, always permanently delete
-        // - If user only has trash permission (no delete), always trash
-        // - If user has delete permission, respect the deletePermanently checkbox
-        const shouldPermanentlyDelete =
-          viewType === 'trash' ||
-          !collectionConfig.trash ||
-          !hasTrashPermission ||
-          (hasDeletePermission && deletePermanently)
+        const permanentlyDelete = shouldPermanentlyDelete({
+          deletePermanently,
+          hasDeletePermission,
+          hasTrashPermission,
+          isTrashView: viewType === 'trash',
+        })
 
-        const deleteManyResponse = shouldPermanentlyDelete
+        const deleteManyResponse = permanentlyDelete
           ? await requests.delete(url, {
               headers: {
                 'Accept-Language': i18n.language,
@@ -330,18 +327,12 @@ export function DeleteMany_v4({
           const successLabel = deletedDocs > 1 ? plural : singular
 
           if (deleteManyResponse.status < 400 || deletedDocs > 0) {
-            const wasTrashed =
-              collectionConfig.trash &&
-              hasTrashPermission &&
-              !(hasDeletePermission && deletePermanently) &&
-              viewType !== 'trash'
-
             let successKey:
               | 'general:deletedCountSuccessfully'
               | 'general:permanentlyDeletedCountSuccessfully'
               | 'general:trashedCountSuccessfully'
 
-            if (wasTrashed) {
+            if (!permanentlyDelete) {
               successKey = 'general:trashedCountSuccessfully'
             } else if (viewType === 'trash' || (hasDeletePermission && deletePermanently)) {
               successKey = 'general:permanentlyDeletedCountSuccessfully'
