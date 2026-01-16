@@ -734,4 +734,180 @@ describe('@payloadcms/plugin-search', () => {
       trash: true, // permanently delete
     })
   })
+
+  describe('locale filtering', () => {
+    it('should filter locales when skipSync excludes them', async () => {
+      // Test config has 3 locales: ['en', 'es', 'de']
+      // For 'filtered-locales' collection with syncEnglishOnly: true, only 'en' should be indexed
+
+      // Create a doc with syncEnglishOnly enabled
+      const enDoc = await payload.create({
+        collection: 'filtered-locales',
+        data: {
+          title: 'Filtered Doc',
+          syncEnglishOnly: true,
+        },
+        locale: 'en',
+      })
+
+      // Query for ALL search docs with locale: 'all' to see total count
+      const { docs: allSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: enDoc.id,
+          },
+        },
+      })
+
+      // Should only have 1 search doc total (English only)
+      expect(allSearchDocs).toHaveLength(1)
+      expect(allSearchDocs[0]?.doc.relationTo).toBe('filtered-locales')
+
+      // Verify the search doc exists for English locale
+      const { docs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: enDoc.id,
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(1)
+
+      const doc = docs[0]
+      expect(doc).toBeDefined()
+      expect(doc.doc.relationTo).toBe('filtered-locales')
+      expect(doc.title).toHaveProperty('en', 'Filtered Doc')
+      expect(doc.title).not.toHaveProperty('es')
+      expect(doc.title).not.toHaveProperty('de')
+
+      // Clean up
+      await payload.delete({
+        collection: 'filtered-locales',
+        id: enDoc.id,
+      })
+    })
+
+    it('should index all locales when skipSync allows all locales', async () => {
+      // Test config has 3 locales: ['en', 'es', 'de']
+      // For 'posts' collection, skipSync returns false for all locales
+
+      // Create a post
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Post for All Locales',
+        },
+        locale: 'en',
+      })
+
+      // Update the post in Spanish locale
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        data: {
+          _status: 'published',
+          title: 'Test Post para Todos los Locales',
+        },
+      })
+
+      // Update the post in German locale
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'de',
+        data: {
+          _status: 'published',
+          title: 'Testbeitrag für alle Sprachen',
+        },
+      })
+
+      // Query for search doc with locale: 'all'
+      const { docs: allSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: post.id,
+          },
+        },
+      })
+
+      // Should have 1 search doc with all locales embedded
+      expect(allSearchDocs).toHaveLength(1)
+      expect(allSearchDocs[0]?.doc.relationTo).toBe(postsSlug)
+      // Verify all locales are present in the localized title field
+      expect(allSearchDocs[0]?.title).toHaveProperty('en', 'Test Post for All Locales')
+      expect(allSearchDocs[0]?.title).toHaveProperty('es', 'Test Post para Todos los Locales')
+      expect(allSearchDocs[0]?.title).toHaveProperty('de', 'Testbeitrag für alle Sprachen')
+
+      // Clean up
+      await payload.delete({
+        collection: postsSlug,
+        id: post.id,
+      })
+    })
+
+    it('should index all locales when syncEnglishOnly is false', async () => {
+      // For 'filtered-locales' collection with syncEnglishOnly: false, all locales should be indexed
+
+      // Create a doc with syncEnglishOnly disabled
+      const doc = await payload.create({
+        collection: 'filtered-locales',
+        data: {
+          title: 'Unfiltered Doc',
+          syncEnglishOnly: false,
+        },
+        locale: 'en',
+      })
+
+      // Verify search doc exists for English
+      const { docs: enSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'en',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(enSearchDocs).toHaveLength(1)
+
+      // Verify search doc exists for Spanish
+      const { docs: esSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'es',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(esSearchDocs).toHaveLength(1)
+
+      // Verify search doc exists for German
+      const { docs: deSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'de',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(deSearchDocs).toHaveLength(1)
+
+      // Clean up
+      await payload.delete({
+        collection: 'filtered-locales',
+        id: doc.id,
+      })
+    })
+  })
 })

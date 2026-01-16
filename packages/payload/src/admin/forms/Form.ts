@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Option, Validate } from '../../fields/config/types.js'
+import type { Field, Option, TabAsField, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -60,7 +60,7 @@ export type FieldState = {
    * The fieldSchema may be part of the form state if `includeSchema: true` is passed to buildFormState.
    * This will never be in the form state of the client.
    */
-  fieldSchema?: Field
+  fieldSchema?: Field | TabAsField
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**

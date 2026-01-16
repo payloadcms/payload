@@ -71,6 +71,7 @@ export const initiatePaymentHandler: InitiatePayment =
     let cart = undefined
     const billingAddress = data?.billingAddress
     const shippingAddress = data?.shippingAddress
+    const cartSecret = data?.secret
 
     let customerEmail: string = user?.email ?? ''
 
@@ -104,11 +105,18 @@ export const initiatePaymentHandler: InitiatePayment =
 
     if (!cart) {
       if (cartID) {
+        // Add cart secret to query for guest cart access control
+        if (cartSecret && typeof cartSecret === 'string') {
+          req.query = req.query || {}
+          req.query.secret = cartSecret
+        }
+
         cart = await payload.findByID({
           id: cartID,
           collection: cartsSlug,
           depth: 2,
           overrideAccess: false,
+          req,
           select: {
             id: true,
             currency: true,
@@ -116,7 +124,6 @@ export const initiatePaymentHandler: InitiatePayment =
             items: true,
             subtotal: true,
           },
-          user,
         })
 
         if (!cart) {

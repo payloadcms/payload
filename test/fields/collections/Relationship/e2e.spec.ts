@@ -726,6 +726,74 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should allow filtering by non-polymorphic hasMany relationship field / equals', async () => {
+    const textDoc1 = await createTextFieldDoc({ text: 'Text 1' })
+    const textDoc2 = await createTextFieldDoc({ text: 'Text 2' })
+    const textDoc3 = await createTextFieldDoc({ text: 'Text 3' })
+
+    await createRelationshipFieldDoc(
+      { value: textDoc1.id, relationTo: 'text-fields' },
+      {
+        relationshipHasMany: [textDoc1.id],
+      },
+    )
+
+    await createRelationshipFieldDoc(
+      { value: textDoc2.id, relationTo: 'text-fields' },
+      {
+        relationshipHasMany: [textDoc2.id, textDoc3.id],
+      },
+    )
+
+    await page.goto(url.list)
+    await wait(1000)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship Has Many',
+      operatorLabel: 'equals',
+      value: 'Text 1',
+      multiSelect: true,
+    })
+
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should allow filtering by polymorphic hasMany relationship field / equals', async () => {
+    const textDoc1 = await createTextFieldDoc({ text: 'Poly Text 1' })
+    const textDoc2 = await createTextFieldDoc({ text: 'Poly Text 2' })
+
+    await createRelationshipFieldDoc(
+      { value: textDoc1.id, relationTo: 'text-fields' },
+      {
+        relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: textDoc1.id }],
+      },
+    )
+
+    await createRelationshipFieldDoc(
+      { value: textDoc2.id, relationTo: 'text-fields' },
+      {
+        relationHasManyPolymorphic: [
+          { relationTo: 'text-fields', value: textDoc1.id },
+          { relationTo: 'text-fields', value: textDoc2.id },
+        ],
+      },
+    )
+
+    await page.goto(url.list)
+    await wait(1000)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Relation Has Many Polymorphic',
+      operatorLabel: 'equals',
+      value: 'Poly Text 1',
+      multiSelect: true,
+    })
+
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
   test('should be able to select relationship with drawer appearance', async () => {
     await loadCreatePage()
 

@@ -1,9 +1,9 @@
 import { v4 as uuid } from 'uuid'
 
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { TypedUser } from '../index.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
-import type { UserSession } from './types.js'
+import type { UntypedUser, UserSession } from './types.js'
 
 /**
  * Removes expired sessions from an array of sessions
@@ -66,5 +66,30 @@ export const addSessionToUser = async ({
 
   return {
     sid,
+  }
+}
+
+export const revokeSession = async ({
+  collectionConfig,
+  payload,
+  req,
+  sid,
+  user,
+}: {
+  collectionConfig: SanitizedCollectionConfig
+  payload: Payload
+  req: PayloadRequest
+  sid: string
+  user: null | (TypeWithID & UntypedUser)
+}): Promise<void> => {
+  if (collectionConfig.auth.useSessions && user && user.sessions?.length) {
+    user.sessions = user.sessions.filter((session) => session.id !== sid)
+    await payload.db.updateOne({
+      id: user.id,
+      collection: collectionConfig.slug,
+      data: user,
+      req,
+      returning: false,
+    })
   }
 }

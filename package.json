@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.70.0",
+  "version": "3.71.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -153,7 +153,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "15.4.7",
+    "@next/bundle-analyzer": "15.4.10",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -180,6 +180,7 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
+    "eslint": "9.22.0",
     "execa": "5.1.1",
     "form-data": "3.0.1",
     "fs-extra": "10.1.0",
@@ -214,12 +215,25 @@
     "vitest": "4.0.15",
     "wrangler": "~4.42.0"
   },
-  "packageManager": "pnpm@9.7.1",
+  "packageManager": "pnpm@10.27.0",
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9.7.0"
+    "pnpm": "^10.27.0"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "@swc/core",
+      "@vercel/git-hooks",
+      "better-sqlite3",
+      "bufferutil",
+      "esbuild",
+      "mongodb-memory-server",
+      "sharp",
+      "unrs-resolver",
+      "utf-8-validate",
+      "workerd"
+    ],
     "overrides": {
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
