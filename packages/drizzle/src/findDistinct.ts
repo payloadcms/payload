@@ -1,13 +1,35 @@
+import type { asc, desc, SQL } from 'drizzle-orm'
+
 import { max, sql } from 'drizzle-orm'
 import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter } from './types.js'
+import type { BuildQueryJoinAliases, DrizzleAdapter, GenericColumn } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { DistinctSymbol } from './utilities/rawConstraint.js'
+
+const getOrderColumn = (
+  orderBy: { column: GenericColumn; order: typeof asc | typeof desc }[],
+  selectFields: Record<string, GenericColumn>,
+  joins: BuildQueryJoinAliases,
+): GenericColumn | null | SQL.Aliased => {
+  if (orderBy.length === 0) {
+    return null
+  }
+
+  if (orderBy[0].column === selectFields['_selected']) {
+    return null
+  }
+
+  if (joins.length > 0) {
+    return orderBy[0].column
+  }
+
+  return max(orderBy[0]?.column).as('_order')
+}
 
 export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, args) {
   const collectionConfig: SanitizedCollectionConfig =
@@ -38,20 +60,19 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
 
   const db = await getTransaction(this, args.req)
 
-  const _order =
-    orderBy[0].column === selectFields['_selected'] ? null : max(orderBy[0]?.column).as('_order')
+  const _order = getOrderColumn(orderBy, selectFields, joins)
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     db,
     forceRun: true,
-    hasAggregates: Boolean(_order),
+    hasAggregates: Boolean(_order) && !joins.length,
     joins,
     query: ({ query }) => {
-      if (_order) {
-        query = query.orderBy(orderBy[0].order(sql`_order`))
-      } else {
+      if (joins.length > 0) {
         query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+      } else if (_order && orderBy.length > 0) {
+        query = query.orderBy(orderBy[0].order(sql`_order`))
       }
 
       if (args.limit) {
