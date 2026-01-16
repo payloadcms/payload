@@ -166,14 +166,12 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   if (!$group) {
     $group = {
-      _id: {
-        _field: `$${fieldPath}`,
-        ...(sortProperty === fieldPath
-          ? {}
-          : {
-              _sort: `$${sortProperty}`,
-            }),
-      },
+      _id: `$${fieldPath}`,
+      ...(sortProperty === fieldPath
+        ? {}
+        : {
+            _sort: { $max: `$${sortProperty}` },
+          }),
     }
   }
 
@@ -195,7 +193,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
     },
     {
       $sort: {
-        [sortProperty === fieldPath ? '_id._field' : '_id._sort']: sortDirection,
+        [sortProperty === fieldPath ? '_id' : '_sort']: sortDirection,
       },
     },
   ]
@@ -205,7 +203,7 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
   const getValues = async () => {
     return Model.aggregate(pipeline, { session }).then((res) =>
       res.map((each) => ({
-        [args.field]: JSON.parse(JSON.stringify(each._id._field)),
+        [args.field]: JSON.parse(JSON.stringify(each._id)),
       })),
     )
   }
