@@ -34,6 +34,7 @@ import type {
   UploadField,
 } from '../../fields/config/types.js'
 import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -173,11 +174,13 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   data: Partial<T>
   doc: T
+  docWithLocales: T
   /**
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
+  previousDocWithLocales: T
   req: PayloadRequest
 }) => any
 
@@ -195,6 +198,7 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  docWithLocales: T
   findMany?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
@@ -577,6 +581,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
       }
     | false
   /**
+   * Enable hierarchical tree structure for this collection
+   *
+   * Use `true` to enable with defaults (auto-detects parent field)
+   * or provide configuration object
+   *
+   * @example
+   * // Enable with defaults
+   * hierarchy: true
+   *
+   * @example
+   * // Customize field names and slugify function
+   * hierarchy: {
+   *   parentFieldName: 'parent',
+   *   slugify: (text) => customSlugify(text),
+   *   slugPathFieldName: '_breadcrumbPath'
+   * }
+   */
+  hierarchy?: boolean | HierarchyConfig
+  /**
    * Hooks to modify Payload functionality
    */
   hooks?: {
@@ -719,7 +742,15 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
+    | 'admin'
+    | 'auth'
+    | 'endpoints'
+    | 'fields'
+    | 'folders'
+    | 'hierarchy'
+    | 'slug'
+    | 'upload'
+    | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -734,6 +765,7 @@ export interface SanitizedCollectionConfig
    * Object of collections to join 'Join Fields object keyed by collection
    */
   folders: CollectionFoldersConfiguration | false
+  hierarchy: false | SanitizedHierarchyConfig
   joins: SanitizedJoins
 
   /**
