@@ -59,11 +59,11 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
-    "dotenv": "16.4.7",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "dotenv": "catalog:",
     "prettier": "3.5.3",
-    "typescript": "5.7.3"
+    "typescript": "catalog:"
   },
   "publishConfig": {
     "exports": {
