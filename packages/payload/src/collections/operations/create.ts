@@ -246,7 +246,8 @@ export const createOperation = async <
       config.localization &&
       collectionConfig.versions &&
       collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus
+      collectionConfig.versions.drafts.localizeStatus &&
+      publishAllLocales
     ) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
@@ -265,11 +266,7 @@ export const createOperation = async <
       }
 
       for (const localeCode of accessibleLocaleCodes) {
-        if (publishAllLocales) {
-          resultWithLocales._status[localeCode] = 'published'
-        } else if (!resultWithLocales._status[localeCode]) {
-          resultWithLocales._status[localeCode] = 'draft'
-        }
+        resultWithLocales._status[localeCode] = 'published'
       }
     }
 

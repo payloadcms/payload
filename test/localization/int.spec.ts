@@ -3631,6 +3631,12 @@ describe('Localization', () => {
     describe('collections', () => {
       describe('on create', () => {
         it('should set other locales to draft upon creation', async () => {
+          // Only MongoDB initializes all locales to draft on create
+          // SQL databases do not do this otherwise all fields get initialized to null
+          if (!mongooseList.includes(process.env.PAYLOAD_DATABASE || '')) {
+            return
+          }
+
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
             data: {
