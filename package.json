@@ -122,6 +122,7 @@
     "script:license-check": "pnpm --filter scripts license-check",
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
+    "script:setup-figma": "./scripts/setup-figma-dev.sh",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:e2e": "pnpm runts ./test/runE2E.ts",
@@ -135,6 +136,7 @@
     "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
     "test:int:sqlite": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=sqlite DISABLE_LOGGING=true vitest --project int",
+    "test:int:summary": "pnpm runts ./test/runTestsWithSummary.ts",
     "test:types": "tstyche",
     "test:unit": "vitest run --project unit",
     "translateNewKeys": "pnpm --filter @tools/scripts run generateTranslations:core"
