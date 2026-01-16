@@ -37,11 +37,7 @@ export type DocumentInfoProps = {
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
-  /**
-   * Whether the user can trash (soft delete) documents.
-   * Determined by checking delete access with `deletedAt` not set.
-   * Only applicable when `trash` is enabled on the collection.
-   */
+  /** Whether the user can trash (soft delete) documents. Only applicable when `trash` is enabled. */
   readonly hasTrashPermission?: boolean
   readonly id?: number | string
   readonly initialData?: Data
