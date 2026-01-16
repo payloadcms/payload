@@ -221,6 +221,19 @@
     "pnpm": "^10.27.0"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "@swc/core",
+      "@vercel/git-hooks",
+      "better-sqlite3",
+      "bufferutil",
+      "esbuild",
+      "mongodb-memory-server",
+      "sharp",
+      "unrs-resolver",
+      "utf-8-validate",
+      "workerd"
+    ],
     "overrides": {
       "copyfiles": "catalog:",
       "cross-env": "catalog:",
