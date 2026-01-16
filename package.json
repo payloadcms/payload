@@ -213,6 +213,7 @@
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
     "typescript": "catalog:",
+    "vitest": "catalog:",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@10.27.0",
@@ -242,7 +243,8 @@
       "mongodb-memory-server": "catalog:",
       "react": "catalog:",
       "react-dom": "catalog:",
-      "typescript": "catalog:"
+      "typescript": "catalog:",
+      "vitest": "catalog:"
     }
   }
 }
