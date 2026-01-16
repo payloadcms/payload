@@ -122,6 +122,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Postoji problem pri učitavanju datoteke.',
     restoringTitle:
       'Došlo je do greške prilikom vraćanja {{title}}. Molimo vas da proverite svoju vezu i pokušate ponovo.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Token je nevalidan ili je istekao.',
     tokenNotProvided: 'Token nije obezbeđen.',
     unableToCopy: 'Kopiranje nije moguće.',
@@ -552,6 +553,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Vratićete promene u dokumentu u objavljeno stanje. Da li ste sigurni?',
     aboutToUnpublish: 'Poništićete objavu ovog dokumenta. Da li ste sigurni?',
+    aboutToUnpublishIn: 'Uskoro ćete odjaviti ovaj dokument na {{locale}}. Da li ste sigurni?',
     aboutToUnpublishSelection:
       'Upravo ćete poništiti objavu svih {{label}} u odabiru. Da li ste sigurni?',
     autosave: 'Automatsko čuvanje',
@@ -599,6 +601,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     restoring: 'Vraćanje...',
     reverting: 'Vraćanje...',
     revertToPublished: 'Vrati na objavljeno',
+    revertUnsuccessful: 'Povratak nije uspeo. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Sačuvaj nacrt',
     scheduledSuccessfully: 'Uspešno zakazano.',
     schedulePublish: 'Zakaži objavljivanje',
@@ -609,6 +612,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublished: 'Neobjavljeno',
+    unpublishedSuccessfully: 'Uspešno nepublikovano.',
+    unpublishIn: 'Poništi objavljivanje na {{locale}}',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
     versionAgo: 'pre {{distance}}',
