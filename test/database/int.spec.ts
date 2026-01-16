@@ -39,7 +39,12 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
-import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
+import {
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fieldsPersistanceSlug,
+  postsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -3630,6 +3635,79 @@ describe('database', () => {
 
     // Should stay the same ID
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
+  })
+
+  it('should apply default values on upsert insert but not on update', async () => {
+    // TODO: remove this as soon as It's fixed in the other database adapters
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+    // First upsert (INSERT): should apply defaults
+    const inserted = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        // Don't pass defaultValue field - should be auto-applied
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Defaults should be applied on insert
+    expect(inserted.defaultValue).toBe('default value from database')
+    expect(inserted.select).toBe('default')
+    expect(inserted.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Second upsert (UPDATE): should NOT overwrite existing values with defaults
+    const updated = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        defaultValue: 'custom value', // Explicitly set a different value
+        select: 'option0', // Change from default
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(updated.id)
+
+    // Custom values should be preserved, not overwritten with defaults
+    expect(updated.defaultValue).toBe('custom value')
+    expect(updated.select).toBe('option0')
+    expect(updated.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Third upsert (UPDATE) with partial data: should NOT apply defaults to missing fields
+    const partialUpdate = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test-updated',
+        // Don't pass defaultValue or select - should NOT reset to defaults
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(partialUpdate.id)
+
+    // Previous values should be preserved (not reset to defaults)
+    expect(partialUpdate.defaultValue).toBe('custom value')
+    expect(partialUpdate.select).toBe('option0')
+    expect(partialUpdate.title).toBe('upsert-test-updated')
   })
 
   it('should enforce unique ids on db level even after delete', async () => {
