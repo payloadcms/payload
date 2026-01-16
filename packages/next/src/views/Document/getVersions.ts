@@ -66,7 +66,9 @@ export const getVersions = async ({
 
   if (!shouldFetchVersions) {
     // Without readVersions permission, determine published status from the _status field
-    const hasPublishedDoc = doc?._status !== 'draft'
+    const hasPublishedDoc = localizedDraftsEnabled
+      ? doc?._status === 'published'
+      : doc?._status !== 'draft'
 
     return {
       hasPublishedDoc,
@@ -105,18 +107,9 @@ export const getVersions = async ({
             where: {
               and: [
                 {
-                  or: [
-                    {
-                      _status: {
-                        equals: 'published',
-                      },
-                    },
-                    {
-                      _status: {
-                        exists: false,
-                      },
-                    },
-                  ],
+                  _status: {
+                    equals: 'published',
+                  },
                 },
                 {
                   id: {
