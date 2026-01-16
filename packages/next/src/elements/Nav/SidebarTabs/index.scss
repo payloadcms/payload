@@ -9,12 +9,12 @@
 
     &__tabs {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(base(2), 1fr));
-      gap: base(0.25);
-      padding: base(0.5);
+      grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
+      gap: 2px;
+      padding: 2px;
       margin-bottom: var(--base);
       background-color: var(--theme-elevation-50);
-      border-radius: var(--style-radius-l);
+      border-radius: var(--style-radius-m);
     }
 
     &__tab {
@@ -22,10 +22,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      aspect-ratio: 1;
-      padding: base(0.5);
+      padding: calc(var(--base) / 4);
       cursor: pointer;
-      border-radius: calc(var(--style-radius-l) - 2px);
+      border-radius: var(--style-radius-s);
       border: 1px solid transparent;
       background-color: transparent;
       color: var(--theme-elevation-600);
@@ -38,9 +37,8 @@
 
       &--active {
         background-color: var(--theme-bg);
-        border-color: var(--theme-border-color);
+        border-color: var(--theme-elevation-100);
         color: var(--theme-text);
-        @include shadow-sm;
       }
     }
 
@@ -48,8 +46,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: base(0.9);
-      height: base(0.9);
 
       svg {
         width: 100%;
