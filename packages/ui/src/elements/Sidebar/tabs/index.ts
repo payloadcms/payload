@@ -1,2 +1,2 @@
-export { CollectionsTab } from './CollectionsTab.client.js'
-export type { CollectionsTabProps } from './CollectionsTab.client.js'
+export { CollectionsTab } from './CollectionsTab.js'
+export type { CollectionsTabProps } from './CollectionsTab.js'

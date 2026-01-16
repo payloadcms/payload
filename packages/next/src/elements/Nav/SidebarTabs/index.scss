@@ -1,0 +1,55 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .sidebar-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+
+    &__tabs {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 2);
+      padding: 0 0 var(--base) 0;
+      border-bottom: 1px solid var(--theme-elevation-150);
+    }
+
+    &__tab {
+      all: unset;
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 2);
+      padding: calc(var(--base) / 2) 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--theme-elevation-100);
+      }
+
+      &--active {
+        background-color: var(--theme-elevation-150);
+        color: var(--theme-text);
+      }
+    }
+
+    &__tab-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+    }
+
+    &__tab-label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+    }
+
+    &__content {
+      width: 100%;
+      flex-grow: 1;
+    }
+  }
+}

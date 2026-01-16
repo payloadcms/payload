@@ -915,6 +915,11 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /** Sidebar configuration */
+      sidebar?: {
+        /** Extensible tab system */
+        tabs?: SidebarTab[]
+      }
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
@@ -1029,11 +1034,6 @@ export type Config = {
        * @default '/unauthorized'
        */
       unauthorized?: `/${string}`
-    }
-    /** Sidebar configuration */
-    sidebar?: {
-      /** Extensible tab system */
-      tabs?: SidebarTab[]
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
