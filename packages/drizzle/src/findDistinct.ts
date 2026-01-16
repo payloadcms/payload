@@ -1,7 +1,8 @@
+import { max } from 'drizzle-orm'
 import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
-import type { DrizzleAdapter, GenericColumn } from './types.js'
+import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
@@ -37,10 +38,13 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
 
   const db = await getTransaction(this, args.req)
 
+  const _order = orderBy[0].column === selectFields['_selected'] ? null : max(orderBy[0]?.column)
+
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     db,
     forceRun: true,
+    hasAggregates: Boolean(_order),
     joins,
     query: ({ query }) => {
       query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
@@ -57,9 +61,8 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     },
     selectFields: {
       _selected: selectFields['_selected'],
-      ...(orderBy.length &&
-        (orderBy[0].column === selectFields['_selected'] ? {} : { _order: orderBy[0]?.column })),
-    } as Record<string, GenericColumn>,
+      ...(_order ? { _order } : {}),
+    } as Record<string, any>,
     tableName,
     where,
   })
