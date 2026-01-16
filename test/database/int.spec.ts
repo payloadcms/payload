@@ -2806,61 +2806,60 @@ describe('database', () => {
   })
 
   describe('Schema generation', { db: 'drizzle' }, () => {
-    if (
-      process.env.PAYLOAD_DATABASE.includes('postgres') ||
-      process.env.PAYLOAD_DATABASE === 'supabase'
-    ) {
-      it('should generate Drizzle Postgres schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+    it('should generate Drizzle Postgres schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
-
-        const module = await import(outputFile)
-
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
-
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
-
-        // Confirm that module exports every enum
-        for (const enumName in payload.db.enums) {
-          expect(module).toHaveProperty(enumName)
-        }
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
 
-    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
-      it('should generate Drizzle SQLite schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      const module = await import(outputFile)
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
 
-        const module = await import(outputFile)
+      // Confirm that module exports every enum
+      for (const enumName in payload.db.enums) {
+        expect(module).toHaveProperty(enumName)
+      }
+    })
 
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
+    it('should generate Drizzle SQLite schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('sqlite')) {
+        return
+      }
 
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
+
+      const module = await import(outputFile)
+
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
+
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
+    })
   })
 
   describe('drizzle: schema hooks', () => {
@@ -3573,6 +3572,63 @@ describe('database', () => {
     expect(result.text).toStrictEqual('1')
   })
 
+  it('should convert strings to numbers in hasMany number fields', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-numbers-hasMany',
+        // @ts-expect-error passing strings when numbers are expected
+        numbersHasMany: ['10', '20', '30'],
+      },
+    })
+
+    expect(result.numbersHasMany).toEqual([10, 20, 30])
+  })
+
+  it('should store and retrieve date fields as ISO strings', async () => {
+    const testDate = new Date('2024-01-15T10:30:00.000Z')
+
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-date-field',
+        publishDate: testDate,
+      },
+    })
+
+    // Dates should be stored as ISO strings
+    expect(typeof result.publishDate).toBe('string')
+    expect(result.publishDate).toBe('2024-01-15T10:30:00.000Z')
+
+    // Reading back should also return ISO string
+    const retrieved = await payload.findByID({
+      collection: postsSlug,
+      id: result.id,
+    })
+
+    expect(typeof retrieved.publishDate).toBe('string')
+    expect(retrieved.publishDate).toBe('2024-01-15T10:30:00.000Z')
+  })
+
+  it('should convert Unix timestamps to ISO strings for date fields', async () => {
+    // Unix timestamp for 2024-01-15T10:30:00.000Z
+    const unixTimestamp = 1705314600000
+
+    // Using payload.db.create to bypass Payload's validation and test adapter coercion
+    const result = await payload.db.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-date-coercion',
+        publishDate: unixTimestamp,
+      },
+      req: {} as any,
+    })
+
+    // Should be converted to ISO string
+    expect(typeof result.publishDate).toBe('string')
+    expect(result.publishDate).toBe('2024-01-15T10:30:00.000Z')
+  })
+
   it('should not allow to query by a field with `virtual: true`', async () => {
     await expect(
       payload.find({
@@ -3585,10 +3641,13 @@ describe('database', () => {
   it('should not allow document creation with relationship data to an invalid document ID', async () => {
     let invalidDoc
 
+    // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)
+    const invalidId = payload.db.name === 'content_api' ? 1 : 'not-real-id'
+
     try {
       invalidDoc = await payload.create({
         collection: 'relation-b',
-        data: { relationship: 'not-real-id', title: 'invalid' },
+        data: { relationship: invalidId, title: 'invalid' },
       })
     } catch (error) {
       // instanceof checks don't work with libsql

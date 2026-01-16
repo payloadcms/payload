@@ -11,10 +11,7 @@ import { useField } from '../../../forms/useField/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
-export const FolderTypeField = ({
-  options: allSelectOptions,
-  ...props
-}: { options: Option[] } & SelectFieldClientProps) => {
+export const FolderTypeField = (props: SelectFieldClientProps) => {
   const {
     field,
     field: {
@@ -28,6 +25,7 @@ export const FolderTypeField = ({
       hasMany = false,
       label,
       localized,
+      options: allSelectOptions = [],
       required,
     },
     onChange: onChangeFromProps,

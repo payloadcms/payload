@@ -122,6 +122,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Виникла помилка під час завантаження файлу.',
     restoringTitle:
       "Виникла помилка при відновленні {{title}}. Будь ласка, перевірте своє з'єднання і спробуйте ще раз.",
+    revertingDocument: 'Виникла проблема під час відновлення цього документа.',
     tokenInvalidOrExpired: 'Токен недійсний, або його строк дії закінчився.',
     tokenNotProvided: 'Токен не надано.',
     unableToCopy: 'Неможливо скопіювати.',
@@ -551,6 +552,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Ви бажаєте повернути зміни цього документа до його опублікованого стану. Ви впевнені?',
     aboutToUnpublish: 'Ви бажаєте скасувати публікацю цього документа. Ви впевнені?',
+    aboutToUnpublishIn: 'Ви збираєтеся зняти з публікації цей документ на {{locale}}. Ви впевнені?',
     aboutToUnpublishSelection:
       'Ви бажаєте скасувати публікацію всіх {{label}} у вибірці. Ви впевнені?',
     autosave: 'Автозбереження',
@@ -598,6 +600,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     restoring: 'Відновлення...',
     reverting: 'Повернення до опублікованого стану...',
     revertToPublished: 'Повернутися до опублікованого стану',
+    revertUnsuccessful: 'Відкат невдалий. Раніше опублікована версія не знайдена.',
     saveDraft: 'Зберегти чернетку',
     scheduledSuccessfully: 'Успішно заплановано.',
     schedulePublish: 'Розклад публікації',
@@ -608,6 +611,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфічна версія',
     status: 'Статус',
     unpublish: 'Скасувати публікацію',
+    unpublished: 'Неопубліковано',
+    unpublishedSuccessfully: 'Успішно знято з публікації.',
+    unpublishIn: 'Скасувати публікацію в {{locale}}',
     unpublishing: 'Скасування публікації...',
     version: 'Версія',
     versionAgo: '{{distance}} тому',

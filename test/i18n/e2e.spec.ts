@@ -75,7 +75,19 @@ describe('i18n', () => {
       }[language]
       await page.goto(serverURL + '/admin/account')
       await page.locator('.payload-settings__language .react-select').click()
+
+      // Wait for the server action response after selecting the language
+      const responsePromise = page.waitForResponse((response) => {
+        // Server actions in Next.js show up as POST requests
+        return response.request().method() === 'POST' && response.status() === 200
+      })
+
       await page.locator('.rs__option', { hasText: LanguageLabel.valueLabel }).click()
+
+      await responsePromise
+
+      // Wait for the language field label to update with the translated text
+      // This confirms router.refresh() has completed and re-rendered the page
       await expect(
         page.locator('.payload-settings__language', { hasText: LanguageLabel.fieldLabel }),
       ).toBeVisible()
