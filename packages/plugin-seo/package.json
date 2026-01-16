@@ -74,8 +74,8 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "payload": "workspace:*"
   },
   "peerDependencies": {

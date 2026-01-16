@@ -122,7 +122,7 @@
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.20.3",
+    "tsx": "catalog:",
     "undici": "7.10.0",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
