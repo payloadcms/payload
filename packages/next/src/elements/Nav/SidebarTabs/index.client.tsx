@@ -3,6 +3,7 @@
 import type { NavPreferences } from 'payload'
 
 import { usePreferences } from '@payloadcms/ui'
+import { PREFERENCE_KEYS } from 'payload'
 import React, { useState } from 'react'
 
 export type RenderedTab = {
@@ -36,7 +37,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 
   const handleTabChange = (slug: string) => {
     setActiveTab(slug)
-    void setPreference('sidebar', { activeTab: slug })
+    void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
   }
 
   const activeTabData = renderedTabs.find((tab) => tab.slug === activeTab)

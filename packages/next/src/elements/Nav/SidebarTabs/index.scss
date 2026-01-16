@@ -11,7 +11,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
       gap: 2px;
-      padding: 2px;
       margin-bottom: var(--base);
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
@@ -22,6 +21,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      max-height: calc(var(--base) * 2);
       padding: calc(var(--base) / 4);
       cursor: pointer;
       border-radius: var(--style-radius-s);
