@@ -252,6 +252,16 @@ export type Currency = {
    * @example '$'
    */
   symbol: string
+  /**
+   * The position of the currency symbol relative to the amount.
+   * @example 'before' for '$10.00' or 'after' for '10.00€'
+   */
+  symbolPosition: 'after' | 'before'
+  /**
+   * The separator between the symbol and the amount.
+   * @example ' ' (a space) for '€ 10.00' or '' (empty string) for '$10.00'
+   */
+  symbolSeparator?: string
 }
 
 /**
