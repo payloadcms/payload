@@ -27,12 +27,37 @@ export default defineConfig({
         inline: [/@payloadcms\/figma/],
       },
     },
+    coverage: {
+      provider: 'v8',
+      reporter: ['json', 'lcov', 'text', 'html'],
+      reportsDirectory: './coverage',
+      all: true,
+      include: ['packages/*/src/**/*.{ts,tsx}', 'packages/payload/src/**/*.{ts,tsx}'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/test/**',
+        '**/*.config.ts',
+        '**/*.d.ts',
+        '**/types.ts',
+        '**/payload-types.ts',
+        '**/__mocks__/**',
+        '**/templates/**',
+        '**/examples/**',
+      ],
+    },
     projects: [
       {
         test: {
           include: ['packages/**/*.spec.ts'],
           name: 'unit',
           environment: 'node',
+          coverage: {
+            provider: 'v8',
+            reportsDirectory: './coverage/unit',
+          },
         },
       },
       {
@@ -50,6 +75,10 @@ export default defineConfig({
           hookTimeout: 90000,
           testTimeout: 90000,
           setupFiles: ['./test/vitest.setup.ts'],
+          coverage: {
+            provider: 'v8',
+            reportsDirectory: './coverage/int',
+          },
         },
       },
     ],

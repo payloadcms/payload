@@ -1,0 +1,28 @@
+{
+  "all": true,
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/payload/src/**/*.ts",
+    "packages/payload/src/**/*.tsx"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/test/**",
+    "**/*.config.ts",
+    "**/*.d.ts",
+    "**/types.ts",
+    "**/payload-types.ts",
+    "**/__mocks__/**",
+    "**/templates/**",
+    "**/examples/**"
+  ],
+  "reporter": ["lcov", "text", "html", "json-summary"],
+  "report-dir": "./coverage/merged",
+  "temp-dir": "./coverage/.nyc_output",
+  "cache": false,
+  "check-coverage": false
+}
