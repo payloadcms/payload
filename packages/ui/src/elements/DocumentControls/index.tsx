@@ -123,7 +123,6 @@ export const DocumentControls: React.FC<{
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
-  // Get document-level trash/delete permissions
   const { hasDeletePermission: docHasDeletePermission, hasTrashPermission: docHasTrashPermission } =
     useDocumentInfo()
 
@@ -152,8 +151,6 @@ export const DocumentControls: React.FC<{
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  // For collections with trash enabled, use document-level permissions
-  // Otherwise fall back to collection-level delete permission
   const collectionDeletePermission = permissions && 'delete' in permissions && permissions.delete
 
   const hasDeletePermission = collectionConfig?.trash

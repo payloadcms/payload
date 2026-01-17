@@ -66,13 +66,7 @@ export const getDocumentPermissions = async (args: {
         ).update
       }
 
-      // When trash is enabled, compute separate permissions for trashing vs permanently deleting
-      // This follows the same pattern as publish permission:
-      // - hasPublishPermission checks UPDATE access with data._status: 'published'
-      // - hasTrashPermission checks DELETE access with data.deletedAt set (trash attempt)
-      // - hasDeletePermission checks DELETE access without data.deletedAt (permanent delete)
       if (collectionConfig.trash) {
-        // Check if user can trash (soft delete) - simulates a trash attempt by passing deletedAt
         hasTrashPermission = (
           await docAccessOperation({
             id,
@@ -87,7 +81,6 @@ export const getDocumentPermissions = async (args: {
           })
         ).delete
 
-        // Check if user can permanently delete - simulates permanent delete (no deletedAt in data)
         hasDeletePermission = (
           await docAccessOperation({
             id,

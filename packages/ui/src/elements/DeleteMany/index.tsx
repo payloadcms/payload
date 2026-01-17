@@ -64,9 +64,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const collectionPermissions = permissions?.collections?.[slug]
 
-  // Use props if provided, otherwise fall back to auth context
-  // For hasTrashPermission, if props are not provided, assume same as hasDeletePermission from context
-  // (for backwards compatibility when trash permission is not separately computed)
   const hasDeletePermission =
     hasDeletePermissionFromProps !== undefined
       ? hasDeletePermissionFromProps
@@ -80,9 +77,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   const ids = selectingAll ? [] : selectedIDs
 
-  // Determine if we should show the delete button based on view type and permissions:
-  // - In trash view: Only show if user can permanently delete (since delete = permanent delete)
-  // - In regular view: Show if user can trash OR permanently delete
   const isTrashView = viewType === 'trash'
   const canShowDeleteButton = isTrashView
     ? hasDeletePermission
