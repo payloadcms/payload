@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -604,14 +605,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -623,6 +627,7 @@ describe('database', () => {
       },
     )
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -790,17 +795,6 @@ describe('database', () => {
 
     expect(res.values).toStrictEqual(titles)
 
-    // const resREST = await restClient
-    //   .GET('/posts/distinct', {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     query: { sortOrder: 'asc', field: 'title' },
-    //   })
-    //   .then((res) => res.json())
-
-    // expect(resREST.values).toEqual(titles)
-
     const resLimit = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
@@ -827,6 +821,59 @@ describe('database', () => {
     })
 
     expect(resAscDefault.values).toStrictEqual(titles)
+  })
+
+  it('should sort find on a different field with findDistinct', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const titles: {
+      title: string
+    }[] = [
+      'title-1',
+      'title-2',
+      'title-3',
+      'title-4',
+      'title-5',
+      'title-6',
+      'title-7',
+      'title-8',
+      'title-9',
+    ].map((title) => ({ title }))
+
+    const numbers = [42, 7, 3, 19, 73, 8, 100, 1, 56]
+
+    const titlesSortedByNumber = titles.toSorted(
+      (a, b) => numbers[titles.indexOf(a)]! - numbers[titles.indexOf(b)]!,
+    )
+
+    for (const entry of titles) {
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({
+          collection: 'posts',
+          data: {
+            number: numbers[titles.indexOf(entry)]! + Math.random(),
+            title: entry.title,
+          },
+        })
+      }
+    }
+
+    const resDesc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: '-number',
+    })
+
+    const resAsc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: 'number',
+    })
+
+    const reversed = titlesSortedByNumber.toReversed()
+
+    expect(resAsc.values).toStrictEqual(titlesSortedByNumber)
+    expect(resDesc.values).toStrictEqual(reversed)
   })
 
   it('should populate distinct relationships when depth>0', async () => {
