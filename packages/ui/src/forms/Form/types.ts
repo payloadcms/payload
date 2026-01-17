@@ -134,7 +134,7 @@ export type CreateFormData = (
    */
   options?: {
     /**
-     * If provided, will use this instead of of derived data from the current form state.
+     * If provided, will use this instead of derived data from the current form state.
      */
     data?: Data
     mergeOverrideData?: boolean
