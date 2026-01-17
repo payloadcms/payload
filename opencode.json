@@ -1,0 +1,16 @@
+{
+  "mcp": {
+    "claude-os": {
+      "type": "local",
+      "command": [
+        "/home/omd/miniconda3/envs/claude-os/bin/python3",
+        "/home/omd/claude-os/mcp_server/claude_code_mcp.py"
+      ],
+      "environment": {
+        "CLAUDE_OS_API": "http://localhost:8051"
+      },
+      "enabled": true
+    }
+  },
+  "$schema": "https://opencode.ai/config.json"
+}
