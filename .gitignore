@@ -353,3 +353,8 @@ licenses.csv
 
 # SQLite DB
 payload.db
+
+# AI Assistant artifacts
+.claude-os/
+.opencode/
+dev-server*.log

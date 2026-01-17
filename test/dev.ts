@@ -47,8 +47,14 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   process.exit(0)
 }
 
-// Enable turbopack by default, unless --no-turbo is passed
-let enableTurbo = args.turbo !== false
+// TODO: Re-enable Turbopack once Next.js fixes server-external-packages.json bug
+// Issue: Next.js 16.1.2 renamed the file to .jsonc but Turbopack still looks for .json
+// Tracking: https://github.com/vercel/next.js/issues/...
+let enableTurbo = false
+
+if (enableTurbo === false) {
+  console.log(chalk.yellow('⚠️  Turbopack disabled for Next.js 16 compatibility testing'))
+}
 
 if (['admin-root'].includes(testSuiteArg)) {
   console.log(

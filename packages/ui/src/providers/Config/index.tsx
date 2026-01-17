@@ -89,7 +89,18 @@ export const ConfigProvider: React.FC<{
   return <RootConfigContext value={value}>{children}</RootConfigContext>
 }
 
-export const useConfig = (): ClientConfigContext => use(RootConfigContext)
+export const useConfig = (): ClientConfigContext => {
+  const context = use(RootConfigContext)
+
+  if (!context) {
+    throw new Error(
+      'useConfig must be used within a ConfigProvider. ' +
+        'Make sure your component is wrapped with ConfigProvider in the layout.',
+    )
+  }
+
+  return context
+}
 
 /**
  * This provider shadows the `ConfigProvider` on the _page_ level, allowing us to
@@ -106,7 +117,11 @@ export const PageConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const { config: rootConfig, setConfig: setRootConfig } = useConfig()
+  const rootContext = use(RootConfigContext)
+
+  // Extract values with safe defaults to ensure hooks are always called in same order
+  const rootConfig = rootContext?.config
+  const setRootConfig = rootContext?.setConfig
 
   /**
    * This `useEffect` is required in order for the _page_ to be able to refresh the client config,
@@ -115,17 +130,24 @@ export const PageConfigProvider: React.FC<{
    * update the config, as the user may have been authenticated in the process, which affects the client config.
    */
   useEffect(() => {
-    setRootConfig(configFromProps)
+    if (setRootConfig) {
+      setRootConfig(configFromProps)
+    }
   }, [configFromProps, setRootConfig])
+
+  // If no root context available, just provide the config directly
+  if (!rootContext) {
+    return <ConfigProvider config={configFromProps}>{children}</ConfigProvider>
+  }
 
   // If this component receives a different config than what is in context from the layout, it is stale.
   // While stale, we instantiate a new context provider that provides the new config until the root context is updated.
   // Unfortunately, referential equality alone does not work bc the reference is lost during server/client serialization,
   // so we need to also compare the `unauthenticated` property.
-  if (
-    rootConfig !== configFromProps &&
-    rootConfig.unauthenticated !== configFromProps.unauthenticated
-  ) {
+  const isStale =
+    rootConfig !== configFromProps && rootConfig.unauthenticated !== configFromProps.unauthenticated
+
+  if (isStale) {
     return <ConfigProvider config={configFromProps}>{children}</ConfigProvider>
   }
 
