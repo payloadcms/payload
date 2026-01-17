@@ -5,8 +5,6 @@ import type {
   DrizzleAdapter,
   DrizzleTransaction,
   GenericColumn,
-  GenericPgColumn,
-  TransactionPg,
   TransactionSQLite,
 } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
