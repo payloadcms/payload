@@ -138,6 +138,10 @@ export type FileAllowList = Array<{
 type Admin = {
   components?: {
     /**
+     * The Controls component to extend the bulk upload controls in the admin panel.
+     */
+    bulkControls?: PayloadComponent[]
+    /**
      * The Controls component to extend the upload controls in the admin panel.
      */
     controls?: PayloadComponent[]

@@ -107,6 +107,7 @@ export interface Config {
     'admin-upload-control': AdminUploadControl;
     'no-files-required': NoFilesRequired;
     'relation-to-no-files-required': RelationToNoFilesRequired;
+    'admin-bulk-upload-control': AdminBulkUploadControl;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
@@ -174,6 +175,7 @@ export interface Config {
     'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
     'no-files-required': NoFilesRequiredSelect<false> | NoFilesRequiredSelect<true>;
     'relation-to-no-files-required': RelationToNoFilesRequiredSelect<false> | RelationToNoFilesRequiredSelect<true>;
+    'admin-bulk-upload-control': AdminBulkUploadControlSelect<false> | AdminBulkUploadControlSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
@@ -1482,6 +1484,24 @@ export interface RelationToNoFilesRequired {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-bulk-upload-control".
+ */
+export interface AdminBulkUploadControl {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
@@ -2013,6 +2033,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relation-to-no-files-required';
         value: number | RelationToNoFilesRequired;
+      } | null)
+    | ({
+        relationTo: 'admin-bulk-upload-control';
+        value: number | AdminBulkUploadControl;
       } | null)
     | ({
         relationTo: 'optional-file';
@@ -3435,6 +3459,23 @@ export interface RelationToNoFilesRequiredSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-bulk-upload-control_select".
+ */
+export interface AdminBulkUploadControlSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file_select".
  */
 export interface OptionalFileSelect<T extends boolean = true> {
@@ -3858,6 +3899,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
