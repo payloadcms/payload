@@ -41,6 +41,11 @@
       "types": "./src/exports/payments/stripe.ts",
       "default": "./src/exports/payments/stripe.ts"
     },
+    "./payments/mollie": {
+      "import": "./src/exports/payments/mollie.ts",
+      "types": "./src/exports/payments/mollie.ts",
+      "default": "./src/exports/payments/mollie.ts"
+    },
     "./rsc": {
       "import": "./src/exports/rsc.ts",
       "types": "./src/exports/rsc.ts",
@@ -88,6 +93,7 @@
     "qs-esm": "7.0.2"
   },
   "devDependencies": {
+    "@mollie/api-client": "4.3.3",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
@@ -118,6 +124,11 @@
         "import": "./dist/exports/payments/stripe.js",
         "types": "./dist/exports/payments/stripe.d.ts",
         "default": "./dist/exports/payments/stripe.js"
+      },
+      "./payments/mollie": {
+        "import": "./dist/exports/payments/mollie.js",
+        "types": "./dist/exports/payments/mollie.d.ts",
+        "default": "./dist/exports/payments/mollie.js"
       },
       "./rsc": {
         "import": "./dist/exports/rsc.js",
