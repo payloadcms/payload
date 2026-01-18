@@ -20,28 +20,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/exports/index.ts",
-      "types": "./src/exports/index.ts",
-      "default": "./src/exports/index.ts"
+      "import": "./dist/exports/index.js",
+      "types": "./dist/exports/index.d.ts",
+      "default": "./dist/exports/index.js"
     },
     "./all": {
-      "import": "./src/exports/all.ts",
-      "types": "./src/exports/all.ts",
-      "default": "./src/exports/all.ts"
+      "import": "./dist/exports/all.js",
+      "types": "./dist/exports/all.d.ts",
+      "default": "./dist/exports/all.js"
     },
     "./utilities": {
-      "import": "./src/exports/utilities.ts",
-      "types": "./src/exports/utilities.ts",
-      "default": "./src/exports/utilities.ts"
+      "import": "./dist/exports/utilities.js",
+      "types": "./dist/exports/utilities.d.ts",
+      "default": "./dist/exports/utilities.js"
     },
     "./languages/*": {
-      "import": "./src/languages/*.ts",
-      "types": "./src/languages/*.ts",
-      "default": "./src/languages/*.ts"
+      "import": "./dist/languages/*.js",
+      "types": "./dist/languages/*.d.ts",
+      "default": "./dist/languages/*.js"
     }
   },
-  "main": "./src/exports/index.ts",
-  "types": "./src/exports/index.ts",
+  "main": "./dist/exports/index.js",
+  "types": "./dist/exports/index.d.ts",
   "files": [
     "dist"
   ],
