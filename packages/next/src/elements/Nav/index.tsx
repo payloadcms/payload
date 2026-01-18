@@ -6,6 +6,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { DefaultNavClient } from './index.client.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
@@ -142,12 +143,24 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             user,
           },
         })}
-        <SidebarTabs
-          {...props}
-          groups={groups}
-          navPreferences={navPreferences}
-          tabs={sidebarTabs}
-        />
+        {sidebarTabs.length > 0 ? (
+          <SidebarTabs
+            documentSubViewType={documentSubViewType}
+            groups={groups}
+            i18n={i18n}
+            locale={locale}
+            navPreferences={navPreferences}
+            params={params}
+            payload={payload}
+            permissions={permissions}
+            searchParams={searchParams}
+            tabs={sidebarTabs}
+            user={user}
+            viewType={viewType}
+          />
+        ) : (
+          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+        )}
         {RenderServerComponent({
           clientProps: {
             documentSubViewType,

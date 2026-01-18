@@ -139,6 +139,16 @@ export default buildConfigWithDefaults({
           path: customParamViewPath,
         },
       },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Custom Tab',
+            icon: '/components/CustomIcon.tsx#CustomIcon',
+            component: '/components/CustomTab.tsx#CustomTab',
+          },
+        ],
+      },
     },
     meta: {
       description: 'This is a custom meta description',

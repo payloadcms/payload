@@ -4,11 +4,11 @@ import type { NavPreferences, SidebarTab } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { ListViewIcon } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { CollectionsTab } from '@payloadcms/ui/rsc'
 import React from 'react'
 
 import type { NavProps } from '../index.js'
 
+import { DefaultNavClient } from '../index.client.js'
 import { SidebarTabsClient } from './index.client.js'
 import './index.scss'
 
@@ -36,16 +36,10 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
     viewType,
   } = props
 
-  // Built-in collections tab
-  const collectionsTab = {
-    slug: 'collections',
-    content: (
-      <CollectionsTab
-        adminRoute={payload.config.routes.admin}
-        groups={groups}
-        navPreferences={navPreferences}
-      />
-    ),
+  // Built-in default nav tab (collections and globals)
+  const defaultNavTab = {
+    slug: 'nav',
+    content: <DefaultNavClient groups={groups} navPreferences={navPreferences} />,
     icon: <ListViewIcon />,
     isDefaultActive: true,
     label: i18n.t('general:collections'),
@@ -101,7 +95,7 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
     }
   })
 
-  const renderedTabs = [collectionsTab, ...customTabs]
+  const renderedTabs = [defaultNavTab, ...customTabs]
 
   return (
     <SidebarTabsClient

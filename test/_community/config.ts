@@ -18,18 +18,6 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    components: {
-      sidebar: {
-        tabs: [
-          {
-            slug: 'custom-tab',
-            label: 'Custom Tab',
-            icon: '/components/CustomIcon#CustomIcon',
-            component: '/components/CustomTab#CustomTab',
-          },
-        ],
-      },
-    },
   },
   editor: lexicalEditor({}),
   globals: [
