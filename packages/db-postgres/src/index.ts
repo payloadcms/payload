@@ -51,6 +51,7 @@ import {
   execute,
   init,
   insert,
+  migrateToBlocksAsJSON,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
@@ -112,6 +113,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
+      migrateToBlocksAsJSON,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       enums: {},

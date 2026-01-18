@@ -52,6 +52,7 @@ import {
   execute,
   init,
   insert,
+  migrateToBlocksAsJSON,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
@@ -124,6 +125,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      migrateToBlocksAsJSON,
       operators: operatorMap,
       pgSchema: adapterSchema,
       pool: undefined,

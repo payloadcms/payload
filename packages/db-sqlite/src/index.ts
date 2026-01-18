@@ -51,6 +51,7 @@ import {
   execute,
   init,
   insert,
+  migrateToBlocksAsJSON,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
@@ -114,6 +115,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      migrateToBlocksAsJSON,
       operators,
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve

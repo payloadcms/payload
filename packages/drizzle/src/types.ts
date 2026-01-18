@@ -362,16 +362,18 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
+  migrateToBlocksAsJSON: () => Promise<void>
   operators: Operators
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
-  rejectInitializing: () => void
 
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
+
   schema: Record<string, unknown>
 
   schemaName?: string

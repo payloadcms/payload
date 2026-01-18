@@ -48,6 +48,7 @@ import {
   dropDatabase,
   init,
   insert,
+  migrateToBlocksAsJSON,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
@@ -92,6 +93,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       binding: args.binding,
       blocksAsJSON: args.blocksAsJSON ?? false,
+      migrateToBlocksAsJSON,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       defaultDrizzleSnapshot,
