@@ -23,53 +23,57 @@
   "type": "module",
   "exports": {
     "./css": {
-      "import": "./dist/prod/styles.css",
-      "default": "./dist/prod/styles.css"
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./dist/withPayload/withPayload.js",
-      "require": "./dist/cjs/withPayload.cjs",
-      "default": "./dist/withPayload/withPayload.js"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
-      "import": "./dist/exports/layouts.js",
-      "types": "./dist/exports/layouts.d.ts",
-      "default": "./dist/exports/layouts.js"
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
     },
     "./routes": {
-      "import": "./dist/exports/routes.js",
-      "types": "./dist/exports/routes.d.ts",
-      "default": "./dist/exports/routes.js"
-    },
-    "./templates": {
-      "import": "./dist/exports/templates.js",
-      "types": "./dist/exports/templates.d.ts",
-      "default": "./dist/exports/templates.js"
+      "import": "./src/exports/routes.ts",
+      "types": "./src/exports/routes.ts",
+      "default": "./src/exports/routes.ts"
     },
     "./auth": {
-      "import": "./dist/exports/auth.js",
-      "types": "./dist/exports/auth.d.ts",
-      "default": "./dist/exports/auth.js"
+      "import": "./src/exports/auth.ts",
+      "types": "./src/exports/auth.ts",
+      "default": "./src/exports/auth.ts"
+    },
+    "./templates": {
+      "import": "./src/exports/templates.ts",
+      "types": "./src/exports/templates.ts",
+      "default": "./src/exports/templates.ts"
     },
     "./utilities": {
-      "import": "./dist/exports/utilities.js",
-      "types": "./dist/exports/utilities.d.ts",
-      "default": "./dist/exports/utilities.js"
+      "import": "./src/exports/utilities.ts",
+      "types": "./src/exports/utilities.ts",
+      "default": "./src/exports/utilities.ts"
     },
     "./views": {
-      "import": "./dist/exports/views.js",
-      "types": "./dist/exports/views.d.ts",
-      "default": "./dist/exports/views.js"
+      "import": "./src/exports/views.ts",
+      "types": "./src/exports/views.ts",
+      "default": "./src/exports/views.ts"
     },
     "./client": {
-      "import": "./dist/exports/client.js",
-      "types": "./dist/exports/client.d.ts",
-      "default": "./dist/exports/client.js"
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     },
     "./rsc": {
-      "import": "./dist/exports/rsc.js",
-      "types": "./dist/exports/rsc.d.ts",
-      "default": "./dist/exports/rsc.js"
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     }
   },
   "main": "./src/index.js",

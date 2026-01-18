@@ -21,19 +21,19 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     },
     "./migration-utils": {
-      "import": "./dist/exports/migration-utils.js",
-      "types": "./dist/exports/migration-utils.d.ts",
-      "default": "./dist/exports/migration-utils.js"
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
     },
     "./internal": {
-      "import": "./dist/exports/internal.js",
-      "types": "./dist/exports/internal.d.ts",
-      "default": "./dist/exports/internal.js"
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     }
   },
   "main": "./src/index.ts",
