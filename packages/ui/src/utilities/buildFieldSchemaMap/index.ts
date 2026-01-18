@@ -1,7 +1,7 @@
-import type { I18n } from '@ruya.sa/translations'
-import type { Field, FieldSchemaMap, SanitizedConfig, TextField } from '@ruya.sa/payload'
+import type { I18n } from '@payloadcms/translations'
+import type { Field, FieldSchemaMap, SanitizedConfig, TextField } from 'payload'
 
-import { confirmPassword, password } from '@ruya.sa/payload/shared'
+import { confirmPassword, password } from 'payload/shared'
 
 import { traverseFields } from './traverseFields.js'
 

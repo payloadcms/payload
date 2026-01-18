@@ -1,5 +1,5 @@
 'use client'
-import type { TextFieldClientComponent } from '@ruya.sa/payload'
+import type { TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 

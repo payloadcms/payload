@@ -1,4 +1,4 @@
-import type { Where } from '@ruya.sa/payload'
+import type { Where } from 'payload'
 
 import type { UserWithTenantsField } from '../types.js'
 

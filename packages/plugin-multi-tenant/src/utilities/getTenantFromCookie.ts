@@ -1,5 +1,5 @@
-import { parseCookies } from '@ruya.sa/payload'
-import { isNumber } from '@ruya.sa/payload/shared'
+import { parseCookies } from 'payload'
+import { isNumber } from 'payload/shared'
 
 /**
  * A function that takes request headers and an idType and returns the current tenant ID from the cookie

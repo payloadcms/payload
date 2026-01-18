@@ -5,7 +5,7 @@ import type {
   PaginatedDocs,
   Sort,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>

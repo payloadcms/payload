@@ -3,7 +3,7 @@ import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { useScrollInfo, useThrottledEffect, useTranslation } from '@ruya.sa/ui'
+import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 

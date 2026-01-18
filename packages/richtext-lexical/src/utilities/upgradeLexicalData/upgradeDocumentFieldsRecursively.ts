@@ -1,8 +1,8 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, FlattenedBlock, Payload } from '@ruya.sa/payload'
+import type { Field, FlattenedBlock, Payload } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
 import type { LexicalRichTextAdapter } from '../../types.js'
 

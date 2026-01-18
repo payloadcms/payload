@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionSlug } from '@ruya.sa/payload'
+import type { CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { useRouter } from 'next/navigation.js'

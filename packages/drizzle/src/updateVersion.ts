@@ -3,9 +3,9 @@ import type {
   SanitizedCollectionConfig,
   TypeWithVersion,
   UpdateVersionArgs,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { buildVersionCollectionFields } from '@ruya.sa/payload'
+import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

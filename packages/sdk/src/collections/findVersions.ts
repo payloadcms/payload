@@ -7,7 +7,7 @@ import type {
   TypedLocale,
   TypeWithVersion,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromCollectionSlug, PopulateType } from '../types.js'

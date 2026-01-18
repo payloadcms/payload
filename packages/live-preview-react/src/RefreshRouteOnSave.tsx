@@ -2,7 +2,7 @@
 
 import type React from 'react'
 
-import { isDocumentEvent, ready } from '@ruya.sa/live-preview'
+import { isDocumentEvent, ready } from '@payloadcms/live-preview'
 import { useCallback, useEffect, useRef } from 'react'
 
 export const RefreshRouteOnSave: React.FC<{

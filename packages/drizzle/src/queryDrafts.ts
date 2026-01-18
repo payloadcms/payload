@@ -1,6 +1,6 @@
-import type { QueryDrafts, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { QueryDrafts, SanitizedCollectionConfig } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries } from '@ruya.sa/payload'
+import { buildVersionCollectionFields, combineQueries } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

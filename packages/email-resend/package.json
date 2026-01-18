@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/email-resend",
-  "version": "3.71.3",
+  "name": "@payloadcms/email-resend",
+  "version": "3.71.1",
   "description": "Payload Resend Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,10 +42,10 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

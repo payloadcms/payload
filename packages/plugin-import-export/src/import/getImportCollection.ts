@@ -3,7 +3,7 @@ import type {
   CollectionBeforeOperationHook,
   CollectionConfig,
   Config,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -43,7 +43,7 @@ export const getImportCollection = ({
     admin: {
       components: {
         edit: {
-          SaveButton: '@ruya.sa/plugin-import-export/rsc#ImportSaveButton',
+          SaveButton: '@payloadcms/plugin-import-export/rsc#ImportSaveButton',
         },
       },
       disableCopyToLocale: true,

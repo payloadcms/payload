@@ -1,7 +1,7 @@
 'use client'
-import type { DateFieldClient, DefaultCellComponentProps } from '@ruya.sa/payload'
+import type { DateFieldClient, DefaultCellComponentProps } from 'payload'
 
-import { getObjectDotNotation } from '@ruya.sa/payload/shared'
+import { getObjectDotNotation } from 'payload/shared'
 import React from 'react'
 
 import { useConfig } from '../../../../../providers/Config/index.js'

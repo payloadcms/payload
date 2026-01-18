@@ -1,8 +1,8 @@
-import type { LabelFunction, StaticLabel } from '@ruya.sa/payload'
+import type { LabelFunction, StaticLabel } from 'payload'
 
 import './index.scss'
 
-import { getTranslation, type I18nClient } from '@ruya.sa/translations'
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
 import { FieldDiffLabel } from '../FieldDiffLabel/index.js'
 

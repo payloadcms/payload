@@ -26,7 +26,7 @@ import type {
   TextareaField,
   TextField,
   UploadField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -40,8 +40,8 @@ import {
   GraphQLUnionType,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from '@ruya.sa/payload'
-import { fieldAffectsData, tabHasName } from '@ruya.sa/payload/shared'
+import { combineQueries, createDataloaderCacheKey, MissingEditorProp, toWords } from 'payload'
+import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import type { Context } from '../resolvers/types.js'
 

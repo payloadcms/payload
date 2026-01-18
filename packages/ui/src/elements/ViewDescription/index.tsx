@@ -1,7 +1,7 @@
 'use client'
-import type { DescriptionFunction, StaticDescription, ViewDescriptionClientProps } from '@ruya.sa/payload'
+import type { DescriptionFunction, StaticDescription, ViewDescriptionClientProps } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'

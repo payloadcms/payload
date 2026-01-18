@@ -1,14 +1,14 @@
-import type { I18n } from '@ruya.sa/translations'
+import type { I18n } from '@payloadcms/translations'
 import type {
   Column,
   PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   TypeWithVersion,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { SortColumn } from '@ruya.sa/ui'
-import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
+import { SortColumn } from '@payloadcms/ui'
+import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'

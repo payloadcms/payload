@@ -15,7 +15,7 @@ describe('detectPayloadConfigStructure', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   db: mongooseAdapter({ url: '' }),
@@ -44,7 +44,7 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 const config = buildConfig({
   db: mongooseAdapter({ url: '' })
@@ -63,8 +63,8 @@ export default config`,
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig as createConfig } from '@ruya.sa/payload'
-import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+      `import { buildConfig as createConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default createConfig({
   db: mongooseAdapter({ url: '' }),
@@ -83,7 +83,7 @@ export default createConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 const helper = buildConfig({ collections: [] })
 
@@ -102,7 +102,7 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig, CollectionConfig } from '@ruya.sa/payload'
+      `import { buildConfig, CollectionConfig } from 'payload'
 
 export default buildConfig({
   collections: [],
@@ -121,18 +121,18 @@ describe('addDatabaseAdapter', () => {
     {
       adapter: 'mongodb' as const,
       adapterName: 'mongooseAdapter',
-      packageName: '@ruya.sa/db-mongodb',
+      packageName: '@payloadcms/db-mongodb',
     },
     {
       adapter: 'postgres' as const,
       adapterName: 'postgresAdapter',
-      packageName: '@ruya.sa/db-postgres',
+      packageName: '@payloadcms/db-postgres',
     },
   ])('adds $adapter adapter with import and config', ({ adapter, adapterName, packageName }) => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: []
@@ -161,8 +161,8 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
-import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({ url: '' }),
@@ -181,7 +181,7 @@ export default buildConfig({
     expect(text).toMatch(/import.*postgresAdapter.*from.*@payloadcms\/db-postgres/)
     expect(text).toContain('db: postgresAdapter')
     expect(text).not.toContain('mongooseAdapter')
-    expect(text).not.toContain('@ruya.sa/db-mongodb')
+    expect(text).not.toContain('@payloadcms/db-mongodb')
   })
 })
 
@@ -190,7 +190,7 @@ describe('addStorageAdapter', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   plugins: []
@@ -210,7 +210,7 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: []
@@ -229,7 +229,7 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   plugins: [
@@ -252,7 +252,7 @@ describe('removeSharp', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 export default buildConfig({
@@ -275,7 +275,7 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'payload.config.ts',
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: []
@@ -304,7 +304,7 @@ describe('configurePayloadConfig', () => {
     const filePath = path.join(tempDir, 'payload.config.ts')
     fs.writeFileSync(
       filePath,
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: []
@@ -329,7 +329,7 @@ export default buildConfig({
     const filePath = path.join(tempDir, 'payload.config.ts')
     fs.writeFileSync(
       filePath,
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 
 export default buildConfig({
   collections: []
@@ -352,9 +352,9 @@ export default buildConfig({
     const filePath = path.join(tempDir, 'payload.config.ts')
     fs.writeFileSync(
       filePath,
-      `import { buildConfig } from '@ruya.sa/payload'
+      `import { buildConfig } from 'payload'
 import sharp from 'sharp'
-import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({ url: '' }),
@@ -407,8 +407,8 @@ export default buildConfig({
     const filePath = path.join(tempDir, 'payload.config.ts')
     fs.writeFileSync(
       filePath,
-      `import { buildConfig } from '@ruya.sa/payload'
-import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+      `import { buildConfig } from 'payload'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
@@ -426,8 +426,8 @@ export default buildConfig({
     // Verify config was updated
     const content = fs.readFileSync(filePath, 'utf-8')
     expect(content).toContain('postgresAdapter')
-    expect(content).toContain('@ruya.sa/db-postgres')
+    expect(content).toContain('@payloadcms/db-postgres')
     expect(content).not.toContain('mongooseAdapter')
-    expect(content).not.toContain('@ruya.sa/db-mongodb')
+    expect(content).not.toContain('@payloadcms/db-mongodb')
   })
 })

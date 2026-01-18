@@ -1,6 +1,6 @@
-import type { Collection } from '@ruya.sa/payload'
+import type { Collection } from 'payload'
 
-import { generatePayloadCookie, isolateObjectProperty, loginOperation } from '@ruya.sa/payload'
+import { generatePayloadCookie, isolateObjectProperty, loginOperation } from 'payload'
 
 import type { Context } from '../types.js'
 

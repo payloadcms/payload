@@ -1,4 +1,4 @@
-import type { DatabaseAdapterObj, Payload } from '@ruya.sa/payload'
+import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
@@ -38,7 +38,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
-} from '@ruya.sa/drizzle'
+} from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
   countDistinct,
@@ -52,9 +52,9 @@ import {
   init,
   insert,
   requireDrizzleKit,
-} from '@ruya.sa/drizzle/postgres'
+} from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from '@ruya.sa/payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
@@ -192,7 +192,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       migrateReset,
       migrateStatus,
       migrationDir,
-      packageName: '@ruya.sa/db-postgres',
+      packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
       rawRelations: {},
@@ -226,6 +226,6 @@ export type {
   GeneratedDatabaseSchema,
   PostgresAdapter,
 } from './types.js'
-export type { MigrateDownArgs, MigrateUpArgs } from '@ruya.sa/drizzle/postgres'
-export { geometryColumn } from '@ruya.sa/drizzle/postgres'
+export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

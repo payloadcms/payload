@@ -1,8 +1,8 @@
 'use client'
-import type { NumberFieldClientComponent, NumberFieldClientProps } from '@ruya.sa/payload'
+import type { NumberFieldClientComponent, NumberFieldClientProps } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { isNumber } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { isNumber } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'

@@ -1,4 +1,4 @@
-import type { Plugin, SingleRelationshipField } from '@ruya.sa/payload'
+import type { Plugin, SingleRelationshipField } from 'payload'
 
 import type { NestedDocsPluginConfig } from './types.js'
 

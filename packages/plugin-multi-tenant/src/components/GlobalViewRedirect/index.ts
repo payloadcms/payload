@@ -1,4 +1,4 @@
-import type { CollectionSlug, ServerProps, ViewTypes } from '@ruya.sa/payload'
+import type { CollectionSlug, ServerProps, ViewTypes } from 'payload'
 
 import { headers as getHeaders } from 'next/headers.js'
 import { redirect } from 'next/navigation.js'

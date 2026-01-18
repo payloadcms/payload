@@ -5,7 +5,7 @@ import {
   type Operation,
   type PayloadRequest,
   type SanitizedConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 /**
  * Multi-level check to determine whether live preview is enabled on a collection or global.

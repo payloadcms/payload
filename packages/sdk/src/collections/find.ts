@@ -6,7 +6,7 @@ import type {
   Sort,
   TypedLocale,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'

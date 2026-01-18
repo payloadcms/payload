@@ -4,13 +4,13 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@ruya.sa/plugin-cloud-storage/types'
+} from '@payloadcms/plugin-cloud-storage/types'
 import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
-import type { Config, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
+import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
-import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
-import { initClientUploads } from '@ruya.sa/plugin-cloud-storage/utilities'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { SignedDownloadsConfig } from './staticHandler.js'
 
@@ -134,7 +134,7 @@ export const s3Storage: S3StoragePlugin =
     const isPluginDisabled = s3StorageOptions.enabled === false
 
     initClientUploads({
-      clientHandler: '@ruya.sa/storage-s3/client#S3ClientUploadHandler',
+      clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
       collections: s3StorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),

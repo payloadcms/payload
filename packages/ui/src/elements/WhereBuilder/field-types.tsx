@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 
 const equalsOperators = [
   {

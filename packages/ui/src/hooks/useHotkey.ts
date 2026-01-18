@@ -1,7 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { setsAreEqual } from '@ruya.sa/payload/shared'
+import { setsAreEqual } from 'payload/shared'
 import { useCallback, useEffect } from 'react'
 
 // Required to be outside of hook, else debounce would be necessary

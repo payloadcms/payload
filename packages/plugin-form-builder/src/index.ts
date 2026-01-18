@@ -1,4 +1,4 @@
-import type { Config } from '@ruya.sa/payload'
+import type { Config } from 'payload'
 
 import type { FormBuilderPluginConfig } from './types.js'
 

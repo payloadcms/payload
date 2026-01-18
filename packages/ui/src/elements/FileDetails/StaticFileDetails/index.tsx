@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'file-details'
 
-import type { Data, FileSizes, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 export type StaticFileDetailsProps = {
   customUploadActions?: React.ReactNode[]

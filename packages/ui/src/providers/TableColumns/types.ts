@@ -1,4 +1,4 @@
-import type { CollectionPreferences, Column } from '@ruya.sa/payload'
+import type { CollectionPreferences, Column } from 'payload'
 
 import type { SortColumnProps } from '../../elements/SortColumn/index.js'
 

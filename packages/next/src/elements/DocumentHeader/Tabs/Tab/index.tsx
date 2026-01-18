@@ -5,10 +5,10 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type React from 'react'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { Fragment } from 'react'
 
 import { DocumentTabLink } from './TabLink.js'

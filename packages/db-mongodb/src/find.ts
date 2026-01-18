@@ -1,7 +1,7 @@
 import type { PaginateOptions, PipelineStage } from 'mongoose'
-import type { Find } from '@ruya.sa/payload'
+import type { Find } from 'payload'
 
-import { flattenWhereToOperators } from '@ruya.sa/payload'
+import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

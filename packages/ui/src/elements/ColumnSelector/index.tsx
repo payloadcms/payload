@@ -1,7 +1,7 @@
 'use client'
-import type { SanitizedCollectionConfig, StaticLabel } from '@ruya.sa/payload'
+import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
 
-import { fieldIsHiddenOrDisabled, fieldIsID } from '@ruya.sa/payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 import React, { useId, useMemo } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'

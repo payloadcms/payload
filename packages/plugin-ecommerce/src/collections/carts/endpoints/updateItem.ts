@@ -1,6 +1,6 @@
-import type { CollectionSlug, Endpoint } from '@ruya.sa/payload'
+import type { CollectionSlug, Endpoint } from 'payload'
 
-import { addDataAndFileToRequest } from '@ruya.sa/payload'
+import { addDataAndFileToRequest } from 'payload'
 
 import type { FieldWithOperator } from '../operations/types.js'
 

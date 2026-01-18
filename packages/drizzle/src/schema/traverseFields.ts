@@ -1,12 +1,12 @@
-import type { FlattenedField } from '@ruya.sa/payload'
+import type { FlattenedField } from 'payload'
 
-import { InvalidConfiguration } from '@ruya.sa/payload'
+import { InvalidConfiguration } from 'payload'
 import {
   fieldAffectsData,
   fieldIsVirtual,
   fieldShouldBeLocalized,
   optionIsObject,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type {

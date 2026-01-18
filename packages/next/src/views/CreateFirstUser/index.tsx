@@ -2,9 +2,9 @@ import type {
   AdminViewServerProps,
   SanitizedDocumentPermissions,
   SanitizedFieldsPermissions,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { buildFormState } from '@ruya.sa/ui/utilities/buildFormState'
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import React from 'react'
 
 import { getDocPreferences } from '../Document/getDocPreferences.js'

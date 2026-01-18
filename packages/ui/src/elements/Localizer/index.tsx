@@ -1,5 +1,5 @@
 'use client'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'

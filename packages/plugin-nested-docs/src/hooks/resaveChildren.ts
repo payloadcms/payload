@@ -1,6 +1,6 @@
-import type { CollectionAfterChangeHook, JsonObject, ValidationError } from '@ruya.sa/payload'
+import type { CollectionAfterChangeHook, JsonObject, ValidationError } from 'payload'
 
-import { APIError, ValidationErrorName } from '@ruya.sa/payload'
+import { APIError, ValidationErrorName } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 

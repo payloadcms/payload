@@ -1,4 +1,4 @@
-import type { TextareaField } from '@ruya.sa/payload'
+import type { TextareaField } from 'payload'
 
 interface FieldFunctionProps {
   /**
@@ -20,7 +20,7 @@ export const MetaDescriptionField: FieldFunction = ({ hasGenerateFn = false, ove
           clientProps: {
             hasGenerateDescriptionFn: hasGenerateFn,
           },
-          path: '@ruya.sa/plugin-seo/client#MetaDescriptionComponent',
+          path: '@payloadcms/plugin-seo/client#MetaDescriptionComponent',
         },
       },
     },

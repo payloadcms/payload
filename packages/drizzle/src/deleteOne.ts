@@ -1,4 +1,4 @@
-import type { DeleteOne } from '@ruya.sa/payload'
+import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'

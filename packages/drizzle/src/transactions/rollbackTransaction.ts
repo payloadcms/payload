@@ -1,4 +1,4 @@
-import type { RollbackTransaction } from '@ruya.sa/payload'
+import type { RollbackTransaction } from 'payload'
 
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(
   incomingID = '',

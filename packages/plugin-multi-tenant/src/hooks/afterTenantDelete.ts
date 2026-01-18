@@ -3,9 +3,9 @@ import type {
   CollectionConfig,
   JsonObject,
   PaginatedDocs,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { generateCookie, mergeHeaders } from '@ruya.sa/payload'
+import { generateCookie, mergeHeaders } from 'payload'
 
 import type { UserWithTenantsField } from '../types.js'
 

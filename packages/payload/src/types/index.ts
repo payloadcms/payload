@@ -1,4 +1,4 @@
-import type { I18n, TFunction } from '@ruya.sa/translations'
+import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
@@ -99,7 +99,7 @@ type PayloadRequestData = {
    * use either:
    *  1. `const data = await req.json()`
    *
-   *  2. import { addDataAndFileToRequest } from '@ruya.sa/payload'
+   *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
    *
    * You should not expect this object to be the document data. It is the request data.

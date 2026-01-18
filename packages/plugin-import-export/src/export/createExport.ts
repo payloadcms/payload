@@ -1,8 +1,8 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, TypedUser, Where } from '@ruya.sa/payload'
+import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'

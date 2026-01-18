@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormState } from '@ruya.sa/payload'
+import type { FormState } from 'payload'
 
 import {
   useDocumentInfo,
@@ -8,8 +8,8 @@ import {
   useModal,
   useServerFunctions,
   useTranslation,
-} from '@ruya.sa/ui'
-import { reduceFieldsToValues } from '@ruya.sa/payload/shared'
+} from '@payloadcms/ui'
+import { reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

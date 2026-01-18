@@ -1,7 +1,7 @@
 'use client'
 import type React from 'react'
 
-import { useDocumentInfo, useField } from '@ruya.sa/ui'
+import { useDocumentInfo, useField } from '@payloadcms/ui'
 import { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'

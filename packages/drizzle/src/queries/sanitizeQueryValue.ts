@@ -1,7 +1,7 @@
 import type { SQL } from 'drizzle-orm'
 
-import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from '@ruya.sa/payload'
-import { fieldAffectsData } from '@ruya.sa/payload/shared'
+import { APIError, createArrayFromCommaDelineated, type Field, type TabAsField } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 import { validate as uuidValidate } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'

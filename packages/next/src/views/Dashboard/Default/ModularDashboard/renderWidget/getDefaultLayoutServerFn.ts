@@ -4,9 +4,9 @@ import type {
   ServerFunction,
   Widget,
   WidgetServerProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
 import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
 

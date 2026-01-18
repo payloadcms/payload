@@ -1,4 +1,4 @@
-import type { FlattenedField, Where } from '@ruya.sa/payload'
+import type { FlattenedField, Where } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

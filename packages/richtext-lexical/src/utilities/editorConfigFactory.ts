@@ -1,5 +1,5 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-import type { RichTextAdapterProvider, RichTextField, SanitizedConfig } from '@ruya.sa/payload'
+import type { RichTextAdapterProvider, RichTextField, SanitizedConfig } from 'payload'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'

@@ -1,4 +1,4 @@
-import type { DateFieldClient } from '@ruya.sa/payload'
+import type { DateFieldClient } from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 

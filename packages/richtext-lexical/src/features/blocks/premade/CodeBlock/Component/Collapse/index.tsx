@@ -3,7 +3,7 @@ import React from 'react'
 import './index.scss'
 
 const baseClass = 'code-block-collapse-button'
-import { useCollapsible } from '@ruya.sa/ui'
+import { useCollapsible } from '@payloadcms/ui'
 
 import { CollapseIcon } from '../../../../../../lexical/ui/icons/Collapse/index.js'
 

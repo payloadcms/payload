@@ -1,6 +1,6 @@
-import type { Config, Field, GroupField, TabsField } from '@ruya.sa/payload'
+import type { Config, Field, GroupField, TabsField } from 'payload'
 
-import { deepMergeSimple } from '@ruya.sa/payload/shared'
+import { deepMergeSimple } from 'payload/shared'
 
 import type {
   GenerateDescription,

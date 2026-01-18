@@ -1,5 +1,5 @@
 'use client'
-import type { PreviewButtonClientProps } from '@ruya.sa/payload'
+import type { PreviewButtonClientProps } from 'payload'
 
 import React from 'react'
 

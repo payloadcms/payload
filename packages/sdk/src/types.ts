@@ -9,7 +9,7 @@ import type {
   TransformDataWithSelect,
   TypeWithID,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 // Simple property access - PayloadTypesShape guarantees these properties exist
 export type DataFromCollectionSlug<

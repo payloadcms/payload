@@ -4,7 +4,7 @@ import type {
   GlobalSlug,
   PayloadRequest,
   TypedUser,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type { z } from 'zod'
 
 import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'

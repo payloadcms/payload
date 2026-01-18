@@ -1,4 +1,4 @@
-import type { RollbackTransaction } from '@ruya.sa/payload'
+import type { RollbackTransaction } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

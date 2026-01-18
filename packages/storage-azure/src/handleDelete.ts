@@ -1,6 +1,6 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { HandleDelete } from '@ruya.sa/plugin-cloud-storage/types'
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
+import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 

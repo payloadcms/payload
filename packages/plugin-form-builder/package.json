@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-form-builder",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-form-builder",
+  "version": "3.71.1",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -62,20 +62,20 @@
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
-    "@ruya.sa/ui": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "escape-html": "^1.0.3"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

@@ -7,10 +7,10 @@ import type {
   JoinFieldClientComponent,
   PaginatedDocs,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, flattenTopLevelFields } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'

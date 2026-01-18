@@ -1,6 +1,6 @@
 'use client'
 
-import { useTranslation } from '@ruya.sa/ui'
+import { useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../translations/index.js'

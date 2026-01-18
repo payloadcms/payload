@@ -1,7 +1,7 @@
 'use client'
-import type { DefaultDocumentIDType, TypedUser } from '@ruya.sa/payload'
+import type { DefaultDocumentIDType, TypedUser } from 'payload'
 
-import { deepMergeSimple, formatAdminURL } from '@ruya.sa/payload/shared'
+import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 

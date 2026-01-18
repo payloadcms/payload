@@ -1,5 +1,5 @@
 import type { ScopeContext } from '@sentry/types'
-import type { APIError, Config } from '@ruya.sa/payload'
+import type { APIError, Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
@@ -45,7 +45,7 @@ export const sentryPlugin =
           ...config.admin?.components,
           providers: [
             ...(config.admin?.components?.providers ?? []),
-            '@ruya.sa/plugin-sentry/client#AdminErrorBoundary',
+            '@payloadcms/plugin-sentry/client#AdminErrorBoundary',
           ],
         },
       },

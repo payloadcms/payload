@@ -1,4 +1,4 @@
-import type { ValueWithRelation } from '@ruya.sa/payload'
+import type { ValueWithRelation } from 'payload'
 
 export type Props = {
   readonly Button?: React.ReactNode

@@ -4,7 +4,7 @@ import {
   type PayloadHandler,
   type PayloadRequest,
   type UploadCollectionSlug,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 type Args = {
   access?: (args: {

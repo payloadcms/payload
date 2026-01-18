@@ -1,4 +1,4 @@
-import type { NavPreferences, PayloadRequest } from '@ruya.sa/payload'
+import type { NavPreferences, PayloadRequest } from 'payload'
 
 import { cache } from 'react'
 

@@ -4,10 +4,10 @@ import type {
   PayloadRequest,
   SanitizedGlobalConfig,
   SelectType,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
-import { isolateObjectProperty, updateOperationGlobal } from '@ruya.sa/payload'
+import { isolateObjectProperty, updateOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 

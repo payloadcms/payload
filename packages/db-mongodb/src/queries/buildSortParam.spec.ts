@@ -1,7 +1,7 @@
-import type { Config, SanitizedConfig } from '@ruya.sa/payload'
+import type { Config, SanitizedConfig } from 'payload'
 import { describe, beforeAll, it, expect } from 'vitest'
 
-import { sanitizeConfig } from '@ruya.sa/payload'
+import { sanitizeConfig } from 'payload'
 
 import { buildSortParam } from './buildSortParam.js'
 import { MongooseAdapter } from '../index.js'

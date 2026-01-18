@@ -1,6 +1,6 @@
 'use client'
-import type { ComboboxEntry } from '@ruya.sa/ui'
-import type {} from '@ruya.sa/payload'
+import type { ComboboxEntry } from '@payloadcms/ui'
+import type {} from 'payload'
 
 import './index.scss'
 
@@ -14,7 +14,7 @@ import {
   useForm,
   useFormFields,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React from 'react'
 
 import type { AdditionalCodeComponentProps } from './Code.js'

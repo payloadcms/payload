@@ -1,8 +1,8 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from '@ruya.sa/payload'
+import type { SanitizedFieldPermissions } from 'payload'
 
-import { formatAdminURL, getFieldPermissions } from '@ruya.sa/payload/shared'
+import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 

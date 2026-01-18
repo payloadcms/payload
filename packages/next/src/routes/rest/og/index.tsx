@@ -1,6 +1,6 @@
-import type { PayloadHandler } from '@ruya.sa/payload'
+import type { PayloadHandler } from 'payload'
 
-import { PayloadIcon } from '@ruya.sa/ui/shared'
+import { PayloadIcon } from '@payloadcms/ui/shared'
 import fs from 'fs/promises'
 import { ImageResponse } from 'next/og.js'
 import path from 'path'

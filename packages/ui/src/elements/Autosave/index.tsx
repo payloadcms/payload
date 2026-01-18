@@ -1,6 +1,6 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import type { ClientCollectionConfig, ClientGlobalConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
@@ -8,7 +8,7 @@ import {
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 

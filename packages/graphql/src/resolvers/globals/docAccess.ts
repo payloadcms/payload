@@ -3,9 +3,9 @@ import type {
   SanitizedCollectionPermission,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { docAccessOperationGlobal, isolateObjectProperty } from '@ruya.sa/payload'
+import { docAccessOperationGlobal, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

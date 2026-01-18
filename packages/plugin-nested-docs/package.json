@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-nested-docs",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-nested-docs",
+  "version": "3.71.1",
   "description": "The official Nested Docs plugin for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,11 +47,11 @@
     "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
-    "@ruya.sa/payload": "workspace:*"
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from '@ruya.sa/payload'
+import type { SanitizedConfig } from 'payload'
 
 import { type SanitizedServerEditorConfig } from '../index.js'
 import { defaultEditorConfig } from '../lexical/config/server/default.js'

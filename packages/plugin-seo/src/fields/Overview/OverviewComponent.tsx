@@ -1,8 +1,8 @@
 'use client'
 
-import type { FormField, UIField } from '@ruya.sa/payload'
+import type { FormField, UIField } from 'payload'
 
-import { useAllFormFields, useForm, useTranslation } from '@ruya.sa/ui'
+import { useAllFormFields, useForm, useTranslation } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'

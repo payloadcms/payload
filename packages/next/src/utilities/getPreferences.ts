@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType, Payload } from '@ruya.sa/payload'
+import type { DefaultDocumentIDType, Payload } from 'payload'
 
 import { cache } from 'react'
 

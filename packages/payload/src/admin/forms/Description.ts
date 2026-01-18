@@ -1,4 +1,4 @@
-import type { I18nClient, TFunction } from '@ruya.sa/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { Field } from '../../fields/config/types.js'
 import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.js'

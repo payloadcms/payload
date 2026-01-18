@@ -1,4 +1,4 @@
-import type { FilterOptions } from '@ruya.sa/payload'
+import type { FilterOptions } from 'payload'
 
 export const parentFilterOptions: (breadcrumbsFieldSlug?: string) => FilterOptions =
   (breadcrumbsFieldSlug = 'breadcrumbs') =>

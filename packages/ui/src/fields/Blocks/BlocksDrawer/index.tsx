@@ -1,8 +1,8 @@
 'use client'
-import type { ClientBlock, Labels } from '@ruya.sa/payload'
+import type { ClientBlock, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect } from 'react'
 
 import { Drawer } from '../../../elements/Drawer/index.js'

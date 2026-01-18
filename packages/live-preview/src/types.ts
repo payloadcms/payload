@@ -1,4 +1,4 @@
-import type { DocumentEvent } from '@ruya.sa/payload'
+import type { DocumentEvent } from 'payload'
 
 export type CollectionPopulationRequestHandler = ({
   apiPath,

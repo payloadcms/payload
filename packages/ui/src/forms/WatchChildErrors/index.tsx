@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 import type React from 'react'
 
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'

@@ -1,7 +1,7 @@
 'use client'
 
-import type { FieldType } from '@ruya.sa/ui'
-import type { UploadFieldClientProps } from '@ruya.sa/payload'
+import type { FieldType } from '@payloadcms/ui'
+import type { UploadFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
@@ -14,9 +14,9 @@ import {
   useForm,
   useLocale,
   useTranslation,
-} from '@ruya.sa/ui'
-import { reduceToSerializableFields } from '@ruya.sa/ui/shared'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+} from '@payloadcms/ui'
+import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'

@@ -15,7 +15,7 @@ export const BoldFeature = createServerFeature({
     }
 
     return {
-      ClientFeature: '@ruya.sa/richtext-lexical/client#BoldFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#BoldFeatureClient',
       markdownTransformers,
     }
   },

@@ -1,8 +1,8 @@
-import type { AcceptedLanguages } from '@ruya.sa/translations'
-import type { CollectionConfig, Config } from '@ruya.sa/payload'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { CollectionConfig, Config } from 'payload'
 
 import chalk from 'chalk'
-import { hasAutosaveEnabled } from '@ruya.sa/payload/shared'
+import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -318,7 +318,7 @@ export const multiTenantPlugin =
           admin: {
             components: {
               Field: {
-                path: '@ruya.sa/plugin-multi-tenant/client#WatchTenantCollection',
+                path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
             disableBulkEdit: true,
@@ -350,7 +350,7 @@ export const multiTenantPlugin =
           collection.admin.components.edit ??= {}
           collection.admin.components.edit.editMenuItems ??= []
           collection.admin.components.edit.editMenuItems.push({
-            path: '@ruya.sa/plugin-multi-tenant/client#AssignTenantFieldTrigger',
+            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
           })
         }
 
@@ -459,7 +459,7 @@ export const multiTenantPlugin =
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
         userHasAccessToAllTenants,
       },
-      path: '@ruya.sa/plugin-multi-tenant/rsc#TenantSelectionProvider',
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
     })
 
     /**
@@ -467,7 +467,7 @@ export const multiTenantPlugin =
      */
     if (globalCollectionSlugs.length) {
       incomingConfig.admin.components.actions.push({
-        path: '@ruya.sa/plugin-multi-tenant/rsc#GlobalViewRedirect',
+        path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
         serverProps: {
           basePath,
           globalSlugs: globalCollectionSlugs,
@@ -494,7 +494,7 @@ export const multiTenantPlugin =
         ],
         label: pluginConfig.tenantSelectorLabel || undefined,
       },
-      path: '@ruya.sa/plugin-multi-tenant/rsc#TenantSelector',
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
     })
 
     /**

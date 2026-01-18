@@ -1,4 +1,4 @@
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 
 export const mergeFieldStyles = (
   field: ClientField | Omit<ClientField, 'type'>,

@@ -1,4 +1,4 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type {

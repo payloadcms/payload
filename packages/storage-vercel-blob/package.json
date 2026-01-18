@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/storage-vercel-blob",
-  "version": "3.71.3",
+  "name": "@payloadcms/storage-vercel-blob",
+  "version": "3.71.1",
   "description": "Payload storage adapter for Vercel Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,14 +47,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ruya.sa/plugin-cloud-storage": "workspace:*",
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
     "@vercel/blob": "^0.22.3"
   },
   "devDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

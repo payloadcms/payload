@@ -1,8 +1,8 @@
 'use client'
 
-import type { Data, TextFieldClientComponent } from '@ruya.sa/payload'
+import type { Data, TextFieldClientComponent } from 'payload'
 
-import { TextField, useLocale, useWatchForm } from '@ruya.sa/ui'
+import { TextField, useLocale, useWatchForm } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 type FieldWithID = {

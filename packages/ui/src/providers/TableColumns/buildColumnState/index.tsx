@@ -1,4 +1,4 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientComponentProps,
   ClientField,
@@ -16,14 +16,14 @@ import type {
   ServerComponentProps,
   StaticLabel,
   ViewTypes,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
   flattenTopLevelFields,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 import React from 'react'
 
 import type { SortColumnProps } from '../../../elements/SortColumn/index.js'

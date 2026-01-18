@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-cloud-storage",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-cloud-storage",
+  "version": "3.71.1",
   "description": "The official cloud storage plugin for Payload CMS",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -59,7 +59,7 @@
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
-    "@ruya.sa/ui": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "find-node-modules": "^2.1.3",
     "range-parser": "^1.2.1"
   },
@@ -67,10 +67,10 @@
     "@types/find-node-modules": "^2.1.2",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

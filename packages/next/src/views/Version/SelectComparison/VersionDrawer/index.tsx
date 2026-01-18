@@ -8,7 +8,7 @@ import {
   useModal,
   useServerFunctions,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'

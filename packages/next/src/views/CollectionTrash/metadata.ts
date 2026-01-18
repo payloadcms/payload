@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 

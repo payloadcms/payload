@@ -4,11 +4,11 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@ruya.sa/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
+} from '@payloadcms/plugin-cloud-storage/types'
+import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
-import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
-import { initClientUploads } from '@ruya.sa/plugin-cloud-storage/utilities'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClientUploadHandler.js'
 
@@ -116,7 +116,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       VercelBlobClientUploadHandlerExtra,
       VercelBlobStorageOptions['collections'][string]
     >({
-      clientHandler: '@ruya.sa/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
       collections: options.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(options.clientUploads),

@@ -1,4 +1,4 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
@@ -8,14 +8,14 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { PageConfigProvider } from '@ruya.sa/ui'
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
-import { getVisibleEntities } from '@ruya.sa/ui/shared'
-import { getClientConfig } from '@ruya.sa/ui/utilities/getClientConfig'
+import { PageConfigProvider } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getVisibleEntities } from '@payloadcms/ui/shared'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { applyLocaleFiltering, formatAdminURL } from '@ruya.sa/payload/shared'
+import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 

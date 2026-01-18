@@ -1,8 +1,8 @@
 'use client'
-import type { Column } from '@ruya.sa/ui'
-import type { ClientField, PaginatedDocs, Where } from '@ruya.sa/payload'
+import type { Column } from '@payloadcms/ui'
+import type { ClientField, PaginatedDocs, Where } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   CodeEditorLazy,
   Pagination,
@@ -14,7 +14,7 @@ import {
   useDocumentInfo,
   useFormFields,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React, { useEffect, useRef, useState, useTransition } from 'react'
 
 import type {

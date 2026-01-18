@@ -1,6 +1,6 @@
-import type { Field, FlattenedBlock, PayloadRequest, PopulateType } from '@ruya.sa/payload'
+import type { Field, FlattenedBlock, PayloadRequest, PopulateType } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
 import { populate } from './populate.js'
 import { recurseRichText } from './richTextRelationshipPromise.js'

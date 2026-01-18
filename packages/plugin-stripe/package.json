@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-stripe",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-stripe",
+  "version": "3.71.1",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -62,23 +62,23 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ruya.sa/translations": "workspace:*",
-    "@ruya.sa/ui": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
-    "@ruya.sa/next": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
     "@types/lodash.get": "^4.4.7",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
     "@types/uuid": "10.0.0",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

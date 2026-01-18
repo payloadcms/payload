@@ -1,6 +1,6 @@
-import type { FieldAffectingData } from '@ruya.sa/payload'
+import type { FieldAffectingData } from 'payload'
 
-import { fieldAffectsData } from '@ruya.sa/payload/shared'
+import { fieldAffectsData } from 'payload/shared'
 
 export const isFieldNullable = ({
   field,

@@ -1,5 +1,5 @@
 'use client'
-import type { NavPreferences } from '@ruya.sa/payload'
+import type { NavPreferences } from 'payload'
 
 import React, { useState } from 'react'
 

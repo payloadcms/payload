@@ -1,7 +1,7 @@
 'use client'
 import type { ChangeEvent } from 'react'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'

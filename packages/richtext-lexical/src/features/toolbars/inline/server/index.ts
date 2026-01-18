@@ -2,7 +2,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 
 export const InlineToolbarFeature = createServerFeature({
   feature: {
-    ClientFeature: '@ruya.sa/richtext-lexical/client#InlineToolbarFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient',
   },
   key: 'toolbarInline',
 })

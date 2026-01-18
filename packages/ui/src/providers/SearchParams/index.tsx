@@ -62,7 +62,7 @@ export const SearchParamsProvider: React.FC<{ children?: React.ReactNode }> = ({
  * ```
  * If you need to parse the `where` query, you can do so with the `parseSearchParams` utility.
  * ```tsx
- * import { parseSearchParams } from '@ruya.sa/ui'
+ * import { parseSearchParams } from '@payloadcms/ui'
  * const parsedSearchParams = parseSearchParams(searchParams)
  * ```
  */

@@ -1,7 +1,7 @@
 'use client'
-import type { SelectFieldClientComponent } from '@ruya.sa/payload'
+import type { SelectFieldClientComponent } from 'payload'
 
-import { SelectField, useDocumentInfo } from '@ruya.sa/ui'
+import { SelectField, useDocumentInfo } from '@payloadcms/ui'
 
 export const ImportCollectionField: SelectFieldClientComponent = (props) => {
   const { id, initialData } = useDocumentInfo()

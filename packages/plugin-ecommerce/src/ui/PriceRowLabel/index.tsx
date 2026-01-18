@@ -1,6 +1,6 @@
 'use client'
 
-import { useRowLabel } from '@ruya.sa/ui'
+import { useRowLabel } from '@payloadcms/ui'
 import { useMemo } from 'react'
 
 import type { CurrenciesConfig } from '../../types/index.js'

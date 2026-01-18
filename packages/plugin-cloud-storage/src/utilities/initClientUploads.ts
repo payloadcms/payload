@@ -1,4 +1,4 @@
-import type { Config, PayloadHandler } from '@ruya.sa/payload'
+import type { Config, PayloadHandler } from 'payload'
 
 export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>({
   clientHandler,

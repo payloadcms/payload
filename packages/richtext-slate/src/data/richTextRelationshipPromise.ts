@@ -4,7 +4,7 @@ import type {
   PopulateType,
   RichTextAdapter,
   RichTextField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { AdapterArguments } from '../types.js'
 

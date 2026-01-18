@@ -1,6 +1,6 @@
-import type { FlattenedArrayField } from '@ruya.sa/payload'
+import type { FlattenedArrayField } from 'payload'
 
-import { fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type {

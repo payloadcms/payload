@@ -1,8 +1,8 @@
 'use client'
 
-import type { CodeFieldClient, CodeFieldClientProps } from '@ruya.sa/payload'
+import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
 
-import { CodeField, useFormFields } from '@ruya.sa/ui'
+import { CodeField, useFormFields } from '@payloadcms/ui'
 import React, { useId, useMemo } from 'react'
 
 import { defaultLanguages } from './defaultLanguages.js'

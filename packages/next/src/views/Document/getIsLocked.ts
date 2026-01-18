@@ -4,10 +4,10 @@ import type {
   SanitizedGlobalConfig,
   TypedUser,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { sanitizeID } from '@ruya.sa/ui/shared'
-import { extractID } from '@ruya.sa/payload/shared'
+import { sanitizeID } from '@payloadcms/ui/shared'
+import { extractID } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

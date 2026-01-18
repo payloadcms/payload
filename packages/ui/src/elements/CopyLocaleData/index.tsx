@@ -1,9 +1,9 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 

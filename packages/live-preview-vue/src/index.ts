@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 
-import { ready, subscribe, unsubscribe } from '@ruya.sa/live-preview'
+import { ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
 import { onMounted, onUnmounted, ref } from 'vue'
 
 /**

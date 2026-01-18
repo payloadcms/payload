@@ -1,9 +1,9 @@
 'use client'
 
-import type { Locale } from '@ruya.sa/payload'
+import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'

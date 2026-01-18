@@ -3,10 +3,10 @@ import type { ElementFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { getTranslation } from '@ruya.sa/translations'
-import { Button, useConfig, usePayloadAPI, useTranslation } from '@ruya.sa/ui'
+import { getTranslation } from '@payloadcms/translations'
+import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'

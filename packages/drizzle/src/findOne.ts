@@ -1,4 +1,4 @@
-import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from '@ruya.sa/payload'
+import type { FindOneArgs, SanitizedCollectionConfig, TypeWithID } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

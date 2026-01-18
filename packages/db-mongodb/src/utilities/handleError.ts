@@ -1,6 +1,6 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
-import { ValidationError } from '@ruya.sa/payload'
+import { ValidationError } from 'payload'
 
 function extractFieldFromMessage(message: string) {
   // eslint-disable-next-line regexp/no-super-linear-backtracking

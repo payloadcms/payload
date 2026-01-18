@@ -1,6 +1,6 @@
-import type { ColumnPreference, SelectType } from '@ruya.sa/payload'
+import type { ColumnPreference, SelectType } from 'payload'
 
-import { unflatten } from '@ruya.sa/payload/shared'
+import { unflatten } from 'payload/shared'
 
 export const transformColumnsToSelect = (columns: ColumnPreference[]): SelectType => {
   const columnsSelect = columns.reduce((acc, column) => {

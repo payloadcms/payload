@@ -1,6 +1,6 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { SanitizedConfig } from '@ruya.sa/payload'
+import type { SanitizedConfig } from 'payload'
 
 import { generateMetadata } from '../../utilities/meta.js'
 

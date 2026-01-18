@@ -1,8 +1,8 @@
-import type { AdminViewServerProps, ServerProps } from '@ruya.sa/payload'
+import type { AdminViewServerProps, ServerProps } from 'payload'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
-import { getSafeRedirect } from '@ruya.sa/payload/shared'
+import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'

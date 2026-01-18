@@ -1,8 +1,8 @@
 'use client'
-import type { ClientCollectionConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { hasAutosaveEnabled } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'

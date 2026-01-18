@@ -1,10 +1,10 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientConfig, ViewTypes } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, ClientConfig, ViewTypes } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'

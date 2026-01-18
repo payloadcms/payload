@@ -1,5 +1,5 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { HandleDelete } from '@ruya.sa/plugin-cloud-storage/types'
+import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 
 import path from 'path'
 

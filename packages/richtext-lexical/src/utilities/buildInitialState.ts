@@ -8,9 +8,9 @@ import type {
   PayloadRequest,
   RichTextField,
   SanitizedFieldPermissions,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { fieldSchemasToFormState } from '@ruya.sa/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { SerializedBlockNode } from '../nodeTypes.js'
 

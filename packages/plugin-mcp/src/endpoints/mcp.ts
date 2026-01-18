@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from '@ruya.sa/payload'
+import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 

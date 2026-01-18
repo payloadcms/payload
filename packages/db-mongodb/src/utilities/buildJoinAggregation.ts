@@ -10,8 +10,8 @@ import {
   getQueryDraftsSort,
   type JoinQuery,
   type SanitizedCollectionConfig,
-} from '@ruya.sa/payload'
-import { fieldShouldBeLocalized, hasDraftsEnabled } from '@ruya.sa/payload/shared'
+} from 'payload'
+import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel } from '../types.js'

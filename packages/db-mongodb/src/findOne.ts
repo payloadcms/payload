@@ -1,6 +1,6 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
 
-import { type FindOne } from '@ruya.sa/payload'
+import { type FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

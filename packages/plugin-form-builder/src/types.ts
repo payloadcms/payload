@@ -4,7 +4,7 @@ import type {
   CollectionConfig,
   Field,
   TypeWithID,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export interface BlockConfig {
   block: Block

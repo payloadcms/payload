@@ -1,5 +1,5 @@
 'use client'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   type CollectionSlug,
   type Column,
@@ -7,8 +7,8 @@ import {
   type ListQuery,
   type PaginatedDocs,
   type Where,
-} from '@ruya.sa/payload'
-import { hoistQueryParamsToAnd, transformColumnsToPreferences } from '@ruya.sa/payload/shared'
+} from 'payload'
+import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'

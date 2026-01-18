@@ -1,6 +1,6 @@
-import type { FlattenedBlock, FlattenedBlocksField } from '@ruya.sa/payload'
+import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
-import { fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'

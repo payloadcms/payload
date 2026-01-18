@@ -1,4 +1,4 @@
-import type { FieldHook } from '@ruya.sa/payload'
+import type { FieldHook } from 'payload'
 
 export const statusBeforeRead: FieldHook = ({ data }) => {
   if (data?.purchasedAt) {

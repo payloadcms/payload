@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from '@ruya.sa/payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 import type stream from 'stream'
 
 import { Upload } from '@aws-sdk/lib-storage'

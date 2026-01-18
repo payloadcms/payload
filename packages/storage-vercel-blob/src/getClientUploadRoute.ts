@@ -1,7 +1,7 @@
-import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from '@ruya.sa/payload'
+import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'payload'
 
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client'
-import { APIError, Forbidden } from '@ruya.sa/payload'
+import { APIError, Forbidden } from 'payload'
 
 type Args = {
   access?: (args: {

@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/db-vercel-postgres",
-  "version": "3.71.3",
+  "name": "@payloadcms/db-vercel-postgres",
+  "version": "3.71.1",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -74,7 +74,7 @@
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
-    "@ruya.sa/drizzle": "workspace:*",
+    "@payloadcms/drizzle": "workspace:*",
     "@vercel/postgres": "^0.9.0",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
@@ -86,14 +86,14 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.25.5",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

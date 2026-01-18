@@ -1,6 +1,6 @@
 import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
 
-import { flattenWhereToOperators, type UpdateMany } from '@ruya.sa/payload'
+import { flattenWhereToOperators, type UpdateMany } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

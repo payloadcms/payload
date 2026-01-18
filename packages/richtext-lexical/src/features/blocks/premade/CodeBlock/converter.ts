@@ -1,4 +1,4 @@
-import type { BlockJSX } from '@ruya.sa/payload'
+import type { BlockJSX } from 'payload'
 
 /**
  * @internal

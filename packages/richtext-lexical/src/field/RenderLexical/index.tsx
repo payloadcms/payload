@@ -1,5 +1,5 @@
 'use client'
-import type { RichTextField } from '@ruya.sa/payload'
+import type { RichTextField } from 'payload'
 
 import {
   FieldContext,
@@ -10,7 +10,7 @@ import {
   type ServerFunctionsContextType,
   ShimmerEffect,
   useServerFunctions,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import type { DefaultTypedEditorState } from '../../nodeTypes.js'

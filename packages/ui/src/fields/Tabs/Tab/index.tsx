@@ -1,9 +1,9 @@
 'use client'
 
-import type { ClientTab } from '@ruya.sa/payload'
+import type { ClientTab } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { tabHasName } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { tabHasName } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'

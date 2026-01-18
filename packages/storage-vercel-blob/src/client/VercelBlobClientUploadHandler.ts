@@ -1,7 +1,7 @@
 'use client'
-import { createClientUploadHandler } from '@ruya.sa/plugin-cloud-storage/client'
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean

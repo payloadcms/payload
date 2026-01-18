@@ -1,16 +1,16 @@
 'use client'
 
-import type { SelectType, Where } from '@ruya.sa/payload'
+import type { SelectType, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   combineWhereConstraints,
   formatAdminURL,
   mergeListSearchAndWhere,
   unflatten,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 

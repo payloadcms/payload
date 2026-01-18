@@ -1,4 +1,4 @@
-import type { Access } from '@ruya.sa/payload'
+import type { Access } from 'payload'
 
 /**
  * Internal access function for guest cart access via secret in context or queries.

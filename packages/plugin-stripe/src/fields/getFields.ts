@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from '@ruya.sa/payload'
+import type { CollectionConfig, Field } from 'payload'
 
 import type { SanitizedStripePluginConfig } from '../types.js'
 
@@ -37,7 +37,7 @@ export const getFields = ({ collection, pluginConfig, syncConfig }: Args): Field
     type: 'ui',
     admin: {
       components: {
-        Field: '@ruya.sa/plugin-stripe/client#LinkToDoc',
+        Field: '@payloadcms/plugin-stripe/client#LinkToDoc',
       },
       custom: {
         isTestKey: pluginConfig.isTestKey,

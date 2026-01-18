@@ -6,7 +6,7 @@ import { HorizontalRuleServerNode } from './nodes/HorizontalRuleNode.js'
 
 export const HorizontalRuleFeature = createServerFeature({
   feature: {
-    ClientFeature: '@ruya.sa/richtext-lexical/client#HorizontalRuleFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient',
     i18n,
     markdownTransformers: [MarkdownTransformer],
     nodes: [

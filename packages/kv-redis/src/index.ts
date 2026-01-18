@@ -1,4 +1,4 @@
-import type { KVAdapter, KVAdapterResult, KVStoreValue } from '@ruya.sa/payload'
+import type { KVAdapter, KVAdapterResult, KVStoreValue } from 'payload'
 
 import { Redis } from 'ioredis'
 

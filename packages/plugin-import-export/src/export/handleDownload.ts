@@ -1,6 +1,6 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 import { createExport } from './createExport.js'
 

@@ -1,5 +1,5 @@
 'use client'
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
 import React, { useCallback, useMemo, useRef } from 'react'
 

@@ -1,4 +1,4 @@
-import type { FlattenedField } from '@ruya.sa/payload'
+import type { FlattenedField } from 'payload'
 
 /**
  * Checks whether we should use the upsertRow function for the passed data and otherwise use a simple SQL SET call.

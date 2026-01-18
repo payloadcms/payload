@@ -1,5 +1,5 @@
 import type { PaginateOptions, Schema } from 'mongoose'
-import type { Payload, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import paginate from 'mongoose-paginate-v2'
 

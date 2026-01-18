@@ -8,10 +8,10 @@ import {
   useAuth,
   useConfig,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
-import { type FormState } from '@ruya.sa/payload'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { type FormState } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 type Args = {

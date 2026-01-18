@@ -24,7 +24,7 @@ import type {
   TextareaField,
   TextField,
   UploadField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import {
   GraphQLBoolean,
@@ -36,8 +36,8 @@ import {
   GraphQLNonNull,
   GraphQLString,
 } from 'graphql'
-import { flattenTopLevelFields, toWords } from '@ruya.sa/payload'
-import { fieldAffectsData, optionIsObject, tabHasName } from '@ruya.sa/payload/shared'
+import { flattenTopLevelFields, toWords } from 'payload'
+import { fieldAffectsData, optionIsObject, tabHasName } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'

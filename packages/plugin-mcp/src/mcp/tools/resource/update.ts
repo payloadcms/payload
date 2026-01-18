@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, TypedUser } from '@ruya.sa/payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 import { z } from 'zod'
 

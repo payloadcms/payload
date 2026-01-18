@@ -1,7 +1,7 @@
 'use client'
-import type { DefaultCellComponentProps, TypedCollection } from '@ruya.sa/payload'
+import type { DefaultCellComponentProps, TypedCollection } from 'payload'
 
-import { useTranslation } from '@ruya.sa/ui'
+import { useTranslation } from '@payloadcms/ui'
 
 import type { CurrenciesConfig, Currency } from '../../types/index.js'
 

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import type { AdminViewServerProps, ImportMap, SanitizedConfig } from '@ruya.sa/payload'
+import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
-import { getVisibleEntities } from '@ruya.sa/ui/shared'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { getVisibleEntities } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 

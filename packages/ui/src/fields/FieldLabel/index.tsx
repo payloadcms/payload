@@ -1,8 +1,8 @@
 'use client'
 
-import type { GenericLabelProps } from '@ruya.sa/payload'
+import type { GenericLabelProps } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useForm } from '../../forms/Form/context.js'

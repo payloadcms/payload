@@ -1,4 +1,4 @@
-import type { CollectionSlug } from '@ruya.sa/payload'
+import type { CollectionSlug } from 'payload'
 
 export const isPolymorphicRelationship = (
   value: unknown,

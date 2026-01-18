@@ -1,6 +1,6 @@
-import type { CollectionAfterDeleteHook, CollectionConfig } from '@ruya.sa/payload'
+import type { CollectionAfterDeleteHook, CollectionConfig } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'

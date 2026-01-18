@@ -5,7 +5,7 @@ import type {
   ClientField,
   FieldPaths,
   SanitizedFieldPermissions,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import React from 'react'
 

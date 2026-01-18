@@ -1,8 +1,8 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import { useEffect } from 'react'
 
 import type { StepNavItem } from '../../../elements/StepNav/index.js'

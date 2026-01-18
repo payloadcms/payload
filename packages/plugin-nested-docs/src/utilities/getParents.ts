@@ -1,4 +1,4 @@
-import type { CollectionConfig, Document, PayloadRequest } from '@ruya.sa/payload'
+import type { CollectionConfig, Document, PayloadRequest } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 

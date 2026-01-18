@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useState } from 'react'
 

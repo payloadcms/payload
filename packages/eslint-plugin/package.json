@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/eslint-plugin",
-  "version": "3.71.3",
+  "name": "@payloadcms/eslint-plugin",
+  "version": "3.28.0",
   "description": "Payload plugin for ESLint",
   "keywords": [],
   "homepage": "https://payloadcms.com",

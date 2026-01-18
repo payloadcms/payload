@@ -1,4 +1,4 @@
-import type { Slugify } from '@ruya.sa/payload/shared'
+import type { Slugify } from 'payload/shared'
 
 import {
   flattenAllFields,
@@ -6,8 +6,8 @@ import {
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
-} from '@ruya.sa/payload'
-import { slugify as defaultSlugify } from '@ruya.sa/payload/shared'
+} from 'payload'
+import { slugify as defaultSlugify } from 'payload/shared'
 
 /**
  * This server function is directly related to the {@link https://payloadcms.com/docs/fields/text#slug-field | Slug Field}.

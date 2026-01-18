@@ -1,4 +1,4 @@
-import type { PayloadRequest, VisibleEntities } from '@ruya.sa/payload'
+import type { PayloadRequest, VisibleEntities } from 'payload'
 
 type Hidden = ((args: { user: unknown }) => boolean) | boolean
 

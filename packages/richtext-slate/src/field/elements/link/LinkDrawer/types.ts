@@ -1,4 +1,4 @@
-import type { ClientField, FormState } from '@ruya.sa/payload'
+import type { ClientField, FormState } from 'payload'
 
 export type Props = {
   readonly drawerSlug: string

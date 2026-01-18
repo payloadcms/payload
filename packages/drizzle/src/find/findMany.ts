@@ -1,4 +1,4 @@
-import type { FindArgs, FlattenedField, TypeWithID } from '@ruya.sa/payload'
+import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 

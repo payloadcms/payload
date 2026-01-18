@@ -1,4 +1,4 @@
-import { type FormField, type FormState } from '@ruya.sa/payload'
+import { type FormField, type FormState } from 'payload'
 
 type BlacklistedKeys = 'customComponents' | 'validate'
 const blacklistedKeys: BlacklistedKeys[] = ['validate', 'customComponents']

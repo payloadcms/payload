@@ -1,12 +1,12 @@
-import type { QueryPreset, SanitizedCollectionPermission } from '@ruya.sa/payload'
+import type { QueryPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   formatAdminURL,
   transformColumnsToPreferences,
   transformColumnsToSearchParams,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 

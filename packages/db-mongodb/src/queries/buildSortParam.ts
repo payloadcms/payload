@@ -6,7 +6,7 @@ import {
   getFieldByPath,
   type SanitizedConfig,
   type Sort,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

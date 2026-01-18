@@ -1,4 +1,4 @@
-import type { AllowList } from '@ruya.sa/payload'
+import type { AllowList } from 'payload'
 
 export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
   try {

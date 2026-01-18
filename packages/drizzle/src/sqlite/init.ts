@@ -1,4 +1,4 @@
-import type { Init } from '@ruya.sa/payload'
+import type { Init } from 'payload'
 
 import type { DrizzleAdapter } from '../types.js'
 import type { BaseSQLiteAdapter } from './types.js'

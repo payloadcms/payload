@@ -18,7 +18,7 @@ import type {
   TextareaField,
   TextField,
   UploadField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { GraphQLEnumType, GraphQLInputObjectType } from 'graphql'
 

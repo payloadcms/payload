@@ -13,7 +13,7 @@ import type {
   TypedCollection,
   TypedUser,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type React from 'react'
 
 import type { TypedEcommerce } from './utilities.js'

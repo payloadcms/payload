@@ -1,8 +1,8 @@
 'use client'
-import type { CollectionSlug, ListQuery } from '@ruya.sa/payload'
+import type { CollectionSlug, ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { hoistQueryParamsToAnd } from '@ruya.sa/payload/shared'
+import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'

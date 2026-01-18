@@ -1,6 +1,6 @@
-import type { PayloadRequest, SelectType } from '@ruya.sa/payload'
+import type { PayloadRequest, SelectType } from 'payload'
 
-import { createDataloaderCacheKey } from '@ruya.sa/payload'
+import { createDataloaderCacheKey } from 'payload'
 
 type PopulateArguments = {
   collectionSlug: string

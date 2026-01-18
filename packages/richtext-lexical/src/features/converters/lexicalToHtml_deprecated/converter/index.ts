@@ -1,7 +1,7 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type { Payload, PayloadRequest } from '@ruya.sa/payload'
+import type { Payload, PayloadRequest } from 'payload'
 
-import { createLocalReq } from '@ruya.sa/payload'
+import { createLocalReq } from 'payload'
 
 import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
@@ -48,13 +48,13 @@ export type ConvertLexicalToHTMLArgs = {
 )
 
 /**
- * @deprecated - will be removed in 4.0. Use the function exported from `@ruya.sa/richtext-lexical/html` instead.
+ * @deprecated - will be removed in 4.0. Use the function exported from `@payloadcms/richtext-lexical/html` instead.
  * @example
  * ```ts
  * // old (deprecated)
- * import { convertLexicalToHTML } from '@ruya.sa/richtext-lexical'
+ * import { convertLexicalToHTML } from '@payloadcms/richtext-lexical'
  * // new (recommended)
- * import { convertLexicalToHTML } from '@ruya.sa/richtext-lexical/html'
+ * import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
  * ```
  * For more details, you can refer to https://payloadcms.com/docs/rich-text/converting-html to see all the
  * ways to convert lexical to HTML.

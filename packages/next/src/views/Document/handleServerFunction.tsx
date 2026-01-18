@@ -1,10 +1,10 @@
-import type { RenderDocumentServerFunction } from '@ruya.sa/ui'
-import type { DocumentPreferences, VisibleEntities } from '@ruya.sa/payload'
+import type { RenderDocumentServerFunction } from '@payloadcms/ui'
+import type { DocumentPreferences, VisibleEntities } from 'payload'
 
-import { getClientConfig } from '@ruya.sa/ui/utilities/getClientConfig'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
-import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from '@ruya.sa/payload'
-import { applyLocaleFiltering } from '@ruya.sa/payload/shared'
+import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderDocument } from './index.js'
 

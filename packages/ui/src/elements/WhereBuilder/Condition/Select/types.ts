@@ -1,4 +1,4 @@
-import type { LabelFunction, Option, SelectFieldClient } from '@ruya.sa/payload'
+import type { LabelFunction, Option, SelectFieldClient } from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 

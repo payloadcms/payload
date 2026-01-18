@@ -15,7 +15,7 @@
     "@remix-run/react": "^2.15.2",
     "@remix-run/serve": "^2.15.2",
     "isbot": "^4.1.0",
-    "@ruya.sa/payload": "latest",
+    "payload": "latest",
     "payload-app": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

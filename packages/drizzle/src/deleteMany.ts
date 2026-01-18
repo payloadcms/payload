@@ -1,4 +1,4 @@
-import type { DeleteMany } from '@ruya.sa/payload'
+import type { DeleteMany } from 'payload'
 
 import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'

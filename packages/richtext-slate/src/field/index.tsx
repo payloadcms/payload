@@ -1,6 +1,6 @@
 'use client'
 
-import { ShimmerEffect, useClientFunctions } from '@ruya.sa/ui'
+import { ShimmerEffect, useClientFunctions } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { RichTextPlugin, SlateFieldProps } from '../types.js'

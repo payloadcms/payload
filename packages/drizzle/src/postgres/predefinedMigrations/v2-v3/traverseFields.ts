@@ -1,4 +1,4 @@
-import type { FlattenedField, Payload } from '@ruya.sa/payload'
+import type { FlattenedField, Payload } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

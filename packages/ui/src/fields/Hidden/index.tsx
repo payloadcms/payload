@@ -1,6 +1,6 @@
 'use client'
 
-import type { HiddenFieldProps } from '@ruya.sa/payload'
+import type { HiddenFieldProps } from 'payload'
 
 import React, { useEffect } from 'react'
 

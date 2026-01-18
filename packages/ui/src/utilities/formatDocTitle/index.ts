@@ -1,12 +1,12 @@
-import type { I18n } from '@ruya.sa/translations'
+import type { I18n } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
   ClientGlobalConfig,
   SanitizedConfig,
   TypeWithID,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 
 import { formatDate } from './formatDateTitle.js'
 import { formatLexicalDocTitle, isSerializedLexicalEditor } from './formatLexicalDocTitle.js'

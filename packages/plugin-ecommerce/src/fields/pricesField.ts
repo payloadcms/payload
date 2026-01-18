@@ -1,4 +1,4 @@
-import type { GroupField } from '@ruya.sa/payload'
+import type { GroupField } from 'payload'
 
 import type { CurrenciesConfig } from '../types/index.js'
 

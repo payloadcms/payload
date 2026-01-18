@@ -1,5 +1,5 @@
 'use client'
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'
 

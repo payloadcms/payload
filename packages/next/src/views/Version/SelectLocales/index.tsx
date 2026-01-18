@@ -1,7 +1,7 @@
 'use client'
 
-import { AnimateHeight } from '@ruya.sa/ui'
-import { PillSelector, type SelectablePill } from '@ruya.sa/ui'
+import { AnimateHeight } from '@payloadcms/ui'
+import { PillSelector, type SelectablePill } from '@payloadcms/ui'
 import React from 'react'
 
 const baseClass = 'select-version-locales'

@@ -1,6 +1,6 @@
-import type { PayloadRequest, TypedUser } from '@ruya.sa/payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'

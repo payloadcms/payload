@@ -1,8 +1,8 @@
-import type { StaticHandler } from '@ruya.sa/plugin-cloud-storage/types'
-import type { Where } from '@ruya.sa/payload'
+import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
+import type { Where } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
-import { getRangeRequestInfo } from '@ruya.sa/payload/internal'
+import { getRangeRequestInfo } from 'payload/internal'
 
 import { getKeyFromFilename } from './utilities.js'
 

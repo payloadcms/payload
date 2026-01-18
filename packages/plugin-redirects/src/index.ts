@@ -1,6 +1,6 @@
-import type { CollectionConfig, Config, Field, SelectField } from '@ruya.sa/payload'
+import type { CollectionConfig, Config, Field, SelectField } from 'payload'
 
-import { deepMergeSimple } from '@ruya.sa/payload/shared'
+import { deepMergeSimple } from 'payload/shared'
 
 import type { RedirectsPluginConfig } from './types.js'
 

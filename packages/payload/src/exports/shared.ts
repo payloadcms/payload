@@ -147,4 +147,4 @@ export { wait } from '../utilities/wait.js'
 export { wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'
 
-export { deepMergeSimple } from '@ruya.sa/translations/utilities'
+export { deepMergeSimple } from '@payloadcms/translations/utilities'

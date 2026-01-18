@@ -1,4 +1,4 @@
-import type { CollectionConfig, Config } from '@ruya.sa/payload'
+import type { CollectionConfig, Config } from 'payload'
 
 import type { ExportConfig, ImportConfig, ImportExportPluginConfig } from '../types.js'
 

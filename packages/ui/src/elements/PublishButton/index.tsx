@@ -1,10 +1,10 @@
 'use client'
 
-import type { PublishButtonClientProps } from '@ruya.sa/payload'
+import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 

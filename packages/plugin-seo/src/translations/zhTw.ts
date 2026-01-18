@@ -1,4 +1,4 @@
-import type { GenericTranslationsObject } from '@ruya.sa/translations'
+import type { GenericTranslationsObject } from '@payloadcms/translations'
 
 export const zhTw: GenericTranslationsObject = {
   $schema: './translation-schema.json',

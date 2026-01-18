@@ -1,5 +1,5 @@
 'use client'
-import { GearIcon, Popup, useTranslation } from '@ruya.sa/ui'
+import { GearIcon, Popup, useTranslation } from '@payloadcms/ui'
 import React, { Fragment } from 'react'
 
 import './index.scss'

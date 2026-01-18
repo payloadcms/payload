@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
+import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 

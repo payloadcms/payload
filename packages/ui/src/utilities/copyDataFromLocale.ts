@@ -9,8 +9,8 @@ import {
   type PayloadRequest,
   type ServerFunction,
   traverseFields,
-} from '@ruya.sa/payload'
-import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '@ruya.sa/payload/shared'
+} from 'payload'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 

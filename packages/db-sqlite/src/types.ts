@@ -1,7 +1,7 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
-import type { extendDrizzleTable, Operators } from '@ruya.sa/drizzle'
-import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@ruya.sa/drizzle/sqlite'
-import type { BuildQueryJoinAliases, DrizzleAdapter } from '@ruya.sa/drizzle/types'
+import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
+import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
@@ -12,7 +12,7 @@ import type {
   SQLiteTransactionConfig,
 } from 'drizzle-orm/sqlite-core'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
-import type { Payload, PayloadRequest } from '@ruya.sa/payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 type SQLiteSchema = {
   relations: Record<string, GenericRelation>
@@ -136,7 +136,7 @@ export type MigrateUpArgs = {
    * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
    * @example
    * ```ts
-   * import { type MigrateUpArgs, sql } from '@ruya.sa/db-sqlite'
+   * import { type MigrateUpArgs, sql } from '@payloadcms/db-sqlite'
    *
    * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
@@ -149,7 +149,7 @@ export type MigrateUpArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
-   * import { type MigrateUpArgs } from '@ruya.sa/db-sqlite'
+   * import { type MigrateUpArgs } from '@payloadcms/db-sqlite'
    *
    * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
@@ -167,7 +167,7 @@ export type MigrateDownArgs = {
    * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
    * @example
    * ```ts
-   * import { type MigrateDownArgs, sql } from '@ruya.sa/db-sqlite'
+   * import { type MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
    *
    * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
    *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
@@ -180,7 +180,7 @@ export type MigrateDownArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
-   * import { type MigrateDownArgs } from '@ruya.sa/db-sqlite'
+   * import { type MigrateDownArgs } from '@payloadcms/db-sqlite'
    *
    * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
@@ -194,7 +194,7 @@ export type MigrateDownArgs = {
   req: PayloadRequest
 }
 
-declare module '@ruya.sa/payload' {
+declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {

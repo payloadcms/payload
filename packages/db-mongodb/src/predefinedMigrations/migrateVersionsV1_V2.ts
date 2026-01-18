@@ -1,5 +1,5 @@
 import type { ClientSession } from 'mongoose'
-import type { Payload, PayloadRequest } from '@ruya.sa/payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

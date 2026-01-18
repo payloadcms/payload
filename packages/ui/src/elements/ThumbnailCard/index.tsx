@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, TypeWithID } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, TypeWithID } from 'payload'
 
 import React from 'react'
 

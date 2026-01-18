@@ -1,4 +1,4 @@
-import type { ClientUser } from '@ruya.sa/payload'
+import type { ClientUser } from 'payload'
 
 export interface HandleTakeOverParams {
   clearRouteCache?: () => void

@@ -1,7 +1,7 @@
-import type { DefaultCellComponentProps } from '@ruya.sa/payload'
+import type { DefaultCellComponentProps } from 'payload'
 import type { JSX } from 'react'
 
-import { toWords } from '@ruya.sa/payload/shared'
+import { toWords } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 export const QueryPresetsAccessCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {

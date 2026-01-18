@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@ruya.sa/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
   AccessArgs,
   AccessResult,
@@ -9,7 +9,7 @@ import type {
   RelationshipField,
   SingleRelationshipField,
   TypedUser,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**

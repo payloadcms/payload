@@ -1,4 +1,4 @@
-import type { I18n } from '@ruya.sa/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import type { Auth } from '../auth/types.js'

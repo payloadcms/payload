@@ -4,9 +4,9 @@ import type {
   JoinFieldClient,
   RelationshipFieldClient,
   UploadFieldClient,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'

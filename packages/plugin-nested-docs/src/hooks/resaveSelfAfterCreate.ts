@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook } from '@ruya.sa/payload'
+import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Breadcrumb, NestedDocsPluginConfig } from '../types.js'
 

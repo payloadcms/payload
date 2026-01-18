@@ -8,7 +8,7 @@ export const ol: RichTextCustomElement = {
     clientProps: {
       format: name,
     },
-    path: '@ruya.sa/richtext-slate/client#OLElementButton',
+    path: '@payloadcms/richtext-slate/client#OLElementButton',
   },
-  Element: '@ruya.sa/richtext-slate/client#OrderedListElement',
+  Element: '@payloadcms/richtext-slate/client#OrderedListElement',
 }

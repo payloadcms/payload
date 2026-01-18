@@ -1,5 +1,5 @@
 'use client'
-import type { ClientComponentProps } from '@ruya.sa/payload'
+import type { ClientComponentProps } from 'payload'
 
 import React from 'react'
 

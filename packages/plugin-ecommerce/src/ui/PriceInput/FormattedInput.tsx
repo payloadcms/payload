@@ -1,8 +1,8 @@
 'use client'
 
-import type { StaticDescription, StaticLabel } from '@ruya.sa/payload'
+import type { StaticDescription, StaticLabel } from 'payload'
 
-import { FieldDescription, FieldLabel, useField, useFormFields } from '@ruya.sa/ui'
+import { FieldDescription, FieldLabel, useField, useFormFields } from '@payloadcms/ui'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Currency } from '../../types/index.js'

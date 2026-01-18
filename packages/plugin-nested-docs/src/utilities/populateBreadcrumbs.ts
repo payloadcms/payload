@@ -1,4 +1,4 @@
-import type { Data, Document, PayloadRequest, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { Data, Document, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import type { GenerateLabel, GenerateURL } from '../types.js'
 

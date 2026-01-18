@@ -1,6 +1,6 @@
-import type { SanitizedConfig } from '@ruya.sa/payload'
+import type { SanitizedConfig } from 'payload'
 
-import { accessOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { accessOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

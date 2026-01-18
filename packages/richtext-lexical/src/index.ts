@@ -1,4 +1,4 @@
-import type { GenericLanguages, GenericTranslationsObject } from '@ruya.sa/translations'
+import type { GenericLanguages, GenericTranslationsObject } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
@@ -11,7 +11,7 @@ import {
   deepMergeSimple,
   type RichTextAdapter,
   withNullableJSONSchemaType,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
@@ -97,12 +97,12 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
-      CellComponent: '@ruya.sa/richtext-lexical/rsc#RscEntryLexicalCell',
-      DiffComponent: '@ruya.sa/richtext-lexical/rsc#LexicalDiffComponent',
+      CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
-        path: '@ruya.sa/richtext-lexical/rsc#RscEntryLexicalField',
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
           admin: args?.admin,
           // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`

@@ -1,7 +1,7 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
-import type { FindGlobalVersions } from '@ruya.sa/payload'
+import type { FindGlobalVersions } from 'payload'
 
-import { APIError, buildVersionGlobalFields, flattenWhereToOperators } from '@ruya.sa/payload'
+import { APIError, buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

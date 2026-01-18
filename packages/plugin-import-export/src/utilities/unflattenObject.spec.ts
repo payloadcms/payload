@@ -1,4 +1,4 @@
-import { FlattenedField, PayloadRequest } from '@ruya.sa/payload'
+import { FlattenedField, PayloadRequest } from 'payload'
 
 import { unflattenObject } from './unflattenObject.js'
 

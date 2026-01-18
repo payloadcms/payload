@@ -1,4 +1,4 @@
-import type { SelectField } from '@ruya.sa/payload'
+import type { SelectField } from 'payload'
 
 import type { CurrenciesConfig } from '../types/index.js'
 

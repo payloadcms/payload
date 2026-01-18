@@ -1,4 +1,4 @@
-import type { Config, Field } from '@ruya.sa/payload'
+import type { Config, Field } from 'payload'
 
 type GetFieldsOptions = {
   collectionSlugs?: string[]
@@ -17,7 +17,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
 
       admin: {
         components: {
-          Field: '@ruya.sa/plugin-import-export/rsc#ImportCollectionField',
+          Field: '@payloadcms/plugin-import-export/rsc#ImportCollectionField',
         },
       },
       // @ts-expect-error - this is not correctly typed in plugins right now
@@ -150,7 +150,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
       type: 'ui',
       admin: {
         components: {
-          Field: '@ruya.sa/plugin-import-export/rsc#ImportPreview',
+          Field: '@payloadcms/plugin-import-export/rsc#ImportPreview',
         },
       },
     },

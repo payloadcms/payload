@@ -1,6 +1,6 @@
 'use client'
-import { createClientUploadHandler } from '@ruya.sa/plugin-cloud-storage/client'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { formatAdminURL } from 'payload/shared'
 
 export const GcsClientUploadHandler = createClientUploadHandler({
   handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {

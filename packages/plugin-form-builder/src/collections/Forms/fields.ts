@@ -1,4 +1,4 @@
-import type { Block, Field } from '@ruya.sa/payload'
+import type { Block, Field } from 'payload'
 
 import type { FieldConfig, PaymentFieldConfig } from '../../types.js'
 
@@ -597,7 +597,7 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             type: 'text',
             admin: {
               components: {
-                Field: '@ruya.sa/plugin-form-builder/client#DynamicFieldSelector',
+                Field: '@payloadcms/plugin-form-builder/client#DynamicFieldSelector',
               },
             },
           },
@@ -677,7 +677,7 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
             type: 'text',
             admin: {
               components: {
-                Field: '@ruya.sa/plugin-form-builder/client#DynamicPriceSelector',
+                Field: '@payloadcms/plugin-form-builder/client#DynamicPriceSelector',
               },
             },
             label: 'Value',

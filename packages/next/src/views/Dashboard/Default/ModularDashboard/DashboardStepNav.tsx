@@ -1,5 +1,5 @@
 'use client'
-import type { ClientWidget } from '@ruya.sa/payload'
+import type { ClientWidget } from 'payload'
 
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   ReactSelect,
   useStepNav,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import { useEffect, useId } from 'react'
 
 export function DashboardStepNav({

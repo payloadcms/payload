@@ -1,6 +1,6 @@
 'use client'
-import { type Column } from '@ruya.sa/payload'
-import { transformColumnsToSearchParams } from '@ruya.sa/payload/shared'
+import { type Column } from 'payload'
+import { transformColumnsToSearchParams } from 'payload/shared'
 import React, { startTransition, useCallback, useRef } from 'react'
 
 import type { ITableColumns, TableColumnsProviderProps } from './types.js'

@@ -1,8 +1,8 @@
 'use client'
 
-import type { NumberFieldClientComponent } from '@ruya.sa/payload'
+import type { NumberFieldClientComponent } from 'payload'
 
-import { NumberField, useField } from '@ruya.sa/ui'
+import { NumberField, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import './index.scss'

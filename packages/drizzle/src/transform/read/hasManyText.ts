@@ -1,4 +1,4 @@
-import type { TextField } from '@ruya.sa/payload'
+import type { TextField } from 'payload'
 
 type Args = {
   field: TextField

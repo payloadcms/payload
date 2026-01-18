@@ -1,1 +1,1 @@
-export { da } from '@ruya.sa/translations/languages/da'
+export { da } from '@payloadcms/translations/languages/da'

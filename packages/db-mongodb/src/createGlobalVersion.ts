@@ -1,4 +1,4 @@
-import { buildVersionGlobalFields, type CreateGlobalVersion } from '@ruya.sa/payload'
+import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

@@ -1,4 +1,4 @@
-import type { I18nClient, TFunction } from '@ruya.sa/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {

@@ -1,4 +1,4 @@
-import type { FieldDiffClientProps, FieldDiffServerProps, FieldTypes } from '@ruya.sa/payload'
+import type { FieldDiffClientProps, FieldDiffServerProps, FieldTypes } from 'payload'
 
 import { Collapsible } from './Collapsible/index.js'
 import { DateDiffComponent } from './Date/index.js'

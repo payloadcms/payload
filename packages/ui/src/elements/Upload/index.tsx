@@ -1,8 +1,8 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig, UploadEdits } from '@ruya.sa/payload'
+import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, isImage } from '@ruya.sa/payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 

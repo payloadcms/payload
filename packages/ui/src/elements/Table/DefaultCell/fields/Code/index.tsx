@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, CodeFieldClient, DefaultCellComponentProps } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, CodeFieldClient, DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 

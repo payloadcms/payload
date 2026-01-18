@@ -1,5 +1,5 @@
-import type { TFunction } from '@ruya.sa/translations'
-import type { Config, Field, SelectField } from '@ruya.sa/payload'
+import type { TFunction } from '@payloadcms/translations'
+import type { Config, Field, SelectField } from 'payload'
 
 import { getFilename } from '../utilities/getFilename.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
@@ -93,7 +93,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               type: 'number',
               admin: {
                 components: {
-                  Field: '@ruya.sa/plugin-import-export/rsc#Page',
+                  Field: '@payloadcms/plugin-import-export/rsc#Page',
                 },
                 condition: ({ limit }) => {
                   // Show the page field only if limit is set
@@ -115,7 +115,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               type: 'text',
               admin: {
                 components: {
-                  Field: '@ruya.sa/plugin-import-export/rsc#SortBy',
+                  Field: '@payloadcms/plugin-import-export/rsc#SortBy',
                 },
               },
               // @ts-expect-error - this is not correctly typed in plugins right now
@@ -126,7 +126,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               type: 'select',
               admin: {
                 components: {
-                  Field: '@ruya.sa/plugin-import-export/rsc#SortOrder',
+                  Field: '@payloadcms/plugin-import-export/rsc#SortOrder',
                 },
                 // Only show when `sort` has a value
                 condition: ({ sort }) => typeof sort === 'string' && sort.trim().length > 0,
@@ -186,7 +186,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
           type: 'radio',
           admin: {
             components: {
-              Field: '@ruya.sa/plugin-import-export/rsc#SelectionToUseField',
+              Field: '@payloadcms/plugin-import-export/rsc#SelectionToUseField',
             },
           },
           options: [
@@ -213,7 +213,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
           type: 'text',
           admin: {
             components: {
-              Field: '@ruya.sa/plugin-import-export/rsc#FieldsToExport',
+              Field: '@payloadcms/plugin-import-export/rsc#FieldsToExport',
             },
           },
           hasMany: true,
@@ -225,7 +225,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
           type: 'text',
           admin: {
             components: {
-              Field: '@ruya.sa/plugin-import-export/rsc#CollectionField',
+              Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
           },
           required: true,
@@ -254,7 +254,7 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
       type: 'ui',
       admin: {
         components: {
-          Field: '@ruya.sa/plugin-import-export/rsc#ExportPreview',
+          Field: '@payloadcms/plugin-import-export/rsc#ExportPreview',
         },
       },
     },

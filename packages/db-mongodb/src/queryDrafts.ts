@@ -1,7 +1,7 @@
 import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
-import type { QueryDrafts } from '@ruya.sa/payload'
+import type { QueryDrafts } from 'payload'
 
-import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from '@ruya.sa/payload'
+import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

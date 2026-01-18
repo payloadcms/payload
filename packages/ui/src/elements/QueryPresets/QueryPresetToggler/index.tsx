@@ -1,7 +1,7 @@
 'use client'
-import type { QueryPreset } from '@ruya.sa/payload'
+import type { QueryPreset } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 
 import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'

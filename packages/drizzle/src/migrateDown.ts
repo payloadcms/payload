@@ -5,7 +5,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { DrizzleAdapter } from './types.js'
 

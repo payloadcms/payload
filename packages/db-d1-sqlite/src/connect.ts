@@ -1,7 +1,7 @@
-import type { DrizzleAdapter } from '@ruya.sa/drizzle'
-import type { Connect, Migration } from '@ruya.sa/payload'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
+import type { Connect, Migration } from 'payload'
 
-import { pushDevSchema } from '@ruya.sa/drizzle'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
 
 import type { SQLiteD1Adapter } from './types.js'

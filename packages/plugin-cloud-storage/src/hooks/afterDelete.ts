@@ -1,4 +1,4 @@
-import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from '@ruya.sa/payload'
+import type { CollectionAfterDeleteHook, CollectionConfig, FileData, TypeWithID } from 'payload'
 
 import type { GeneratedAdapter, TypeWithPrefix } from '../types.js'
 

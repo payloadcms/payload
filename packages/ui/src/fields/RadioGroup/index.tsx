@@ -1,7 +1,7 @@
 'use client'
-import type { RadioFieldClientComponent, RadioFieldClientProps } from '@ruya.sa/payload'
+import type { RadioFieldClientComponent, RadioFieldClientProps } from 'payload'
 
-import { optionIsObject } from '@ruya.sa/payload/shared'
+import { optionIsObject } from 'payload/shared'
 import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'

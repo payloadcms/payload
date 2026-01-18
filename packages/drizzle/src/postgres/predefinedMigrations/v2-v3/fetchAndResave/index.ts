@@ -1,4 +1,4 @@
-import type { FlattenedField, Payload, PayloadRequest } from '@ruya.sa/payload'
+import type { FlattenedField, Payload, PayloadRequest } from 'payload'
 
 import type { BasePostgresAdapter, PostgresDB } from '../../../types.js'
 import type { DocsToResave } from '../types.js'

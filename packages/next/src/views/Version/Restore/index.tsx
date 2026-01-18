@@ -1,8 +1,8 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, SanitizedCollectionConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   ConfirmationModal,
@@ -12,10 +12,10 @@ import {
   useModal,
   useRouteTransition,
   useTranslation,
-} from '@ruya.sa/ui'
-import { requests } from '@ruya.sa/ui/shared'
+} from '@payloadcms/ui'
+import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import './index.scss'
 

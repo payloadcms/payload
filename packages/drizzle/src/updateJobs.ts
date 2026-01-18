@@ -1,4 +1,4 @@
-import type { UpdateJobs, Where } from '@ruya.sa/payload'
+import type { UpdateJobs, Where } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

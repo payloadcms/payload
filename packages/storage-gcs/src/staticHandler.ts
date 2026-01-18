@@ -1,10 +1,10 @@
-import type { StaticHandler } from '@ruya.sa/plugin-cloud-storage/types'
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
+import type { CollectionConfig } from 'payload'
 
 import { ApiError, type Storage } from '@google-cloud/storage'
-import { getFilePrefix } from '@ruya.sa/plugin-cloud-storage/utilities'
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
-import { getRangeRequestInfo } from '@ruya.sa/payload/internal'
+import { getRangeRequestInfo } from 'payload/internal'
 
 interface Args {
   bucket: string

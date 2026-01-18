@@ -1,8 +1,8 @@
 'use client'
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 
-import { ChevronIcon, FieldDiffLabel, useConfig, useTranslation } from '@ruya.sa/ui'
-import { fieldIsArrayType, fieldIsBlockType } from '@ruya.sa/payload/shared'
+import { ChevronIcon, FieldDiffLabel, useConfig, useTranslation } from '@payloadcms/ui'
+import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
 import './index.scss'

@@ -1,7 +1,7 @@
 'use client'
-import type { OptionObject, RadioFieldClientProps } from '@ruya.sa/payload'
+import type { OptionObject, RadioFieldClientProps } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { useEditDepth } from '../../../providers/EditDepth/index.js'

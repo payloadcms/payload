@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/translations",
-  "version": "3.71.3",
+  "name": "@payloadcms/translations",
+  "version": "3.71.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -58,7 +58,7 @@
     "date-fns": "4.1.0"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
     "dotenv": "16.4.7",

@@ -4,8 +4,8 @@ import type {
   MigrateDownArgs,
   MigrateUpArgs,
   PostgresSchemaHook,
-} from '@ruya.sa/drizzle/postgres'
-import type { DrizzleAdapter } from '@ruya.sa/drizzle/types'
+} from '@payloadcms/drizzle/postgres'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, ExtractTablesWithRelations } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type {
@@ -97,7 +97,7 @@ export type PostgresAdapter = {
   poolOptions: PoolConfig
 } & BasePostgresAdapter
 
-declare module '@ruya.sa/payload' {
+declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
@@ -117,7 +117,7 @@ declare module '@ruya.sa/payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
-    /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @ruya.sa/plugin-sentry. */
+    /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @payloadcms/plugin-sentry. */
     pg?: PgDependency
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool

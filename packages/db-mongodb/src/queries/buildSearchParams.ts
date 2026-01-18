@@ -1,9 +1,9 @@
 import type { FilterQuery } from 'mongoose'
-import type { FlattenedField, Operator, PathToQuery, Payload } from '@ruya.sa/payload'
+import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, getFieldByPath, getLocalizedPaths } from '@ruya.sa/payload'
-import { validOperatorSet } from '@ruya.sa/payload/shared'
+import { APIError, getFieldByPath, getLocalizedPaths } from 'payload'
+import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'

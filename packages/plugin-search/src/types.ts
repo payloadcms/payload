@@ -7,7 +7,7 @@ import type {
   Payload,
   PayloadRequest,
   StaticLabel,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export type DocToSync = {
   [key: string]: any

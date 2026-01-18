@@ -4,11 +4,11 @@ import type {
   FieldPaths,
   FlattenedBlock,
   ServerComponentProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { createClientField, MissingEditorProp } from '@ruya.sa/payload'
-import { fieldIsHiddenOrDisabled } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { createClientField, MissingEditorProp } from 'payload'
+import { fieldIsHiddenOrDisabled } from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 

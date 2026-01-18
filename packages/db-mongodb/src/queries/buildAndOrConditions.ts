@@ -1,4 +1,4 @@
-import type { FlattenedField, Payload, Where } from '@ruya.sa/payload'
+import type { FlattenedField, Payload, Where } from 'payload'
 
 import { parseParams } from './parseParams.js'
 

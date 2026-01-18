@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/richtext-lexical",
-  "version": "3.71.3",
+  "name": "@payloadcms/richtext-lexical",
+  "version": "3.71.1",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -378,8 +378,8 @@
     "@lexical/selection": "0.35.0",
     "@lexical/table": "0.35.0",
     "@lexical/utils": "0.35.0",
-    "@ruya.sa/translations": "workspace:*",
-    "@ruya.sa/ui": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
     "acorn": "8.12.1",
     "bson-objectid": "2.0.4",
@@ -403,7 +403,7 @@
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
     "@lexical/eslint-plugin": "0.35.0",
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
     "@types/node": "22.15.30",
@@ -413,14 +413,14 @@
     "babel-plugin-transform-remove-imports": "^1.8.0",
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0",
     "@faceless-ui/scroll-info": "2.0.0",
-    "@ruya.sa/next": "workspace:*",
-    "@ruya.sa/payload": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

@@ -1,6 +1,6 @@
-import type { Field } from '@ruya.sa/payload'
+import type { Field } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldShouldBeLocalized } from 'payload/shared'
 
 export const hasLocalesTable = ({
   fields,

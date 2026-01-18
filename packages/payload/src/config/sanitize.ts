@@ -1,7 +1,7 @@
-import type { AcceptedLanguages } from '@ruya.sa/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import { en } from '@ruya.sa/translations/languages/en'
-import { deepMergeSimple } from '@ruya.sa/translations/utilities'
+import { en } from '@payloadcms/translations/languages/en'
+import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -57,7 +57,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collections',
-    ComponentPath: '@ruya.sa/ui/rsc#CollectionCards',
+    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
     minWidth: 'full',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
@@ -412,7 +412,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     validRelationships,
   )
 
-  // @ts-expect-error indexSortableFields is only valid for @ruya.sa/db-mongodb
+  // @ts-expect-error indexSortableFields is only valid for @payloadcms/db-mongodb
   if (config?.db?.indexSortableFields) {
     migrations.indexes = [
       {

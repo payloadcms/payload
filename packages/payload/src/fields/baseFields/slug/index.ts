@@ -131,7 +131,7 @@ export const slugField: SlugField = ({
               clientProps: {
                 useAsSlug,
               } satisfies SlugFieldClientPropsOnly,
-              path: '@ruya.sa/ui#SlugField',
+              path: '@payloadcms/ui#SlugField',
             },
           },
           width: '100%',

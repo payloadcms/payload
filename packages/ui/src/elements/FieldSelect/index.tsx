@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, FormState, SanitizedFieldPermissions } from '@ruya.sa/payload'
+import type { ClientField, FormState, SanitizedFieldPermissions } from 'payload'
 
 import React, { useState } from 'react'
 

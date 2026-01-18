@@ -1,6 +1,6 @@
 'use client'
 
-import type { EditViewProps } from '@ruya.sa/payload'
+import type { EditViewProps } from 'payload'
 
 import React from 'react'
 

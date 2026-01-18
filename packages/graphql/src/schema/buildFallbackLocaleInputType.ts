@@ -1,4 +1,4 @@
-import type { SanitizedLocalizationConfig } from '@ruya.sa/payload'
+import type { SanitizedLocalizationConfig } from 'payload'
 
 import { GraphQLEnumType } from 'graphql'
 

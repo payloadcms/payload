@@ -1,6 +1,6 @@
-import type { DBIdentifierName } from '@ruya.sa/payload'
+import type { DBIdentifierName } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

@@ -1,4 +1,4 @@
-import type { TFunction } from '@ruya.sa/translations'
+import type { TFunction } from '@payloadcms/translations'
 
 export const validateLimitValue = (
   value: null | number | undefined,

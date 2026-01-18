@@ -1,4 +1,4 @@
-import type { NumberFieldServerProps } from '@ruya.sa/payload'
+import type { NumberFieldServerProps } from 'payload'
 
 import './index.css'
 

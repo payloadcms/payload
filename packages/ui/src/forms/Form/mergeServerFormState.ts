@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from '@ruya.sa/payload'
+import type { FormState } from 'payload'
 
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 

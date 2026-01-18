@@ -1,6 +1,6 @@
-import type { EmailAdapter, SendEmailOptions } from '@ruya.sa/payload'
+import type { EmailAdapter, SendEmailOptions } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 export type ResendAdapterArgs = {
   apiKey: string

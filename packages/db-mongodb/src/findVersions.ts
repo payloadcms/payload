@@ -1,7 +1,7 @@
 import type { PaginateOptions, QueryOptions } from 'mongoose'
-import type { FindVersions } from '@ruya.sa/payload'
+import type { FindVersions } from 'payload'
 
-import { buildVersionCollectionFields, flattenWhereToOperators } from '@ruya.sa/payload'
+import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

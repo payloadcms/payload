@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
-import type { UpdateMany } from '@ruya.sa/payload'
+import type { UpdateMany } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

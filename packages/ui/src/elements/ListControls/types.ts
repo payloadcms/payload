@@ -4,7 +4,7 @@ import type {
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export type ListControlsProps = {
   readonly beforeActions?: React.ReactNode[]

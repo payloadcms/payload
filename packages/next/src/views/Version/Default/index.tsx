@@ -12,7 +12,7 @@ import {
   useLocale,
   useRouteTransition,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 

@@ -1,7 +1,7 @@
 'use client'
-import type { ClientField, Data, FormState, JsonObject } from '@ruya.sa/payload'
+import type { ClientField, Data, FormState, JsonObject } from 'payload'
 
-import { Drawer, EditDepthProvider, useModal } from '@ruya.sa/ui'
+import { Drawer, EditDepthProvider, useModal } from '@payloadcms/ui'
 import React from 'react'
 
 import { DrawerContent } from './DrawerContent.js'

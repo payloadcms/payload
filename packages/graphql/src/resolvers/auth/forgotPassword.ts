@@ -1,6 +1,6 @@
-import type { Collection } from '@ruya.sa/payload'
+import type { Collection } from 'payload'
 
-import { forgotPasswordOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { forgotPasswordOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

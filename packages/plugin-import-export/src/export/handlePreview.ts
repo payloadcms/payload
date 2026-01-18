@@ -1,6 +1,6 @@
-import type { FlattenedField, PayloadRequest, Where } from '@ruya.sa/payload'
+import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
-import { addDataAndFileToRequest } from '@ruya.sa/payload'
+import { addDataAndFileToRequest } from 'payload'
 
 import type { ExportPreviewResponse } from '../types.js'
 

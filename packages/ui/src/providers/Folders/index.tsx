@@ -1,10 +1,10 @@
 'use client'
 
-import type { ClientCollectionConfig, CollectionSlug, FolderSortKeys } from '@ruya.sa/payload'
-import type { FolderBreadcrumb, FolderDocumentItemKey, FolderOrDocument } from '@ruya.sa/payload/shared'
+import type { ClientCollectionConfig, CollectionSlug, FolderSortKeys } from 'payload'
+import type { FolderBreadcrumb, FolderDocumentItemKey, FolderOrDocument } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { extractID, formatAdminURL, formatFolderOrDocumentItem } from '@ruya.sa/payload/shared'
+import { extractID, formatAdminURL, formatFolderOrDocumentItem } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'

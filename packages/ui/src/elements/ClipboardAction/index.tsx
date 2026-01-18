@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormStateWithoutComponents } from '@ruya.sa/payload'
+import type { FormStateWithoutComponents } from 'payload'
 
 import { type FC, useCallback } from 'react'
 import { toast } from 'sonner'

@@ -1,9 +1,9 @@
 'use client'
 
-import type { TFunction } from '@ruya.sa/translations'
-import type { LoginWithUsernameOptions, SanitizedFieldPermissions } from '@ruya.sa/payload'
+import type { TFunction } from '@payloadcms/translations'
+import type { LoginWithUsernameOptions, SanitizedFieldPermissions } from 'payload'
 
-import { email, getFieldPermissions, username } from '@ruya.sa/payload/shared'
+import { email, getFieldPermissions, username } from 'payload/shared'
 import React from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'

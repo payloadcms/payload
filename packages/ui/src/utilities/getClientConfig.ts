@@ -1,7 +1,7 @@
-import type { SupportedLanguages } from '@ruya.sa/translations'
-import type { ClientConfig, CreateClientConfigArgs } from '@ruya.sa/payload'
+import type { SupportedLanguages } from '@payloadcms/translations'
+import type { ClientConfig, CreateClientConfigArgs } from 'payload'
 
-import { createClientConfig, createUnauthenticatedClientConfig } from '@ruya.sa/payload'
+import { createClientConfig, createUnauthenticatedClientConfig } from 'payload'
 import { cache } from 'react'
 
 type CachedClientConfigs = Record<keyof SupportedLanguages, ClientConfig>

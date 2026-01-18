@@ -1,4 +1,4 @@
-import type { FindGlobal } from '@ruya.sa/payload'
+import type { FindGlobal } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

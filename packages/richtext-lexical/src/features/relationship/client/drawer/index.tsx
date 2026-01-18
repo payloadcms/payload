@@ -1,9 +1,9 @@
 'use client'
 import type { LexicalEditor } from 'lexical'
-import type { CollectionSlug } from '@ruya.sa/payload'
+import type { CollectionSlug } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { type ListDrawerProps, toast } from '@ruya.sa/ui'
+import { type ListDrawerProps, toast } from '@payloadcms/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 

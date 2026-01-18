@@ -1,6 +1,6 @@
-import type { Collection, PayloadRequest, Where } from '@ruya.sa/payload'
+import type { Collection, PayloadRequest, Where } from 'payload'
 
-import { countOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { countOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

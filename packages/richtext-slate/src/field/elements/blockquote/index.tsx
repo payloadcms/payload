@@ -8,7 +8,7 @@ export const blockquote: RichTextCustomElement = {
     clientProps: {
       format: name,
     },
-    path: '@ruya.sa/richtext-slate/client#BlockquoteElementButton',
+    path: '@payloadcms/richtext-slate/client#BlockquoteElementButton',
   },
-  Element: '@ruya.sa/richtext-slate/client#BlockquoteElement',
+  Element: '@payloadcms/richtext-slate/client#BlockquoteElement',
 }

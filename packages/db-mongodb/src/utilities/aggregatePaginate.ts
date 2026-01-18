@@ -1,6 +1,6 @@
 import type { CollationOptions } from 'mongodb'
 import type { ClientSession, Model, PipelineStage } from 'mongoose'
-import type { PaginatedDocs } from '@ruya.sa/payload'
+import type { PaginatedDocs } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 

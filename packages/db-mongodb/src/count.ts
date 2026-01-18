@@ -1,7 +1,7 @@
 import type { CountOptions } from 'mongodb'
-import type { Count } from '@ruya.sa/payload'
+import type { Count } from 'payload'
 
-import { flattenWhereToOperators } from '@ruya.sa/payload'
+import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

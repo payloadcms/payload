@@ -1,6 +1,6 @@
 'use client'
 
-import type { SlugFieldClientProps } from '@ruya.sa/payload'
+import type { SlugFieldClientProps } from 'payload'
 
 import React, { useCallback, useState } from 'react'
 

@@ -1,9 +1,9 @@
 'use client'
-import type { CollapsibleProps } from '@ruya.sa/ui/elements/Collapsible'
-import type { ClientField, FormState } from '@ruya.sa/payload'
+import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
+import type { ClientField, FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { RenderFields, useFormSubmitted } from '@ruya.sa/ui'
+import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
 
 export type BlockCollapsibleProps = {

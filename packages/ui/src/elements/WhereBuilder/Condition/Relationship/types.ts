@@ -1,11 +1,11 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
   PaginatedDocs,
   RelationshipFieldClient,
   ResolvedFilterOptions,
   UploadFieldClient,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 

@@ -4,14 +4,14 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
-} from '@ruya.sa/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal, logError } from '@ruya.sa/payload'
-import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
+} from '@payloadcms/ui/shared'
+import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig

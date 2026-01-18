@@ -1,4 +1,4 @@
-import type { RelationshipFieldValidation, SingleRelationshipField } from '@ruya.sa/payload'
+import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
 
 import type { RootTenantFieldConfigOverrides } from '../../types.js'
 
@@ -67,7 +67,7 @@ export const tenantField = ({
       components: {
         ...(overrides.admin?.components || {}),
         Field: {
-          path: '@ruya.sa/plugin-multi-tenant/client#TenantField',
+          path: '@payloadcms/plugin-multi-tenant/client#TenantField',
           ...(typeof overrides.admin?.components?.Field !== 'string'
             ? overrides.admin?.components?.Field || {}
             : {}),

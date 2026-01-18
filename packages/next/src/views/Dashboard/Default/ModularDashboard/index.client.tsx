@@ -1,11 +1,11 @@
 'use client'
 
 import type { Modifier } from '@dnd-kit/core'
-import type { ClientWidget, WidgetWidth } from '@ruya.sa/payload'
+import type { ClientWidget, WidgetWidth } from 'payload'
 
 import { DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core'
 import { snapCenterToCursor } from '@dnd-kit/modifiers'
-import { ChevronIcon, Popup, PopupList, useTranslation, XIcon } from '@ruya.sa/ui'
+import { ChevronIcon, Popup, PopupList, useTranslation, XIcon } from '@payloadcms/ui'
 import React, { useMemo, useState } from 'react'
 
 /**

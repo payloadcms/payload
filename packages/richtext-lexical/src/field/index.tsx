@@ -1,8 +1,8 @@
 'use client'
 
-import type { RichTextFieldClient } from '@ruya.sa/payload'
+import type { RichTextFieldClient } from 'payload'
 
-import { ShimmerEffect, useConfig } from '@ruya.sa/ui'
+import { ShimmerEffect, useConfig } from '@payloadcms/ui'
 import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'

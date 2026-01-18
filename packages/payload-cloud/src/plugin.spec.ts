@@ -1,9 +1,9 @@
-import type { Config, Payload } from '@ruya.sa/payload'
+import type { Config, Payload } from 'payload'
 import { describe, beforeAll, beforeEach, it, expect, test, vitest, Mock } from 'vitest'
 
-import { nodemailerAdapter } from '@ruya.sa/email-nodemailer'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
-import { defaults } from '@ruya.sa/payload'
+import { defaults } from 'payload'
 
 // TO-DO: this would be needed for the TO-DO tests below.
 // maybe we have to use jest.unstable_mockModule? (already tried)

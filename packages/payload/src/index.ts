@@ -120,7 +120,7 @@ import {
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
-import type { SupportedLanguages } from '@ruya.sa/translations'
+import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
 
@@ -1815,4 +1815,4 @@ export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
-export { deepMergeSimple } from '@ruya.sa/translations/utilities'
+export { deepMergeSimple } from '@payloadcms/translations/utilities'

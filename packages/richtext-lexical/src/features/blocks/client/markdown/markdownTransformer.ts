@@ -1,4 +1,4 @@
-import type { ClientBlock } from '@ruya.sa/payload'
+import type { ClientBlock } from 'payload'
 
 import {
   $parseSerializedNode,

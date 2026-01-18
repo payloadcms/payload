@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType, GeneratedTypes } from '@ruya.sa/payload'
+import type { DefaultDocumentIDType, GeneratedTypes } from 'payload'
 
 /**
  * THIS FILE IS EXTREMELY SENSITIVE PLEASE BE CAREFUL AS THERE IS EVIL AT PLAY
@@ -39,7 +39,7 @@ type ResolveEcommerceType<T> = T extends { ecommerce: infer E }
 
 export type TypedEcommerce = EcommerceBase & ResolveEcommerceType<GeneratedTypes>
 
-declare module '@ruya.sa/payload' {
+declare module 'payload' {
   export interface GeneratedTypes {
     ecommerceUntyped: {
       collections: {

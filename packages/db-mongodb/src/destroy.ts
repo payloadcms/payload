@@ -1,4 +1,4 @@
-import type { Destroy } from '@ruya.sa/payload'
+import type { Destroy } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

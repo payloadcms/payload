@@ -1,4 +1,4 @@
-import type { DocumentInfoContext } from '@ruya.sa/ui'
+import type { DocumentInfoContext } from '@payloadcms/ui'
 import type {
   CollectionConfig,
   CollectionSlug,
@@ -7,7 +7,7 @@ import type {
   GlobalSlug,
   PayloadRequest,
   UploadCollectionSlug,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 

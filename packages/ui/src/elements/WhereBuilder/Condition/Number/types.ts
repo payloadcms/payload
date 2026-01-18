@@ -1,4 +1,4 @@
-import type { NumberFieldClient } from '@ruya.sa/payload'
+import type { NumberFieldClient } from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 

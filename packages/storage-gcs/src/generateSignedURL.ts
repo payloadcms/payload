@@ -1,9 +1,9 @@
 import type { Storage } from '@google-cloud/storage'
-import type { ClientUploadsAccess } from '@ruya.sa/plugin-cloud-storage/types'
-import type { PayloadHandler } from '@ruya.sa/payload'
+import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
+import type { PayloadHandler } from 'payload'
 
 import path from 'path'
-import { APIError, Forbidden } from '@ruya.sa/payload'
+import { APIError, Forbidden } from 'payload'
 
 import type { GcsStorageOptions } from './index.js'
 

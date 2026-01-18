@@ -1,4 +1,4 @@
-import type { DocumentSubViewTypes, ViewTypes } from '@ruya.sa/payload'
+import type { DocumentSubViewTypes, ViewTypes } from 'payload'
 
 export function getDocumentViewInfo(segments: string[]): {
   documentSubViewType?: DocumentSubViewTypes

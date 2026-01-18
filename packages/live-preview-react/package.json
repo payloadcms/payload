@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/live-preview-react",
-  "version": "3.71.3",
+  "name": "@payloadcms/live-preview-react",
+  "version": "3.71.1",
   "description": "The official React SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,13 +42,13 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ruya.sa/live-preview": "workspace:*"
+    "@payloadcms/live-preview": "workspace:*"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1",

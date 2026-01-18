@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps, JSONFieldClient } from '@ruya.sa/payload'
+import type { DefaultCellComponentProps, JSONFieldClient } from 'payload'
 
 import React from 'react'
 

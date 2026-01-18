@@ -2,7 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { isImage } from '@ruya.sa/payload/shared'
+import { isImage } from 'payload/shared'
 import React from 'react'
 
 import { SelectInput } from '../../../fields/Select/Input.js'

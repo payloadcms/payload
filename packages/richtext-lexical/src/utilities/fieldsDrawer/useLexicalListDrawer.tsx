@@ -1,9 +1,9 @@
 'use client'
-import type { UseListDrawer } from '@ruya.sa/ui'
+import type { UseListDrawer } from '@payloadcms/ui'
 import type { BaseSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useListDrawer, useModal } from '@ruya.sa/ui'
+import { useListDrawer, useModal } from '@payloadcms/ui'
 import {
   $getNodeByKey,
   $getPreviousSelection,

@@ -1,8 +1,8 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
-import { reduceFieldsToValues } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { reduceFieldsToValues } from 'payload/shared'
 import React from 'react'
 
 import { useAuth } from '../../../providers/Auth/index.js'

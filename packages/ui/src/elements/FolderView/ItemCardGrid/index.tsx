@@ -1,6 +1,6 @@
 'use client'
 
-import type { FolderOrDocument } from '@ruya.sa/payload/shared'
+import type { FolderOrDocument } from 'payload/shared'
 
 import React from 'react'
 

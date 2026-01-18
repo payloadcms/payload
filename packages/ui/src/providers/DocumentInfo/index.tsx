@@ -1,7 +1,7 @@
 'use client'
-import type { ClientUser, DocumentPreferences } from '@ruya.sa/payload'
+import type { ClientUser, DocumentPreferences } from 'payload'
 
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 

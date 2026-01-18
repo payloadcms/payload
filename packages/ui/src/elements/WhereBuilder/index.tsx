@@ -1,8 +1,8 @@
 'use client'
-import type { Operator } from '@ruya.sa/payload'
+import type { Operator } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { transformWhereQuery, validateWhereQuery } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'

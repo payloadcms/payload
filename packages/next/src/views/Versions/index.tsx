@@ -1,7 +1,7 @@
-import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@ruya.sa/ui'
+import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import { type DocumentViewServerProps, type PaginatedDocs, type Where } from '@ruya.sa/payload'
-import { formatAdminURL, hasDraftsEnabled, isNumber } from '@ruya.sa/payload/shared'
+import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'payload'
+import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'

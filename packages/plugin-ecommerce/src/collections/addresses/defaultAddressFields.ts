@@ -1,4 +1,4 @@
-import type { Field } from '@ruya.sa/payload'
+import type { Field } from 'payload'
 
 export const defaultAddressFields: () => Field[] = () => {
   return [

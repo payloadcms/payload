@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Collection, CollectionSlug, DataFromCollectionSlug } from '@ruya.sa/payload'
+import type { Collection, CollectionSlug, DataFromCollectionSlug } from 'payload'
 
-import { findByIDOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { findByIDOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

@@ -10,7 +10,7 @@ import type {
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
   TypedUser,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import React from 'react'
 
@@ -82,7 +82,7 @@ export type DocumentInfoContext = {
    * via the `useDocumentTitle` hook.
    * @example
    * ```tsx
-   * import { useDocumentTitle } from '@ruya.sa/ui'
+   * import { useDocumentTitle } from '@payloadcms/ui'
    * const { setDocumentTitle } = useDocumentTitle()
    * ```
    */
@@ -98,7 +98,7 @@ export type DocumentInfoContext = {
    * via the `useDocumentTitle` hook.
    * @example
    * ```tsx
-   * import { useDocumentTitle } from '@ruya.sa/ui'
+   * import { useDocumentTitle } from '@payloadcms/ui'
    * const { title } = useDocumentTitle()
    * ```
    */

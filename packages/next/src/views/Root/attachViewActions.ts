@@ -3,7 +3,7 @@ import type {
   EditConfig,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export function getViewActions({
   editConfig,

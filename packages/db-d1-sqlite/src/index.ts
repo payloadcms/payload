@@ -1,5 +1,5 @@
-import type { Operators } from '@ruya.sa/drizzle'
-import type { DatabaseAdapterObj, Payload } from '@ruya.sa/payload'
+import type { Operators } from '@payloadcms/drizzle'
+import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
@@ -37,7 +37,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
-} from '@ruya.sa/drizzle'
+} from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
   convertPathToJSONTraversal,
@@ -49,9 +49,9 @@ import {
   init,
   insert,
   requireDrizzleKit,
-} from '@ruya.sa/drizzle/sqlite'
+} from '@payloadcms/drizzle/sqlite'
 import { like, notLike } from 'drizzle-orm'
-import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from '@ruya.sa/payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, SQLiteD1Adapter } from './types.js'
@@ -179,7 +179,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       migrateReset,
       migrateStatus,
       migrationDir,
-      packageName: '@ruya.sa/db-d1-sqlite',
+      packageName: '@payloadcms/db-d1-sqlite',
       payload,
       queryDrafts,
       rejectInitializing,

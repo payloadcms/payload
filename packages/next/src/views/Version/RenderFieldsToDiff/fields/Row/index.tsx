@@ -1,5 +1,5 @@
 'use client'
-import type { RowFieldDiffClientComponent } from '@ruya.sa/payload'
+import type { RowFieldDiffClientComponent } from 'payload'
 
 import React from 'react'
 

@@ -1,4 +1,4 @@
-import type { DocumentViewServerProps } from '@ruya.sa/payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import React from 'react'
 

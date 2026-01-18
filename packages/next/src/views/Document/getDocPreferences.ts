@@ -1,6 +1,6 @@
-import type { DocumentPreferences, Payload, TypedUser } from '@ruya.sa/payload'
+import type { DocumentPreferences, Payload, TypedUser } from 'payload'
 
-import { sanitizeID } from '@ruya.sa/ui/shared'
+import { sanitizeID } from '@payloadcms/ui/shared'
 
 type Args = {
   collectionSlug?: string

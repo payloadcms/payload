@@ -1,8 +1,8 @@
 'use client'
-import type { JSONFieldClientComponent, Where } from '@ruya.sa/payload'
+import type { JSONFieldClientComponent, Where } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { toWords } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { toWords } from 'payload/shared'
 import React from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'

@@ -39,150 +39,150 @@ import type {
 } from '../types.js'
 
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type BaseRawColumn = _BaseRawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type BuildDrizzleTable = _BuildDrizzleTable
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type BuildQueryJoinAliases = _BuildQueryJoinAliases
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type ChainedMethods = _ChainedMethods
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type ColumnToCodeConverter = _ColumnToCodeConverter
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type CountDistinct = _CountDistinct
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type CreateJSONQueryArgs = _CreateJSONQueryArgs
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type DeleteWhere = _DeleteWhere
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type DrizzleAdapter = _DrizzleAdapter
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type DrizzleTransaction = _DrizzleTransaction
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type DropDatabase = _DropDatabase
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type EnumRawColumn = _EnumRawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type Execute<T> = _Execute<T>
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type GenericColumn = _GenericColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type GenericColumns<T> = _GenericColumns<T>
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type GenericPgColumn = _GenericPgColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type GenericRelation = _GenericRelation
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type GenericTable = _GenericTable
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type IDType = _IDType
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type Insert = _Insert
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type IntegerRawColumn = _IntegerRawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type Migration = _Migration
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type PostgresDB = _PostgresDB
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RawColumn = _RawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RawForeignKey = _RawForeignKey
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RawIndex = _RawIndex
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RawRelation = _RawRelation
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RawTable = _RawTable
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RelationMap = _RelationMap
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type RequireDrizzleKit = _RequireDrizzleKit
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type SetColumnID = _SetColumnID
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type SQLiteDB = _SQLiteDB
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type TimestampRawColumn = _TimestampRawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type TransactionPg = _TransactionPg
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type TransactionSQLite = _TransactionSQLite
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type UUIDRawColumn = _UUIDRawColumn
 /**
- * @deprecated - import from `@ruya.sa/drizzle` instead
+ * @deprecated - import from `@payloadcms/drizzle` instead
  */
 export type VectorRawColumn = _VectorRawColumn

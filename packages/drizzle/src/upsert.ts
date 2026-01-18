@@ -1,4 +1,4 @@
-import type { Upsert } from '@ruya.sa/payload'
+import type { Upsert } from 'payload'
 
 import type { DrizzleAdapter } from './types.js'
 

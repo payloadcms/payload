@@ -1,4 +1,4 @@
-import type { UIField } from '@ruya.sa/payload'
+import type { UIField } from 'payload'
 
 interface FieldFunctionProps {
   /**
@@ -39,7 +39,7 @@ export const PreviewField: FieldFunction = ({
             hasGenerateURLFn: hasGenerateFn,
             titlePath,
           },
-          path: '@ruya.sa/plugin-seo/client#PreviewComponent',
+          path: '@payloadcms/plugin-seo/client#PreviewComponent',
         },
       },
     },

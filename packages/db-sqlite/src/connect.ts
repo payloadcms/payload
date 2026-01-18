@@ -1,8 +1,8 @@
-import type { DrizzleAdapter } from '@ruya.sa/drizzle/types'
-import type { Connect, Migration } from '@ruya.sa/payload'
+import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { Connect, Migration } from 'payload'
 
 import { createClient } from '@libsql/client'
-import { pushDevSchema } from '@ruya.sa/drizzle'
+import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/libsql'
 
 import type { SQLiteAdapter } from './types.js'

@@ -1,4 +1,4 @@
-import type { Block } from '@ruya.sa/payload'
+import type { Block } from 'payload'
 
 import type { AdditionalCodeComponentProps } from './Component/Code.js'
 
@@ -25,10 +25,10 @@ export const CodeBlock: (
             // If default languages are used, return undefined (=> do not pass `languages` variable) in order to reduce data sent to the client
             languages: args?.languages,
           },
-          path: '@ruya.sa/richtext-lexical/client#CodeBlockBlockComponent',
+          path: '@payloadcms/richtext-lexical/client#CodeBlockBlockComponent',
         },
       },
-      jsx: '@ruya.sa/richtext-lexical/client#codeConverterClient',
+      jsx: '@payloadcms/richtext-lexical/client#codeConverterClient',
     },
     fields: [
       {
@@ -51,7 +51,7 @@ export const CodeBlock: (
           components: {
             Field: {
               clientProps: args,
-              path: '@ruya.sa/richtext-lexical/client#CodeComponent',
+              path: '@payloadcms/richtext-lexical/client#CodeComponent',
             },
           },
         },

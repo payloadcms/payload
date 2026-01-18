@@ -5,10 +5,10 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import { toWords } from '@ruya.sa/payload'
+import { toWords } from 'payload'
 
 import { GraphQLJSONObject } from '../packages/graphql-type-json/index.js'
 import { formatName } from '../utilities/formatName.js'

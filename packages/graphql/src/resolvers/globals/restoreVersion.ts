@@ -1,6 +1,6 @@
-import type { Document, PayloadRequest, SanitizedGlobalConfig } from '@ruya.sa/payload'
+import type { Document, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 
-import { isolateObjectProperty, restoreVersionOperationGlobal } from '@ruya.sa/payload'
+import { isolateObjectProperty, restoreVersionOperationGlobal } from 'payload'
 
 import type { Context } from '../types.js'
 

@@ -1,6 +1,6 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 export type ParseJSONArgs = {
   data: Buffer | string

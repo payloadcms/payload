@@ -5,11 +5,11 @@ import type {
   Operator,
   Payload,
   RelationshipField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from '@ruya.sa/payload'
-import { fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
+import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField

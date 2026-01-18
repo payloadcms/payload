@@ -1,4 +1,4 @@
-import type { SingleRelationshipField } from '@ruya.sa/payload'
+import type { SingleRelationshipField } from 'payload'
 
 export const createParentField = (
   relationTo: string,

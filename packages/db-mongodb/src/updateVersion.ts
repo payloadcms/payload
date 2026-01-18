@@ -1,6 +1,6 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
 
-import { buildVersionCollectionFields, type UpdateVersion } from '@ruya.sa/payload'
+import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

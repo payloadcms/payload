@@ -1,5 +1,5 @@
 import type { ScopeContext } from '@sentry/types'
-import type { AfterErrorHookArgs } from '@ruya.sa/payload'
+import type { AfterErrorHookArgs } from 'payload'
 
 type SentryInstance = {
   captureException: (err: Error, hint: any) => string

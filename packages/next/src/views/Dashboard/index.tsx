@@ -1,8 +1,8 @@
-import type { AdminViewServerProps } from '@ruya.sa/payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { HydrateAuthProvider, SetStepNav } from '@ruya.sa/ui'
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
-import { getGlobalData, getNavGroups } from '@ruya.sa/ui/shared'
+import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'

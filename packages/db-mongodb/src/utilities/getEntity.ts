@@ -1,6 +1,6 @@
-import type { Collection, SanitizedCollectionConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
+import type { Collection, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel, GlobalModel } from '../types.js'

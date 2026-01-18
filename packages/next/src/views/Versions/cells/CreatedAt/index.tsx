@@ -1,7 +1,7 @@
 'use client'
-import { Link, useConfig, useTranslation } from '@ruya.sa/ui'
-import { formatDate } from '@ruya.sa/ui/shared'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { Link, useConfig, useTranslation } from '@payloadcms/ui'
+import { formatDate } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 export type CreatedAtCellProps = {

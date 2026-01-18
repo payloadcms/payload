@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-ecommerce",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-ecommerce",
+  "version": "3.71.1",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
@@ -83,22 +83,22 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ruya.sa/translations": "workspace:*",
-    "@ruya.sa/ui": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
     "qs-esm": "7.0.2"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
-    "@ruya.sa/next": "workspace:*",
-    "@ruya.sa/translations": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "stripe": "18.3.0"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

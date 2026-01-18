@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import React from 'react'
 

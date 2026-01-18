@@ -1,4 +1,4 @@
-import type { Config as PayloadConfig, PayloadRequest } from '@ruya.sa/payload'
+import type { Config as PayloadConfig, PayloadRequest } from 'payload'
 
 import Stripe from 'stripe'
 

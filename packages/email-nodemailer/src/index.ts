@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import type { Transporter } from 'nodemailer'
 import type SMTPConnection from 'nodemailer/lib/smtp-connection'
-import type { EmailAdapter } from '@ruya.sa/payload'
+import type { EmailAdapter } from 'payload'
 
 import nodemailer from 'nodemailer'
-import { InvalidConfiguration } from '@ruya.sa/payload'
+import { InvalidConfiguration } from 'payload'
 
 export type NodemailerAdapterArgs = {
   defaultFromAddress: string

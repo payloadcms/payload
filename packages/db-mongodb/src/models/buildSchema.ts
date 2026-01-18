@@ -30,14 +30,14 @@ import {
   type TextareaField,
   type TextField,
   type UploadField,
-} from '@ruya.sa/payload'
+} from 'payload'
 import {
   fieldAffectsData,
   fieldIsPresentationalOnly,
   fieldIsVirtual,
   fieldShouldBeLocalized,
   tabHasName,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean

@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig, Data, FormState, TypeWithID } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, Data, FormState, TypeWithID } from 'payload'
 
 import { createContext, use } from 'react'
 

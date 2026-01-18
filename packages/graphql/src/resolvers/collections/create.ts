@@ -4,9 +4,9 @@ import type {
   DataFromCollectionSlug,
   PayloadRequest,
   RequiredDataFromCollectionSlug,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { createOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { createOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

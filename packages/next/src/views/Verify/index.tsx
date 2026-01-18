@@ -1,6 +1,6 @@
-import type { AdminViewServerProps } from '@ruya.sa/payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'

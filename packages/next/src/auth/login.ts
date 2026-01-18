@@ -1,8 +1,8 @@
 'use server'
 
-import type { CollectionSlug } from '@ruya.sa/payload'
+import type { CollectionSlug } from 'payload'
 
-import { getPayload } from '@ruya.sa/payload'
+import { getPayload } from 'payload'
 
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 

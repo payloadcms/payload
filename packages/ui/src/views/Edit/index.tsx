@@ -1,9 +1,9 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps } from '@ruya.sa/payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, hasAutosaveEnabled } from '@ruya.sa/payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'

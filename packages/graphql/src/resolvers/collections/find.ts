@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Collection, PaginatedDocs, Where } from '@ruya.sa/payload'
+import type { Collection, PaginatedDocs, Where } from 'payload'
 
-import { findOperation, isolateObjectProperty } from '@ruya.sa/payload'
+import { findOperation, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 

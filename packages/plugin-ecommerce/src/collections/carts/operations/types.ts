@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType, Payload, PayloadRequest } from '@ruya.sa/payload'
+import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
 
 /**
  * Represents an item in the cart with populated or ID references.

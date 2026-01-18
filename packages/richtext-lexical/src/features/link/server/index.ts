@@ -5,10 +5,10 @@ import type {
   FieldAffectingData,
   FieldSchemaMap,
   SanitizedConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import escapeHTML from 'escape-html'
-import { sanitizeFields } from '@ruya.sa/payload'
+import { sanitizeFields } from 'payload'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
@@ -137,7 +137,7 @@ export const LinkFeature = createServerFeature<
       : undefined
 
     return {
-      ClientFeature: '@ruya.sa/richtext-lexical/client#LinkFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
         defaultLinkType,
         defaultLinkURL,

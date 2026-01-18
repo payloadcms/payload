@@ -1,10 +1,10 @@
-import type { StaticHandler } from '@ruya.sa/plugin-cloud-storage/types'
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
+import type { CollectionConfig } from 'payload'
 
-import { getFilePrefix } from '@ruya.sa/plugin-cloud-storage/utilities'
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import path from 'path'
-import { getRangeRequestInfo } from '@ruya.sa/payload/internal'
+import { getRangeRequestInfo } from 'payload/internal'
 
 type StaticHandlerArgs = {
   baseUrl: string

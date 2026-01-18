@@ -117,7 +117,7 @@ describe('AST Integration Tests', () => {
 
       // Check that old mongodb adapter is removed if we switched to postgres
       if (dbType === 'postgres') {
-        expect(configContent).not.toContain('@ruya.sa/db-mongodb')
+        expect(configContent).not.toContain('@payloadcms/db-mongodb')
         expect(configContent).not.toContain('mongooseAdapter')
       }
 

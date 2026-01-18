@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, ClientConfig, ClientGlobalConfig } from 'payload'
 
 import { useEffect, useRef } from 'react'
 

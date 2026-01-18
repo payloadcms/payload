@@ -1,5 +1,5 @@
-import payloadEsLintConfig from '@ruya.sa/eslint-config'
-import payloadPlugin from '@ruya.sa/eslint-plugin'
+import payloadEsLintConfig from '@payloadcms/eslint-config'
+import payloadPlugin from '@payloadcms/eslint-plugin'
 
 export const defaultESLintIgnores = [
   '**/.temp',

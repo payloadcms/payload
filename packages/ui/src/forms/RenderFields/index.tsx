@@ -1,8 +1,8 @@
 'use client'
 
-import type { SanitizedFieldPermissions } from '@ruya.sa/payload'
+import type { SanitizedFieldPermissions } from 'payload'
 
-import { fieldIsHiddenOrDisabled, getFieldPaths, getFieldPermissions } from '@ruya.sa/payload/shared'
+import { fieldIsHiddenOrDisabled, getFieldPaths, getFieldPermissions } from 'payload/shared'
 import React from 'react'
 
 import type { RenderFieldsProps } from './types.js'

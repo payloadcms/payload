@@ -154,7 +154,7 @@ describe('createProject', () => {
 
         // Should only have one db adapter
         expect(
-          Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@ruya.sa/db-')),
+          Object.keys(packageJson.dependencies).filter((n) => n.startsWith('@payloadcms/db-')),
         ).toHaveLength(1)
 
         const payloadConfigPath = (
@@ -173,10 +173,10 @@ describe('createProject', () => {
 
         // Verify correct adapter import and usage based on db type
         if (db === 'mongodb') {
-          expect(content).toContain("import { mongooseAdapter } from '@ruya.sa/db-mongodb'")
+          expect(content).toContain("import { mongooseAdapter } from '@payloadcms/db-mongodb'")
           expect(content).toContain('mongooseAdapter')
         } else if (db === 'postgres') {
-          expect(content).toContain("import { postgresAdapter } from '@ruya.sa/db-postgres'")
+          expect(content).toContain("import { postgresAdapter } from '@payloadcms/db-postgres'")
           expect(content).toContain('postgresAdapter')
         }
       })
@@ -189,9 +189,9 @@ describe('createProject', () => {
           name: 'test-project',
           version: '1.0.0',
           dependencies: {
-            '@ruya.sa/db-mongodb': 'workspace:*',
+            '@payloadcms/db-mongodb': 'workspace:*',
             payload: 'workspace:*',
-            '@ruya.sa/ui': 'workspace:*',
+            '@payloadcms/ui': 'workspace:*',
           },
         }
 
@@ -199,9 +199,9 @@ describe('createProject', () => {
           name: 'test-project',
           version: '1.0.0',
           dependencies: {
-            '@ruya.sa/db-mongodb': `${latestVersion}`,
+            '@payloadcms/db-mongodb': `${latestVersion}`,
             payload: `${latestVersion}`,
-            '@ruya.sa/ui': `${latestVersion}`,
+            '@payloadcms/ui': `${latestVersion}`,
           },
         }
 

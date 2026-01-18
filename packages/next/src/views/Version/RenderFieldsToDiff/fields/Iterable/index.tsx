@@ -1,13 +1,13 @@
 'use client'
 
-import type { FieldDiffClientProps } from '@ruya.sa/payload'
+import type { FieldDiffClientProps } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { useConfig, useTranslation } from '@ruya.sa/ui'
+import { getTranslation } from '@payloadcms/translations'
+import { useConfig, useTranslation } from '@payloadcms/ui'
 
 import './index.scss'
 
-import { fieldIsArrayType, fieldIsBlockType } from '@ruya.sa/payload/shared'
+import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'

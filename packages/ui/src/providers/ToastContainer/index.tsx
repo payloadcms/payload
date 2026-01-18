@@ -1,5 +1,5 @@
 'use client'
-import type { ClientConfig } from '@ruya.sa/payload'
+import type { ClientConfig } from 'payload'
 
 import React from 'react'
 import { Toaster } from 'sonner'

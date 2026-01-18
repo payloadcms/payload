@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/storage-gcs",
-  "version": "3.71.3",
+  "name": "@payloadcms/storage-gcs",
+  "version": "3.71.1",
   "description": "Payload storage adapter for Google Cloud Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -48,13 +48,13 @@
   },
   "dependencies": {
     "@google-cloud/storage": "7.17.2",
-    "@ruya.sa/plugin-cloud-storage": "workspace:*"
+    "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

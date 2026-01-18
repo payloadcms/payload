@@ -1,7 +1,7 @@
 import type { PipelineStage } from 'mongoose'
-import type { FindDistinct, FlattenedField } from '@ruya.sa/payload'
+import type { FindDistinct, FlattenedField } from 'payload'
 
-import { getFieldByPath } from '@ruya.sa/payload'
+import { getFieldByPath } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

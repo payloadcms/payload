@@ -1,4 +1,4 @@
-import type { PayloadHandler, Where } from '@ruya.sa/payload'
+import type { PayloadHandler, Where } from 'payload'
 
 import {
   addLocalesToRequestFromData,
@@ -7,7 +7,7 @@ import {
   headersWithCors,
   initTransaction,
   killTransaction,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { SanitizedSearchPluginConfig } from '../types.js'
 

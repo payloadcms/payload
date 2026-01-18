@@ -1,8 +1,8 @@
 'use client'
 
-import type { ClientCollectionConfig } from '@ruya.sa/payload'
+import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Modal,
@@ -13,8 +13,8 @@ import {
   useDocumentTitle,
   useModal,
   useTranslation,
-} from '@ruya.sa/ui'
-import { drawerZBase, useDrawerDepth } from '@ruya.sa/ui/elements/Drawer'
+} from '@payloadcms/ui'
+import { drawerZBase, useDrawerDepth } from '@payloadcms/ui/elements/Drawer'
 import React from 'react'
 
 import type {

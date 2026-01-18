@@ -1,6 +1,6 @@
-import type { FieldWithSubFields, Tab, TabsField } from '@ruya.sa/payload'
+import type { FieldWithSubFields, Tab, TabsField } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 
 import { fieldToSchemaMap } from './fieldToWhereInputSchemaMap.js'
 

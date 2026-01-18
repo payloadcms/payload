@@ -1,6 +1,6 @@
-import type { RichTextAdapter } from '@ruya.sa/payload'
+import type { RichTextAdapter } from 'payload'
 
-import { genImportMapIterateFields } from '@ruya.sa/payload'
+import { genImportMapIterateFields } from 'payload'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { LexicalEditorProps } from '../types.js'
@@ -11,9 +11,9 @@ export const getGenerateImportMap =
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
-    addToImportMap('@ruya.sa/richtext-lexical/rsc#RscEntryLexicalCell')
-    addToImportMap('@ruya.sa/richtext-lexical/rsc#RscEntryLexicalField')
-    addToImportMap('@ruya.sa/richtext-lexical/rsc#LexicalDiffComponent')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
 
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
       if ('componentImports' in resolvedFeature) {

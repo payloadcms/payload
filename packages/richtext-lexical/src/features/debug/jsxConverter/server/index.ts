@@ -2,7 +2,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 
 export const DebugJsxConverterFeature = createServerFeature({
   feature: {
-    ClientFeature: '@ruya.sa/richtext-lexical/client#DebugJsxConverterFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#DebugJsxConverterFeatureClient',
   },
   key: 'jsxConverter',
 })

@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig, TypedUser } from '@ruya.sa/payload'
+import type { Field, SanitizedConfig, TypedUser } from 'payload'
 
 export const getBaseFields = (config: SanitizedConfig): Field[] => [
   {

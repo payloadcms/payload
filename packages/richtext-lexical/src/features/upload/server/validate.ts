@@ -1,5 +1,5 @@
-import { fieldSchemasToFormState } from '@ruya.sa/ui/forms/fieldSchemasToFormState'
-import { isValidID } from '@ruya.sa/payload'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
+import { isValidID } from 'payload'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { UploadFeatureProps } from './index.js'

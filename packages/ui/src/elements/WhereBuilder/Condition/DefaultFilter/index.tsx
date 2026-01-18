@@ -4,7 +4,7 @@ import type {
   ResolvedFilterOptions,
   SelectFieldClient,
   TextFieldClient,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import React from 'react'
 

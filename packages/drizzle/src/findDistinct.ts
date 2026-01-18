@@ -1,4 +1,4 @@
-import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from '@ruya.sa/payload'
+import { type FindDistinct, getFieldByPath, type SanitizedCollectionConfig } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, GenericColumn } from './types.js'

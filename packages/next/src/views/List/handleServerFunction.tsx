@@ -1,7 +1,7 @@
-import type { RenderListServerFnArgs, RenderListServerFnReturnType } from '@ruya.sa/ui'
-import type { CollectionPreferences, ServerFunction, VisibleEntities } from '@ruya.sa/payload'
+import type { RenderListServerFnArgs, RenderListServerFnReturnType } from '@payloadcms/ui'
+import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'payload'
 
-import { getClientConfig } from '@ruya.sa/ui/utilities/getClientConfig'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
 import {
   canAccessAdmin,
@@ -9,8 +9,8 @@ import {
   isEntityHidden,
   parseCookies,
   UnauthorizedError,
-} from '@ruya.sa/payload'
-import { applyLocaleFiltering } from '@ruya.sa/payload/shared'
+} from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
 

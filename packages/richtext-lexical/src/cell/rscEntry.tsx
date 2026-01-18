@@ -1,8 +1,8 @@
 import type { SerializedLexicalNode } from 'lexical'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { Link } from '@ruya.sa/ui'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { Link } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { LexicalRichTextCellProps } from '../types.js'

@@ -1,4 +1,4 @@
-import type { I18n } from '@ruya.sa/translations'
+import type { I18n } from '@payloadcms/translations'
 import type {
   ClientConfig,
   ClientField,
@@ -7,10 +7,10 @@ import type {
   FieldSchemaMap,
   Payload,
   TabAsFieldClient,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { createClientFields } from '@ruya.sa/payload'
-import { fieldAffectsData, getFieldPaths, tabHasName } from '@ruya.sa/payload/shared'
+import { createClientFields } from 'payload'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap

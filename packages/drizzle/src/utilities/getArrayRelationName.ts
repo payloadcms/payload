@@ -1,4 +1,4 @@
-import type { ArrayField } from '@ruya.sa/payload'
+import type { ArrayField } from 'payload'
 
 export const getArrayRelationName = ({
   field,

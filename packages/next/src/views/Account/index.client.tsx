@@ -1,5 +1,5 @@
 'use client'
-import { type StepNavItem, useStepNav, useTranslation } from '@ruya.sa/ui'
+import { type StepNavItem, useStepNav, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 export const AccountClient: React.FC = () => {

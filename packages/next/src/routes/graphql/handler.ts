@@ -1,7 +1,7 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
-import type { APIError, Payload, PayloadRequest, SanitizedConfig } from '@ruya.sa/payload'
+import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { configToSchema } from '@ruya.sa/graphql'
+import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import { status as httpStatus } from 'http-status'
 import {
@@ -11,7 +11,7 @@ import {
   headersWithCors,
   logError,
   mergeHeaders,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 const handleError = async ({
   err,

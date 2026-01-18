@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldClientComponent } from '@ruya.sa/payload'
+import type { SelectFieldClientComponent } from 'payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -10,7 +10,7 @@ import {
   useDocumentInfo,
   useField,
   useListQuery,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { applySortOrder, normalizeQueryParam, stripSortDash } from '../../utilities/sortHelpers.js'

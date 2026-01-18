@@ -1,4 +1,4 @@
-import type { FieldAffectingData } from '@ruya.sa/payload'
+import type { FieldAffectingData } from 'payload'
 
 import type { RawColumn } from '../types.js'
 

@@ -1,8 +1,8 @@
-import type { groupNavItems } from '@ruya.sa/ui/shared'
-import type { AdminViewServerPropsOnly, ClientUser, Locale, ServerProps } from '@ruya.sa/payload'
+import type { groupNavItems } from '@payloadcms/ui/shared'
+import type { AdminViewServerPropsOnly, ClientUser, Locale, ServerProps } from 'payload'
 
-import { Gutter } from '@ruya.sa/ui'
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { Gutter } from '@payloadcms/ui'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import { ModularDashboard } from './ModularDashboard/index.js'

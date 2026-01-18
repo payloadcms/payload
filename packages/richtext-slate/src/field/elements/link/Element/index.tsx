@@ -1,7 +1,7 @@
 'use client'
-import type { FormState } from '@ruya.sa/payload'
+import type { FormState } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Popup,
@@ -13,8 +13,8 @@ import {
   useModal,
   useServerFunctions,
   useTranslation,
-} from '@ruya.sa/ui'
-import { deepCopyObject, reduceFieldsToValues } from '@ruya.sa/payload/shared'
+} from '@payloadcms/ui'
+import { deepCopyObject, reduceFieldsToValues } from 'payload/shared'
 import { useCallback, useEffect, useState } from 'react'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'

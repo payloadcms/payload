@@ -1,6 +1,6 @@
 'use client'
 
-import type { SaveButtonClientProps } from '@ruya.sa/payload'
+import type { SaveButtonClientProps } from 'payload'
 
 import React, { useRef } from 'react'
 

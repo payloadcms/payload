@@ -1,4 +1,4 @@
-import { APIError, type DBIdentifierName } from '@ruya.sa/payload'
+import { APIError, type DBIdentifierName } from 'payload'
 
 type Args = {
   config: {

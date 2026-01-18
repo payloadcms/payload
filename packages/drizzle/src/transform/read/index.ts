@@ -1,4 +1,4 @@
-import type { FlattenedField, JoinQuery, SanitizedConfig, TypeWithID } from '@ruya.sa/payload'
+import type { FlattenedField, JoinQuery, SanitizedConfig, TypeWithID } from 'payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 

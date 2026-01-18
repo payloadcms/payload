@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-search",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-search",
+  "version": "3.71.1",
   "description": "Search plugin for Payload",
   "keywords": [
     "payload",
@@ -60,17 +60,17 @@
     "test": "echo \"Error: no tests specified\""
   },
   "dependencies": {
-    "@ruya.sa/next": "workspace:*",
-    "@ruya.sa/ui": "workspace:*"
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/ui": "workspace:*"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

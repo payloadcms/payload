@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest, UploadConfig } from '@ruya.sa/payload'
+import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload'
 
 export async function getFilePrefix({
   clientUploadContext,

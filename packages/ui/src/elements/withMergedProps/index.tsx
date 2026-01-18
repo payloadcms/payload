@@ -1,4 +1,4 @@
-import { isReactServerComponentOrFunction, serverProps } from '@ruya.sa/payload/shared'
+import { isReactServerComponentOrFunction, serverProps } from 'payload/shared'
 import React from 'react'
 
 /**

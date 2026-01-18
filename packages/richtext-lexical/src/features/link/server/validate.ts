@@ -1,6 +1,6 @@
-import type { Field } from '@ruya.sa/payload'
+import type { Field } from 'payload'
 
-import { fieldSchemasToFormState } from '@ruya.sa/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'

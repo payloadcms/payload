@@ -1,10 +1,10 @@
 'use client'
-import type { I18nClient } from '@ruya.sa/translations'
-import type { ClientBlock, ClientWidget, Labels } from '@ruya.sa/payload'
+import type { I18nClient } from '@payloadcms/translations'
+import type { ClientBlock, ClientWidget, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
-import { toWords } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { toWords } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { DefaultBlockImage } from '../../graphics/DefaultBlockImage/index.js'

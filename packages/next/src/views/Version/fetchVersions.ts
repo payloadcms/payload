@@ -7,7 +7,7 @@ import {
   type TypedUser,
   type TypeWithVersion,
   type Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export const fetchVersion = async <TVersionData extends object = object>({
   id,

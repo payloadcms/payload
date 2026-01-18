@@ -5,10 +5,10 @@ import type {
   FieldPaths,
   RichTextFieldClient,
   ServerComponentProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
-import { createClientFields } from '@ruya.sa/payload'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { createClientFields } from 'payload'
 import React from 'react'
 
 import type { AdapterArguments, RichTextCustomElement, RichTextCustomLeaf } from '../types.js'

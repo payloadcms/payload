@@ -1,6 +1,6 @@
-import type { AcceptedLanguages } from '@ruya.sa/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import { initI18n } from '@ruya.sa/translations'
+import { initI18n } from '@payloadcms/translations'
 
 import type { SanitizedConfig } from '../config/types.js'
 

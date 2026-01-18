@@ -1,11 +1,11 @@
 'use client'
-import type { OptionObject, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { OptionObject, SanitizedCollectionConfig } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 // TODO: abstract the `next/navigation` dependency out from this component
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import { sortableFieldTypes } from '@ruya.sa/payload'
-import { fieldAffectsData } from '@ruya.sa/payload/shared'
+import { sortableFieldTypes } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useEffect, useState } from 'react'
 

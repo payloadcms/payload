@@ -1,4 +1,4 @@
-import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from '@ruya.sa/payload'
+import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
 import type { ToCSVFunction } from '../types.js'
 

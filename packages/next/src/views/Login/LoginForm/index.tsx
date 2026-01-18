@@ -4,8 +4,8 @@ import React from 'react'
 
 const baseClass = 'login__form'
 
-import type { UserWithToken } from '@ruya.sa/ui'
-import type { FormState } from '@ruya.sa/payload'
+import type { UserWithToken } from '@payloadcms/ui'
+import type { FormState } from 'payload'
 
 import {
   Form,
@@ -15,8 +15,8 @@ import {
   useAuth,
   useConfig,
   useTranslation,
-} from '@ruya.sa/ui'
-import { formatAdminURL, getLoginOptions, getSafeRedirect } from '@ruya.sa/payload/shared'
+} from '@payloadcms/ui'
+import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 

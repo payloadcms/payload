@@ -1,6 +1,6 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { HandleUpload } from '@ruya.sa/plugin-cloud-storage/types'
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
+import type { CollectionConfig } from 'payload'
 
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'

@@ -1,6 +1,6 @@
-import type { ClientField, Field } from '@ruya.sa/payload'
+import type { ClientField, Field } from 'payload'
 
-import { fieldIsHiddenOrDisabled, fieldIsID } from '@ruya.sa/payload/shared'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
 
 /**
  * Filters fields that are hidden, disabled, or have `disableListColumn` set to `true`.

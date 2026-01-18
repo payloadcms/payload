@@ -5,10 +5,10 @@ import type {
   TabsFieldClient,
   TabsFieldDiffClientComponent,
   VersionTab,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { useTranslation } from '@ruya.sa/ui'
+import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import './index.scss'

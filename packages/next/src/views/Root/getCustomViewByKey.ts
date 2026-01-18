@@ -1,4 +1,4 @@
-import type { AdminViewServerProps, PayloadComponent, SanitizedConfig } from '@ruya.sa/payload'
+import type { AdminViewServerProps, PayloadComponent, SanitizedConfig } from 'payload'
 
 import type { ViewFromConfig } from './getRouteData.js'
 

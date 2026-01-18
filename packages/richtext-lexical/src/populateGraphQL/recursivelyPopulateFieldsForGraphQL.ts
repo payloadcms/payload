@@ -1,6 +1,6 @@
-import type { Field, JsonObject, PayloadRequest, RequestContext } from '@ruya.sa/payload'
+import type { Field, JsonObject, PayloadRequest, RequestContext } from 'payload'
 
-import { afterReadTraverseFields } from '@ruya.sa/payload'
+import { afterReadTraverseFields } from 'payload'
 
 import type { PopulationPromise } from '../features/typesServer.js'
 

@@ -1,6 +1,6 @@
-import type { ColumnPreference, DefaultCellComponentProps } from '@ruya.sa/payload'
+import type { ColumnPreference, DefaultCellComponentProps } from 'payload'
 
-import { toWords, transformColumnsToSearchParams } from '@ruya.sa/payload/shared'
+import { toWords, transformColumnsToSearchParams } from 'payload/shared'
 import React from 'react'
 
 import { Pill } from '../../../Pill/index.js'

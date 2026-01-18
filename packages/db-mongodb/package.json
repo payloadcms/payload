@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/db-mongodb",
-  "version": "3.71.3",
+  "name": "@payloadcms/db-mongodb",
+  "version": "3.71.1",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -58,16 +58,16 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
     "@types/uuid": "10.0.0",
     "mongodb": "6.16.0",
     "mongodb-memory-server": "10.1.4",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

@@ -1,7 +1,7 @@
-import type { Config, ImportMap, ServerProps } from '@ruya.sa/payload'
+import type { Config, ImportMap, ServerProps } from 'payload'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
-import '@ruya.sa/ui/scss/app.scss'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import '@payloadcms/ui/scss/app.scss'
 import React from 'react'
 
 type Args = {

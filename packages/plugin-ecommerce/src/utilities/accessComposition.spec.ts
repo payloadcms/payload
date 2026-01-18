@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { Access, AccessArgs, Where } from '@ruya.sa/payload'
+import type { Access, AccessArgs, Where } from 'payload'
 
 import { accessAND, conditional, accessOR } from './accessComposition'
 

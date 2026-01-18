@@ -35,4 +35,4 @@ export { sanitizeID } from '../../utilities/sanitizeID.js'
  * The `mergeListSearchAndWhere` function is deprecated.
  * Import this from `payload/shared` instead.
  */
-export { mergeListSearchAndWhere } from '@ruya.sa/payload/shared'
+export { mergeListSearchAndWhere } from 'payload/shared'

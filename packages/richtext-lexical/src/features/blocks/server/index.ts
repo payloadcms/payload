@@ -7,9 +7,9 @@ import type {
   FlattenedBlocksField,
   UIFieldClientProps,
   UIFieldServerProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from '@ruya.sa/payload'
+import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
 import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
@@ -86,7 +86,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     }
 
     return {
-      ClientFeature: '@ruya.sa/richtext-lexical/client#BlocksFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,

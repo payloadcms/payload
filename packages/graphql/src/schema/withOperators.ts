@@ -1,5 +1,5 @@
 import type { GraphQLType } from 'graphql'
-import type { FieldAffectingData, NumberField, RadioField, SelectField } from '@ruya.sa/payload'
+import type { FieldAffectingData, NumberField, RadioField, SelectField } from 'payload'
 
 import {
   GraphQLBoolean,
@@ -11,7 +11,7 @@ import {
   GraphQLString,
 } from 'graphql'
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
-import { optionIsObject } from '@ruya.sa/payload/shared'
+import { optionIsObject } from 'payload/shared'
 
 import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'

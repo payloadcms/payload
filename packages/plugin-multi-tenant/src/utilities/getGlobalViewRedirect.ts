@@ -1,7 +1,7 @@
-import type { Payload, TypedUser, ViewTypes } from '@ruya.sa/payload'
+import type { Payload, TypedUser, ViewTypes } from 'payload'
 
 import { unauthorized } from 'next/navigation.js'
-import { formatAdminURL, hasAutosaveEnabled } from '@ruya.sa/payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 

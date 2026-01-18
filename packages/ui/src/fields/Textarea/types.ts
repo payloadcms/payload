@@ -1,4 +1,4 @@
-import type { StaticDescription, StaticLabel } from '@ruya.sa/payload'
+import type { StaticDescription, StaticLabel } from 'payload'
 import type React from 'react'
 
 import { type ChangeEvent } from 'react'

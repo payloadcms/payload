@@ -1,6 +1,6 @@
-import type { Config, RichTextAdapterProvider } from '@ruya.sa/payload'
+import type { Config, RichTextAdapterProvider } from 'payload'
 
-import { sanitizeFields, withNullableJSONSchemaType } from '@ruya.sa/payload'
+import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
 
 import type { AdapterArguments } from './types.js'
 
@@ -50,16 +50,16 @@ export function slateEditor(
     }
 
     return {
-      CellComponent: '@ruya.sa/richtext-slate/rsc#RscEntrySlateCell',
+      CellComponent: '@payloadcms/richtext-slate/rsc#RscEntrySlateCell',
       FieldComponent: {
-        path: '@ruya.sa/richtext-slate/rsc#RscEntrySlateField',
+        path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
         serverProps: {
           args,
         },
       },
       generateImportMap: ({ addToImportMap }) => {
-        addToImportMap('@ruya.sa/richtext-slate/rsc#RscEntrySlateCell')
-        addToImportMap('@ruya.sa/richtext-slate/rsc#RscEntrySlateField')
+        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
+        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
         Object.values(leafTypes).forEach((leaf) => {
           if (leaf.Button) {
             addToImportMap(leaf.Button)

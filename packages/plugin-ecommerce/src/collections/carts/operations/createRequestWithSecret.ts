@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
 /**
  * Creates a modified request object with the cart secret injected into context.

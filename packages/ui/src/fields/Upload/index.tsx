@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadFieldClientProps, ValueWithRelation } from '@ruya.sa/payload'
+import type { UploadFieldClientProps, ValueWithRelation } from 'payload'
 
 import React, { useMemo } from 'react'
 

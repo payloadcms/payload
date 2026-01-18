@@ -1,4 +1,4 @@
-import type { I18nClient } from '@ruya.sa/translations'
+import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
   DefaultCellComponentProps,
@@ -8,10 +8,10 @@ import type {
   Payload,
   PayloadRequest,
   ViewTypes,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { MissingEditorProp } from '@ruya.sa/payload'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { MissingEditorProp } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'

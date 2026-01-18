@@ -1,4 +1,4 @@
-import type { RadioField, SelectField } from '@ruya.sa/payload'
+import type { RadioField, SelectField } from 'payload'
 
 import { formatName } from './formatName.js'
 

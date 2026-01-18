@@ -1,6 +1,6 @@
-import type { I18n } from '@ruya.sa/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
-import type { SanitizedConfig } from '@ruya.sa/payload'
+import type { SanitizedConfig } from 'payload'
 
 import type { CollectionSlugMap, SanitizedEcommercePluginConfig } from '../types/index.js'
 

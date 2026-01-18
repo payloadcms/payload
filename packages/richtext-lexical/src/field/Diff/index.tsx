@@ -1,7 +1,7 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextFieldDiffServerComponent } from '@ruya.sa/payload'
+import type { RichTextFieldDiffServerComponent } from 'payload'
 
-import { FieldDiffContainer, getHTMLDiffComponents } from '@ruya.sa/ui/rsc'
+import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
 import './index.scss'
 import '../bundled.css'

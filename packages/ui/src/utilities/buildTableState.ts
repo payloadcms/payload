@@ -9,10 +9,10 @@ import type {
   SanitizedCollectionConfig,
   ServerFunction,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { APIError, canAccessAdmin, formatErrors, getAccessResults } from '@ruya.sa/payload'
-import { applyLocaleFiltering, isNumber } from '@ruya.sa/payload/shared'
+import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'

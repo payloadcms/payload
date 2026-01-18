@@ -1,4 +1,4 @@
-import type { NumberField } from '@ruya.sa/payload'
+import type { NumberField } from 'payload'
 
 type Props = {
   overrides?: Partial<NumberField>

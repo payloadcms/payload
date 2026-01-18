@@ -1,10 +1,10 @@
-import type { ServerFunction, ServerFunctionHandler } from '@ruya.sa/payload'
+import type { ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@ruya.sa/ui/rsc'
-import { buildFormStateHandler } from '@ruya.sa/ui/utilities/buildFormState'
-import { buildTableStateHandler } from '@ruya.sa/ui/utilities/buildTableState'
-import { getFolderResultsComponentAndDataHandler } from '@ruya.sa/ui/utilities/getFolderResultsComponentAndData'
-import { schedulePublishHandler } from '@ruya.sa/ui/utilities/schedulePublishHandler'
+import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
+import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
+import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
+import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
+import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'

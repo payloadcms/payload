@@ -1,12 +1,12 @@
-import type { Field, PayloadRequest, ResolvedFilterOptions } from '@ruya.sa/payload'
+import type { Field, PayloadRequest, ResolvedFilterOptions } from 'payload'
 
-import { resolveFilterOptions } from '@ruya.sa/ui/rsc'
+import { resolveFilterOptions } from '@payloadcms/ui/rsc'
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   tabHasName,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 
 export const resolveAllFilterOptions = async ({
   fields,

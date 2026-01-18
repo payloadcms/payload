@@ -1,6 +1,6 @@
 'use client'
 
-import type { Where } from '@ruya.sa/payload'
+import type { Where } from 'payload'
 
 import {
   RadioGroupField,
@@ -9,7 +9,7 @@ import {
   useListQuery,
   useSelection,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React, { useEffect, useMemo } from 'react'
 
 const isWhereEmpty = (where: Where): boolean => {

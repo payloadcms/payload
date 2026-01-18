@@ -1,4 +1,4 @@
-import { buildVersionCollectionFields, type CreateVersion } from '@ruya.sa/payload'
+import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 

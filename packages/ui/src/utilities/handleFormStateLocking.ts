@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser } from '@ruya.sa/payload'
+import type { PayloadRequest, TypedUser } from 'payload'
 
 type Args = {
   collectionSlug?: string

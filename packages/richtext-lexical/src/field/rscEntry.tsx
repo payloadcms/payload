@@ -5,10 +5,10 @@ import type {
   RichTextFieldClient,
   RichTextField as RichTextFieldType,
   ServerComponentProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { renderField } from '@ruya.sa/ui/forms/renderField'
+import { getTranslation } from '@payloadcms/translations'
+import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'

@@ -1,4 +1,4 @@
-import type { ColumnPreference } from '@ruya.sa/payload'
+import type { ColumnPreference } from 'payload'
 
 export function isColumnActive({
   accessor,

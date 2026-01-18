@@ -1,8 +1,8 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
-import { type FolderOrDocument, formatAdminURL } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { type FolderOrDocument, formatAdminURL } from 'payload/shared'
 import React, { useId } from 'react'
 import { toast } from 'sonner'
 

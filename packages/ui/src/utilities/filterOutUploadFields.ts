@@ -1,4 +1,4 @@
-import type { FieldWithPathClient } from '@ruya.sa/payload'
+import type { FieldWithPathClient } from 'payload'
 
 export const filterOutUploadFields = (fields: FieldWithPathClient[]): FieldWithPathClient[] => {
   // List of reserved upload field names

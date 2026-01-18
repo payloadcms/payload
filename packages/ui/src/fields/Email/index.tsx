@@ -3,9 +3,9 @@ import type {
   EmailFieldClientComponent,
   EmailFieldClientProps,
   EmailFieldValidation,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'

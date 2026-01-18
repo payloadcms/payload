@@ -27,7 +27,7 @@ import type {
   TextareaField,
   TextField,
   UploadField,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import type { BuildQueryArgs } from './queries/getBuildQueryPlugin.js'
 
@@ -108,7 +108,7 @@ export type MigrateUpArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
-   *  import { type MigrateUpArgs } from '@ruya.sa/db-mongodb'
+   *  import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
    *
    * export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
@@ -124,7 +124,7 @@ export type MigrateUpArgs = {
    * The MongoDB client session that you can use to execute MongoDB methods directly within the current transaction.
    * @example
    * ```ts
-   * import { type MigrateUpArgs } from '@ruya.sa/db-mongodb'
+   * import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
    *
    * export async function up({ session, payload, req }: MigrateUpArgs): Promise<void> {
    *   const { rows: posts } = await payload.db.collections.posts.collection.find({ session }).toArray()
@@ -139,7 +139,7 @@ export type MigrateDownArgs = {
    * To use the current transaction you must pass `req` to arguments
    * @example
    * ```ts
-   * import { type MigrateDownArgs } from '@ruya.sa/db-mongodb'
+   * import { type MigrateDownArgs } from '@payloadcms/db-mongodb'
    *
    * export async function down({ session, payload, req }: MigrateDownArgs): Promise<void> {
    *   const posts = await payload.find({ collection: 'posts', req })
@@ -155,7 +155,7 @@ export type MigrateDownArgs = {
    * The MongoDB client session that you can use to execute MongoDB methods directly within the current transaction.
    * @example
    * ```ts
-   * import { type MigrateDownArgs } from '@ruya.sa/db-mongodb'
+   * import { type MigrateDownArgs } from '@payloadcms/db-mongodb'
    *
    * export async function down({ session, payload, req }: MigrateDownArgs): Promise<void> {
    *   const { rows: posts } = await payload.db.collections.posts.collection.find({ session }).toArray()

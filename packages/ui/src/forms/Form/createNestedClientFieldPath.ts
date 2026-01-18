@@ -1,7 +1,7 @@
 'use client'
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 
-import { fieldAffectsData } from '@ruya.sa/payload/shared'
+import { fieldAffectsData } from 'payload/shared'
 
 export const createNestedClientFieldPath = (parentPath: string, field: ClientField): string => {
   if (parentPath) {

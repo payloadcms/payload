@@ -9,7 +9,7 @@ import type {
   Operation,
   PayloadRequest,
   SanitizedFieldPermissions,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export type RenderFieldArgs = {
   clientFieldSchemaMap?: ClientFieldSchemaMap

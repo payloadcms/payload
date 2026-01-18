@@ -1,6 +1,6 @@
 'use client'
 // TODO: abstract the `next/navigation` dependency out from this component
-import { collectionDefaults, isNumber } from '@ruya.sa/payload/shared'
+import { collectionDefaults, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'

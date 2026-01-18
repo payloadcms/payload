@@ -1,4 +1,4 @@
-import { type FlattenedField } from '@ruya.sa/payload'
+import { type FlattenedField } from 'payload'
 
 type FieldWithPresentational =
   | {

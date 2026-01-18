@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-sentry",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-sentry",
+  "version": "3.71.1",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -58,13 +58,13 @@
     "@sentry/types": "^8.33.1"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*",
+    "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

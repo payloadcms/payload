@@ -17,10 +17,10 @@ import type {
   SelectType,
   TabAsField,
   Validate,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from '@ruya.sa/payload'
+import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -29,7 +29,7 @@ import {
   fieldIsID,
   fieldIsLocalized,
   tabHasName,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 
 import type { RenderFieldMethod } from './types.js'
 

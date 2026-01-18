@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/graphql",
-  "version": "3.71.3",
+  "name": "@payloadcms/graphql",
+  "version": "3.71.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -59,14 +59,14 @@
     "tsx": "4.20.6"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
     "graphql-http": "^1.22.0",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

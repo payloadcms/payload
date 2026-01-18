@@ -1,4 +1,4 @@
-import { ar } from '@ruya.sa/translations/languages/ar'
+import { ar } from '@payloadcms/translations/languages/ar'
 
 import type { AccessResult } from '../../config/types.js'
 import type {

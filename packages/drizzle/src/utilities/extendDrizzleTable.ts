@@ -7,7 +7,7 @@
 import type { ColumnBuilderBase } from 'drizzle-orm'
 
 import { Table } from 'drizzle-orm'
-import { APIError } from '@ruya.sa/payload'
+import { APIError } from 'payload'
 
 const { Symbol: DrizzleSymbol } = Table as unknown as {
   Symbol: {

@@ -1,9 +1,9 @@
 'use client'
-import type { ClientTranslationKeys, I18nClient } from '@ruya.sa/translations'
-import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from '@ruya.sa/payload'
+import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
+import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from '@ruya.sa/payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 

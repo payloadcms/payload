@@ -1,5 +1,5 @@
 import type { DraggableSyntheticListeners } from '@dnd-kit/core'
-import type { Column } from '@ruya.sa/payload'
+import type { Column } from 'payload'
 import type { HTMLAttributes, Ref } from 'react'
 
 export type Props = {

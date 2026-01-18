@@ -1,6 +1,6 @@
-import type { DefaultCellComponentProps, Where } from '@ruya.sa/payload'
+import type { DefaultCellComponentProps, Where } from 'payload'
 
-import { toWords } from '@ruya.sa/payload/shared'
+import { toWords } from 'payload/shared'
 import React from 'react'
 
 /** @todo: improve this */

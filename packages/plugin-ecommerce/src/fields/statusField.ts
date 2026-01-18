@@ -1,4 +1,4 @@
-import type { SelectField } from '@ruya.sa/payload'
+import type { SelectField } from 'payload'
 
 export const statusOptions: SelectField['options'] = [
   {

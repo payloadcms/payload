@@ -2,7 +2,7 @@ export const migrationTemplate = `
 import {
   MigrateUpArgs,
   MigrateDownArgs,
-} from "@ruya.sa/db-mongodb";
+} from "@payloadcms/db-mongodb";
 
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
   // Migration code

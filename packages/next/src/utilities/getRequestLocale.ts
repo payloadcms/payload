@@ -1,7 +1,7 @@
-import type { Locale, PayloadRequest } from '@ruya.sa/payload'
+import type { Locale, PayloadRequest } from 'payload'
 
-import { upsertPreferences } from '@ruya.sa/ui/rsc'
-import { findLocaleFromCode } from '@ruya.sa/ui/shared'
+import { upsertPreferences } from '@payloadcms/ui/rsc'
+import { findLocaleFromCode } from '@payloadcms/ui/shared'
 
 import { getPreferences } from './getPreferences.js'
 

@@ -1,4 +1,4 @@
-import type { AcceptedLanguages, I18n, I18nClient } from '@ruya.sa/translations'
+import type { AcceptedLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type {
   ImportMap,
   Locale,
@@ -7,9 +7,9 @@ import type {
   SanitizedConfig,
   SanitizedPermissions,
   TypedUser,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { initI18n } from '@ruya.sa/translations'
+import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
 import {
   createLocalReq,
@@ -18,7 +18,7 @@ import {
   getPayload,
   getRequestLanguage,
   parseCookies,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'

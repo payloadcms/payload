@@ -23,7 +23,7 @@ export type Props = {
   readonly value: Value
 }
 
-import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from '@ruya.sa/payload'
+import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 

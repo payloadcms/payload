@@ -1,6 +1,6 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
-import { addDataAndFileToRequest } from '@ruya.sa/payload'
+import { addDataAndFileToRequest } from 'payload'
 
 import type { ImportPreviewResponse } from '../types.js'
 

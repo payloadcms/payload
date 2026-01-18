@@ -1,7 +1,7 @@
-import type { AcceptedLanguages } from '@ruya.sa/translations'
-import type { Config, Endpoint } from '@ruya.sa/payload'
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { Config, Endpoint } from 'payload'
 
-import { deepMergeSimple } from '@ruya.sa/payload/shared'
+import { deepMergeSimple } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types/index.js'

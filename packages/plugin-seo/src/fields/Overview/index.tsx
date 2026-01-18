@@ -1,4 +1,4 @@
-import type { UIField } from '@ruya.sa/payload'
+import type { UIField } from 'payload'
 
 interface FieldFunctionProps {
   descriptionOverrides?: {
@@ -53,7 +53,7 @@ export const OverviewField: FieldFunction = ({
             titleOverrides,
             titlePath,
           },
-          path: '@ruya.sa/plugin-seo/client#OverviewComponent',
+          path: '@payloadcms/plugin-seo/client#OverviewComponent',
         },
       },
     },

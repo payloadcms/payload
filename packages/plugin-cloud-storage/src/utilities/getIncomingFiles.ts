@@ -1,4 +1,4 @@
-import type { FileData, PayloadRequest } from '@ruya.sa/payload'
+import type { FileData, PayloadRequest } from 'payload'
 
 import type { File } from '../types.js'
 

@@ -1,4 +1,4 @@
-import type { CollectionSlug, PayloadRequest, SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { CollectionSlug, PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 export type Breadcrumb = {
   doc: string

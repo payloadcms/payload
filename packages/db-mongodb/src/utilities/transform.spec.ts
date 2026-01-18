@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { flattenAllFields, type Field, type SanitizedConfig } from '@ruya.sa/payload'
+import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
 import { Types } from 'mongoose'
 
 import { transform } from './transform.js'

@@ -6,7 +6,7 @@ import type {
   ClientGlobalConfig,
   CollectionSlug,
   GlobalSlug,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import React, { createContext, use, useCallback, useEffect, useMemo } from 'react'
 

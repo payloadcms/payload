@@ -1,4 +1,4 @@
-import type { CreateGlobalArgs } from '@ruya.sa/payload'
+import type { CreateGlobalArgs } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 

@@ -2,7 +2,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 
 export const TreeViewFeature = createServerFeature({
   feature: {
-    ClientFeature: '@ruya.sa/richtext-lexical/client#TreeViewFeatureClient',
+    ClientFeature: '@payloadcms/richtext-lexical/client#TreeViewFeatureClient',
   },
   key: 'treeView',
 })

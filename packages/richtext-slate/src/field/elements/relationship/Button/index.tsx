@@ -1,7 +1,7 @@
 'use client'
-import type { ListDrawerProps } from '@ruya.sa/ui'
+import type { ListDrawerProps } from '@payloadcms/ui'
 
-import { useListDrawer, useTranslation } from '@ruya.sa/ui'
+import { useListDrawer, useTranslation } from '@payloadcms/ui'
 import React, { Fragment, useCallback, useState } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
 

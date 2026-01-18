@@ -1,5 +1,5 @@
 'use client'
-import type { ClientBlock, ClientField, Labels } from '@ruya.sa/payload'
+import type { ClientBlock, ClientField, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'

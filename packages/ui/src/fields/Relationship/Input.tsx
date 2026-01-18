@@ -5,10 +5,10 @@ import type {
   PaginatedDocs,
   ValueWithRelation,
   Where,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { dequal } from 'dequal/lite'
-import { formatAdminURL, wordBoundariesRegex } from '@ruya.sa/payload/shared'
+import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 

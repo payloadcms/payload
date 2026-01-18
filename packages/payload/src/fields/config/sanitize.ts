@@ -1,4 +1,4 @@
-import { deepMergeSimple } from '@ruya.sa/translations/utilities'
+import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import { v4 as uuid } from 'uuid'
 
 import type {

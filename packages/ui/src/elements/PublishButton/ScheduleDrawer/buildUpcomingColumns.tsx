@@ -1,6 +1,6 @@
-import type { ClientConfig, Column } from '@ruya.sa/payload'
+import type { ClientConfig, Column } from 'payload'
 
-import { getTranslation, type I18nClient, type TFunction } from '@ruya.sa/translations'
+import { getTranslation, type I18nClient, type TFunction } from '@payloadcms/translations'
 import React from 'react'
 
 import type { UpcomingEvent } from './types.js'

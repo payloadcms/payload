@@ -1,6 +1,6 @@
 import type { asc, desc, SQL, Table } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
-import type { FlattenedField, Sort, Where } from '@ruya.sa/payload'
+import type { FlattenedField, Sort, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
 import type { QueryContext } from './parseParams.js'

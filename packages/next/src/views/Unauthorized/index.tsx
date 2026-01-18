@@ -1,7 +1,7 @@
-import type { AdminViewServerProps } from '@ruya.sa/payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { Button, Gutter } from '@ruya.sa/ui'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { Button, Gutter } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { CollectionConfig } from 'payload'
 import type { Readable } from 'stream'
 
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.js'

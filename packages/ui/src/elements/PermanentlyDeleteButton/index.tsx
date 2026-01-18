@@ -1,11 +1,11 @@
 'use client'
 
-import type { SanitizedCollectionConfig } from '@ruya.sa/payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'

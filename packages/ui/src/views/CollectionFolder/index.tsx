@@ -1,12 +1,12 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from '@ruya.sa/payload'
+import type { FolderListViewClientProps } from 'payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'

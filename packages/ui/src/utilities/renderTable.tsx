@@ -14,10 +14,10 @@ import type {
   SanitizedCollectionConfig,
   SanitizedFieldsPermissions,
   ViewTypes,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getTranslation, type I18nClient } from '@ruya.sa/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled } from '@ruya.sa/payload/shared'
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { fieldAffectsData, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'

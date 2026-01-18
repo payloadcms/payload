@@ -127,7 +127,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Full package name of the database adapter
    *
-   * @example @ruya.sa/db-postgres
+   * @example @payloadcms/db-postgres
    */
   packageName: string
   /**

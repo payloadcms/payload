@@ -1,7 +1,7 @@
 'use client'
-import type { TextFieldDiffClientComponent } from '@ruya.sa/payload'
+import type { TextFieldDiffClientComponent } from 'payload'
 
-import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@ruya.sa/ui'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
 
 import './index.scss'
 

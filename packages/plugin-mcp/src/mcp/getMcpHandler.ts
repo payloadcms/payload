@@ -2,7 +2,7 @@ import type { JSONSchema4 } from 'json-schema'
 
 import { createMcpHandler } from '@vercel/mcp-adapter'
 import { join } from 'path'
-import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from '@ruya.sa/payload'
+import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 

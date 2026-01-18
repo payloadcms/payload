@@ -1,6 +1,6 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { HandleUpload } from '@ruya.sa/plugin-cloud-storage/types'
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
+import type { CollectionConfig } from 'payload'
 
 import { AbortController } from '@azure/abort-controller'
 import fs from 'fs'

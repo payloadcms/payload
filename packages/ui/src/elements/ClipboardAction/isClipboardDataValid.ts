@@ -1,6 +1,6 @@
-import type { ClientBlock, ClientField } from '@ruya.sa/payload'
+import type { ClientBlock, ClientField } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields } from '@ruya.sa/payload/shared'
+import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
 
 import type { ClipboardPasteActionValidateArgs } from './types.js'
 

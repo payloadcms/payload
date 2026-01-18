@@ -1,4 +1,4 @@
-import type { TFunction } from '@ruya.sa/translations'
+import type { TFunction } from '@payloadcms/translations'
 import type {
   BasePayload,
   ClientWidget,
@@ -8,9 +8,9 @@ import type {
   Widget,
   WidgetInstance,
   WidgetServerProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'

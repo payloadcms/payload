@@ -1,4 +1,4 @@
-import type { DayPickerProps, SharedProps, TimePickerProps } from '@ruya.sa/payload'
+import type { DayPickerProps, SharedProps, TimePickerProps } from 'payload'
 
 export type Props = {
   id?: string

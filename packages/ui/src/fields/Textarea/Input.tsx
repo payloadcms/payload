@@ -1,7 +1,7 @@
 'use client'
 import type { CSSProperties } from 'react'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { TextAreaInputProps } from './types.js'

@@ -1,5 +1,5 @@
 'use client'
-import type { Row } from '@ruya.sa/payload'
+import type { Row } from 'payload'
 
 export const extractRowsAndCollapsedIDs = ({
   collapsed,

@@ -8,10 +8,10 @@ import type {
   JsonObject,
   SanitizedDocumentPermissions,
   UploadEdits,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'

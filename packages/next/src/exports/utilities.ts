@@ -10,12 +10,12 @@ import {
   headersWithCors as _headersWithCors,
   mergeHeaders as _mergeHeaders,
   sanitizeLocales as _sanitizeLocales,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 /**
  * Use:
  * ```ts
- * import { mergeHeaders } from '@ruya.sa/payload'
+ * import { mergeHeaders } from 'payload'
  * ```
  * @deprecated
  */
@@ -25,7 +25,7 @@ export const mergeHeaders = _mergeHeaders
  * @deprecated
  * Use:
  * ```ts
- * import { headersWithCors } from '@ruya.sa/payload'
+ * import { headersWithCors } from 'payload'
  * ```
  */
 export const headersWithCors = _headersWithCors
@@ -34,7 +34,7 @@ export const headersWithCors = _headersWithCors
  * @deprecated
  * Use:
  * ```ts
- * import { createPayloadRequest } from '@ruya.sa/payload'
+ * import { createPayloadRequest } from 'payload'
  * ```
  */
 export const createPayloadRequest = _createPayloadRequest
@@ -43,7 +43,7 @@ export const createPayloadRequest = _createPayloadRequest
  * @deprecated
  * Use:
  * ```ts
- * import { addDataAndFileToRequest } from '@ruya.sa/payload'
+ * import { addDataAndFileToRequest } from 'payload'
  * ```
  */
 export const addDataAndFileToRequest = _addDataAndFileToRequest
@@ -52,7 +52,7 @@ export const addDataAndFileToRequest = _addDataAndFileToRequest
  * @deprecated
  * Use:
  * ```ts
- * import { sanitizeLocales } from '@ruya.sa/payload'
+ * import { sanitizeLocales } from 'payload'
  * ```
  */
 export const sanitizeLocales = _sanitizeLocales
@@ -61,7 +61,7 @@ export const sanitizeLocales = _sanitizeLocales
  * @deprecated
  * Use:
  * ```ts
- * import { addLocalesToRequestFromData } from '@ruya.sa/payload'
+ * import { addLocalesToRequestFromData } from 'payload'
  * ```
  */
 export const addLocalesToRequestFromData = _addLocalesToRequestFromData

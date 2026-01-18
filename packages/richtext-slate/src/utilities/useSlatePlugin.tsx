@@ -1,6 +1,6 @@
 import type { Editor } from 'slate'
 
-import { useAddClientFunction } from '@ruya.sa/ui'
+import { useAddClientFunction } from '@payloadcms/ui'
 
 import { useSlateProps } from './SlatePropsProvider.js'
 

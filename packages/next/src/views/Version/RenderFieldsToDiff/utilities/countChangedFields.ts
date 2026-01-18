@@ -1,6 +1,6 @@
-import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } from '@ruya.sa/payload'
+import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } from 'payload'
 
-import { fieldShouldBeLocalized, groupHasName } from '@ruya.sa/payload/shared'
+import { fieldShouldBeLocalized, groupHasName } from 'payload/shared'
 
 import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'

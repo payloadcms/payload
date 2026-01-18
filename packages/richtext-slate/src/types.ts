@@ -4,7 +4,7 @@ import type {
   PayloadComponent,
   RichTextFieldClientProps,
   SanitizedConfig,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type { Editor } from 'slate'
 
 /**

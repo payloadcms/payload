@@ -1,6 +1,6 @@
-import type { Access, Where } from '@ruya.sa/payload'
+import type { Access, Where } from 'payload'
 
-import { combineWhereConstraints } from '@ruya.sa/payload/shared'
+import { combineWhereConstraints } from 'payload/shared'
 
 /**
  * Combines multiple access functions with OR logic.

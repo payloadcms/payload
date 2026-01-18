@@ -8,7 +8,7 @@ export const ul: RichTextCustomElement = {
     clientProps: {
       format: name,
     },
-    path: '@ruya.sa/richtext-slate/client#ULElementButton',
+    path: '@payloadcms/richtext-slate/client#ULElementButton',
   },
-  Element: '@ruya.sa/richtext-slate/client#UnorderedListElement',
+  Element: '@payloadcms/richtext-slate/client#UnorderedListElement',
 }

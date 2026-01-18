@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '@ruya.sa/payload'
+import type { CollectionConfig } from 'payload'
 
 import { existsSync } from 'fs'
 import { join } from 'path'

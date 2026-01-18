@@ -109,7 +109,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
            * same package.
            *
            * Example:
-           * - @ruya.sa/richtext-lexical (in bundle) -> installs qs-esm (bundled because of importer)
+           * - @payloadcms/richtext-lexical (in bundle) -> installs qs-esm (bundled because of importer)
            * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
            * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
            *
@@ -118,28 +118,28 @@ export const withPayload = (nextConfig = {}, options = {}) => {
            */
           [
             'payload',
-            '@ruya.sa/db-mongodb',
-            '@ruya.sa/db-postgres',
-            '@ruya.sa/db-sqlite',
-            '@ruya.sa/db-vercel-postgres',
-            '@ruya.sa/db-d1-sqlite',
-            '@ruya.sa/drizzle',
-            '@ruya.sa/email-nodemailer',
-            '@ruya.sa/email-resend',
-            '@ruya.sa/graphql',
-            '@ruya.sa/payload-cloud',
-            '@ruya.sa/plugin-redirects',
+            '@payloadcms/db-mongodb',
+            '@payloadcms/db-postgres',
+            '@payloadcms/db-sqlite',
+            '@payloadcms/db-vercel-postgres',
+            '@payloadcms/db-d1-sqlite',
+            '@payloadcms/drizzle',
+            '@payloadcms/email-nodemailer',
+            '@payloadcms/email-resend',
+            '@payloadcms/graphql',
+            '@payloadcms/payload-cloud',
+            '@payloadcms/plugin-redirects',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
             // see: https://github.com/vercel/next.js/discussions/76991
-            //'@ruya.sa/plugin-cloud-storage',
-            //'@ruya.sa/plugin-sentry',
-            //'@ruya.sa/plugin-stripe',
-            // @ruya.sa/richtext-lexical
-            //'@ruya.sa/storage-azure',
-            //'@ruya.sa/storage-gcs',
-            //'@ruya.sa/storage-s3',
-            //'@ruya.sa/storage-uploadthing',
-            //'@ruya.sa/storage-vercel-blob',
+            //'@payloadcms/plugin-cloud-storage',
+            //'@payloadcms/plugin-sentry',
+            //'@payloadcms/plugin-stripe',
+            // @payloadcms/richtext-lexical
+            //'@payloadcms/storage-azure',
+            //'@payloadcms/storage-gcs',
+            //'@payloadcms/storage-s3',
+            //'@payloadcms/storage-uploadthing',
+            //'@payloadcms/storage-vercel-blob',
           ]
         : []),
     ],
@@ -195,7 +195,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
              * ./node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib/index.js
              * ./node_modules/.pnpm/mongoose@8.15.1/node_modules/mongoose/lib/index.js
              * ./node_modules/.pnpm/mongoose@8.15.1/node_modules/mongoose/index.js
-             * ./node_modules/.pnpm/@payloadcms+db-mongodb@3.64.0_payload@3.64.0_graphql@16.12.0_typescript@5.7.3_/node_modules/@ruya.sa/db-mongodb/dist/index.js
+             * ./node_modules/.pnpm/@payloadcms+db-mongodb@3.64.0_payload@3.64.0_graphql@16.12.0_typescript@5.7.3_/node_modules/@payloadcms/db-mongodb/dist/index.js
              * ./src/payload.config.ts
              * ./src/app/my-route/route.ts
              *

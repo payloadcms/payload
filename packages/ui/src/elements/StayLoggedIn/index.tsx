@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { OnCancel } from '../ConfirmationModal/index.js'

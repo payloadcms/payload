@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
 /**
  * @deprecated - will be removed in 4.0

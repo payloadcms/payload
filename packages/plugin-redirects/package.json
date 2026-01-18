@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-redirects",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-redirects",
+  "version": "3.71.1",
   "description": "Redirects plugin for Payload",
   "keywords": [
     "payload",
@@ -57,14 +57,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@ruya.sa/translations": "workspace:*",
-    "@ruya.sa/payload": "workspace:*"
+    "@payloadcms/translations": "workspace:*",
+    "payload": "workspace:*"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*"
+    "@payloadcms/eslint-config": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

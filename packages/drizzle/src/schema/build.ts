@@ -1,6 +1,6 @@
-import type { FlattenedField, SanitizedCompoundIndex } from '@ruya.sa/payload'
+import type { FlattenedField, SanitizedCompoundIndex } from 'payload'
 
-import { InvalidConfiguration } from '@ruya.sa/payload'
+import { InvalidConfiguration } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type {

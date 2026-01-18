@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '@ruya.sa/payload'
+import type { PayloadRequest } from 'payload'
 
 import { parse } from 'csv-parse'
 

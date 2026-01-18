@@ -36,7 +36,7 @@ export const HeadingFeature = createServerFeature<
     enabledHeadingSizes.sort()
 
     return {
-      ClientFeature: '@ruya.sa/richtext-lexical/client#HeadingFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',
       clientFeatureProps: props,
       i18n,
       markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],

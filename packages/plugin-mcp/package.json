@@ -1,6 +1,6 @@
 {
-  "name": "@ruya.sa/plugin-mcp",
-  "version": "3.71.3",
+  "name": "@payloadcms/plugin-mcp",
+  "version": "3.71.1",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
@@ -55,11 +55,11 @@
     "zod": "^3.25.50"
   },
   "devDependencies": {
-    "@ruya.sa/eslint-config": "workspace:*",
-    "@ruya.sa/payload": "workspace:*"
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
   },
   "peerDependencies": {
-    "@ruya.sa/payload": "workspace:*"
+    "payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

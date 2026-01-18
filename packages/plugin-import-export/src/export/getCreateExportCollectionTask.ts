@@ -1,4 +1,4 @@
-import type { Config, TaskConfig } from '@ruya.sa/payload'
+import type { Config, TaskConfig } from 'payload'
 
 import type { Export } from './createExport.js'
 

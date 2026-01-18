@@ -4,13 +4,13 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@ruya.sa/plugin-cloud-storage/types'
-import type { Config, Field, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
+} from '@payloadcms/plugin-cloud-storage/types'
+import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
 import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
-import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
-import { initClientUploads } from '@ruya.sa/plugin-cloud-storage/utilities'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import { UTApi } from 'uploadthing/server'
 
 import { generateURL } from './generateURL.js'
@@ -77,7 +77,7 @@ export const uploadthingStorage: UploadthingPlugin =
     const isPluginDisabled = uploadthingStorageOptions.enabled === false
 
     initClientUploads({
-      clientHandler: '@ruya.sa/storage-uploadthing/client#UploadthingClientUploadHandler',
+      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
       collections: uploadthingStorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(uploadthingStorageOptions.clientUploads),

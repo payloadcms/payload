@@ -10,11 +10,11 @@ import type {
   UploadFieldClient,
   UploadField as UploadFieldType,
   ValueWithRelation,
-} from '@ruya.sa/payload'
+} from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 

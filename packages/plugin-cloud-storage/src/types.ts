@@ -6,7 +6,7 @@ import type {
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 export interface File {
   buffer: Buffer

@@ -1,4 +1,4 @@
-import type { SelectFieldClient } from '@ruya.sa/payload'
+import type { SelectFieldClient } from 'payload'
 
 export type Props = {
   id: string

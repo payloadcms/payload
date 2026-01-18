@@ -1,4 +1,4 @@
-import type { CollectionSlug, PayloadTypesShape, TypedLocale, Where } from '@ruya.sa/payload'
+import type { CollectionSlug, PayloadTypesShape, TypedLocale, Where } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 

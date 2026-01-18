@@ -1,6 +1,6 @@
 /**
  * Test predefined migration for testing plugin-style module specifier imports.
- * This is used in integration tests to verify that external packages (without @ruya.sa/db-* prefix)
+ * This is used in integration tests to verify that external packages (without @payloadcms/db-* prefix)
  * can export predefined migrations via their package.json exports.
  *
  * This tests the second code path in getPredefinedMigration.ts (lines 56-72)

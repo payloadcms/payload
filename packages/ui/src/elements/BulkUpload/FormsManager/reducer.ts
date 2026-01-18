@@ -1,4 +1,4 @@
-import type { FormState, UploadEdits } from '@ruya.sa/payload'
+import type { FormState, UploadEdits } from 'payload'
 
 import { v4 as uuidv4 } from 'uuid'
 

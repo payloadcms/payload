@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldHook, ImageSize } from '@ruya.sa/payload'
+import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 

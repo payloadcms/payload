@@ -1,13 +1,13 @@
 'use client'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   PopupList,
   Translation,
   useConfig,
   useDocumentDrawer,
   useTranslation,
-} from '@ruya.sa/ui'
+} from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import type {

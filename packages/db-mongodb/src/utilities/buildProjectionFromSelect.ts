@@ -4,14 +4,14 @@ import type {
   SelectIncludeType,
   SelectMode,
   SelectType,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
   fieldShouldBeLocalized,
   getSelectMode,
-} from '@ruya.sa/payload/shared'
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 

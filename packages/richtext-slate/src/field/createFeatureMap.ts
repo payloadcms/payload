@@ -1,4 +1,4 @@
-import type { ClientField } from '@ruya.sa/payload'
+import type { ClientField } from 'payload'
 
 import type { EnabledFeatures } from './types.js'
 

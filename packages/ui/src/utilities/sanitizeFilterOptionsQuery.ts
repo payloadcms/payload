@@ -1,4 +1,4 @@
-import type { Where } from '@ruya.sa/payload'
+import type { Where } from 'payload'
 
 export const sanitizeFilterOptionsQuery = (query: Where): Where => {
   for (const key in query) {

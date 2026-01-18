@@ -1,5 +1,5 @@
 import type { Storage } from '@google-cloud/storage'
-import type { HandleDelete } from '@ruya.sa/plugin-cloud-storage/types'
+import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 
 import path from 'path'
 

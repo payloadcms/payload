@@ -4,7 +4,7 @@ import type {
   OptionObject,
   SelectFieldClientComponent,
   SelectFieldClientProps,
-} from '@ruya.sa/payload'
+} from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 

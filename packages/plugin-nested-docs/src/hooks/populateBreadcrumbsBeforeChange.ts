@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook } from '@ruya.sa/payload'
+import type { CollectionBeforeChangeHook } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 

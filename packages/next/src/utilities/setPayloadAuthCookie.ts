@@ -1,7 +1,7 @@
-import type { Auth } from '@ruya.sa/payload'
+import type { Auth } from 'payload'
 
 import { cookies as getCookies } from 'next/headers.js'
-import { generatePayloadCookie } from '@ruya.sa/payload'
+import { generatePayloadCookie } from 'payload'
 
 type SetPayloadAuthCookieArgs = {
   authConfig: Auth

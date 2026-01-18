@@ -3,7 +3,7 @@ import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
-import { useEditDepth } from '@ruya.sa/ui'
+import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 

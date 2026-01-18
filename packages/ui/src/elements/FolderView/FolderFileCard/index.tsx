@@ -1,9 +1,9 @@
 'use client'
 
-import type { FolderOrDocument } from '@ruya.sa/payload/shared'
+import type { FolderOrDocument } from 'payload/shared'
 
 import { useDroppable } from '@dnd-kit/core'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'

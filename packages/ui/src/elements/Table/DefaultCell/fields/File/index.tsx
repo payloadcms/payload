@@ -4,9 +4,9 @@ import type {
   DefaultCellComponentProps,
   TextFieldClient,
   UploadFieldClient,
-} from '@ruya.sa/payload'
+} from 'payload'
 
-import { getBestFitFromSizes, isImage } from '@ruya.sa/payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import './index.scss'

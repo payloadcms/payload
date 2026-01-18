@@ -1,11 +1,11 @@
 'use client'
-import type { GroupFieldDiffClientComponent } from '@ruya.sa/payload'
+import type { GroupFieldDiffClientComponent } from 'payload'
 
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 
 import './index.scss'
 
-import { useTranslation } from '@ruya.sa/ui'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'

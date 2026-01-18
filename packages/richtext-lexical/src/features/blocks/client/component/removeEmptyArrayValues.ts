@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from '@ruya.sa/payload'
+import type { FormState } from 'payload'
 
 /**
  * By default, if an array field is empty, it will be included in the form state with a value of 0.

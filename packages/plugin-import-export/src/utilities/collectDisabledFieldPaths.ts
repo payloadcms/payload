@@ -1,7 +1,7 @@
-import type { Field } from '@ruya.sa/payload'
+import type { Field } from 'payload'
 
-import { traverseFields } from '@ruya.sa/payload'
-import { fieldAffectsData } from '@ruya.sa/payload/shared'
+import { traverseFields } from 'payload'
+import { fieldAffectsData } from 'payload/shared'
 
 /**
  * Recursively traverses a Payload field schema to collect all field paths

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs } from '@ruya.sa/payload'
+import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import React, { useCallback } from 'react'
 

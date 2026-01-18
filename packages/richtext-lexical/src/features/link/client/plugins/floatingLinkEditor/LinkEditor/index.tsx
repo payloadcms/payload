@@ -1,11 +1,11 @@
 'use client'
 import type { ElementNode, LexicalNode } from 'lexical'
-import type { Data, FormState } from '@ruya.sa/payload'
+import type { Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
-import { getTranslation } from '@ruya.sa/translations'
+import { getTranslation } from '@payloadcms/translations'
 import {
   CloseMenuIcon,
   EditIcon,
@@ -15,8 +15,8 @@ import {
   useEditDepth,
   useLocale,
   useTranslation,
-} from '@ruya.sa/ui'
-import { requests } from '@ruya.sa/ui/shared'
+} from '@payloadcms/ui'
+import { requests } from '@payloadcms/ui/shared'
 import {
   $getSelection,
   $isLineBreakNode,
@@ -27,7 +27,7 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'

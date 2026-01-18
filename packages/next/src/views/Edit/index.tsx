@@ -1,8 +1,8 @@
 'use client'
 
-import type { DocumentViewClientProps } from '@ruya.sa/payload'
+import type { DocumentViewClientProps } from 'payload'
 
-import { DefaultEditView } from '@ruya.sa/ui'
+import { DefaultEditView } from '@payloadcms/ui'
 import React from 'react'
 
 export const EditView: React.FC<DocumentViewClientProps> = (props) => {

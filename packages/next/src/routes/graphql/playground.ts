@@ -1,6 +1,6 @@
 import { renderPlaygroundPage } from 'graphql-playground-html'
-import { createPayloadRequest, type SanitizedConfig } from '@ruya.sa/payload'
-import { formatAdminURL } from '@ruya.sa/payload/shared'
+import { createPayloadRequest, type SanitizedConfig } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 export const GET = (config: Promise<SanitizedConfig>) => async (request: Request) => {
   const req = await createPayloadRequest({
