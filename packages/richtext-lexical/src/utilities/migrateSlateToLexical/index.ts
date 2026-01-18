@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { CollectionConfig, Field, GlobalConfig, Payload } from 'payload'
+import type { CollectionConfig, Field, GlobalConfig, Payload } from '@ruya.sa/payload'
 
 import { migrateDocumentFieldsRecursively } from './migrateDocumentFieldsRecursively.js'
 

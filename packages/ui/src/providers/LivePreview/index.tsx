@@ -1,5 +1,5 @@
 'use client'
-import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from 'payload'
+import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from '@ruya.sa/payload'
 
 import { DndContext } from '@dnd-kit/core'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'

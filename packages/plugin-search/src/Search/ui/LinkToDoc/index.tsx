@@ -1,4 +1,4 @@
-import type { UIField } from 'payload'
+import type { UIField } from '@ruya.sa/payload'
 
 import React from 'react'
 

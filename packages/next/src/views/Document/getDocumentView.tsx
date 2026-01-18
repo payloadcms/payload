@@ -5,7 +5,7 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type React from 'react'
 
 import type { ViewToRender } from './index.js'

@@ -2,6 +2,6 @@ import type { RichTextCustomElement } from '../../../types.js'
 
 export const textAlign: RichTextCustomElement = {
   name: 'alignment',
-  Button: '@payloadcms/richtext-slate/client#TextAlignElementButton',
+  Button: '@ruya.sa/richtext-slate/client#TextAlignElementButton',
   Element: false,
 }

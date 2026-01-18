@@ -1,5 +1,5 @@
 'use client'
-import type { Column, SanitizedCollectionConfig } from 'payload'
+import type { Column, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import {
   LoadingOverlayToggle,
@@ -8,7 +8,7 @@ import {
   Table,
   useListQuery,
   useTranslation,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import { useSearchParams } from 'next/navigation.js'
 import React from 'react'
 

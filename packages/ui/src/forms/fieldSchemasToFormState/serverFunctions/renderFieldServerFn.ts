@@ -4,7 +4,7 @@ import {
   type FieldState,
   type ServerFunction,
   UnauthorizedError,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { getClientConfig } from '../../../utilities/getClientConfig.js'
 import { getClientSchemaMap } from '../../../utilities/getClientSchemaMap.js'

@@ -1,5 +1,5 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'

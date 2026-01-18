@@ -1,4 +1,4 @@
-import type { Validate } from 'payload'
+import type { Validate } from '@ruya.sa/payload'
 
 type Props = {
   productsCollectionSlug?: string

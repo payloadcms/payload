@@ -1,11 +1,11 @@
 'use client'
-import type { FormProps, UserWithToken } from '@payloadcms/ui'
+import type { FormProps, UserWithToken } from '@ruya.sa/ui'
 import type {
   DocumentPreferences,
   FormState,
   LoginWithUsernameOptions,
   SanitizedDocumentPermissions,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import {
   ConfirmPasswordField,
@@ -18,9 +18,9 @@ import {
   useConfig,
   useServerFunctions,
   useTranslation,
-} from '@payloadcms/ui'
-import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/shared'
-import { formatAdminURL } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { abortAndIgnore, handleAbortRef } from '@ruya.sa/ui/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{

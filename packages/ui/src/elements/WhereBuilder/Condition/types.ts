@@ -1,4 +1,4 @@
-import type { Operator, Where } from 'payload'
+import type { Operator, Where } from '@ruya.sa/payload'
 
 import type { Action, ReducedField } from '../types.js'
 

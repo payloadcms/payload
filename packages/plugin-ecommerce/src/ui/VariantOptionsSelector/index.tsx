@@ -1,6 +1,6 @@
-import type { SelectFieldServerProps } from 'payload'
+import type { SelectFieldServerProps } from '@ruya.sa/payload'
 
-import { FieldLabel } from '@payloadcms/ui'
+import { FieldLabel } from '@ruya.sa/ui'
 
 import { ErrorBox } from './ErrorBox.js'
 import './index.css'

@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedField } from '@ruya.sa/payload'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { RowToInsert } from './types.js'

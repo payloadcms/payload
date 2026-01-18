@@ -5,7 +5,7 @@ export function checkPayloadDependencies() {
   const dependencies = [...PAYLOAD_PACKAGE_LIST]
 
   if (process.env.PAYLOAD_CI_DEPENDENCY_CHECKER !== 'true') {
-    dependencies.push('@payloadcms/plugin-sentry')
+    dependencies.push('@ruya.sa/plugin-sentry')
   }
 
   // First load. First check if there are mismatching dependency versions of payload packages

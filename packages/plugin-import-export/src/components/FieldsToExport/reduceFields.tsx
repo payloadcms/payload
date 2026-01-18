@@ -1,6 +1,6 @@
-import type { ClientField } from 'payload'
+import type { ClientField } from '@ruya.sa/payload'
 
-import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields } from '@ruya.sa/payload/shared'
 import React, { Fragment } from 'react'
 
 const createNestedClientFieldPath = (parentPath: string, field: ClientField): string => {

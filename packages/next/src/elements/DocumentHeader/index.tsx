@@ -3,9 +3,9 @@ import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { Gutter, RenderTitle } from '@payloadcms/ui'
+import { Gutter, RenderTitle } from '@ruya.sa/ui'
 import React from 'react'
 
 import { DocumentTabs } from './Tabs/index.js'

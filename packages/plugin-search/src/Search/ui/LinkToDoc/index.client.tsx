@@ -1,7 +1,7 @@
 'use client'
 
-import { CopyToClipboard, Link, useConfig, useField } from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+import { CopyToClipboard, Link, useConfig, useField } from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 export const LinkToDocClient: React.FC = () => {

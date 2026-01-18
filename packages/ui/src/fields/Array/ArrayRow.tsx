@@ -5,9 +5,9 @@ import type {
   ClientField,
   Row,
   SanitizedFieldPermissions,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'

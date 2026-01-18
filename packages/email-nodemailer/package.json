@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/email-nodemailer",
-  "version": "3.71.1",
+  "name": "@ruya.sa/email-nodemailer",
+  "version": "3.71.3",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -46,10 +46,10 @@
   },
   "devDependencies": {
     "@types/nodemailer": "7.0.2",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

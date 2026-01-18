@@ -1,6 +1,6 @@
 'use client'
 
-import type { SelectFieldClientComponent } from 'payload'
+import type { SelectFieldClientComponent } from '@ruya.sa/payload'
 import type { ReactNode } from 'react'
 
 import {
@@ -10,7 +10,7 @@ import {
   useDocumentInfo,
   useField,
   useListQuery,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'

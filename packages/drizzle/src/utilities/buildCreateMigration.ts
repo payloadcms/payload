@@ -1,9 +1,9 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
-import type { CreateMigration } from 'payload'
+import type { CreateMigration } from '@ruya.sa/payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration, writeMigrationIndex } from 'payload'
+import { getPredefinedMigration, writeMigrationIndex } from '@ruya.sa/payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter } from '../types.js'

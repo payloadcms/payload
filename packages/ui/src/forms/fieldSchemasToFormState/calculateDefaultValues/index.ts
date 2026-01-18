@@ -5,7 +5,7 @@ import type {
   SelectMode,
   SelectType,
   TypedUser,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { iterateFields } from './iterateFields.js'
 

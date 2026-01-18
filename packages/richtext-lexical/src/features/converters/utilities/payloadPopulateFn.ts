@@ -1,4 +1,4 @@
-import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
+import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from '@ruya.sa/payload'
 
 import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 

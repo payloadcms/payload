@@ -5,11 +5,11 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+} from '@ruya.sa/plugin-cloud-storage/types'
+import type { Config, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
 
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
+import { initClientUploads } from '@ruya.sa/plugin-cloud-storage/utilities'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
@@ -92,7 +92,7 @@ export const azureStorage: AzureStoragePlugin =
     const isPluginDisabled = azureStorageOptions.enabled === false
 
     initClientUploads({
-      clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+      clientHandler: '@ruya.sa/storage-azure/client#AzureClientUploadHandler',
       collections: azureStorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),

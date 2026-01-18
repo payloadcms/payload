@@ -1,5 +1,5 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 import type { Action, Option } from './types.js'
 

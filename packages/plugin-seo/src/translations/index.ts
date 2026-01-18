@@ -1,4 +1,4 @@
-import type { GenericTranslationsObject, NestedKeysStripped } from '@payloadcms/translations'
+import type { GenericTranslationsObject, NestedKeysStripped } from '@ruya.sa/translations'
 
 import { ar } from './ar.js'
 import { az } from './az.js'

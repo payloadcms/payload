@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { ClientUser } from '@ruya.sa/payload'
 
 import React, { useState } from 'react'
 

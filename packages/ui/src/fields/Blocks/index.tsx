@@ -1,7 +1,7 @@
 'use client'
-import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
+import type { BlocksFieldClientComponent, ClientBlock } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 

@@ -3,7 +3,7 @@ import type {
   FilterOptionsResult,
   ListQuery,
   SanitizedCollectionConfig,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 

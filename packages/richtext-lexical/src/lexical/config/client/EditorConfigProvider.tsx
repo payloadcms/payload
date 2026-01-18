@@ -4,7 +4,7 @@ import type { LexicalEditor } from 'lexical'
 import type { MarkRequired } from 'ts-essentials'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useEditDepth } from '@payloadcms/ui'
+import { useEditDepth } from '@ruya.sa/ui'
 import * as React from 'react'
 import { createContext, use, useMemo, useRef, useState } from 'react'
 

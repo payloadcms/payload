@@ -1,4 +1,4 @@
-import type { Sort, Where } from 'payload'
+import type { Sort, Where } from '@ruya.sa/payload'
 
 import { stringify } from 'qs-esm'
 

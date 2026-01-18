@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, SelectField } from 'payload'
+import type { CollectionConfig, Field, SelectField } from '@ruya.sa/payload'
 
 import type { redirectTypes } from './redirectTypes.js'
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]

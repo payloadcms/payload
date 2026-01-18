@@ -1,6 +1,6 @@
 'use client'
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { formatAdminURL } from 'payload/shared'
+import { createClientUploadHandler } from '@ruya.sa/plugin-cloud-storage/client'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({

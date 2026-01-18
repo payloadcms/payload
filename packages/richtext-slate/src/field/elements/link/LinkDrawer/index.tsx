@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
+import type { FormProps } from '@ruya.sa/ui'
 
 import {
   Drawer,
@@ -13,7 +13,7 @@ import {
   useHotkey,
   useServerFunctions,
   useTranslation,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import React, { useCallback, useRef } from 'react'
 
 import type { Props } from './types.js'

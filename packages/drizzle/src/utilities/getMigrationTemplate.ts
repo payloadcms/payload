@@ -1,4 +1,4 @@
-import type { MigrationTemplateArgs } from 'payload'
+import type { MigrationTemplateArgs } from '@ruya.sa/payload'
 
 export const indent = (text: string) =>
   text

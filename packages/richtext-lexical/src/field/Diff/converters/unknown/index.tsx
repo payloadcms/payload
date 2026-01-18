@@ -1,7 +1,7 @@
 import type { LexicalNode } from 'lexical'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from '@ruya.sa/payload'
 
-import { type I18nClient } from '@payloadcms/translations'
+import { type I18nClient } from '@ruya.sa/translations'
 
 import './index.scss'
 

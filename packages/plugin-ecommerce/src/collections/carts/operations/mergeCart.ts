@@ -1,4 +1,4 @@
-import type { CollectionSlug, DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
+import type { CollectionSlug, DefaultDocumentIDType, Payload, PayloadRequest } from '@ruya.sa/payload'
 
 import type { CartItemData, CartOperationResult } from './types.js'
 

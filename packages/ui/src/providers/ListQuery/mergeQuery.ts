@@ -1,4 +1,4 @@
-import type { ListQuery } from 'payload'
+import type { ListQuery } from '@ruya.sa/payload'
 
 export const mergeQuery = (
   currentQuery: ListQuery,

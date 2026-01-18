@@ -1,4 +1,4 @@
-import { initI18n } from '@payloadcms/translations'
+import { initI18n } from '@ruya.sa/translations'
 import * as qs from 'qs-esm'
 
 import type { SanitizedConfig } from '../config/types.js'

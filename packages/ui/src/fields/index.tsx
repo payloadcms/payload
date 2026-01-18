@@ -6,7 +6,7 @@ import type {
   GenericErrorProps,
   GenericLabelProps,
   HiddenFieldProps,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type React from 'react'
 
 import type { ConfirmPasswordFieldProps } from './ConfirmPassword/index.js'

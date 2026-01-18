@@ -1,11 +1,11 @@
-import type { PayloadRequest, RelationshipField, TypeWithID } from 'payload'
+import type { PayloadRequest, RelationshipField, TypeWithID } from '@ruya.sa/payload'
 
 import {
   fieldAffectsData,
   fieldIsPresentationalOnly,
   fieldShouldBeLocalized,
   flattenTopLevelFields,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 
 import type { RelationshipValue } from './index.js'
 

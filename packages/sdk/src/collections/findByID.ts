@@ -4,7 +4,7 @@ import type {
   PayloadTypesShape,
   SelectType,
   TypedLocale,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'

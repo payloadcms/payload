@@ -5,12 +5,12 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+} from '@ruya.sa/plugin-cloud-storage/types'
+import type { Config, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
 
 import { Storage } from '@google-cloud/storage'
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
+import { initClientUploads } from '@ruya.sa/plugin-cloud-storage/utilities'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
@@ -89,7 +89,7 @@ export const gcsStorage: GcsStoragePlugin =
     const isPluginDisabled = gcsStorageOptions.enabled === false
 
     initClientUploads({
-      clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
+      clientHandler: '@ruya.sa/storage-gcs/client#GcsClientUploadHandler',
       collections: gcsStorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(gcsStorageOptions.clientUploads),

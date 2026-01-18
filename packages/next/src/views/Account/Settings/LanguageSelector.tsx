@@ -1,9 +1,9 @@
 'use client'
-import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ReactSelectOption } from '@payloadcms/ui'
-import type { LanguageOptions } from 'payload'
+import type { AcceptedLanguages } from '@ruya.sa/translations'
+import type { ReactSelectOption } from '@ruya.sa/ui'
+import type { LanguageOptions } from '@ruya.sa/payload'
 
-import { ReactSelect, useTranslation } from '@payloadcms/ui'
+import { ReactSelect, useTranslation } from '@ruya.sa/ui'
 import React from 'react'
 
 export const LanguageSelector: React.FC<{

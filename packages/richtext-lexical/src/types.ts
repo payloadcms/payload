@@ -10,7 +10,7 @@ import type {
   SanitizedConfig,
   ServerFieldBase,
   StaticLabel,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type {
   BaseClientFeatureProps,

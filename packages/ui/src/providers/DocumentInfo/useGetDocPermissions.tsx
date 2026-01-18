@@ -1,6 +1,6 @@
-import type { Data, SanitizedDocumentPermissions, SanitizedPermissions } from 'payload'
+import type { Data, SanitizedDocumentPermissions, SanitizedPermissions } from '@ruya.sa/payload'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 

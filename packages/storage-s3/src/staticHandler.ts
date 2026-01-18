@@ -1,13 +1,13 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { StaticHandler } from '@ruya.sa/plugin-cloud-storage/types'
+import type { CollectionConfig, PayloadRequest } from '@ruya.sa/payload'
 import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix } from '@ruya.sa/plugin-cloud-storage/utilities'
 import path from 'path'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo } from '@ruya.sa/payload/internal'
 
 export type SignedDownloadsConfig =
   | {

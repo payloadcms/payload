@@ -51,8 +51,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Cell: '@ruya.sa/ui#QueryPresetsWhereCell',
+          Field: '@ruya.sa/ui#QueryPresetsWhereField',
         },
       },
       hooks: {
@@ -78,8 +78,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
-          Field: '@payloadcms/ui#QueryPresetsColumnField',
+          Cell: '@ruya.sa/ui#QueryPresetsColumnsCell',
+          Field: '@ruya.sa/ui#QueryPresetsColumnField',
         },
       },
       validate: (value) => {
@@ -99,8 +99,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'text',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
-          Field: '@payloadcms/ui#QueryPresetsGroupByField',
+          Cell: '@ruya.sa/ui#QueryPresetsGroupByCell',
+          Field: '@ruya.sa/ui#QueryPresetsGroupByField',
         },
       },
       label: 'Group By',

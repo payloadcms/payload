@@ -1,4 +1,4 @@
-import type { FieldState, FormState } from 'payload'
+import type { FieldState, FormState } from '@ruya.sa/payload'
 
 import type { ClipboardPasteData } from './types.js'
 

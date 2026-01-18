@@ -1,4 +1,4 @@
-import { canAccessAdmin, type PayloadRequest, type SchedulePublishTaskInput } from 'payload'
+import { canAccessAdmin, type PayloadRequest, type SchedulePublishTaskInput } from '@ruya.sa/payload'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date

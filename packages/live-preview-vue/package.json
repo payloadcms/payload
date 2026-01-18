@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/live-preview-vue",
-  "version": "3.71.1",
+  "name": "@ruya.sa/live-preview-vue",
+  "version": "3.71.3",
   "description": "The official Vue SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -42,11 +42,11 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/live-preview": "workspace:*"
+    "@ruya.sa/live-preview": "workspace:*"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
+    "@ruya.sa/payload": "workspace:*",
     "vue": "^3.0.0"
   },
   "peerDependencies": {

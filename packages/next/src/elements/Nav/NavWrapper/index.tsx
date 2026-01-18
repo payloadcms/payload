@@ -1,5 +1,5 @@
 'use client'
-import { useNav } from '@payloadcms/ui'
+import { useNav } from '@ruya.sa/ui'
 import React from 'react'
 
 import './index.scss'

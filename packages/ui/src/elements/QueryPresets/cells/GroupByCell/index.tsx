@@ -1,6 +1,6 @@
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from '@ruya.sa/payload'
 
-import { toWords } from 'payload/shared'
+import { toWords } from '@ruya.sa/payload/shared'
 import React, { useMemo } from 'react'
 
 import { useAuth } from '../../../../providers/Auth/index.js'

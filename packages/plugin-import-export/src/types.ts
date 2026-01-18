@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug } from 'payload'
+import type { CollectionConfig, CollectionSlug } from '@ruya.sa/payload'
 
 /**
  * Type for overriding import/export collection configurations

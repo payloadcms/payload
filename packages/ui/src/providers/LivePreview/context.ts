@@ -1,5 +1,5 @@
 'use client'
-import type { LivePreviewConfig, LivePreviewURLType } from 'payload'
+import type { LivePreviewConfig, LivePreviewURLType } from '@ruya.sa/payload'
 import type { Dispatch } from 'react'
 import type React from 'react'
 

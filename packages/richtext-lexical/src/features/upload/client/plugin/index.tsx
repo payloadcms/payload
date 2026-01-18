@@ -3,7 +3,7 @@ import type { LexicalCommand } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $dfsIterator, $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { useBulkUpload, useEffectEvent, useModal } from '@payloadcms/ui'
+import { useBulkUpload, useEffectEvent, useModal } from '@ruya.sa/ui'
 import ObjectID from 'bson-objectid'
 import {
   $createRangeSelection,

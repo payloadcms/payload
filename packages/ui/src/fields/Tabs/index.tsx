@@ -6,10 +6,10 @@ import type {
   SanitizedFieldPermissions,
   StaticDescription,
   TabsFieldClientComponent,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { getFieldPaths, toKebabCase } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { getFieldPaths, toKebabCase } from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'

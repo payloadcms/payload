@@ -1,4 +1,4 @@
-import type { ClientComponentProps, ClientField, SanitizedFieldPermissions } from 'payload'
+import type { ClientComponentProps, ClientField, SanitizedFieldPermissions } from '@ruya.sa/payload'
 
 export type RenderFieldsProps = {
   readonly className?: string

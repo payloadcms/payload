@@ -1,7 +1,7 @@
 'use client'
-import type { ClientCollectionConfig, CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug } from '@ruya.sa/payload'
 
-import { useConfig, useEntityVisibility } from '@payloadcms/ui'
+import { useConfig, useEntityVisibility } from '@ruya.sa/ui'
 import * as React from 'react'
 
 type UseEnabledRelationshipsOptions = {

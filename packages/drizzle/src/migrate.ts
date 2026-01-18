@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload } from '@ruya.sa/payload'
 
 import {
   commitTransaction,
@@ -6,7 +6,7 @@ import {
   initTransaction,
   killTransaction,
   readMigrationFiles,
-} from 'payload'
+} from '@ruya.sa/payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'

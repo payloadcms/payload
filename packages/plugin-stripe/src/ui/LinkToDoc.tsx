@@ -1,7 +1,7 @@
 'use client'
-import type { UIFieldClientComponent } from 'payload'
+import type { UIFieldClientComponent } from '@ruya.sa/payload'
 
-import { CopyToClipboard, useFormFields } from '@payloadcms/ui'
+import { CopyToClipboard, useFormFields } from '@ruya.sa/ui'
 import React from 'react'
 
 export const LinkToDoc: UIFieldClientComponent = (props) => {

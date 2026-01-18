@@ -1,7 +1,7 @@
-import type { DeleteVersions, FlattenedField, SanitizedCollectionConfig } from 'payload'
+import type { DeleteVersions, FlattenedField, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import { inArray } from 'drizzle-orm'
-import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from '@ruya.sa/payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

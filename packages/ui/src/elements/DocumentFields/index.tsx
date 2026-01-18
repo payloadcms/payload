@@ -1,7 +1,7 @@
 'use client'
-import type { ClientField, SanitizedDocumentPermissions } from 'payload'
+import type { ClientField, SanitizedDocumentPermissions } from '@ruya.sa/payload'
 
-import { fieldIsSidebar } from 'payload/shared'
+import { fieldIsSidebar } from '@ruya.sa/payload/shared'
 import React, { useMemo } from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'

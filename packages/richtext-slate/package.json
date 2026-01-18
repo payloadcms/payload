@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/richtext-slate",
-  "version": "3.71.1",
+  "name": "@ruya.sa/richtext-slate",
+  "version": "3.71.3",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -55,8 +55,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
+    "@ruya.sa/translations": "workspace:*",
+    "@ruya.sa/ui": "workspace:*",
     "is-hotkey": "0.2.0",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
@@ -64,15 +64,15 @@
     "slate-react": "0.92.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
     "@types/node": "22.15.30",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*",
+    "@ruya.sa/payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

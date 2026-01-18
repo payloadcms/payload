@@ -1,7 +1,7 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { FlattenedField, JoinQuery, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, SelectType } from '@ruya.sa/payload'
 
-import { getSelectMode } from 'payload/shared'
+import { getSelectMode } from '@ruya.sa/payload/shared'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 

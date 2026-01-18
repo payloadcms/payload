@@ -1,10 +1,10 @@
-import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerPropsOnly } from '@ruya.sa/payload'
 
-import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { buildFormState } from '@ruya.sa/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'

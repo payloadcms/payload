@@ -1,7 +1,7 @@
 'use client'
 import type { ChangeEvent } from 'react'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import type { PasswordInputProps } from './types.js'

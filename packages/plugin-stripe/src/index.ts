@@ -1,4 +1,4 @@
-import type { Config, Endpoint } from 'payload'
+import type { Config, Endpoint } from '@ruya.sa/payload'
 
 import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 

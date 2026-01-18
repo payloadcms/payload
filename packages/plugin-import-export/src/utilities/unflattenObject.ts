@@ -1,4 +1,4 @@
-import type { FlattenedField, PayloadRequest } from 'payload'
+import type { FlattenedField, PayloadRequest } from '@ruya.sa/payload'
 
 import type { FromCSVFunction } from '../types.js'
 

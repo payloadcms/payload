@@ -9,11 +9,11 @@ import type {
   SanitizedConfig,
   TraverseFieldsCallback,
   UploadField,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { Types } from 'mongoose'
-import { flattenAllFields, traverseFields } from 'payload'
-import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
+import { flattenAllFields, traverseFields } from '@ruya.sa/payload'
+import { fieldAffectsData, fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 

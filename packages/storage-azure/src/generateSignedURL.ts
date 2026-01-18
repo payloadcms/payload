@@ -1,10 +1,10 @@
 import type { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
-import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
-import type { PayloadHandler } from 'payload'
+import type { ClientUploadsAccess } from '@ruya.sa/plugin-cloud-storage/types'
+import type { PayloadHandler } from '@ruya.sa/payload'
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
 import path from 'path'
-import { APIError, Forbidden } from 'payload'
+import { APIError, Forbidden } from '@ruya.sa/payload'
 
 import type { AzureStorageOptions } from './index.js'
 

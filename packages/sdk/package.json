@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/sdk",
-  "version": "3.71.1",
+  "name": "@ruya.sa/sdk",
+  "version": "3.71.3",
   "description": "The official Payload REST API SDK",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -41,12 +41,12 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "payload": "workspace:*",
+    "@ruya.sa/payload": "workspace:*",
     "qs-esm": "7.0.2",
     "ts-essentials": "10.0.3"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*"
+    "@ruya.sa/eslint-config": "workspace:*"
   },
   "publishConfig": {
     "exports": {

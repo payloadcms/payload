@@ -1,4 +1,4 @@
-import type { ClientField } from 'payload'
+import type { ClientField } from '@ruya.sa/payload'
 
 export const traverseForLocalizedFields = (fields: ClientField[]): boolean => {
   for (const field of fields) {

@@ -9,8 +9,8 @@ import {
   useForm,
   useFormModified,
   useTranslation,
-} from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import type {

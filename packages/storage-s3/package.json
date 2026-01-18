@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/storage-s3",
-  "version": "3.71.1",
+  "name": "@ruya.sa/storage-s3",
+  "version": "3.71.3",
   "description": "Payload storage adapter for Amazon S3",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -50,14 +50,14 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "@aws-sdk/lib-storage": "^3.614.0",
     "@aws-sdk/s3-request-presigner": "^3.614.0",
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@ruya.sa/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
     "@smithy/node-http-handler": "4.0.3",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

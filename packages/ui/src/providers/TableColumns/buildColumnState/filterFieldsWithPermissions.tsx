@@ -3,9 +3,9 @@ import type {
   Field,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID } from '@ruya.sa/payload/shared'
 
 const shouldSkipField = (field: ClientField | Field): boolean =>
   (field.type !== 'ui' && fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||

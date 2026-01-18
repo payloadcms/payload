@@ -27,7 +27,7 @@ import {
   TableCellNode,
 } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
-import { useScrollInfo } from '@payloadcms/ui'
+import { useScrollInfo } from '@ruya.sa/ui'
 import {
   $getSelection,
   $isElementNode,

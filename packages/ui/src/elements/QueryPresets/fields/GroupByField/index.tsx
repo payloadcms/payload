@@ -1,7 +1,7 @@
 'use client'
-import type { TextFieldClientComponent } from 'payload'
+import type { TextFieldClientComponent } from '@ruya.sa/payload'
 
-import { toWords } from 'payload/shared'
+import { toWords } from '@ruya.sa/payload/shared'
 import React, { useMemo } from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'

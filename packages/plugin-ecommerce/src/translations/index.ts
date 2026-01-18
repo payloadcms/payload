@@ -2,7 +2,7 @@ import type {
   GenericTranslationsObject,
   NestedKeysStripped,
   SupportedLanguages,
-} from '@payloadcms/translations'
+} from '@ruya.sa/translations'
 
 import type { PluginDefaultTranslationsObject } from './types.js'
 

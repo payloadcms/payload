@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
+import type { ClientCollectionConfig, ViewTypes, Where } from '@ruya.sa/payload'
 
 import React, { Fragment, useCallback } from 'react'
 

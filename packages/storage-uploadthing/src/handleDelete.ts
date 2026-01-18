@@ -1,7 +1,7 @@
-import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
+import type { HandleDelete } from '@ruya.sa/plugin-cloud-storage/types'
 import type { UTApi } from 'uploadthing/server'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 
 import { getKeyFromFilename } from './utilities.js'
 

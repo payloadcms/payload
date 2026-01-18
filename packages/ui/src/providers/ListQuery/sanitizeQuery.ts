@@ -1,4 +1,4 @@
-import type { ListQuery, Where } from 'payload'
+import type { ListQuery, Where } from '@ruya.sa/payload'
 
 /**
  * Sanitize empty strings from the query, e.g. `?preset=`

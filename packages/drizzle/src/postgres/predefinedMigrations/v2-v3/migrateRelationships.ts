@@ -1,5 +1,5 @@
 import type { PgSchema } from 'drizzle-orm/pg-core'
-import type { FlattenedField, Payload, PayloadRequest } from 'payload'
+import type { FlattenedField, Payload, PayloadRequest } from '@ruya.sa/payload'
 
 import { sql } from 'drizzle-orm'
 

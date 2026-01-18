@@ -1,4 +1,4 @@
-import type { Init } from 'payload'
+import type { Init } from '@ruya.sa/payload'
 
 import type { BasePostgresAdapter } from './types.js'
 

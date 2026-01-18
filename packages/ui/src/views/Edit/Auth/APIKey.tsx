@@ -1,8 +1,8 @@
 'use client'
-import type { PayloadRequest, TextFieldClient } from 'payload'
+import type { PayloadRequest, TextFieldClient } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { text } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { text } from '@ruya.sa/payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 

@@ -2,7 +2,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot, $wrapNodeInElement, mergeRegister } from '@lexical/utils'
-import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
+import { formatDrawerSlug, useEditDepth } from '@ruya.sa/ui'
 import {
   $createParagraphNode,
   $getNodeByKey,

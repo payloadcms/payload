@@ -1,6 +1,6 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
 import {
   type BaseVersionField,
@@ -17,14 +17,14 @@ import {
   type SanitizedFieldPermissions,
   type SanitizedFieldsPermissions,
   type VersionField,
-} from 'payload'
+} from '@ruya.sa/payload'
 import {
   fieldIsID,
   fieldShouldBeLocalized,
   getFieldPaths,
   getUniqueListBy,
   tabHasName,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 
 import { diffComponents } from './fields/index.js'
 

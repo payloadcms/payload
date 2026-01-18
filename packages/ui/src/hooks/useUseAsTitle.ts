@@ -1,7 +1,7 @@
 'use client'
-import type { ClientCollectionConfig, ClientField } from 'payload'
+import type { ClientCollectionConfig, ClientField } from '@ruya.sa/payload'
 
-import { flattenTopLevelFields } from 'payload/shared'
+import { flattenTopLevelFields } from '@ruya.sa/payload/shared'
 
 import { useTranslation } from '../providers/Translation/index.js'
 

@@ -1,11 +1,11 @@
-import type { Config } from 'payload'
+import type { Config } from '@ruya.sa/payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   export interface PayloadRequest {
     payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
   }

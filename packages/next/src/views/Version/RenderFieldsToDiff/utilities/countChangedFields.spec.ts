@@ -1,4 +1,4 @@
-import type { ClientField } from 'payload'
+import type { ClientField } from '@ruya.sa/payload'
 import { describe, it, expect } from 'vitest'
 
 import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'

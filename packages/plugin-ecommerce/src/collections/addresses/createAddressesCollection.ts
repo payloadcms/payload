@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field } from '@ruya.sa/payload'
 
 import type { AccessConfig, CountryType } from '../../types/index.js'
 

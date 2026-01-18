@@ -1,8 +1,8 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientUser, VisibleEntities } from 'payload'
+import type { ClientCollectionConfig, ClientUser, VisibleEntities } from '@ruya.sa/payload'
 
-import { useAuth, useConfig, useEntityVisibility } from '@payloadcms/ui'
+import { useAuth, useConfig, useEntityVisibility } from '@ruya.sa/ui'
 import * as React from 'react'
 
 type Options = {

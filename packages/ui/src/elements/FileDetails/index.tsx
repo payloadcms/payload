@@ -1,5 +1,5 @@
 'use client'
-import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
+import type { Data, FileSizes, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import React from 'react'
 

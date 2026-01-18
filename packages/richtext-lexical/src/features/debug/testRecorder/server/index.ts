@@ -2,7 +2,7 @@ import { createServerFeature } from '../../../../utilities/createServerFeature.j
 
 export const TestRecorderFeature = createServerFeature({
   feature: {
-    ClientFeature: '@payloadcms/richtext-lexical/client#TestRecorderFeatureClient',
+    ClientFeature: '@ruya.sa/richtext-lexical/client#TestRecorderFeatureClient',
   },
   key: 'testRecorder',
 })

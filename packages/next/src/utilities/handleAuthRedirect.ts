@@ -1,6 +1,6 @@
-import type { TypedUser } from 'payload'
+import type { TypedUser } from '@ruya.sa/payload'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import * as qs from 'qs-esm'
 
 type Args = {

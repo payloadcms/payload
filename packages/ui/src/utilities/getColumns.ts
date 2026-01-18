@@ -1,13 +1,13 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 import type {
   ClientCollectionConfig,
   ClientConfig,
   ColumnPreference,
   SanitizedPermissions,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { flattenTopLevelFields } from '@ruya.sa/payload'
+import { fieldAffectsData } from '@ruya.sa/payload/shared'
 
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'

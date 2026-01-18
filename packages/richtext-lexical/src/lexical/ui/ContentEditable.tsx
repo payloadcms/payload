@@ -3,7 +3,7 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'
-import { useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@ruya.sa/ui'
 
 import './ContentEditable.scss'
 

@@ -5,10 +5,10 @@ import type {
   ErrorResult,
   FormState,
   ServerFunction,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
-import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
+import { canAccessAdmin, formatErrors, UnauthorizedError } from '@ruya.sa/payload'
+import { getSelectMode, reduceFieldsToValues } from '@ruya.sa/payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'

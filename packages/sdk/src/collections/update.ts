@@ -5,7 +5,7 @@ import type {
   TypedLocale,
   UploadCollectionSlug,
   Where,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { PayloadSDK } from '../index.js'

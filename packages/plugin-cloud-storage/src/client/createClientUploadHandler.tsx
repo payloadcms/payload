@@ -1,8 +1,8 @@
 'use client'
 
-import type { UploadCollectionSlug } from 'payload'
+import type { UploadCollectionSlug } from '@ruya.sa/payload'
 
-import { useConfig, useEffectEvent, useUploadHandlers } from '@payloadcms/ui'
+import { useConfig, useEffectEvent, useUploadHandlers } from '@ruya.sa/ui'
 import { Fragment, type ReactNode, useEffect } from 'react'
 
 type ClientUploadHandlerProps<T extends Record<string, unknown>> = {

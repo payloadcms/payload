@@ -1,9 +1,9 @@
 'use client'
-import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
+import type { ClientCollectionConfig, Data, FormState, JsonObject } from '@ruya.sa/payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   Button,
   formatDrawerSlug,
@@ -12,9 +12,9 @@ import {
   useEditDepth,
   usePayloadAPI,
   useTranslation,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
-import { formatAdminURL, isImage } from 'payload/shared'
+import { formatAdminURL, isImage } from '@ruya.sa/payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'

@@ -1,8 +1,8 @@
 'use client'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { getTranslation } from '@payloadcms/translations'
-import { validateWhereQuery } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { validateWhereQuery } from '@ruya.sa/payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'

@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { FlattenedField, JoinQuery, PayloadRequest, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, PayloadRequest, SelectType } from '@ruya.sa/payload'
 
 import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types.js'
 

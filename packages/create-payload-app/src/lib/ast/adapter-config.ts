@@ -26,14 +26,14 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
     configTemplate: () => `sqliteD1Adapter({
   binding: cloudflare.env.D1,
 })`,
-    packageName: '@payloadcms/db-d1-sqlite',
+    packageName: '@ruya.sa/db-d1-sqlite',
   },
   mongodb: {
     adapterName: 'mongooseAdapter',
     configTemplate: (envVar: string) => `mongooseAdapter({
   url: process.env.${envVar} || '',
 })`,
-    packageName: '@payloadcms/db-mongodb',
+    packageName: '@ruya.sa/db-mongodb',
   },
   postgres: {
     adapterName: 'postgresAdapter',
@@ -42,7 +42,7 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
     connectionString: process.env.${envVar} || '',
   },
 })`,
-    packageName: '@payloadcms/db-postgres',
+    packageName: '@ruya.sa/db-postgres',
   },
   sqlite: {
     adapterName: 'sqliteAdapter',
@@ -51,7 +51,7 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
     url: process.env.DATABASE_URL || '',
   },
 })`,
-    packageName: '@payloadcms/db-sqlite',
+    packageName: '@ruya.sa/db-sqlite',
   },
   'vercel-postgres': {
     adapterName: 'vercelPostgresAdapter',
@@ -60,7 +60,7 @@ export const DB_ADAPTER_CONFIG: Record<DatabaseAdapter, DatabaseAdapterConfig> =
     connectionString: process.env.POSTGRES_URL || '',
   },
 })`,
-    packageName: '@payloadcms/db-vercel-postgres',
+    packageName: '@ruya.sa/db-vercel-postgres',
   },
 } as const
 
@@ -77,7 +77,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING || '',
     containerName: process.env.AZURE_STORAGE_CONTAINER_NAME || '',
   })`,
-    packageName: '@payloadcms/storage-azure',
+    packageName: '@ruya.sa/storage-azure',
   },
   gcsStorage: {
     adapterName: 'gcsStorage',
@@ -87,7 +87,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     },
     bucket: process.env.GCS_BUCKET || '',
   })`,
-    packageName: '@payloadcms/storage-gcs',
+    packageName: '@ruya.sa/storage-gcs',
   },
   localDisk: {
     adapterName: null,
@@ -100,7 +100,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     bucket: cloudflare.env.R2,
     collections: { media: true },
   })`,
-    packageName: '@payloadcms/storage-r2',
+    packageName: '@ruya.sa/storage-r2',
   },
   s3Storage: {
     adapterName: 's3Storage',
@@ -117,7 +117,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
       region: process.env.S3_REGION || '',
     },
   })`,
-    packageName: '@payloadcms/storage-s3',
+    packageName: '@ruya.sa/storage-s3',
   },
   uploadthingStorage: {
     adapterName: 'uploadthingStorage',
@@ -127,7 +127,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     },
     token: process.env.UPLOADTHING_SECRET || '',
   })`,
-    packageName: '@payloadcms/storage-uploadthing',
+    packageName: '@ruya.sa/storage-uploadthing',
   },
   vercelBlobStorage: {
     adapterName: 'vercelBlobStorage',
@@ -137,7 +137,7 @@ export const STORAGE_ADAPTER_CONFIG: Record<StorageAdapter, StorageAdapterConfig
     },
     token: process.env.BLOB_READ_WRITE_TOKEN || '',
   })`,
-    packageName: '@payloadcms/storage-vercel-blob',
+    packageName: '@ruya.sa/storage-vercel-blob',
   },
 } as const
 

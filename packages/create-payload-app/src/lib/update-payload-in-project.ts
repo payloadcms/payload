@@ -45,7 +45,7 @@ export async function updatePayloadInProject(
 
   // Update all existing Payload packages
   const payloadPackages = Object.keys(packageObj.dependencies).filter((dep) =>
-    dep.startsWith('@payloadcms/'),
+    dep.startsWith('@ruya.sa/'),
   )
 
   const packageNames = ['payload', ...payloadPackages]

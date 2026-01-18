@@ -1,4 +1,4 @@
-import type { UploadField } from 'payload'
+import type { UploadField } from '@ruya.sa/payload'
 
 interface FieldFunctionProps {
   /**
@@ -21,7 +21,7 @@ export const MetaImageField: FieldFunction = ({ hasGenerateFn = false, overrides
           clientProps: {
             hasGenerateImageFn: hasGenerateFn,
           },
-          path: '@payloadcms/plugin-seo/client#MetaImageComponent',
+          path: '@ruya.sa/plugin-seo/client#MetaImageComponent',
         },
       },
       description: 'Maximum upload file size: 12MB. Recommended file size for images is <500KB.',

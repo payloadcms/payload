@@ -1,9 +1,9 @@
 'use client'
 
-import type { TypeWithID } from 'payload'
+import type { TypeWithID } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { formatFilesize } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { formatFilesize } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'

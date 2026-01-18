@@ -1,4 +1,4 @@
-import type { RelationshipFieldServerProps } from 'payload'
+import type { RelationshipFieldServerProps } from '@ruya.sa/payload'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { MoveDocToFolder } from '../../../exports/client/index.js'

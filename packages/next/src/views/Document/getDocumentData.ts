@@ -1,4 +1,4 @@
-import { sanitizeID } from '@payloadcms/ui/shared'
+import { sanitizeID } from '@ruya.sa/ui/shared'
 import {
   type Locale,
   logError,
@@ -6,7 +6,7 @@ import {
   type PayloadRequest,
   type TypedUser,
   type TypeWithID,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 type Args = {
   collectionSlug?: string

@@ -1,4 +1,4 @@
-import { getTranslation, type I18n } from '@payloadcms/translations'
+import { getTranslation, type I18n } from '@ruya.sa/translations'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'
 

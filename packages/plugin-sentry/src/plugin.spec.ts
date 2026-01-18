@@ -1,8 +1,8 @@
-import type { AfterErrorHook, AfterErrorHookArgs, Config, PayloadRequest } from 'payload'
+import type { AfterErrorHook, AfterErrorHookArgs, Config, PayloadRequest } from '@ruya.sa/payload'
 import { randomUUID } from 'crypto'
 import { describe, it, expect, vitest } from 'vitest'
 
-import { defaults } from 'payload'
+import { defaults } from '@ruya.sa/payload'
 
 import { sentryPlugin } from './index'
 
@@ -14,7 +14,7 @@ const mockSentry = {
   },
 }
 
-describe('@payloadcms/plugin-sentry - unit', () => {
+describe('@ruya.sa/plugin-sentry - unit', () => {
   it('should run the plugin', () => {
     const plugin = sentryPlugin({ Sentry: mockSentry, enabled: true })
     const config = plugin(createConfig())

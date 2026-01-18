@@ -1,7 +1,7 @@
 import type { QueryOptions } from 'mongoose'
-import type { FindGlobal } from 'payload'
+import type { FindGlobal } from '@ruya.sa/payload'
 
-import { combineQueries } from 'payload'
+import { combineQueries } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

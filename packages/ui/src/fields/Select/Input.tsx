@@ -1,7 +1,7 @@
 'use client'
-import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'

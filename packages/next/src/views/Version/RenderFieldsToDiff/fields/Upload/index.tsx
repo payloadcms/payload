@@ -4,10 +4,10 @@ import type {
   TypeWithID,
   UploadField,
   UploadFieldDiffServerComponent,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { FieldDiffContainer, File, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
+import { getTranslation, type I18nClient } from '@ruya.sa/translations'
+import { FieldDiffContainer, File, getHTMLDiffComponents } from '@ruya.sa/ui/rsc'
 
 import './index.scss'
 

@@ -1,4 +1,4 @@
-import type { Endpoint } from 'payload'
+import type { Endpoint } from '@ruya.sa/payload'
 
 import Stripe from 'stripe'
 

@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, GlobalConfig, Payload } from 'payload'
+import type { CollectionConfig, Field, GlobalConfig, Payload } from '@ruya.sa/payload'
 
 import { upgradeDocumentFieldsRecursively } from './upgradeDocumentFieldsRecursively.js'
 

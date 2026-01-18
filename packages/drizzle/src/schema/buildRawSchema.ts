@@ -2,8 +2,8 @@ import {
   buildVersionCollectionFields,
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
-} from 'payload'
-import { hasDraftsEnabled } from 'payload/shared'
+} from '@ruya.sa/payload'
+import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'

@@ -26,7 +26,7 @@ import type {
   MigrationData,
   Payload,
   PayloadRequest,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 

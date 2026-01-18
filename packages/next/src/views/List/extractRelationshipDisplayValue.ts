@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig, ClientConfig } from 'payload'
+import type { ClientCollectionConfig, ClientConfig } from '@ruya.sa/payload'
 
 // Helper function to extract display value from relationship
 export const extractRelationshipDisplayValue = (

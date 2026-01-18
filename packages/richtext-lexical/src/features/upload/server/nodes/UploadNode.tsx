@@ -13,7 +13,7 @@ import type {
   JsonObject,
   TypedUploadCollection,
   UploadCollectionSlug,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'

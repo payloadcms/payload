@@ -1,4 +1,4 @@
-import type { ErrorResult } from 'payload'
+import type { ErrorResult } from '@ruya.sa/payload'
 
 /**
  * Error class for SDK API errors.

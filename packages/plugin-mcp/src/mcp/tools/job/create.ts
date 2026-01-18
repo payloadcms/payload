@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from '@ruya.sa/payload'
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
@@ -100,7 +100,7 @@ const createOrUpdateJobFile = (
 
     // Create new job file
     const camelCaseJobName = toCamelCase(jobName)
-    const jobFileContent = `import type { JobsConfig } from 'payload'
+    const jobFileContent = `import type { JobsConfig } from '@ruya.sa/payload'
 import { ${importName} } from '${importPath}'
 
 export const ${camelCaseJobName}JobsConfig: JobsConfig = {
@@ -280,7 +280,7 @@ function generateTaskContent(
 ): string {
   const camelCaseJobSlug = toCamelCase(jobSlug)
 
-  return `import type { Task } from 'payload'
+  return `import type { Task } from '@ruya.sa/payload'
 
 export const ${camelCaseJobSlug}Task: Task = {
   slug: '${jobSlug}',
@@ -316,7 +316,7 @@ function generateWorkflowContent(
 ): string {
   const camelCaseJobSlug = toCamelCase(jobSlug)
 
-  return `import type { Workflow } from 'payload'
+  return `import type { Workflow } from '@ruya.sa/payload'
 
 export const ${camelCaseJobSlug}Workflow: Workflow = {
   slug: '${jobSlug}',

@@ -1,4 +1,4 @@
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 import type { Config } from '../config/types.js'
 import type { Field, Option } from '../fields/config/types.js'
@@ -29,7 +29,7 @@ export const getConstraints = (config: Config): Field => ({
   type: 'group',
   admin: {
     components: {
-      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
+      Cell: '@ruya.sa/ui#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },

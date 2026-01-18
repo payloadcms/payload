@@ -1,5 +1,5 @@
 'use client'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'

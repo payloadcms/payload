@@ -1,7 +1,7 @@
 'use client'
-import type { CollapsibleFieldClientComponent, DocumentPreferences } from 'payload'
+import type { CollapsibleFieldClientComponent, DocumentPreferences } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Collapsible as CollapsibleElement } from '../../elements/Collapsible/index.js'

@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, Config } from 'payload'
+import type { CollectionAfterChangeHook, Config } from '@ruya.sa/payload'
 
 import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 

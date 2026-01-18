@@ -1,5 +1,5 @@
-import type { TFunction } from '@payloadcms/translations'
-import type { FolderSortKeys } from 'payload'
+import type { TFunction } from '@ruya.sa/translations'
+import type { FolderSortKeys } from '@ruya.sa/payload'
 
 import React from 'react'
 

@@ -1,4 +1,4 @@
-import type { SelectIncludeType } from 'payload'
+import type { SelectIncludeType } from '@ruya.sa/payload'
 
 /**
  * Takes an input of array of string paths in dot notation and returns a select object.

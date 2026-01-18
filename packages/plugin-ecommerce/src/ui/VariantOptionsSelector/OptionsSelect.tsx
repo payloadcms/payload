@@ -1,8 +1,8 @@
 'use client'
 
-import type { SelectFieldClient } from 'payload'
+import type { SelectFieldClient } from '@ruya.sa/payload'
 
-import { FieldLabel, ReactSelect, useField, useForm } from '@payloadcms/ui'
+import { FieldLabel, ReactSelect, useField, useForm } from '@ruya.sa/ui'
 import { useCallback, useId, useMemo } from 'react'
 
 type Props = {

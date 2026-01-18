@@ -1,6 +1,6 @@
 {
-  "name": "payload",
-  "version": "3.71.1",
+  "name": "@ruya.sa/payload",
+  "version": "3.71.3",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -73,7 +73,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "bin": {
-    "payload": "bin.js"
+    "@ruya.sa/payload": "bin.js"
   },
   "files": [
     "dist",
@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@next/env": "^15.1.5",
-    "@payloadcms/translations": "workspace:*",
+    "@ruya.sa/translations": "workspace:*",
     "@types/busboy": "1.5.4",
     "ajv": "8.17.1",
     "bson-objectid": "2.0.4",
@@ -130,7 +130,7 @@
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@monaco-editor/react": "4.7.0",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "7.0.2",

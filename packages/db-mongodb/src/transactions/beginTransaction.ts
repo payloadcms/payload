@@ -1,7 +1,7 @@
 import type { TransactionOptions } from 'mongodb'
-import type { BeginTransaction } from 'payload'
+import type { BeginTransaction } from '@ruya.sa/payload'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 import { v4 as uuid } from 'uuid'
 
 import type { MongooseAdapter } from '../index.js'

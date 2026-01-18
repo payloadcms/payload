@@ -1,6 +1,6 @@
-import type { RelationshipField, UploadField } from 'payload'
+import type { RelationshipField, UploadField } from '@ruya.sa/payload'
 
-import { valueIsValueWithRelation } from 'payload/shared'
+import { valueIsValueWithRelation } from '@ruya.sa/payload/shared'
 
 type Args = {
   baseRow: Record<string, unknown>

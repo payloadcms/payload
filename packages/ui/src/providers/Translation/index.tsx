@@ -7,11 +7,11 @@ import type {
   I18nOptions,
   Language,
   TFunction,
-} from '@payloadcms/translations'
+} from '@ruya.sa/translations'
 import type { Locale } from 'date-fns'
-import type { LanguageOptions } from 'payload'
+import type { LanguageOptions } from '@ruya.sa/payload'
 
-import { importDateFNSLocale, t } from '@payloadcms/translations'
+import { importDateFNSLocale, t } from '@ruya.sa/translations'
 import { enUS } from 'date-fns/locale/en-US'
 import { useRouter } from 'next/navigation.js'
 import React, { createContext, use, useEffect, useState } from 'react'

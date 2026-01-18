@@ -1,6 +1,6 @@
 'use client'
 
-import { ShimmerEffect } from '@payloadcms/ui'
+import { ShimmerEffect } from '@ruya.sa/ui'
 
 import '../index.scss'
 

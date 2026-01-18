@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps, TextareaFieldClient } from 'payload'
+import type { DefaultCellComponentProps, TextareaFieldClient } from '@ruya.sa/payload'
 
 import React from 'react'
 

@@ -12,10 +12,10 @@ import type {
   SelectMode,
   SelectType,
   TabAsField,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { stripUnselectedFields } from 'payload'
-import { getFieldPaths } from 'payload/shared'
+import { stripUnselectedFields } from '@ruya.sa/payload'
+import { getFieldPaths } from '@ruya.sa/payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import type { RenderFieldMethod } from './types.js'

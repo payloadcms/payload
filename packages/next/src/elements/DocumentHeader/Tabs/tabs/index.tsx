@@ -1,4 +1,4 @@
-import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
 
 import { VersionsPill } from './VersionsPill/index.js'
 

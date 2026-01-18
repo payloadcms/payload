@@ -1,6 +1,6 @@
 'use client'
-import { useConfig, useModal, useRouteTransition, useTranslation } from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+import { useConfig, useModal, useRouteTransition, useTranslation } from '@ruya.sa/ui'
+import { formatDate } from '@ruya.sa/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 
 import type { CreatedAtCellProps } from '../../../Versions/cells/CreatedAt/index.js'

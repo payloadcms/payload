@@ -1,10 +1,10 @@
 'use client'
-import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
+import type { ClientCollectionConfig, ViewTypes, Where } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
+import { formatAdminURL, mergeListSearchAndWhere } from '@ruya.sa/payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'

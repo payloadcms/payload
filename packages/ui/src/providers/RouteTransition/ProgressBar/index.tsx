@@ -14,7 +14,7 @@ const initialDelay = 150
  * When a transition is triggered, the progress bar will show the progress of that transition and exit when the transition is complete.
  * @returns A progress bar that shows the progress of a route transition
  * @example
- * import { RouteTransitionProvider, ProgressBar, Link } from '@payloadcms/ui'
+ * import { RouteTransitionProvider, ProgressBar, Link } from '@ruya.sa/ui'
  * const App = () => (
  * <RouteTransitionProvider>
  *  <ProgressBar />

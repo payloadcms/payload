@@ -1,4 +1,4 @@
-import { PayloadRequest } from 'payload'
+import { PayloadRequest } from '@ruya.sa/payload'
 
 import { parseCSV } from './parseCSV.js'
 import { describe, it, expect, vi } from 'vitest'

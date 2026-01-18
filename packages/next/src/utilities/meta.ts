@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { MetaConfig } from 'payload'
+import type { MetaConfig } from '@ruya.sa/payload'
 
-import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
+import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@ruya.sa/ui/assets'
 import * as qs from 'qs-esm'
 
 const defaultOpenGraph: Metadata['openGraph'] = {

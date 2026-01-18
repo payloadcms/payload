@@ -2,7 +2,7 @@
 import type { KeyboardEventHandler } from 'react'
 
 import { arrayMove } from '@dnd-kit/sortable'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { useEffect, useId } from 'react'
 import Select, { type StylesConfig } from 'react-select'
 import CreatableSelect from 'react-select/creatable'

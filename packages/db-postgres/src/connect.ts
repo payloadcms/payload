@@ -1,7 +1,7 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Migration } from 'payload'
+import type { DrizzleAdapter } from '@ruya.sa/drizzle/types'
+import type { Connect, Migration } from '@ruya.sa/payload'
 
-import { pushDevSchema } from '@payloadcms/drizzle'
+import { pushDevSchema } from '@ruya.sa/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
 

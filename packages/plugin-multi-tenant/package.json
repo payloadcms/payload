@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.71.1",
+  "name": "@ruya.sa/plugin-multi-tenant",
+  "version": "3.71.3",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
@@ -91,14 +91,14 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "@ruya.sa/eslint-config": "workspace:*",
+    "@ruya.sa/translations": "workspace:*",
+    "@ruya.sa/ui": "workspace:*",
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "@ruya.sa/ui": "workspace:*",
+    "@ruya.sa/payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

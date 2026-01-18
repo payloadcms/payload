@@ -1,7 +1,7 @@
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
+import type { HandleUpload } from '@ruya.sa/plugin-cloud-storage/types'
 import type { UTApi } from 'uploadthing/server'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 import { UTFile } from 'uploadthing/server'
 
 import type { ACL } from './index.js'

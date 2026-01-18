@@ -1,11 +1,11 @@
-import type { Block, Field, FlattenedBlock } from 'payload'
+import type { Block, Field, FlattenedBlock } from '@ruya.sa/payload'
 
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldShouldBeLocalized,
   tabHasName,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 
 import type { RawTable } from '../types.js'
 

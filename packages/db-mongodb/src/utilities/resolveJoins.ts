@@ -1,12 +1,12 @@
-import type { JoinQuery, SanitizedJoins, Where } from 'payload'
+import type { JoinQuery, SanitizedJoins, Where } from '@ruya.sa/payload'
 
 import {
   appendVersionToQueryKey,
   buildVersionCollectionFields,
   combineQueries,
   getQueryDraftsSort,
-} from 'payload'
-import { fieldShouldBeLocalized } from 'payload/shared'
+} from '@ruya.sa/payload'
+import { fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 

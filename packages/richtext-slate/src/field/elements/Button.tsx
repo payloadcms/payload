@@ -1,7 +1,7 @@
 'use client'
 import type { ElementType } from 'react'
 
-import { Tooltip } from '@payloadcms/ui'
+import { Tooltip } from '@ruya.sa/ui'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 

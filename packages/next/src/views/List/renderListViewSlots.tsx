@@ -14,10 +14,10 @@ import type {
   StaticDescription,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { Banner } from '@payloadcms/ui/elements/Banner'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { Banner } from '@ruya.sa/ui/elements/Banner'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
 import React from 'react'
 
 type Args = {

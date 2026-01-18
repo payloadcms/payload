@@ -1,5 +1,5 @@
 'use client'
-import type { TypedUser } from 'payload'
+import type { TypedUser } from '@ruya.sa/payload'
 
 import {
   Button,
@@ -8,8 +8,8 @@ import {
   useConfig,
   useModal,
   useTranslation,
-} from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback } from 'react'
 

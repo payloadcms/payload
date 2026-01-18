@@ -6,7 +6,7 @@ import type {
   Row,
   TypedUser,
   ValidationFieldError,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
 

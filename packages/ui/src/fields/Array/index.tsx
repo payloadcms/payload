@@ -3,9 +3,9 @@ import type {
   ArrayFieldClientComponent,
   ArrayFieldClientProps,
   ArrayField as ArrayFieldType,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { Fragment, useCallback, useId, useMemo } from 'react'
 import { toast } from 'sonner'
 

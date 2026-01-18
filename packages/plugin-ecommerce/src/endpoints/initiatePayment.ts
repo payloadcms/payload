@@ -1,4 +1,4 @@
-import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
+import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from '@ruya.sa/payload'
 
 import type {
   CurrenciesConfig,

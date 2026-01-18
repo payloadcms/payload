@@ -1,8 +1,8 @@
 'use client'
-import type { I18nClient } from '@payloadcms/translations'
-import type { ClientField } from 'payload'
+import type { I18nClient } from '@ruya.sa/translations'
+import type { ClientField } from '@ruya.sa/payload'
 
-import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from '@ruya.sa/payload/shared'
 
 export const getTextFieldsToBeSearched = (
   listSearchableFields: string[],

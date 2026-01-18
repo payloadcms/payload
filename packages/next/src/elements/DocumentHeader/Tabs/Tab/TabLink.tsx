@@ -1,9 +1,9 @@
 'use client'
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '@ruya.sa/payload'
 
-import { Button } from '@payloadcms/ui'
+import { Button } from '@ruya.sa/ui'
 import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 export const DocumentTabLink: React.FC<{

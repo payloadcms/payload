@@ -37,7 +37,7 @@ export const LexicalPluginToLexicalFeature =
       props.converters = converters
 
       return {
-        ClientFeature: '@payloadcms/richtext-lexical/client#LexicalPluginToLexicalFeatureClient',
+        ClientFeature: '@ruya.sa/richtext-lexical/client#LexicalPluginToLexicalFeatureClient',
         hooks: props.disableHooks
           ? undefined
           : {

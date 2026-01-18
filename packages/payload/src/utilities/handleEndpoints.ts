@@ -34,9 +34,9 @@ const notFoundResponse = (req: PayloadRequest, pathname?: string) => {
  *
  * ### Example: Using Hono
  * ```ts
- * import { handleEndpoints } from 'payload';
+ * import { handleEndpoints } from '@ruya.sa/payload';
  * import { serve } from '@hono/node-server';
- * import { loadEnv } from 'payload/node';
+ * import { loadEnv } from '@ruya.sa/payload/node';
  *
  * const port = 3001;
  * loadEnv();

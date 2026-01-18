@@ -1,9 +1,9 @@
 'use client'
 
-import type { Data, ViewTypes } from 'payload'
-import type { FolderOrDocument } from 'payload/shared'
+import type { Data, ViewTypes } from '@ruya.sa/payload'
+import type { FolderOrDocument } from '@ruya.sa/payload/shared'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useEffect } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir

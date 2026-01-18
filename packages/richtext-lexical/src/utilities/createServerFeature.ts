@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '@ruya.sa/payload'
 
 import type {
   FeatureProviderProviderServer,

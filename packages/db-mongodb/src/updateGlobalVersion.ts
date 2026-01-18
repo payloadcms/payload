@@ -1,7 +1,7 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { JsonObject, UpdateGlobalVersionArgs } from 'payload'
+import type { JsonObject, UpdateGlobalVersionArgs } from '@ruya.sa/payload'
 
-import { buildVersionGlobalFields } from 'payload'
+import { buildVersionGlobalFields } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

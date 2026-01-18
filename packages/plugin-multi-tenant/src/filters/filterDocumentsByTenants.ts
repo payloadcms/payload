@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser, Where } from 'payload'
+import type { PayloadRequest, TypedUser, Where } from '@ruya.sa/payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 

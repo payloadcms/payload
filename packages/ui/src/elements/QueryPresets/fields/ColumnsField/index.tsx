@@ -1,7 +1,7 @@
 'use client'
-import type { ColumnPreference, JSONFieldClientComponent } from 'payload'
+import type { ColumnPreference, JSONFieldClientComponent } from '@ruya.sa/payload'
 
-import { toWords, transformColumnsToSearchParams } from 'payload/shared'
+import { toWords, transformColumnsToSearchParams } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'

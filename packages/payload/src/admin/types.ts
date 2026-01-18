@@ -1,4 +1,4 @@
-import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
+import type { AcceptedLanguages, I18nClient } from '@ruya.sa/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'

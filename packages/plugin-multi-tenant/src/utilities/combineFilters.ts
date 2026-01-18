@@ -1,4 +1,4 @@
-import type { BaseFilter, Where } from 'payload'
+import type { BaseFilter, Where } from '@ruya.sa/payload'
 
 type Args = {
   baseFilter?: BaseFilter

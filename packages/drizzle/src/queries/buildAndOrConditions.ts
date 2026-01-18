@@ -1,5 +1,5 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Where } from 'payload'
+import type { FlattenedField, Where } from '@ruya.sa/payload'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'

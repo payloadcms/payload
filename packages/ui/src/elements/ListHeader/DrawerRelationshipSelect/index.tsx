@@ -1,6 +1,6 @@
 'use client'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
 import { useConfig } from '../../../providers/Config/index.js'

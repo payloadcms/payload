@@ -1,11 +1,11 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig } from '@ruya.sa/payload'
 import type React from 'react'
 
-import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useDocumentTitle, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { useConfig, useDocumentTitle, useLocale, useStepNav, useTranslation } from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{

@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, PayloadRequest } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, PayloadRequest } from '@ruya.sa/payload'
 
 interface Args {
   endpoint: string

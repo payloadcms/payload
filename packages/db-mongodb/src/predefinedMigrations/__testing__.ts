@@ -4,7 +4,7 @@
  * predefined migrations via their package.json exports.
  */
 const imports = ``
-const upSQL = `  // Test predefined migration from @payloadcms/db-mongodb/__testing__
+const upSQL = `  // Test predefined migration from @ruya.sa/db-mongodb/__testing__
   payload.logger.info('Test migration UP executed')`
 const downSQL = `  // Test predefined migration DOWN
   payload.logger.info('Test migration DOWN executed')`

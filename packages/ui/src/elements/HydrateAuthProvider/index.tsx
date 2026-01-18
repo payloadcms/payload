@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedPermissions } from 'payload'
+import type { SanitizedPermissions } from '@ruya.sa/payload'
 
 import { useEffect } from 'react'
 

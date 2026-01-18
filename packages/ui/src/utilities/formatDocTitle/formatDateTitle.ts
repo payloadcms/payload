@@ -1,4 +1,4 @@
-import type { I18n, I18nClient } from '@payloadcms/translations'
+import type { I18n, I18nClient } from '@ruya.sa/translations'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { format, formatDistanceToNow, transpose } from 'date-fns'

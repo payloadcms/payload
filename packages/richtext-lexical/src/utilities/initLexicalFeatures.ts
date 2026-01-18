@@ -1,7 +1,7 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 
-import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from 'payload'
-import { getFromImportMap } from 'payload/shared'
+import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from '@ruya.sa/payload'
+import { getFromImportMap } from '@ruya.sa/payload/shared'
 
 import type {
   BaseClientFeatureProps,

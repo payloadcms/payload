@@ -13,12 +13,12 @@ import {
   useDocumentInfo,
   useLocale,
   useTranslation,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 
-import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'

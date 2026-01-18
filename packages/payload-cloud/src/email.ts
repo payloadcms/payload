@@ -1,4 +1,4 @@
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import { nodemailerAdapter } from '@ruya.sa/email-nodemailer'
 import nodemailer from 'nodemailer'
 
 import type { PayloadCloudEmailOptions } from './types.js'

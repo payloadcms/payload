@@ -1,7 +1,7 @@
 import type { ClientSession, Model } from 'mongoose'
-import type { Field, PayloadRequest } from 'payload'
+import type { Field, PayloadRequest } from '@ruya.sa/payload'
 
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import { buildVersionCollectionFields, buildVersionGlobalFields } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from '../index.js'
 

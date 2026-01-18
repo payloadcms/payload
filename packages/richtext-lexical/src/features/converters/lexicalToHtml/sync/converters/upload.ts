@@ -1,4 +1,4 @@
-import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
+import type { FileData, FileSizeImproved, TypeWithID } from '@ruya.sa/payload'
 
 import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
 import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'

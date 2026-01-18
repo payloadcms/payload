@@ -1,4 +1,4 @@
-import type { PaginatedDocs, ValueWithRelation } from 'payload'
+import type { PaginatedDocs, ValueWithRelation } from '@ruya.sa/payload'
 
 export type ValueAsDataWithRelation = {
   relationTo: string

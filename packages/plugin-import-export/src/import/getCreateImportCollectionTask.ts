@@ -1,4 +1,4 @@
-import type { Config, TaskConfig, TypedUser } from 'payload'
+import type { Config, TaskConfig, TypedUser } from '@ruya.sa/payload'
 
 import type { Import } from './createImport.js'
 

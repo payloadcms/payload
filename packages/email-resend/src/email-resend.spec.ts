@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload } from '@ruya.sa/payload'
 import { describe, afterEach, it, expect, vitest, Mock } from 'vitest'
 
 import { resendAdapter } from './index.js'

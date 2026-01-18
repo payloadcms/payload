@@ -11,7 +11,7 @@ import type {
   SanitizedFieldsPermissions,
   SelectMode,
   SelectType,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { RenderFieldMethod } from './types.js'
 

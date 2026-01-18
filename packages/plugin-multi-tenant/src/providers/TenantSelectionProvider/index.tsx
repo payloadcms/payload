@@ -1,4 +1,4 @@
-import type { Payload, TypedUser } from 'payload'
+import type { Payload, TypedUser } from '@ruya.sa/payload'
 
 import { cookies as getCookies } from 'next/headers.js'
 

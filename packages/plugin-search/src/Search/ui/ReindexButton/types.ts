@@ -1,4 +1,4 @@
-import type { CustomComponent, PayloadServerReactComponent } from 'payload'
+import type { CustomComponent, PayloadServerReactComponent } from '@ruya.sa/payload'
 
 import type { CollectionLabels, ResolvedCollectionLabels } from '../../../types.js'
 

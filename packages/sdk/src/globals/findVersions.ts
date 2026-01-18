@@ -7,7 +7,7 @@ import type {
   TypedLocale,
   TypeWithVersion,
   Where,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'

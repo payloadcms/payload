@@ -1,6 +1,6 @@
 'use client'
 
-import { useAddClientFunction } from '@payloadcms/ui'
+import { useAddClientFunction } from '@ruya.sa/ui'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 

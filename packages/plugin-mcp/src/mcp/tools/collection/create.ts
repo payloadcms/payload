@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from '@ruya.sa/payload'
 
 import { writeFileSync } from 'fs'
 import { join } from 'path'
@@ -66,7 +66,7 @@ export const createCollection = async (
   const fieldDefinitions = fields.map(generateFieldDefinition).join('\n')
 
   // Generate collection file content
-  const collectionContent = `import type { CollectionConfig } from 'payload'
+  const collectionContent = `import type { CollectionConfig } from '@ruya.sa/payload'
 
 export const ${capitalizedName}: CollectionConfig = {
   slug: '${slug}',${

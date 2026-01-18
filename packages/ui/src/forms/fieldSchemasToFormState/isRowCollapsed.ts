@@ -1,4 +1,4 @@
-import type { ArrayField, BlocksField, CollapsedPreferences, Row } from 'payload'
+import type { ArrayField, BlocksField, CollapsedPreferences, Row } from '@ruya.sa/payload'
 
 export function isRowCollapsed({
   collapsedPrefs,

@@ -1,4 +1,4 @@
-import type { FilterOptions, FilterOptionsProps, ResolvedFilterOptions } from 'payload'
+import type { FilterOptions, FilterOptionsProps, ResolvedFilterOptions } from '@ruya.sa/payload'
 
 export const resolveFilterOptions = async (
   filterOptions: FilterOptions,

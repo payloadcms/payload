@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/db-postgres",
-  "version": "3.71.1",
+  "name": "@ruya.sa/db-postgres",
+  "version": "3.71.3",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -74,7 +74,7 @@
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
-    "@payloadcms/drizzle": "workspace:*",
+    "@ruya.sa/drizzle": "workspace:*",
     "@types/pg": "8.10.2",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
@@ -86,13 +86,13 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
     "@types/to-snake-case": "1.0.0",
     "esbuild": "0.25.5",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

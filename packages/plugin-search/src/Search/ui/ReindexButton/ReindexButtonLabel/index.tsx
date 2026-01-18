@@ -1,4 +1,4 @@
-import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, Pill, useTranslation } from '@ruya.sa/ui'
 
 export const ReindexButtonLabel = () => {
   const {

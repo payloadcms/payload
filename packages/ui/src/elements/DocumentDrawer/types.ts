@@ -1,4 +1,4 @@
-import type { Data, DefaultDocumentIDType, FormState, Operation } from 'payload'
+import type { Data, DefaultDocumentIDType, FormState, Operation } from '@ruya.sa/payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 

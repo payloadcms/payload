@@ -1,6 +1,6 @@
-import type { Field, FlattenedBlock, Payload } from 'payload'
+import type { Field, FlattenedBlock, Payload } from '@ruya.sa/payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from '@ruya.sa/payload/shared'
 
 import type {
   SlateNode,

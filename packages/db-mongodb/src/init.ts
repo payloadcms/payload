@@ -1,5 +1,5 @@
 import type { PaginateOptions } from 'mongoose'
-import type { Init, SanitizedCollectionConfig } from 'payload'
+import type { Init, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate-v2'
@@ -7,7 +7,7 @@ import {
   buildVersionCollectionFields,
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel, GlobalModel } from './types.js'

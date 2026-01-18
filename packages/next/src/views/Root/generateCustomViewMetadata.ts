@@ -1,11 +1,11 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 import type { Metadata } from 'next'
 import type {
   AdminViewConfig,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { generateMetadata } from '../../utilities/meta.js'
 

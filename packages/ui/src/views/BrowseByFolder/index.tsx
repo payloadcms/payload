@@ -1,10 +1,10 @@
 'use client'
 
 import type { DragEndEvent } from '@dnd-kit/core'
-import type { FolderListViewClientProps } from 'payload'
+import type { FolderListViewClientProps } from '@ruya.sa/payload'
 
 import { useDndMonitor } from '@dnd-kit/core'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 

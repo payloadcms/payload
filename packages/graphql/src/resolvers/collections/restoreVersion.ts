@@ -1,6 +1,6 @@
-import type { Collection, PayloadRequest } from 'payload'
+import type { Collection, PayloadRequest } from '@ruya.sa/payload'
 
-import { isolateObjectProperty, restoreVersionOperation } from 'payload'
+import { isolateObjectProperty, restoreVersionOperation } from '@ruya.sa/payload'
 
 import type { Context } from '../types.js'
 

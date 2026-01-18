@@ -1,6 +1,6 @@
 'use client'
 
-import { ShimmerEffect, useServerFunctions } from '@payloadcms/ui'
+import { ShimmerEffect, useServerFunctions } from '@ruya.sa/ui'
 import React, { useCallback, useEffect, useRef } from 'react'
 
 import type {

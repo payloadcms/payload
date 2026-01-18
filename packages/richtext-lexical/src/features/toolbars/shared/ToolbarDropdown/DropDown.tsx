@@ -1,5 +1,5 @@
 'use client'
-import { Button } from '@payloadcms/ui'
+import { Button } from '@ruya.sa/ui'
 import { $addUpdateTag, isDOMNode, type LexicalEditor } from 'lexical'
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'

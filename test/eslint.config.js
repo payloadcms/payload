@@ -1,5 +1,5 @@
 import { defaultESLintIgnores, rootEslintConfig, rootParserOptions } from '../eslint.config.js'
-import payloadPlugin from '@payloadcms/eslint-plugin'
+import payloadPlugin from '@ruya.sa/eslint-plugin'
 import playwright from 'eslint-plugin-playwright'
 
 /** @typedef {import('eslint').Linter.Config} Config */

@@ -1,6 +1,6 @@
 'use client'
 
-import type { GenericErrorProps } from 'payload'
+import type { GenericErrorProps } from '@ruya.sa/payload'
 
 import React from 'react'
 

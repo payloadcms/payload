@@ -224,13 +224,13 @@ async function installAndConfigurePayload(
 async function installDeps(projectDir: string, packageManager: PackageManager, dbType: DbType) {
   const { getDbPackageName } = await import('./ast/adapter-config.js')
 
-  const packagesToInstall = ['payload', '@payloadcms/next', '@payloadcms/richtext-lexical'].map(
+  const packagesToInstall = ['payload', '@ruya.sa/next', '@ruya.sa/richtext-lexical'].map(
     (pkg) => `${pkg}@latest`,
   )
 
   packagesToInstall.push(`${getDbPackageName(dbType)}@latest`)
 
-  // Match graphql version of @payloadcms/next
+  // Match graphql version of @ruya.sa/next
   packagesToInstall.push('graphql@^16.8.1')
 
   return await installPackages({ packageManager, packagesToInstall, projectDir })

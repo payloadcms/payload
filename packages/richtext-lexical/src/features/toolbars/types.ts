@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 import type { BaseSelection, LexicalEditor } from 'lexical'
 import type React from 'react'
 

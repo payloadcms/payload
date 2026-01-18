@@ -1,9 +1,9 @@
 'use client'
 
-import type { CollectionSlug, JsonObject } from 'payload'
+import type { CollectionSlug, JsonObject } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { validateMimeType } from 'payload/shared'
+import { validateMimeType } from '@ruya.sa/payload/shared'
 import React, { useEffect } from 'react'
 import { toast } from 'sonner'
 

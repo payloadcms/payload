@@ -1,4 +1,4 @@
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'

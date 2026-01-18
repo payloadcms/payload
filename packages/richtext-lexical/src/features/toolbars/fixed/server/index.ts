@@ -45,7 +45,7 @@ export const FixedToolbarFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#FixedToolbarFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#FixedToolbarFeatureClient',
       clientFeatureProps: sanitizedProps,
       sanitizedServerFeatureProps: sanitizedProps,
     }

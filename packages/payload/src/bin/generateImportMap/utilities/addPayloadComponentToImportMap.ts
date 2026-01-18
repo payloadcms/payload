@@ -74,7 +74,7 @@ export function addPayloadComponentToImportMap({
       specifier: exportName,
     }
   } else {
-    // Tsconfig alias or package import, e.g. '@payloadcms/ui' or '@/components/MyComponent'
+    // Tsconfig alias or package import, e.g. '@ruya.sa/ui' or '@/components/MyComponent'
     imports[importIdentifier] = {
       path: componentPath,
       specifier: exportName,

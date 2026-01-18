@@ -1,6 +1,6 @@
 'use client'
 
-import type { FormField, UIField } from 'payload'
+import type { FormField, UIField } from '@ruya.sa/payload'
 
 import {
   useAllFormFields,
@@ -10,9 +10,9 @@ import {
   useForm,
   useLocale,
   useTranslation,
-} from '@payloadcms/ui'
-import { reduceToSerializableFields } from '@payloadcms/ui/shared'
-import { formatAdminURL } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { reduceToSerializableFields } from '@ruya.sa/ui/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'

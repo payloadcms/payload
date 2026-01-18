@@ -1,14 +1,14 @@
-import type { CreateMigration, MigrationTemplateArgs } from 'payload'
+import type { CreateMigration, MigrationTemplateArgs } from '@ruya.sa/payload'
 
 import fs from 'fs'
 import path from 'path'
-import { getPredefinedMigration, writeMigrationIndex } from 'payload'
+import { getPredefinedMigration, writeMigrationIndex } from '@ruya.sa/payload'
 import { fileURLToPath } from 'url'
 
 const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): string => `import {
   MigrateDownArgs,
   MigrateUpArgs,
-} from '@payloadcms/db-mongodb'
+} from '@ruya.sa/db-mongodb'
 ${imports ?? ''}
 export async function up({ payload, req, session }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}

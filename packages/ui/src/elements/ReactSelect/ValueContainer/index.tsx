@@ -1,8 +1,8 @@
 'use client'
-import type { OptionLabel } from 'payload'
+import type { OptionLabel } from '@ruya.sa/payload'
 import type { ValueContainerProps } from 'react-select'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 import { components as SelectComponents } from 'react-select'
 

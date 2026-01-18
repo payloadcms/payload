@@ -2,6 +2,6 @@ import type { RichTextCustomLeaf } from '../../../types.js'
 
 export const italic: RichTextCustomLeaf = {
   name: 'italic',
-  Button: '@payloadcms/richtext-slate/client#ItalicLeafButton',
-  Leaf: '@payloadcms/richtext-slate/client#ItalicLeaf',
+  Button: '@ruya.sa/richtext-slate/client#ItalicLeafButton',
+  Leaf: '@ruya.sa/richtext-slate/client#ItalicLeaf',
 }

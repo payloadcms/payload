@@ -1,8 +1,8 @@
 'use client'
-import type { I18nClient } from '@payloadcms/translations'
-import type { ClientBlock } from 'payload'
+import type { I18nClient } from '@ruya.sa/translations'
+import type { ClientBlock } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'

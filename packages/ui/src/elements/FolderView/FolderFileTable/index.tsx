@@ -1,7 +1,7 @@
 'use client'
 
-import { getTranslation } from '@payloadcms/translations'
-import { extractID } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { extractID } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { DocumentIcon } from '../../../icons/Document/index.js'

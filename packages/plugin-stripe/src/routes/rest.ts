@@ -1,6 +1,6 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from '@ruya.sa/payload'
 
-import { addDataAndFileToRequest, Forbidden } from 'payload'
+import { addDataAndFileToRequest, Forbidden } from '@ruya.sa/payload'
 
 import type { StripePluginConfig } from '../types.js'
 

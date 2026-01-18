@@ -1,11 +1,11 @@
 'use client'
 
-import type { I18nClient } from '@payloadcms/translations'
-import type { ClientConfig } from 'payload'
+import type { I18nClient } from '@ruya.sa/translations'
+import type { ClientConfig } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
-import { setsAreEqual } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { setsAreEqual } from '@ruya.sa/payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import { CheckboxInput } from '../../../fields/Checkbox/index.js'

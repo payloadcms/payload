@@ -1,4 +1,4 @@
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '@ruya.sa/payload'
 
 import fs from 'fs'
 import { printSchema } from 'graphql'

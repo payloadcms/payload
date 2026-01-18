@@ -5,8 +5,8 @@ import type {
   MigrateUpArgs,
   PostgresDB,
   PostgresSchemaHook,
-} from '@payloadcms/drizzle/postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+} from '@ruya.sa/drizzle/postgres'
+import type { DrizzleAdapter } from '@ruya.sa/drizzle/types'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -98,7 +98,7 @@ export type VercelPostgresAdapter = {
   poolOptions?: Args['pool']
 } & BasePostgresAdapter
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   export interface DatabaseAdapter
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {

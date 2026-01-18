@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 import type {
   ClientCollectionConfig,
   ClientConfig,
@@ -8,7 +8,7 @@ import type {
   StaticDescription,
   StaticLabel,
   ValueWithRelation,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type Option = {
   allowEdit: boolean

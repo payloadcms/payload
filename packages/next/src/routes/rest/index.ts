@@ -1,5 +1,5 @@
-import { handleEndpoints, type SanitizedConfig } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { handleEndpoints, type SanitizedConfig } from '@ruya.sa/payload'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 
 import { generateOGImage } from './og/index.js'
 

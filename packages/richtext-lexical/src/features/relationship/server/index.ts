@@ -1,4 +1,4 @@
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug } from '@ruya.sa/payload'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
@@ -48,7 +48,7 @@ export const RelationshipFeature = createServerFeature<
     // we don't need to pass maxDepth to the client, it's only used on the server
     const { maxDepth, ...clientFeatureProps } = props ?? {}
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#RelationshipFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#RelationshipFeatureClient',
       clientFeatureProps,
       i18n,
       nodes: [

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig } from '@ruya.sa/payload'
 
 import type { AllAccessKeys, MultiTenantPluginConfig } from '../types.js'
 

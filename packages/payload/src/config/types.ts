@@ -5,7 +5,7 @@ import type {
   I18nClient,
   I18nOptions,
   TFunction,
-} from '@payloadcms/translations'
+} from '@ruya.sa/translations'
 import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
@@ -1225,7 +1225,7 @@ export type Config = {
    * Pass in a KV adapter for use on this project.
    * @default `DatabaseKVAdapter` from:
    * ```ts
-   * import { createDatabaseKVAdapter } from 'payload'
+   * import { createDatabaseKVAdapter } from '@ruya.sa/payload'
    * createDatabaseKVAdapter()
    * ```
    */

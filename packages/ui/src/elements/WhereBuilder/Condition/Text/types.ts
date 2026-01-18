@@ -1,4 +1,4 @@
-import type { TextFieldClient } from 'payload'
+import type { TextFieldClient } from '@ruya.sa/payload'
 
 import type { DefaultFilterProps } from '../types.js'
 

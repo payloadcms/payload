@@ -1,6 +1,6 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type { Block, CollectionConfig, Field } from '@ruya.sa/payload'
 
-import { deepMergeWithSourceArrays } from 'payload'
+import { deepMergeWithSourceArrays } from '@ruya.sa/payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 

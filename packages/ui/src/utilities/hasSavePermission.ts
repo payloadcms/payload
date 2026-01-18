@@ -2,7 +2,7 @@ import type {
   SanitizedCollectionPermission,
   SanitizedDocumentPermissions,
   SanitizedGlobalPermission,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export const hasSavePermission = (args: {
   /*

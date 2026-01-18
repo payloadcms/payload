@@ -1,4 +1,4 @@
-import type { RelationshipField, UploadField } from 'payload'
+import type { RelationshipField, UploadField } from '@ruya.sa/payload'
 
 type Args = {
   field: RelationshipField | UploadField

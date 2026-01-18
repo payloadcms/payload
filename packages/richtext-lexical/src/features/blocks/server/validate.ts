@@ -1,6 +1,6 @@
-import type { Block } from 'payload'
+import type { Block } from '@ruya.sa/payload'
 
-import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
+import { fieldSchemasToFormState } from '@ruya.sa/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
 import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'

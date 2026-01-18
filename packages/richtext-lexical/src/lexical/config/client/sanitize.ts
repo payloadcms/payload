@@ -2,7 +2,7 @@
 
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
-import { deepMerge } from 'payload/shared'
+import { deepMerge } from '@ruya.sa/payload/shared'
 
 import type { ToolbarGroup } from '../../../features/toolbars/types.js'
 import type {

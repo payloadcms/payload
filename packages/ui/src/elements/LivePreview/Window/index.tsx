@@ -1,8 +1,8 @@
 'use client'
 
-import type { EditViewProps } from 'payload'
+import type { EditViewProps } from '@ruya.sa/payload'
 
-import { reduceFieldsToValues } from 'payload/shared'
+import { reduceFieldsToValues } from '@ruya.sa/payload/shared'
 import React, { useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'

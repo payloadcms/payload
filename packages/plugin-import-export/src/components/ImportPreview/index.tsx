@@ -1,8 +1,8 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, ConditionalDateProps, PaginatedDocs } from 'payload'
+import type { Column } from '@ruya.sa/ui'
+import type { ClientField, ConditionalDateProps, PaginatedDocs } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   Pagination,
   PerPage,
@@ -14,9 +14,9 @@ import {
   useField,
   useFormFields,
   useTranslation,
-} from '@payloadcms/ui'
-import { formatDocTitle } from '@payloadcms/ui/shared'
-import { fieldAffectsData } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { formatDocTitle } from '@ruya.sa/ui/shared'
+import { fieldAffectsData } from '@ruya.sa/payload/shared'
 import React, { useState, useTransition } from 'react'
 
 import type {

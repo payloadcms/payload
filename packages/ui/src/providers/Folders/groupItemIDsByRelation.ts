@@ -1,4 +1,4 @@
-import type { FolderOrDocument } from 'payload/shared'
+import type { FolderOrDocument } from '@ruya.sa/payload/shared'
 
 export function groupItemIDsByRelation(items: FolderOrDocument[]) {
   return items.reduce(

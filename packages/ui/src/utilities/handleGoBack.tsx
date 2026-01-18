@@ -1,6 +1,6 @@
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime.js'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 
 type GoBackProps = {
   adminRoute: string

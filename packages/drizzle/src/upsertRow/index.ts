@@ -1,6 +1,6 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SelectedFields } from 'drizzle-orm/sqlite-core'
-import type { TypeWithID } from 'payload'
+import type { TypeWithID } from '@ruya.sa/payload'
 
 import { and, desc, eq, isNull, or } from 'drizzle-orm'
 

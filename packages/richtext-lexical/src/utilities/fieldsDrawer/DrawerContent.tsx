@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState } from '@ruya.sa/payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
@@ -10,9 +10,9 @@ import {
   useDocumentInfo,
   useServerFunctions,
   useTranslation,
-} from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { abortAndIgnore } from '@ruya.sa/ui/shared'
+import { deepCopyObjectSimpleWithoutReactComponents } from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 

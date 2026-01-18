@@ -2,7 +2,7 @@
 import type { BaseSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { useModal } from '@payloadcms/ui'
+import { useModal } from '@ruya.sa/ui'
 import { $getPreviousSelection, $getSelection, $setSelection } from 'lexical'
 import { useCallback, useEffect, useState } from 'react'
 

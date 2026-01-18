@@ -10,11 +10,11 @@ import type {
   SelectType,
   ViewTypes,
   Where,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { renderTable } from '@payloadcms/ui/rsc'
-import { formatDate } from '@payloadcms/ui/shared'
-import { flattenAllFields } from 'payload'
+import { renderTable } from '@ruya.sa/ui/rsc'
+import { formatDate } from '@ruya.sa/ui/shared'
+import { flattenAllFields } from '@ruya.sa/payload'
 
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'

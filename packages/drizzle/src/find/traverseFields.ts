@@ -13,8 +13,8 @@ import {
   type SelectMode,
   type SelectType,
   type Where,
-} from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
+} from '@ruya.sa/payload'
+import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'

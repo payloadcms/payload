@@ -1,12 +1,12 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 import type {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
   StaticLabel,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 /**
  * @deprecated Import from `payload` instead

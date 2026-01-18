@@ -10,11 +10,11 @@ import type {
   SanitizedConfig,
   SanitizedGlobalConfig,
   ViewTypes,
-} from 'payload'
+} from '@ruya.sa/payload'
 import type React from 'react'
 
-import { parseDocumentID } from 'payload'
-import { formatAdminURL, isNumber } from 'payload/shared'
+import { parseDocumentID } from '@ruya.sa/payload'
+import { formatAdminURL, isNumber } from '@ruya.sa/payload/shared'
 
 import { AccountView } from '../Account/index.js'
 import { BrowseByFolder } from '../BrowseByFolder/index.js'

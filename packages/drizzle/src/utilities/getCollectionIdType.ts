@@ -1,4 +1,4 @@
-import type { Collection } from 'payload'
+import type { Collection } from '@ruya.sa/payload'
 
 import type { DrizzleAdapter } from '../types.js'
 

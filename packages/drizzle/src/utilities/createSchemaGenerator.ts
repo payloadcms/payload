@@ -1,4 +1,4 @@
-import type { GenerateSchema } from 'payload'
+import type { GenerateSchema } from '@ruya.sa/payload'
 
 import { existsSync } from 'fs'
 import { writeFile } from 'fs/promises'

@@ -4,10 +4,10 @@ import type {
   SerializedTableRowNode as _SerializedTableRowNode,
 } from '@lexical/table'
 import type { SerializedLexicalNode } from 'lexical'
-import type { Config, Field, FieldSchemaMap } from 'payload'
+import type { Config, Field, FieldSchemaMap } from '@ruya.sa/payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
-import { sanitizeFields } from 'payload'
+import { sanitizeFields } from '@ruya.sa/payload'
 
 import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
@@ -51,7 +51,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       validRelationships,
     })
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#TableFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#TableFeatureClient',
       generateSchemaMap: () => {
         const schemaMap: FieldSchemaMap = new Map()
 

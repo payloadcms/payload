@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
+import type { CollectionConfig, Field, GroupField, TextField } from '@ruya.sa/payload'
 
 import path from 'path'
 

@@ -1,8 +1,8 @@
 'use client'
-import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
+import type { DateFieldClientComponent, DateFieldValidation } from '@ruya.sa/payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import { transpose } from 'date-fns'
 import { useCallback, useMemo } from 'react'
 

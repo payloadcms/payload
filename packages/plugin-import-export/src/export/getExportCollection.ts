@@ -3,7 +3,7 @@ import type {
   CollectionBeforeOperationHook,
   CollectionConfig,
   Config,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { ExportConfig, ImportExportPluginConfig } from '../types.js'
 import type { Export } from './createExport.js'
@@ -40,7 +40,7 @@ export const getExportCollection = ({
     admin: {
       components: {
         edit: {
-          SaveButton: '@payloadcms/plugin-import-export/rsc#ExportSaveButton',
+          SaveButton: '@ruya.sa/plugin-import-export/rsc#ExportSaveButton',
         },
       },
       custom: {

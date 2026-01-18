@@ -1,4 +1,4 @@
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from '@ruya.sa/payload'
 
 import { isValidReactElement } from './isValidReactElement.js'
 

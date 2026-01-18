@@ -23,8 +23,8 @@ export const addFolderFieldToCollection = ({
           allowCreate: false,
           allowEdit: false,
           components: {
-            Cell: '@payloadcms/ui/rsc#FolderTableCell',
-            Field: '@payloadcms/ui/rsc#FolderField',
+            Cell: '@ruya.sa/ui/rsc#FolderTableCell',
+            Field: '@ruya.sa/ui/rsc#FolderField',
           },
         },
       },

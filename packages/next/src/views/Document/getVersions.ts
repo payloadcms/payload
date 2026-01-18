@@ -1,4 +1,4 @@
-import { sanitizeID } from '@payloadcms/ui/shared'
+import { sanitizeID } from '@ruya.sa/ui/shared'
 import {
   combineQueries,
   extractAccessFromPermission,
@@ -7,8 +7,8 @@ import {
   type SanitizedDocumentPermissions,
   type SanitizedGlobalConfig,
   type TypedUser,
-} from 'payload'
-import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
+} from '@ruya.sa/payload'
+import { hasAutosaveEnabled, hasDraftsEnabled } from '@ruya.sa/payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig

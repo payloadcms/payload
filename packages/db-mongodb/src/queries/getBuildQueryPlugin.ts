@@ -1,6 +1,6 @@
-import type { FlattenedField, Payload, Where } from 'payload'
+import type { FlattenedField, Payload, Where } from '@ruya.sa/payload'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 
 import { parseParams } from './parseParams.js'
 

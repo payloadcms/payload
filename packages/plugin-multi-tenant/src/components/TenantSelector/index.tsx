@@ -1,4 +1,4 @@
-import type { ServerProps } from 'payload'
+import type { ServerProps } from '@ruya.sa/payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 

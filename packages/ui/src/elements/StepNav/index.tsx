@@ -1,6 +1,6 @@
 'use client'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { Fragment } from 'react'
 
 import type { StepNavItem } from './types.js'

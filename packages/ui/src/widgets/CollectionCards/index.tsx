@@ -1,8 +1,8 @@
-import type { WidgetServerProps } from 'payload'
+import type { WidgetServerProps } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { EntityType, getAccessResults } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { EntityType, getAccessResults } from '@ruya.sa/payload'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { Button } from '../../elements/Button/index.js'

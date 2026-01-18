@@ -1,11 +1,11 @@
-import type { ClientField, FormState, SanitizedFieldPermissions } from 'payload'
+import type { ClientField, FormState, SanitizedFieldPermissions } from '@ruya.sa/payload'
 
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsHiddenOrDisabled,
   getFieldPermissions,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'

@@ -1,4 +1,4 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@ruya.sa/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -23,7 +23,7 @@ import type {
   TypedFallbackLocale,
   ValidateOptions,
   ValidationFieldError,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'

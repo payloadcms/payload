@@ -1,3 +1,3 @@
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '@ruya.sa/payload'
 
 export default {} as Promise<SanitizedConfig>

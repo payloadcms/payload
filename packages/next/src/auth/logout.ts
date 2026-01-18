@@ -1,9 +1,9 @@
 'use server'
 
-import type { SanitizedConfig } from 'payload'
+import type { SanitizedConfig } from '@ruya.sa/payload'
 
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
-import { createLocalReq, getPayload, logoutOperation } from 'payload'
+import { createLocalReq, getPayload, logoutOperation } from '@ruya.sa/payload'
 
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 

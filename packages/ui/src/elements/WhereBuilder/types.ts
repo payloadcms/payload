@@ -4,7 +4,7 @@ import type {
   ResolvedFilterOptions,
   SanitizedCollectionConfig,
   Where,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type WhereBuilderProps = {
   readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']

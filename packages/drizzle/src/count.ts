@@ -1,4 +1,4 @@
-import type { Count, SanitizedCollectionConfig } from 'payload'
+import type { Count, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import toSnakeCase from 'to-snake-case'
 

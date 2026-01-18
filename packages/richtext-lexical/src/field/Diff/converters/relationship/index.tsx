@@ -1,10 +1,10 @@
-import type { FileData, PayloadRequest, TypeWithID } from 'payload'
+import type { FileData, PayloadRequest, TypeWithID } from '@ruya.sa/payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { getTranslation, type I18nClient } from '@ruya.sa/translations'
 
 import './index.scss'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedRelationshipNode } from '../../../../nodeTypes.js'

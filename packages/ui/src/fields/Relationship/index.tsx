@@ -1,5 +1,5 @@
 'use client'
-import type { RelationshipFieldClientComponent, ValueWithRelation } from 'payload'
+import type { RelationshipFieldClientComponent, ValueWithRelation } from '@ruya.sa/payload'
 
 import React, { useCallback, useMemo } from 'react'
 

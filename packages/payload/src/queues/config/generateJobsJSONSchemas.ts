@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18n } from '@ruya.sa/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedConfig } from '../../config/types.js'

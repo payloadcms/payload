@@ -1,12 +1,12 @@
-import type { FileData, PayloadRequest, TypeWithID } from 'payload'
+import type { FileData, PayloadRequest, TypeWithID } from '@ruya.sa/payload'
 
-import { type I18nClient } from '@payloadcms/translations'
-import { File } from '@payloadcms/ui/rsc'
+import { type I18nClient } from '@ruya.sa/translations'
+import { File } from '@ruya.sa/ui/rsc'
 import { createHash } from 'crypto'
 
 import './index.scss'
 
-import { formatFilesize } from 'payload/shared'
+import { formatFilesize } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'

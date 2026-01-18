@@ -1,5 +1,5 @@
 'use client'
-import { toast, useRouteTransition } from '@payloadcms/ui'
+import { toast, useRouteTransition } from '@ruya.sa/ui'
 import { useRouter } from 'next/navigation.js'
 import React, { useEffect } from 'react'
 

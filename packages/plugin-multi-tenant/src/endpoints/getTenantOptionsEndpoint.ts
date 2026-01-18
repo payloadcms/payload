@@ -1,6 +1,6 @@
-import type { Endpoint } from 'payload'
+import type { Endpoint } from '@ruya.sa/payload'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 

@@ -18,17 +18,17 @@
     "generate:importmap": "payload generate:importmap",
     "generate:types": "payload generate:types",
     "lint": "next lint",
-    "payload": "payload",
+    "@ruya.sa/payload": "payload",
     "start": "next start"
   },
   "dependencies": {
-    "@payloadcms/db-mongodb": "latest",
-    "@payloadcms/next": "latest",
-    "@payloadcms/richtext-lexical": "latest",
+    "@ruya.sa/db-mongodb": "latest",
+    "@ruya.sa/next": "latest",
+    "@ruya.sa/richtext-lexical": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "^15.4.10",
-    "payload": "latest",
+    "@ruya.sa/payload": "latest",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "sharp": "0.32.6"

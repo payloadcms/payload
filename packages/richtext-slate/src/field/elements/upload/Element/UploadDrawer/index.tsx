@@ -1,9 +1,9 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { FormProps } from '@ruya.sa/ui'
+import type { ClientCollectionConfig } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   Drawer,
   EditDepthProvider,
@@ -16,8 +16,8 @@ import {
   useModal,
   useServerFunctions,
   useTranslation,
-} from '@payloadcms/ui'
-import { deepCopyObject } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { deepCopyObject } from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'

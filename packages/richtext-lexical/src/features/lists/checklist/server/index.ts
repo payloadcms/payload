@@ -10,7 +10,7 @@ import { i18n } from './i18n.js'
 export const ChecklistFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#ChecklistFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#ChecklistFeatureClient',
       i18n,
       markdownTransformers: [CHECK_LIST],
       nodes: shouldRegisterListBaseNodes('checklist', featureProviderMap)

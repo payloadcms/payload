@@ -1,10 +1,10 @@
 import type { SQL, Table } from 'drizzle-orm'
-import type { FlattenedField, Operator, Sort, Where } from 'payload'
+import type { FlattenedField, Operator, Sort, Where } from '@ruya.sa/payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
-import { APIError, QueryError } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { APIError, QueryError } from '@ruya.sa/payload'
+import { validOperatorSet } from '@ruya.sa/payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'

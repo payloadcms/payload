@@ -1,6 +1,6 @@
-import type { Config } from 'payload'
+import type { Config } from '@ruya.sa/payload'
 
-import { deepMergeSimple } from 'payload'
+import { deepMergeSimple } from '@ruya.sa/payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
@@ -52,7 +52,7 @@ export const importExportPlugin =
     config.admin.components = config.admin.components || {}
     config.admin.components.providers = config.admin.components.providers || []
     config.admin.components.providers.push(
-      '@payloadcms/plugin-import-export/rsc#ImportExportProvider',
+      '@ruya.sa/plugin-import-export/rsc#ImportExportProvider',
     )
 
     // inject the createExport and createImport jobs into the config
@@ -110,7 +110,7 @@ export const importExportPlugin =
           clientProps: {
             exportCollectionSlug: exportSlugForCollection,
           },
-          path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
+          path: '@ruya.sa/plugin-import-export/rsc#ExportListMenuItem',
         })
       }
 
@@ -120,7 +120,7 @@ export const importExportPlugin =
           clientProps: {
             importCollectionSlug: importSlugForCollection,
           },
-          path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
+          path: '@ruya.sa/plugin-import-export/rsc#ImportListMenuItem',
         })
       }
 
@@ -162,7 +162,7 @@ export const importExportPlugin =
     return config
   }
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   export interface FieldCustom {
     'plugin-import-export'?: {
       /**

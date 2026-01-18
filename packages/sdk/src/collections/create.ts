@@ -4,7 +4,7 @@ import type {
   SelectType,
   TypedLocale,
   UploadCollectionSlug,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {

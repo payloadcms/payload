@@ -14,9 +14,9 @@ import type {
   StaticDescription,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps

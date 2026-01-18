@@ -1,5 +1,5 @@
 'use client'
-import type { JSONFieldClientComponent, JsonObject } from 'payload'
+import type { JSONFieldClientComponent, JsonObject } from '@ruya.sa/payload'
 
 import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'

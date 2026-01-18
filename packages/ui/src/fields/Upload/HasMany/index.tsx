@@ -1,5 +1,5 @@
 'use client'
-import type { JsonObject } from 'payload'
+import type { JsonObject } from '@ruya.sa/payload'
 
 import React from 'react'
 
@@ -11,7 +11,7 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
-import { getBestFitFromSizes, isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from '@ruya.sa/payload/shared'
 
 import './index.scss'
 

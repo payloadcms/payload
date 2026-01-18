@@ -1,8 +1,8 @@
-import type { I18n } from '@payloadcms/translations'
-import type { Field, FieldSchemaMap, SanitizedConfig, TabAsField } from 'payload'
+import type { I18n } from '@ruya.sa/translations'
+import type { Field, FieldSchemaMap, SanitizedConfig, TabAsField } from '@ruya.sa/payload'
 
-import { MissingEditorProp } from 'payload'
-import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
+import { MissingEditorProp } from '@ruya.sa/payload'
+import { fieldAffectsData, getFieldPaths, tabHasName } from '@ruya.sa/payload/shared'
 
 type Args = {
   config: SanitizedConfig

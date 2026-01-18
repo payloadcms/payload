@@ -5,7 +5,7 @@ import './index.scss'
 
 const baseClass = 'thumbnail'
 
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import { File } from '../../graphics/File/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'

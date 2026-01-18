@@ -1,4 +1,4 @@
-import type { CollectionSlug, Field, FieldAffectingData, SanitizedConfig } from 'payload'
+import type { CollectionSlug, Field, FieldAffectingData, SanitizedConfig } from '@ruya.sa/payload'
 
 import { getBaseFields } from './baseFields.js'
 

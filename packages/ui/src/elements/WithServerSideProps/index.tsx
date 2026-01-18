@@ -1,6 +1,6 @@
-import type { WithServerSidePropsComponent } from 'payload'
+import type { WithServerSidePropsComponent } from '@ruya.sa/payload'
 
-import { isReactServerComponentOrFunction } from 'payload/shared'
+import { isReactServerComponentOrFunction } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 export const WithServerSideProps: WithServerSidePropsComponent = ({

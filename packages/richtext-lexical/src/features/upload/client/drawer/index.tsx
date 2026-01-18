@@ -1,10 +1,10 @@
 'use client'
-import type { ListDrawerProps } from '@payloadcms/ui'
+import type { ListDrawerProps } from '@ruya.sa/ui'
 import type { LexicalEditor } from 'lexical'
-import type { UploadCollectionSlug } from 'payload'
+import type { UploadCollectionSlug } from '@ruya.sa/payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { toast } from '@payloadcms/ui'
+import { toast } from '@ruya.sa/ui'
 import { $getNodeByKey, COMMAND_PRIORITY_EDITOR } from 'lexical'
 import React, { useCallback, useEffect, useState } from 'react'
 

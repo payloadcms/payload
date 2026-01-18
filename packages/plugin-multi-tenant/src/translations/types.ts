@@ -1,4 +1,4 @@
-import type { Language } from '@payloadcms/translations'
+import type { Language } from '@ruya.sa/translations'
 
 import type { enTranslations } from './languages/en.js'
 

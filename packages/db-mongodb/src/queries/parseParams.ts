@@ -1,8 +1,8 @@
 import type { FilterQuery } from 'mongoose'
-import type { FlattenedField, Operator, Payload, Where } from 'payload'
+import type { FlattenedField, Operator, Payload, Where } from '@ruya.sa/payload'
 
-import { deepMergeWithCombinedArrays } from 'payload'
-import { validOperatorSet } from 'payload/shared'
+import { deepMergeWithCombinedArrays } from '@ruya.sa/payload'
+import { validOperatorSet } from '@ruya.sa/payload/shared'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'

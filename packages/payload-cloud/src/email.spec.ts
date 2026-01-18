@@ -1,7 +1,7 @@
-import type { Config, Payload } from 'payload'
+import type { Config, Payload } from '@ruya.sa/payload'
 import { describe, beforeAll, beforeEach, it, expect, vitest } from 'vitest'
 import nodemailer from 'nodemailer'
-import { defaults } from 'payload'
+import { defaults } from '@ruya.sa/payload'
 
 import { payloadCloudEmail } from './email.js'
 

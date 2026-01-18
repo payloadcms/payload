@@ -1,7 +1,7 @@
 'use client'
-import type { SelectType, TypeWithID } from 'payload'
+import type { SelectType, TypeWithID } from '@ruya.sa/payload'
 
-import { appendUploadSelectFields, formatAdminURL } from 'payload/shared'
+import { appendUploadSelectFields, formatAdminURL } from '@ruya.sa/payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 

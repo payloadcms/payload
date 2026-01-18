@@ -1,4 +1,4 @@
-import type { Execute } from '@payloadcms/drizzle'
+import type { Execute } from '@ruya.sa/drizzle'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 
 import { sql } from 'drizzle-orm'

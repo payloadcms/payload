@@ -1,4 +1,4 @@
-import type { ClientField, ColumnPreference, Field } from 'payload'
+import type { ClientField, ColumnPreference, Field } from '@ruya.sa/payload'
 
 function getAccessor(field) {
   return field.accessor ?? ('name' in field ? field.name : undefined)

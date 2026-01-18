@@ -1,4 +1,4 @@
-import type { ArrayField, RelationshipField } from 'payload'
+import type { ArrayField, RelationshipField } from '@ruya.sa/payload'
 
 import { defaults } from '../../defaults.js'
 

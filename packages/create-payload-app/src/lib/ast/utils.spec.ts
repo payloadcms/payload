@@ -14,31 +14,31 @@ describe('findImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+      `import { buildConfig } from '@ruya.sa/payload'
+import { mongooseAdapter } from '@ruya.sa/db-mongodb'`,
     )
 
-    const result = findImportDeclaration({ sourceFile, moduleSpecifier: '@payloadcms/db-mongodb' })
+    const result = findImportDeclaration({ sourceFile, moduleSpecifier: '@ruya.sa/db-mongodb' })
 
     expect(result).toBeDefined()
-    expect(result?.getModuleSpecifierValue()).toBe('@payloadcms/db-mongodb')
+    expect(result?.getModuleSpecifierValue()).toBe('@ruya.sa/db-mongodb')
   })
 })
 
 describe('addImportDeclaration', () => {
   it('adds new import when not present', () => {
     const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from '@ruya.sa/payload'`)
 
     const result = addImportDeclaration({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-postgres',
+      moduleSpecifier: '@ruya.sa/db-postgres',
       namedImports: ['postgresAdapter'],
     })
 
     const imports = result.getImportDeclarations()
     expect(imports).toHaveLength(2)
-    expect(imports[1].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
+    expect(imports[1].getModuleSpecifierValue()).toBe('@ruya.sa/db-postgres')
     expect(imports[1].getNamedImports()[0].getName()).toBe('postgresAdapter')
   })
 
@@ -46,12 +46,12 @@ describe('addImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+      `import { mongooseAdapter } from '@ruya.sa/db-mongodb'`,
     )
 
     const result = addImportDeclaration({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
+      moduleSpecifier: '@ruya.sa/db-mongodb',
       namedImports: ['mongooseAdapter'],
     })
 
@@ -61,7 +61,7 @@ describe('addImportDeclaration', () => {
 
   it('adds named import to existing module import', () => {
     const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from '@ruya.sa/payload'`)
 
     const result = addImportDeclaration({
       sourceFile,
@@ -82,7 +82,7 @@ describe('removeImportDeclaration', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { buildConfig } from 'payload'
+      `import { buildConfig } from '@ruya.sa/payload'
 import sharp from 'sharp'`,
     )
 
@@ -96,7 +96,7 @@ import sharp from 'sharp'`,
 
   it('returns undefined removedIndex when import not found', () => {
     const project = new Project({ useInMemoryFileSystem: true })
-    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from 'payload'`)
+    const sourceFile = project.createSourceFile('test.ts', `import { buildConfig } from '@ruya.sa/payload'`)
 
     const result = removeImportDeclaration({ sourceFile, moduleSpecifier: 'sharp' })
 
@@ -109,12 +109,12 @@ describe('removeNamedImports', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter, SomeOtherType } from '@payloadcms/db-mongodb'`,
+      `import { mongooseAdapter, SomeOtherType } from '@ruya.sa/db-mongodb'`,
     )
 
     const importDecl = findImportDeclaration({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
+      moduleSpecifier: '@ruya.sa/db-mongodb',
     })!
 
     const result = removeNamedImports({
@@ -134,13 +134,13 @@ describe('removeNamedImports', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { buildConfig } from 'payload'
-import { mongooseAdapter } from '@payloadcms/db-mongodb'`,
+      `import { buildConfig } from '@ruya.sa/payload'
+import { mongooseAdapter } from '@ruya.sa/db-mongodb'`,
     )
 
     const importDecl = findImportDeclaration({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
+      moduleSpecifier: '@ruya.sa/db-mongodb',
     })!
 
     const result = removeNamedImports({
@@ -162,7 +162,7 @@ describe('isNamedImportUsed', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+      `import { mongooseAdapter } from '@ruya.sa/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({ url: '' })
@@ -178,8 +178,8 @@ export default buildConfig({
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { postgresAdapter } from '@payloadcms/db-postgres'
+      `import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+import { postgresAdapter } from '@ruya.sa/db-postgres'
 
 export default buildConfig({
   db: postgresAdapter({ url: '' })
@@ -197,8 +197,8 @@ describe('cleanupOrphanedImports', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
-import { postgresAdapter } from '@payloadcms/db-postgres'
+      `import { mongooseAdapter } from '@ruya.sa/db-mongodb'
+import { postgresAdapter } from '@ruya.sa/db-postgres'
 
 export default buildConfig({
   db: postgresAdapter({ url: '' })
@@ -207,7 +207,7 @@ export default buildConfig({
 
     const result = cleanupOrphanedImports({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
+      moduleSpecifier: '@ruya.sa/db-mongodb',
       importNames: ['mongooseAdapter'],
     })
 
@@ -215,14 +215,14 @@ export default buildConfig({
     expect(result.kept).toEqual([])
     const imports = result.sourceFile.getImportDeclarations()
     expect(imports).toHaveLength(1)
-    expect(imports[0].getModuleSpecifierValue()).toBe('@payloadcms/db-postgres')
+    expect(imports[0].getModuleSpecifierValue()).toBe('@ruya.sa/db-postgres')
   })
 
   it('keeps used imports', () => {
     const project = new Project({ useInMemoryFileSystem: true })
     const sourceFile = project.createSourceFile(
       'test.ts',
-      `import { mongooseAdapter } from '@payloadcms/db-mongodb'
+      `import { mongooseAdapter } from '@ruya.sa/db-mongodb'
 
 export default buildConfig({
   db: mongooseAdapter({ url: '' })
@@ -231,7 +231,7 @@ export default buildConfig({
 
     const result = cleanupOrphanedImports({
       sourceFile,
-      moduleSpecifier: '@payloadcms/db-mongodb',
+      moduleSpecifier: '@ruya.sa/db-mongodb',
       importNames: ['mongooseAdapter'],
     })
 

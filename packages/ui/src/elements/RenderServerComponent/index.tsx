@@ -1,6 +1,6 @@
-import type { ImportMap, PayloadComponent } from 'payload'
+import type { ImportMap, PayloadComponent } from '@ruya.sa/payload'
 
-import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
+import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'

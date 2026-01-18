@@ -272,7 +272,7 @@ export interface Auth {
 }
 
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
@@ -546,7 +546,7 @@ export interface Auth {
 }
 
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

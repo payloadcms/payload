@@ -1,6 +1,6 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@ruya.sa/translations'
 
-import { initI18n } from '@payloadcms/translations'
+import { initI18n } from '@ruya.sa/translations'
 import fs from 'fs/promises'
 import { compile } from 'json-schema-to-typescript'
 
@@ -31,8 +31,8 @@ export async function generateTypes(
 
   const jsonSchema = configToJSONSchema(config, config.db.defaultIDType, i18n)
 
-  const declare = `declare module 'payload' {\n  export interface GeneratedTypes extends Config {}\n}`
-  const declareWithTSIgnoreError = `declare module 'payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
+  const declare = `declare module '@ruya.sa/payload' {\n  export interface GeneratedTypes extends Config {}\n}`
+  const declareWithTSIgnoreError = `declare module '@ruya.sa/payload' {\n  // @ts-ignore \n  export interface GeneratedTypes extends Config {}\n}`
 
   let compiled = await compile(jsonSchema, 'Config', {
     bannerComment:

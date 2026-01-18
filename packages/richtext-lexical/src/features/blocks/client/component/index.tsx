@@ -2,7 +2,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   Button,
   Collapsible,
@@ -22,16 +22,16 @@ import {
   useFormSubmitted,
   useServerFunctions,
   useTranslation,
-} from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
+} from '@ruya.sa/ui'
+import { abortAndIgnore } from '@ruya.sa/ui/shared'
 import { $getNodeByKey } from 'lexical'
 import {
   type BlocksFieldClient,
   type ClientBlock,
   type CollapsedPreferences,
   type FormState,
-} from 'payload'
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+} from '@ruya.sa/payload'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 

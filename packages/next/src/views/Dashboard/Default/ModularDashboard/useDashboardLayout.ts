@@ -1,4 +1,4 @@
-import type { WidgetWidth } from 'payload'
+import type { WidgetWidth } from '@ruya.sa/payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import {
@@ -8,7 +8,7 @@ import {
   useModal,
   usePreferences,
   useServerFunctions,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import React, { useCallback, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'

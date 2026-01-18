@@ -1,4 +1,4 @@
-import type { PaginatedDocs, PayloadRequest, SanitizedCollectionConfig } from 'payload'
+import type { PaginatedDocs, PayloadRequest, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 /**
  * Enriches list view documents with correct draft status display.

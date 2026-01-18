@@ -10,10 +10,10 @@ import {
   useEditDepth,
   useEffectEvent,
   useField,
-} from '@payloadcms/ui'
-import { mergeFieldStyles } from '@payloadcms/ui/shared'
+} from '@ruya.sa/ui'
+import { mergeFieldStyles } from '@ruya.sa/ui/shared'
 import { dequal } from 'dequal/lite'
-import { type Validate } from 'payload'
+import { type Validate } from '@ruya.sa/payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 

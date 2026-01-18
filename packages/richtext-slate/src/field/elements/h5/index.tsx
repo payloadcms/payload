@@ -8,7 +8,7 @@ export const h5: RichTextCustomElement = {
     clientProps: {
       format: name,
     },
-    path: '@payloadcms/richtext-slate/client#H5ElementButton',
+    path: '@ruya.sa/richtext-slate/client#H5ElementButton',
   },
-  Element: '@payloadcms/richtext-slate/client#Heading5Element',
+  Element: '@ruya.sa/richtext-slate/client#Heading5Element',
 }

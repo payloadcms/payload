@@ -1,7 +1,7 @@
 'use client'
-import type { ClientField } from 'payload'
+import type { ClientField } from '@ruya.sa/payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData } from '@ruya.sa/payload/shared'
 
 export const buildPathSegments = (fields: ClientField[]): (`${string}.` | string)[] => {
   return fields.reduce((acc: (`${string}.` | string)[], field) => {

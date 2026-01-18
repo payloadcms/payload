@@ -1,5 +1,5 @@
 import type { OperationArgs } from 'graphql-http'
-import type { GraphQLInfo, SanitizedConfig } from 'payload'
+import type { GraphQLInfo, SanitizedConfig } from '@ruya.sa/payload'
 
 import * as GraphQL from 'graphql'
 

@@ -1,5 +1,5 @@
 'use client'
-import type { FieldPaths } from 'payload'
+import type { FieldPaths } from '@ruya.sa/payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import React from 'react'

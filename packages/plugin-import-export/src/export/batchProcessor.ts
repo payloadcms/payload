@@ -2,7 +2,7 @@
  * Export-specific batch processor for processing documents in batches during export.
  * Uses the generic batch processing utilities from useBatchProcessor.
  */
-import type { PayloadRequest, SelectType, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, SelectType, Sort, TypedUser, Where } from '@ruya.sa/payload'
 
 import { type BatchProcessorOptions } from '../utilities/useBatchProcessor.js'
 

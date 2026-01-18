@@ -1,6 +1,6 @@
-import type { MetaConfig } from 'payload'
+import type { MetaConfig } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 

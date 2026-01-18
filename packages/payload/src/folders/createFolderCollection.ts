@@ -86,7 +86,7 @@ export const createFolderCollection = ({
               admin: {
                 components: {
                   Field: {
-                    path: '@payloadcms/ui#FolderTypeField',
+                    path: '@ruya.sa/ui#FolderTypeField',
                   },
                 },
                 position: 'sidebar',

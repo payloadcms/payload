@@ -1,10 +1,10 @@
 'use client'
 
-import type { ClientCollectionConfig, SelectType } from 'payload'
+import type { ClientCollectionConfig, SelectType } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
-import { unflatten } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { unflatten } from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../../forms/Form/index.js'

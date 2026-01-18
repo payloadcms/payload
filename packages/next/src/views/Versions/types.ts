@@ -1,11 +1,11 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18n } from '@ruya.sa/translations'
 import type {
   PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
   TypedUser,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type DefaultVersionsViewProps = {
   canAccessAdmin: boolean

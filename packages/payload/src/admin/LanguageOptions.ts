@@ -1,4 +1,4 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@ruya.sa/translations'
 
 export type LanguageOptions = {
   label: string

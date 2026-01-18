@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { RichTextField, Validate } from 'payload'
+import type { RichTextField, Validate } from '@ruya.sa/payload'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 

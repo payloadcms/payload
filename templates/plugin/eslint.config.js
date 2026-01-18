@@ -1,6 +1,6 @@
 // @ts-check
 
-import payloadEsLintConfig from '@payloadcms/eslint-config'
+import payloadEsLintConfig from '@ruya.sa/eslint-config'
 
 export const defaultESLintIgnores = [
   '**/.temp',

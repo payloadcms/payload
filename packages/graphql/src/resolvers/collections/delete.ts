@@ -1,6 +1,6 @@
-import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
+import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from '@ruya.sa/payload'
 
-import { deleteByIDOperation, isolateObjectProperty } from 'payload'
+import { deleteByIDOperation, isolateObjectProperty } from '@ruya.sa/payload'
 
 import type { Context } from '../types.js'
 

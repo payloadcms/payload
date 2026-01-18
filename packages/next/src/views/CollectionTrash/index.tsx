@@ -1,4 +1,4 @@
-import type { AdminViewServerProps, ListQuery } from 'payload'
+import type { AdminViewServerProps, ListQuery } from '@ruya.sa/payload'
 import type React from 'react'
 
 import { notFound } from 'next/navigation.js'

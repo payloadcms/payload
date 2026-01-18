@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig } from '@ruya.sa/payload'
 
 import {
   useConfig,
@@ -10,7 +10,7 @@ import {
   useFormFields,
   useFormSubmitted,
   useOperation,
-} from '@payloadcms/ui'
+} from '@ruya.sa/ui'
 import React from 'react'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'

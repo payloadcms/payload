@@ -6,7 +6,7 @@ import type {
   SelectType,
   TabAsField,
   TypedUser,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { defaultValuePromise } from './promise.js'
 

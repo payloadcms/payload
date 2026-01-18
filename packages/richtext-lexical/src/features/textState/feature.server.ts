@@ -27,7 +27,7 @@ export type TextStateFeatureProps = {
    *
    *
    * @example
-   * import { defaultColors } from '@payloadcms/richtext-lexical'
+   * import { defaultColors } from '@ruya.sa/richtext-lexical'
    *
    * state: {
    *   color: {
@@ -68,7 +68,7 @@ export const TextStateFeature = createServerFeature<
 >({
   feature: ({ props }) => {
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#TextStateFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#TextStateFeatureClient',
       clientFeatureProps: {
         state: props?.state,
       },

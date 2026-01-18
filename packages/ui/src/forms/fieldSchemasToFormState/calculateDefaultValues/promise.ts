@@ -7,10 +7,10 @@ import type {
   SelectType,
   TabAsField,
   TypedUser,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getBlockSelect, getDefaultValue, stripUnselectedFields } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { getBlockSelect, getDefaultValue, stripUnselectedFields } from '@ruya.sa/payload'
+import { fieldAffectsData, tabHasName } from '@ruya.sa/payload/shared'
 
 import { iterateFields } from './iterateFields.js'
 

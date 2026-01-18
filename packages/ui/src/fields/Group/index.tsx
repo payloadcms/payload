@@ -1,9 +1,9 @@
 'use client'
 
-import type { GroupFieldClientComponent } from 'payload'
+import type { GroupFieldClientComponent } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { groupHasName } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { groupHasName } from '@ruya.sa/payload/shared'
 import React, { useMemo } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'

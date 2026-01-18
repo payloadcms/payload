@@ -3,10 +3,10 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
-} from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+} from '@ruya.sa/plugin-cloud-storage/types'
+import type { Config, Plugin, UploadCollectionSlug } from '@ruya.sa/payload'
 
-import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { cloudStoragePlugin } from '@ruya.sa/plugin-cloud-storage'
 
 import type { R2Bucket } from './types.js'
 

@@ -1,5 +1,5 @@
 import type { PgTableFn } from 'drizzle-orm/pg-core'
-import type { DatabaseAdapterObj, Payload } from 'payload'
+import type { DatabaseAdapterObj, Payload } from '@ruya.sa/payload'
 
 import {
   beginTransaction,
@@ -39,7 +39,7 @@ import {
   updateOne,
   updateVersion,
   upsert,
-} from '@payloadcms/drizzle'
+} from '@ruya.sa/drizzle'
 import {
   columnToCodeConverter,
   countDistinct,
@@ -53,9 +53,9 @@ import {
   init,
   insert,
   requireDrizzleKit,
-} from '@payloadcms/drizzle/postgres'
+} from '@ruya.sa/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from '@ruya.sa/payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
@@ -189,7 +189,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       migrateReset,
       migrateStatus,
       migrationDir,
-      packageName: '@payloadcms/db-vercel-postgres',
+      packageName: '@ruya.sa/db-vercel-postgres',
       payload,
       queryDrafts,
       readReplicaOptions: args.readReplicas,
@@ -224,6 +224,6 @@ export type {
   GeneratedDatabaseSchema,
   VercelPostgresAdapter,
 } from './types.js'
-export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
-export { geometryColumn } from '@payloadcms/drizzle/postgres'
+export type { MigrateDownArgs, MigrateUpArgs } from '@ruya.sa/drizzle/postgres'
+export { geometryColumn } from '@ruya.sa/drizzle/postgres'
 export { sql } from 'drizzle-orm'

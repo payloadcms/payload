@@ -1,6 +1,6 @@
-import type { Collection, Field, PayloadRequest, RichTextField, SelectType } from 'payload'
+import type { Collection, Field, PayloadRequest, RichTextField, SelectType } from '@ruya.sa/payload'
 
-import { createDataloaderCacheKey } from 'payload'
+import { createDataloaderCacheKey } from '@ruya.sa/payload'
 
 import type { AdapterArguments } from '../types.js'
 

@@ -1,5 +1,5 @@
-import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { ClientConfig, ClientFieldSchemaMap, FieldSchemaMap, Payload } from 'payload'
+import type { I18n, I18nClient } from '@ruya.sa/translations'
+import type { ClientConfig, ClientFieldSchemaMap, FieldSchemaMap, Payload } from '@ruya.sa/payload'
 
 import { cache } from 'react'
 

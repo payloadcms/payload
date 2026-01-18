@@ -6,12 +6,12 @@ import type {
   NumberField,
   RelationshipField,
   TextField,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { and, eq, getTableName, like, or, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
-import { APIError, getFieldByPath } from 'payload'
-import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
+import { APIError, getFieldByPath } from '@ruya.sa/payload'
+import { fieldShouldBeLocalized, tabHasName } from '@ruya.sa/payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
 

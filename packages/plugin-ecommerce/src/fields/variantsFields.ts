@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field } from '@ruya.sa/payload'
 
 type Props = {
   /**

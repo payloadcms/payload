@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, FieldAccess } from 'payload'
+import type { CollectionBeforeChangeHook, FieldAccess } from '@ruya.sa/payload'
 
 interface Props {
   isCustomer?: FieldAccess

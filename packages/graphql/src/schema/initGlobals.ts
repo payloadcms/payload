@@ -2,10 +2,10 @@ import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLString } from 'graph
 import pluralize from 'pluralize'
 const { singular } = pluralize
 
-import type { Field, GraphQLInfo, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
+import type { Field, GraphQLInfo, SanitizedConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
 
-import { buildVersionGlobalFields, toWords } from 'payload'
-import { hasDraftsEnabled } from 'payload/shared'
+import { buildVersionGlobalFields, toWords } from '@ruya.sa/payload'
+import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
 
 import { docAccessResolver } from '../resolvers/globals/docAccess.js'
 import { findOne } from '../resolvers/globals/findOne.js'

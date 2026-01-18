@@ -1,6 +1,6 @@
 'use client'
 import { usePathname } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'

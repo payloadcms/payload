@@ -1,4 +1,4 @@
-import type { PayloadRequest, SelectType } from 'payload'
+import type { PayloadRequest, SelectType } from '@ruya.sa/payload'
 
 export type Context = {
   headers: {

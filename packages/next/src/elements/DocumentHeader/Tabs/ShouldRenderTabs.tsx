@@ -1,7 +1,7 @@
 'use client'
 import type React from 'react'
 
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentInfo } from '@ruya.sa/ui'
 
 export const ShouldRenderTabs: React.FC<{
   children: React.ReactNode

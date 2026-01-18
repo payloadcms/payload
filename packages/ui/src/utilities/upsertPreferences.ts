@@ -1,4 +1,4 @@
-import type { DefaultDocumentIDType, Payload, PayloadRequest } from 'payload'
+import type { DefaultDocumentIDType, Payload, PayloadRequest } from '@ruya.sa/payload'
 
 import { dequal } from 'dequal/lite'
 import { cache } from 'react'

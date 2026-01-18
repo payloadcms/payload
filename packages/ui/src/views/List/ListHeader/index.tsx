@@ -1,7 +1,7 @@
-import type { I18nClient, TFunction } from '@payloadcms/translations'
-import type { ClientCollectionConfig, ViewTypes } from 'payload'
+import type { I18nClient, TFunction } from '@ruya.sa/translations'
+import type { ClientCollectionConfig, ViewTypes } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import { CloseModalButton } from '../../../elements/CloseModalButton/index.js'

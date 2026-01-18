@@ -10,11 +10,11 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
+import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { getColumns, renderFilters, renderTable, upsertPreferences } from '@ruya.sa/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
   appendUploadSelectFields,
@@ -24,7 +24,7 @@ import {
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
   transformColumnsToSearchParams,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 import React, { Fragment } from 'react'
 
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'

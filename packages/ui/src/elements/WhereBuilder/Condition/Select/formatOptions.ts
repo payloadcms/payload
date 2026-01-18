@@ -1,4 +1,4 @@
-import type { Option, OptionObject } from 'payload'
+import type { Option, OptionObject } from '@ruya.sa/payload'
 
 /**
  * Formats an array of options for use in a select input.

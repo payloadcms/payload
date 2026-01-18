@@ -8,7 +8,7 @@ import { i18n } from './i18n.js'
 
 export const UnorderedListFeature = createServerFeature({
   feature: {
-    ClientFeature: '@payloadcms/richtext-lexical/client#UnorderedListFeatureClient',
+    ClientFeature: '@ruya.sa/richtext-lexical/client#UnorderedListFeatureClient',
     i18n,
     markdownTransformers: [UNORDERED_LIST],
     nodes: [

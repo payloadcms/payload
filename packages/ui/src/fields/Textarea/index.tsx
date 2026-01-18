@@ -1,7 +1,7 @@
 'use client'
-import type { TextareaFieldClientComponent, TextareaFieldValidation } from 'payload'
+import type { TextareaFieldClientComponent, TextareaFieldValidation } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import type { TextAreaInputProps } from './types.js'

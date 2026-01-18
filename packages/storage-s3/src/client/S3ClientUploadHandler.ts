@@ -1,7 +1,7 @@
 'use client'
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { toast } from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+import { createClientUploadHandler } from '@ruya.sa/plugin-cloud-storage/client'
+import { toast } from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
   handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {

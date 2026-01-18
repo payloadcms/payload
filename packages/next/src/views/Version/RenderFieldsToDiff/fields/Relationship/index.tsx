@@ -3,10 +3,10 @@ import type {
   RelationshipField,
   RelationshipFieldDiffServerComponent,
   TypeWithID,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
+import { getTranslation, type I18nClient } from '@ruya.sa/translations'
+import { FieldDiffContainer, getHTMLDiffComponents } from '@ruya.sa/ui/rsc'
 
 import './index.scss'
 

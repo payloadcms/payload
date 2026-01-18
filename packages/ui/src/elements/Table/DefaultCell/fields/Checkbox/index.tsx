@@ -1,5 +1,5 @@
 'use client'
-import type { CheckboxFieldClient, DefaultCellComponentProps } from 'payload'
+import type { CheckboxFieldClient, DefaultCellComponentProps } from '@ruya.sa/payload'
 
 import React from 'react'
 

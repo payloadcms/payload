@@ -1,9 +1,9 @@
-import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { PayloadRequest, ServerProps } from 'payload'
+import type { EntityToGroup } from '@ruya.sa/ui/shared'
+import type { PayloadRequest, ServerProps } from '@ruya.sa/payload'
 
-import { Logout } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { Logout } from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { EntityType, groupNavItems } from '@ruya.sa/ui/shared'
 import React from 'react'
 
 import { NavHamburger } from './NavHamburger/index.js'

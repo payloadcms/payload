@@ -158,10 +158,10 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import { Column } from 'payload'` instead.
+   * Use `import { Column } from '@ruya.sa/payload'` instead.
    */
   Column,
-} from 'payload'
+} from '@ruya.sa/payload'
 export { DefaultCell } from '../../elements/Table/DefaultCell/index.js'
 export { Thumbnail } from '../../elements/Thumbnail/index.js'
 export { Tooltip } from '../../elements/Tooltip/index.js'
@@ -375,46 +375,46 @@ export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListViewSlots } from 'payload'` instead.
+   * Use `import type { ListViewSlots } from '@ruya.sa/payload'` instead.
    */
   ListViewSlots,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
+   * Use `import type { ListViewClientProps } from '@ruya.sa/payload'` instead.
    */
   ListViewClientProps,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListViewClientProps } from 'payload'` instead.
+   * Use `import type { ListViewClientProps } from '@ruya.sa/payload'` instead.
    */
   ListViewClientProps as ListComponentClientProps,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { ListViewServerProps } from 'payload'` instead.
+   * Use `import type { ListViewServerProps } from '@ruya.sa/payload'` instead.
    */
   ListViewServerProps as ListComponentServerProps,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type {
   /**
    * @deprecated
    * This export will be removed in the next major version.
-   * Use `import type { CollectionPreferences } from 'payload'` instead.
+   * Use `import type { CollectionPreferences } from '@ruya.sa/payload'` instead.
    */
   ListPreferences,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 

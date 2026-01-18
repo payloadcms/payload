@@ -1,9 +1,9 @@
 'use client'
 
-import type { I18nClient } from '@payloadcms/translations'
-import type { BlocksFieldClient, ClientBlock } from 'payload'
+import type { I18nClient } from '@ruya.sa/translations'
+import type { BlocksFieldClient, ClientBlock } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 
 import type {
   SlashMenuGroup,

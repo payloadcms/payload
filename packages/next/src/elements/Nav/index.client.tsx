@@ -1,13 +1,13 @@
 'use client'
 
-import type { groupNavItems } from '@payloadcms/ui/shared'
-import type { NavPreferences } from 'payload'
+import type { groupNavItems } from '@ruya.sa/ui/shared'
+import type { NavPreferences } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType } from '@payloadcms/ui/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@ruya.sa/ui'
+import { EntityType } from '@ruya.sa/ui/shared'
 import { usePathname } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'

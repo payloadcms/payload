@@ -1,8 +1,8 @@
-import type { DefaultServerCellComponentProps, Payload } from 'payload'
+import type { DefaultServerCellComponentProps, Payload } from '@ruya.sa/payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { Link } from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+import { getTranslation, type I18nClient } from '@ruya.sa/translations'
+import { Link } from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 /**

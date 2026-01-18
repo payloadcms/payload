@@ -10,10 +10,10 @@ import { dynamicImport } from '../../utilities/dynamicImport.js'
  * Get predefined migration 'up', 'down' and 'imports'.
  *
  * Supports two import methods:
- * 1. @payloadcms/db-* packages: Loads from adapter's predefinedMigrations folder directly (no package.json export needed)
- *    Example: `--file @payloadcms/db-mongodb/relationships-v2-v3`
+ * 1. @ruya.sa/db-* packages: Loads from adapter's predefinedMigrations folder directly (no package.json export needed)
+ *    Example: `--file @ruya.sa/db-mongodb/relationships-v2-v3`
  * 2. Any other package/path: Uses dynamic import via package.json exports or absolute file paths
- *    Example: `--file @payloadcms/plugin-seo/someMigration` or `--file /absolute/path/to/migration.ts`
+ *    Example: `--file @ruya.sa/plugin-seo/someMigration` or `--file /absolute/path/to/migration.ts`
  */
 export const getPredefinedMigration = async ({
   dirname,
@@ -28,9 +28,9 @@ export const getPredefinedMigration = async ({
 }): Promise<MigrationTemplateArgs> => {
   const importPath = file ?? migrationNameArg
 
-  // Path 1: @payloadcms/db-* adapters - load directly from predefinedMigrations folder
+  // Path 1: @ruya.sa/db-* adapters - load directly from predefinedMigrations folder
   // These don't need package.json exports; files are resolved relative to adapter's dirname
-  if (importPath?.startsWith('@payloadcms/db-')) {
+  if (importPath?.startsWith('@ruya.sa/db-')) {
     const migrationName = importPath.split('/').slice(2).join('/')
     let cleanPath = path.join(dirname, `./predefinedMigrations/${migrationName}`)
     if (fs.existsSync(`${cleanPath}.mjs`)) {
@@ -63,7 +63,7 @@ export const getPredefinedMigration = async ({
     }
   } else if (importPath) {
     // Path 2: Any other package or file path - use dynamic import
-    // Supports: package.json exports (e.g. @payloadcms/plugin-seo/migration) or absolute file paths
+    // Supports: package.json exports (e.g. @ruya.sa/plugin-seo/migration) or absolute file paths
     try {
       const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(importPath)
       return {

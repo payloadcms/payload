@@ -1,6 +1,6 @@
-import type { Data, FormState } from 'payload'
+import type { Data, FormState } from '@ruya.sa/payload'
 
-import { unflatten as flatleyUnflatten } from 'payload/shared'
+import { unflatten as flatleyUnflatten } from '@ruya.sa/payload/shared'
 
 type ReturnType = {
   data: Data

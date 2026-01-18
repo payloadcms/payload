@@ -1,6 +1,6 @@
 {
   "name": "@tools/constants",
-  "version": "0.0.1",
+  "version": "3.71.3",
   "description": "Shared constants for Payload internal tooling",
   "license": "MIT",
   "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",

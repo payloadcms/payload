@@ -27,21 +27,24 @@ importers:
       '@next/bundle-analyzer':
         specifier: 15.4.10
         version: 15.4.10(bufferutil@4.1.0)(utf-8-validate@6.0.6)
-      '@payloadcms/db-postgres':
-        specifier: workspace:*
-        version: link:packages/db-postgres
-      '@payloadcms/eslint-config':
-        specifier: workspace:*
-        version: link:packages/eslint-config
-      '@payloadcms/eslint-plugin':
-        specifier: workspace:*
-        version: link:packages/eslint-plugin
-      '@payloadcms/live-preview-react':
-        specifier: workspace:*
-        version: link:packages/live-preview-react
       '@playwright/test':
         specifier: 1.56.1
         version: 1.56.1
+      '@ruya.sa/create-payload-app':
+        specifier: workspace:*
+        version: link:packages/create-payload-app
+      '@ruya.sa/db-postgres':
+        specifier: workspace:*
+        version: link:packages/db-postgres
+      '@ruya.sa/eslint-config':
+        specifier: workspace:*
+        version: link:packages/eslint-config
+      '@ruya.sa/eslint-plugin':
+        specifier: workspace:*
+        version: link:packages/eslint-plugin
+      '@ruya.sa/live-preview-react':
+        specifier: workspace:*
+        version: link:packages/live-preview-react
       '@sentry/nextjs':
         specifier: ^8.33.1
         version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.3(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.97.2))(react@19.2.1)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.5))
@@ -87,9 +90,6 @@ importers:
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
-      create-payload-app:
-        specifier: workspace:*
-        version: link:packages/create-payload-app
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
@@ -217,18 +217,18 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/create-payload-app:
     dependencies:
@@ -290,7 +290,7 @@ importers:
 
   packages/db-d1-sqlite:
     dependencies:
-      '@payloadcms/drizzle':
+      '@ruya.sa/drizzle':
         specifier: workspace:*
         version: link:../drizzle
       console-table-printer:
@@ -312,9 +312,12 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
@@ -324,9 +327,6 @@ importers:
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-mongodb:
     dependencies:
@@ -343,9 +343,12 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.12
         version: 1.0.12(@aws-sdk/credential-providers@3.971.0)
@@ -361,13 +364,10 @@ importers:
       mongodb-memory-server:
         specifier: 10.1.4
         version: 10.1.4(@aws-sdk/credential-providers@3.971.0)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-postgres:
     dependencies:
-      '@payloadcms/drizzle':
+      '@ruya.sa/drizzle':
         specifier: workspace:*
         version: link:../drizzle
       '@types/pg':
@@ -398,25 +398,25 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.25.5)
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
       esbuild:
         specifier: 0.25.5
         version: 0.25.5
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-sqlite:
     dependencies:
       '@libsql/client':
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
-      '@payloadcms/drizzle':
+      '@ruya.sa/drizzle':
         specifier: workspace:*
         version: link:../drizzle
       console-table-printer:
@@ -438,9 +438,12 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
@@ -450,13 +453,10 @@ importers:
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-vercel-postgres:
     dependencies:
-      '@payloadcms/drizzle':
+      '@ruya.sa/drizzle':
         specifier: workspace:*
         version: link:../drizzle
       '@vercel/postgres':
@@ -487,9 +487,12 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.25.5)
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
@@ -499,9 +502,6 @@ importers:
       esbuild:
         specifier: 0.25.5
         version: 0.25.5
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/drizzle:
     dependencies:
@@ -527,18 +527,18 @@ importers:
       '@libsql/client':
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/email-nodemailer:
     dependencies:
@@ -546,16 +546,16 @@ importers:
         specifier: 7.0.12
         version: 7.0.12
     devDependencies:
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/nodemailer':
         specifier: 7.0.2
         version: 7.0.2
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/email-resend:
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
@@ -567,7 +567,7 @@ importers:
       '@eslint/js':
         specifier: 9.22.0
         version: 9.22.0
-      '@payloadcms/eslint-plugin':
+      '@ruya.sa/eslint-plugin':
         specifier: workspace:*
         version: link:../eslint-plugin
       '@types/eslint':
@@ -679,18 +679,18 @@ importers:
         specifier: 4.20.6
         version: 4.20.6
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
       graphql-http:
         specifier: ^1.22.0
         version: 1.22.4(graphql@16.8.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/kv-redis:
     dependencies:
@@ -698,22 +698,22 @@ importers:
         specifier: ^5.4.1
         version: 5.9.2
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/live-preview:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/live-preview-react:
     dependencies:
-      '@payloadcms/live-preview':
+      '@ruya.sa/live-preview':
         specifier: workspace:*
         version: link:../live-preview
       react:
@@ -723,29 +723,29 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/live-preview-vue:
     dependencies:
-      '@payloadcms/live-preview':
+      '@ruya.sa/live-preview':
         specifier: workspace:*
         version: link:../live-preview
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
       vue:
@@ -763,13 +763,13 @@ importers:
       '@dnd-kit/sortable':
         specifier: 10.0.0
         version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
-      '@payloadcms/graphql':
+      '@ruya.sa/graphql':
         specifier: workspace:*
         version: link:../graphql
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       busboy:
@@ -827,9 +827,12 @@ importers:
       '@next/eslint-plugin-next':
         specifier: 15.4.7
         version: 15.4.7
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/busboy':
         specifier: 1.5.4
         version: 1.5.4
@@ -851,9 +854,6 @@ importers:
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.25.5)(sass-embedded@1.97.2)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
       swc-plugin-transform-remove-imports:
         specifier: 8.3.0
         version: 8.3.0
@@ -863,7 +863,7 @@ importers:
       '@next/env':
         specifier: ^15.1.5
         version: 15.4.7
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
       '@types/busboy':
@@ -966,7 +966,7 @@ importers:
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/json-schema':
@@ -1032,7 +1032,7 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.614.0
         version: 3.971.0(@aws-sdk/client-s3@3.971.0)
-      '@payloadcms/email-nodemailer':
+      '@ruya.sa/email-nodemailer':
         specifier: workspace:*
         version: link:../email-nodemailer
       amazon-cognito-identity-js:
@@ -1042,16 +1042,16 @@ importers:
         specifier: 7.0.12
         version: 7.0.12
     devDependencies:
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/nodemailer':
         specifier: 7.0.2
         version: 7.0.2
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-cloud-storage:
     dependencies:
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       find-node-modules:
@@ -1067,6 +1067,9 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/find-node-modules':
         specifier: ^2.1.2
         version: 2.1.2
@@ -1076,16 +1079,13 @@ importers:
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-ecommerce:
     dependencies:
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       qs-esm:
@@ -1098,12 +1098,15 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../next
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/json-schema':
         specifier: 7.0.15
         version: 7.0.15
@@ -1113,16 +1116,13 @@ importers:
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
       stripe:
         specifier: 18.3.0
         version: 18.3.0(@types/node@22.15.30)
 
   packages/plugin-form-builder:
     dependencies:
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       escape-html:
@@ -1135,9 +1135,12 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/escape-html':
         specifier: ^1.0.4
         version: 1.0.4
@@ -1153,19 +1156,16 @@ importers:
       cross-env:
         specifier: 7.0.3
         version: 7.0.3
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-import-export:
     dependencies:
       '@faceless-ui/modal':
         specifier: 3.0.0
         version: 3.0.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       csv-parse:
@@ -1178,10 +1178,10 @@ importers:
         specifier: 7.0.2
         version: 7.0.2
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
@@ -1203,56 +1203,56 @@ importers:
         specifier: ^3.25.50
         version: 3.25.76
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/plugin-multi-tenant:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
+      '@ruya.sa/translations':
+        specifier: workspace:*
+        version: link:../translations
+      '@ruya.sa/ui':
+        specifier: workspace:*
+        version: link:../ui
 
   packages/plugin-nested-docs:
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/plugin-redirects:
     dependencies:
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
+      '@ruya.sa/translations':
+        specifier: workspace:*
+        version: link:../translations
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
 
   packages/plugin-search:
     dependencies:
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../next
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       react:
@@ -1262,18 +1262,18 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-sentry:
     dependencies:
@@ -1290,25 +1290,25 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-seo:
     dependencies:
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       react:
@@ -1318,28 +1318,28 @@ importers:
         specifier: 19.2.1
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../next
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/plugin-stripe:
     dependencies:
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       lodash.get:
@@ -1352,12 +1352,15 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../next
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/lodash.get':
         specifier: ^4.4.7
         version: 4.4.9
@@ -1370,9 +1373,6 @@ importers:
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/richtext-lexical:
     dependencies:
@@ -1415,13 +1415,13 @@ importers:
       '@lexical/utils':
         specifier: 0.35.0
         version: 0.35.0
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../next
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       '@types/uuid':
@@ -1494,9 +1494,12 @@ importers:
       '@lexical/eslint-plugin':
         specifier: 0.35.0
         version: 0.35.0(eslint@9.22.0(jiti@2.6.1))
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/escape-html':
         specifier: 1.0.4
         version: 1.0.4
@@ -1524,19 +1527,16 @@ importers:
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.25.5)(sass-embedded@1.97.2)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
       swc-plugin-transform-remove-imports:
         specifier: 8.3.0
         version: 8.3.0
 
   packages/richtext-slate:
     dependencies:
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../ui
       is-hotkey:
@@ -1561,9 +1561,12 @@ importers:
         specifier: 0.92.0
         version: 0.92.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(slate@0.91.4)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/is-hotkey':
         specifier: ^0.1.10
         version: 0.1.10
@@ -1576,13 +1579,10 @@ importers:
       '@types/react-dom':
         specifier: 19.2.1
         version: 19.2.1(@types/react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/sdk:
     dependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
       qs-esm:
@@ -1592,7 +1592,7 @@ importers:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
 
@@ -1604,11 +1604,11 @@ importers:
       '@azure/storage-blob':
         specifier: ^12.11.0
         version: 12.30.0
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
@@ -1617,21 +1617,21 @@ importers:
       '@google-cloud/storage':
         specifier: 7.17.2
         version: 7.17.2
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/storage-r2:
     dependencies:
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
@@ -1646,40 +1646,40 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.614.0
         version: 3.971.0
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@smithy/node-http-handler':
         specifier: 4.0.3
         version: 4.0.3
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/storage-uploadthing:
     dependencies:
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: 7.3.0
         version: 7.3.0(express@5.2.1)(next@16.1.3(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.97.2))(tailwindcss@4.1.18)
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
   packages/storage-vercel-blob:
     dependencies:
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
       '@vercel/blob':
         specifier: ^0.22.3
         version: 0.22.3
     devDependencies:
-      payload:
+      '@ruya.sa/payload':
         specifier: workspace:*
         version: link:../payload
 
@@ -1689,7 +1689,7 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
     devDependencies:
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
       '@types/react':
@@ -1734,7 +1734,7 @@ importers:
       '@monaco-editor/react':
         specifier: 4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../translations
       bson-objectid:
@@ -1807,9 +1807,12 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
         version: 0.2.6(cjs-module-lexer@1.4.3)(esbuild@0.25.5)
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../payload
       '@types/react':
         specifier: 19.2.1
         version: 19.2.1
@@ -1828,22 +1831,22 @@ importers:
       esbuild-sass-plugin:
         specifier: 3.3.1
         version: 3.3.1(esbuild@0.25.5)(sass-embedded@1.97.2)
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   templates/blank:
     dependencies:
-      '@payloadcms/db-mongodb':
+      '@ruya.sa/db-mongodb':
         specifier: workspace:*
         version: link:../../packages/db-mongodb
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../../packages/next
-      '@payloadcms/richtext-lexical':
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../../packages/payload
+      '@ruya.sa/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       cross-env:
@@ -1858,9 +1861,6 @@ importers:
       next:
         specifier: 16.1.3
         version: 16.1.3(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.97.2)
-      payload:
-        specifier: workspace:*
-        version: link:../../packages/payload
       react:
         specifier: 19.2.1
         version: 19.2.1
@@ -1919,39 +1919,6 @@ importers:
 
   templates/ecommerce:
     dependencies:
-      '@payloadcms/admin-bar':
-        specifier: workspace:*
-        version: link:../../packages/admin-bar
-      '@payloadcms/db-mongodb':
-        specifier: workspace:*
-        version: link:../../packages/db-mongodb
-      '@payloadcms/email-nodemailer':
-        specifier: workspace:*
-        version: link:../../packages/email-nodemailer
-      '@payloadcms/live-preview-react':
-        specifier: workspace:*
-        version: link:../../packages/live-preview-react
-      '@payloadcms/next':
-        specifier: workspace:*
-        version: link:../../packages/next
-      '@payloadcms/plugin-ecommerce':
-        specifier: workspace:*
-        version: link:../../packages/plugin-ecommerce
-      '@payloadcms/plugin-form-builder':
-        specifier: workspace:*
-        version: link:../../packages/plugin-form-builder
-      '@payloadcms/plugin-seo':
-        specifier: workspace:*
-        version: link:../../packages/plugin-seo
-      '@payloadcms/richtext-lexical':
-        specifier: workspace:*
-        version: link:../../packages/richtext-lexical
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../../packages/translations
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@radix-ui/react-accordion':
         specifier: 1.2.11
         version: 1.2.11(@types/react-dom@19.2.1(@types/react@19.2.1))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -1970,6 +1937,42 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.1.2
         version: 1.2.4(@types/react@19.2.1)(react@19.2.1)
+      '@ruya.sa/admin-bar':
+        specifier: workspace:*
+        version: link:../../packages/admin-bar
+      '@ruya.sa/db-mongodb':
+        specifier: workspace:*
+        version: link:../../packages/db-mongodb
+      '@ruya.sa/email-nodemailer':
+        specifier: workspace:*
+        version: link:../../packages/email-nodemailer
+      '@ruya.sa/live-preview-react':
+        specifier: workspace:*
+        version: link:../../packages/live-preview-react
+      '@ruya.sa/next':
+        specifier: workspace:*
+        version: link:../../packages/next
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../../packages/payload
+      '@ruya.sa/plugin-ecommerce':
+        specifier: workspace:*
+        version: link:../../packages/plugin-ecommerce
+      '@ruya.sa/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../../packages/plugin-form-builder
+      '@ruya.sa/plugin-seo':
+        specifier: workspace:*
+        version: link:../../packages/plugin-seo
+      '@ruya.sa/richtext-lexical':
+        specifier: workspace:*
+        version: link:../../packages/richtext-lexical
+      '@ruya.sa/translations':
+        specifier: workspace:*
+        version: link:../../packages/translations
+      '@ruya.sa/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@stripe/react-stripe-js':
         specifier: ^3
         version: 3.7.0(@stripe/stripe-js@4.10.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -2015,9 +2018,6 @@ importers:
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      payload:
-        specifier: workspace:*
-        version: link:../../packages/payload
       prism-react-renderer:
         specifier: ^2.3.1
         version: 2.4.1(react@19.2.1)
@@ -2139,39 +2139,6 @@ importers:
 
   templates/website:
     dependencies:
-      '@payloadcms/admin-bar':
-        specifier: workspace:*
-        version: link:../../packages/admin-bar
-      '@payloadcms/db-mongodb':
-        specifier: workspace:*
-        version: link:../../packages/db-mongodb
-      '@payloadcms/live-preview-react':
-        specifier: workspace:*
-        version: link:../../packages/live-preview-react
-      '@payloadcms/next':
-        specifier: workspace:*
-        version: link:../../packages/next
-      '@payloadcms/plugin-form-builder':
-        specifier: workspace:*
-        version: link:../../packages/plugin-form-builder
-      '@payloadcms/plugin-nested-docs':
-        specifier: workspace:*
-        version: link:../../packages/plugin-nested-docs
-      '@payloadcms/plugin-redirects':
-        specifier: workspace:*
-        version: link:../../packages/plugin-redirects
-      '@payloadcms/plugin-search':
-        specifier: workspace:*
-        version: link:../../packages/plugin-search
-      '@payloadcms/plugin-seo':
-        specifier: workspace:*
-        version: link:../../packages/plugin-seo
-      '@payloadcms/richtext-lexical':
-        specifier: workspace:*
-        version: link:../../packages/richtext-lexical
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
       '@radix-ui/react-checkbox':
         specifier: ^1.0.4
         version: 1.3.3(@types/react-dom@19.2.1(@types/react@19.2.1))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -2184,6 +2151,42 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.2.4(@types/react@19.2.1)(react@19.2.1)
+      '@ruya.sa/admin-bar':
+        specifier: workspace:*
+        version: link:../../packages/admin-bar
+      '@ruya.sa/db-mongodb':
+        specifier: workspace:*
+        version: link:../../packages/db-mongodb
+      '@ruya.sa/live-preview-react':
+        specifier: workspace:*
+        version: link:../../packages/live-preview-react
+      '@ruya.sa/next':
+        specifier: workspace:*
+        version: link:../../packages/next
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../../packages/payload
+      '@ruya.sa/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../../packages/plugin-form-builder
+      '@ruya.sa/plugin-nested-docs':
+        specifier: workspace:*
+        version: link:../../packages/plugin-nested-docs
+      '@ruya.sa/plugin-redirects':
+        specifier: workspace:*
+        version: link:../../packages/plugin-redirects
+      '@ruya.sa/plugin-search':
+        specifier: workspace:*
+        version: link:../../packages/plugin-search
+      '@ruya.sa/plugin-seo':
+        specifier: workspace:*
+        version: link:../../packages/plugin-seo
+      '@ruya.sa/richtext-lexical':
+        specifier: workspace:*
+        version: link:../../packages/richtext-lexical
+      '@ruya.sa/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -2211,9 +2214,6 @@ importers:
       next-sitemap:
         specifier: ^4.2.3
         version: 4.2.3(next@16.1.3(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.97.2))
-      payload:
-        specifier: workspace:*
-        version: link:../../packages/payload
       prism-react-renderer:
         specifier: ^2.3.1
         version: 2.4.1(react@19.2.1)
@@ -2307,7 +2307,7 @@ importers:
     dependencies:
       recharts:
         specifier: 3.2.1
-        version: 3.2.1(@types/react@19.1.12)(react-dom@19.2.1(react@19.2.1))(react-is@16.13.1)(react@19.2.1)(redux@5.0.1)
+        version: 3.2.1(@types/react@19.1.12)(react-dom@19.2.1(react@19.2.1))(react-is@17.0.2)(react@19.2.1)(redux@5.0.1)
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
@@ -2333,124 +2333,130 @@ importers:
       '@opennextjs/cloudflare':
         specifier: 1.9.2
         version: 1.9.2(wrangler@4.42.2(bufferutil@4.1.0)(utf-8-validate@6.0.6))
-      '@payloadcms/admin-bar':
+      '@ruya.sa/admin-bar':
         specifier: workspace:*
         version: link:../packages/admin-bar
-      '@payloadcms/db-d1-sqlite':
+      '@ruya.sa/create-payload-app':
+        specifier: workspace:*
+        version: link:../packages/create-payload-app
+      '@ruya.sa/db-d1-sqlite':
         specifier: workspace:*
         version: link:../packages/db-d1-sqlite
-      '@payloadcms/db-mongodb':
+      '@ruya.sa/db-mongodb':
         specifier: workspace:*
         version: link:../packages/db-mongodb
-      '@payloadcms/db-postgres':
+      '@ruya.sa/db-postgres':
         specifier: workspace:*
         version: link:../packages/db-postgres
-      '@payloadcms/db-sqlite':
+      '@ruya.sa/db-sqlite':
         specifier: workspace:*
         version: link:../packages/db-sqlite
-      '@payloadcms/db-vercel-postgres':
+      '@ruya.sa/db-vercel-postgres':
         specifier: workspace:*
         version: link:../packages/db-vercel-postgres
-      '@payloadcms/drizzle':
+      '@ruya.sa/drizzle':
         specifier: workspace:*
         version: link:../packages/drizzle
-      '@payloadcms/email-nodemailer':
+      '@ruya.sa/email-nodemailer':
         specifier: workspace:*
         version: link:../packages/email-nodemailer
-      '@payloadcms/email-resend':
+      '@ruya.sa/email-resend':
         specifier: workspace:*
         version: link:../packages/email-resend
-      '@payloadcms/eslint-config':
+      '@ruya.sa/eslint-config':
         specifier: workspace:*
         version: link:../packages/eslint-config
-      '@payloadcms/eslint-plugin':
+      '@ruya.sa/eslint-plugin':
         specifier: workspace:*
         version: link:../packages/eslint-plugin
-      '@payloadcms/graphql':
+      '@ruya.sa/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
-      '@payloadcms/kv-redis':
+      '@ruya.sa/kv-redis':
         specifier: workspace:*
         version: link:../packages/kv-redis
-      '@payloadcms/live-preview':
+      '@ruya.sa/live-preview':
         specifier: workspace:*
         version: link:../packages/live-preview
-      '@payloadcms/live-preview-react':
+      '@ruya.sa/live-preview-react':
         specifier: workspace:*
         version: link:../packages/live-preview-react
-      '@payloadcms/next':
+      '@ruya.sa/next':
         specifier: workspace:*
         version: link:../packages/next
-      '@payloadcms/payload-cloud':
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../packages/payload
+      '@ruya.sa/payload-cloud':
         specifier: workspace:*
         version: link:../packages/payload-cloud
-      '@payloadcms/plugin-cloud-storage':
+      '@ruya.sa/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../packages/plugin-cloud-storage
-      '@payloadcms/plugin-ecommerce':
+      '@ruya.sa/plugin-ecommerce':
         specifier: workspace:*
         version: link:../packages/plugin-ecommerce
-      '@payloadcms/plugin-form-builder':
+      '@ruya.sa/plugin-form-builder':
         specifier: workspace:*
         version: link:../packages/plugin-form-builder
-      '@payloadcms/plugin-import-export':
+      '@ruya.sa/plugin-import-export':
         specifier: workspace:*
         version: link:../packages/plugin-import-export
-      '@payloadcms/plugin-mcp':
+      '@ruya.sa/plugin-mcp':
         specifier: workspace:*
         version: link:../packages/plugin-mcp
-      '@payloadcms/plugin-multi-tenant':
+      '@ruya.sa/plugin-multi-tenant':
         specifier: workspace:*
         version: link:../packages/plugin-multi-tenant
-      '@payloadcms/plugin-nested-docs':
+      '@ruya.sa/plugin-nested-docs':
         specifier: workspace:*
         version: link:../packages/plugin-nested-docs
-      '@payloadcms/plugin-redirects':
+      '@ruya.sa/plugin-redirects':
         specifier: workspace:*
         version: link:../packages/plugin-redirects
-      '@payloadcms/plugin-search':
+      '@ruya.sa/plugin-search':
         specifier: workspace:*
         version: link:../packages/plugin-search
-      '@payloadcms/plugin-sentry':
+      '@ruya.sa/plugin-sentry':
         specifier: workspace:*
         version: link:../packages/plugin-sentry
-      '@payloadcms/plugin-seo':
+      '@ruya.sa/plugin-seo':
         specifier: workspace:*
         version: link:../packages/plugin-seo
-      '@payloadcms/plugin-stripe':
+      '@ruya.sa/plugin-stripe':
         specifier: workspace:*
         version: link:../packages/plugin-stripe
-      '@payloadcms/richtext-lexical':
+      '@ruya.sa/richtext-lexical':
         specifier: workspace:*
         version: link:../packages/richtext-lexical
-      '@payloadcms/richtext-slate':
+      '@ruya.sa/richtext-slate':
         specifier: workspace:*
         version: link:../packages/richtext-slate
-      '@payloadcms/sdk':
+      '@ruya.sa/sdk':
         specifier: workspace:*
         version: link:../packages/sdk
-      '@payloadcms/storage-azure':
+      '@ruya.sa/storage-azure':
         specifier: workspace:*
         version: link:../packages/storage-azure
-      '@payloadcms/storage-gcs':
+      '@ruya.sa/storage-gcs':
         specifier: workspace:*
         version: link:../packages/storage-gcs
-      '@payloadcms/storage-r2':
+      '@ruya.sa/storage-r2':
         specifier: workspace:*
         version: link:../packages/storage-r2
-      '@payloadcms/storage-s3':
+      '@ruya.sa/storage-s3':
         specifier: workspace:*
         version: link:../packages/storage-s3
-      '@payloadcms/storage-uploadthing':
+      '@ruya.sa/storage-uploadthing':
         specifier: workspace:*
         version: link:../packages/storage-uploadthing
-      '@payloadcms/storage-vercel-blob':
+      '@ruya.sa/storage-vercel-blob':
         specifier: workspace:*
         version: link:../packages/storage-vercel-blob
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../packages/translations
-      '@payloadcms/ui':
+      '@ruya.sa/ui':
         specifier: workspace:*
         version: link:../packages/ui
       '@sentry/nextjs':
@@ -2480,9 +2486,6 @@ importers:
       comment-json:
         specifier: ^4.2.3
         version: 4.5.1
-      create-payload-app:
-        specifier: workspace:*
-        version: link:../packages/create-payload-app
       csv-parse:
         specifier: ^5.6.0
         version: 5.6.0
@@ -2528,9 +2531,6 @@ importers:
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
-      payload:
-        specifier: workspace:*
-        version: link:../packages/payload
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -2627,6 +2627,12 @@ importers:
 
   tools/scripts:
     dependencies:
+      '@ruya.sa/create-payload-app':
+        specifier: workspace:*
+        version: link:../../packages/create-payload-app
+      '@ruya.sa/payload':
+        specifier: workspace:*
+        version: link:../../packages/payload
       '@swc-node/register':
         specifier: 1.11.1
         version: 1.11.1(@swc/core@1.15.3)(@swc/types@0.1.25)(typescript@5.7.3)
@@ -2642,9 +2648,6 @@ importers:
       changelogen:
         specifier: ^0.5.5
         version: 0.5.7
-      create-payload-app:
-        specifier: workspace:*
-        version: link:../../packages/create-payload-app
       csv-stringify:
         specifier: ^6.5.2
         version: 6.5.2
@@ -2654,23 +2657,20 @@ importers:
       open:
         specifier: ^10.1.0
         version: 10.2.0
-      payload:
-        specifier: workspace:*
-        version: link:../../packages/payload
     devDependencies:
-      '@payloadcms/plugin-ecommerce':
+      '@ruya.sa/plugin-ecommerce':
         specifier: workspace:*
         version: link:../../packages/plugin-ecommerce
-      '@payloadcms/plugin-import-export':
+      '@ruya.sa/plugin-import-export':
         specifier: workspace:*
         version: link:../../packages/plugin-import-export
-      '@payloadcms/plugin-multi-tenant':
+      '@ruya.sa/plugin-multi-tenant':
         specifier: workspace:*
         version: link:../../packages/plugin-multi-tenant
-      '@payloadcms/richtext-lexical':
+      '@ruya.sa/richtext-lexical':
         specifier: workspace:*
         version: link:../../packages/richtext-lexical
-      '@payloadcms/translations':
+      '@ruya.sa/translations':
         specifier: workspace:*
         version: link:../../packages/translations
 
@@ -22481,8 +22481,8 @@ snapshots:
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
       eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.22.0(jiti@2.6.1))
@@ -22521,8 +22521,8 @@ snapshots:
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
       eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.22.0(jiti@2.6.1))
@@ -22561,7 +22561,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -22572,7 +22572,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-import-x: 4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
     transitivePeerDependencies:
       - supports-color
@@ -22588,14 +22588,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
       eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -22669,7 +22669,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -22680,7 +22680,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -25997,7 +25997,7 @@ snapshots:
 
   real-require@0.2.0: {}
 
-  recharts@3.2.1(@types/react@19.1.12)(react-dom@19.2.1(react@19.2.1))(react-is@16.13.1)(react@19.2.1)(redux@5.0.1):
+  recharts@3.2.1(@types/react@19.1.12)(react-dom@19.2.1(react@19.2.1))(react-is@17.0.2)(react@19.2.1)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.1.12)(react@19.2.1)(redux@5.0.1))(react@19.2.1)
       clsx: 2.1.1
@@ -26007,7 +26007,7 @@ snapshots:
       immer: 10.2.0
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
-      react-is: 16.13.1
+      react-is: 17.0.2
       react-redux: 9.2.0(@types/react@19.1.12)(react@19.2.1)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3

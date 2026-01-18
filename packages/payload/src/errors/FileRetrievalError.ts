@@ -1,4 +1,4 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { TFunction } from '@ruya.sa/translations'
 
 import { status as httpStatus } from 'http-status'
 

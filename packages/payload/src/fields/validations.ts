@@ -3,7 +3,7 @@ import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
-import type { TFunction } from '@payloadcms/translations'
+import type { TFunction } from '@ruya.sa/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'

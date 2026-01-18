@@ -1,5 +1,5 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { UpdateGlobal } from 'payload'
+import type { UpdateGlobal } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

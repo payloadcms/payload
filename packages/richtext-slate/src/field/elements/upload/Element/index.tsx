@@ -1,9 +1,9 @@
 'use client'
 
-import type { ListDrawerProps } from '@payloadcms/ui'
-import type { ClientCollectionConfig } from 'payload'
+import type { ListDrawerProps } from '@ruya.sa/ui'
+import type { ClientCollectionConfig } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   Button,
   DrawerToggler,
@@ -14,8 +14,8 @@ import {
   useListDrawer,
   usePayloadAPI,
   useTranslation,
-} from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
+} from '@ruya.sa/ui'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'

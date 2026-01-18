@@ -1,4 +1,4 @@
-import type { ArrayField, Field } from 'payload'
+import type { ArrayField, Field } from '@ruya.sa/payload'
 
 import type { CurrenciesConfig } from '../types/index.js'
 

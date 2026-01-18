@@ -1,5 +1,5 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
-import type { RichTextField, ValidateOptions } from 'payload'
+import type { RichTextField, ValidateOptions } from '@ruya.sa/payload'
 
 import type { NodeValidation } from '../features/typesServer.js'
 

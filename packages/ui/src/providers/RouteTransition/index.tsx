@@ -4,12 +4,12 @@ import React, { startTransition, useCallback, useEffect, useOptimistic, useRef }
 /**
  * Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
  * To use route transitions, place the `RouteTransitionProvider` at the root of your application, outside of the `ProgressBar` component.
- * To trigger a route transition, use the `Link` component from `@payloadcms/ui`,
+ * To trigger a route transition, use the `Link` component from `@ruya.sa/ui`,
  * or wrap a callback function with the `startRouteTransition` method.
  * To gain access to the `RouteTransitionContext`, call the `useRouteTransition` hook in your component.
  * @returns A context provider with methods and state for transitioning between routes, including `isTransitioning`, `startRouteTransition`, and `transitionProgress`.
  * @example
- * import { RouteTransitionProvider, ProgressBar, Link } from '@payloadcms/ui'
+ * import { RouteTransitionProvider, ProgressBar, Link } from '@ruya.sa/ui'
  * const App = () => (
  *  <RouteTransitionProvider>
  *   <ProgressBar />
@@ -110,7 +110,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  * @example
  * 'use client'
  * import React, { useCallback } from 'react'
- * import { useTransition } from '@payloadcms/ui'
+ * import { useTransition } from '@ruya.sa/ui'
  * import { useRouter } from 'next/navigation'
  *
  * const MyComponent: React.FC = () => {

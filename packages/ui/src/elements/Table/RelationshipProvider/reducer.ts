@@ -1,4 +1,4 @@
-import type { TypeWithID } from 'payload'
+import type { TypeWithID } from '@ruya.sa/payload'
 
 import type { Documents } from './index.js'
 

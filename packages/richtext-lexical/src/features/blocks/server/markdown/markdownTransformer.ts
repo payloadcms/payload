@@ -1,5 +1,5 @@
 import type { ElementNode, SerializedLexicalNode } from 'lexical'
-import type { Block } from 'payload'
+import type { Block } from '@ruya.sa/payload'
 
 import { $parseSerializedNode } from 'lexical'
 

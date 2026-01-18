@@ -1,4 +1,4 @@
-import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import type { EditViewComponent, SanitizedCollectionConfig, SanitizedGlobalConfig } from '@ruya.sa/payload'
 
 import { isPathMatchingRoute } from '../Root/isPathMatchingRoute.js'
 

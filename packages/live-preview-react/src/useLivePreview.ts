@@ -1,5 +1,5 @@
 'use client'
-import { ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
+import { ready, subscribe, unsubscribe } from '@ruya.sa/live-preview'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**

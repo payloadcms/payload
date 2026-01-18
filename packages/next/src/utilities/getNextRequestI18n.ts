@@ -1,8 +1,8 @@
-import type { ClientTranslationsObject, I18nClient } from '@payloadcms/translations'
+import type { ClientTranslationsObject, I18nClient } from '@ruya.sa/translations'
 
-import { initI18n } from '@payloadcms/translations'
+import { initI18n } from '@ruya.sa/translations'
 import { cookies, headers } from 'next/headers.js'
-import { getRequestLanguage, type SanitizedConfig } from 'payload'
+import { getRequestLanguage, type SanitizedConfig } from '@ruya.sa/payload'
 
 /**
  * In the context of Next.js, this function initializes the i18n object for the current request.

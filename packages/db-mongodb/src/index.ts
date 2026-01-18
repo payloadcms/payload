@@ -18,10 +18,10 @@ import type {
   UpdateGlobalVersionArgs,
   UpdateOneArgs,
   UpdateVersionArgs,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import mongoose from 'mongoose'
-import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from '@ruya.sa/payload'
 
 import type {
   CollectionModel,
@@ -210,7 +210,7 @@ export type MongooseAdapter = {
 } & Args &
   BaseDatabaseAdapter
 
-declare module 'payload' {
+declare module '@ruya.sa/payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
       Omit<Args, 'migrationDir'> {
@@ -331,7 +331,7 @@ export function mongooseAdapter({
       init,
       migrateFresh,
       migrationDir,
-      packageName: '@payloadcms/db-mongodb',
+      packageName: '@ruya.sa/db-mongodb',
       payload,
       prodMigrations,
       queryDrafts,

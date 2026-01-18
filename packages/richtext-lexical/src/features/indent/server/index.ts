@@ -23,7 +23,7 @@ export const IndentFeature = createServerFeature<
 >({
   feature: ({ props }) => {
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#IndentFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#IndentFeatureClient',
       clientFeatureProps: props,
       i18n,
     }

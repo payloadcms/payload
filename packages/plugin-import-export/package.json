@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/plugin-import-export",
-  "version": "3.71.1",
+  "name": "@ruya.sa/plugin-import-export",
+  "version": "3.71.3",
   "description": "Import-Export plugin for Payload",
   "keywords": [
     "payload",
@@ -71,20 +71,20 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "3.0.0",
-    "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
+    "@ruya.sa/translations": "workspace:*",
+    "@ruya.sa/ui": "workspace:*",
     "csv-parse": "5.6.0",
     "csv-stringify": "6.5.2",
     "qs-esm": "7.0.2"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "@ruya.sa/eslint-config": "workspace:*",
+    "@ruya.sa/ui": "workspace:*",
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "@payloadcms/ui": "workspace:*",
-    "payload": "workspace:*"
+    "@ruya.sa/ui": "workspace:*",
+    "@ruya.sa/payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

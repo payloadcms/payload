@@ -8,21 +8,21 @@ import type {
   EditViewComponent,
   PayloadComponent,
   RenderDocumentVersionsProperties,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import {
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
   LivePreviewProvider,
-} from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
-import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
-import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+} from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { handleLivePreview, handlePreview } from '@ruya.sa/ui/rsc'
+import { isEditing as getIsEditing } from '@ruya.sa/ui/shared'
+import { buildFormState } from '@ruya.sa/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
-import { isolateObjectProperty, logError } from 'payload'
-import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
+import { isolateObjectProperty, logError } from '@ruya.sa/payload'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'

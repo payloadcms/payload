@@ -1,6 +1,6 @@
-import type { CollectionBeforeValidateHook, CollectionConfig } from 'payload'
+import type { CollectionBeforeValidateHook, CollectionConfig } from '@ruya.sa/payload'
 
-import { APIError } from 'payload'
+import { APIError } from '@ruya.sa/payload'
 import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'

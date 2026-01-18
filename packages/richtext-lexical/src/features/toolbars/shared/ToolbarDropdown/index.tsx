@@ -6,7 +6,7 @@ const baseClass = 'toolbar-popup__dropdown'
 import type { LexicalEditor } from 'lexical'
 
 import { mergeRegister } from '@lexical/utils'
-import { useTranslation } from '@payloadcms/ui'
+import { useTranslation } from '@ruya.sa/ui'
 import { $getSelection } from 'lexical'
 
 import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'

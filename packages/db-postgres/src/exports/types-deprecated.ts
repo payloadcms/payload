@@ -5,16 +5,16 @@ import type {
 } from '../types.js'
 
 /**
- * @deprecated - import from `@payloadcms/db-postgres` instead
+ * @deprecated - import from `@ruya.sa/db-postgres` instead
  */
 export type Args = _Args
 
 /**
- * @deprecated - import from `@payloadcms/db-postgres` instead
+ * @deprecated - import from `@ruya.sa/db-postgres` instead
  */
 export type GeneratedDatabaseSchema = _GeneratedDatabaseSchema
 
 /**
- * @deprecated - import from `@payloadcms/db-postgres` instead
+ * @deprecated - import from `@ruya.sa/db-postgres` instead
  */
 export type PostgresAdapter = _PostgresAdapter

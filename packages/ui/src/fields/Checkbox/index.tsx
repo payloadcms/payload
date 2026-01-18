@@ -3,9 +3,9 @@ import type {
   CheckboxFieldClientComponent,
   CheckboxFieldClientProps,
   CheckboxFieldValidation,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
+import { rtlLanguages } from '@ruya.sa/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'

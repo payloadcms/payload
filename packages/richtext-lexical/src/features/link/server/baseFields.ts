@@ -6,7 +6,7 @@ import type {
   TextField,
   TextFieldSingleValidation,
   TypedUser,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import type { LinkFields } from '../nodes/types.js'
 

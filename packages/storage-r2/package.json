@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/storage-r2",
-  "version": "3.71.1",
+  "name": "@ruya.sa/storage-r2",
+  "version": "3.71.3",
   "description": "Payload storage adapter for Cloudflare R2",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,13 +47,13 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@ruya.sa/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

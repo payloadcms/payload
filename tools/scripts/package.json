@@ -33,17 +33,17 @@
     "@tools/releaser": "workspace:*",
     "chalk": "^4.1.2",
     "changelogen": "^0.5.5",
-    "create-payload-app": "workspace:*",
+    "@ruya.sa/create-payload-app": "workspace:*",
     "csv-stringify": "^6.5.2",
     "license-checker": "25.0.1",
     "open": "^10.1.0",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "devDependencies": {
-    "@payloadcms/plugin-ecommerce": "workspace:*",
-    "@payloadcms/plugin-import-export": "workspace:*",
-    "@payloadcms/plugin-multi-tenant": "workspace:*",
-    "@payloadcms/richtext-lexical": "workspace:*",
-    "@payloadcms/translations": "workspace:*"
+    "@ruya.sa/plugin-ecommerce": "workspace:*",
+    "@ruya.sa/plugin-import-export": "workspace:*",
+    "@ruya.sa/plugin-multi-tenant": "workspace:*",
+    "@ruya.sa/richtext-lexical": "workspace:*",
+    "@ruya.sa/translations": "workspace:*"
   }
 }

@@ -1,6 +1,6 @@
-import type { Block, Field, SanitizedConfig, TypedUser } from 'payload'
+import type { Block, Field, SanitizedConfig, TypedUser } from '@ruya.sa/payload'
 
-import { combineWhereConstraints } from 'payload/shared'
+import { combineWhereConstraints } from '@ruya.sa/payload/shared'
 
 /**
  * Recursively applies baseFilter from collection config to relationship fields

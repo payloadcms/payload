@@ -1,4 +1,4 @@
-import type { Document } from 'payload'
+import type { Document } from '@ruya.sa/payload'
 
 import type { ToCSVFunction } from '../types.js'
 

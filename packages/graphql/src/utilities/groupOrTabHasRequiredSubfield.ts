@@ -1,6 +1,6 @@
-import type { Field, Tab } from 'payload'
+import type { Field, Tab } from '@ruya.sa/payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData } from '@ruya.sa/payload/shared'
 
 export const groupOrTabHasRequiredSubfield = (entity: Field | Tab): boolean => {
   if ('type' in entity && entity.type === 'group') {

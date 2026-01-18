@@ -1,10 +1,10 @@
 'use client'
 
-import type { FormProps } from '@payloadcms/ui'
-import type { FormState, PayloadRequest } from 'payload'
+import type { FormProps } from '@ruya.sa/ui'
+import type { FormState, PayloadRequest } from '@ruya.sa/payload'
 
-import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@payloadcms/ui'
-import { email, text } from 'payload/shared'
+import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@ruya.sa/ui'
+import { email, text } from '@ruya.sa/payload/shared'
 import React, { useState } from 'react'
 
 import { FormHeader } from '../../../elements/FormHeader/index.js'

@@ -1,9 +1,9 @@
 'use client'
 
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { extractID } from 'payload/shared'
+import { extractID } from '@ruya.sa/payload/shared'
 import React, { Fragment } from 'react'
 import { toast } from 'sonner'
 

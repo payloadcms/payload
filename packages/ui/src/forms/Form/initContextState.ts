@@ -1,5 +1,5 @@
 'use client'
-import type { Data, FormField, FormState } from 'payload'
+import type { Data, FormField, FormState } from '@ruya.sa/payload'
 
 import type {
   Context,

@@ -1,5 +1,5 @@
 'use client'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'

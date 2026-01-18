@@ -7,9 +7,9 @@ import type {
   Payload,
   TypeWithID,
   UploadCollectionSlug,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { sanitizeFields } from 'payload'
+import { sanitizeFields } from '@ruya.sa/payload'
 
 import type { UploadFeaturePropsClient } from '../client/index.js'
 
@@ -109,7 +109,7 @@ export const UploadFeature = createServerFeature<
     }
 
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#UploadFeatureClient',
+      ClientFeature: '@ruya.sa/richtext-lexical/client#UploadFeatureClient',
       clientFeatureProps: clientProps,
       generateSchemaMap: ({ props }) => {
         if (!props?.collections) {

@@ -1,4 +1,4 @@
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload'
+import type { PayloadRequest, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import type { Breadcrumb, GenerateLabel, GenerateURL } from '../types.js'
 

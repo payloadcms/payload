@@ -1,7 +1,7 @@
-import type { I18n } from '@payloadcms/translations'
-import type { BasePayload, Config, LanguageOptions, TypedUser } from 'payload'
+import type { I18n } from '@ruya.sa/translations'
+import type { BasePayload, Config, LanguageOptions, TypedUser } from '@ruya.sa/payload'
 
-import { FieldLabel } from '@payloadcms/ui'
+import { FieldLabel } from '@ruya.sa/ui'
 import React from 'react'
 
 import { ResetPreferences } from '../ResetPreferences/index.js'

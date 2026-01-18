@@ -2,7 +2,7 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { type FormState, type PayloadRequest } from 'payload'
+import { type FormState, type PayloadRequest } from '@ruya.sa/payload'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
@@ -10,7 +10,7 @@ import {
   hasDraftValidationEnabled,
   reduceFieldsToValues,
   wait,
-} from 'payload/shared'
+} from '@ruya.sa/payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 

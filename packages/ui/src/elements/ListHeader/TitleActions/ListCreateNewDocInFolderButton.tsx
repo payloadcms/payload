@@ -1,9 +1,9 @@
 'use client'
 
-import type { ClientCollectionConfig, CollectionSlug } from 'payload'
+import type { ClientCollectionConfig, CollectionSlug } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React from 'react'
 
 import { useConfig } from '../../../providers/Config/index.js'

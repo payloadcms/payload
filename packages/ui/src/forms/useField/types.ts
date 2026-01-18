@@ -1,4 +1,4 @@
-import type { FieldState, Validate } from 'payload'
+import type { FieldState, Validate } from '@ruya.sa/payload'
 
 export type Options = {
   disableFormData?: boolean

@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/db-sqlite",
-  "version": "3.71.1",
+  "name": "@ruya.sa/db-sqlite",
+  "version": "3.71.3",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@libsql/client": "0.14.0",
-    "@payloadcms/drizzle": "workspace:*",
+    "@ruya.sa/drizzle": "workspace:*",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
@@ -82,14 +82,14 @@
     "uuid": "9.0.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "@types/uuid": "10.0.0",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "publishConfig": {
     "exports": {

@@ -1,5 +1,5 @@
 'use client'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig, VisibleEntities } from 'payload'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig, VisibleEntities } from '@ruya.sa/payload'
 
 import React, { createContext, use, useCallback } from 'react'
 

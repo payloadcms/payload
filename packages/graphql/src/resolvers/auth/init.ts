@@ -1,4 +1,4 @@
-import { initOperation, isolateObjectProperty } from 'payload'
+import { initOperation, isolateObjectProperty } from '@ruya.sa/payload'
 
 import type { Context } from '../types.js'
 

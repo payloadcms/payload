@@ -1,11 +1,11 @@
 'use client'
 
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest } from '@ruya.sa/payload'
 import type { BaseEditor, BaseOperation } from 'slate'
 import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import {
   FieldDescription,
   FieldError,
@@ -14,8 +14,8 @@ import {
   useEditDepth,
   useField,
   useTranslation,
-} from '@payloadcms/ui'
-import { mergeFieldStyles } from '@payloadcms/ui/shared'
+} from '@ruya.sa/ui'
+import { mergeFieldStyles } from '@ruya.sa/ui/shared'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createEditor, Node, Element as SlateElement, Text, Transforms } from 'slate'

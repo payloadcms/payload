@@ -13,8 +13,8 @@ import type {
   ServerFunction,
   ServerFunctionClient,
   SlugifyServerFunctionArgs,
-} from 'payload'
-import type { Slugify } from 'payload/shared'
+} from '@ruya.sa/payload'
+import type { Slugify } from '@ruya.sa/payload/shared'
 
 import React, { createContext, useCallback } from 'react'
 

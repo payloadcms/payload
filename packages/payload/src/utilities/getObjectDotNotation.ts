@@ -5,7 +5,7 @@
  * @example
  *
  * ```ts
- * import { getObjectDotNotation } from 'payload/shared'
+ * import { getObjectDotNotation } from '@ruya.sa/payload/shared'
  *
  * const obj = { a: { b: { c: 42 } } }
  * const value = getObjectDotNotation<number>(obj, 'a.b.c', 0) // value is 42

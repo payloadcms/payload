@@ -1,8 +1,8 @@
-import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from 'payload'
+import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from '@ruya.sa/payload'
 
 import { sql } from 'drizzle-orm'
-import { buildVersionGlobalFields } from 'payload'
-import { hasDraftsEnabled } from 'payload/shared'
+import { buildVersionGlobalFields } from '@ruya.sa/payload'
+import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

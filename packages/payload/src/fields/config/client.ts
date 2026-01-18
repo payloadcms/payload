@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@ruya.sa/translations'
 
 import type {
   AdminClient,

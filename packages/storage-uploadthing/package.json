@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/storage-uploadthing",
-  "version": "3.71.1",
+  "name": "@ruya.sa/storage-uploadthing",
+  "version": "3.71.3",
   "description": "Payload storage adapter for uploadthing",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,14 +47,14 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "@ruya.sa/plugin-cloud-storage": "workspace:*",
     "uploadthing": "7.3.0"
   },
   "devDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

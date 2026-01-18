@@ -1,5 +1,5 @@
 'use client'
-import type { StaticLabel } from 'payload'
+import type { StaticLabel } from '@ruya.sa/payload'
 
 import React, { useId } from 'react'
 

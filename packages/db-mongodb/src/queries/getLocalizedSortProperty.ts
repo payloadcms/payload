@@ -1,6 +1,6 @@
-import type { FlattenedField, SanitizedConfig } from 'payload'
+import type { FlattenedField, SanitizedConfig } from '@ruya.sa/payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from '@ruya.sa/payload/shared'
 
 type Args = {
   config: SanitizedConfig

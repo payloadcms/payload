@@ -1,4 +1,4 @@
-import type { Where } from 'payload'
+import type { Where } from '@ruya.sa/payload'
 
 export function combineWhereConstraints(constraints: Array<Where>): Where {
   if (constraints.length === 0) {

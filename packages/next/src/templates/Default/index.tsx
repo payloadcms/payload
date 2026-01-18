@@ -5,7 +5,7 @@ import type {
   ServerProps,
   ViewTypes,
   VisibleEntities,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import {
   ActionsProvider,
@@ -13,8 +13,8 @@ import {
   BulkUploadProvider,
   EntityVisibilityProvider,
   NavToggler,
-} from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+} from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
 
 import './index.scss'
 

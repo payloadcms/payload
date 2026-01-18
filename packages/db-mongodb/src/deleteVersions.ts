@@ -1,6 +1,6 @@
-import type { DeleteVersions, FlattenedField } from 'payload'
+import type { DeleteVersions, FlattenedField } from '@ruya.sa/payload'
 
-import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel } from './types.js'

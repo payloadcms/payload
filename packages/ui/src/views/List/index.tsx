@@ -1,10 +1,10 @@
 'use client'
 
-import type { ListViewClientProps } from 'payload'
+import type { ListViewClientProps } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatAdminURL, formatFilesize } from 'payload/shared'
+import { formatAdminURL, formatFilesize } from '@ruya.sa/payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'

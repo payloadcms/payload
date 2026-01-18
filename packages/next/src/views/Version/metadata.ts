@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import type { MetaConfig } from 'payload'
+import type { MetaConfig } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { formatDate } from '@payloadcms/ui/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { formatDate } from '@ruya.sa/ui/shared'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 

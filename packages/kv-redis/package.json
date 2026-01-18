@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/kv-redis",
-  "version": "3.71.1",
+  "name": "@ruya.sa/kv-redis",
+  "version": "3.71.3",
   "description": "Redis KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -44,10 +44,10 @@
     "ioredis": "^5.4.1"
   },
   "devDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

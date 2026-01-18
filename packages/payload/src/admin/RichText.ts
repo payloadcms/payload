@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GenericLanguages, I18n } from '@payloadcms/translations'
+import type { GenericLanguages, I18n } from '@ruya.sa/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'

@@ -1,5 +1,5 @@
 'use client'
-import type { FormState } from 'payload'
+import type { FormState } from '@ruya.sa/payload'
 
 type Result = {
   remainingFields: FormState

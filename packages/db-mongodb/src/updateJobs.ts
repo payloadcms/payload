@@ -1,5 +1,5 @@
 import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
-import type { Job, UpdateJobs, Where } from 'payload'
+import type { Job, UpdateJobs, Where } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

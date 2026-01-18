@@ -1,8 +1,8 @@
 'use client'
-import type { Validate, ValidateOptions } from 'payload'
+import type { Validate, ValidateOptions } from '@ruya.sa/payload'
 
-import { EmailField, TextField, useTranslation } from '@payloadcms/ui'
-import { email, username } from 'payload/shared'
+import { EmailField, TextField, useTranslation } from '@ruya.sa/ui'
+import { email, username } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 export type LoginFieldProps = {

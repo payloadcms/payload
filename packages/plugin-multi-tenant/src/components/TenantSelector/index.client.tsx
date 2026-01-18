@@ -1,9 +1,9 @@
 'use client'
-import type { ReactSelectOption } from '@payloadcms/ui'
-import type { ViewTypes } from 'payload'
+import type { ReactSelectOption } from '@ruya.sa/ui'
+import type { ViewTypes } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { ConfirmationModal, SelectInput, useModal, useTranslation } from '@payloadcms/ui'
+import { getTranslation } from '@ruya.sa/translations'
+import { ConfirmationModal, SelectInput, useModal, useTranslation } from '@ruya.sa/ui'
 import React from 'react'
 
 import type {

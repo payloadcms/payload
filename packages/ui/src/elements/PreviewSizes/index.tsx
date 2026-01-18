@@ -1,5 +1,5 @@
 'use client'
-import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig } from 'payload'
+import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig } from '@ruya.sa/payload'
 
 import React, { useEffect, useMemo, useState } from 'react'
 

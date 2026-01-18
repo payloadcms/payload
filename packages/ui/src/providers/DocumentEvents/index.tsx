@@ -1,5 +1,5 @@
 'use client'
-import type { DocumentEvent } from 'payload'
+import type { DocumentEvent } from '@ruya.sa/payload'
 
 import React, { createContext, use, useState } from 'react'
 

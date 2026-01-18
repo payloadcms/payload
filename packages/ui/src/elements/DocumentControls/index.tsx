@@ -5,10 +5,10 @@ import type {
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from '@ruya.sa/payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'

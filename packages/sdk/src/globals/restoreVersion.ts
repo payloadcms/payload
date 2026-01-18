@@ -1,4 +1,4 @@
-import type { GlobalSlug, PayloadTypesShape, TypedLocale, TypeWithVersion } from 'payload'
+import type { GlobalSlug, PayloadTypesShape, TypedLocale, TypeWithVersion } from '@ruya.sa/payload'
 
 import type { PayloadSDK } from '../index.js'
 import type { DataFromGlobalSlug, PopulateType } from '../types.js'

@@ -1,4 +1,4 @@
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
+import type { HandleUpload } from '@ruya.sa/plugin-cloud-storage/types'
 
 import { put } from '@vercel/blob'
 import path from 'path'

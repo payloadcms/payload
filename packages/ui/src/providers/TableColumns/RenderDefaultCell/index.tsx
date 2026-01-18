@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultCellComponentProps } from 'payload'
+import type { DefaultCellComponentProps } from '@ruya.sa/payload'
 
 import React from 'react'
 

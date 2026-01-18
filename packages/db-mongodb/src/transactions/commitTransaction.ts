@@ -1,4 +1,4 @@
-import type { CommitTransaction } from 'payload'
+import type { CommitTransaction } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from '../index.js'
 

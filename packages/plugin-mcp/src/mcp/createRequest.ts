@@ -1,4 +1,4 @@
-import { AuthenticationError, type PayloadRequest } from 'payload'
+import { AuthenticationError, type PayloadRequest } from '@ruya.sa/payload'
 
 export const createRequestFromPayloadRequest = (req: PayloadRequest) => {
   if (!req.url) {

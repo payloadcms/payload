@@ -1,8 +1,8 @@
 'use client'
 
-import type { JsonObject } from 'payload'
+import type { JsonObject } from '@ruya.sa/payload'
 
-import { getBestFitFromSizes, isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'

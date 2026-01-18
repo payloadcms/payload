@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionConfig, Field } from '@ruya.sa/payload'
 
 import type { SanitizedSearchPluginConfig } from '../types.js'
 import type { ReindexButtonServerProps } from './ui/ReindexButton/types.js'
@@ -47,7 +47,7 @@ export const generateSearchCollection = (
       admin: {
         components: {
           Field: {
-            path: '@payloadcms/plugin-search/client#LinkToDoc',
+            path: '@ruya.sa/plugin-search/client#LinkToDoc',
           },
         },
         position: 'sidebar',
@@ -73,7 +73,7 @@ export const generateSearchCollection = (
           list: {
             actions: [
               {
-                path: '@payloadcms/plugin-search/client#ReindexButton',
+                path: '@ruya.sa/plugin-search/client#ReindexButton',
                 serverProps: {
                   collectionLabels,
                   searchCollections,

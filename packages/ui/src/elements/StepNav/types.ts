@@ -1,4 +1,4 @@
-import type { LabelFunction, StaticLabel } from 'payload'
+import type { LabelFunction, StaticLabel } from '@ruya.sa/payload'
 import type React from 'react'
 
 export type StepNavItem = {

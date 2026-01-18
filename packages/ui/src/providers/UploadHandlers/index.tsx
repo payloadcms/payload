@@ -1,5 +1,5 @@
 'use client'
-import type { UploadCollectionSlug } from 'payload'
+import type { UploadCollectionSlug } from '@ruya.sa/payload'
 
 import React, { useState } from 'react'
 

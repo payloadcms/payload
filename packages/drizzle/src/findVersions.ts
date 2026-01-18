@@ -1,6 +1,6 @@
-import type { FindVersions, SanitizedCollectionConfig } from 'payload'
+import type { FindVersions, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
-import { buildVersionCollectionFields } from 'payload'
+import { buildVersionCollectionFields } from '@ruya.sa/payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

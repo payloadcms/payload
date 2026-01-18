@@ -1,8 +1,8 @@
-import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { StaticHandler } from '@ruya.sa/plugin-cloud-storage/types'
+import type { CollectionConfig } from '@ruya.sa/payload'
 
 import path from 'path'
-import { getRangeRequestInfo } from 'payload/internal'
+import { getRangeRequestInfo } from '@ruya.sa/payload/internal'
 
 import type { R2Bucket } from './types.js'
 

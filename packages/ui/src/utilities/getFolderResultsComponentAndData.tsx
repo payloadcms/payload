@@ -4,11 +4,11 @@ import type {
   GetFolderResultsComponentAndDataArgs,
   ServerFunction,
   Where,
-} from 'payload'
-import type { FolderBreadcrumb, FolderOrDocument } from 'payload/shared'
+} from '@ruya.sa/payload'
+import type { FolderBreadcrumb, FolderOrDocument } from '@ruya.sa/payload/shared'
 
-import { APIError, formatErrors, getFolderData } from 'payload'
-import { buildFolderWhereConstraints, combineWhereConstraints } from 'payload/shared'
+import { APIError, formatErrors, getFolderData } from '@ruya.sa/payload'
+import { buildFolderWhereConstraints, combineWhereConstraints } from '@ruya.sa/payload/shared'
 
 import {
   FolderFileTable,

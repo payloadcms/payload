@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/storage-azure",
-  "version": "3.71.1",
+  "name": "@ruya.sa/storage-azure",
+  "version": "3.71.3",
   "description": "Payload storage adapter for Azure Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -49,13 +49,13 @@
   "dependencies": {
     "@azure/abort-controller": "^1.1.0",
     "@azure/storage-blob": "^12.11.0",
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@ruya.sa/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

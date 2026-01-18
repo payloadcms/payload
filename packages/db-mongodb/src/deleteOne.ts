@@ -1,5 +1,5 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { DeleteOne } from 'payload'
+import type { DeleteOne } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

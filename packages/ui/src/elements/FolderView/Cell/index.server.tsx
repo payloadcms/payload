@@ -1,4 +1,4 @@
-import type { DefaultServerCellComponentProps } from 'payload'
+import type { DefaultServerCellComponentProps } from '@ruya.sa/payload'
 
 import React from 'react'
 

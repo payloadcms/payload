@@ -1,4 +1,4 @@
-import type { OptionObject, Payload, TypedUser } from 'payload'
+import type { OptionObject, Payload, TypedUser } from '@ruya.sa/payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 

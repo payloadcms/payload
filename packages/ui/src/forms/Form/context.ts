@@ -1,5 +1,5 @@
 'use client'
-import type { RenderedField } from 'payload'
+import type { RenderedField } from '@ruya.sa/payload'
 
 import { createContext, use } from 'react'
 import {

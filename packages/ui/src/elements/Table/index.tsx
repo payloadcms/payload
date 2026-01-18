@@ -1,6 +1,6 @@
 'use client'
 
-import type { Column } from 'payload'
+import type { Column } from '@ruya.sa/payload'
 
 import React from 'react'
 

@@ -1,7 +1,7 @@
 import type { CountOptions } from 'mongodb'
-import type { CountVersions } from 'payload'
+import type { CountVersions } from '@ruya.sa/payload'
 
-import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, flattenWhereToOperators } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

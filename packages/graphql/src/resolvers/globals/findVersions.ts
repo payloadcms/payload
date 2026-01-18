@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo } from 'graphql'
-import type { Document, SanitizedGlobalConfig, Where } from 'payload'
+import type { Document, SanitizedGlobalConfig, Where } from '@ruya.sa/payload'
 
-import { findVersionsOperationGlobal, isolateObjectProperty } from 'payload'
+import { findVersionsOperationGlobal, isolateObjectProperty } from '@ruya.sa/payload'
 
 import type { Context } from '../types.js'
 

@@ -1,10 +1,10 @@
 'use client'
 const baseClass = 'render-field-diffs'
-import type { VersionField } from 'payload'
+import type { VersionField } from '@ruya.sa/payload'
 
 import './index.scss'
 
-import { ShimmerEffect } from '@payloadcms/ui'
+import { ShimmerEffect } from '@ruya.sa/ui'
 import React, { Fragment, useEffect } from 'react'
 
 export const RenderVersionFieldsToDiff = ({

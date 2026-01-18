@@ -1,5 +1,5 @@
-import type { TFunction } from '@payloadcms/translations'
-import type { Pill } from '@payloadcms/ui'
+import type { TFunction } from '@ruya.sa/translations'
+import type { Pill } from '@ruya.sa/ui'
 
 type Args = {
   currentlyPublishedVersion?: {

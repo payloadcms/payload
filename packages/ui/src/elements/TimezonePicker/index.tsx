@@ -1,6 +1,6 @@
 'use client'
 
-import type { OptionObject } from 'payload'
+import type { OptionObject } from '@ruya.sa/payload'
 import type React from 'react'
 
 import { useMemo } from 'react'

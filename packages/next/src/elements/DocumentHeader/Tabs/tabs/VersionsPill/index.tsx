@@ -1,5 +1,5 @@
 'use client'
-import { useDocumentInfo } from '@payloadcms/ui'
+import { useDocumentInfo } from '@ruya.sa/ui'
 import React from 'react'
 
 import './index.scss'

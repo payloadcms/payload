@@ -1,6 +1,6 @@
 {
-  "name": "create-payload-app",
-  "version": "3.71.1",
+  "name": "@ruya.sa/create-payload-app",
+  "version": "3.71.3",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -40,7 +40,7 @@
     }
   },
   "bin": {
-    "create-payload-app": "bin/cli.js"
+    "@ruya.sa/create-payload-app": "bin/cli.js"
   },
   "files": [
     "package.json",

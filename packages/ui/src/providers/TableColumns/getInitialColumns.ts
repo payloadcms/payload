@@ -1,6 +1,6 @@
-import type { ClientField, CollectionConfig, CollectionPreferences, Field } from 'payload'
+import type { ClientField, CollectionConfig, CollectionPreferences, Field } from '@ruya.sa/payload'
 
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData } from '@ruya.sa/payload/shared'
 
 const getRemainingColumns = <T extends ClientField[] | Field[]>(
   fields: T,

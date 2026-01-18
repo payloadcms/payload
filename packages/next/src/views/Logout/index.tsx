@@ -1,4 +1,4 @@
-import type { AdminViewServerProps } from 'payload'
+import type { AdminViewServerProps } from '@ruya.sa/payload'
 
 import React from 'react'
 

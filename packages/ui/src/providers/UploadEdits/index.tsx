@@ -1,5 +1,5 @@
 'use client'
-import type { UploadEdits } from 'payload'
+import type { UploadEdits } from '@ruya.sa/payload'
 
 import React from 'react'
 

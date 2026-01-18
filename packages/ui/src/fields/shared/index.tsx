@@ -1,5 +1,5 @@
 'use client'
-import type { Locale, SanitizedLocalizationConfig } from 'payload'
+import type { Locale, SanitizedLocalizationConfig } from '@ruya.sa/payload'
 
 export const fieldBaseClass = 'field-type'
 

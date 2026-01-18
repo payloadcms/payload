@@ -1,5 +1,5 @@
-import type { TFunction } from '@payloadcms/translations'
-import type { ClientBlock, ClientField, FormStateWithoutComponents } from 'payload'
+import type { TFunction } from '@ruya.sa/translations'
+import type { ClientBlock, ClientField, FormStateWithoutComponents } from '@ruya.sa/payload'
 
 export type ClipboardCopyBlocksSchema = {
   schemaBlocks: ClientBlock[]

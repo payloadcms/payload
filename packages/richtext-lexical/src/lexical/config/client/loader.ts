@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientConfig, RichTextFieldClient } from 'payload'
+import type { ClientConfig, RichTextFieldClient } from '@ruya.sa/payload'
 
 import type {
   ClientFeatureProviderMap,

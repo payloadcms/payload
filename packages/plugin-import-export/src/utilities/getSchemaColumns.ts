@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import { getFlattenedFieldKeys } from './getFlattenedFieldKeys.js'
 

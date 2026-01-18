@@ -1,4 +1,4 @@
-import type { Access, AccessArgs, AccessResult, CollectionConfig, TypedUser, Where } from 'payload'
+import type { Access, AccessArgs, AccessResult, CollectionConfig, TypedUser, Where } from '@ruya.sa/payload'
 
 import type { AllAccessKeys, MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
 

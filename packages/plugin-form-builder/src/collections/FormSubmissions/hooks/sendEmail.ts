@@ -1,4 +1,4 @@
-import type { CollectionAfterChangeHook } from 'payload'
+import type { CollectionAfterChangeHook } from '@ruya.sa/payload'
 
 import type { Email, FormattedEmail, FormBuilderPluginConfig } from '../../../types.js'
 

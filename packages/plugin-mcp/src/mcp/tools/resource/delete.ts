@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, TypedUser } from '@ruya.sa/payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 

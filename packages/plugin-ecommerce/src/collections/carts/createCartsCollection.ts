@@ -1,4 +1,4 @@
-import type { Access, CollectionConfig, Field } from 'payload'
+import type { Access, CollectionConfig, Field } from '@ruya.sa/payload'
 
 import type { AccessConfig, CurrenciesConfig } from '../../types/index.js'
 import type { CartItemMatcher } from './operations/types.js'

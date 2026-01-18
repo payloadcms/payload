@@ -1,6 +1,6 @@
 {
-  "name": "@payloadcms/ui",
-  "version": "3.71.1",
+  "name": "@ruya.sa/ui",
+  "version": "3.71.3",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -145,7 +145,7 @@
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
     "@monaco-editor/react": "4.7.0",
-    "@payloadcms/translations": "workspace:*",
+    "@ruya.sa/translations": "workspace:*",
     "bson-objectid": "2.0.4",
     "date-fns": "4.1.0",
     "dequal": "2.0.3",
@@ -168,18 +168,18 @@
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
-    "@payloadcms/eslint-config": "workspace:*",
+    "@ruya.sa/eslint-config": "workspace:*",
     "@types/react": "19.2.1",
     "@types/react-dom": "19.2.1",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.25.5",
     "esbuild-sass-plugin": "3.3.1",
-    "payload": "workspace:*"
+    "@ruya.sa/payload": "workspace:*"
   },
   "peerDependencies": {
     "next": "^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9 || ^16.0.0",
-    "payload": "workspace:*",
+    "@ruya.sa/payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },

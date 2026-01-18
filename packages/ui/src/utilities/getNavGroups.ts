@@ -1,6 +1,6 @@
-import type { SanitizedConfig, SanitizedPermissions, VisibleEntities } from 'payload'
+import type { SanitizedConfig, SanitizedPermissions, VisibleEntities } from '@ruya.sa/payload'
 
-import { type I18nClient } from '@payloadcms/translations'
+import { type I18nClient } from '@ruya.sa/translations'
 
 import { EntityType } from './groupNavItems.js'
 import { type EntityToGroup, groupNavItems } from './groupNavItems.js'

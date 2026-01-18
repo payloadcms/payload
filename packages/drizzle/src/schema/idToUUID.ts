@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { FlattenedField } from '@ruya.sa/payload'
 
 export const idToUUID = (fields: FlattenedField[]): FlattenedField[] =>
   fields.map((field) => {

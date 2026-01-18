@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { SelectType, TypeWithID } from 'payload'
+import type { SelectType, TypeWithID } from '@ruya.sa/payload'
 
 import type {
   DefaultNodeTypes,

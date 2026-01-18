@@ -1,4 +1,4 @@
-import type { I18n } from '@payloadcms/translations'
+import type { I18n } from '@ruya.sa/translations'
 import type {
   ClientConfig,
   ClientField,
@@ -6,7 +6,7 @@ import type {
   FieldSchemaMap,
   Payload,
   TextFieldClient,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 import { traverseFields } from './traverseFields.js'
 

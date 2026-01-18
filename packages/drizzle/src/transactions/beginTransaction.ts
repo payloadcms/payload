@@ -1,4 +1,4 @@
-import type { BeginTransaction } from 'payload'
+import type { BeginTransaction } from '@ruya.sa/payload'
 
 import { v4 as uuid } from 'uuid'
 

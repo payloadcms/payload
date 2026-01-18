@@ -1,4 +1,4 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient } from '@ruya.sa/translations'
 
 import type { ClientField, Field, FieldTypes, Tab } from '../../fields/config/types.js'
 import type {

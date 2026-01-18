@@ -6,9 +6,9 @@ import type {
   ClientConfig,
   ClientField,
   VersionField,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { getUniqueListBy } from 'payload/shared'
+import { getUniqueListBy } from '@ruya.sa/payload/shared'
 
 /**
  * Get the fields for a row in an iterable field for comparison.

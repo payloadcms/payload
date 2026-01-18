@@ -1,4 +1,4 @@
-import type { ClientTranslationsObject } from '@payloadcms/translations'
+import type { ClientTranslationsObject } from '@ruya.sa/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'

@@ -1,4 +1,4 @@
-import type { CollectionSlug, Data, ListQuery } from 'payload'
+import type { CollectionSlug, Data, ListQuery } from '@ruya.sa/payload'
 
 import { createContext, use } from 'react'
 

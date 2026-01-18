@@ -1,4 +1,4 @@
-import type { NumberField } from 'payload'
+import type { NumberField } from '@ruya.sa/payload'
 
 type Args = {
   field: NumberField

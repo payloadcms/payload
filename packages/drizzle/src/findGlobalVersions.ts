@@ -1,6 +1,6 @@
-import type { FindGlobalVersions, SanitizedGlobalConfig } from 'payload'
+import type { FindGlobalVersions, SanitizedGlobalConfig } from '@ruya.sa/payload'
 
-import { buildVersionGlobalFields } from 'payload'
+import { buildVersionGlobalFields } from '@ruya.sa/payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'

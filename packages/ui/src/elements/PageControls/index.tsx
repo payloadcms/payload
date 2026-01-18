@@ -1,7 +1,7 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
+import type { ClientCollectionConfig, PaginatedDocs } from '@ruya.sa/payload'
 
-import { isNumber } from 'payload/shared'
+import { isNumber } from '@ruya.sa/payload/shared'
 import React, { Fragment } from 'react'
 
 import type { IListQueryContext } from '../../providers/ListQuery/types.js'

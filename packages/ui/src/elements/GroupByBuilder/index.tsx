@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Field, SanitizedCollectionConfig } from 'payload'
+import type { ClientField, Field, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import './index.scss'
 

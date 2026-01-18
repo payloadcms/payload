@@ -1,13 +1,13 @@
 'use client'
-import type { DateFieldDiffClientComponent } from 'payload'
+import type { DateFieldDiffClientComponent } from '@ruya.sa/payload'
 
 import {
   FieldDiffContainer,
   getHTMLDiffComponents,
   useConfig,
   useTranslation,
-} from '@payloadcms/ui'
-import { formatDate } from '@payloadcms/ui/shared'
+} from '@ruya.sa/ui'
+import { formatDate } from '@ruya.sa/ui/shared'
 
 import './index.scss'
 

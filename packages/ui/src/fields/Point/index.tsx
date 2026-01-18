@@ -1,7 +1,7 @@
 'use client'
-import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
+import type { PointFieldClientComponent, PointFieldValidation } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
+import { getTranslation } from '@ruya.sa/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'

@@ -1,6 +1,6 @@
 'use client'
 
-import { confirmPassword } from 'payload/shared'
+import { confirmPassword } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { useField } from '../../forms/useField/index.js'

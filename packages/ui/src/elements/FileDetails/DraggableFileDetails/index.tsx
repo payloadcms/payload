@@ -7,7 +7,7 @@ import './index.scss'
 
 const baseClass = 'file-details-draggable'
 
-import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
+import type { Data, FileSizes, SanitizedCollectionConfig } from '@ruya.sa/payload'
 
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DragHandleIcon } from '../../../icons/DragHandle/index.js'

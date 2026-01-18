@@ -1,10 +1,10 @@
-import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
-import type { PayloadHandler } from 'payload'
+import type { ClientUploadsAccess } from '@ruya.sa/plugin-cloud-storage/types'
+import type { PayloadHandler } from '@ruya.sa/payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import path from 'path'
-import { APIError, Forbidden, ValidationError } from 'payload'
+import { APIError, Forbidden, ValidationError } from '@ruya.sa/payload'
 
 import type { S3StorageOptions } from './index.js'
 

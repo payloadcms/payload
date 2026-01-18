@@ -1,4 +1,4 @@
-import type { RichTextField, Validate } from 'payload'
+import type { RichTextField, Validate } from '@ruya.sa/payload'
 
 import type { AdapterArguments } from '../types.js'
 

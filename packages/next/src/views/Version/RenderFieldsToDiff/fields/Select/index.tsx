@@ -1,9 +1,9 @@
 'use client'
-import type { I18nClient } from '@payloadcms/translations'
-import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
+import type { I18nClient } from '@ruya.sa/translations'
+import type { Option, SelectField, SelectFieldDiffClientComponent } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
+import { getTranslation } from '@ruya.sa/translations'
+import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@ruya.sa/ui'
 import React from 'react'
 
 import './index.scss'

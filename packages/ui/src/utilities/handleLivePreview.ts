@@ -6,7 +6,7 @@ import type {
   Operation,
   PayloadRequest,
   SanitizedConfig,
-} from 'payload'
+} from '@ruya.sa/payload'
 
 export const getLivePreviewConfig = ({
   collectionConfig,

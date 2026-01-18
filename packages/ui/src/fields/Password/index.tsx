@@ -1,7 +1,7 @@
 'use client'
-import type { PasswordFieldValidation, PayloadRequest } from 'payload'
+import type { PasswordFieldValidation, PayloadRequest } from '@ruya.sa/payload'
 
-import { password } from 'payload/shared'
+import { password } from '@ruya.sa/payload/shared'
 import React, { useCallback, useMemo } from 'react'
 
 import type { PasswordFieldProps } from './types.js'

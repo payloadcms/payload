@@ -1,8 +1,8 @@
 'use client'
-import type { DefaultCellComponentProps, OptionObject, SelectFieldClient } from 'payload'
+import type { DefaultCellComponentProps, OptionObject, SelectFieldClient } from '@ruya.sa/payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { optionsAreObjects } from 'payload/shared'
+import { getTranslation } from '@ruya.sa/translations'
+import { optionsAreObjects } from '@ruya.sa/payload/shared'
 import React from 'react'
 
 import { useTranslation } from '../../../../../providers/Translation/index.js'

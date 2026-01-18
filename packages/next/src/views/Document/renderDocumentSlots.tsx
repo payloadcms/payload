@@ -15,11 +15,11 @@ import type {
   StaticDescription,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
-} from 'payload'
+} from '@ruya.sa/payload'
 
-import { ViewDescription } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { hasDraftsEnabled } from 'payload/shared'
+import { ViewDescription } from '@ruya.sa/ui'
+import { RenderServerComponent } from '@ruya.sa/ui/elements/RenderServerComponent'
+import { hasDraftsEnabled } from '@ruya.sa/payload/shared'
 
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 

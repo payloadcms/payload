@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 

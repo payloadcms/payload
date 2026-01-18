@@ -1,7 +1,7 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@ruya.sa/translations'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 
-import { extractHeaderLanguage } from '@payloadcms/translations'
+import { extractHeaderLanguage } from '@ruya.sa/translations'
 
 import type { SanitizedConfig } from '../config/types.js'
 

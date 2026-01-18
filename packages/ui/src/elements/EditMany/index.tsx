@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, Where } from '@ruya.sa/payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'

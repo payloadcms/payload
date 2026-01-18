@@ -1,6 +1,6 @@
 'use client'
 
-import type { FolderBreadcrumb } from 'payload/shared'
+import type { FolderBreadcrumb } from '@ruya.sa/payload/shared'
 
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'

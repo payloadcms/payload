@@ -1,8 +1,8 @@
 'use client'
 
-import type { SaveDraftButtonClientProps } from 'payload'
+import type { SaveDraftButtonClientProps } from '@ruya.sa/payload'
 
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL } from '@ruya.sa/payload/shared'
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'

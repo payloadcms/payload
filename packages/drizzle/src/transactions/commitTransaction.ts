@@ -1,4 +1,4 @@
-import type { CommitTransaction } from 'payload'
+import type { CommitTransaction } from '@ruya.sa/payload'
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(
   incomingID = '',

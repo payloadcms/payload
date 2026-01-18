@@ -1,8 +1,8 @@
 import type { ConnectOptions } from 'mongoose'
-import type { Connect, Migration } from 'payload'
+import type { Connect, Migration } from '@ruya.sa/payload'
 
 import mongoose from 'mongoose'
-import { defaultBeginTransaction } from 'payload'
+import { defaultBeginTransaction } from '@ruya.sa/payload'
 
 import type { MongooseAdapter } from './index.js'
 

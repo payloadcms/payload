@@ -1,5 +1,5 @@
 import type { GraphQLType } from 'graphql'
-import type { FieldAffectingData } from 'payload'
+import type { FieldAffectingData } from '@ruya.sa/payload'
 
 import { GraphQLNonNull } from 'graphql'
 
