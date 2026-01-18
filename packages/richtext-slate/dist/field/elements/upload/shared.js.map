@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/field/elements/upload/shared.ts"],"sourcesContent":["export const uploadName = 'upload'\nexport const uploadFieldsSchemaPath = 'upload.fields'\n"],"names":["uploadName","uploadFieldsSchemaPath"],"mappings":"AAAA,OAAO,MAAMA,aAAa,SAAQ;AAClC,OAAO,MAAMC,yBAAyB,gBAAe"}

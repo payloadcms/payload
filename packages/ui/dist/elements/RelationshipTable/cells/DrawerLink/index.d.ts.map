@@ -1,1 +1,0 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../../src/elements/RelationshipTable/cells/DrawerLink/index.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,MAAM,OAAO,CAAA;AAEzB,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,gBAAgB,CAAA;AAKlD,OAAO,cAAc,CAAA;AAErB,eAAO,MAAM,UAAU,EAAE,KAAK,CAAC,EAAE,CAAC;IAChC,eAAe,CAAC,EAAE,MAAM,CAAA;IACxB,YAAY,EAAE,YAAY,CAAA;CAC3B,CAiBA,CAAA"}

@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/rsc.ts"],"sourcesContent":["export { PriceInput } from '../ui/PriceInput/index.js'\nexport { VariantOptionsSelector } from '../ui/VariantOptionsSelector/index.js'\n"],"names":["PriceInput","VariantOptionsSelector"],"mappings":"AAAA,SAASA,UAAU,QAAQ,4BAA2B;AACtD,SAASC,sBAAsB,QAAQ,wCAAuC"}

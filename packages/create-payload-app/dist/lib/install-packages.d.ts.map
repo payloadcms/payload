@@ -1,1 +1,0 @@
-{"version":3,"file":"install-packages.d.ts","sourceRoot":"","sources":["../../src/lib/install-packages.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAIjD,wBAAsB,eAAe,CAAC,IAAI,EAAE;IAC1C,cAAc,EAAE,cAAc,CAAA;IAC9B,iBAAiB,EAAE,MAAM,EAAE,CAAA;IAC3B,UAAU,EAAE,MAAM,CAAA;CACnB;;GAmCA"}

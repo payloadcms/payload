@@ -1,1 +1,0 @@
-{"version":3,"file":"getCollectionIdType.d.ts","sourceRoot":"","sources":["../../src/utilities/getCollectionIdType.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,SAAS,CAAA;AAEzC,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AASjD,eAAO,MAAM,mBAAmB,6BAG7B;IACD,OAAO,EAAE,cAAc,CAAA;IACvB,UAAU,EAAE,UAAU,CAAA;CACvB,sBAEA,CAAA"}

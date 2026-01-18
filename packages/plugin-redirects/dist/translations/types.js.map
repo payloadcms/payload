@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/translations/types.ts"],"sourcesContent":["import type { en } from './languages/en.js'\n\nexport type PluginDefaultTranslationsObject = typeof en\n"],"names":[],"mappings":"AAEA,WAAuD"}

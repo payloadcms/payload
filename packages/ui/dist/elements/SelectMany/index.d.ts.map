@@ -1,1 +1,0 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/SelectMany/index.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAA;AAEzB,OAAO,EAAE,YAAY,EAAE,MAAM,oCAAoC,CAAA;AAIjE,eAAO,MAAM,UAAU,EAAE,KAAK,CAAC,EAAE,CAAC;IAChC,OAAO,CAAC,EAAE,CAAC,GAAG,EAAE,UAAU,CAAC,OAAO,YAAY,CAAC,CAAC,UAAU,CAAC,KAAK,IAAI,CAAA;CACrE,CAuBA,CAAA"}

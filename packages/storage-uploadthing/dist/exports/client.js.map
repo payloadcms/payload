@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/client.ts"],"sourcesContent":["export { UploadthingClientUploadHandler } from '../client/UploadthingClientUploadHandler.js'\n"],"names":["UploadthingClientUploadHandler"],"mappings":"AAAA,SAASA,8BAA8B,QAAQ,8CAA6C"}

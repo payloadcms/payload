@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/client.ts"],"sourcesContent":["export { LinkToDoc } from '../Search/ui/LinkToDoc/index.js'\nexport { ReindexButton } from '../Search/ui/ReindexButton/index.js'\n"],"names":["LinkToDoc","ReindexButton"],"mappings":"AAAA,SAASA,SAAS,QAAQ,kCAAiC;AAC3D,SAASC,aAAa,QAAQ,sCAAqC"}

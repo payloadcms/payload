@@ -1,1 +1,0 @@
-{"version":3,"file":"numbers.d.ts","sourceRoot":"","sources":["../../../src/transform/write/numbers.ts"],"names":[],"mappings":"AAAA,KAAK,IAAI,GAAG;IACV,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,CAAA;IAChC,IAAI,EAAE,OAAO,EAAE,CAAA;IACf,OAAO,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,CAAA;CACnC,CAAA;AAED,eAAO,MAAM,gBAAgB,+BAAgC,IAAI,SAQhE,CAAA"}

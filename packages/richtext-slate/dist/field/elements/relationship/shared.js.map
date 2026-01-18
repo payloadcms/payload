@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/field/elements/relationship/shared.ts"],"sourcesContent":["export const relationshipName = 'relationship'\n"],"names":["relationshipName"],"mappings":"AAAA,OAAO,MAAMA,mBAAmB,eAAc"}

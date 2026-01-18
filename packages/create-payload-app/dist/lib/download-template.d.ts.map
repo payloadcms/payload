@@ -1,1 +1,0 @@
-{"version":3,"file":"download-template.d.ts","sourceRoot":"","sources":["../../src/lib/download-template.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,aAAa,CAAA;AAIlD,wBAAsB,gBAAgB,CAAC,EACrC,KAAK,EACL,UAAU,EACV,QAAQ,GACT,EAAE;IACD,KAAK,CAAC,EAAE,OAAO,CAAA;IACf,UAAU,EAAE,MAAM,CAAA;IAClB,QAAQ,EAAE,eAAe,CAAA;CAC1B,iBAmBA"}

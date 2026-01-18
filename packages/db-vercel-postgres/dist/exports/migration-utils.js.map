@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/migration-utils.ts"],"sourcesContent":["export { migratePostgresV2toV3 } from '@payloadcms/drizzle/postgres'\n"],"names":["migratePostgresV2toV3"],"mappings":"AAAA,SAASA,qBAAqB,QAAQ,+BAA8B"}

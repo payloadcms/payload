@@ -1,1 +1,0 @@
-{"version":3,"file":"types.js","names":[],"sources":["../../../src/forms/RowLabel/types.ts"],"sourcesContent":["export type RowLabelProps = {\n  readonly className?: string\n  readonly CustomComponent?: React.ReactNode\n  readonly label?: React.ReactNode | string\n  readonly path: string\n  readonly rowNumber?: number\n}\n"],"mappings":"AAAA","ignoreList":[]}

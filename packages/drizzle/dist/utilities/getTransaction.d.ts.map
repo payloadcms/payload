@@ -1,1 +1,0 @@
-{"version":3,"file":"getTransaction.d.ts","sourceRoot":"","sources":["../../src/utilities/getTransaction.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAE7C,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAEjD;;;;;GAKG;AACH,eAAO,MAAM,cAAc,GAAU,CAAC,SAAS,cAAc,4BAClD,CAAC,QACJ,OAAO,CAAC,cAAc,CAAC,KAC5B,OAAO,CAAC,CAAC,CAAC,SAAS,CAAC,CAMtB,CAAA"}

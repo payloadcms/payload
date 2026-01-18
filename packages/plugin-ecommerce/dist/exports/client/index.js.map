@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/exports/client/index.ts"],"sourcesContent":["export { PriceCell } from '../../ui/PriceCell/index.js'\nexport { PriceRowLabel } from '../../ui/PriceRowLabel/index.js'\n"],"names":["PriceCell","PriceRowLabel"],"mappings":"AAAA,SAASA,SAAS,QAAQ,8BAA6B;AACvD,SAASC,aAAa,QAAQ,kCAAiC"}

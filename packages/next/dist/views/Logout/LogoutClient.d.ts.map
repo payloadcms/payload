@@ -1,1 +1,0 @@
-{"version":3,"file":"LogoutClient.d.ts","sourceRoot":"","sources":["../../../src/views/Logout/LogoutClient.tsx"],"names":[],"mappings":"AAYA,OAAO,KAAoB,MAAM,OAAO,CAAA;AAExC,OAAO,cAAc,CAAA;AAIrB;;;;;;;;;GASG;AACH,eAAO,MAAM,YAAY,EAAE,KAAK,CAAC,EAAE,CAAC;IAClC,UAAU,EAAE,MAAM,CAAA;IAClB,UAAU,CAAC,EAAE,OAAO,CAAA;IACpB,QAAQ,EAAE,MAAM,CAAA;CACjB,CA2DA,CAAA"}

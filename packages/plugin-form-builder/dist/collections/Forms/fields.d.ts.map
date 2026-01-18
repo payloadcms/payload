@@ -1,1 +1,0 @@
-{"version":3,"file":"fields.d.ts","sourceRoot":"","sources":["../../../src/collections/Forms/fields.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAS,MAAM,SAAS,CAAA;AAE3C,OAAO,KAAK,EAAE,WAAW,EAAsB,MAAM,gBAAgB,CAAA;AA2sBrE,eAAO,MAAM,MAAM,EAad;IACH,CAAC,GAAG,EAAE,MAAM,GAAG,CAAC,CAAC,WAAW,CAAC,EAAE,OAAO,GAAG,WAAW,KAAK,KAAK,CAAC,GAAG,KAAK,CAAA;CACxE,CAAA"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"getArrayRelationName.d.ts","sourceRoot":"","sources":["../../src/utilities/getArrayRelationName.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,SAAS,CAAA;AAEzC,eAAO,MAAM,oBAAoB,gCAI9B;IACD,KAAK,EAAE,UAAU,CAAA;IACjB,IAAI,EAAE,MAAM,CAAA;IACZ,SAAS,EAAE,MAAM,CAAA;CAClB,WAMA,CAAA"}

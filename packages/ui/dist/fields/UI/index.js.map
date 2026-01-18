@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","names":["UIField"],"sources":["../../../src/fields/UI/index.tsx"],"sourcesContent":["'use client'\nimport type React from 'react'\n\nexport const UIField: React.FC = () => {\n  return null\n}\n"],"mappings":"AAAA;;AAGA,OAAO,MAAMA,OAAA,GAAoBA,CAAA;EAC/B,OAAO;AACT","ignoreList":[]}

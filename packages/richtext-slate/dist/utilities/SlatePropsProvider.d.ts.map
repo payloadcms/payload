@@ -1,1 +1,0 @@
-{"version":3,"file":"SlatePropsProvider.d.ts","sourceRoot":"","sources":["../../src/utilities/SlatePropsProvider.tsx"],"names":[],"mappings":"AAEA,OAAc,EAAiB,KAAK,SAAS,EAAO,MAAM,OAAO,CAAA;AAEjE,UAAU,UAAU;IAClB,UAAU,EAAE,MAAM,CAAA;CACnB;AAID,wBAAgB,kBAAkB,CAAC,EACjC,QAAQ,EACR,UAAU,GACX,EAAE;IACD,QAAQ,EAAE,SAAS,CAAA;IACnB,UAAU,EAAE,MAAM,CAAA;CACnB,2CAEA;AAED,wBAAgB,aAAa,eAM5B"}

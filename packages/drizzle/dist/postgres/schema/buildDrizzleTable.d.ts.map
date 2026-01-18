@@ -1,1 +1,0 @@
-{"version":3,"file":"buildDrizzleTable.d.ts","sourceRoot":"","sources":["../../../src/postgres/schema/buildDrizzleTable.ts"],"names":[],"mappings":"AAqBA,OAAO,KAAK,EAAa,QAAQ,EAAE,MAAM,gBAAgB,CAAA;AACzD,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,aAAa,CAAA;AAgBtD,eAAO,MAAM,iBAAiB,2BAG3B;IACD,OAAO,EAAE,mBAAmB,CAAA;IAC5B,QAAQ,EAAE,QAAQ,CAAA;CACnB,SAoKA,CAAA"}

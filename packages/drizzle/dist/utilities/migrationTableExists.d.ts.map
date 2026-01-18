@@ -1,1 +1,0 @@
-{"version":3,"file":"migrationTableExists.d.ts","sourceRoot":"","sources":["../../src/utilities/migrationTableExists.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,oBAAoB,CAAA;AAExD,OAAO,KAAK,EAAE,cAAc,EAAE,UAAU,EAAE,MAAM,aAAa,CAAA;AAE7D,eAAO,MAAM,oBAAoB,YACtB,cAAc,OAClB,cAAc,GAAG,UAAU,KAC/B,OAAO,CAAC,OAAO,CA2BjB,CAAA"}

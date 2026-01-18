@@ -1,1 +1,0 @@
-{"version":3,"file":"getUserTenantIDs.d.ts","sourceRoot":"","sources":["../../src/utilities/getUserTenantIDs.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAU,oBAAoB,EAAE,MAAM,aAAa,CAAA;AAK/D;;;;GAIG;AACH,eAAO,MAAM,gBAAgB,GAAI,MAAM,SAAS,MAAM,GAAG,MAAM,QACvD,IAAI,GAAG,oBAAoB,YACvB;IACR,qBAAqB,CAAC,EAAE,MAAM,CAAA;IAC9B,2BAA2B,CAAC,EAAE,MAAM,CAAA;CACrC,KACA,MAAM,EAoBR,CAAA"}

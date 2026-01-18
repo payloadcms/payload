@@ -1,1 +1,0 @@
-{"version":3,"file":"mdx.d.ts","sourceRoot":"","sources":["../../../../src/exports/server/ast/mdx.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,YAAY,EAAE,MAAM,0BAA0B,CAAA;AAIvD,MAAM,MAAM,GAAG,GAAG,UAAU,CAAC,OAAO,YAAY,CAAC,CAAA;AAEjD,wBAAgB,aAAa,CAAC,EAC5B,SAAS,EACT,aAAa,GACd,EAAE;IACD,SAAS,EAAE,MAAM,CAAA;IACjB,aAAa,CAAC,EAAE,OAAO,CAAA;CACxB,GAAG,GAAG,CAkCN"}

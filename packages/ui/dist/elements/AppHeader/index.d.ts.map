@@ -1,1 +1,0 @@
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/AppHeader/index.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAsC,MAAM,OAAO,CAAA;AAc1D,OAAO,cAAc,CAAA;AAIrB,KAAK,KAAK,GAAG;IACX,YAAY,CAAC,EAAE,KAAK,CAAC,SAAS,CAAA;IAC9B,UAAU,CAAC,EAAE,KAAK,CAAC,SAAS,CAAA;CAC7B,CAAA;AACD,wBAAgB,SAAS,CAAC,EAAE,YAAY,EAAE,UAAU,EAAE,EAAE,KAAK,qBAuF5D"}

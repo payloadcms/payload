@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/field/elements/link/shared.ts"],"sourcesContent":["export const modalSlug = 'rich-text-link-modal'\nexport const linkFieldsSchemaPath = 'link.fields'\n"],"names":["modalSlug","linkFieldsSchemaPath"],"mappings":"AAAA,OAAO,MAAMA,YAAY,uBAAsB;AAC/C,OAAO,MAAMC,uBAAuB,cAAa"}

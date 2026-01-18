@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/utilities/isValidStringID.ts"],"sourcesContent":["export function isValidStringID(value: string) {\n  return /^[\\w-]+$/.test(value)\n}\n"],"names":["isValidStringID","value","test"],"mappings":"AAAA,OAAO,SAASA,gBAAgBC,KAAa;IAC3C,OAAO,WAAWC,IAAI,CAACD;AACzB"}

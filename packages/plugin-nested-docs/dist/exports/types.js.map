@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/types.ts"],"sourcesContent":["export type { Breadcrumb, GenerateLabel, GenerateURL, NestedDocsPluginConfig } from '../types.js'\n"],"names":[],"mappings":"AAAA,WAAiG"}

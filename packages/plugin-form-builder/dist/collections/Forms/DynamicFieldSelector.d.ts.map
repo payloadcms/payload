@@ -1,1 +1,0 @@
-{"version":3,"file":"DynamicFieldSelector.d.ts","sourceRoot":"","sources":["../../../src/collections/Forms/DynamicFieldSelector.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,sBAAsB,EAAE,qBAAqB,EAAE,MAAM,SAAS,CAAA;AAG5E,OAAO,KAA8B,MAAM,OAAO,CAAA;AAIlD,eAAO,MAAM,oBAAoB,EAAE,KAAK,CAAC,EAAE,CACzC;IAAE,QAAQ,EAAE,qBAAqB,CAAA;CAAE,GAAG,sBAAsB,CAqC7D,CAAA"}

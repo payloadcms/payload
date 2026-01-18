@@ -1,1 +1,0 @@
-{"version":3,"file":"buildRawSchema.d.ts","sourceRoot":"","sources":["../../src/schema/buildRawSchema.ts"],"names":[],"mappings":"AAQA,OAAO,KAAK,EAAE,cAAc,EAAY,WAAW,EAAE,MAAM,aAAa,CAAA;AAMxE;;GAEG;AACH,eAAO,MAAM,cAAc,8BAGxB;IACD,OAAO,EAAE,cAAc,CAAA;IACvB,WAAW,EAAE,WAAW,CAAA;CACzB,SAoHA,CAAA"}

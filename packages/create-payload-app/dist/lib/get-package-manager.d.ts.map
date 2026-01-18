@@ -1,1 +1,0 @@
-{"version":3,"file":"get-package-manager.d.ts","sourceRoot":"","sources":["../../src/lib/get-package-manager.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,OAAO,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAE1D,wBAAsB,iBAAiB,CAAC,IAAI,EAAE;IAC5C,OAAO,CAAC,EAAE,OAAO,CAAA;IACjB,UAAU,EAAE,MAAM,CAAA;CACnB,GAAG,OAAO,CAAC,cAAc,CAAC,CA0B1B"}

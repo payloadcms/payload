@@ -1,1 +1,0 @@
-{"version":3,"file":"ensureSafeCollectionsChange.d.ts","sourceRoot":"","sources":["../../../src/folders/hooks/ensureSafeCollectionsChange.ts"],"names":[],"mappings":"AAAA,OAAO,EAAY,KAAK,4BAA4B,EAAE,KAAK,cAAc,EAAE,MAAM,gBAAgB,CAAA;AAIjG,eAAO,MAAM,2BAA2B,oBACpB;IAAE,WAAW,EAAE,cAAc,CAAA;CAAE,KAAG,4BA0InD,CAAA"}

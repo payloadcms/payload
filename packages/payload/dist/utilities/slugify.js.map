@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/utilities/slugify.ts"],"sourcesContent":["export const slugify = (val?: string): string | undefined =>\n  val\n    ?.replace(/ /g, '-')\n    .replace(/[^\\w-]+/g, '')\n    .toLowerCase()\n"],"names":["slugify","val","replace","toLowerCase"],"mappings":"AAAA,OAAO,MAAMA,UAAU,CAACC,MACtBA,KACIC,QAAQ,MAAM,KACfA,QAAQ,YAAY,IACpBC,cAAa"}

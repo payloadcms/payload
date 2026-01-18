@@ -1,1 +1,0 @@
-{"version":3,"file":"rest.d.ts","sourceRoot":"","sources":["../../src/routes/rest.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAI7C,OAAO,KAAK,EAAE,kBAAkB,EAAE,MAAM,aAAa,CAAA;AAIrD,eAAO,MAAM,UAAU,SAAgB;IACrC,YAAY,EAAE,kBAAkB,CAAA;IAChC,GAAG,EAAE,cAAc,CAAA;CACpB,KAAG,OAAO,CAAC,GAAG,CAyCd,CAAA"}

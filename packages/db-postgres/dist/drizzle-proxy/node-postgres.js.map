@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/drizzle-proxy/node-postgres.ts"],"sourcesContent":["export * from 'drizzle-orm/node-postgres'\n"],"names":[],"mappings":"AAAA,cAAc,4BAA2B"}

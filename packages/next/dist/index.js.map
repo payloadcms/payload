@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","names":["default","withPayload"],"sources":["../src/index.js"],"sourcesContent":["export { default as withPayload } from './withPayload/withPayload.js'\n"],"mappings":"AAAA,SAASA,OAAA,IAAWC,WAAW,QAAQ","ignoreList":[]}

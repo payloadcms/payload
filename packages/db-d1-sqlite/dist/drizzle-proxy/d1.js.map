@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/drizzle-proxy/d1.ts"],"sourcesContent":["export * from 'drizzle-orm/d1'\n"],"names":[],"mappings":"AAAA,cAAc,iBAAgB"}

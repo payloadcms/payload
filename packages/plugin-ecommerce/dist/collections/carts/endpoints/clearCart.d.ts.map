@@ -1,1 +1,0 @@
-{"version":3,"file":"clearCart.d.ts","sourceRoot":"","sources":["../../../../src/collections/carts/endpoints/clearCart.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAA;AAMvD,KAAK,IAAI,GAAG;IACV,SAAS,EAAE,cAAc,CAAA;CAC1B,CAAA;AAED;;;;;;;GAOG;AACH,eAAO,MAAM,iBAAiB,kBAAmB,IAAI,KAAG,QA6BtD,CAAA"}

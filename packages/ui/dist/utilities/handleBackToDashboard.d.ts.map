@@ -1,1 +1,0 @@
-{"version":3,"file":"handleBackToDashboard.d.ts","sourceRoot":"","sources":["../../src/utilities/handleBackToDashboard.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,2DAA2D,CAAA;AAIlG,KAAK,oBAAoB,GAAG;IAC1B,UAAU,EAAE,MAAM,CAAA;IAClB,MAAM,EAAE,iBAAiB,CAAA;IACzB,SAAS,CAAC,EAAE,MAAM,CAAA;CACnB,CAAA;AAED,eAAO,MAAM,qBAAqB,sCAAuC,oBAAoB,SAO5F,CAAA"}

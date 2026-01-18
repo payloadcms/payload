@@ -1,1 +1,0 @@
-{"version":3,"file":"variantsFields.d.ts","sourceRoot":"","sources":["../../src/fields/variantsFields.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,MAAM,SAAS,CAAA;AAEpC,KAAK,KAAK,GAAG;IACX;;OAEG;IACH,YAAY,CAAC,EAAE,MAAM,CAAA;IACrB;;OAEG;IACH,gBAAgB,CAAC,EAAE,MAAM,CAAA;CAC1B,CAAA;AAED,eAAO,MAAM,cAAc,EAAE,CAAC,KAAK,EAAE,KAAK,KAAK,KAAK,EA+CnD,CAAA"}

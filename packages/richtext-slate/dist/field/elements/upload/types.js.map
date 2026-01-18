@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/field/elements/upload/types.ts"],"sourcesContent":["import type { Element } from 'slate'\n\nexport type UploadElementType = {\n  fields: Record<string, unknown>\n  relationTo: string\n  value: {\n    id: number | string\n  } | null\n} & Element\n"],"names":[],"mappings":"AAEA,WAMW"}

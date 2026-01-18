@@ -1,1 +1,0 @@
-{"version":3,"file":"headersWithCors.d.ts","sourceRoot":"","sources":["../../src/utilities/headersWithCors.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,mBAAmB,CAAA;AAEvD,KAAK,QAAQ,GAAG;IACd,OAAO,EAAE,OAAO,CAAA;IAChB,GAAG,EAAE,OAAO,CAAC,cAAc,CAAC,CAAA;CAC7B,CAAA;AACD,eAAO,MAAM,eAAe,qBAAsB,QAAQ,KAAG,OAiD5D,CAAA"}

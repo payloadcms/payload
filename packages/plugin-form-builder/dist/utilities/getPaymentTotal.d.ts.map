@@ -1,1 +1,0 @@
-{"version":3,"file":"getPaymentTotal.d.ts","sourceRoot":"","sources":["../../src/utilities/getPaymentTotal.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,YAAY,EAAkB,MAAM,aAAa,CAAA;AAE5E,eAAO,MAAM,eAAe,SACpB;IACJ,WAAW,EAAE,WAAW,CAAA;CACzB,GAAG,OAAO,CAAC,YAAY,CAAC,KACxB,MA8CF,CAAA"}

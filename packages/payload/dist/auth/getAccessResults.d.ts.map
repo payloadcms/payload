@@ -1,1 +1,0 @@
-{"version":3,"file":"getAccessResults.d.ts","sourceRoot":"","sources":["../../src/auth/getAccessResults.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAiB,cAAc,EAAE,MAAM,mBAAmB,CAAA;AACtE,OAAO,KAAK,EAAe,oBAAoB,EAAE,MAAM,YAAY,CAAA;AAKnE,KAAK,oBAAoB,GAAG;IAC1B,GAAG,EAAE,cAAc,CAAA;CACpB,CAAA;AACD,wBAAsB,gBAAgB,CAAC,EACrC,GAAG,GACJ,EAAE,oBAAoB,GAAG,OAAO,CAAC,oBAAoB,CAAC,CAqEtD"}

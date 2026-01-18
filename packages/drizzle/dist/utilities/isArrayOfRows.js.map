@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/utilities/isArrayOfRows.ts"],"sourcesContent":["export function isArrayOfRows(data: unknown): data is Record<string, unknown>[] {\n  return Array.isArray(data)\n}\n"],"names":["isArrayOfRows","data","Array","isArray"],"mappings":"AAAA,OAAO,SAASA,cAAcC,IAAa;IACzC,OAAOC,MAAMC,OAAO,CAACF;AACvB"}

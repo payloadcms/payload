@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/drizzle-proxy/relations.ts"],"sourcesContent":["export * from 'drizzle-orm/relations'\n"],"names":[],"mappings":"AAAA,cAAc,wBAAuB"}

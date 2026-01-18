@@ -1,1 +1,0 @@
-{"version":3,"file":"isPolymorphicRelationship.d.ts","sourceRoot":"","sources":["../../src/utilities/isPolymorphicRelationship.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAE7C,eAAO,MAAM,yBAAyB,UAC7B,OAAO,KACb,KAAK,IAAI;IACV,UAAU,EAAE,cAAc,CAAA;IAC1B,KAAK,EAAE,MAAM,GAAG,MAAM,CAAA;CASvB,CAAA"}

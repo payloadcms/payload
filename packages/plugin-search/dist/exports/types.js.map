@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/types.ts"],"sourcesContent":["export type { BeforeSync, DocToSync, SearchPluginConfig, SyncWithSearch } from '../types.js'\n"],"names":[],"mappings":"AAAA,WAA4F"}

@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/resolvers/types.ts"],"sourcesContent":["import type { PayloadRequest, SelectType } from 'payload'\n\nexport type Context = {\n  headers: {\n    [key: string]: string\n  }\n  req: PayloadRequest\n  select: SelectType\n}\n"],"names":[],"mappings":"AAEA,WAMC"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"LexicalNodeContextMenuPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalNodeContextMenuPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

@@ -1,1 +1,0 @@
-{"version":3,"file":"sendEmail.d.ts","sourceRoot":"","sources":["../../../../src/collections/FormSubmissions/hooks/sendEmail.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,yBAAyB,EAAE,MAAM,SAAS,CAAA;AAExD,OAAO,KAAK,EAAyB,uBAAuB,EAAE,MAAM,mBAAmB,CAAA;AAMvF,KAAK,iBAAiB,GAAG,UAAU,CAAC,yBAAyB,CAAC,CAAC,CAAC,CAAC,CAAA;AAEjE,eAAO,MAAM,SAAS,0BACG,iBAAiB,cAC5B,uBAAuB,kBAkGpC,CAAA"}

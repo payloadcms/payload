@@ -1,1 +1,0 @@
-{"version":3,"file":"generateURL.d.ts","sourceRoot":"","sources":["../src/generateURL.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,KAAK,GAAG,MAAM,oBAAoB,CAAA;AAC9C,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,wCAAwC,CAAA;AAIzE,UAAU,IAAI;IACZ,MAAM,EAAE,MAAM,CAAA;IACd,MAAM,EAAE,GAAG,CAAC,cAAc,CAAA;CAC3B;AAED,eAAO,MAAM,cAAc,qCACU,IAAI,KAAG,WAIzC,CAAA"}

@@ -1,1 +1,0 @@
-{"version":3,"file":"RefreshRouteOnSave.d.ts","sourceRoot":"","sources":["../src/RefreshRouteOnSave.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,KAAK,MAAM,OAAO,CAAA;AAK9B,eAAO,MAAM,kBAAkB,EAAE,KAAK,CAAC,EAAE,CAAC;IACxC,QAAQ,CAAC,EAAE,MAAM,CAAA;IACjB,KAAK,CAAC,EAAE,MAAM,CAAA;IACd,OAAO,EAAE,MAAM,IAAI,CAAA;IACnB,SAAS,EAAE,MAAM,CAAA;CAClB,CA0CA,CAAA"}

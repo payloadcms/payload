@@ -1,1 +1,0 @@
-{"version":3,"file":"initGlobals.d.ts","sourceRoot":"","sources":["../../src/schema/initGlobals.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAS,WAAW,EAAE,eAAe,EAAyB,MAAM,SAAS,CAAA;AAkBzF,KAAK,sBAAsB,GAAG;IAC5B,MAAM,EAAE,eAAe,CAAA;IACvB,aAAa,EAAE,WAAW,CAAA;CAC3B,CAAA;AACD,wBAAgB,WAAW,CAAC,EAAE,MAAM,EAAE,aAAa,EAAE,EAAE,sBAAsB,GAAG,IAAI,CA8KnF"}

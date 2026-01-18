@@ -1,1 +1,0 @@
-{"version":3,"file":"migrateRelationshipsV2_V3.d.ts","sourceRoot":"","sources":["../../src/predefinedMigrations/migrateRelationshipsV2_V3.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAS,cAAc,EAAE,MAAM,SAAS,CAAA;AA8GpD,wBAAsB,yBAAyB,CAAC,EAC9C,SAAS,EACT,GAAG,GACJ,EAAE;IACD,SAAS,EAAE,MAAM,CAAA;IACjB,GAAG,EAAE,cAAc,CAAA;CACpB,GAAG,OAAO,CAAC,IAAI,CAAC,CAqGhB"}

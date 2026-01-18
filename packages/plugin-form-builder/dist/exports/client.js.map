@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../src/exports/client.ts"],"sourcesContent":["export { DynamicFieldSelector } from '../collections/Forms/DynamicFieldSelector.js'\nexport { DynamicPriceSelector } from '../collections/Forms/DynamicPriceSelector.js'\n"],"names":["DynamicFieldSelector","DynamicPriceSelector"],"mappings":"AAAA,SAASA,oBAAoB,QAAQ,+CAA8C;AACnF,SAASC,oBAAoB,QAAQ,+CAA8C"}

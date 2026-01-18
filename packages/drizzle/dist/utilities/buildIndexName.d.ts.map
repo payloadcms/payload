@@ -1,1 +1,0 @@
-{"version":3,"file":"buildIndexName.d.ts","sourceRoot":"","sources":["../../src/utilities/buildIndexName.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAEjD,eAAO,MAAM,cAAc,6CAKxB;IACD,OAAO,EAAE,cAAc,CAAA;IACvB,YAAY,CAAC,EAAE,OAAO,CAAA;IACtB,IAAI,EAAE,MAAM,CAAA;IACZ,MAAM,CAAC,EAAE,MAAM,CAAA;CAChB,KAAG,MAmBH,CAAA"}
