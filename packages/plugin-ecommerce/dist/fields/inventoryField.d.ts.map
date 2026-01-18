@@ -1,0 +1,1 @@
+{"version":3,"file":"inventoryField.d.ts","sourceRoot":"","sources":["../../src/fields/inventoryField.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,SAAS,CAAA;AAE1C,KAAK,KAAK,GAAG;IACX,SAAS,CAAC,EAAE,OAAO,CAAC,WAAW,CAAC,CAAA;CACjC,CAAA;AAED,eAAO,MAAM,cAAc,EAAE,CAAC,KAAK,CAAC,EAAE,KAAK,KAAK,WAe/C,CAAA"}

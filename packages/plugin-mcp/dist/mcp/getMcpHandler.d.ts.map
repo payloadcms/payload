@@ -1,0 +1,1 @@
+{"version":3,"file":"getMcpHandler.d.ts","sourceRoot":"","sources":["../../src/mcp/getMcpHandler.ts"],"names":[],"mappings":"AAIA,OAAO,EAAgC,KAAK,cAAc,EAAkB,MAAM,SAAS,CAAA;AAE3F,OAAO,KAAK,EAAE,iBAAiB,EAAE,qBAAqB,EAAE,MAAM,aAAa,CAAA;AAkC3E,eAAO,MAAM,aAAa,kBACT,qBAAqB,qBACjB,iBAAiB,OAC/B,cAAc,4CA2dpB,CAAA"}

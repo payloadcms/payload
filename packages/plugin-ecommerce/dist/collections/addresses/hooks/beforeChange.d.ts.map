@@ -1,0 +1,1 @@
+{"version":3,"file":"beforeChange.d.ts","sourceRoot":"","sources":["../../../../src/collections/addresses/hooks/beforeChange.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,0BAA0B,EAAE,WAAW,EAAE,MAAM,SAAS,CAAA;AAEtE,UAAU,KAAK;IACb,UAAU,CAAC,EAAE,WAAW,CAAA;CACzB;AAED,eAAO,MAAM,YAAY,EAAE,CAAC,IAAI,EAAE,KAAK,KAAK,0BAgBzC,CAAA"}

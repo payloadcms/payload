@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/features/migrations/lexicalPluginToLexical/nodes/unknownConvertedNode/Component.tsx"],
+  "sourcesContent": ["'use client'\nimport React from 'react'\n\nimport type { UnknownConvertedNodeData } from './index.js'\n\nimport './index.scss'\n\ntype Props = {\n  data: UnknownConvertedNodeData\n}\n\nexport const UnknownConvertedNodeComponent: React.FC<Props> = (props) => {\n  const { data } = props\n\n  return (\n    <div>\n      Unknown converted payload-plugin-lexical node: <strong>{data?.nodeType}</strong>\n    </div>\n  )\n}\n"],
+  "mappings": "+DACA,MAAkB,QAUX,IAAMA,EAAkDC,GAAA,CAC7D,GAAM,CAAEC,KAAAA,CAAI,EAAKD,EAEjB,OACEE,EAAC,MAAA,WAAI,kDAC4CC,EAAC,SAAA,UAAQF,GAAMG,aAGpE",
+  "names": ["UnknownConvertedNodeComponent", "props", "data", "_jsxs", "_jsx", "nodeType"]
+}

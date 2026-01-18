@@ -1,0 +1,1 @@
+{"version":3,"file":"defaultConverters.d.ts","sourceRoot":"","sources":["../../../../../src/features/converters/lexicalToJSX/converter/defaultConverters.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,0BAA0B,CAAA;AAChE,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,YAAY,CAAA;AAc/C,eAAO,MAAM,oBAAoB,EAAE,aAAa,CAAC,gBAAgB,CAYhE,CAAA"}

@@ -1,0 +1,134 @@
+import { buildQuery } from './queries/buildQuery.js';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { getCollection } from './utilities/getEntity.js';
+import { getSession } from './utilities/getSession.js';
+import { handleError } from './utilities/handleError.js';
+import { transform } from './utilities/transform.js';
+export const updateJobs = async function updateMany({ id, data, limit, req, returning, sort: sortArg, where: whereArg }) {
+    if (!data?.log?.length && !(data.log && typeof data.log === 'object' && '$push' in data.log)) {
+        delete data.log;
+    }
+    const where = id ? {
+        id: {
+            equals: id
+        }
+    } : whereArg;
+    const { collectionConfig, Model } = getCollection({
+        adapter: this,
+        collectionSlug: 'payload-jobs'
+    });
+    const sort = buildSortParam({
+        adapter: this,
+        config: this.payload.config,
+        fields: collectionConfig.flattenedFields,
+        sort: sortArg || collectionConfig.defaultSort,
+        timestamps: true
+    });
+    let query = await buildQuery({
+        adapter: this,
+        collectionSlug: collectionConfig.slug,
+        fields: collectionConfig.flattenedFields,
+        where
+    });
+    let updateData = data;
+    const $inc = {};
+    const $push = {};
+    const $addToSet = {};
+    const $pull = {};
+    transform({
+        $addToSet,
+        $inc,
+        $pull,
+        $push,
+        adapter: this,
+        data,
+        fields: collectionConfig.fields,
+        operation: 'write'
+    });
+    const updateOps = {};
+    if (Object.keys($inc).length) {
+        updateOps.$inc = $inc;
+    }
+    if (Object.keys($push).length) {
+        updateOps.$push = $push;
+    }
+    if (Object.keys($addToSet).length) {
+        updateOps.$addToSet = $addToSet;
+    }
+    if (Object.keys($pull).length) {
+        updateOps.$pull = $pull;
+    }
+    if (Object.keys(updateOps).length) {
+        updateOps.$set = updateData;
+        updateData = updateOps;
+    }
+    const options = {
+        lean: true,
+        new: true,
+        session: await getSession(this, req),
+        // Timestamps are manually added by the write transform
+        timestamps: false
+    };
+    let result = [];
+    try {
+        if (id) {
+            if (returning === false) {
+                await Model.updateOne(query, updateData, options);
+                transform({
+                    adapter: this,
+                    data,
+                    fields: collectionConfig.fields,
+                    operation: 'read'
+                });
+                return null;
+            } else {
+                const doc = await Model.findOneAndUpdate(query, updateData, options);
+                result = doc ? [
+                    doc
+                ] : [];
+            }
+        } else {
+            if (typeof limit === 'number' && limit > 0) {
+                const documentsToUpdate = await Model.find(query, {}, {
+                    ...options,
+                    limit,
+                    projection: {
+                        _id: 1
+                    },
+                    sort
+                });
+                if (documentsToUpdate.length === 0) {
+                    return null;
+                }
+                query = {
+                    _id: {
+                        $in: documentsToUpdate.map((doc)=>doc._id)
+                    }
+                };
+            }
+            await Model.updateMany(query, updateData, options);
+            if (returning === false) {
+                return null;
+            }
+            result = await Model.find(query, {}, {
+                ...options,
+                sort
+            });
+        }
+    } catch (error) {
+        handleError({
+            collection: collectionConfig.slug,
+            error,
+            req
+        });
+    }
+    transform({
+        adapter: this,
+        data: result,
+        fields: collectionConfig.fields,
+        operation: 'read'
+    });
+    return result;
+};
+
+//# sourceMappingURL=updateJobs.js.map

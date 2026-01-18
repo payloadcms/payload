@@ -1,0 +1,48 @@
+export const idTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Semua lokasi',
+        collectionRequired: 'Diperlukan Koleksi untuk menunjukkan pratinjau',
+        documentsToExport: '{{count}} documents to export',
+        documentsToImport: '{{count}} documents to import',
+        exportDocumentLabel: 'Ekspor {{label}}',
+        exportOptions: 'Opsi Ekspor',
+        'field-collectionSlug-label': 'Koleksi',
+        'field-depth-label': 'Kedalaman',
+        'field-drafts-label': 'Sertakan draf',
+        'field-fields-label': 'Bidang',
+        'field-format-label': 'Format Ekspor',
+        'field-importMode-create-label': 'Buat dokumen baru',
+        'field-importMode-label': 'Mode Impor',
+        'field-importMode-update-label': 'Perbarui dokumen yang ada',
+        'field-importMode-upsert-label': 'Buat atau perbarui dokumen',
+        'field-limit-label': 'Batas',
+        'field-locale-label': 'Lokal',
+        'field-matchField-description': 'Bidang yang digunakan untuk mencocokkan dokumen yang ada',
+        'field-matchField-label': 'Cocokkan Field',
+        'field-name-label': 'Nama file',
+        'field-page-label': 'Halaman',
+        'field-selectionToUse-label': 'Pilihan untuk digunakan',
+        'field-sort-label': 'Urut berdasarkan',
+        'field-sort-order-label': 'Urutan sortir',
+        'field-status-label': 'Status',
+        'field-summary-label': 'Ringkasan Impor',
+        importDocumentLabel: 'Impor {{label}}',
+        importResults: 'Hasil Impor',
+        matchBy: 'Cocokkan dengan',
+        mode: 'Mode',
+        noDataToPreview: 'Tidak ada data untuk pratinjau',
+        previewPageInfo: '{{start}}-{{end}} of {{total}}',
+        'selectionToUse-allDocuments': 'Gunakan semua dokumen',
+        'selectionToUse-currentFilters': 'Gunakan filter saat ini',
+        'selectionToUse-currentSelection': 'Gunakan pilihan saat ini',
+        startImport: 'Mulai Impor',
+        totalDocumentsCount: '{{count}} total dokumen',
+        uploadFileToSeePreview: 'Unggah sebuah file untuk melihat pratinjau'
+    }
+};
+export const id = {
+    dateFNSKey: 'id',
+    translations: idTranslations
+};
+
+//# sourceMappingURL=id.js.map

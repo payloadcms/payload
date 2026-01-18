@@ -1,0 +1,30 @@
+@layer payload-default {
+  .bulk-upload--add-files {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &__dropArea {
+      height: 100%;
+      padding: calc(var(--base) * 2) var(--gutter-h);
+    }
+
+    .dropzone {
+      flex-direction: column;
+      justify-content: center;
+      display: flex;
+      gap: var(--base);
+      background-color: var(--theme-elevation-50);
+
+      p {
+        margin: 0;
+      }
+    }
+
+    &__dragAndDropText {
+      margin: 0;
+      text-transform: lowercase;
+      align-self: center;
+    }
+  }
+}

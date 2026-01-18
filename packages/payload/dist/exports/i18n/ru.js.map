@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/ru.ts"],"sourcesContent":["export { ru } from '@payloadcms/translations/languages/ru'\n"],"names":["ru"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

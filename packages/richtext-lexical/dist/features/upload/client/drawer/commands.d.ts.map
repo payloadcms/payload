@@ -1,0 +1,1 @@
+{"version":3,"file":"commands.d.ts","sourceRoot":"","sources":["../../../../../src/features/upload/client/drawer/commands.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAI7C,eAAO,MAAM,iCAAiC,EAAE,cAAc,CAAC;IAC7D,OAAO,EAAE;QAAE,OAAO,EAAE,MAAM,CAAA;KAAE,GAAG,KAAK,CAAA;CACrC,CAAsD,CAAA"}

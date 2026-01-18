@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/admin/forms/RowLabel.ts"],"sourcesContent":["import type { CustomComponent } from '../../config/types.js'\n\nexport type RowLabelComponent = CustomComponent\n\nexport type RowLabel = Record<string, string> | string\n"],"names":[],"mappings":"AAIA,WAAsD"}

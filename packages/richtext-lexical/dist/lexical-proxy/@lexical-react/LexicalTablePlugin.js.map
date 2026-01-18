@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalTablePlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalTablePlugin.ts"],"sourcesContent":["export * from '@lexical/react/LexicalTablePlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

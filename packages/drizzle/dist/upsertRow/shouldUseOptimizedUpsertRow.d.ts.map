@@ -1,0 +1,1 @@
+{"version":3,"file":"shouldUseOptimizedUpsertRow.d.ts","sourceRoot":"","sources":["../../src/upsertRow/shouldUseOptimizedUpsertRow.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAE7C;;;GAGG;AACH,eAAO,MAAM,2BAA2B,sBAGrC;IACD,IAAI,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,CAAA;IAC7B,MAAM,EAAE,cAAc,EAAE,CAAA;CACzB,QA8EA,CAAA"}

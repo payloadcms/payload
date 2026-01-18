@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/field/hotkeys.tsx"],"sourcesContent":["export const hotkeys = {\n  'mod+`': 'code',\n  'mod+b': 'bold',\n  'mod+i': 'italic',\n  'mod+u': 'underline',\n}\n"],"names":["hotkeys"],"mappings":"AAAA,OAAO,MAAMA,UAAU;IACrB,SAAS;IACT,SAAS;IACT,SAAS;IACT,SAAS;AACX,EAAC"}

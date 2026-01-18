@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","names":["Modal","useModal"],"sources":["../../../src/elements/Modal/index.tsx"],"sourcesContent":["'use client'\nimport { Modal, useModal } from '@faceless-ui/modal'\nexport { Modal, useModal }\n"],"mappings":"AAAA;;AACA,SAASA,KAAK,EAAEC,QAAQ,QAAQ;AAChC,SAASD,KAAK,EAAEC,QAAQ","ignoreList":[]}

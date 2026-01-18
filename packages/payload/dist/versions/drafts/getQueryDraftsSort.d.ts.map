@@ -1,0 +1,1 @@
+{"version":3,"file":"getQueryDraftsSort.d.ts","sourceRoot":"","sources":["../../../src/versions/drafts/getQueryDraftsSort.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,yBAAyB,EAAE,MAAM,mCAAmC,CAAA;AAClF,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,sBAAsB,CAAA;AAEhD;;;GAGG;AACH,eAAO,MAAM,kBAAkB,gCAG5B;IACD,gBAAgB,EAAE,yBAAyB,CAAA;IAC3C,IAAI,CAAC,EAAE,IAAI,CAAA;CACZ,KAAG,IA6BH,CAAA"}

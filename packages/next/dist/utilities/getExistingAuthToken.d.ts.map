@@ -1,0 +1,1 @@
+{"version":3,"file":"getExistingAuthToken.d.ts","sourceRoot":"","sources":["../../src/utilities/getExistingAuthToken.ts"],"names":[],"mappings":"AAEA,KAAK,MAAM,GAAG;IACZ,IAAI,EAAE,MAAM,CAAA;IACZ,KAAK,EAAE,MAAM,CAAA;CACd,CAAA;AACD,wBAAsB,oBAAoB,CAAC,YAAY,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,GAAG,SAAS,CAAC,CAG5F"}

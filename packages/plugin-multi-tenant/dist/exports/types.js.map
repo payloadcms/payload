@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/exports/types.ts"],"sourcesContent":["export type { MultiTenantPluginConfig } from '../types.js'\n"],"names":[],"mappings":"AAAA,WAA0D"}

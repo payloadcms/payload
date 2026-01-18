@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/ta.ts"],"sourcesContent":["export { ta } from '@payloadcms/translations/languages/ta'\n"],"names":["ta"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

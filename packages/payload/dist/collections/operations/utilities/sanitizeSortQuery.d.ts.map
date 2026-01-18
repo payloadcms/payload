@@ -1,0 +1,1 @@
+{"version":3,"file":"sanitizeSortQuery.d.ts","sourceRoot":"","sources":["../../../../src/collections/operations/utilities/sanitizeSortQuery.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,iCAAiC,CAAA;AA+BrE;;GAEG;AACH,eAAO,MAAM,iBAAiB,sBAG3B;IACD,MAAM,EAAE,cAAc,EAAE,CAAA;IACxB,IAAI,CAAC,EAAE,MAAM,GAAG,MAAM,EAAE,CAAA;CACzB,KAAG,MAAM,GAAG,MAAM,EAAE,GAAG,SAUvB,CAAA"}

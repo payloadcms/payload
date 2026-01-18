@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/RenderCustomComponent/index.tsx"],"names":[],"mappings":"AAAA,KAAK,IAAI,GAAG;IACV,eAAe,CAAC,EAAE,KAAK,CAAC,SAAS,CAAA;IACjC,QAAQ,EAAE,KAAK,CAAC,SAAS,CAAA;CAC1B,CAAA;AAED;;;;;;;;;;GAUG;AACH,wBAAgB,qBAAqB,CAAC,EAAE,eAAe,EAAE,QAAQ,EAAE,EAAE,IAAI,GAAG,KAAK,CAAC,SAAS,CAE1F"}

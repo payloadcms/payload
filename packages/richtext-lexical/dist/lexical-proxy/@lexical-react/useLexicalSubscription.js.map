@@ -1,0 +1,1 @@
+{"version":3,"file":"useLexicalSubscription.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/useLexicalSubscription.tsx"],"sourcesContent":["export * from '@lexical/react/useLexicalSubscription'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

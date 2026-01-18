@@ -1,0 +1,1 @@
+{"version":3,"file":"migrateVersionsV1_V2.d.ts","sourceRoot":"","sources":["../../src/predefinedMigrations/migrateVersionsV1_V2.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAW,cAAc,EAAE,MAAM,SAAS,CAAA;AAOtD,wBAAsB,oBAAoB,CAAC,EAAE,GAAG,EAAE,EAAE;IAAE,GAAG,EAAE,cAAc,CAAA;CAAE,iBAqC1E"}

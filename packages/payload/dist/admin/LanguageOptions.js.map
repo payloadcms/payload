@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/admin/LanguageOptions.ts"],"sourcesContent":["import type { AcceptedLanguages } from '@payloadcms/translations'\n\nexport type LanguageOptions = {\n  label: string\n  value: AcceptedLanguages\n}[]\n"],"names":[],"mappings":"AAEA,WAGG"}

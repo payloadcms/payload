@@ -1,0 +1,33 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .error-pill {
+    align-self: center;
+    align-items: center;
+    border: 0;
+    padding: 0 base(0.25);
+    flex-shrink: 0;
+    border-radius: var(--style-radius-l);
+    line-height: 18px;
+    font-size: 11px;
+    text-align: center;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme-error-300);
+    color: var(--theme-error-950);
+
+    &--fixed-width {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    &__count {
+      letter-spacing: 0.5px;
+      margin-left: 0.5px;
+    }
+  }
+}

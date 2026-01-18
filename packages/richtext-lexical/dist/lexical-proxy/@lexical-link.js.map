@@ -1,0 +1,1 @@
+{"version":3,"file":"@lexical-link.js","names":[],"sources":["../../src/lexical-proxy/@lexical-link.ts"],"sourcesContent":["export * from '@lexical/link'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

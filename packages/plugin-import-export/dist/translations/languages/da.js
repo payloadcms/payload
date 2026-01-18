@@ -1,0 +1,48 @@
+export const daTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Alle lokaliteter',
+        collectionRequired: 'Samling krævet for at vise forhåndsvisning',
+        documentsToExport: '{{count}} dokumenter at eksportere',
+        documentsToImport: '{{count}} dokumenter at importere',
+        exportDocumentLabel: 'Eksport {{label}}',
+        exportOptions: 'Eksportmuligheder',
+        'field-collectionSlug-label': 'Samling',
+        'field-depth-label': 'Dybde',
+        'field-drafts-label': 'Inkluder udkast',
+        'field-fields-label': 'Felter',
+        'field-format-label': 'Eksportformat',
+        'field-importMode-create-label': 'Opret nye dokumenter',
+        'field-importMode-label': 'Importtilstand',
+        'field-importMode-update-label': 'Opdater eksisterende dokumenter',
+        'field-importMode-upsert-label': 'Opret eller opdater dokumenter',
+        'field-limit-label': 'Begrænsning',
+        'field-locale-label': 'Lokale',
+        'field-matchField-description': 'Felt til brug for matchning af eksisterende dokumenter',
+        'field-matchField-label': 'Match felt',
+        'field-name-label': 'Filnavn',
+        'field-page-label': 'Side',
+        'field-selectionToUse-label': 'Valg til brug',
+        'field-sort-label': 'Sorter efter',
+        'field-sort-order-label': 'Sorteringsrækkefølge',
+        'field-status-label': 'Status',
+        'field-summary-label': 'Importoversigt',
+        importDocumentLabel: 'Importér {{label}}',
+        importResults: 'Importresultater',
+        matchBy: 'Match af',
+        mode: 'Tilstand',
+        noDataToPreview: 'Ingen data at forhåndsvise',
+        previewPageInfo: '{{start}}-{{end}} af {{total}}',
+        'selectionToUse-allDocuments': 'Brug alle dokumenter',
+        'selectionToUse-currentFilters': 'Brug nuværende filtre',
+        'selectionToUse-currentSelection': 'Brug nuværende valg',
+        startImport: 'Start Import',
+        totalDocumentsCount: '{{count}} samlede dokumenter',
+        uploadFileToSeePreview: 'Upload en fil for at se en forhåndsvisning'
+    }
+};
+export const da = {
+    dateFNSKey: 'da',
+    translations: daTranslations
+};
+
+//# sourceMappingURL=da.js.map

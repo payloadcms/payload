@@ -1,0 +1,1 @@
+{"version":3,"file":"markdownTransformer.d.ts","sourceRoot":"","sources":["../../../src/features/experimental_table/markdownTransformer.ts"],"names":[],"mappings":"AAgBA,OAAO,EAGL,KAAK,kBAAkB,EACvB,KAAK,WAAW,EACjB,MAAM,2CAA2C,CAAA;AAOlD,eAAO,MAAM,wBAAwB,EAAE,CAAC,KAAK,EAAE;IAC7C,eAAe,EAAE,WAAW,EAAE,CAAA;CAC/B,KAAK,kBAiIJ,CAAA"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalAutoEmbedPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalAutoEmbedPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalAutoEmbedPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

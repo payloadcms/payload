@@ -1,0 +1,1 @@
+{"version":3,"file":"InvalidSchema.d.ts","sourceRoot":"","sources":["../../src/errors/InvalidSchema.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,aAAc,SAAQ,QAAQ;gBAC7B,OAAO,EAAE,MAAM,EAAE,OAAO,EAAE,GAAG;CAG1C"}

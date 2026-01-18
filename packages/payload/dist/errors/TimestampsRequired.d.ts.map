@@ -1,0 +1,1 @@
+{"version":3,"file":"TimestampsRequired.d.ts","sourceRoot":"","sources":["../../src/errors/TimestampsRequired.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,gCAAgC,CAAA;AAEtE,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,kBAAmB,SAAQ,QAAQ;gBAClC,UAAU,EAAE,gBAAgB;CAKzC"}

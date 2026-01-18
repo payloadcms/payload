@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/ca.ts"],"sourcesContent":["export { ca } from '@payloadcms/translations/languages/ca'\n"],"names":["ca"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"initCollections.d.ts","sourceRoot":"","sources":["../../src/schema/initCollections.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAGV,WAAW,EAEX,eAAe,EAChB,MAAM,SAAS,CAAA;AAyChB,KAAK,0BAA0B,GAAG;IAChC,MAAM,EAAE,eAAe,CAAA;IACvB,aAAa,EAAE,WAAW,CAAA;CAC3B,CAAA;AACD,wBAAgB,eAAe,CAAC,EAAE,MAAM,EAAE,aAAa,EAAE,EAAE,0BAA0B,GAAG,IAAI,CAshB3F"}

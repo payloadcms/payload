@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/ColumnSelector/index.tsx"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,yBAAyB,EAAe,MAAM,SAAS,CAAA;AAGrE,OAAO,KAAyB,MAAM,OAAO,CAAA;AAO7C,MAAM,MAAM,KAAK,GAAG;IAClB,QAAQ,CAAC,cAAc,EAAE,yBAAyB,CAAC,MAAM,CAAC,CAAA;CAC3D,CAAA;AAED,eAAO,MAAM,cAAc,EAAE,KAAK,CAAC,EAAE,CAAC,KAAK,CA4D1C,CAAA"}

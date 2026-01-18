@@ -1,0 +1,42 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .thumbnail-card {
+    @include btn-reset;
+    @include shadow-m;
+    width: 100%;
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-border-color);
+    border-radius: var(--style-radius-m);
+    transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
+    padding: base(0.5);
+
+    &__label {
+      padding: base(0.75) base(0.5) base(0.25) base(0.5);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    &--has-on-click {
+      cursor: pointer;
+
+      &:hover,
+      &:focus,
+      &:active {
+        border: 1px solid var(--theme-elevation-350);
+      }
+    }
+
+    &--align-label-center {
+      text-align: center;
+    }
+
+    &__thumbnail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"list.d.ts","sourceRoot":"","sources":["../../../../../../src/features/converters/lexicalToJSX/converter/converters/list.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,sBAAsB,EAAE,kBAAkB,EAAE,MAAM,6BAA6B,CAAA;AAC7F,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,aAAa,CAAA;AAEhD,eAAO,MAAM,gBAAgB,EAAE,aAAa,CAAC,sBAAsB,GAAG,kBAAkB,CAqDvF,CAAA"}

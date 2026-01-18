@@ -1,0 +1,1 @@
+{"version":3,"file":"createDatabase.d.ts","sourceRoot":"","sources":["../../src/postgres/createDatabase.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,YAAY,CAAA;AAgBrD,KAAK,IAAI,GAAG;IACV;;OAEG;IACH,IAAI,CAAC,EAAE,MAAM,CAAA;IACb;;OAEG;IACH,UAAU,CAAC,EAAE,MAAM,CAAA;CACpB,CAAA;AACD,eAAO,MAAM,cAAc,SAAyB,mBAAmB,SAAQ,IAAI,qBAkFlF,CAAA"}

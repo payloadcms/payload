@@ -1,0 +1,1 @@
+{"version":3,"file":"buildDrizzleRelations.d.ts","sourceRoot":"","sources":["../../src/schema/buildDrizzleRelations.ts"],"names":[],"mappings":"AAIA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAEjD,eAAO,MAAM,qBAAqB,gBAAiB;IAAE,OAAO,EAAE,cAAc,CAAA;CAAE,SAmC7E,CAAA"}

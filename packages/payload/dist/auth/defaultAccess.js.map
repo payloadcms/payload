@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/auth/defaultAccess.ts"],"sourcesContent":["import type { PayloadRequest } from '../types/index.js'\n\nexport const defaultAccess = ({ req: { user } }: { req: PayloadRequest }): boolean => Boolean(user)\n"],"names":["defaultAccess","req","user","Boolean"],"mappings":"AAEA,OAAO,MAAMA,gBAAgB,CAAC,EAAEC,KAAK,EAAEC,IAAI,EAAE,EAA2B,GAAcC,QAAQD,MAAK"}

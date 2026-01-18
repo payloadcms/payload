@@ -1,0 +1,45 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  label.field-label {
+    display: flex;
+    align-items: center;
+  }
+
+  label.field-label:not(.unstyled) {
+    @extend %body;
+    display: flex;
+    padding-bottom: base(0.25);
+    color: var(--theme-elevation-800);
+    font-family: var(--font-body);
+    [dir='ltr'] & {
+      margin-right: auto;
+    }
+    [dir='rtl'] & {
+      margin-left: auto;
+    }
+
+    .required {
+      color: var(--theme-error-500);
+    }
+
+    .required {
+      [dir='ltr'] & {
+        margin-left: base(0.25);
+      }
+      [dir='rtl'] & {
+        margin-right: base(0.25);
+      }
+    }
+  }
+
+  .localized {
+    @extend %body;
+    [dir='ltr'] & {
+      margin-left: base(0.25);
+    }
+    [dir='rtl'] & {
+      margin-right: base(0.25);
+    }
+  }
+}

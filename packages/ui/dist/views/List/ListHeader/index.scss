@@ -1,0 +1,63 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .list-drawer {
+    .list-header__title {
+      @extend %h2;
+    }
+
+    &__header {
+      margin-top: base(2.5);
+      width: 100%;
+
+      @include mid-break {
+        margin-top: base(1.5);
+      }
+    }
+
+    .doc-drawer__toggler.list-header__create-new-button {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+      border-radius: var(--style-radius-s);
+
+      &:hover .pill {
+        background: var(--theme-elevation-250);
+      }
+
+      &:focus:not(:focus-visible),
+      &:focus-within:not(:focus-visible) {
+        outline: none;
+      }
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
+      }
+
+      &:disabled {
+        pointer-events: none;
+      }
+
+      .pill {
+        cursor: inherit;
+      }
+    }
+
+    &__select-collection-wrap {
+      margin-top: base(1);
+    }
+
+    @include mid-break {
+      .collection-list__header {
+        margin-bottom: base(0.5);
+      }
+
+      &__select-collection-wrap {
+        margin-top: calc(var(--base) / 2);
+      }
+    }
+  }
+}

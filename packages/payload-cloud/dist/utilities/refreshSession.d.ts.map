@@ -1,0 +1,1 @@
+{"version":3,"file":"refreshSession.d.ts","sourceRoot":"","sources":["../../src/utilities/refreshSession.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,EAAE,EAAE,MAAM,oBAAoB,CAAA;AAKvC,MAAM,MAAM,gBAAgB,GAAG,MAAM,OAAO,CAAC;IAC3C,UAAU,EAAE,MAAM,CAAA;IAClB,aAAa,EAAE,EAAE,CAAA;CAClB,CAAC,CAAA;AAEF,eAAO,MAAM,cAAc;;;;EAkC1B,CAAA"}

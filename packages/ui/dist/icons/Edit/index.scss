@@ -1,0 +1,14 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--edit {
+    height: $baseline;
+    width: $baseline;
+    shape-rendering: auto;
+
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalCharacterLimitPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalCharacterLimitPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalCharacterLimitPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

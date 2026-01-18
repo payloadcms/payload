@@ -1,0 +1,252 @@
+'use client';
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { getTranslation } from '@payloadcms/translations';
+import { CodeEditorLazy, Pagination, PerPage, Table, Translation, useConfig, useDebouncedEffect, useDocumentInfo, useFormFields, useTranslation } from '@payloadcms/ui';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js';
+import './index.scss';
+import { useImportExport } from '../ImportExportProvider/index.js';
+const baseClass = 'export-preview';
+export const ExportPreview = ()=>{
+    const [isPending, startTransition] = useTransition();
+    const { collection } = useImportExport();
+    const { config, config: { routes } } = useConfig();
+    const { collectionSlug } = useDocumentInfo();
+    const { draft, fields, format, limit, locale, sort, where } = useFormFields(([fields])=>{
+        return {
+            draft: fields['drafts']?.value,
+            fields: fields['fields']?.value,
+            format: fields['format']?.value,
+            limit: fields['limit']?.value,
+            locale: fields['locale']?.value,
+            sort: fields['sort']?.value,
+            where: fields['where']?.value
+        };
+    });
+    const [dataToRender, setDataToRender] = useState([]);
+    const [exportTotalDocs, setExportTotalDocs] = useState(0);
+    const [columns, setColumns] = useState([]);
+    const { i18n, t } = useTranslation();
+    // Preview pagination state (separate from export config)
+    const [previewPage, setPreviewPage] = useState(1);
+    const [previewLimit, setPreviewLimit] = useState(DEFAULT_PREVIEW_LIMIT);
+    const [paginationData, setPaginationData] = useState(null);
+    // Track previous export config to reset preview page when it changes
+    const prevExportConfigRef = useRef({
+        draft,
+        fields,
+        format,
+        limit,
+        locale,
+        sort,
+        where
+    });
+    // Reset preview page when export config changes
+    useEffect(()=>{
+        const prevConfig = prevExportConfigRef.current;
+        const configChanged = prevConfig.draft !== draft || prevConfig.limit !== limit || prevConfig.locale !== locale || prevConfig.sort !== sort || JSON.stringify(prevConfig.fields) !== JSON.stringify(fields) || JSON.stringify(prevConfig.where) !== JSON.stringify(where);
+        if (configChanged) {
+            setPreviewPage(1);
+            prevExportConfigRef.current = {
+                draft,
+                fields,
+                format,
+                limit,
+                locale,
+                sort,
+                where
+            };
+        }
+    }, [
+        draft,
+        fields,
+        format,
+        limit,
+        locale,
+        sort,
+        where
+    ]);
+    const targetCollectionSlug = typeof collection === 'string' && collection;
+    const isCSV = format === 'csv';
+    useDebouncedEffect(()=>{
+        if (!collectionSlug || !targetCollectionSlug) {
+            return;
+        }
+        const abortController = new AbortController();
+        const fetchData = async ()=>{
+            try {
+                const res = await fetch(`${routes.api}/${collectionSlug}/export-preview`, {
+                    body: JSON.stringify({
+                        collectionSlug: targetCollectionSlug,
+                        draft,
+                        fields,
+                        format,
+                        limit,
+                        locale,
+                        previewLimit,
+                        previewPage,
+                        sort,
+                        where
+                    }),
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'POST',
+                    signal: abortController.signal
+                });
+                if (!res.ok) {
+                    return;
+                }
+                const { columns: serverColumns, docs, exportTotalDocs: serverExportTotalDocs, hasNextPage, hasPrevPage, limit: responseLimit, page: responsePage, totalPages } = await res.json();
+                // For CSV: use server-provided columns (from getSchemaColumns) for consistent ordering
+                // For JSON: derive keys from docs
+                const allKeys = Array.from(new Set(docs.flatMap((doc)=>Object.keys(doc))));
+                // Use server columns if available (CSV format), otherwise fall back to data-derived keys
+                const fieldKeys = serverColumns && serverColumns.length > 0 ? serverColumns : allKeys;
+                // Build columns based on field keys
+                const newColumns = fieldKeys.map((key)=>({
+                        accessor: key,
+                        active: true,
+                        field: {
+                            name: key
+                        },
+                        Heading: getTranslation(key, i18n),
+                        renderedCells: docs.map((doc)=>{
+                            const val = doc[key];
+                            if (val === undefined || val === null) {
+                                return null;
+                            }
+                            // Avoid ESLint warning by type-checking before calling String()
+                            if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+                                return String(val);
+                            }
+                            if (Array.isArray(val)) {
+                                return val.map(String).join(', ');
+                            }
+                            return JSON.stringify(val);
+                        })
+                    }));
+                setExportTotalDocs(serverExportTotalDocs);
+                setPaginationData({
+                    hasNextPage,
+                    hasPrevPage,
+                    limit: responseLimit,
+                    nextPage: responsePage + 1,
+                    page: responsePage,
+                    prevPage: responsePage - 1,
+                    totalPages
+                });
+                setColumns(newColumns);
+                setDataToRender(docs);
+            } catch (error) {
+                console.error('Error fetching preview data:', error);
+            }
+        };
+        startTransition(async ()=>await fetchData());
+        return ()=>{
+            if (!abortController.signal.aborted) {
+                abortController.abort('Component unmounted');
+            }
+        };
+    }, [
+        collectionSlug,
+        draft,
+        fields,
+        format,
+        i18n,
+        limit,
+        locale,
+        previewLimit,
+        previewPage,
+        sort,
+        where,
+        routes.api,
+        targetCollectionSlug
+    ], 500);
+    const handlePageChange = (page)=>{
+        setPreviewPage(page);
+    };
+    const handlePerPageChange = (newLimit)=>{
+        setPreviewLimit(newLimit);
+        setPreviewPage(1);
+    };
+    return /*#__PURE__*/ _jsxs("div", {
+        className: baseClass,
+        children: [
+            /*#__PURE__*/ _jsxs("div", {
+                className: `${baseClass}__header`,
+                children: [
+                    /*#__PURE__*/ _jsx("h3", {
+                        children: /*#__PURE__*/ _jsx(Translation, {
+                            i18nKey: "version:preview",
+                            t: t
+                        })
+                    }),
+                    exportTotalDocs > 0 && !isPending && /*#__PURE__*/ _jsx("span", {
+                        className: `${baseClass}__export-count`,
+                        children: /*#__PURE__*/ _jsx(Translation, {
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-expect-error
+                            i18nKey: "plugin-import-export:documentsToExport",
+                            t: t,
+                            variables: {
+                                count: exportTotalDocs
+                            }
+                        })
+                    })
+                ]
+            }),
+            isPending && !dataToRender && /*#__PURE__*/ _jsx("div", {
+                className: `${baseClass}__loading`,
+                children: /*#__PURE__*/ _jsx(Translation, {
+                    i18nKey: "general:loading",
+                    t: t
+                })
+            }),
+            dataToRender && (isCSV ? /*#__PURE__*/ _jsx(Table, {
+                columns: columns,
+                data: dataToRender
+            }) : /*#__PURE__*/ _jsx(CodeEditorLazy, {
+                language: "json",
+                readOnly: true,
+                value: JSON.stringify(dataToRender, null, 2)
+            })),
+            paginationData && exportTotalDocs > 0 && /*#__PURE__*/ _jsxs("div", {
+                className: `${baseClass}__pagination`,
+                children: [
+                    paginationData.totalPages > 1 && /*#__PURE__*/ _jsx(Pagination, {
+                        hasNextPage: paginationData.hasNextPage,
+                        hasPrevPage: paginationData.hasPrevPage,
+                        nextPage: paginationData.nextPage ?? undefined,
+                        numberOfNeighbors: 1,
+                        onChange: handlePageChange,
+                        page: paginationData.page,
+                        prevPage: paginationData.prevPage ?? undefined,
+                        totalPages: paginationData.totalPages
+                    }),
+                    /*#__PURE__*/ _jsx("span", {
+                        className: `${baseClass}__page-info`,
+                        children: /*#__PURE__*/ _jsx(Translation, {
+                            // @ts-expect-error - plugin translations not typed
+                            i18nKey: "plugin-import-export:previewPageInfo",
+                            t: t,
+                            variables: {
+                                end: Math.min((paginationData.page ?? 1) * previewLimit, exportTotalDocs),
+                                start: ((paginationData.page ?? 1) - 1) * previewLimit + 1,
+                                total: exportTotalDocs
+                            }
+                        })
+                    }),
+                    /*#__PURE__*/ _jsx(PerPage, {
+                        handleChange: handlePerPageChange,
+                        limit: previewLimit,
+                        limits: PREVIEW_LIMIT_OPTIONS
+                    })
+                ]
+            })
+        ]
+    });
+};
+
+//# sourceMappingURL=index.js.map

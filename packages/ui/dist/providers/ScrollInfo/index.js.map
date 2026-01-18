@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","names":["ScrollInfoProvider","useScrollInfo"],"sources":["../../../src/providers/ScrollInfo/index.tsx"],"sourcesContent":["'use client'\nexport { ScrollInfoProvider, useScrollInfo } from '@faceless-ui/scroll-info'\n"],"mappings":"AAAA;;AACA,SAASA,kBAAkB,EAAEC,aAAa,QAAQ","ignoreList":[]}

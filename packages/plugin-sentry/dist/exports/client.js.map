@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/exports/client.ts"],"sourcesContent":["export { AdminErrorBoundary } from '../providers/AdminErrorBoundary.js'\n"],"names":["AdminErrorBoundary"],"mappings":"AAAA,SAASA,kBAAkB,QAAQ,qCAAoC"}

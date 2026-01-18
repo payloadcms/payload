@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalTabIndentationPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalTabIndentationPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalTabIndentationPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

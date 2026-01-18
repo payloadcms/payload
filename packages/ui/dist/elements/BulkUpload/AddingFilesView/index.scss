@@ -1,0 +1,25 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .bulk-upload--file-manager {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+
+    &__editView {
+      flex-grow: 1;
+      height: 100%;
+      max-height: 100%;
+      overflow: auto;
+    }
+
+    @include mid-break {
+      flex-direction: column-reverse;
+
+      &__editView {
+        flex-grow: 1;
+      }
+    }
+  }
+}

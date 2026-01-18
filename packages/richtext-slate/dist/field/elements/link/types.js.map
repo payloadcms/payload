@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/field/elements/link/types.ts"],"sourcesContent":["import type { Element } from 'slate'\n\nexport type LinkElementType = {\n  doc: Record<string, unknown>\n  fields: Record<string, unknown>\n  linkType: string\n  newTab: boolean\n  url: string\n} & Element\n"],"names":[],"mappings":"AAEA,WAMW"}

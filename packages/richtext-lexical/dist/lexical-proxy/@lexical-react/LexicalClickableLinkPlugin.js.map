@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalClickableLinkPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalClickableLinkPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalClickableLinkPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

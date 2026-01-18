@@ -1,0 +1,1 @@
+{"version":3,"file":"useLexicalEditable.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/useLexicalEditable.ts"],"sourcesContent":["export * from '@lexical/react/useLexicalEditable'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

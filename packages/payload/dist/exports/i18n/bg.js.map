@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/bg.ts"],"sourcesContent":["export { bg } from '@payloadcms/translations/languages/bg'\n"],"names":["bg"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

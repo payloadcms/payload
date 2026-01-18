@@ -1,0 +1,16 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .bulk-upload--drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(var(--base) * 2.5) var(--gutter-h);
+    height: 48px;
+    border-bottom: 1px solid var(--theme-border-color);
+
+    h2 {
+      margin: 0;
+    }
+  }
+}

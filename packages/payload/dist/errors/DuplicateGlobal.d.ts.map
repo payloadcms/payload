@@ -1,0 +1,1 @@
+{"version":3,"file":"DuplicateGlobal.d.ts","sourceRoot":"","sources":["../../src/errors/DuplicateGlobal.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,4BAA4B,CAAA;AAE9D,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,eAAgB,SAAQ,QAAQ;gBAC/B,MAAM,EAAE,YAAY;CAGjC"}

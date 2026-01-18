@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","names":[],"sources":["../../../../src/elements/BulkUpload/EditForm/types.ts"],"sourcesContent":["import type { UploadProps_v4 } from '../../Upload/index.js'\n\nexport type EditFormProps = {\n  readonly submitted?: boolean\n} & Pick<UploadProps_v4, 'resetUploadEdits' | 'updateUploadEdits' | 'uploadEdits'>\n"],"mappings":"AAEA","ignoreList":[]}

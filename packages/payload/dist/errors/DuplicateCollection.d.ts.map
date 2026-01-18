@@ -1,0 +1,1 @@
+{"version":3,"file":"DuplicateCollection.d.ts","sourceRoot":"","sources":["../../src/errors/DuplicateCollection.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,mBAAoB,SAAQ,QAAQ;gBACnC,YAAY,EAAE,MAAM,EAAE,SAAS,EAAE,MAAM;CAGpD"}

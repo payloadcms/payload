@@ -1,0 +1,1 @@
+{"version":3,"file":"handleGoBack.d.ts","sourceRoot":"","sources":["../../src/utilities/handleGoBack.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,2DAA2D,CAAA;AAIlG,KAAK,WAAW,GAAG;IACjB,UAAU,EAAE,MAAM,CAAA;IAClB,cAAc,EAAE,MAAM,CAAA;IACtB,MAAM,EAAE,iBAAiB,CAAA;IACzB,SAAS,CAAC,EAAE,MAAM,CAAA;CACnB,CAAA;AAED,eAAO,MAAM,YAAY,sDAAuD,WAAW,SAM1F,CAAA"}

@@ -1,0 +1,32 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .list-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .pill-selector,
+    .where-builder,
+    .sort-complex,
+    .group-by-builder {
+      margin-top: calc(var(--base) / 2);
+    }
+
+    @include small-break {
+      .search-bar__actions {
+        .pill {
+          padding: base(0.2) base(0.2) base(0.2) base(0.4);
+          justify-content: space-between;
+        }
+      }
+
+      &__toggle-columns,
+      &__toggle-where,
+      &__toggle-sort,
+      &__toggle-group-by {
+        flex: 1;
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"table.d.ts","sourceRoot":"","sources":["../../../../../../src/features/converters/lexicalToHtml/sync/converters/table.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EACV,uBAAuB,EACvB,mBAAmB,EACnB,sBAAsB,EACvB,MAAM,6BAA6B,CAAA;AACpC,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,aAAa,CAAA;AAEjD,eAAO,MAAM,kBAAkB,EAAE,cAAc,CAC7C,uBAAuB,GAAG,mBAAmB,GAAG,sBAAsB,CAkDvE,CAAA"}

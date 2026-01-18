@@ -1,0 +1,1 @@
+{"version":3,"file":"FileUploadError.d.ts","sourceRoot":"","sources":["../../src/errors/FileUploadError.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,0BAA0B,CAAA;AAKzD,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,eAAgB,SAAQ,QAAQ;gBAC/B,CAAC,CAAC,EAAE,SAAS;CAM1B"}

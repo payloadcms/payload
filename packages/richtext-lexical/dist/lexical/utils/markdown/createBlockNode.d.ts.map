@@ -1,0 +1,1 @@
+{"version":3,"file":"createBlockNode.d.ts","sourceRoot":"","sources":["../../../../src/lexical/utils/markdown/createBlockNode.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,SAAS,CAAA;AAE1C,OAAO,KAAK,EAAE,kBAAkB,EAAE,MAAM,6DAA6D,CAAA;AAErG,eAAO,MAAM,eAAe,eACd,CAAC,KAAK,EAAE,KAAK,CAAC,MAAM,CAAC,KAAK,WAAW,KAChD,kBAAkB,CAAC,SAAS,CAS9B,CAAA"}

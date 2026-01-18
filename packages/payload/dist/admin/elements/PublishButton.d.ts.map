@@ -1,0 +1,1 @@
+{"version":3,"file":"PublishButton.d.ts","sourceRoot":"","sources":["../../../src/admin/elements/PublishButton.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,uBAAuB,CAAA;AAExD,MAAM,MAAM,wBAAwB,GAAG;IACrC,KAAK,CAAC,EAAE,MAAM,CAAA;CACf,CAAA;AAED,MAAM,MAAM,4BAA4B,GAAG,EAAE,GAAG,WAAW,CAAA;AAE3D,MAAM,MAAM,wBAAwB,GAAG,wBAAwB,GAAG,4BAA4B,CAAA"}

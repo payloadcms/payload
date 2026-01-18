@@ -1,0 +1,91 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "plugin-seo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "missing": {
+          "type": "string"
+        },
+        "almostThere": {
+          "type": "string"
+        },
+        "autoGenerate": {
+          "type": "string"
+        },
+        "bestPractices": {
+          "type": "string"
+        },
+        "characterCount": {
+          "type": "string"
+        },
+        "charactersLeftOver": {
+          "type": "string"
+        },
+        "charactersToGo": {
+          "type": "string"
+        },
+        "charactersTooMany": {
+          "type": "string"
+        },
+        "checksPassing": {
+          "type": "string"
+        },
+        "good": {
+          "type": "string"
+        },
+        "imageAutoGenerationTip": {
+          "type": "string"
+        },
+        "lengthTipDescription": {
+          "type": "string"
+        },
+        "lengthTipTitle": {
+          "type": "string"
+        },
+        "noImage": {
+          "type": "string"
+        },
+        "preview": {
+          "type": "string"
+        },
+        "previewDescription": {
+          "type": "string"
+        },
+        "tooLong": {
+          "type": "string"
+        },
+        "tooShort": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "autoGenerate",
+        "imageAutoGenerationTip",
+        "bestPractices",
+        "lengthTipTitle",
+        "lengthTipDescription",
+        "good",
+        "tooLong",
+        "tooShort",
+        "almostThere",
+        "characterCount",
+        "charactersToGo",
+        "charactersLeftOver",
+        "charactersTooMany",
+        "noImage",
+        "checksPassing",
+        "preview",
+        "previewDescription",
+        "missing"
+      ]
+    }
+  },
+  "required": ["plugin-seo"]
+}

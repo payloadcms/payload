@@ -1,0 +1,1 @@
+{"version":3,"file":"createBlocksMap.d.ts","sourceRoot":"","sources":["../../src/utilities/createBlocksMap.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,SAAS,GAAG;IACtB,CAAC,IAAI,EAAE,MAAM,GAAG,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,EAAE,CAAA;CAC1C,CAAA;AAED,eAAO,MAAM,eAAe,SAAU,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,KAAG,SAyC/D,CAAA"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/defaults.ts"],"sourcesContent":["export const defaults = {\n  userCollection: 'users',\n}\n"],"names":["defaults","userCollection"],"mappings":"AAAA,OAAO,MAAMA,WAAW;IACtBC,gBAAgB;AAClB,EAAC"}

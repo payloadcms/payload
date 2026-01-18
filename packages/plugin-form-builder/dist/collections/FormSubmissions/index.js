@@ -1,0 +1,98 @@
+import { defaultPaymentFields } from './fields/defaultPaymentFields.js';
+import { createCharge } from './hooks/createCharge.js';
+import { sendEmail } from './hooks/sendEmail.js';
+// all settings can be overridden by the config
+export const generateSubmissionCollection = (formConfig)=>{
+    const formSlug = formConfig?.formOverrides?.slug || 'forms';
+    const enablePaymentFields = Boolean(formConfig?.fields?.payment);
+    const defaultFields = [
+        {
+            name: 'form',
+            type: 'relationship',
+            relationTo: formSlug,
+            required: true,
+            // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+            validate: async (value, { req: { payload }, req })=>{
+                /* Don't run in the client side */ if (!payload) {
+                    return true;
+                }
+                if (payload) {
+                    let _existingForm;
+                    try {
+                        _existingForm = await payload.findByID({
+                            id: value,
+                            collection: formSlug,
+                            req
+                        });
+                        return true;
+                    } catch (_error) {
+                        return 'Cannot create this submission because this form does not exist.';
+                    }
+                }
+            }
+        },
+        {
+            name: 'submissionData',
+            type: 'array',
+            fields: [
+                {
+                    name: 'field',
+                    type: 'text',
+                    required: true
+                },
+                {
+                    name: 'value',
+                    type: 'textarea',
+                    required: true,
+                    validate: (value)=>{
+                        // TODO:
+                        // create a validation function that dynamically
+                        // relies on the field type and its options as configured.
+                        // How to access sibling data from this field?
+                        // Need the `name` of the field in order to validate it.
+                        // Might not be possible to use this validation function.
+                        // Instead, might need to do all validation in a `beforeValidate` collection hook.
+                        if (typeof value !== 'undefined') {
+                            return true;
+                        }
+                        return 'This field is required.';
+                    }
+                }
+            ]
+        },
+        ...enablePaymentFields ? [
+            defaultPaymentFields
+        ] : []
+    ];
+    const newConfig = {
+        ...formConfig?.formSubmissionOverrides || {},
+        slug: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
+        access: {
+            create: ()=>true,
+            read: ({ req: { user } })=>!!user,
+            update: ()=>false,
+            ...formConfig?.formSubmissionOverrides?.access || {}
+        },
+        admin: {
+            ...formConfig?.formSubmissionOverrides?.admin || {},
+            enableRichTextRelationship: false
+        },
+        fields: formConfig?.formSubmissionOverrides?.fields && typeof formConfig?.formSubmissionOverrides?.fields === 'function' ? formConfig.formSubmissionOverrides.fields({
+            defaultFields
+        }) : defaultFields,
+        hooks: {
+            ...formConfig?.formSubmissionOverrides?.hooks || {},
+            afterChange: [
+                (data)=>sendEmail(data, formConfig),
+                ...formConfig?.formSubmissionOverrides?.hooks?.afterChange || []
+            ],
+            beforeChange: [
+                (data)=>createCharge(data, formConfig),
+                ...formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []
+            ]
+        }
+    };
+    return newConfig;
+};
+
+//# sourceMappingURL=index.js.map

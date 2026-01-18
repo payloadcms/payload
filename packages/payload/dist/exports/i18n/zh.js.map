@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/zh.ts"],"sourcesContent":["export { zh } from '@payloadcms/translations/languages/zh'\n"],"names":["zh"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

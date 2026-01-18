@@ -1,0 +1,18 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .icon--indent-left {
+    height: $baseline;
+    width: $baseline;
+
+    .stroke {
+      fill: none;
+      stroke: var(--theme-elevation-800);
+      stroke-width: $style-stroke-width-m;
+    }
+
+    .fill {
+      fill: var(--theme-elevation-800);
+    }
+  }
+}

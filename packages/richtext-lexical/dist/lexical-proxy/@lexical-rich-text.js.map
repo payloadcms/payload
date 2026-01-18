@@ -1,0 +1,1 @@
+{"version":3,"file":"@lexical-rich-text.js","names":[],"sources":["../../src/lexical-proxy/@lexical-rich-text.ts"],"sourcesContent":["export * from '@lexical/rich-text'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

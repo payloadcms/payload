@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalEditorRefPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalEditorRefPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalEditorRefPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

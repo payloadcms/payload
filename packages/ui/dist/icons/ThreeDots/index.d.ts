@@ -1,0 +1,6 @@
+import React from 'react';
+import './index.scss';
+export declare function ThreeDotsIcon({ className }: {
+    className?: string;
+}): React.JSX.Element;
+//# sourceMappingURL=index.d.ts.map

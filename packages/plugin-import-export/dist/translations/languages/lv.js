@@ -1,0 +1,48 @@
+export const lvTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Visi lokālie iestatījumi',
+        collectionRequired: 'Nepieciešama kolekcija, lai parādītu priekšskatījumu',
+        documentsToExport: '{{count}} documents to export',
+        documentsToImport: '{{count}} documents to import',
+        exportDocumentLabel: 'Eksportēt {{label}}',
+        exportOptions: 'Eksportēšanas opcijas',
+        'field-collectionSlug-label': 'Kolekcija',
+        'field-depth-label': 'Dziļums',
+        'field-drafts-label': 'Iekļaut melnrakstus',
+        'field-fields-label': 'Lauki',
+        'field-format-label': 'Eksportēšanas formāts',
+        'field-importMode-create-label': 'Izveidot jaunus dokumentus',
+        'field-importMode-label': 'Importa režīms',
+        'field-importMode-update-label': 'Atjaunot esošos dokumentus',
+        'field-importMode-upsert-label': 'Izveidot vai atjaunināt dokumentus',
+        'field-limit-label': 'Ierobežojums',
+        'field-locale-label': 'Lokalizācija',
+        'field-matchField-description': 'Lauks, ko izmantot, lai atbilstu esošiem dokumentiem',
+        'field-matchField-label': 'Sakrišanas lauks',
+        'field-name-label': 'Faila nosaukums',
+        'field-page-label': 'Lapa',
+        'field-selectionToUse-label': 'Izvēlēties lietošanu',
+        'field-sort-label': 'Kārtot pēc',
+        'field-sort-order-label': 'Kārtošanas secība',
+        'field-status-label': 'Statuss',
+        'field-summary-label': 'Importa kopsavilkums',
+        importDocumentLabel: 'Importēt {{label}}',
+        importResults: 'Importa rezultāti',
+        matchBy: 'Saskanā ar',
+        mode: 'Režīms',
+        noDataToPreview: 'Nav datu priekšskatīšanai',
+        previewPageInfo: '{{start}}-{{end}} of {{total}}',
+        'selectionToUse-allDocuments': 'Izmantojiet visus dokumentus',
+        'selectionToUse-currentFilters': 'Izmantot pašreizējos filtrus',
+        'selectionToUse-currentSelection': 'Izmantot pašreizējo izvēli',
+        startImport: 'Sākt importēšanu',
+        totalDocumentsCount: '{{count}} kopējie dokumenti',
+        uploadFileToSeePreview: 'Augšupielādējiet failu, lai redzētu priekšskatījumu'
+    }
+};
+export const lv = {
+    dateFNSKey: 'lv',
+    translations: lvTranslations
+};
+
+//# sourceMappingURL=lv.js.map

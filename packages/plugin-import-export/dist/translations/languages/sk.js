@@ -1,0 +1,48 @@
+export const skTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Všetky miestne nastavenia',
+        collectionRequired: 'Je potrebná kolekcia pre zobrazenie náhľadu',
+        documentsToExport: '{{count}} documents to export',
+        documentsToImport: '{{count}} documents to import',
+        exportDocumentLabel: 'Export {{label}}',
+        exportOptions: 'Možnosti exportu',
+        'field-collectionSlug-label': 'Kolekcia',
+        'field-depth-label': 'Hĺbka',
+        'field-drafts-label': 'Zahrnúť návrhy',
+        'field-fields-label': 'Polia',
+        'field-format-label': 'Formát exportu',
+        'field-importMode-create-label': 'Vytvorte nové dokumenty',
+        'field-importMode-label': 'Režim importu',
+        'field-importMode-update-label': 'Aktualizovať existujúce dokumenty',
+        'field-importMode-upsert-label': 'Vytvorte alebo aktualizujte dokumenty',
+        'field-limit-label': 'Limit',
+        'field-locale-label': 'Lokalita',
+        'field-matchField-description': 'Pole na použitie pre zhodu existujúcich dokumentov',
+        'field-matchField-label': 'Párovať Pole',
+        'field-name-label': 'Názov súboru',
+        'field-page-label': 'Stránka',
+        'field-selectionToUse-label': 'Výber na použitie',
+        'field-sort-label': 'Triediť podľa',
+        'field-sort-order-label': 'Poradie triedenia',
+        'field-status-label': 'Stav',
+        'field-summary-label': 'Súhrn importu',
+        importDocumentLabel: 'Importovať {{label}}',
+        importResults: 'Výsledky importu',
+        matchBy: 'Porovnať podľa',
+        mode: 'Režim',
+        noDataToPreview: 'Žiadne dáta na ukážku',
+        previewPageInfo: '{{start}}-{{end}} of {{total}}',
+        'selectionToUse-allDocuments': 'Použite všetky dokumenty',
+        'selectionToUse-currentFilters': 'Použiť aktuálne filtre',
+        'selectionToUse-currentSelection': 'Použiť aktuálny výber',
+        startImport: 'Začnite Import',
+        totalDocumentsCount: '{{count}} celkový počet dokumentov',
+        uploadFileToSeePreview: 'Nahrajte súbor, aby ste videli náhľad'
+    }
+};
+export const sk = {
+    dateFNSKey: 'sk',
+    translations: skTranslations
+};
+
+//# sourceMappingURL=sk.js.map

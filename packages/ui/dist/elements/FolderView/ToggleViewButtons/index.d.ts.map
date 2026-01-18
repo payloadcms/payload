@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../src/elements/FolderView/ToggleViewButtons/index.tsx"],"names":[],"mappings":"AAGA,OAAO,cAAc,CAAA;AAIrB,KAAK,KAAK,GAAG;IACX,UAAU,EAAE,MAAM,GAAG,MAAM,CAAA;IAC3B,aAAa,EAAE,CAAC,IAAI,EAAE,MAAM,GAAG,MAAM,KAAK,IAAI,CAAA;CAC/C,CAAA;AACD,wBAAgB,iBAAiB,CAAC,EAAE,UAAU,EAAE,aAAa,EAAE,EAAE,KAAK,+BA2BrE"}

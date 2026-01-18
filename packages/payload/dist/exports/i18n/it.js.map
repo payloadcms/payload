@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/it.ts"],"sourcesContent":["export { it } from '@payloadcms/translations/languages/it'\n"],"names":["it"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

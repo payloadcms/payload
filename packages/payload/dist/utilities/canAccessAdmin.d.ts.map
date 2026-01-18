@@ -1,0 +1,1 @@
+{"version":3,"file":"canAccessAdmin.d.ts","sourceRoot":"","sources":["../../src/utilities/canAccessAdmin.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,mBAAmB,CAAA;AAIvD;;;;;;;GAOG;AACH,eAAO,MAAM,cAAc,YAAmB;IAAE,GAAG,EAAE,cAAc,CAAA;CAAE,kBA8BpE,CAAA"}

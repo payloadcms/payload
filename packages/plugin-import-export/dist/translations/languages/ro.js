@@ -1,0 +1,48 @@
+export const roTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Toate locațiile',
+        collectionRequired: 'Colecție necesară pentru a arăta previzualizarea',
+        documentsToExport: '{{count}} documents to export',
+        documentsToImport: '{{count}} documents to import',
+        exportDocumentLabel: 'Export {{label}}',
+        exportOptions: 'Opțiuni de export',
+        'field-collectionSlug-label': 'Colecție',
+        'field-depth-label': 'Adâncime',
+        'field-drafts-label': 'Includează schițe',
+        'field-fields-label': 'Campuri',
+        'field-format-label': 'Format de export',
+        'field-importMode-create-label': 'Creați documente noi',
+        'field-importMode-label': 'Modul Import',
+        'field-importMode-update-label': 'Actualizați documentele existente',
+        'field-importMode-upsert-label': 'Crează sau actualizează documente',
+        'field-limit-label': 'Limită',
+        'field-locale-label': 'Localizare',
+        'field-matchField-description': 'Câmp pentru a se potrivi cu documentele existente',
+        'field-matchField-label': 'Câmp potrivit',
+        'field-name-label': 'Numele fișierului',
+        'field-page-label': 'Pagina',
+        'field-selectionToUse-label': 'Selectarea pentru utilizare',
+        'field-sort-label': 'Sortează după',
+        'field-sort-order-label': 'Ordine de sortare',
+        'field-status-label': 'Stare',
+        'field-summary-label': 'Rezumatul Importului',
+        importDocumentLabel: 'Importați {{label}}',
+        importResults: 'Rezultatele Importului',
+        matchBy: 'Potrivire după',
+        mode: 'Mod',
+        noDataToPreview: 'Nu există date de previzualizat.',
+        previewPageInfo: '{{start}}-{{end}} of {{total}}',
+        'selectionToUse-allDocuments': 'Utilizați toate documentele.',
+        'selectionToUse-currentFilters': 'Utilizați filtrele curente',
+        'selectionToUse-currentSelection': 'Utilizați selecția curentă',
+        startImport: 'Începe Importul',
+        totalDocumentsCount: '{{count}} documente totale',
+        uploadFileToSeePreview: 'Încărcați un fișier pentru a vedea previzualizarea'
+    }
+};
+export const ro = {
+    dateFNSKey: 'ro',
+    translations: roTranslations
+};
+
+//# sourceMappingURL=ro.js.map

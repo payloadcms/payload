@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalNodeMenuPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalNodeMenuPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalNodeMenuPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

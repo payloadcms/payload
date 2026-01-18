@@ -1,0 +1,1 @@
+{"version":3,"file":"sanitizePluginConfig.d.ts","sourceRoot":"","sources":["../../src/utilities/sanitizePluginConfig.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,qBAAqB,EAAE,8BAA8B,EAAE,MAAM,mBAAmB,CAAA;AAK9F,KAAK,KAAK,GAAG;IACX,YAAY,EAAE,qBAAqB,CAAA;CACpC,CAAA;AAED,eAAO,MAAM,oBAAoB,qBAAsB,KAAK,KAAG,8BA6F9D,CAAA"}

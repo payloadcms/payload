@@ -1,0 +1,1 @@
+{"version":3,"file":"validateOptions.d.ts","sourceRoot":"","sources":["../../../../../src/collections/variants/createVariantsCollection/hooks/validateOptions.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAA;AAEvC,KAAK,KAAK,GAAG;IACX,sBAAsB,CAAC,EAAE,MAAM,CAAA;CAChC,CAAA;AAED,eAAO,MAAM,eAAe,EAAE,CAAC,KAAK,CAAC,EAAE,KAAK,KAAK,QAmE9C,CAAA"}

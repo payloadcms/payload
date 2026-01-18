@@ -1,0 +1,48 @@
+export const deTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Alle Gebietsschemata',
+        collectionRequired: 'Sammlung erforderlich zur Vorschauanzeige',
+        documentsToExport: '{{count}} Dokumente zum Exportieren',
+        documentsToImport: '{{count}} Dokumente zum Importieren',
+        exportDocumentLabel: 'Export {{label}}',
+        exportOptions: 'Exportoptionen',
+        'field-collectionSlug-label': 'Sammlung',
+        'field-depth-label': 'Tiefe',
+        'field-drafts-label': 'Fügen Sie Entwürfe hinzu',
+        'field-fields-label': 'Felder',
+        'field-format-label': 'Exportformat',
+        'field-importMode-create-label': 'Erstellen Sie neue Dokumente',
+        'field-importMode-label': 'Importmodus',
+        'field-importMode-update-label': 'Aktualisieren Sie bestehende Dokumente',
+        'field-importMode-upsert-label': 'Erstellen oder aktualisieren Sie Dokumente',
+        'field-limit-label': 'Grenze',
+        'field-locale-label': 'Ort',
+        'field-matchField-description': 'Feld zur Abgleichung bestehender Dokumente',
+        'field-matchField-label': 'Übereinstimmendes Feld',
+        'field-name-label': 'Dateiname',
+        'field-page-label': 'Seite',
+        'field-selectionToUse-label': 'Auswahl zur Verwendung',
+        'field-sort-label': 'Sortieren nach',
+        'field-sort-order-label': 'Sortierreihenfolge',
+        'field-status-label': 'Status',
+        'field-summary-label': 'Zusammenfassung des Imports',
+        importDocumentLabel: 'Importieren {{label}}',
+        importResults: 'Ergebnisse importieren',
+        matchBy: 'Übereinstimmung nach',
+        mode: 'Modus',
+        noDataToPreview: 'Keine Daten zur Vorschau',
+        previewPageInfo: '{{start}}-{{end}} von {{total}}',
+        'selectionToUse-allDocuments': 'Verwenden Sie alle Dokumente.',
+        'selectionToUse-currentFilters': 'Verwenden Sie aktuelle Filter',
+        'selectionToUse-currentSelection': 'Verwenden Sie die aktuelle Auswahl',
+        startImport: 'Starten Sie den Import',
+        totalDocumentsCount: '{{count}} gesamte Dokumente',
+        uploadFileToSeePreview: 'Laden Sie eine Datei hoch, um eine Vorschau zu sehen.'
+    }
+};
+export const de = {
+    dateFNSKey: 'de',
+    translations: deTranslations
+};
+
+//# sourceMappingURL=de.js.map

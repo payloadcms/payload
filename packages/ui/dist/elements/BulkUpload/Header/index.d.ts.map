@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../src/elements/BulkUpload/Header/index.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,MAAM,OAAO,CAAA;AAGzB,OAAO,cAAc,CAAA;AAIrB,KAAK,KAAK,GAAG;IACX,QAAQ,CAAC,OAAO,EAAE,MAAM,IAAI,CAAA;IAC5B,QAAQ,CAAC,KAAK,EAAE,MAAM,CAAA;CACvB,CAAA;AACD,wBAAgB,YAAY,CAAC,EAAE,OAAO,EAAE,KAAK,EAAE,EAAE,KAAK,qBAOrD"}

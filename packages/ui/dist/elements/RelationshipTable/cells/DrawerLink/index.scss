@@ -1,0 +1,16 @@
+@layer payload-default {
+  .drawer-link {
+    display: flex;
+    gap: calc(var(--base) / 2);
+
+    &__doc-drawer-toggler {
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--color-text);
+      font-size: inherit;
+      line-height: inherit;
+    }
+  }
+}

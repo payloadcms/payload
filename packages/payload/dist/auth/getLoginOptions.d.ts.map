@@ -1,0 +1,1 @@
+{"version":3,"file":"getLoginOptions.d.ts","sourceRoot":"","sources":["../../src/auth/getLoginOptions.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,IAAI,EAAE,MAAM,YAAY,CAAA;AAEtC,eAAO,MAAM,eAAe,sBACP,IAAI,CAAC,mBAAmB,CAAC,KAC3C;IACD,iBAAiB,EAAE,OAAO,CAAA;IAC1B,oBAAoB,EAAE,OAAO,CAAA;CAM9B,CAAA"}

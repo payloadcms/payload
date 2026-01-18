@@ -1,0 +1,1 @@
+{"version":3,"file":"getCollectionSlugMap.d.ts","sourceRoot":"","sources":["../../src/utilities/getCollectionSlugMap.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,8BAA8B,EAAE,MAAM,mBAAmB,CAAA;AAE1F,KAAK,KAAK,GAAG;IACX,cAAc,CAAC,EAAE,OAAO,CAAA;IACxB,qBAAqB,EAAE,8BAA8B,CAAA;CACtD,CAAA;AAED;;;;GAIG;AACH,eAAO,MAAM,oBAAoB,+CAG9B,KAAK,KAAG,iBAiCV,CAAA"}

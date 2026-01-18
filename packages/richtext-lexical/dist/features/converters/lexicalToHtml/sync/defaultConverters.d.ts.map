@@ -1,0 +1,1 @@
+{"version":3,"file":"defaultConverters.d.ts","sourceRoot":"","sources":["../../../../../src/features/converters/lexicalToHtml/sync/defaultConverters.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,0BAA0B,CAAA;AAChE,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,YAAY,CAAA;AAchD,eAAO,MAAM,qBAAqB,EAAE,cAAc,CAAC,gBAAgB,CAYlE,CAAA"}

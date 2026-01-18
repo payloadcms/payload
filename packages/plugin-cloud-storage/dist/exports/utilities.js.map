@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/exports/utilities.ts"],"sourcesContent":["export { getFilePrefix } from '../utilities/getFilePrefix.js'\nexport { initClientUploads } from '../utilities/initClientUploads.js'\n"],"names":["getFilePrefix","initClientUploads"],"mappings":"AAAA,SAASA,aAAa,QAAQ,gCAA+B;AAC7D,SAASC,iBAAiB,QAAQ,oCAAmC"}

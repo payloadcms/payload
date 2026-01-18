@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/exports/client.ts"],"sourcesContent":["'use client'\n\nexport { LinkToDoc } from '../ui/LinkToDoc.js'\n"],"names":["LinkToDoc"],"mappings":"AAAA;AAEA,SAASA,SAAS,QAAQ,qBAAoB"}

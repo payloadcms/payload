@@ -1,0 +1,14 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--check {
+    height: $baseline;
+    width: $baseline;
+
+    .stroke {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: $style-stroke-width-m;
+    }
+  }
+}

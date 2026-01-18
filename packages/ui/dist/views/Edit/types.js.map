@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","names":[],"sources":["../../../src/views/Edit/types.ts"],"sourcesContent":["import type { SanitizedCollectionConfig } from 'payload'\n\nexport type IndexProps = {\n  collection: SanitizedCollectionConfig\n  isEditing?: boolean\n}\n"],"mappings":"AAEA","ignoreList":[]}

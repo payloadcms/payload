@@ -1,0 +1,85 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .tabs-field__tab-button {
+    @extend %btn-reset;
+    @extend %h4;
+    display: flex;
+    padding-bottom: base(1);
+    margin: 0;
+    margin-inline-end: $baseline;
+    cursor: pointer;
+    opacity: 0.5;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+    gap: base(0.5);
+
+    &:last-child {
+      margin: 0;
+    }
+
+    &:after {
+      content: ' ';
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      left: 0;
+      height: 1px;
+      background: var(--theme-elevation-800);
+      opacity: 0;
+    }
+
+    &:hover {
+      opacity: 0.75;
+
+      &:after {
+        opacity: 0.2;
+      }
+    }
+
+    &--hidden {
+      display: none;
+    }
+
+    &--active {
+      opacity: 1 !important;
+
+      &:after {
+        opacity: 1 !important;
+        height: 2px;
+      }
+    }
+
+    &__description {
+      margin-bottom: calc(var(--base) / 2);
+    }
+
+    @include small-break {
+      margin: 0 base(0.75) 0 0;
+      padding-bottom: base(0.5);
+
+      &:last-child {
+        margin: 0;
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .tabs-field__tab-button--has-error {
+      color: var(--theme-error-750);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .tabs-field__tab-button--has-error {
+      color: var(--theme-error-500);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
+}

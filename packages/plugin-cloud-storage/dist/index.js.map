@@ -1,0 +1,1 @@
+{"version":3,"sources":["../src/index.ts"],"sourcesContent":["export { cloudStoragePlugin } from './plugin.js'\n"],"names":["cloudStoragePlugin"],"mappings":"AAAA,SAASA,kBAAkB,QAAQ,cAAa"}

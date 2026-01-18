@@ -1,0 +1,48 @@
+export const csTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Všechny lokalizace',
+        collectionRequired: 'Je nutné mít sbírku k zobrazení náhledu.',
+        documentsToExport: '{{count}} dokumentů k exportu',
+        documentsToImport: '{{count}} dokumentů k importu',
+        exportDocumentLabel: 'Export {{label}}',
+        exportOptions: 'Možnosti exportu',
+        'field-collectionSlug-label': 'Kolekce',
+        'field-depth-label': 'Hloubka',
+        'field-drafts-label': 'Zahrnout návrhy',
+        'field-fields-label': 'Pole',
+        'field-format-label': 'Formát exportu',
+        'field-importMode-create-label': 'Vytvořte nové dokumenty',
+        'field-importMode-label': 'Režim importu',
+        'field-importMode-update-label': 'Aktualizujte stávající dokumenty',
+        'field-importMode-upsert-label': 'Vytvořte nebo aktualizujte dokumenty',
+        'field-limit-label': 'Limita',
+        'field-locale-label': 'Místní',
+        'field-matchField-description': 'Pole pro shodu s existujícími dokumenty',
+        'field-matchField-label': 'Shoda pole',
+        'field-name-label': 'Název souboru',
+        'field-page-label': 'Stránka',
+        'field-selectionToUse-label': 'Výběr k použití',
+        'field-sort-label': 'Seřadit podle',
+        'field-sort-order-label': 'Řazení',
+        'field-status-label': 'Stav',
+        'field-summary-label': 'Souhrn importu',
+        importDocumentLabel: 'Import {{label}}',
+        importResults: 'Výsledky importu',
+        matchBy: 'Shoda podle',
+        mode: 'Mód',
+        noDataToPreview: 'Žádná data k prohlížení',
+        previewPageInfo: '{{start}}-{{end}} z {{total}}',
+        'selectionToUse-allDocuments': 'Použijte všechny dokumenty',
+        'selectionToUse-currentFilters': 'Použijte aktuální filtry',
+        'selectionToUse-currentSelection': 'Použijte aktuální výběr',
+        startImport: 'Začít import',
+        totalDocumentsCount: '{{count}} celkem dokumentů',
+        uploadFileToSeePreview: 'Nahrajte soubor pro zobrazení náhledu'
+    }
+};
+export const cs = {
+    dateFNSKey: 'cs',
+    translations: csTranslations
+};
+
+//# sourceMappingURL=cs.js.map

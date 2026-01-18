@@ -1,0 +1,20 @@
+.no-results {
+  padding: calc(var(--base) * 2) var(--base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--theme-border-color);
+  border-radius: var(--style-radius-m);
+  text-align: center;
+
+  &__actions {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    margin-top: var(--base);
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

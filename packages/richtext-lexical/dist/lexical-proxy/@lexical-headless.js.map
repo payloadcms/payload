@@ -1,0 +1,1 @@
+{"version":3,"file":"@lexical-headless.js","names":[],"sources":["../../src/lexical-proxy/@lexical-headless.ts"],"sourcesContent":["export * from '@lexical/headless'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

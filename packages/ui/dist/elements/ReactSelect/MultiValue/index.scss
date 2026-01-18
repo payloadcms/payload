@@ -1,0 +1,39 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .multi-value {
+    &.rs__multi-value {
+      display: flex;
+      padding: 0;
+      border: 1px solid var(--theme-border-color);
+      border-radius: var(--style-radius-s);
+      line-height: calc(#{$baseline} - 2px);
+      margin: base(0.25) base(0.5) base(0.25) 0;
+      transition: border 0.2s cubic-bezier(0.2, 0, 0, 1);
+
+      &:hover {
+        border: 1px solid var(--theme-elevation-250);
+      }
+    }
+
+    &--is-dragging {
+      z-index: 2;
+    }
+  }
+
+  html[data-theme='light'] {
+    .multi-value {
+      &.rs__multi-value {
+        background: var(--theme-elevation-50);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .multi-value {
+      &.rs__multi-value {
+        background: var(--theme-elevation-50);
+      }
+    }
+  }
+}

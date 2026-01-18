@@ -1,0 +1,13 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--line {
+    width: $baseline;
+    height: $baseline;
+
+    .stroke {
+      stroke: currentColor;
+      stroke-width: $style-stroke-width;
+    }
+  }
+}

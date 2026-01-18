@@ -1,0 +1,48 @@
+export const rsTranslations = {
+    'plugin-import-export': {
+        allLocales: 'Sve lokacije',
+        collectionRequired: 'Potrebna kolekcija za prikaz pretpregleda',
+        documentsToExport: '{{count}} documents to export',
+        documentsToImport: '{{count}} documents to import',
+        exportDocumentLabel: 'Извоз {{label}}',
+        exportOptions: 'Опције извоза',
+        'field-collectionSlug-label': 'Kolekcija',
+        'field-depth-label': 'Dubina',
+        'field-drafts-label': 'Uključite nacrte',
+        'field-fields-label': 'Polja',
+        'field-format-label': 'Format izvoza',
+        'field-importMode-create-label': 'Kreirajte nove dokumente',
+        'field-importMode-label': 'Način uvoza',
+        'field-importMode-update-label': 'Ažurirajte postojeće dokumente',
+        'field-importMode-upsert-label': 'Kreirajte ili ažurirajte dokumente',
+        'field-limit-label': 'Ograničenje',
+        'field-locale-label': 'Локалитет',
+        'field-matchField-description': 'Polje za uparivanje postojećih dokumenata',
+        'field-matchField-label': 'Polje za uparivanje',
+        'field-name-label': 'Ime datoteke',
+        'field-page-label': 'Strana',
+        'field-selectionToUse-label': 'Izbor za upotrebu',
+        'field-sort-label': 'Sortiraj po',
+        'field-sort-order-label': 'Redoslijed sortiranja',
+        'field-status-label': 'Status',
+        'field-summary-label': 'Rezime uvoza',
+        importDocumentLabel: 'Uvoz {{label}}',
+        importResults: 'Rezultati uvoza',
+        matchBy: 'Upareni po',
+        mode: 'Način rada',
+        noDataToPreview: 'Nema podataka za pregled.',
+        previewPageInfo: '{{start}}-{{end}} of {{total}}',
+        'selectionToUse-allDocuments': 'Koristite sve dokumente',
+        'selectionToUse-currentFilters': 'Koristite trenutne filtere',
+        'selectionToUse-currentSelection': 'Koristite trenutni izbor',
+        startImport: 'Pokreni uvoz',
+        totalDocumentsCount: '{{count}} ukupno dokumenata',
+        uploadFileToSeePreview: 'Otpremite datoteku da biste videli pretpregled'
+    }
+};
+export const rs = {
+    dateFNSKey: 'rs',
+    translations: rsTranslations
+};
+
+//# sourceMappingURL=rs.js.map

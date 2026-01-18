@@ -1,0 +1,1 @@
+{"version":3,"file":"access.d.ts","sourceRoot":"","sources":["../../../src/resolvers/auth/access.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,SAAS,CAAA;AAI9C,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,aAAa,CAAA;AAe1C,wBAAgB,cAAc,CAAC,MAAM,EAAE,eAAe,gCACV,OAAO,kBAelD"}

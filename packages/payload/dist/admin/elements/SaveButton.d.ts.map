@@ -1,0 +1,1 @@
+{"version":3,"file":"SaveButton.d.ts","sourceRoot":"","sources":["../../../src/admin/elements/SaveButton.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,uBAAuB,CAAA;AAExD,MAAM,MAAM,qBAAqB,GAAG;IAClC,KAAK,CAAC,EAAE,MAAM,CAAA;CACf,CAAA;AAED,MAAM,MAAM,yBAAyB,GAAG,EAAE,GAAG,WAAW,CAAA;AAExD,MAAM,MAAM,qBAAqB,GAAG,qBAAqB,GAAG,yBAAyB,CAAA"}

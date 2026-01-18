@@ -1,0 +1,1 @@
+{"version":3,"file":"blockquote.d.ts","sourceRoot":"","sources":["../../../../../../src/features/converters/lexicalToJSX/converter/converters/blockquote.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,6BAA6B,CAAA;AACtE,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,aAAa,CAAA;AAEhD,eAAO,MAAM,sBAAsB,EAAE,aAAa,CAAC,mBAAmB,CAQrE,CAAA"}

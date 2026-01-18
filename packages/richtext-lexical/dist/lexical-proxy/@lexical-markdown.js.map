@@ -1,0 +1,1 @@
+{"version":3,"file":"@lexical-markdown.js","names":[],"sources":["../../src/lexical-proxy/@lexical-markdown.ts"],"sourcesContent":["export * from '../packages/@lexical/markdown/index.js'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/data/defaultValue.ts"],"sourcesContent":["export const defaultRichTextValue = [\n  {\n    children: [{ text: '' }],\n  },\n]\n"],"names":["defaultRichTextValue","children","text"],"mappings":"AAAA,OAAO,MAAMA,uBAAuB;IAClC;QACEC,UAAU;YAAC;gBAAEC,MAAM;YAAG;SAAE;IAC1B;CACD,CAAA"}

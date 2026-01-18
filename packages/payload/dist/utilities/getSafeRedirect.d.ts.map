@@ -1,0 +1,1 @@
+{"version":3,"file":"getSafeRedirect.d.ts","sourceRoot":"","sources":["../../src/utilities/getSafeRedirect.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,eAAe,mDAIzB;IACD,iBAAiB,CAAC,EAAE,OAAO,CAAA;IAC3B,UAAU,CAAC,EAAE,MAAM,CAAA;IACnB,UAAU,EAAE,MAAM,GAAG,MAAM,EAAE,CAAA;CAC9B,KAAG,MAmCH,CAAA"}

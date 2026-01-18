@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/field/elements/indent/shared.ts"],"sourcesContent":["export const indentType = 'indent'\n"],"names":["indentType"],"mappings":"AAAA,OAAO,MAAMA,aAAa,SAAQ"}

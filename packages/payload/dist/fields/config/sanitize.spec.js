@@ -1,0 +1,597 @@
+import { DuplicateFieldName, InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js';
+import { sanitizeFields } from './sanitize.js';
+import { describe, it, expect } from 'vitest';
+describe('sanitizeFields', ()=>{
+    const config = {};
+    const collectionConfig = {};
+    it('should throw on missing type field', async ()=>{
+        const fields = [
+            // @ts-expect-error
+            {
+                name: 'Some Collection',
+                label: 'some-collection'
+            }
+        ];
+        await expect(async ()=>{
+            await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            });
+        }).rejects.toThrow(MissingFieldType);
+    });
+    it('should throw on invalid field name', async ()=>{
+        const fields = [
+            {
+                name: 'some.collection',
+                type: 'text',
+                label: 'some.collection'
+            }
+        ];
+        await expect(async ()=>{
+            await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            });
+        }).rejects.toThrow(InvalidFieldName);
+    });
+    it('should throw on duplicate field name', async ()=>{
+        const fields = [
+            {
+                name: 'someField',
+                type: 'text',
+                label: 'someField'
+            },
+            {
+                name: 'someField',
+                type: 'text',
+                label: 'someField'
+            }
+        ];
+        await expect(async ()=>{
+            await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            });
+        }).rejects.toThrow(DuplicateFieldName);
+    });
+    it('should throw on duplicate block slug', async ()=>{
+        const fields = [
+            {
+                name: 'blocks',
+                type: 'blocks',
+                blocks: [
+                    {
+                        slug: 'block',
+                        fields: [
+                            {
+                                name: 'blockField',
+                                type: 'text'
+                            }
+                        ]
+                    },
+                    {
+                        slug: 'block',
+                        fields: [
+                            {
+                                name: 'blockField',
+                                type: 'text'
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+        await expect(async ()=>{
+            await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            });
+        }).rejects.toThrow(DuplicateFieldName);
+    });
+    describe('auto-labeling', ()=>{
+        it('should populate label if missing', async ()=>{
+            const fields = [
+                {
+                    name: 'someField',
+                    type: 'text'
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            expect(sanitizedField.name).toStrictEqual('someField');
+            expect(sanitizedField.label).toStrictEqual('Some Field');
+            expect(sanitizedField.type).toStrictEqual('text');
+        });
+        it('should allow auto-label override', async ()=>{
+            const fields = [
+                {
+                    name: 'someField',
+                    type: 'text',
+                    label: 'Do not label'
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            expect(sanitizedField.name).toStrictEqual('someField');
+            expect(sanitizedField.label).toStrictEqual('Do not label');
+            expect(sanitizedField.type).toStrictEqual('text');
+        });
+        describe('opt-out', ()=>{
+            it('should allow label opt-out', async ()=>{
+                const fields = [
+                    {
+                        name: 'someField',
+                        type: 'text',
+                        label: false
+                    }
+                ];
+                const sanitizedField = (await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships: []
+                }))[0];
+                expect(sanitizedField.name).toStrictEqual('someField');
+                expect(sanitizedField.label).toStrictEqual(false);
+                expect(sanitizedField.type).toStrictEqual('text');
+            });
+            it('should allow label opt-out for arrays', async ()=>{
+                const arrayField = {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                        {
+                            name: 'itemName',
+                            type: 'text'
+                        }
+                    ],
+                    label: false
+                };
+                const sanitizedField = (await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields: [
+                        arrayField
+                    ],
+                    validRelationships: []
+                }))[0];
+                expect(sanitizedField.name).toStrictEqual('items');
+                expect(sanitizedField.label).toStrictEqual(false);
+                expect(sanitizedField.type).toStrictEqual('array');
+                expect(sanitizedField.labels).toBeUndefined();
+            });
+            it('should allow label opt-out for blocks', async ()=>{
+                const fields = [
+                    {
+                        name: 'noLabelBlock',
+                        type: 'blocks',
+                        blocks: [
+                            {
+                                slug: 'number',
+                                fields: [
+                                    {
+                                        name: 'testNumber',
+                                        type: 'number'
+                                    }
+                                ]
+                            }
+                        ],
+                        label: false
+                    }
+                ];
+                const sanitizedField = (await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships: []
+                }))[0];
+                expect(sanitizedField.name).toStrictEqual('noLabelBlock');
+                expect(sanitizedField.label).toStrictEqual(false);
+                expect(sanitizedField.type).toStrictEqual('blocks');
+                expect(sanitizedField.labels).toBeUndefined();
+            });
+        });
+        it('should label arrays with plural and singular', async ()=>{
+            const fields = [
+                {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                        {
+                            name: 'itemName',
+                            type: 'text'
+                        }
+                    ]
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            expect(sanitizedField.name).toStrictEqual('items');
+            expect(sanitizedField.label).toStrictEqual('Items');
+            expect(sanitizedField.type).toStrictEqual('array');
+            expect(sanitizedField.labels).toMatchObject({
+                plural: 'Items',
+                singular: 'Item'
+            });
+        });
+        it('should label blocks with plural and singular', async ()=>{
+            const fields = [
+                {
+                    name: 'specialBlock',
+                    type: 'blocks',
+                    blocks: [
+                        {
+                            slug: 'number',
+                            fields: [
+                                {
+                                    name: 'testNumber',
+                                    type: 'number'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            expect(sanitizedField.name).toStrictEqual('specialBlock');
+            expect(sanitizedField.label).toStrictEqual('Special Block');
+            expect(sanitizedField.type).toStrictEqual('blocks');
+            expect(sanitizedField.labels).toMatchObject({
+                plural: 'Special Blocks',
+                singular: 'Special Block'
+            });
+            expect(sanitizedField.blocks[0].fields[0].label).toStrictEqual('Test Number');
+        });
+    });
+    describe('relationships', ()=>{
+        it('should not throw on valid relationship', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Relationship',
+                    type: 'relationship',
+                    label: 'my-relationship',
+                    relationTo: 'some-collection'
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).not.toThrow();
+        });
+        it('should not throw on valid relationship - multiple', async ()=>{
+            const validRelationships = [
+                'some-collection',
+                'another-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Relationship',
+                    type: 'relationship',
+                    label: 'my-relationship',
+                    relationTo: [
+                        'some-collection',
+                        'another-collection'
+                    ]
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).not.toThrow();
+        });
+        it('should not throw on valid relationship inside blocks', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const relationshipBlock = {
+                slug: 'relationshipBlock',
+                fields: [
+                    {
+                        name: 'My Relationship',
+                        type: 'relationship',
+                        label: 'my-relationship',
+                        relationTo: 'some-collection'
+                    }
+                ]
+            };
+            const fields = [
+                {
+                    name: 'layout',
+                    type: 'blocks',
+                    blocks: [
+                        relationshipBlock
+                    ],
+                    label: 'Layout Blocks'
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).not.toThrow();
+        });
+        it('should throw on invalid relationship', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Relationship',
+                    type: 'relationship',
+                    label: 'my-relationship',
+                    relationTo: 'not-valid'
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow(InvalidFieldRelationship);
+        });
+        it('should throw on invalid relationship - multiple', async ()=>{
+            const validRelationships = [
+                'some-collection',
+                'another-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Relationship',
+                    type: 'relationship',
+                    label: 'my-relationship',
+                    relationTo: [
+                        'some-collection',
+                        'not-valid'
+                    ]
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow(InvalidFieldRelationship);
+        });
+        it('should throw on invalid relationship inside blocks', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const relationshipBlock = {
+                slug: 'relationshipBlock',
+                fields: [
+                    {
+                        name: 'My Relationship',
+                        type: 'relationship',
+                        label: 'my-relationship',
+                        relationTo: 'not-valid'
+                    }
+                ]
+            };
+            const fields = [
+                {
+                    name: 'layout',
+                    type: 'blocks',
+                    blocks: [
+                        relationshipBlock
+                    ],
+                    label: 'Layout Blocks'
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow(InvalidFieldRelationship);
+        });
+        it('should throw on empty relationTo array', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Relationship',
+                    type: 'relationship',
+                    label: 'my-relationship',
+                    relationTo: []
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow('has an empty relationTo array');
+        });
+        it('should throw on empty relationTo array for upload field', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const fields = [
+                {
+                    name: 'My Upload',
+                    type: 'upload',
+                    label: 'my-upload',
+                    relationTo: []
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow('has an empty relationTo array');
+        });
+        it('should throw on empty relationTo array inside blocks', async ()=>{
+            const validRelationships = [
+                'some-collection'
+            ];
+            const relationshipBlock = {
+                slug: 'relationshipBlock',
+                fields: [
+                    {
+                        name: 'My Relationship',
+                        type: 'relationship',
+                        label: 'my-relationship',
+                        relationTo: []
+                    }
+                ]
+            };
+            const fields = [
+                {
+                    name: 'layout',
+                    type: 'blocks',
+                    blocks: [
+                        relationshipBlock
+                    ],
+                    label: 'Layout Blocks'
+                }
+            ];
+            await expect(async ()=>{
+                await sanitizeFields({
+                    config,
+                    collectionConfig,
+                    fields,
+                    validRelationships
+                });
+            }).rejects.toThrow('has an empty relationTo array');
+        });
+        it('should defaultValue of checkbox to false if required and undefined', async ()=>{
+            const fields = [
+                {
+                    name: 'My Checkbox',
+                    type: 'checkbox',
+                    required: true
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            expect(sanitizedField.defaultValue).toStrictEqual(false);
+        });
+        it('should return empty field array if no fields', async ()=>{
+            const sanitizedFields = await sanitizeFields({
+                config,
+                collectionConfig,
+                fields: [],
+                validRelationships: []
+            });
+            expect(sanitizedFields).toStrictEqual([]);
+        });
+    });
+    describe('blocks', ()=>{
+        it('should maintain admin.blockName true after sanitization', async ()=>{
+            const fields = [
+                {
+                    name: 'noLabelBlock',
+                    type: 'blocks',
+                    blocks: [
+                        {
+                            slug: 'number',
+                            admin: {
+                                disableBlockName: true
+                            },
+                            fields: [
+                                {
+                                    name: 'testNumber',
+                                    type: 'number'
+                                }
+                            ]
+                        }
+                    ],
+                    label: false
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            const sanitizedBlock = sanitizedField.blocks[0];
+            expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(true);
+        });
+        it('should default admin.disableBlockName to true after sanitization', async ()=>{
+            const fields = [
+                {
+                    name: 'noLabelBlock',
+                    type: 'blocks',
+                    blocks: [
+                        {
+                            slug: 'number',
+                            fields: [
+                                {
+                                    name: 'testNumber',
+                                    type: 'number'
+                                }
+                            ]
+                        }
+                    ],
+                    label: false
+                }
+            ];
+            const sanitizedField = (await sanitizeFields({
+                config,
+                collectionConfig,
+                fields,
+                validRelationships: []
+            }))[0];
+            const sanitizedBlock = sanitizedField.blocks[0];
+            expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined);
+        });
+    });
+});
+
+//# sourceMappingURL=sanitize.spec.js.map

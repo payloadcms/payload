@@ -1,0 +1,1 @@
+{"version":3,"file":"selectiveCache.d.ts","sourceRoot":"","sources":["../../src/utilities/selectiveCache.ts"],"names":[],"mappings":"AAEA,KAAK,WAAW,GAAG,MAAM,CAAA;AAazB;;;;;GAKG;AACH,wBAAgB,cAAc,CAAC,MAAM,SAAS,MAAM,GAAG,WAAW,EAAE,SAAS,EAAE,MAAM;mBAejD,MAAM,OAAO,CAAC,MAAM,CAAC,0BAAiB,OAAO,CAAC,MAAM,CAAC;EAoBxF"}
