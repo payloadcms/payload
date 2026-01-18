@@ -358,3 +358,6 @@ payload.db
 .claude-os/
 .opencode/
 dev-server*.log
+
+# Allow built package distributions for GitHub install
+!packages/*/dist/**
