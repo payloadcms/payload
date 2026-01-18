@@ -1,0 +1,1 @@
+{"version":3,"file":"dashboard.d.ts","sourceRoot":"","sources":["../../../src/admin/views/dashboard.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,gBAAgB,CAAA;AAEpD,oBAAY,UAAU;IACpB,UAAU,gBAAgB;IAC1B,MAAM,YAAY;CACnB;AAED,MAAM,MAAM,iBAAiB,GAAG;IAC9B,GAAG,EAAE,cAAc,CAAA;IACnB,UAAU,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,OAAO,CAAC,CAAA;IACpC,UAAU,EAAE,MAAM,CAAA;CACnB,CAAA"}

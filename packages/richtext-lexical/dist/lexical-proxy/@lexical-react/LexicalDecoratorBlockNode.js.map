@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalDecoratorBlockNode.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalDecoratorBlockNode.ts"],"sourcesContent":["export * from '@lexical/react/LexicalDecoratorBlockNode'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

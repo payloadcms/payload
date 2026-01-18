@@ -1,0 +1,1 @@
+{"version":3,"file":"index.client.d.ts","sourceRoot":"","sources":["../../../src/views/Verify/index.client.tsx"],"names":[],"mappings":"AAKA,KAAK,KAAK,GAAG;IACX,OAAO,EAAE,MAAM,CAAA;IACf,UAAU,EAAE,MAAM,CAAA;CACnB,CAAA;AACD,wBAAgB,gBAAgB,CAAC,EAAE,OAAO,EAAE,UAAU,EAAE,EAAE,KAAK,OAwB9D"}

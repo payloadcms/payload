@@ -1,0 +1,49 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .field-type.textarea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    textarea {
+      @include formInput();
+      overflow-y: auto;
+      resize: vertical;
+      min-height: base(3);
+      height: auto;
+      display: flex;
+    }
+
+    textarea:not(:empty) {
+      field-sizing: content;
+      min-height: calc(var(--rows) * var(--base) + var(--base) * 0.8 + 2px);
+    }
+
+    &.read-only {
+      .textarea-outer {
+        @include readOnly;
+      }
+    }
+  }
+
+  html[data-theme='light'] {
+    .field-type.textarea {
+      &.error {
+        textarea {
+          @include lightInputError;
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .field-type.textarea {
+      &.error {
+        textarea {
+          @include darkInputError;
+        }
+      }
+    }
+  }
+}

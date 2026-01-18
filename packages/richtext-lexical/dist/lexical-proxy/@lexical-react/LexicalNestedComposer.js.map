@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalNestedComposer.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalNestedComposer.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalNestedComposer'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

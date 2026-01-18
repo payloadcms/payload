@@ -1,0 +1,1 @@
+{"version":3,"file":"uploadTimer.d.ts","sourceRoot":"","sources":["../../../src/uploads/fetchAPI-multipart/uploadTimer.ts"],"names":[],"mappings":"AAAA,KAAK,iBAAiB,GAAG,CACvB,OAAO,CAAC,EAAE,MAAM,EAChB,QAAQ,CAAC,EAAE,MAAM,IAAI,KAClB;IACH,KAAK,EAAE,MAAM,IAAI,CAAA;IACjB,GAAG,EAAE,MAAM,OAAO,CAAA;CACnB,CAAA;AAED,eAAO,MAAM,iBAAiB,EAAE,iBAkB/B,CAAA"}

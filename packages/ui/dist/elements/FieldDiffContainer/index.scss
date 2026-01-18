@@ -1,0 +1,45 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .field-diff {
+    &__locale-label {
+      background: var(--theme-elevation-100);
+      border-radius: var(--style-radius-s);
+      padding: calc(var(--base) * 0.2);
+      // border-radius: $style-radius-m;
+      [dir='ltr'] & {
+        margin-right: calc(var(--base) * 0.25);
+      }
+      [dir='rtl'] & {
+        margin-left: calc(var(--base) * 0.25);
+      }
+    }
+
+    &-container {
+      position: relative;
+
+      // Vertical separator line - not needed anymore, as the parent version view container adds a vertical line that spans the entire height of the container.
+      /*
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--left-offset);
+      width: 1px;
+      background-color: var(--theme-elevation-100);
+      transform: translateX(-50%); // Center the line
+    }*/
+    }
+
+    &-content {
+      display: grid;
+      // Need to use 50% 50% so that we can apply overflow-x without the column shrinking to the content width.
+      // Need -base(0.5) to enure the gap is center aligned - this is required when using 50% over 1fr.
+      grid-template-columns: calc(50% - base(0.5)) calc(50% - base(0.5));
+      gap: base(1);
+      background: var(--theme-elevation-50);
+      padding: base(0.5);
+    }
+  }
+}

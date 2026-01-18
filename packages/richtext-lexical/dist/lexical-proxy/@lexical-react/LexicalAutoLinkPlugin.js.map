@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalAutoLinkPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalAutoLinkPlugin.ts"],"sourcesContent":["export * from '@lexical/react/LexicalAutoLinkPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

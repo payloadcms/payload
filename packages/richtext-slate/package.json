@@ -24,23 +24,23 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.tsx",
-      "types": "./src/index.tsx",
-      "default": "./src/index.tsx"
-    },
-    "./client": {
-      "import": "./src/exports/client/index.ts",
-      "types": "./src/exports/client/index.ts",
-      "default": "./src/exports/client/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./rsc": {
-      "import": "./src/exports/server/rsc.ts",
-      "types": "./src/exports/server/rsc.ts",
-      "default": "./src/exports/server/rsc.ts"
+      "import": "./dist/exports/server/rsc.js",
+      "types": "./dist/exports/server/rsc.d.ts",
+      "default": "./dist/exports/server/rsc.js"
+    },
+    "./client": {
+      "import": "./dist/exports/client/index.js",
+      "types": "./dist/exports/client/index.d.ts",
+      "default": "./dist/exports/client/index.js"
     }
   },
-  "main": "./src/index.tsx",
-  "types": "./src/index.tsx",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -100,5 +100,22 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "_originalExports": {
+    ".": {
+      "import": "./src/index.tsx",
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    },
+    "./client": {
+      "import": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/server/rsc.ts",
+      "types": "./src/exports/server/rsc.ts",
+      "default": "./src/exports/server/rsc.ts"
+    }
   }
 }

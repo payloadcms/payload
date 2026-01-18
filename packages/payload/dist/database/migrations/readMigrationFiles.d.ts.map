@@ -1,0 +1,1 @@
+{"version":3,"file":"readMigrationFiles.d.ts","sourceRoot":"","sources":["../../../src/database/migrations/readMigrationFiles.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,gBAAgB,CAAA;AAC7C,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,aAAa,CAAA;AAI5C;;GAEG;AACH,eAAO,MAAM,kBAAkB,iBAE5B;IACD,OAAO,EAAE,OAAO,CAAA;CACjB,KAAG,OAAO,CAAC,SAAS,EAAE,CAyCtB,CAAA"}

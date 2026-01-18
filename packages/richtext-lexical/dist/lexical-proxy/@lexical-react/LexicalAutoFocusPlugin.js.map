@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalAutoFocusPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalAutoFocusPlugin.ts"],"sourcesContent":["export * from '@lexical/react/LexicalAutoFocusPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

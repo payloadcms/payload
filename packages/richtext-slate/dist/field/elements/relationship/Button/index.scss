@@ -1,0 +1,9 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .relationship-rich-text-button {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+}

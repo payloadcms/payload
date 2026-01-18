@@ -1,0 +1,1 @@
+{"version":3,"file":"commands.d.ts","sourceRoot":"","sources":["../../../../../src/features/blocks/client/plugin/commands.ts"],"names":[],"mappings":"AACA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAI7C,OAAO,KAAK,EAAE,kBAAkB,EAAE,MAAM,YAAY,CAAA;AAEpD,eAAO,MAAM,oBAAoB,EAAE,cAAc,CAAC,kBAAkB,CAC7B,CAAA;AAEvC,eAAO,MAAM,2BAA2B,EAAE,cAAc,CAAC,OAAO,CAAC,kBAAkB,CAAC,CACtC,CAAA"}

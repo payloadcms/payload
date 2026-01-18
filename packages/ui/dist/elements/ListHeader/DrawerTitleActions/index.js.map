@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","names":["ListDrawerCreateNewDocButton"],"sources":["../../../../src/elements/ListHeader/DrawerTitleActions/index.tsx"],"sourcesContent":["export { ListDrawerCreateNewDocButton } from './ListDrawerCreateNewDocButton.js'\n"],"mappings":"AAAA,SAASA,4BAA4B,QAAQ","ignoreList":[]}

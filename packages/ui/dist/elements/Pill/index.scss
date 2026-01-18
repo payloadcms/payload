@@ -1,0 +1,182 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .pill {
+    --pill-padding-block-start: 0px;
+    --pill-padding-inline-start: 0px;
+    --pill-padding-block-end: 0px;
+    --pill-padding-inline-end: 0px;
+    font-size: 1rem;
+    line-height: calc(var(--base) * 1.2);
+    display: inline-flex;
+    background: var(--theme-elevation-150);
+    color: var(--theme-elevation-800);
+    border-radius: $style-radius-s;
+    cursor: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 0;
+    align-items: center;
+    flex-shrink: 0;
+    gap: base(0.2);
+    padding: var(--pill-padding-block-start) var(--pill-padding-inline-end)
+      var(--pill-padding-block-end) var(--pill-padding-inline-start);
+    --pill-icon-size: calc(var(--base) * 1.2);
+
+    &--rounded {
+      border-radius: var(--style-radius-l);
+      font-size: 12px;
+    }
+
+    &:active,
+    &:focus:not(:focus-visible) {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    &__icon .icon {
+      flex-shrink: 0;
+      width: var(--pill-icon-size);
+      height: var(--pill-icon-size);
+    }
+
+    &__label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &--has-action {
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    &--is-dragging {
+      cursor: grabbing;
+    }
+
+    &--has-icon {
+      gap: 0;
+      --pill-padding-inline-start: base(0.4);
+      --pill-padding-inline-end: base(0.1);
+
+      svg {
+        display: block;
+      }
+    }
+
+    &--align-icon-left {
+      flex-direction: row-reverse;
+      padding-inline-start: base(0.1);
+      padding-inline-end: base(0.4);
+    }
+
+    &--style-white {
+      background: var(--theme-elevation-0);
+
+      &.pill--has-action {
+        &:hover,
+        &:active {
+          background: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    &--style-always-white {
+      background: var(--theme-elevation-850);
+      color: var(--theme-elevation-0);
+
+      &.pill--has-action {
+        &:hover,
+        &:active {
+          background: var(--theme-elevation-750);
+        }
+      }
+    }
+
+    &--style-light {
+      &.pill--has-action {
+        &:hover,
+        &:active {
+          background: var(--theme-elevation-100);
+        }
+      }
+    }
+
+    &--style-light-gray {
+      background: var(--theme-elevation-100);
+      color: var(--theme-elevation-800);
+    }
+
+    &--style-warning {
+      background: var(--theme-warning-150);
+      color: var(--theme-warning-800);
+    }
+
+    &--style-success {
+      background: var(--theme-success-150);
+      color: var(--theme-success-800);
+    }
+
+    &--style-error {
+      background: var(--theme-error-150);
+      color: var(--theme-error-800);
+    }
+
+    &--style-dark {
+      background: var(--theme-elevation-800);
+      color: var(--theme-elevation-0);
+
+      svg {
+        @include color-svg(var(--theme-elevation-0));
+      }
+
+      &.pill--has-action {
+        &:hover {
+          background: var(--theme-elevation-750);
+        }
+
+        &:active {
+          background: var(--theme-elevation-700);
+        }
+      }
+    }
+
+    &--size-medium {
+      --pill-padding-block-start: calc(var(--base) * 0.2);
+      --pill-padding-inline-end: calc(var(--base) * 0.6);
+      --pill-padding-block-end: calc(var(--base) * 0.2);
+      --pill-padding-inline-start: calc(var(--base) * 0.6);
+    }
+
+    &--size-small {
+      --pill-icon-size: calc(var(--base) * 0.9);
+      --pill-padding-block-start: 0;
+      --pill-padding-inline-end: calc(var(--base) * 0.4);
+      --pill-padding-inline-start: calc(var(--base) * 0.4);
+      --pill-padding-block-end: 0;
+    }
+  }
+
+  html[data-theme='light'] {
+    .pill {
+      &--style-always-white {
+        background: var(--theme-elevation-0);
+        color: var(--theme-elevation-800);
+        border: 1px solid var(--theme-elevation-100);
+
+        &.pill--has-action {
+          &:hover,
+          &:active {
+            background: var(--theme-elevation-100);
+          }
+        }
+      }
+    }
+  }
+}

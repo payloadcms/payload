@@ -41,37 +41,37 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./internal": {
-      "import": "./src/exports/internal.ts",
-      "types": "./src/exports/internal.ts",
-      "default": "./src/exports/internal.ts"
-    },
-    "./shared": {
-      "import": "./src/exports/shared.ts",
-      "types": "./src/exports/shared.ts",
-      "default": "./src/exports/shared.ts"
+      "import": "./dist/exports/internal.js",
+      "types": "./dist/exports/internal.d.ts",
+      "default": "./dist/exports/internal.js"
     },
     "./node": {
-      "import": "./src/exports/node.ts",
-      "types": "./src/exports/node.ts",
-      "default": "./src/exports/node.ts"
+      "import": "./dist/exports/node.js",
+      "types": "./dist/exports/node.d.ts",
+      "default": "./dist/exports/node.js"
+    },
+    "./shared": {
+      "import": "./dist/exports/shared.js",
+      "types": "./dist/exports/shared.d.ts",
+      "default": "./dist/exports/shared.js"
     },
     "./i18n/*": {
-      "import": "./src/exports/i18n/*.ts",
-      "types": "./src/exports/i18n/*.ts",
-      "default": "./src/exports/i18n/*.ts"
+      "import": "./dist/exports/i18n/*.js",
+      "types": "./dist/exports/i18n/*.d.ts",
+      "default": "./dist/exports/i18n/*.js"
     },
     "./__testing__/predefinedMigration": {
-      "import": "./src/__testing__/predefinedMigration.js",
-      "default": "./src/__testing__/predefinedMigration.js"
+      "import": "./dist/__testing__/predefinedMigration.js",
+      "default": "./dist/__testing__/predefinedMigration.js"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
     "payload": "bin.js"
   },
@@ -189,5 +189,36 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
+  },
+  "_originalExports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
+    "./node": {
+      "import": "./src/exports/node.ts",
+      "types": "./src/exports/node.ts",
+      "default": "./src/exports/node.ts"
+    },
+    "./i18n/*": {
+      "import": "./src/exports/i18n/*.ts",
+      "types": "./src/exports/i18n/*.ts",
+      "default": "./src/exports/i18n/*.ts"
+    },
+    "./__testing__/predefinedMigration": {
+      "import": "./src/__testing__/predefinedMigration.js",
+      "default": "./src/__testing__/predefinedMigration.js"
+    }
   }
 }

@@ -1,0 +1,1 @@
+{"version":3,"file":"@lexical-selection.js","names":[],"sources":["../../src/lexical-proxy/@lexical-selection.ts"],"sourcesContent":["export * from '@lexical/selection'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

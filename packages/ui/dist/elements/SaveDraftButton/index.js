@@ -1,0 +1,105 @@
+'use client';
+
+import { jsx as _jsx } from "react/jsx-runtime";
+import { formatAdminURL } from 'payload/shared';
+import React, { useCallback, useRef } from 'react';
+import { useForm, useFormModified } from '../../forms/Form/context.js';
+import { FormSubmit } from '../../forms/Submit/index.js';
+import { useHotkey } from '../../hooks/useHotkey.js';
+import { useConfig } from '../../providers/Config/index.js';
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js';
+import { useEditDepth } from '../../providers/EditDepth/index.js';
+import { useLocale } from '../../providers/Locale/index.js';
+import { useOperation } from '../../providers/Operation/index.js';
+import { useTranslation } from '../../providers/Translation/index.js';
+const baseClass = 'save-draft';
+export function SaveDraftButton(props) {
+  const {
+    config: {
+      routes: {
+        api
+      }
+    }
+  } = useConfig();
+  const {
+    id,
+    collectionSlug,
+    globalSlug,
+    setUnpublishedVersionCount,
+    uploadStatus
+  } = useDocumentInfo();
+  const modified = useFormModified();
+  const {
+    code: locale
+  } = useLocale();
+  const ref = useRef(null);
+  const editDepth = useEditDepth();
+  const {
+    t
+  } = useTranslation();
+  const {
+    submit
+  } = useForm();
+  const operation = useOperation();
+  const disabled = operation === 'update' && !modified || uploadStatus === 'uploading';
+  const saveDraft = useCallback(async () => {
+    if (disabled) {
+      return;
+    }
+    const search = `?locale=${locale}&depth=0&fallback-locale=null&draft=true`;
+    let action;
+    let method = 'POST';
+    if (collectionSlug) {
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`
+      });
+      if (id) {
+        method = 'PATCH';
+      }
+    }
+    if (globalSlug) {
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${globalSlug}${search}`
+      });
+    }
+    await submit({
+      action,
+      method,
+      overrides: {
+        _status: 'draft'
+      },
+      skipValidation: true
+    });
+    setUnpublishedVersionCount(count => count + 1);
+  }, [submit, collectionSlug, globalSlug, api, locale, id, disabled, setUnpublishedVersionCount]);
+  useHotkey({
+    cmdCtrlKey: true,
+    editDepth,
+    keyCodes: ['s']
+  }, e => {
+    if (disabled) {
+      // absorb the event
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    if (ref?.current) {
+      ref.current.click();
+    }
+  });
+  return /*#__PURE__*/_jsx(FormSubmit, {
+    buttonId: "action-save-draft",
+    buttonStyle: "secondary",
+    className: baseClass,
+    disabled: disabled,
+    onClick: () => {
+      return void saveDraft();
+    },
+    ref: ref,
+    size: "medium",
+    type: "button",
+    children: t('version:saveDraft')
+  });
+}
+//# sourceMappingURL=index.js.map

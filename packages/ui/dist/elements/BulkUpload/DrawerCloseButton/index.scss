@@ -1,0 +1,29 @@
+@layer payload-default {
+  .drawer-close-button {
+    --size: calc(var(--base) * 1.2);
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    direction: ltr;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--size);
+    height: var(--size);
+
+    svg {
+      margin: calc(-1 * var(--size));
+      width: calc(var(--size) * 2);
+      height: calc(var(--size) * 2);
+
+      position: relative;
+
+      .stroke {
+        stroke-width: 1px;
+        vector-effect: non-scaling-stroke;
+      }
+    }
+  }
+}

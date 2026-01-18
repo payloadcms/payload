@@ -1,0 +1,1 @@
+{"version":3,"file":"getImportMapToBaseDirPath.d.ts","sourceRoot":"","sources":["../../../../src/bin/generateImportMap/utilities/getImportMapToBaseDirPath.ts"],"names":[],"mappings":"AAEA;;;GAGG;AACH,wBAAgB,yBAAyB,CAAC,EACxC,OAAO,EACP,aAAa,GACd,EAAE;IACD;;OAEG;IACH,OAAO,EAAE,MAAM,CAAA;IACf;;OAEG;IACH,aAAa,EAAE,MAAM,CAAA;CACtB,GAAG,MAAM,CAoBT"}

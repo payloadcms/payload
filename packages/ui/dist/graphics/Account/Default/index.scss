@@ -1,0 +1,64 @@
+@layer payload-default {
+  .graphic-account {
+    vector-effect: non-scaling-stroke;
+    overflow: visible;
+    position: relative;
+
+    &__bg {
+      fill: var(--theme-elevation-50);
+      stroke: var(--theme-elevation-200);
+      stroke-width: 1px;
+    }
+
+    &__head,
+    &__body {
+      fill: var(--theme-elevation-200);
+    }
+
+    &--active {
+      .graphic-account {
+        &__bg {
+          fill: var(--theme-elevation-500);
+          stroke: var(--theme-text);
+        }
+
+        &__head,
+        &__body {
+          fill: var(--theme-text);
+        }
+      }
+    }
+
+    &:hover:not(.graphic-account--active) {
+      .graphic-account {
+        &__bg {
+          fill: var(--theme-elevation-200);
+          stroke: var(--theme-elevation-600);
+        }
+
+        &__head,
+        &__body {
+          fill: var(--theme-elevation-600);
+        }
+      }
+    }
+  }
+
+  [data-theme='light'] {
+    .graphic-account {
+      &--active {
+        .graphic-account {
+          &__bg {
+            fill: var(--theme-elevation-300);
+            stroke: var(--theme-elevation-600);
+          }
+
+          &__head,
+          &__body {
+            fill: var(--theme-elevation-600);
+          }
+        }
+      }
+    }
+  }
+}

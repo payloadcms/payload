@@ -1,0 +1,1 @@
+{"version":3,"file":"access.d.ts","sourceRoot":"","sources":["../../src/query-presets/access.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,EAAE,MAAM,EAAE,MAAM,oBAAoB,CAAA;AACxD,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,mBAAmB,CAAA;AAclD,eAAO,MAAM,SAAS,WAAY,MAAM,KAAG,MAAM,CAAC,SAAS,EAAE,MAAM,CAwFhE,CAAA"}

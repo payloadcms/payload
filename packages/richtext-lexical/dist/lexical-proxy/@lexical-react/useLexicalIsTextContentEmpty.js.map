@@ -1,0 +1,1 @@
+{"version":3,"file":"useLexicalIsTextContentEmpty.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/useLexicalIsTextContentEmpty.ts"],"sourcesContent":["export * from '@lexical/react/useLexicalIsTextContentEmpty'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

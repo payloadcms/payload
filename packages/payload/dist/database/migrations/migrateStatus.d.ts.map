@@ -1,0 +1,1 @@
+{"version":3,"file":"migrateStatus.d.ts","sourceRoot":"","sources":["../../../src/database/migrations/migrateStatus.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,aAAa,CAAA;AAKtD,wBAAsB,aAAa,CAAC,IAAI,EAAE,mBAAmB,GAAG,OAAO,CAAC,IAAI,CAAC,CAkC5E"}

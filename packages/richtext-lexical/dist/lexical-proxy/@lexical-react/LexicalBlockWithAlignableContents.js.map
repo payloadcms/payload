@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalBlockWithAlignableContents.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalBlockWithAlignableContents.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalBlockWithAlignableContents'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

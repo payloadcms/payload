@@ -1,0 +1,1 @@
+{"version":3,"file":"buildCollectionSchema.d.ts","sourceRoot":"","sources":["../../src/models/buildCollectionSchema.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAmB,MAAM,EAAE,MAAM,UAAU,CAAA;AACvD,OAAO,KAAK,EAAE,OAAO,EAAE,yBAAyB,EAAE,MAAM,SAAS,CAAA;AAOjE,eAAO,MAAM,qBAAqB,eACpB,yBAAyB,WAC5B,OAAO,yBAEf,MAoCF,CAAA"}

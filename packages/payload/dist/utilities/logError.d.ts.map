@@ -1,0 +1,1 @@
+{"version":3,"file":"logError.d.ts","sourceRoot":"","sources":["../../src/utilities/logError.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,mBAAmB,CAAA;AAEhD,eAAO,MAAM,QAAQ,qBAAsB;IAAE,GAAG,EAAE,OAAO,CAAC;IAAC,OAAO,EAAE,OAAO,CAAA;CAAE,KAAG,IAyB/E,CAAA"}

@@ -1,0 +1,61 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .collection-edit {
+    --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04) 0%, transparent 100%);
+
+    &__main-wrapper {
+      width: 100%;
+      display: flex;
+    }
+
+    &__main {
+      width: 100%;
+      container-type: inline-size;
+
+      &--popup-open {
+        width: 100%;
+      }
+
+      &--is-live-previewing {
+        width: 40%;
+        position: relative;
+
+        &::after {
+          content: ' ';
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: calc(var(--base) * 2);
+          height: 100%;
+          background: var(--gradient);
+          pointer-events: none;
+          z-index: -1;
+        }
+      }
+    }
+
+    &__form {
+      height: 100%;
+      width: 100%;
+    }
+
+    &__auth {
+      margin-bottom: base(1.6);
+      border-radius: var(--style-radius-s);
+    }
+
+    @include small-break {
+      &__auth {
+        margin-top: 0;
+        margin-bottom: var(--base);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .collection-edit {
+      --gradient: linear-gradient(to left, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+  }
+}

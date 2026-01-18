@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","names":[],"sources":["../../../../../src/features/converters/lexicalToPlaintext/shared/types.ts"],"sourcesContent":["import type { SerializedLexicalNode } from 'lexical'\nexport type SerializedLexicalNodeWithParent = {\n  parent?: SerializedLexicalNode\n} & SerializedLexicalNode\n"],"mappings":"AACA","ignoreList":[]}

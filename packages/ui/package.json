@@ -23,98 +23,93 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/exports/client/index.ts",
-      "types": "./src/exports/client/index.ts",
-      "default": "./src/exports/client/index.ts"
+      "import": "./dist/exports/client/index.js",
+      "types": "./dist/exports/client/index.d.ts",
+      "default": "./dist/exports/client/index.js"
     },
     "./shared": {
-      "import": "./src/exports/shared/index.ts",
-      "types": "./src/exports/shared/index.ts",
-      "default": "./src/exports/shared/index.ts"
+      "import": "./dist/exports/shared/index.js",
+      "types": "./dist/exports/shared/index.d.ts",
+      "default": "./dist/exports/shared/index.js"
+    },
+    "./css": {
+      "import": "./dist/styles.css",
+      "default": "./dist/styles.css"
     },
     "./scss": {
-      "import": "./src/scss/styles.scss",
-      "default": "./src/scss/styles.scss"
-    },
-    "./icons/*": {
-      "import": "./src/icons/*/index.tsx",
-      "types": "./src/icons/*/index.tsx",
-      "default": "./src/icons/*/index.tsx"
-    },
-    "./elements/*": {
-      "import": "./src/elements/*/index.tsx",
-      "types": "./src/elements/*/index.tsx",
-      "default": "./src/elements/*/index.tsx"
-    },
-    "./elements/RenderServerComponent": {
-      "import": "./src/elements/RenderServerComponent/index.tsx",
-      "types": "./src/elements/RenderServerComponent/index.tsx",
-      "default": "./src/elements/RenderServerComponent/index.tsx"
+      "import": "./dist/scss/styles.scss",
+      "default": "./dist/scss/styles.scss"
     },
     "./rsc": {
-      "import": "./src/exports/rsc/index.ts",
-      "types": "./src/exports/rsc/index.ts",
-      "default": "./src/exports/rsc/index.ts"
+      "import": "./dist/exports/rsc/index.js",
+      "types": "./dist/exports/rsc/index.d.ts",
+      "default": "./dist/exports/rsc/index.js"
     },
-    "./utilities/buildFormState": {
-      "import": "./src/utilities/buildFormState.ts",
-      "types": "./src/utilities/buildFormState.ts",
-      "default": "./src/utilities/buildFormState.ts"
+    "./scss/app.scss": "./dist/scss/app.scss",
+    "./styles.css": "./dist/styles.css",
+    "./assets": {
+      "import": "./dist/assets/index.js",
+      "types": "./dist/assets/index.d.ts",
+      "default": "./dist/assets/index.js"
     },
-    "./utilities/buildTableState": {
-      "import": "./src/utilities/buildTableState.ts",
-      "types": "./src/utilities/buildTableState.ts",
-      "default": "./src/utilities/buildTableState.ts"
+    "./elements/RenderServerComponent": {
+      "import": "./dist/elements/RenderServerComponent/index.js",
+      "types": "./dist/elements/RenderServerComponent/index.d.ts",
+      "default": "./dist/elements/RenderServerComponent/index.js"
     },
-    "./utilities/getFolderResultsComponentAndData": {
-      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
-      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
-      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
+    "./elements/*": {
+      "import": "./dist/elements/*/index.js",
+      "types": "./dist/elements/*/index.d.ts",
+      "default": "./dist/elements/*/index.js"
     },
-    "./utilities/getClientSchemaMap": {
-      "import": "./src/utilities/getClientSchemaMap.ts",
-      "types": "./src/utilities/getClientSchemaMap.ts",
-      "default": "./src/utilities/getClientSchemaMap.ts"
-    },
-    "./utilities/getSchemaMap": {
-      "import": "./src/utilities/getSchemaMap.ts",
-      "types": "./src/utilities/getSchemaMap.ts",
-      "default": "./src/utilities/getSchemaMap.ts"
-    },
-    "./utilities/schedulePublishHandler": {
-      "import": "./src/utilities/schedulePublishHandler.ts",
-      "types": "./src/utilities/schedulePublishHandler.ts",
-      "default": "./src/utilities/schedulePublishHandler.ts"
-    },
-    "./utilities/getClientConfig": {
-      "import": "./src/utilities/getClientConfig.ts",
-      "types": "./src/utilities/getClientConfig.ts",
-      "default": "./src/utilities/getClientConfig.ts"
-    },
-    "./utilities/buildFieldSchemaMap/traverseFields": {
-      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
-      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
+    "./fields/*": {
+      "import": "./dist/fields/*/index.js",
+      "types": "./dist/fields/*/index.d.ts",
+      "default": "./dist/fields/*/index.js"
     },
     "./forms/fieldSchemasToFormState": {
-      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
+      "import": "./dist/forms/fieldSchemasToFormState/index.js",
+      "types": "./dist/forms/fieldSchemasToFormState/index.d.ts",
+      "default": "./dist/forms/fieldSchemasToFormState/index.js"
     },
     "./forms/renderField": {
-      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
-      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
+      "import": "./dist/forms/fieldSchemasToFormState/renderField.js",
+      "types": "./dist/forms/fieldSchemasToFormState/renderField.d.ts",
+      "default": "./dist/forms/fieldSchemasToFormState/renderField.js"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
-    "./assets": {
-      "import": "./src/assets/index.ts",
-      "types": "./src/assets/index.ts",
-      "default": "./src/assets/index.ts"
+    "./forms/*": {
+      "import": "./dist/forms/*/index.js",
+      "types": "./dist/forms/*/index.d.ts",
+      "default": "./dist/forms/*/index.js"
+    },
+    "./graphics/*": {
+      "import": "./dist/graphics/*/index.js",
+      "types": "./dist/graphics/*/index.d.ts",
+      "default": "./dist/graphics/*/index.js"
+    },
+    "./hooks/*": {
+      "import": "./dist/hooks/*.js",
+      "types": "./dist/hooks/*.d.ts",
+      "default": "./dist/hooks/*.js"
+    },
+    "./icons/*": {
+      "import": "./dist/icons/*/index.js",
+      "types": "./dist/icons/*/index.d.ts",
+      "default": "./dist/icons/*/index.js"
+    },
+    "./providers/*": {
+      "import": "./dist/providers/*/index.js",
+      "types": "./dist/providers/*/index.d.ts",
+      "default": "./dist/providers/*/index.js"
+    },
+    "./utilities/*": {
+      "import": "./dist/utilities/*.js",
+      "types": "./dist/utilities/*.d.ts",
+      "default": "./dist/utilities/*.js"
     }
   },
-  "main": "./src/exports/client/index.ts",
-  "types": "./src/exports/client/index.ts",
+  "main": "./dist/exports/client/index.js",
+  "types": "./dist/exports/client/index.d.ts",
   "files": [
     "dist"
   ],
@@ -276,5 +271,97 @@
     },
     "main": "./dist/exports/client/index.js",
     "types": "./dist/exports/client/index.d.ts"
+  },
+  "_originalExports": {
+    ".": {
+      "import": "./src/exports/client/index.ts",
+      "types": "./src/exports/client/index.ts",
+      "default": "./src/exports/client/index.ts"
+    },
+    "./shared": {
+      "import": "./src/exports/shared/index.ts",
+      "types": "./src/exports/shared/index.ts",
+      "default": "./src/exports/shared/index.ts"
+    },
+    "./scss": {
+      "import": "./src/scss/styles.scss",
+      "default": "./src/scss/styles.scss"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx"
+    },
+    "./elements/RenderServerComponent": {
+      "import": "./src/elements/RenderServerComponent/index.tsx",
+      "types": "./src/elements/RenderServerComponent/index.tsx",
+      "default": "./src/elements/RenderServerComponent/index.tsx"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc/index.ts",
+      "types": "./src/exports/rsc/index.ts",
+      "default": "./src/exports/rsc/index.ts"
+    },
+    "./utilities/buildFormState": {
+      "import": "./src/utilities/buildFormState.ts",
+      "types": "./src/utilities/buildFormState.ts",
+      "default": "./src/utilities/buildFormState.ts"
+    },
+    "./utilities/buildTableState": {
+      "import": "./src/utilities/buildTableState.ts",
+      "types": "./src/utilities/buildTableState.ts",
+      "default": "./src/utilities/buildTableState.ts"
+    },
+    "./utilities/getFolderResultsComponentAndData": {
+      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
+    },
+    "./utilities/getClientSchemaMap": {
+      "import": "./src/utilities/getClientSchemaMap.ts",
+      "types": "./src/utilities/getClientSchemaMap.ts",
+      "default": "./src/utilities/getClientSchemaMap.ts"
+    },
+    "./utilities/getSchemaMap": {
+      "import": "./src/utilities/getSchemaMap.ts",
+      "types": "./src/utilities/getSchemaMap.ts",
+      "default": "./src/utilities/getSchemaMap.ts"
+    },
+    "./utilities/schedulePublishHandler": {
+      "import": "./src/utilities/schedulePublishHandler.ts",
+      "types": "./src/utilities/schedulePublishHandler.ts",
+      "default": "./src/utilities/schedulePublishHandler.ts"
+    },
+    "./utilities/getClientConfig": {
+      "import": "./src/utilities/getClientConfig.ts",
+      "types": "./src/utilities/getClientConfig.ts",
+      "default": "./src/utilities/getClientConfig.ts"
+    },
+    "./utilities/buildFieldSchemaMap/traverseFields": {
+      "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
+      "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
+    },
+    "./forms/fieldSchemasToFormState": {
+      "import": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/index.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/index.tsx"
+    },
+    "./forms/renderField": {
+      "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
+      "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
+    },
+    "./scss/app.scss": "./src/scss/app.scss",
+    "./assets": {
+      "import": "./src/assets/index.ts",
+      "types": "./src/assets/index.ts",
+      "default": "./src/assets/index.ts"
+    }
   }
 }

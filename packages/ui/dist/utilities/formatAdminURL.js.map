@@ -1,0 +1,1 @@
+{"version":3,"file":"formatAdminURL.js","names":["formatAdminURL"],"sources":["../../src/utilities/formatAdminURL.ts"],"sourcesContent":["/** Will read the `routes.admin` config and appropriately handle `\"/\"` admin paths */\nexport { formatAdminURL } from 'payload/shared'\n"],"mappings":"AAAA,qFACA,SAASA,cAAc,QAAQ","ignoreList":[]}

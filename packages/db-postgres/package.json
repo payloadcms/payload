@@ -21,43 +21,43 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./types": {
-      "import": "./src/exports/types-deprecated.ts",
-      "types": "./src/exports/types-deprecated.ts",
-      "default": "./src/exports/types-deprecated.ts"
+      "import": "./dist/exports/types-deprecated.js",
+      "types": "./dist/exports/types-deprecated.d.ts",
+      "default": "./dist/exports/types-deprecated.js"
     },
     "./migration-utils": {
-      "import": "./src/exports/migration-utils.ts",
-      "types": "./src/exports/migration-utils.ts",
-      "default": "./src/exports/migration-utils.ts"
+      "import": "./dist/exports/migration-utils.js",
+      "types": "./dist/exports/migration-utils.d.ts",
+      "default": "./dist/exports/migration-utils.js"
     },
     "./drizzle": {
-      "import": "./src/drizzle-proxy/index.ts",
-      "types": "./src/drizzle-proxy/index.ts",
-      "default": "./src/drizzle-proxy/index.ts"
+      "import": "./dist/drizzle-proxy/index.js",
+      "types": "./dist/drizzle-proxy/index.d.ts",
+      "default": "./dist/drizzle-proxy/index.js"
     },
     "./drizzle/pg-core": {
-      "import": "./src/drizzle-proxy/pg-core.ts",
-      "types": "./src/drizzle-proxy/pg-core.ts",
-      "default": "./src/drizzle-proxy/pg-core.ts"
+      "import": "./dist/drizzle-proxy/pg-core.js",
+      "types": "./dist/drizzle-proxy/pg-core.d.ts",
+      "default": "./dist/drizzle-proxy/pg-core.js"
     },
     "./drizzle/node-postgres": {
-      "import": "./src/drizzle-proxy/node-postgres.ts",
-      "types": "./src/drizzle-proxy/node-postgres.ts",
-      "default": "./src/drizzle-proxy/node-postgres.ts"
+      "import": "./dist/drizzle-proxy/node-postgres.js",
+      "types": "./dist/drizzle-proxy/node-postgres.d.ts",
+      "default": "./dist/drizzle-proxy/node-postgres.js"
     },
     "./drizzle/relations": {
-      "import": "./src/drizzle-proxy/relations.ts",
-      "types": "./src/drizzle-proxy/relations.ts",
-      "default": "./src/drizzle-proxy/relations.ts"
+      "import": "./dist/drizzle-proxy/relations.js",
+      "types": "./dist/drizzle-proxy/relations.d.ts",
+      "default": "./dist/drizzle-proxy/relations.js"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "mock.js"
@@ -134,5 +134,42 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "_originalExports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts",
+      "default": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/pg-core": {
+      "import": "./src/drizzle-proxy/pg-core.ts",
+      "types": "./src/drizzle-proxy/pg-core.ts",
+      "default": "./src/drizzle-proxy/pg-core.ts"
+    },
+    "./drizzle/node-postgres": {
+      "import": "./src/drizzle-proxy/node-postgres.ts",
+      "types": "./src/drizzle-proxy/node-postgres.ts",
+      "default": "./src/drizzle-proxy/node-postgres.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
+    }
   }
 }

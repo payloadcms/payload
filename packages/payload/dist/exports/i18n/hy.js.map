@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/hy.ts"],"sourcesContent":["export { hy } from '@payloadcms/translations/languages/hy'\n"],"names":["hy"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

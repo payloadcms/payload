@@ -1,0 +1,1 @@
+{"version":3,"file":"dissasociateAfterDelete.d.ts","sourceRoot":"","sources":["../../../src/folders/hooks/dissasociateAfterDelete.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,yBAAyB,EAAE,MAAM,gBAAgB,CAAA;AAE/D,KAAK,IAAI,GAAG;IACV,eAAe,EAAE,MAAM,EAAE,CAAA;IACzB,eAAe,EAAE,MAAM,CAAA;CACxB,CAAA;AACD,eAAO,MAAM,uBAAuB,0CAGjC,IAAI,KAAG,yBAiBT,CAAA"}

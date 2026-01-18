@@ -1,0 +1,39 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .popup-button {
+    height: 100%;
+    color: currentColor;
+    padding: 0;
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+    border: 0;
+    cursor: pointer;
+    display: inline-flex;
+
+    &--background {
+      background: transparent;
+    }
+
+    &--size-xsmall {
+      padding: base(0.1);
+    }
+
+    &--size-small {
+      padding: base(0.2);
+    }
+
+    &--size-medium {
+      padding: base(0.3);
+    }
+
+    &--size-large {
+      padding: base(0.4);
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+    }
+  }
+}

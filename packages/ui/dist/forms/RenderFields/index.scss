@@ -1,0 +1,65 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  // Positioned field-type__wrap is needed for correct positioning of field tooltips.
+  // This is set outside of .render-fields, so that manually rendered fields (e.g. in Auth/index.tsx)
+  // outside RenderFields also receive this styling.
+  .field-type__wrap {
+    position: relative;
+  }
+
+  .render-fields {
+    --spacing-field: var(--base);
+
+    &--margins-small {
+      --spacing-field: var(--base);
+    }
+
+    &--margins-none {
+      --spacing-field: 0;
+    }
+
+    & > .field-type {
+      margin-bottom: var(--spacing-field);
+      position: relative;
+
+      &[type='hidden'] {
+        margin-bottom: 0;
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+
+    // at the top-level, add extra margins for the following field types
+    &:not(.render-fields--margins-small) {
+      & > .field-type {
+        &.group-field,
+        &.blocks-field,
+        &.array-field,
+        &.collapsible-field,
+        &.rich-text {
+          margin-top: calc(var(--spacing-field) * 2);
+          margin-bottom: calc(var(--spacing-field) * 2);
+
+          &:first-child {
+            margin-top: 0;
+          }
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    @include small-break {
+      --spacing-field: calc(var(--base) / 2);
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"getLocalI18n.d.ts","sourceRoot":"","sources":["../../src/translations/getLocalI18n.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,0BAA0B,CAAA;AAIjE,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,oBAAoB,CAAA;AAEzD,eAAO,MAAM,YAAY,0BAGtB;IACD,MAAM,EAAE,eAAe,CAAA;IACvB,QAAQ,EAAE,iBAAiB,CAAA;CAC5B,qDAKG,CAAA"}

@@ -1,0 +1,36 @@
+import { genImportMapIterateFields } from './iterateFields.js';
+export function iterateGlobals({ addToImportMap, baseDir, config, globals, importMap, imports }) {
+    for (const global of globals){
+        genImportMapIterateFields({
+            addToImportMap,
+            baseDir,
+            config,
+            fields: global.fields,
+            importMap,
+            imports
+        });
+        addToImportMap(global.admin?.components?.elements?.beforeDocumentControls);
+        addToImportMap(global.admin?.components?.elements?.Description);
+        addToImportMap(global.admin?.components?.elements?.PreviewButton);
+        addToImportMap(global.admin?.components?.elements?.PublishButton);
+        addToImportMap(global.admin?.components?.elements?.SaveButton);
+        addToImportMap(global.admin?.components?.elements?.SaveDraftButton);
+        addToImportMap(global.admin?.components?.elements?.Status);
+        if (global.admin?.components?.views?.edit) {
+            for (const editViewConfig of Object.values(global.admin?.components?.views?.edit)){
+                if ('Component' in editViewConfig) {
+                    addToImportMap(editViewConfig?.Component);
+                }
+                if ('actions' in editViewConfig) {
+                    addToImportMap(editViewConfig?.actions);
+                }
+                if ('tab' in editViewConfig) {
+                    addToImportMap(editViewConfig?.tab?.Component);
+                    addToImportMap(editViewConfig?.tab?.Pill);
+                }
+            }
+        }
+    }
+}
+
+//# sourceMappingURL=iterateGlobals.js.map

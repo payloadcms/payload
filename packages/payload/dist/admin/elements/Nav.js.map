@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/admin/elements/Nav.ts"],"sourcesContent":["export type NavPreferences = {\n  groups: NavGroupPreferences\n  open: boolean\n}\n\nexport type NavGroupPreferences = {\n  [key: string]: {\n    open: boolean\n  }\n}\n"],"names":[],"mappings":"AAKA,WAIC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"extractPropsFromJSXPropsString.d.ts","sourceRoot":"","sources":["../../../src/utilities/jsx/extractPropsFromJSXPropsString.ts"],"names":[],"mappings":"AAEA;;;;;;;GAOG;AACH,wBAAgB,8BAA8B,CAAC,EAC7C,WAAW,GACZ,EAAE;IACD,WAAW,EAAE,MAAM,CAAA;CACpB,GAAG,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC,CAmCtB"}

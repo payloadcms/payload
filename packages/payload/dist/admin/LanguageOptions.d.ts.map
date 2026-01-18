@@ -1,0 +1,1 @@
+{"version":3,"file":"LanguageOptions.d.ts","sourceRoot":"","sources":["../../src/admin/LanguageOptions.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,iBAAiB,EAAE,MAAM,0BAA0B,CAAA;AAEjE,MAAM,MAAM,eAAe,GAAG;IAC5B,KAAK,EAAE,MAAM,CAAA;IACb,KAAK,EAAE,iBAAiB,CAAA;CACzB,EAAE,CAAA"}

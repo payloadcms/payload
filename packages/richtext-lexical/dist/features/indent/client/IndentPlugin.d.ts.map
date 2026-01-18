@@ -1,0 +1,1 @@
+{"version":3,"file":"IndentPlugin.d.ts","sourceRoot":"","sources":["../../../../src/features/indent/client/IndentPlugin.tsx"],"names":[],"mappings":"AAiBA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,sBAAsB,CAAA;AAC3D,OAAO,KAAK,EAAE,kBAAkB,EAAE,MAAM,oBAAoB,CAAA;AAE5D,eAAO,MAAM,YAAY,EAAE,eAAe,CAAC,kBAAkB,CAmE5D,CAAA"}

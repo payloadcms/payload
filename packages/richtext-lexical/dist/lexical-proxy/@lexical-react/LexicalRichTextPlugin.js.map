@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalRichTextPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalRichTextPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalRichTextPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

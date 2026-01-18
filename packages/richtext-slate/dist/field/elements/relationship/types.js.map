@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../src/field/elements/relationship/types.ts"],"sourcesContent":["import type { Element } from 'slate'\n\nexport type RelationshipElementType = {\n  relationTo: string\n  value: {\n    id: number | string\n  } | null\n} & Element\n"],"names":[],"mappings":"AAEA,WAKW"}

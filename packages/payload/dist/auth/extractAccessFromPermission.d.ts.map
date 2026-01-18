@@ -1,0 +1,1 @@
+{"version":3,"file":"extractAccessFromPermission.d.ts","sourceRoot":"","sources":["../../src/auth/extractAccessFromPermission.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,oBAAoB,CAAA;AACtD,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,YAAY,CAAA;AAE5C,eAAO,MAAM,2BAA2B,kBAAmB,OAAO,GAAG,UAAU,KAAG,YAajF,CAAA"}

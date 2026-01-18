@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalTypeaheadMenuPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalTypeaheadMenuPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalTypeaheadMenuPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

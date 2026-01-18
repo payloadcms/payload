@@ -1,0 +1,17 @@
+.icon--dots {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  height: 2rem;
+  width: 2rem;
+
+  > div {
+    width: 3px;
+    height: 3px;
+    border-radius: 100%;
+    background-color: currentColor;
+  }
+}

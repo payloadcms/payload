@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/nb.ts"],"sourcesContent":["export { nb } from '@payloadcms/translations/languages/nb'\n"],"names":["nb"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

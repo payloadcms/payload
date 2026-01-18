@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/CopyToClipboard/index.tsx"],"names":[],"mappings":"AACA,OAAO,KAAmB,MAAM,OAAO,CAAA;AAKvC,OAAO,cAAc,CAAA;AAIrB,MAAM,MAAM,KAAK,GAAG;IAClB,cAAc,CAAC,EAAE,MAAM,CAAA;IACvB,cAAc,CAAC,EAAE,MAAM,CAAA;IACvB,KAAK,CAAC,EAAE,MAAM,CAAA;CACf,CAAA;AAED,eAAO,MAAM,eAAe,EAAE,KAAK,CAAC,EAAE,CAAC,KAAK,CAiC3C,CAAA"}

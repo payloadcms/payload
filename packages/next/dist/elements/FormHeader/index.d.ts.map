@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/FormHeader/index.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAA;AAEzB,OAAO,cAAc,CAAA;AAIrB,KAAK,KAAK,GAAG;IACX,WAAW,CAAC,EAAE,KAAK,CAAC,SAAS,GAAG,MAAM,CAAA;IACtC,OAAO,EAAE,MAAM,CAAA;CAChB,CAAA;AACD,wBAAgB,UAAU,CAAC,EAAE,WAAW,EAAE,OAAO,EAAE,EAAE,KAAK,qBAWzD"}

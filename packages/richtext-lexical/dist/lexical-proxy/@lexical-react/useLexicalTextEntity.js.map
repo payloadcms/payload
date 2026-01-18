@@ -1,0 +1,1 @@
+{"version":3,"file":"useLexicalTextEntity.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/useLexicalTextEntity.ts"],"sourcesContent":["export * from '@lexical/react/useLexicalTextEntity'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

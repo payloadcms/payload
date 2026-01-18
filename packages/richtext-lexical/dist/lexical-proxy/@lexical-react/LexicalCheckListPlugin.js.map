@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalCheckListPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalCheckListPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalCheckListPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/uk.ts"],"sourcesContent":["export { uk } from '@payloadcms/translations/languages/uk'\n"],"names":["uk"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/ro.ts"],"sourcesContent":["export { ro } from '@payloadcms/translations/languages/ro'\n"],"names":["ro"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

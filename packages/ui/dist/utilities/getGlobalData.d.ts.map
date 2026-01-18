@@ -1,0 +1,1 @@
+{"version":3,"file":"getGlobalData.d.ts","sourceRoot":"","sources":["../../src/utilities/getGlobalData.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,UAAU,EAAE,cAAc,EAAa,MAAM,SAAS,CAAA;AAIpE,wBAAsB,aAAa,CAAC,GAAG,EAAE,cAAc;UAU7C;QAAE,SAAS,EAAE,OAAO,CAAC;QAAC,aAAa,EAAE,MAAM,CAAC;QAAC,YAAY,EAAE,UAAU,GAAG,MAAM,GAAG,MAAM,CAAA;KAAE;mBAChF,MAAM;UACf,MAAM;KAgEf"}

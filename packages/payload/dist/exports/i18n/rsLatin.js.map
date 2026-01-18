@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/rsLatin.ts"],"sourcesContent":["export { rsLatin } from '@payloadcms/translations/languages/rsLatin'\n"],"names":["rsLatin"],"mappings":"AAAA,SAASA,OAAO,QAAQ,6CAA4C"}

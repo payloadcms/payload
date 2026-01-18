@@ -1,0 +1,1 @@
+{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../../../src/features/converters/lexicalToPlaintext/shared/types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,qBAAqB,EAAE,MAAM,SAAS,CAAA;AACpD,MAAM,MAAM,+BAA+B,GAAG;IAC5C,MAAM,CAAC,EAAE,qBAAqB,CAAA;CAC/B,GAAG,qBAAqB,CAAA"}

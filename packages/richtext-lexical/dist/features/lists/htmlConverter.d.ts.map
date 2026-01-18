@@ -1,0 +1,1 @@
+{"version":3,"file":"htmlConverter.d.ts","sourceRoot":"","sources":["../../../src/features/lists/htmlConverter.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,2DAA2D,CAAA;AAC9F,OAAO,KAAK,EAAE,sBAAsB,EAAE,kBAAkB,EAAE,MAAM,mBAAmB,CAAA;AAInF,eAAO,MAAM,iBAAiB,EAAE,aAAa,CAAC,kBAAkB,CA8B/D,CAAA;AAED,eAAO,MAAM,qBAAqB,EAAE,aAAa,CAAC,sBAAsB,CAyDvE,CAAA"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"defaultAccess.d.ts","sourceRoot":"","sources":["../../src/auth/defaultAccess.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,mBAAmB,CAAA;AAEvD,eAAO,MAAM,aAAa,sBAAuB;IAAE,GAAG,EAAE,cAAc,CAAA;CAAE,KAAG,OAAwB,CAAA"}

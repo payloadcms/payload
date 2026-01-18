@@ -1,0 +1,1 @@
+{"version":3,"file":"isPathMatchingRoute.d.ts","sourceRoot":"","sources":["../../../src/views/Root/isPathMatchingRoute.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,mBAAmB,gEAM7B;IACD,YAAY,EAAE,MAAM,CAAA;IACpB,KAAK,CAAC,EAAE,OAAO,CAAA;IACf,IAAI,CAAC,EAAE,MAAM,CAAA;IACb,SAAS,CAAC,EAAE,OAAO,CAAA;IACnB,MAAM,CAAC,EAAE,OAAO,CAAA;CACjB,YAyBA,CAAA"}

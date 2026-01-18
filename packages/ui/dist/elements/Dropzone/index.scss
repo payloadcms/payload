@@ -1,0 +1,43 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: calc(var(--base) * 0.9) var(--base);
+    background: transparent;
+    border: 1px dotted var(--theme-elevation-400);
+    border-radius: var(--style-radius-s);
+    height: 100%;
+    width: 100%;
+    box-shadow: 0 0 0 0 transparent;
+    transition: all 100ms cubic-bezier(0, 0.2, 0.2, 1);
+
+    .btn {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    &.dragging {
+      border-color: var(--theme-success-500);
+      background: var(--theme-success-150);
+      @include shadow-m;
+
+      * {
+        pointer-events: none;
+      }
+    }
+
+    @include mid-break {
+      display: block;
+      text-align: center;
+    }
+
+    &.dropzoneStyle--none {
+      all: unset;
+    }
+  }
+}

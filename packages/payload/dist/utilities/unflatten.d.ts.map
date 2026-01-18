@@ -1,0 +1,1 @@
+{"version":3,"file":"unflatten.d.ts","sourceRoot":"","sources":["../../src/utilities/unflatten.ts"],"names":[],"mappings":"AA2BA,UAAU,IAAI;IACZ,SAAS,CAAC,EAAE,MAAM,CAAA;IAClB,MAAM,CAAC,EAAE,GAAG,CAAA;IACZ,SAAS,CAAC,EAAE,OAAO,CAAA;IACnB,SAAS,CAAC,EAAE,OAAO,CAAA;CACpB;AAED,eAAO,MAAM,SAAS,WAAY,GAAG,SAAS,IAAI,QA0DjD,CAAA"}

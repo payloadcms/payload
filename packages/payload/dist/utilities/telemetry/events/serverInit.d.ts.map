@@ -1,0 +1,1 @@
+{"version":3,"file":"serverInit.d.ts","sourceRoot":"","sources":["../../../../src/utilities/telemetry/events/serverInit.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,mBAAmB,CAAA;AAIhD,MAAM,MAAM,eAAe,GAAG;IAC5B,IAAI,EAAE,aAAa,CAAA;CACpB,CAAA;AAED,eAAO,MAAM,UAAU,YAAa,OAAO,KAAG,IAQ7C,CAAA"}

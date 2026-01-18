@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/folders/constants.ts"],"sourcesContent":["export const foldersSlug = 'payload-folders'\nexport const parentFolderFieldName = 'folder'\n"],"names":["foldersSlug","parentFolderFieldName"],"mappings":"AAAA,OAAO,MAAMA,cAAc,kBAAiB;AAC5C,OAAO,MAAMC,wBAAwB,SAAQ"}

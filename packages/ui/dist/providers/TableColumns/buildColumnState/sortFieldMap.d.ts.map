@@ -1,0 +1,1 @@
+{"version":3,"file":"sortFieldMap.d.ts","sourceRoot":"","sources":["../../../../src/providers/TableColumns/buildColumnState/sortFieldMap.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,gBAAgB,EAAE,KAAK,EAAE,MAAM,SAAS,CAAA;AAMnE,wBAAgB,YAAY,CAAC,CAAC,SAAS,WAAW,GAAG,KAAK,EACxD,QAAQ,EAAE,CAAC,EAAE,EACb,MAAM,EAAE,gBAAgB,EAAE,GACzB,CAAC,EAAE,CAmBL"}

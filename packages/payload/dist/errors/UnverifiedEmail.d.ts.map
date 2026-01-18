@@ -1,0 +1,1 @@
+{"version":3,"file":"UnverifiedEmail.d.ts","sourceRoot":"","sources":["../../src/errors/UnverifiedEmail.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,0BAA0B,CAAA;AAKzD,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,eAAgB,SAAQ,QAAQ;gBAC/B,EAAE,CAAC,EAAE,EAAE;QAAE,CAAC,CAAC,EAAE,SAAS,CAAA;KAAE;CAMrC"}

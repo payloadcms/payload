@@ -21,28 +21,28 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./postgres": {
-      "import": "./src/exports/postgres.ts",
-      "types": "./src/exports/postgres.ts",
-      "default": "./src/exports/postgres.ts"
+      "import": "./dist/exports/postgres.js",
+      "types": "./dist/exports/postgres.d.ts",
+      "default": "./dist/exports/postgres.js"
     },
     "./sqlite": {
-      "import": "./src/exports/sqlite.ts",
-      "types": "./src/exports/sqlite.ts",
-      "default": "./src/exports/sqlite.ts"
+      "import": "./dist/exports/sqlite.js",
+      "types": "./dist/exports/sqlite.d.ts",
+      "default": "./dist/exports/sqlite.js"
     },
     "./types": {
-      "import": "./src/exports/types-deprecated.ts",
-      "types": "./src/exports/types-deprecated.ts",
-      "default": "./src/exports/types-deprecated.ts"
+      "import": "./dist/exports/types-deprecated.js",
+      "types": "./dist/exports/types-deprecated.d.ts",
+      "default": "./dist/exports/types-deprecated.js"
     }
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "mock.js"
@@ -99,5 +99,27 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "_originalExports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./postgres": {
+      "import": "./src/exports/postgres.ts",
+      "types": "./src/exports/postgres.ts",
+      "default": "./src/exports/postgres.ts"
+    },
+    "./sqlite": {
+      "import": "./src/exports/sqlite.ts",
+      "types": "./src/exports/sqlite.ts",
+      "default": "./src/exports/sqlite.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts",
+      "default": "./src/exports/types-deprecated.ts"
+    }
   }
 }

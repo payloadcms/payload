@@ -1,0 +1,1 @@
+{"version":3,"file":"getPreferences.d.ts","sourceRoot":"","sources":["../../src/utilities/getPreferences.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,qBAAqB,EAAE,OAAO,EAAE,MAAM,SAAS,CAAA;AAI7D,eAAO,MAAM,cAAc,GAClB,CAAC,OACD,MAAM,WACF,OAAO,UACR,qBAAqB,YACnB,MAAM,KACf,OAAO,CAAC;IAAE,EAAE,EAAE,qBAAqB,CAAC;IAAC,KAAK,EAAE,CAAC,CAAA;CAAE,CA+BnD,CAAA"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalCollaborationContext.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalCollaborationContext.ts"],"sourcesContent":["export * from '@lexical/react/LexicalCollaborationContext'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

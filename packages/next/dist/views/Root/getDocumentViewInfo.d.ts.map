@@ -1,0 +1,1 @@
+{"version":3,"file":"getDocumentViewInfo.d.ts","sourceRoot":"","sources":["../../../src/views/Root/getDocumentViewInfo.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,oBAAoB,EAAE,SAAS,EAAE,MAAM,SAAS,CAAA;AAE9D,wBAAgB,mBAAmB,CAAC,QAAQ,EAAE,MAAM,EAAE,GAAG;IACvD,mBAAmB,CAAC,EAAE,oBAAoB,CAAA;IAC1C,QAAQ,EAAE,SAAS,CAAA;CACpB,CA4BA"}

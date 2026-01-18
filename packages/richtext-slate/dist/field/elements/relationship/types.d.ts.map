@@ -1,0 +1,1 @@
+{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../../src/field/elements/relationship/types.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,OAAO,CAAA;AAEpC,MAAM,MAAM,uBAAuB,GAAG;IACpC,UAAU,EAAE,MAAM,CAAA;IAClB,KAAK,EAAE;QACL,EAAE,EAAE,MAAM,GAAG,MAAM,CAAA;KACpB,GAAG,IAAI,CAAA;CACT,GAAG,OAAO,CAAA"}

@@ -1,0 +1,84 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .doc-drawer {
+    &__header {
+      width: 100%;
+      margin-top: calc(var(--base) * 2);
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.5);
+      border-bottom: 1px solid var(--theme-elevation-100);
+      padding-bottom: var(--base);
+    }
+
+    &__header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    &__header-text {
+      margin: 0;
+    }
+
+    &__header-toggler {
+      background: transparent;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+
+      &:focus,
+      &:focus-within {
+        outline: none;
+      }
+
+      &:disabled {
+        pointer-events: none;
+      }
+    }
+
+    &__header-close {
+      border: 0;
+      background-color: transparent;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+      width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
+
+      svg {
+        width: calc(var(--base) * 2);
+        height: calc(var(--base) * 2);
+        position: relative;
+
+        .stroke {
+          stroke-width: 2px;
+          vector-effect: non-scaling-stroke;
+        }
+      }
+    }
+
+    &__after-header {
+      padding-top: calc(var(--base) / 4);
+    }
+
+    &__divider {
+      height: 1px;
+      background: var(--theme-elevation-100);
+      width: 100%;
+    }
+
+    @include mid-break {
+      .doc-drawer__header {
+        margin-top: calc(var(--base) * 1.5);
+        margin-bottom: calc(var(--base) * 0.5);
+        padding-left: var(--gutter-h);
+        padding-right: var(--gutter-h);
+      }
+    }
+  }
+}

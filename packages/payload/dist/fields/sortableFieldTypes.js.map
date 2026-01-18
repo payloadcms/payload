@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/fields/sortableFieldTypes.ts"],"sourcesContent":["export const sortableFieldTypes = [\n  'text',\n  'textarea',\n  'code',\n  'json',\n  'number',\n  'email',\n  'radio',\n  'select',\n  'date',\n]\n"],"names":["sortableFieldTypes"],"mappings":"AAAA,OAAO,MAAMA,qBAAqB;IAChC;IACA;IACA;IACA;IACA;IACA;IACA;IACA;IACA;CACD,CAAA"}

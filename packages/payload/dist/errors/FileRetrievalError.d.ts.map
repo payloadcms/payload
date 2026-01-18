@@ -1,0 +1,1 @@
+{"version":3,"file":"FileRetrievalError.d.ts","sourceRoot":"","sources":["../../src/errors/FileRetrievalError.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,0BAA0B,CAAA;AAIzD,OAAO,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAA;AAExC,qBAAa,kBAAmB,SAAQ,QAAQ;gBAClC,CAAC,CAAC,EAAE,SAAS,EAAE,OAAO,CAAC,EAAE,MAAM;CAQ5C"}

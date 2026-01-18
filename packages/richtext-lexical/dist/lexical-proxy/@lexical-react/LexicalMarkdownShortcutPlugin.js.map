@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalMarkdownShortcutPlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalMarkdownShortcutPlugin.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalMarkdownShortcutPlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

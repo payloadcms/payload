@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/da.ts"],"sourcesContent":["export { da } from '@payloadcms/translations/languages/da'\n"],"names":["da"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

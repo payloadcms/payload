@@ -1,0 +1,11 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .collection-edit {
+    width: 100%;
+
+    &__form {
+      height: auto;
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalComposer.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalComposer.tsx"],"sourcesContent":["export * from '@lexical/react/LexicalComposer'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

@@ -1,0 +1,181 @@
+import { executeAccess } from '../../auth/executeAccess.js';
+import { NotFound } from '../../errors/NotFound.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js';
+import { getSelectMode } from '../../utilities/getSelectMode.js';
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js';
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js';
+export const findOneOperation = async (args)=>{
+    const { slug, depth, draft: replaceWithVersion = false, flattenLocales, globalConfig, includeLockStatus: includeLockStatusFromArgs, overrideAccess = false, populate, req: { fallbackLocale, locale }, req, select: incomingSelect, showHiddenFields } = args;
+    const includeLockStatus = includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug];
+    try {
+        // /////////////////////////////////////
+        // beforeOperation - Global
+        // /////////////////////////////////////
+        if (globalConfig.hooks?.beforeOperation?.length) {
+            for (const hook of globalConfig.hooks.beforeOperation){
+                args = await hook({
+                    args,
+                    context: args.req.context,
+                    global: globalConfig,
+                    operation: 'read',
+                    req: args.req
+                }) || args;
+            }
+        }
+        // /////////////////////////////////////
+        // Retrieve and execute access
+        // /////////////////////////////////////
+        let accessResult;
+        if (!overrideAccess) {
+            accessResult = await executeAccess({
+                req
+            }, globalConfig.access.read);
+        }
+        if (accessResult === false) {
+            throw new NotFound(req.t);
+        }
+        const select = sanitizeSelect({
+            fields: globalConfig.flattenedFields,
+            forceSelect: globalConfig.forceSelect,
+            select: incomingSelect
+        });
+        // /////////////////////////////////////
+        // Perform database operation
+        // /////////////////////////////////////
+        const docFromDB = await req.payload.db.findGlobal({
+            slug,
+            locale: locale,
+            req,
+            select,
+            where: overrideAccess ? undefined : accessResult
+        });
+        // Check if no document was returned (Postgres returns {} instead of null)
+        const hasDoc = docFromDB && Object.keys(docFromDB).length > 0;
+        if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
+            return {};
+        }
+        let doc = args.data ?? (hasDoc ? docFromDB : null) ?? {};
+        // /////////////////////////////////////
+        // Include Lock Status if required
+        // /////////////////////////////////////
+        if (includeLockStatus && slug) {
+            let lockStatus = null;
+            try {
+                const lockDocumentsProp = globalConfig?.lockDocuments;
+                const lockDurationDefault = 300 // Default 5 minutes in seconds
+                ;
+                const lockDuration = typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault;
+                const lockDurationInMilliseconds = lockDuration * 1000;
+                const lockedDocument = await req.payload.find({
+                    collection: lockedDocumentsCollectionSlug,
+                    depth: 1,
+                    limit: 1,
+                    overrideAccess: false,
+                    pagination: false,
+                    req,
+                    where: {
+                        and: [
+                            {
+                                globalSlug: {
+                                    equals: slug
+                                }
+                            },
+                            {
+                                updatedAt: {
+                                    greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds)
+                                }
+                            }
+                        ]
+                    }
+                });
+                if (lockedDocument && lockedDocument.docs.length > 0) {
+                    lockStatus = lockedDocument.docs[0];
+                }
+            } catch  {
+            // swallow error
+            }
+            doc._isLocked = !!lockStatus;
+            doc._userEditing = lockStatus?.user?.value ?? null;
+        }
+        // /////////////////////////////////////
+        // Replace document with draft if available
+        // /////////////////////////////////////
+        if (replaceWithVersion && hasDraftsEnabled(globalConfig)) {
+            doc = await replaceWithDraftIfAvailable({
+                accessResult,
+                doc,
+                entity: globalConfig,
+                entityType: 'global',
+                overrideAccess,
+                req,
+                select
+            });
+        }
+        // /////////////////////////////////////
+        // Execute before global hook
+        // /////////////////////////////////////
+        if (globalConfig.hooks?.beforeRead?.length) {
+            for (const hook of globalConfig.hooks.beforeRead){
+                doc = await hook({
+                    context: req.context,
+                    doc,
+                    global: globalConfig,
+                    req
+                }) || doc;
+            }
+        }
+        // /////////////////////////////////////
+        // Execute globalType field if not selected
+        // /////////////////////////////////////
+        if (select && doc.globalType) {
+            const selectMode = getSelectMode(select);
+            if (selectMode === 'include' && !select['globalType'] || selectMode === 'exclude' && select['globalType'] === false) {
+                delete doc['globalType'];
+            }
+        }
+        // /////////////////////////////////////
+        // Execute field-level hooks and access
+        // /////////////////////////////////////
+        doc = await afterRead({
+            collection: null,
+            context: req.context,
+            depth: depth,
+            doc,
+            draft: replaceWithVersion,
+            fallbackLocale: fallbackLocale,
+            flattenLocales,
+            global: globalConfig,
+            locale: locale,
+            overrideAccess,
+            populate,
+            req,
+            select,
+            showHiddenFields: showHiddenFields
+        });
+        // /////////////////////////////////////
+        // Execute after global hook
+        // /////////////////////////////////////
+        if (globalConfig.hooks?.afterRead?.length) {
+            for (const hook of globalConfig.hooks.afterRead){
+                doc = await hook({
+                    context: req.context,
+                    doc,
+                    global: globalConfig,
+                    req
+                }) || doc;
+            }
+        }
+        // /////////////////////////////////////
+        // Return results
+        // /////////////////////////////////////
+        return doc;
+    } catch (error) {
+        await killTransaction(req);
+        throw error;
+    }
+};
+
+//# sourceMappingURL=findOne.js.map

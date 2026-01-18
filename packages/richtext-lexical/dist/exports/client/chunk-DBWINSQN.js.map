@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/features/relationship/client/drawer/commands.ts"],
+  "sourcesContent": ["import type { LexicalCommand } from 'lexical'\n\nimport { createCommand } from 'lexical'\n\nexport const INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND: LexicalCommand<{\n  replace: { nodeKey: string } | false\n}> = createCommand('INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND')\n"],
+  "mappings": "AAEA,OAASA,iBAAAA,MAAqB,UAEvB,IAAMC,EAERD,EAAc,yCAAA",
+  "names": ["createCommand", "INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND"]
+}

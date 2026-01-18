@@ -1,0 +1,1 @@
+{"version":3,"file":"getRequestLocale.d.ts","sourceRoot":"","sources":["../../src/utilities/getRequestLocale.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,MAAM,EAAE,cAAc,EAAE,MAAM,SAAS,CAAA;AAOrD,KAAK,qBAAqB,GAAG;IAC3B,GAAG,EAAE,cAAc,CAAA;CACpB,CAAA;AAED,wBAAsB,gBAAgB,CAAC,EAAE,GAAG,EAAE,EAAE,qBAAqB,GAAG,OAAO,CAAC,MAAM,CAAC,CA8BtF"}

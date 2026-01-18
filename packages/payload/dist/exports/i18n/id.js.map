@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/id.ts"],"sourcesContent":["export { id } from '@payloadcms/translations/languages/id'\n"],"names":["id"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

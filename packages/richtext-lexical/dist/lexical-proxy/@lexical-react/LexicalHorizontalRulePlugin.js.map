@@ -1,0 +1,1 @@
+{"version":3,"file":"LexicalHorizontalRulePlugin.js","names":[],"sources":["../../../src/lexical-proxy/@lexical-react/LexicalHorizontalRulePlugin.ts"],"sourcesContent":["export * from '@lexical/react/LexicalHorizontalRulePlugin'\n"],"mappings":"AAAA,cAAc","ignoreList":[]}

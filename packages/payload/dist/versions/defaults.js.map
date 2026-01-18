@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/versions/defaults.ts"],"sourcesContent":["export const versionDefaults = {\n  autosaveInterval: 2000,\n}\n"],"names":["versionDefaults","autosaveInterval"],"mappings":"AAAA,OAAO,MAAMA,kBAAkB;IAC7BC,kBAAkB;AACpB,EAAC"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/elements/NavGroup/index.tsx"],"names":[],"mappings":"AAGA,OAAO,KAAmB,MAAM,OAAO,CAAA;AAIvC,OAAO,cAAc,CAAA;AAMrB,KAAK,KAAK,GAAG;IACX,QAAQ,EAAE,KAAK,CAAC,SAAS,CAAA;IACzB,MAAM,CAAC,EAAE,OAAO,CAAA;IAChB,KAAK,EAAE,MAAM,CAAA;CACd,CAAA;AAID,eAAO,MAAM,QAAQ,EAAE,KAAK,CAAC,EAAE,CAAC,KAAK,CA0DpC,CAAA"}

@@ -1,0 +1,168 @@
+'use client';
+
+import { c as _c } from "react/compiler-runtime";
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text';
+import { $setBlocksType } from '@lexical/selection';
+import { $getSelection, $isRangeSelection } from 'lexical';
+import { useEffect } from 'react';
+import { H1Icon } from '../../../lexical/ui/icons/H1/index.js';
+import { H2Icon } from '../../../lexical/ui/icons/H2/index.js';
+import { H3Icon } from '../../../lexical/ui/icons/H3/index.js';
+import { H4Icon } from '../../../lexical/ui/icons/H4/index.js';
+import { H5Icon } from '../../../lexical/ui/icons/H5/index.js';
+import { H6Icon } from '../../../lexical/ui/icons/H6/index.js';
+import { createClientFeature } from '../../../utilities/createClientFeature.js';
+import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js';
+import { toolbarTextDropdownGroupWithItems } from '../../shared/toolbar/textDropdownGroup.js';
+import { MarkdownTransformer } from '../markdownTransformer.js';
+const $setHeading = headingSize => {
+  const selection = $getSelection();
+  $setBlocksType(selection, () => $createHeadingNode(headingSize));
+};
+const iconImports = {
+  h1: H1Icon,
+  h2: H2Icon,
+  h3: H3Icon,
+  h4: H4Icon,
+  h5: H5Icon,
+  h6: H6Icon
+};
+export const HeadingFeatureClient = createClientFeature(({
+  props
+}) => {
+  const {
+    enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+  } = props;
+  const toolbarGroups = [toolbarTextDropdownGroupWithItems(enabledHeadingSizes.map((headingSize, i) => {
+    return {
+      ChildComponent: iconImports[headingSize],
+      isActive: ({
+        selection
+      }) => {
+        if (!$isRangeSelection(selection)) {
+          return false;
+        }
+        for (const node of selection.getNodes()) {
+          if ($isHeadingNode(node) && node.getTag() === headingSize) {
+            continue;
+          }
+          const parent = node.getParent();
+          if ($isHeadingNode(parent) && parent.getTag() === headingSize) {
+            continue;
+          }
+          return false;
+        }
+        return true;
+      },
+      key: headingSize,
+      label: ({
+        i18n
+      }) => {
+        return i18n.t('lexical:heading:label', {
+          headingLevel: headingSize.charAt(1)
+        });
+      },
+      onSelect: ({
+        editor
+      }) => {
+        editor.update(() => {
+          $setHeading(headingSize);
+        });
+      },
+      order: i + 2
+    };
+  }))];
+  return {
+    markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
+    nodes: [HeadingNode],
+    plugins: [{
+      Component: HeadingPlugin,
+      position: 'normal'
+    }],
+    sanitizedClientFeatureProps: props,
+    slashMenu: {
+      groups: enabledHeadingSizes?.length ? [slashMenuBasicGroupWithItems(enabledHeadingSizes.map(headingSize => {
+        return {
+          Icon: iconImports[headingSize],
+          key: `heading-${headingSize.charAt(1)}`,
+          keywords: ['heading', headingSize],
+          label: ({
+            i18n
+          }) => {
+            return i18n.t('lexical:heading:label', {
+              headingLevel: headingSize.charAt(1)
+            });
+          },
+          onSelect: ({
+            editor
+          }) => {
+            editor.update(() => {
+              $setHeading(headingSize);
+            });
+          }
+        };
+      }))] : []
+    },
+    toolbarFixed: {
+      groups: enabledHeadingSizes?.length ? toolbarGroups : []
+    },
+    toolbarInline: {
+      groups: enabledHeadingSizes?.length ? toolbarGroups : []
+    }
+  };
+});
+const HeadingPlugin = t0 => {
+  const $ = _c(9);
+  const {
+    clientProps
+  } = t0;
+  const {
+    enabledHeadingSizes: t1
+  } = clientProps;
+  let t2;
+  if ($[0] !== t1) {
+    t2 = t1 === undefined ? ["h1", "h2", "h3", "h4", "h5", "h6"] : t1;
+    $[0] = t1;
+    $[1] = t2;
+  } else {
+    t2 = $[1];
+  }
+  const enabledHeadingSizes = t2;
+  let t3;
+  if ($[2] !== enabledHeadingSizes) {
+    t3 = enabledHeadingSizes.at(-1);
+    $[2] = enabledHeadingSizes;
+    $[3] = t3;
+  } else {
+    t3 = $[3];
+  }
+  const lowestAllowed = t3;
+  const [editor] = useLexicalComposerContext();
+  let t4;
+  let t5;
+  if ($[4] !== editor || $[5] !== enabledHeadingSizes || $[6] !== lowestAllowed) {
+    t4 = () => {
+      if (!lowestAllowed || enabledHeadingSizes.length === 6) {
+        return;
+      }
+      return editor.registerNodeTransform(HeadingNode, node => {
+        if (!enabledHeadingSizes.includes(node.getTag())) {
+          node.setTag(lowestAllowed);
+        }
+      });
+    };
+    t5 = [editor, enabledHeadingSizes, lowestAllowed];
+    $[4] = editor;
+    $[5] = enabledHeadingSizes;
+    $[6] = lowestAllowed;
+    $[7] = t4;
+    $[8] = t5;
+  } else {
+    t4 = $[7];
+    t5 = $[8];
+  }
+  useEffect(t4, t5);
+  return null;
+};
+//# sourceMappingURL=index.js.map

@@ -1,0 +1,379 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  a.btn {
+    display: inline-block;
+  }
+
+  .btn--withPopup {
+    margin-block: 4px;
+    .btn {
+      margin: 0;
+    }
+  }
+
+  .btn {
+    --btn-font-weight: normal;
+    * {
+      pointer-events: none;
+    }
+
+    // button aesthetic styles
+    &--style-primary {
+      --color: var(--theme-elevation-0);
+      --bg-color: var(--theme-elevation-800);
+      --box-shadow: none;
+      --hover-bg: var(--theme-elevation-600);
+      --hover-color: var(--color);
+
+      &.btn--disabled {
+        --bg-color: var(--theme-elevation-200);
+        --color: var(--theme-elevation-800);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+
+    &--style-secondary {
+      --color: var(--theme-text);
+      --bg-color: transparent;
+      --box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
+      --hover-color: var(--theme-elevation-600);
+      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-200);
+        --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+        --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+        --hover-color: var(--color);
+      }
+    }
+
+    &--style-pill {
+      --bg-color: var(--theme-elevation-150);
+      --color: var(--theme-elevation-800);
+      --hover-color: var(--theme-elevation-800);
+      --hover-bg: var(--theme-elevation-100);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-600);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+
+    // colors and padding are mixed on this class
+    &--style-icon-label,
+    &--style-icon-label.btn--icon-position-left,
+    &--style-icon-label.btn--icon-position-right {
+      padding: 0;
+      font-weight: 600;
+      --color: var(--theme-text);
+      --bg-color: transparent;
+      --hover-color: var(--theme-elevation-600);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-200);
+        --hover-color: var(--color);
+      }
+
+      .btn__content {
+        --btn-icon-content-gap: calc(var(--base) * 0.4);
+      }
+    }
+
+    &--style-subtle {
+      --color: var(--theme-text);
+      --bg-color: var(--theme-elevation-100);
+      --hover-bg: var(--theme-elevation-150);
+      --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-250);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-450);
+        --hover-box-shadow: var(--box-shadow);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+
+    &--style-tab {
+      --bg-color: transparent;
+      --hover-bg: var(--theme-elevation-50);
+      --color: var(--theme-text);
+      --btn-font-weight: 500;
+
+      &.btn--disabled {
+        --btn-font-weight: 600;
+        --hover-box-shadow: var(--box-shadow);
+        --bg-color: var(--theme-elevation-100);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+  }
+
+  .popup--active .btn {
+    background-color: var(--hover-bg);
+  }
+
+  .btn--withPopup {
+    .popup-button {
+      color: var(--color, inherit);
+      background-color: var(--bg-color);
+      box-shadow: var(--box-shadow);
+      border-radius: $style-radius-m;
+      align-items: center;
+
+      html:not([dir='RTL']) & {
+        border-left: 1px solid var(--theme-bg);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      html[dir='RTL'] & {
+        border-right: 1px solid var(--theme-bg);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      &:hover,
+      &:focus-visible,
+      &:focus,
+      &:active {
+        background-color: var(--hover-bg);
+        color: var(--hover-color);
+        box-shadow: var(--hover-box-shadow);
+      }
+    }
+  }
+
+  .btn,
+  .btn--withPopup .btn {
+    &:hover,
+    &:focus-visible,
+    &:focus,
+    &:active {
+      color: var(--hover-color);
+      box-shadow: var(--hover-box-shadow);
+      background-color: var(--hover-bg);
+    }
+  }
+
+  .btn--disabled,
+  .btn--disabled .btn {
+    cursor: not-allowed;
+  }
+
+  .btn {
+    --btn-padding-block-start: 0;
+    --btn-padding-inline-end: 0;
+    --btn-padding-block-end: 0;
+    --btn-padding-inline-start: 0;
+
+    --btn-icon-size: calc(var(--base) * 1.2);
+    --btn-icon-border-color: currentColor;
+    --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+    --btn-icon-content-gap: calc(var(--base) * 0.4);
+    --margin-block: calc(var(--base) * 1.2);
+    --btn-line-height: calc(var(--base) * 1.2);
+
+    border-radius: var(--style-radius-s);
+    font-size: var(--base-body-size);
+    font-family: var(--font-body);
+    font-weight: var(--btn-font-weight, normal);
+    margin-block: var(--margin-block);
+    line-height: var(--btn-line-height);
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    transition-property: border, color, box-shadow, background;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
+      var(--btn-padding-block-end) var(--btn-padding-inline-start);
+    color: var(--color, inherit);
+    background-color: var(--bg-color, transparent);
+    box-shadow: var(--box-shadow, none);
+
+    &__icon {
+      width: 100%;
+      height: 100%;
+
+      .stroke {
+        stroke: var(--color, currentColor);
+        fill: none;
+      }
+
+      .fill {
+        fill: var(--color, currentColor);
+      }
+    }
+
+    &__content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &__icon {
+      width: var(--btn-icon-size);
+      height: var(--btn-icon-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--btn-icon-border-color);
+      border-radius: 100%;
+      padding: var(--btn-icon-padding);
+      color: inherit;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      &.btn--size-small {
+        padding: calc(var(--base) * (0.2));
+      }
+    }
+
+    &--withPopup {
+      display: flex;
+    }
+
+    &--has-tooltip {
+      position: relative;
+    }
+
+    &--icon {
+      .btn__content {
+        gap: var(--btn-icon-content-gap);
+      }
+    }
+
+    &--icon-style-without-border,
+    &--icon-style-none {
+      --btn-icon-border-color: transparent;
+    }
+
+    &--icon-position-left {
+      .btn__content {
+        flex-direction: row-reverse;
+      }
+    }
+
+    &--size-small {
+      --btn-icon-size: calc(var(--base) * 0.9);
+      // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: 0;
+      --btn-padding-inline-end: calc(var(--base) * 0.4);
+      --btn-padding-inline-start: calc(var(--base) * 0.4);
+      --btn-padding-block-end: 0;
+
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.3);
+      }
+
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.3);
+      }
+
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--size-xsmall {
+      --btn-icon-size: calc(var(--base) * 0.8);
+      // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: 0;
+      --btn-padding-inline-end: calc(var(--base) * 0.3);
+      --btn-padding-inline-start: calc(var(--base) * 0.3);
+      --btn-padding-block-end: 0;
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.2);
+      }
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.2);
+      }
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--size-medium {
+      // --btn-icon-padding: 0px;
+      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: calc(var(--base) * 0.2);
+      --btn-padding-inline-end: calc(var(--base) * 0.6);
+      --btn-padding-block-end: calc(var(--base) * 0.2);
+      --btn-padding-inline-start: calc(var(--base) * 0.6);
+
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.4);
+      }
+
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.4);
+      }
+
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--size-large {
+      // --btn-icon-padding: 0px;
+      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-content-gap: calc(var(--base) * 0.4);
+      --btn-padding-block-start: calc(var(--base) * 0.4);
+      --btn-padding-inline-end: calc(var(--base) * 0.8);
+      --btn-padding-inline-start: calc(var(--base) * 0.8);
+      --btn-padding-block-end: calc(var(--base) * 0.4);
+
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.6);
+      }
+
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.6);
+      }
+
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--withPopup .btn {
+      html:not([dir='RTL']) & {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      html[dir='RTL'] & {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    &.btn--disabled {
+      cursor: not-allowed;
+    }
+
+    &--style-none {
+      padding: 0;
+    }
+
+    &--no-margin {
+      --margin-block: 0;
+    }
+  }
+}

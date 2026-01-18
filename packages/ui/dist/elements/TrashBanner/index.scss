@@ -1,0 +1,20 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .trash-banner {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.5);
+    margin-bottom: var(--base);
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
+    border-radius: var(--style-radius-s);
+    background: var(--theme-warning-100);
+    color: var(--theme-warning-600);
+  }
+
+  html[data-theme='dark'] {
+    .trash-banner {
+      color: var(--theme-warning-800);
+    }
+  }
+}

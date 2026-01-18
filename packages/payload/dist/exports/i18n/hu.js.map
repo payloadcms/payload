@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/hu.ts"],"sourcesContent":["export { hu } from '@payloadcms/translations/languages/hu'\n"],"names":["hu"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

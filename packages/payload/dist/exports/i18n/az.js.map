@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/exports/i18n/az.ts"],"sourcesContent":["export { az } from '@payloadcms/translations/languages/az'\n"],"names":["az"],"mappings":"AAAA,SAASA,EAAE,QAAQ,wCAAuC"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/exports/internal.ts"],"sourcesContent":["export { transform } from '../utilities/transform.js'\n"],"names":["transform"],"mappings":"AAAA,SAASA,SAAS,QAAQ,4BAA2B"}

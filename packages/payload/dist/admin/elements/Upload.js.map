@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/admin/elements/Upload.ts"],"sourcesContent":["import type { CustomComponent } from '../../config/types.js'\n\nexport type CustomUpload = CustomComponent\n"],"names":[],"mappings":"AAEA,WAA0C"}

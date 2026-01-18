@@ -1,0 +1,57 @@
+import { status as httpStatus } from 'http-status';
+import { APIError, Forbidden } from '../../errors/index.js';
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js';
+import { commitTransaction } from '../../utilities/commitTransaction.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+export const verifyEmailOperation = async (args)=>{
+    const { collection, req, token } = args;
+    if (collection.config.auth.disableLocalStrategy) {
+        throw new Forbidden(req.t);
+    }
+    if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
+        throw new APIError('Missing required data.', httpStatus.BAD_REQUEST);
+    }
+    try {
+        const shouldCommit = await initTransaction(req);
+        const where = appendNonTrashedFilter({
+            enableTrash: Boolean(collection.config.trash),
+            trash: false,
+            where: {
+                _verificationToken: {
+                    equals: token
+                }
+            }
+        });
+        const user = await req.payload.db.findOne({
+            collection: collection.config.slug,
+            req,
+            where
+        });
+        if (!user) {
+            throw new APIError('Verification token is invalid.', httpStatus.FORBIDDEN);
+        }
+        // Ensure updatedAt date is always updated
+        user.updatedAt = new Date().toISOString();
+        await req.payload.db.updateOne({
+            id: user.id,
+            collection: collection.config.slug,
+            data: {
+                ...user,
+                _verificationToken: null,
+                _verified: true
+            },
+            req,
+            returning: false
+        });
+        if (shouldCommit) {
+            await commitTransaction(req);
+        }
+        return true;
+    } catch (error) {
+        await killTransaction(req);
+        throw error;
+    }
+};
+
+//# sourceMappingURL=verifyEmail.js.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"isCustomAdminView.d.ts","sourceRoot":"","sources":["../../src/utilities/isCustomAdminView.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,SAAS,CAAA;AAI9C;;GAEG;AACH,eAAO,MAAM,iBAAiB,mCAI3B;IACD,UAAU,EAAE,MAAM,CAAA;IAClB,MAAM,EAAE,eAAe,CAAA;IACvB,KAAK,EAAE,MAAM,CAAA;CACd,KAAG,OAmBH,CAAA"}

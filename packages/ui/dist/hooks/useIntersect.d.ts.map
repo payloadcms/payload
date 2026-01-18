@@ -1,0 +1,1 @@
+{"version":3,"file":"useIntersect.d.ts","sourceRoot":"","sources":["../../src/hooks/useIntersect.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,KAAK,MAAM,OAAO,CAAA;AAI9B,KAAK,SAAS,GAAG;IACf,OAAO,EAAE,KAAK,CAAC,QAAQ,CAAC,WAAW,CAAC;IACpC,KAAK,EAAE,yBAAyB;IAChC,IAAI,EAAE,WAAW;CAClB,CAAA;AAED,eAAO,MAAM,YAAY;;;;aAEb,OAAO,KAChB,SA6BF,CAAA"}
