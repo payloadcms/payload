@@ -139,7 +139,7 @@ describe('Localization', () => {
     test('should filter version locale selector with filterAvailableLocales', async () => {
       await page.goto(urlPostsWithDrafts.create)
       await page.locator('#field-title').fill('title')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await page.locator('text=Versions').click()
       const firstVersion = await findTableRow(page, 'Currently Published')
@@ -305,8 +305,8 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
-      await page.locator('#action-save').click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+      await saveDocAndAssert(page)
+
       const collectionUrl = page.url()
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
