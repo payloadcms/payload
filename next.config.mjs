@@ -45,6 +45,7 @@ const config = withBundleAnalyzer(
             hostname: 'localhost',
           },
         ],
+        qualities: [5, 50, 75, 100]
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {
