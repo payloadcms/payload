@@ -26,7 +26,7 @@
     "@payloadcms/ui": "3.71.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "16.1.1-canary.28",
+    "next": "16.1.1-canary.32",
     "payload": "3.71.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -40,7 +40,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.1.1-canary.28",
+    "eslint-config-next": "16.1.1-canary.32",
     "jsdom": "26.1.0",
     "playwright": "1.56.1",
     "playwright-core": "1.56.1",

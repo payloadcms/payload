@@ -153,7 +153,7 @@
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "16.1.1-canary.28",
+    "@next/bundle-analyzer": "16.1.1-canary.32",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -189,7 +189,7 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongoose": "8.15.1",
-    "next": "16.1.1-canary.28",
+    "next": "16.1.1-canary.32",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "pg": "8.16.3",

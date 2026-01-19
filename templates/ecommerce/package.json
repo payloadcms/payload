@@ -52,7 +52,7 @@
     "graphql": "^16.8.2",
     "jsonwebtoken": "9.0.1",
     "lucide-react": "^0.477.0",
-    "next": "16.1.1-canary.28",
+    "next": "16.1.1-canary.32",
     "next-themes": "0.4.6",
     "payload": "workspace:*",
     "prism-react-renderer": "^2.3.1",
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
-    "@next/eslint-plugin-next": "16.1.1-canary.28",
+    "@next/eslint-plugin-next": "16.1.1-canary.32",
     "@playwright/test": "1.56.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/postcss": "4.0.12",

@@ -24,8 +24,8 @@ importers:
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@next/bundle-analyzer':
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
@@ -43,7 +43,7 @@ importers:
         version: 1.56.1
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/node':
         specifier: ^8.33.1
         version: 8.55.0
@@ -132,8 +132,8 @@ importers:
         specifier: 8.15.1
         version: 8.15.1(@aws-sdk/credential-providers@3.969.0)
       next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       open:
         specifier: ^10.1.0
         version: 10.2.0
@@ -793,8 +793,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       next:
-        specifier: ^15.4.10 || ^16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
+        specifier: ^15.4.10 || ^16.1.1-canary.32
+        version: 16.1.1-canary.32(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
       path-to-regexp:
         specifier: 6.3.0
         version: 6.3.0
@@ -824,8 +824,8 @@ importers:
         specifier: 7.27.1
         version: 7.27.1(@babel/core@7.27.3)
       '@next/eslint-plugin-next':
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -1194,7 +1194,7 @@ importers:
         version: 7.0.15
       '@vercel/mcp-adapter':
         specifier: ^1.0.0
-        version: 1.0.0(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
+        version: 1.0.0(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
       json-schema-to-zod:
         specifier: 2.6.1
         version: 2.6.1
@@ -1278,7 +1278,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.55.0
@@ -1663,7 +1663,7 @@ importers:
         version: link:../plugin-cloud-storage
       uploadthing:
         specifier: 7.3.0
-        version: 7.3.0(express@5.2.1)(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(tailwindcss@4.1.18)
+        version: 7.3.0(express@5.2.1)(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(tailwindcss@4.1.18)
     devDependencies:
       payload:
         specifier: workspace:*
@@ -1749,8 +1749,8 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || ^16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+        specifier: ^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || ^16.1.1-canary.32
+        version: 16.1.1-canary.32(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -1855,8 +1855,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -1892,8 +1892,8 @@ importers:
         specifier: ^9.16.0
         version: 9.22.0(jiti@2.6.1)
       eslint-config-next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
       jsdom:
         specifier: 26.1.0
         version: 26.1.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -1998,7 +1998,7 @@ importers:
         version: 8.6.0(react@19.2.3)
       geist:
         specifier: ^1.3.0
-        version: 1.5.1(next@16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
+        version: 1.5.1(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -2009,8 +2009,8 @@ importers:
         specifier: ^0.477.0
         version: 0.477.0(react@19.2.3)
       next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -2052,8 +2052,8 @@ importers:
         specifier: ^3.2.0
         version: 3.3.3
       '@next/eslint-plugin-next':
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32
       '@playwright/test':
         specifier: 1.56.1
         version: 1.56.1
@@ -2197,7 +2197,7 @@ importers:
         version: 16.4.7
       geist:
         specifier: ^1.3.0
-        version: 1.5.1(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
+        version: 1.5.1(next@16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -2205,11 +2205,11 @@ importers:
         specifier: ^0.378.0
         version: 0.378.0(react@19.2.3)
       next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       next-sitemap:
         specifier: ^4.2.3
-        version: 4.2.3(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
+        version: 4.2.3(next@16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -2272,8 +2272,8 @@ importers:
         specifier: ^9.16.0
         version: 9.22.0(jiti@1.21.7)
       eslint-config-next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
       jsdom:
         specifier: 26.1.0
         version: 26.1.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -2306,7 +2306,7 @@ importers:
     dependencies:
       recharts:
         specifier: 3.2.1
-        version: 3.2.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-is@16.13.1)(react@19.2.3)(redux@5.0.1)
+        version: 3.2.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-is@17.0.2)(react@19.2.3)(redux@5.0.1)
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
@@ -2327,8 +2327,8 @@ importers:
         specifier: ^1.17.2
         version: 1.24.3(zod@3.25.76)
       '@next/env':
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32
       '@opennextjs/cloudflare':
         specifier: 1.9.2
         version: 1.9.2(wrangler@4.42.2(bufferutil@4.1.0)(utf-8-validate@6.0.6))
@@ -2454,7 +2454,7 @@ importers:
         version: link:../packages/ui
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.120.4(react@19.2.3)
@@ -2519,8 +2519,8 @@ importers:
         specifier: 8.15.1
         version: 8.15.1(@aws-sdk/credential-providers@3.969.0)
       next:
-        specifier: 16.1.1-canary.28
-        version: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
+        specifier: 16.1.1-canary.32
+        version: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
       nodemailer:
         specifier: 7.0.12
         version: 7.0.12
@@ -5558,8 +5558,8 @@ packages:
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
 
-  '@next/bundle-analyzer@16.1.1-canary.28':
-    resolution: {integrity: sha512-N6BDbU5LOtje3/9rqiMFdpVMUdSvGXFiwDtVJlLr+nVHGzsl9Af6g/t11gYivZOmhf7103QrSaHyir/gYyRaow==}
+  '@next/bundle-analyzer@16.1.1-canary.32':
+    resolution: {integrity: sha512-TFEQfLo7VSBKNF3xm66ESvXNLYVtXKkXH5E9pygpU1VHeojvZpvUex4mFpcDSEXbj290MKs+sz6KgSMn9g3jUg==}
 
   '@next/env@13.5.11':
     resolution: {integrity: sha512-fbb2C7HChgM7CemdCY+y3N1n8pcTKdqtQLbC7/EQtPdLvlMUT9JX/dBYl8MMZAtYG4uVMyPFHXckb68q/NRwqg==}
@@ -5567,59 +5567,59 @@ packages:
   '@next/env@15.5.9':
     resolution: {integrity: sha512-4GlTZ+EJM7WaW2HEZcyU317tIQDjkQIyENDLxYJfSWlfqguN+dHkZgyQTV/7ykvobU7yEH5gKvreNrH4B6QgIg==}
 
-  '@next/env@16.1.1-canary.28':
-    resolution: {integrity: sha512-IY62HVn+rsqTw/3qTXCbl+CiW3bnpVQeTUJ5tBsUZZeDVxNQJ0vlijZo3oFozDfe935OI/+Z+/q++7Xrkzc5tg==}
+  '@next/env@16.1.1-canary.32':
+    resolution: {integrity: sha512-keKbmUulATPdGBgSKv8CIxMS5GUhRSaBt1aRSG5vtGNw+qypg/V+HMR0m9qhJZ76HDLAC7hF4AByE6YFgW5qFA==}
 
   '@next/eslint-plugin-next@15.1.0':
     resolution: {integrity: sha512-+jPT0h+nelBT6HC9ZCHGc7DgGVy04cv4shYdAe6tKlEbjQUtwU3LzQhzbDHQyY2m6g39m6B0kOFVuLGBrxxbGg==}
 
-  '@next/eslint-plugin-next@16.1.1-canary.28':
-    resolution: {integrity: sha512-oUAgJCelm4eT7heF5lzYXsMKqFPKPx8HhAEAl+TwEEcIzUUHZkFWC5t85xPviAXBWTd3vFw7FgsX5vkmsz+iYg==}
+  '@next/eslint-plugin-next@16.1.1-canary.32':
+    resolution: {integrity: sha512-v6DUZ+3YECQwWGxSwrqGSZrOEiJhpqK0FmV+jeuz645QA02lLt8zAo0Ctc8LUQrhaxaIlkIwkCMZq6tl/qfEJg==}
 
-  '@next/swc-darwin-arm64@16.1.1-canary.28':
-    resolution: {integrity: sha512-CA57BAGtd7cyp90irzPQVZeUeiIm3V4MxOeX2X5Jku6o3nUc8BBv4g8VH3hJ6MGnb0QyJwwb2axVyS2PCwjOew==}
+  '@next/swc-darwin-arm64@16.1.1-canary.32':
+    resolution: {integrity: sha512-XEyyK1zNo/5pqHd/nV+gv/3+keTcHB4j8P64YMKAtgHtquzoz6LSEm+et8WDTidRFHQHVsPEnhzCAvzVIJ5cog==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
 
-  '@next/swc-darwin-x64@16.1.1-canary.28':
-    resolution: {integrity: sha512-jairr9HY6SMjY3ZykyxdkNsCHOgQa1+PsmAzqFWWOrnkZgO7T+FIQqq9svyASqst3OscxanMRQHMqXCVxkzhPg==}
+  '@next/swc-darwin-x64@16.1.1-canary.32':
+    resolution: {integrity: sha512-VuPvLlIz8+LI1MsDbaHJBYw48Zdnn6AHsGuoWguGABFmYLCHzrAi4a5U1fTLkTcEMJlJQ0GYC4xMWcvIQ3kzVA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
 
-  '@next/swc-linux-arm64-gnu@16.1.1-canary.28':
-    resolution: {integrity: sha512-EzcOhilljqKC/FlI0Cqgg7tU4yAoK1TcVtSZNauoq2+D6ZeYO7O0ksPOVPuJlaPB9xGLPBeBBfZDXKUonFHZQQ==}
+  '@next/swc-linux-arm64-gnu@16.1.1-canary.32':
+    resolution: {integrity: sha512-+FSZCS2AlJ+iTLeWkgTip1dhKy0KoOVlx7O1navHT7shL2UpqhsKCdeJ9uS3/Awo9xkkwSH3RqiTkHk0+DdqCw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-arm64-musl@16.1.1-canary.28':
-    resolution: {integrity: sha512-tQhgsari0SVq53ddzFXK4z9q75xtuQ5jgBmZjjuiSco1LO2+yNEAfoEZFkf7ztHx8QNDchP6ahHHi11ta974Uw==}
+  '@next/swc-linux-arm64-musl@16.1.1-canary.32':
+    resolution: {integrity: sha512-Wrx/+KrPF0iqhidEHkl/iud/hZpcJ8bWaIzG5FaGiR47ZeMzFRlhsttuoKqhYjGZcIbgkKFoCprTivEJRM0nQw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-x64-gnu@16.1.1-canary.28':
-    resolution: {integrity: sha512-dX/mEBXEzfPwzy6p1rpgjlUGzxgC4utdFu3GrcN4Ko09i94/CDI7xlgLzHXeo8RKA4dJpwAqQwCmG9EV0ldJSQ==}
+  '@next/swc-linux-x64-gnu@16.1.1-canary.32':
+    resolution: {integrity: sha512-jl91zkAuJniTJtOtGiL0wYIcCCliiIZWjs2MDkJg4Oc7YYy2MQRjYcDa8eVjEhliPh1AyGlc/AKx5iEkYiz28A==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-linux-x64-musl@16.1.1-canary.28':
-    resolution: {integrity: sha512-1XnZ5QrTd17m3eylaLg/HVY8W4KwXjYiav4WOxPVG27Hhb6ggVUxPgozf23VapCST/Z1UZpv4wzDtRzyFNgLEg==}
+  '@next/swc-linux-x64-musl@16.1.1-canary.32':
+    resolution: {integrity: sha512-XmryXin93F7o9E1j2CBr09ZqVZ9mgYDd7R24YSM492zPd7//bYH7qgSOjZzutuQrQWtiQ+Ksxn7hs5MwXVRgDA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-win32-arm64-msvc@16.1.1-canary.28':
-    resolution: {integrity: sha512-MQ7zJ/4kZZxzDtiz663qTCpOLy0Lv1wAIKuC3xhnnpvcCmJgnoKqAuReJKONeaev8NS7gvvn+W9/oW5H2s8sYA==}
+  '@next/swc-win32-arm64-msvc@16.1.1-canary.32':
+    resolution: {integrity: sha512-k+9rbDnMVEmrfETqBn7LPbeFHt3qQNKC7cPUkOXFwhgbrGcV6C7aMZP7QM2VxzEPUXy2jYAwkeDZRdTgclxTFA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
 
-  '@next/swc-win32-x64-msvc@16.1.1-canary.28':
-    resolution: {integrity: sha512-okLdyUDsSHCvW12ghqNhnnsUxOw1rhYERssAhMycn8d4hDyuRluEkLoDQ8im5LKZ4Caj7f6Ruq4lJ/4xMpiQJw==}
+  '@next/swc-win32-x64-msvc@16.1.1-canary.32':
+    resolution: {integrity: sha512-f2D1aavlzDkHSRLPGW+P3hMfKSEI4Ue4HTEYrxlVWs/X50yv1d2yEC4PZX2x/MWuuEp8APFCJWBFzBASLjd4aQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -9523,8 +9523,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-config-next@16.1.1-canary.28:
-    resolution: {integrity: sha512-31RGWHdZVJqWKy9rrMXQ31WJb58RolzAFo1ZB50ygWRc5erq2VEPgSaemfhqAi3Juu1fjayoSc6oqCEZwgbDLQ==}
+  eslint-config-next@16.1.1-canary.32:
+    resolution: {integrity: sha512-mfKeWtMMnSYfCoEjGW5yFTWG4zS+aZE8+RaAwQk0Qd/IV3tNP94eeOGHvLCktIeiP6hDpEagCVN6FOj0koVK0A==}
     peerDependencies:
       eslint: '>=9.0.0'
       typescript: 5.7.3
@@ -11531,8 +11531,8 @@ packages:
       react: 19.2.3
       react-dom: 19.2.3
 
-  next@16.1.1-canary.28:
-    resolution: {integrity: sha512-u5eZzXqRy2Au9lJxbJ4XUKRtOQAh1Lx1jAeEOcATgJgTUiwLoWiKda5ip6sR4qqD2DrBjgwZbOV1rvhdRaCLIA==}
+  next@16.1.1-canary.32:
+    resolution: {integrity: sha512-wEZrnqgX0mNnCgrUkHPWbkKZiEVsmLn9wSzjctF3rfgLuMuxVQLOSZRp4HTTKNaqjd4wayMW5q6BxZIO0HwkfA==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -17931,7 +17931,7 @@ snapshots:
     dependencies:
       '@types/pg': 8.11.6
 
-  '@next/bundle-analyzer@16.1.1-canary.28(bufferutil@4.1.0)(utf-8-validate@6.0.6)':
+  '@next/bundle-analyzer@16.1.1-canary.32(bufferutil@4.1.0)(utf-8-validate@6.0.6)':
     dependencies:
       webpack-bundle-analyzer: 4.10.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
     transitivePeerDependencies:
@@ -17942,38 +17942,38 @@ snapshots:
 
   '@next/env@15.5.9': {}
 
-  '@next/env@16.1.1-canary.28': {}
+  '@next/env@16.1.1-canary.32': {}
 
   '@next/eslint-plugin-next@15.1.0':
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/eslint-plugin-next@16.1.1-canary.28':
+  '@next/eslint-plugin-next@16.1.1-canary.32':
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/swc-darwin-arm64@16.1.1-canary.28':
+  '@next/swc-darwin-arm64@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-darwin-x64@16.1.1-canary.28':
+  '@next/swc-darwin-x64@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-linux-arm64-gnu@16.1.1-canary.28':
+  '@next/swc-linux-arm64-gnu@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-linux-arm64-musl@16.1.1-canary.28':
+  '@next/swc-linux-arm64-musl@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-linux-x64-gnu@16.1.1-canary.28':
+  '@next/swc-linux-x64-gnu@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-linux-x64-musl@16.1.1-canary.28':
+  '@next/swc-linux-x64-musl@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-win32-arm64-msvc@16.1.1-canary.28':
+  '@next/swc-win32-arm64-msvc@16.1.1-canary.32':
     optional: true
 
-  '@next/swc-win32-x64-msvc@16.1.1-canary.28':
+  '@next/swc-win32-x64-msvc@16.1.1-canary.32':
     optional: true
 
   '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3':
@@ -19090,7 +19090,7 @@ snapshots:
       '@sentry/utils': 7.120.4
       localforage: 1.10.0
 
-  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))':
+  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.38.0
@@ -19103,7 +19103,7 @@ snapshots:
       '@sentry/vercel-edge': 8.55.0
       '@sentry/webpack-plugin': 2.22.7(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
       chalk: 3.0.0
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.11
@@ -19117,7 +19117,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))':
+  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(react@19.2.3)(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.38.0
@@ -19130,7 +19130,7 @@ snapshots:
       '@sentry/vercel-edge': 8.55.0
       '@sentry/webpack-plugin': 2.22.7(webpack@5.104.1(@swc/core@1.15.3)(esbuild@0.25.12))
       chalk: 3.0.0
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.11
@@ -20701,12 +20701,12 @@ snapshots:
 
   '@vercel/git-hooks@1.0.0': {}
 
-  '@vercel/mcp-adapter@1.0.0(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))':
+  '@vercel/mcp-adapter@1.0.0(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))':
     dependencies:
       '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
-      mcp-handler: 1.0.7(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
+      mcp-handler: 1.0.7(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))
     optionalDependencies:
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
 
   '@vercel/postgres@0.9.0':
     dependencies:
@@ -22536,7 +22536,7 @@ snapshots:
       eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.22.0(jiti@2.6.1))
@@ -22547,18 +22547,18 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-config-next@16.1.1-canary.28(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3):
+  eslint-config-next@16.1.1-canary.32(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3):
     dependencies:
-      '@next/eslint-plugin-next': 16.1.1-canary.28
-      eslint: 9.22.0(jiti@1.21.7)
+      '@next/eslint-plugin-next': 16.1.1-canary.32
+      eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7))
-      eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@1.21.7))
-      eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@1.21.7))
-      eslint-plugin-react-hooks: 7.0.1(eslint@9.22.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-react-hooks: 7.0.1(eslint@9.22.0(jiti@2.6.1))
       globals: 16.4.0
-      typescript-eslint: 8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
+      typescript-eslint: 8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
     optionalDependencies:
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -22567,18 +22567,18 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-config-next@16.1.1-canary.28(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3):
+  eslint-config-next@16.1.1-canary.32(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3):
     dependencies:
-      '@next/eslint-plugin-next': 16.1.1-canary.28
-      eslint: 9.22.0(jiti@2.6.1)
+      '@next/eslint-plugin-next': 16.1.1-canary.32
+      eslint: 9.22.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@2.6.1))
-      eslint-plugin-react-hooks: 7.0.1(eslint@9.22.0(jiti@2.6.1))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@1.21.7))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@1.21.7))
+      eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@1.21.7))
+      eslint-plugin-react: 7.37.5(eslint@9.22.0(jiti@1.21.7))
+      eslint-plugin-react-hooks: 7.0.1(eslint@9.22.0(jiti@1.21.7))
       globals: 16.4.0
-      typescript-eslint: 8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
+      typescript-eslint: 8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
     optionalDependencies:
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -22599,7 +22599,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@1.21.7)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -22610,8 +22610,24 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@1.21.7))
       eslint-plugin-import-x: 4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
+    dependencies:
+      '@nolyfill/is-core-module': 1.0.39
+      debug: 4.4.3
+      eslint: 9.22.0(jiti@2.6.1)
+      get-tsconfig: 4.13.0
+      is-bun-module: 2.0.0
+      stable-hash: 0.0.5
+      tinyglobby: 0.2.15
+      unrs-resolver: 1.11.1
+    optionalDependencies:
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import-x: 4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -22626,7 +22642,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1))
       eslint-plugin-import-x: 4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
     transitivePeerDependencies:
       - supports-color
@@ -22642,14 +22658,24 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
+      '@typescript-eslint/parser': 8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
+      eslint: 9.22.0(jiti@2.6.1)
+      eslint-import-resolver-node: 0.3.9
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
+    transitivePeerDependencies:
+      - supports-color
+
+  eslint-module-utils@2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@1.21.7)):
+    dependencies:
+      debug: 3.2.7
+    optionalDependencies:
       eslint: 9.22.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0)(eslint@9.22.0(jiti@1.21.7))
     transitivePeerDependencies:
       - supports-color
 
@@ -22694,7 +22720,7 @@ snapshots:
       - supports-color
       - typescript
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -22723,7 +22749,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -22732,9 +22758,9 @@ snapshots:
       array.prototype.flatmap: 1.3.3
       debug: 3.2.7
       doctrine: 2.1.0
-      eslint: 9.22.0(jiti@1.21.7)
+      eslint: 9.22.0(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7)))(eslint@9.22.0(jiti@1.21.7))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import-x@4.6.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1)))(eslint@9.22.0(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -22746,13 +22772,13 @@ snapshots:
       string.prototype.trimend: 1.0.9
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 8.53.0(eslint@9.22.0(jiti@1.21.7))(typescript@5.7.3)
+      '@typescript-eslint/parser': 8.53.0(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@1.21.7)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -22761,9 +22787,9 @@ snapshots:
       array.prototype.flatmap: 1.3.3
       debug: 3.2.7
       doctrine: 2.1.0
-      eslint: 9.22.0(jiti@2.6.1)
+      eslint: 9.22.0(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.6.1))(typescript@5.7.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.22.0(jiti@1.21.7))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -23630,13 +23656,13 @@ snapshots:
       - encoding
       - supports-color
 
-  geist@1.5.1(next@16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
+  geist@1.5.1(next@16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
     dependencies:
-      next: 16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
 
-  geist@1.5.1(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
+  geist@1.5.1(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
     dependencies:
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
 
   generator-function@2.0.1: {}
 
@@ -24644,14 +24670,14 @@ snapshots:
 
   mathml-tag-names@2.1.3: {}
 
-  mcp-handler@1.0.7(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
+  mcp-handler@1.0.7(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
     dependencies:
       '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
       chalk: 5.6.2
       commander: 11.1.0
       redis: 4.7.1
     optionalDependencies:
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
 
   md5@2.3.0:
     dependencies:
@@ -25135,22 +25161,22 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next-sitemap@4.2.3(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
+  next-sitemap@4.2.3(next@16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.11
       fast-glob: 3.3.3
       minimist: 1.2.8
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
 
   next-themes@0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
-  next@16.1.1-canary.28(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4):
+  next@16.1.1-canary.32(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4):
     dependencies:
-      '@next/env': 16.1.1-canary.28
+      '@next/env': 16.1.1-canary.32
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001764
@@ -25159,14 +25185,14 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       styled-jsx: 5.1.6(@babel/core@7.27.3)(react@19.2.3)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.1.1-canary.28
-      '@next/swc-darwin-x64': 16.1.1-canary.28
-      '@next/swc-linux-arm64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-arm64-musl': 16.1.1-canary.28
-      '@next/swc-linux-x64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-x64-musl': 16.1.1-canary.28
-      '@next/swc-win32-arm64-msvc': 16.1.1-canary.28
-      '@next/swc-win32-x64-msvc': 16.1.1-canary.28
+      '@next/swc-darwin-arm64': 16.1.1-canary.32
+      '@next/swc-darwin-x64': 16.1.1-canary.32
+      '@next/swc-linux-arm64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-arm64-musl': 16.1.1-canary.32
+      '@next/swc-linux-x64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-x64-musl': 16.1.1-canary.32
+      '@next/swc-win32-arm64-msvc': 16.1.1-canary.32
+      '@next/swc-win32-x64-msvc': 16.1.1-canary.32
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.56.1
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25176,9 +25202,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.1.1-canary.28(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
+  next@16.1.1-canary.32(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
     dependencies:
-      '@next/env': 16.1.1-canary.28
+      '@next/env': 16.1.1-canary.32
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001764
@@ -25187,14 +25213,14 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       styled-jsx: 5.1.6(@babel/core@7.27.3)(react@19.2.3)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.1.1-canary.28
-      '@next/swc-darwin-x64': 16.1.1-canary.28
-      '@next/swc-linux-arm64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-arm64-musl': 16.1.1-canary.28
-      '@next/swc-linux-x64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-x64-musl': 16.1.1-canary.28
-      '@next/swc-win32-arm64-msvc': 16.1.1-canary.28
-      '@next/swc-win32-x64-msvc': 16.1.1-canary.28
+      '@next/swc-darwin-arm64': 16.1.1-canary.32
+      '@next/swc-darwin-x64': 16.1.1-canary.32
+      '@next/swc-linux-arm64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-arm64-musl': 16.1.1-canary.32
+      '@next/swc-linux-x64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-x64-musl': 16.1.1-canary.32
+      '@next/swc-win32-arm64-msvc': 16.1.1-canary.32
+      '@next/swc-win32-x64-msvc': 16.1.1-canary.32
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.56.1
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25204,9 +25230,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.1.1-canary.28(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
+  next@16.1.1-canary.32(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
     dependencies:
-      '@next/env': 16.1.1-canary.28
+      '@next/env': 16.1.1-canary.32
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001764
@@ -25215,14 +25241,14 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       styled-jsx: 5.1.6(@babel/core@7.28.6)(react@19.2.3)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.1.1-canary.28
-      '@next/swc-darwin-x64': 16.1.1-canary.28
-      '@next/swc-linux-arm64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-arm64-musl': 16.1.1-canary.28
-      '@next/swc-linux-x64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-x64-musl': 16.1.1-canary.28
-      '@next/swc-win32-arm64-msvc': 16.1.1-canary.28
-      '@next/swc-win32-x64-msvc': 16.1.1-canary.28
+      '@next/swc-darwin-arm64': 16.1.1-canary.32
+      '@next/swc-darwin-x64': 16.1.1-canary.32
+      '@next/swc-linux-arm64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-arm64-musl': 16.1.1-canary.32
+      '@next/swc-linux-x64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-x64-musl': 16.1.1-canary.32
+      '@next/swc-win32-arm64-msvc': 16.1.1-canary.32
+      '@next/swc-win32-x64-msvc': 16.1.1-canary.32
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.56.1
       sass: 1.97.2
@@ -25231,25 +25257,25 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4):
+  next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4):
     dependencies:
-      '@next/env': 16.1.1-canary.28
+      '@next/env': 16.1.1-canary.32
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001764
       postcss: 8.4.31
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      styled-jsx: 5.1.6(@babel/core@7.28.6)(react@19.2.3)
+      styled-jsx: 5.1.6(react@19.2.3)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.1.1-canary.28
-      '@next/swc-darwin-x64': 16.1.1-canary.28
-      '@next/swc-linux-arm64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-arm64-musl': 16.1.1-canary.28
-      '@next/swc-linux-x64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-x64-musl': 16.1.1-canary.28
-      '@next/swc-win32-arm64-msvc': 16.1.1-canary.28
-      '@next/swc-win32-x64-msvc': 16.1.1-canary.28
+      '@next/swc-darwin-arm64': 16.1.1-canary.32
+      '@next/swc-darwin-x64': 16.1.1-canary.32
+      '@next/swc-linux-arm64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-arm64-musl': 16.1.1-canary.32
+      '@next/swc-linux-x64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-x64-musl': 16.1.1-canary.32
+      '@next/swc-win32-arm64-msvc': 16.1.1-canary.32
+      '@next/swc-win32-x64-msvc': 16.1.1-canary.32
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.56.1
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25259,25 +25285,25 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
+  next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2):
     dependencies:
-      '@next/env': 16.1.1-canary.28
+      '@next/env': 16.1.1-canary.32
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001764
       postcss: 8.4.31
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      styled-jsx: 5.1.6(@babel/core@7.28.6)(react@19.2.3)
+      styled-jsx: 5.1.6(react@19.2.3)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.1.1-canary.28
-      '@next/swc-darwin-x64': 16.1.1-canary.28
-      '@next/swc-linux-arm64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-arm64-musl': 16.1.1-canary.28
-      '@next/swc-linux-x64-gnu': 16.1.1-canary.28
-      '@next/swc-linux-x64-musl': 16.1.1-canary.28
-      '@next/swc-win32-arm64-msvc': 16.1.1-canary.28
-      '@next/swc-win32-x64-msvc': 16.1.1-canary.28
+      '@next/swc-darwin-arm64': 16.1.1-canary.32
+      '@next/swc-darwin-x64': 16.1.1-canary.32
+      '@next/swc-linux-arm64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-arm64-musl': 16.1.1-canary.32
+      '@next/swc-linux-x64-gnu': 16.1.1-canary.32
+      '@next/swc-linux-x64-musl': 16.1.1-canary.32
+      '@next/swc-win32-arm64-msvc': 16.1.1-canary.32
+      '@next/swc-win32-x64-msvc': 16.1.1-canary.32
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.56.1
       sass: 1.97.2
@@ -26102,7 +26128,7 @@ snapshots:
 
   real-require@0.2.0: {}
 
-  recharts@3.2.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-is@16.13.1)(react@19.2.3)(redux@5.0.1):
+  recharts@3.2.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react-is@17.0.2)(react@19.2.3)(redux@5.0.1):
     dependencies:
       '@reduxjs/toolkit': 2.11.2(react-redux@9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1))(react@19.2.3)
       clsx: 2.1.1
@@ -26112,7 +26138,7 @@ snapshots:
       immer: 10.2.0
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      react-is: 16.13.1
+      react-is: 17.0.2
       react-redux: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
       reselect: 5.1.1
       tiny-invariant: 1.3.3
@@ -27093,6 +27119,11 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.28.6
 
+  styled-jsx@5.1.6(react@19.2.3):
+    dependencies:
+      client-only: 0.0.1
+      react: 19.2.3
+
   stylelint@16.26.1(typescript@5.7.3):
     dependencies:
       '@csstools/css-parser-algorithms': 3.0.5(@csstools/css-tokenizer@3.0.4)
@@ -27741,7 +27772,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  uploadthing@7.3.0(express@5.2.1)(next@16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(tailwindcss@4.1.18):
+  uploadthing@7.3.0(express@5.2.1)(next@16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2))(tailwindcss@4.1.18):
     dependencies:
       '@effect/platform': 0.69.8(effect@3.10.3)
       '@uploadthing/mime-types': 0.3.2
@@ -27749,7 +27780,7 @@ snapshots:
       effect: 3.10.3
     optionalDependencies:
       express: 5.2.1
-      next: 16.1.1-canary.28(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
+      next: 16.1.1-canary.32(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       tailwindcss: 4.1.18
 
   uri-js@4.4.1:
