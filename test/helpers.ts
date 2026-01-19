@@ -209,11 +209,17 @@ export async function saveDocAndAssert(
   // 2. some operation
   // 3. second saveDocAndAssert
   // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
-  const closeButtons = page.locator('.payload-toast-container button.payload-toast-close-button')
-  const count = await closeButtons.count()
+  await closeAllToasts(page)
+}
 
-  for (let i = 0; i < count; i++) {
-    await closeButtons.nth(i).click()
+export async function closeAllToasts(page: Page): Promise<void> {
+  const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
+  let count = await page.locator(toastCloseSelector).count()
+
+  while (count > 0) {
+    await page.locator(toastCloseSelector).first().click()
+    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
+    count--
   }
 }
 

@@ -20,6 +20,7 @@ import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
+  closeAllToasts,
   closeLocaleSelector,
   ensureCompilationIsDone,
   findTableRow,
@@ -802,13 +803,7 @@ describe('Localization', () => {
         'successfully duplicated',
       )
       // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
-      const closeButtons = page.locator(
-        '.payload-toast-container button.payload-toast-close-button',
-      )
-      const count = await closeButtons.count()
-      for (let i = 0; i < count; i++) {
-        await closeButtons.nth(i).click()
-      }
+      await closeAllToasts(page)
 
       await expect.poll(() => page.url()).not.toContain(id)
       await page.waitForURL((url) => !url.toString().includes(id))
