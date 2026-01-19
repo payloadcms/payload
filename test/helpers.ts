@@ -203,6 +203,18 @@ export async function saveDocAndAssert(
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
+
+  // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
+  // 1. saveDocAndAssert
+  // 2. some operation
+  // 3. second saveDocAndAssert
+  // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
+  const closeButtons = page.locator('.payload-toast-container button.payload-toast-close-button')
+  const count = await closeButtons.count()
+
+  for (let i = 0; i < count; i++) {
+    await closeButtons.nth(i).click()
+  }
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
