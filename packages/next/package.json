@@ -131,7 +131,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.1.1-canary.32",
+    "@next/eslint-plugin-next": "16.1.1-canary.33",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.2.8",
@@ -145,7 +145,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.4.10 || ^16.1.1-canary.32",
+    "next": "^15.4.10 || ^16.1.1-canary.33",
     "payload": "workspace:*"
   },
   "engines": {
