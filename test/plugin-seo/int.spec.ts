@@ -58,23 +58,29 @@ describe('@payloadcms/plugin-seo', () => {
     await payload.destroy()
   })
 
-  it('should return correct value and previousValue data in hooks', async () => {
+  it('should return different previousValue and value in afterChange hooks when relationship changes', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
 
+    // The existing page has mediaDoc as featuredMedia
+    // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
     await payload.update({
       collection: 'pages',
       id: page.id,
       data: {
+        // this field has an afterChange hook that will log 'IDENTICAL VALUES'
+        // when previousValue === value
         featuredMedia: mediaDoc2.id,
       },
       depth: 0,
     })
 
-    const hookCalls = consoleSpy.mock.calls.filter((call) =>
+    const identicalValuesLogs = consoleSpy.mock.calls.filter((call) =>
       call.some((arg) => typeof arg === 'string' && arg.includes('IDENTICAL VALUES')),
     )
 
-    expect(hookCalls.length).toBe(0)
+    // If 'IDENTICAL VALUES' was logged, it means previousValue and value
+    // because we updated the field, they should be different
+    expect(identicalValuesLogs.length).toBe(0)
 
     consoleSpy.mockRestore()
   })
