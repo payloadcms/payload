@@ -667,8 +667,9 @@ describe('Localization', () => {
     })
 
     test('blocks - should show fallback checkbox for non-default locale', async () => {
-      await changeLocale(page, 'en')
+      // Navigate to page first (previous test may have left page on API endpoint)
       await page.goto(urlBlocks.create)
+      await changeLocale(page, 'en')
       const titleLocator = page.locator('#field-title')
       await titleLocator.fill('Block Test')
       await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
@@ -800,10 +801,20 @@ describe('Localization', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'successfully duplicated',
       )
+      // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
+      const closeButtons = page.locator(
+        '.payload-toast-container button.payload-toast-close-button',
+      )
+      const count = await closeButtons.count()
+      for (let i = 0; i < count; i++) {
+        await closeButtons.nth(i).click()
+      }
 
       await expect.poll(() => page.url()).not.toContain(id)
       await page.waitForURL((url) => !url.toString().includes(id))
 
+      // Wait for page to be ready after duplicate redirect
+      await expect(page.locator('.localizer button.popup-button')).toBeVisible()
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
       await changeLocale(page, spanishLocale)
