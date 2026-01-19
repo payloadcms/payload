@@ -314,7 +314,7 @@ export const promise = async ({
       if (isNamedTab) {
         tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
         tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
-        tabPreviousSiblingDoc = (previousSiblingDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({
