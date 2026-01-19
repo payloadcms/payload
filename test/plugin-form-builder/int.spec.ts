@@ -697,7 +697,8 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdSubmissionIds.push(submission.id)
 
         expect(submission).toHaveProperty('id')
-        expect(submission.submissionData[0]).toHaveProperty('value', mediaDoc.id)
+        // IDs are stored as strings in submission data
+        expect(submission.submissionData?.[0]).toHaveProperty('value', String(mediaDoc.id))
       })
     })
 
@@ -959,7 +960,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         ).toHaveProperty('value', 'john@example.com')
         expect(
           submission.submissionData.find((d: { field: string }) => d.field === 'avatar'),
-        ).toHaveProperty('value', mediaDoc.id)
+        ).toHaveProperty('value', String(mediaDoc.id))
       })
 
       it('should handle form with no upload fields same as before', async () => {
@@ -1049,7 +1050,9 @@ describe('@payloadcms/plugin-form-builder', () => {
           id: avatarData.value,
         })
 
-        expect(mediaDoc).toHaveProperty('id', avatarData.value)
+        expect(mediaDoc).toBeDefined()
+        // Compare as strings since submission data stores IDs as strings
+        expect(String(mediaDoc.id)).toBe(String(avatarData.value))
         expect(mediaDoc).toHaveProperty('filename')
       })
 
