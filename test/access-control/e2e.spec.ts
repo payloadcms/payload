@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { formatAdminURL, wait  } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -488,8 +488,7 @@ describe('Access Control', () => {
       await page.locator('#field-name').fill('name')
       await expect(page.locator('#field-name')).toHaveValue('name')
       await expect(page.locator('#action-save')).toBeVisible()
-      await page.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await saveDocAndAssert(page)
       await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('#field-name')).toBeDisabled()
     })
@@ -543,16 +542,14 @@ describe('Access Control', () => {
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill('anonymous@email.com')
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
 
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill(devUser.email)
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeEnabled()
         await expect(page.locator('#action-save')).toBeVisible()
       })
