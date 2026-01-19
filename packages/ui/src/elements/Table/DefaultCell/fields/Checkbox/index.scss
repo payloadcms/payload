@@ -20,5 +20,15 @@
 
     background: var(--theme-elevation-100);
     color: var(--theme-elevation-800);
+
+    &[data-checked='true'] {
+      background: var(--theme-success-100);
+      color: var(--theme-success-600);
+    }
+
+    &[data-checked='false'] {
+      background: var(--theme-error-100);
+      color: var(--theme-error-600);
+    }
   }
 }
