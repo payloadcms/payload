@@ -22,6 +22,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
@@ -444,7 +445,7 @@ describe('lexicalBlocks', () => {
 
       await blockTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error')
+      await saveDocAndAssert(page, '#action-save', 'error',{disableDismissAllToasts: true})
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
@@ -541,11 +542,11 @@ describe('lexicalBlocks', () => {
         .getByText('Some text below relationship node 1')
         .first()
       await expect(spanInSubEditor).toBeVisible()
-      await spanInSubEditor.click() // Use click, because focus does not work
+      await spanInSubEditor.click({delay: 100}) // Use click, because focus does not work
 
       // Now go to the END of the span while selecting the text
       for (let i = 0; i < 18; i++) {
-        await page.keyboard.press('Shift+ArrowRight')
+        await page.keyboard.press('Shift+ArrowRight', {delay: 50})
       }
       // The following text should now be selectedelationship node 1
 
@@ -1545,6 +1546,8 @@ async function navigateToLexicalFields(
   await expect(richTextField).toBeVisible()
   // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
   await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(10)
+
+  await waitForFormReady(page)
 
   return {
     richTextField,
