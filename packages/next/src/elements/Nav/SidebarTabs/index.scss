@@ -10,7 +10,6 @@
     &__tabs {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
-      gap: 2px;
       margin-bottom: var(--base);
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
