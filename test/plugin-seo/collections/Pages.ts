@@ -50,13 +50,13 @@ export const Pages: CollectionConfig = {
               relationTo: 'media',
               hooks: {
                 afterChange: [
-                  ({ previousValue, value }) => {
+                  ({ previousValue, value, req }) => {
                     if (
                       previousValue === value &&
                       previousValue !== null &&
                       previousValue !== undefined
                     ) {
-                      console.log('IDENTICAL VALUES')
+                      req.context.identicalCount = ((req.context.identicalCount as number) || 0) + 1
                     }
 
                     return value

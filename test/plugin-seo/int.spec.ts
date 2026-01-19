@@ -59,30 +59,24 @@ describe('@payloadcms/plugin-seo', () => {
   })
 
   it('should return different previousValue and value in afterChange hooks when relationship changes', async () => {
-    const consoleSpy = vi.spyOn(console, 'log')
-
     // The existing page has mediaDoc as featuredMedia
     // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
+    const context: { identicalCount?: number } = {}
     await payload.update({
       collection: 'pages',
       id: page.id,
       data: {
-        // this field has an afterChange hook that will log 'IDENTICAL VALUES'
+        // this field has an afterChange hook that will increment req.context.identicalCount
         // when previousValue === value
         featuredMedia: mediaDoc2.id,
       },
       depth: 0,
+      context,
     })
 
-    const identicalValuesLogs = consoleSpy.mock.calls.filter((call) =>
-      call.some((arg) => typeof arg === 'string' && arg.includes('IDENTICAL VALUES')),
-    )
-
-    // If 'IDENTICAL VALUES' was logged, it means previousValue and value
-    // because we updated the field, they should be different
-    expect(identicalValuesLogs.length).toBe(0)
-
-    consoleSpy.mockRestore()
+    // If identicalCount was incremented, it means previousValue === value incorrectly
+    // Since we updated the field, they should be different, so count should be undefined
+    expect(context.identicalCount).toBeUndefined()
   })
 
   it('should add meta title', async () => {
