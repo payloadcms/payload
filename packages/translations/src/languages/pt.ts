@@ -122,6 +122,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
     restoringTitle:
       'Ocorreu um erro ao restaurar {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    revertingDocument: 'Ocorreu um problema ao reverter este documento.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
     unableToCopy: 'Não é possível copiar.',
@@ -556,6 +557,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Você está prestes a reverter as alterações desse documento para seu estado de publicação. Tem certeza?',
     aboutToUnpublish: 'Você está prestes a despublicar esse documento. Tem certeza?',
+    aboutToUnpublishIn: 'Está prestes a não publicar este documento em {{locale}}. Tem a certeza?',
     aboutToUnpublishSelection:
       'Você está prestes a cancelar a publicação de todos os {{label}} na seleção. Tem certeza?',
     autosave: 'Salvamento automático',
@@ -603,6 +605,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revertendo...',
     revertToPublished: 'Reverter para publicado',
+    revertUnsuccessful:
+      'Reversão não bem-sucedida. Nenhuma versão publicada anteriormente encontrada.',
     saveDraft: 'Salvar rascunho',
     scheduledSuccessfully: 'Agendado com sucesso.',
     schedulePublish: 'Agendar Publicação',
@@ -613,6 +617,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versão Específica',
     status: 'Status',
     unpublish: 'Despublicar',
+    unpublished: 'Não publicado',
+    unpublishedSuccessfully: 'Não publicado com sucesso.',
+    unpublishIn: 'Despublicar em {{locale}}',
     unpublishing: 'Despublicando...',
     version: 'Versão',
     versionAgo: 'há {{distance}}',

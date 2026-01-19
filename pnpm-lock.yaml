@@ -950,8 +950,8 @@ importers:
         specifier: 4.20.3
         version: 4.20.3
       undici:
-        specifier: 7.10.0
-        version: 7.10.0
+        specifier: 7.18.2
+        version: 7.18.2
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -13677,6 +13677,10 @@ packages:
     resolution: {integrity: sha512-Vqs8HTzjpQXZeXdpsfChQTlafcMQaaIwnGwLam1wudSSjlJeQ3bw1j+TLPePgrCnCpUXx7Ba5Pdpf5OBih62NQ==}
     engines: {node: '>=20.18.1'}
 
+  undici@7.18.2:
+    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
+    engines: {node: '>=20.18.1'}
+
   unenv@2.0.0-rc.21:
     resolution: {integrity: sha512-Wj7/AMtE9MRnAXa6Su3Lk0LNCfqDYgfwVjwRFVum9U7wsto1imuHqk4kTm7Jni+5A0Hn7dttL6O/zjvUvoo+8A==}
 
@@ -25311,6 +25315,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+    optional: true
 
   node-abi@3.85.0:
     dependencies:
@@ -27680,6 +27685,8 @@ snapshots:
   undici@7.10.0: {}
 
   undici@7.14.0: {}
+
+  undici@7.18.2: {}
 
   unenv@2.0.0-rc.21:
     dependencies:
