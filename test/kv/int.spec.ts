@@ -7,6 +7,7 @@ import { Miniflare } from 'miniflare'
 import path from 'path'
 import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 

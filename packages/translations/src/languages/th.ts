@@ -78,6 +78,11 @@ export const thTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
+  dashboard: {
+    addWidget: 'เพิ่มวิดเจ็ต',
+    deleteWidget: 'ลบวิดเจ็ต {{id}}',
+    searchWidgets: 'ค้นหาวิดเจ็ต...',
+  },
   error: {
     accountAlreadyActivated: 'บัญชีนี้ถูกเปิดใช้งานไปแล้ว',
     autosaving: 'เกิดปัญหาระหว่างการบันทึกเอกสารอัตโนมัติ',
@@ -114,6 +119,7 @@ export const thTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'เกิดปัญหาระหว่างการอัปโหลดไฟล์',
     restoringTitle:
       'เกิดข้อผิดพลาดขณะกำลังคืนค่า {{title}} กรุณาตรวจสอบการเชื่อมต่อของคุณและลองอีกครั้ง',
+    revertingDocument: 'เกิดปัญหาขณะกลับไปยังเอกสารนี้',
     tokenInvalidOrExpired: 'Token ไม่ถูกต้องหรือหมดอายุ',
     tokenNotProvided: 'ไม่ได้รับโทเค็น',
     unableToCopy: 'ไม่สามารถคัดลอกได้',
@@ -537,6 +543,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'คุณกำลังจะย้อนการเปลี่ยนแปลงของเอกสารนี้ไปยังเวอร์ชันที่เผยแพร่อยู่ คุณต้องการดำเนินการต่อหรือไม่?',
     aboutToUnpublish: 'คุณกำลังจะยกเลิกเผยแพร่เอกสารนี้ คุณต้องการดำเนินการต่อหรือไม่?',
+    aboutToUnpublishIn: 'คุณกำลังจะยกเลิกการเผยแพร่เอกสารนี้ใน {{locale}} คุณแน่ใจไหม?',
     aboutToUnpublishSelection: 'คุณกำลังจะเลิกเผยแพร่ {{label}} ทั้งหมดในส่วนที่เลือก คุณแน่ใจไหม?',
     autosave: 'บันทึกอัตโนมัติ',
     autosavedSuccessfully: 'บันทึกอัตโนมัติสำเร็จ',
@@ -584,6 +591,7 @@ export const thTranslations: DefaultTranslationsObject = {
     restoring: 'กำลังกู้คืน...',
     reverting: 'กำลังย้อน...',
     revertToPublished: 'ย้อนกลับไปเวอร์ชันที่เผยแพร่อยู่',
+    revertUnsuccessful: 'ย้อนกลับไม่สำเร็จ ไม่พบเวอร์ชันที่เผยแพร่ก่อนหน้านี้',
     saveDraft: 'บันทึกร่าง',
     scheduledSuccessfully: 'ได้ทำการจัดตารางเรียบร้อยแล้ว',
     schedulePublish: 'ตั้งเวลาเผยแพร่',
@@ -594,6 +602,9 @@ export const thTranslations: DefaultTranslationsObject = {
     specificVersion: 'เวอร์ชันเฉพาะ',
     status: 'สถานะ',
     unpublish: 'หยุดเผยแพร่',
+    unpublished: 'ยังไม่ได้เผยแพร่',
+    unpublishedSuccessfully: 'ยกเลิกการเผยแพร่สำเร็จ',
+    unpublishIn: 'ยกเลิกการเผยแพร่ใน {{locale}}',
     unpublishing: 'กำลังหยุดการเผยแพร่...',
     version: 'เวอร์ชัน',
     versionAgo: '{{distance}} ที่แล้ว',

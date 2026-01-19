@@ -10,6 +10,11 @@ import { getTenantFromCookie } from './getTenantFromCookie.js'
 import { getTenantOptions } from './getTenantOptions.js'
 
 type Args = {
+  /**
+   * This is no longer needed and is handled internally.
+   *
+   * @deprecated
+   */
   basePath?: string
   docID?: number | string
   headers: Headers
@@ -26,7 +31,6 @@ type Args = {
 }
 export async function getGlobalViewRedirect({
   slug: collectionSlug,
-  basePath,
   docID,
   headers,
   payload,
@@ -121,7 +125,6 @@ export async function getGlobalViewRedirect({
     // no tenants were found, redirect to the admin view
     return formatAdminURL({
       adminRoute: payload.config.routes.admin,
-      basePath,
       path: '',
       serverURL: payload.config.serverURL,
     })
@@ -130,7 +133,6 @@ export async function getGlobalViewRedirect({
   if (redirectRoute) {
     return formatAdminURL({
       adminRoute: payload.config.routes.admin,
-      basePath,
       path: redirectRoute,
       serverURL: payload.config.serverURL,
     })

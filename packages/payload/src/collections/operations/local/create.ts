@@ -89,6 +89,10 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
+   * Publish to all locales
+   */
+  publishAllLocales?: boolean
+  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
@@ -151,6 +155,7 @@ export async function createLocal<
     overrideAccess = true,
     overwriteExistingFiles = false,
     populate,
+    publishAllLocales,
     select,
     showHiddenFields,
   } = options
@@ -178,6 +183,7 @@ export async function createLocal<
     overrideAccess,
     overwriteExistingFiles,
     populate,
+    publishAllLocales,
     req,
     select,
     showHiddenFields,

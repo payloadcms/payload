@@ -60,6 +60,7 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -322,7 +323,6 @@ export function DefaultEditView({
         const redirectRoute = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
-          serverURL,
         })
 
         startRouteTransition(() => router.push(redirectRoute))
@@ -413,7 +413,6 @@ export function DefaultEditView({
       incrementVersionCount,
       adminRoute,
       locale,
-      serverURL,
       startRouteTransition,
       router,
       resetUploadEdits,
@@ -623,6 +622,7 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}

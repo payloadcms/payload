@@ -46,6 +46,7 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
 no-restrict-file-*
 
@@ -344,6 +345,11 @@ test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
 /media-documents
+/media-with-always-insert-fields
+
 
 
 licenses.csv
+
+# SQLite DB
+payload.db

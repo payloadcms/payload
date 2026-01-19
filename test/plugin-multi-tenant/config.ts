@@ -15,16 +15,36 @@ import { Relationships } from './collections/Relationships.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
-import { autosaveGlobalSlug, menuItemsSlug, menuSlug } from './shared.js'
+import { autosaveGlobalSlug, menuItemsSlug, menuSlug, notTenantedSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Tenants, Users, MenuItems, Menu, AutosaveGlobal, Relationships],
+  collections: [
+    Tenants,
+    Users,
+    MenuItems,
+    Menu,
+    AutosaveGlobal,
+    Relationships,
+    {
+      slug: notTenantedSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+  ],
   admin: {
     autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
+      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
         Icon: '/components/Icon/index.js#Icon',

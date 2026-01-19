@@ -97,7 +97,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
             <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
-              href={formatAdminURL({ adminRoute, path: accountRoute, serverURL })}
+              href={formatAdminURL({ adminRoute, path: accountRoute })}
               prefetch={false}
               tabIndex={0}
             >

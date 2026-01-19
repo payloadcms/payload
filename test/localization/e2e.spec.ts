@@ -12,6 +12,7 @@ import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -36,6 +37,7 @@ import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArray
 import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  allFieldsLocalizedSlug,
   arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
@@ -69,6 +71,7 @@ let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
 let noLocalizedFieldsURL: AdminUrlUtil
 let urlBlocks: AdminUrlUtil
+let urlAllFieldsLocalized: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -97,6 +100,7 @@ describe('Localization', () => {
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
     urlBlocks = new AdminUrlUtil(serverURL, blocksCollectionSlug)
+    urlAllFieldsLocalized = new AdminUrlUtil(serverURL, allFieldsLocalizedSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -121,14 +125,15 @@ describe('Localization', () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
+      await expect(page.locator('.popup__content')).toBeVisible()
     })
 
     test('should filter locale with filterAvailableLocales', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+      await expect(page.locator('.popup__content')).toBeVisible()
+      await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
     test('should filter version locale selector with filterAvailableLocales', async () => {
@@ -154,11 +159,9 @@ describe('Localization', () => {
 
       await page.locator('.localizer button.popup-button').first().click()
 
-      await expect(page.locator('.localizer .popup')).toHaveClass(/popup--active/)
+      await expect(page.locator('.popup__content')).toBeVisible()
 
-      const activeOption = page.locator(
-        `.localizer .popup.popup--active .popup-button-list__button--selected`,
-      )
+      const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
 
       await expect(activeOption).toBeVisible()
       const tagName = await activeOption.evaluate((node) => node.tagName)
@@ -545,7 +548,7 @@ describe('Localization', () => {
       await openLocaleSelector(page)
 
       const localeToSelect = page
-        .locator('.localizer .popup.popup--active .popup-button-list__button')
+        .locator('.popup__content .popup-button-list__button')
         .locator('.localizer__locale-code', {
           hasText: `${spanishLocale}`,
         })
@@ -635,7 +638,11 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${arrayWithFallbackCollectionSlug}/${id}`,
+        serverURL,
+      })
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')
@@ -713,13 +720,42 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
-      await chevronButton.click()
       await saveDocAndAssert(page, '#publish-locale')
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
+    })
+
+    test('blocks - ensure publish locale popup is visible on smaller screen sizes', async () => {
+      // This verifies that the Popup component is not hidden behind overflow: hidden of the parent element,
+      // which is set for smaller screen sizes.
+      // This was an issue until createPortal was introduced in the Popup component.
+      await page.setViewportSize({ width: 480, height: 720 })
+      await page.goto(urlBlocks.create)
+      await page.locator('.form-submit .popup-button').click()
+
+      const popup = page.locator('.popup__content')
+      await expect(popup).toBeVisible()
+
+      // Verify popup is actually visible (not clipped by overflow: hidden)
+      // by checking if elementFromPoint at popup's center returns the popup or its child
+      const box = await popup.boundingBox()
+      expect(box).not.toBeNull()
+
+      const centerX = box!.x + box!.width / 2
+      const centerY = box!.y + box!.height / 2
+
+      const isActuallyVisible = await page.evaluate(
+        ({ selector, x, y }) => {
+          const popup = document.querySelector(selector)
+          const elementAtPoint = document.elementFromPoint(x, y)
+          return popup?.contains(elementAtPoint) ?? false
+        },
+        { selector: '.popup__content', x: centerX, y: centerY },
+      )
+
+      expect(isActuallyVisible).toBe(true)
     })
   })
 
@@ -774,6 +810,57 @@ describe('Localization', () => {
       await expect(page.locator('#field-title')).toBeEmpty()
       await changeLocale(page, 'pt')
       await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
+    })
+  })
+
+  describe('localize status', () => {
+    describe('versions list', () => {
+      test('should show currently published doc in version list', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+      })
+
+      test('should only show published status when viewing the published locale', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await changeLocale(page, spanishLocale)
+
+        // publish es
+        await page.locator('#field-text').fill('ES Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+        await changeLocale(page, defaultLocale)
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+      })
     })
   })
 

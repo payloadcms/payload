@@ -4,10 +4,12 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
+  formatAdminURL,
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
 } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -45,7 +47,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -109,16 +110,34 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let url: string
           let method: string
           let entitySlug: string
+          const params = qs.stringify(
+            {
+              autosave: true,
+              depth: 0,
+              draft: true,
+              'fallback-locale': 'null',
+              locale,
+            },
+            {
+              addQueryPrefix: true,
+            },
+          )
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/${entitySlug}/${id}${params}`,
+            })
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${locale}&fallback-locale=null`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/globals/${entitySlug}${params}`,
+            })
             method = 'POST'
           }
 

@@ -1,7 +1,9 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
@@ -903,6 +905,23 @@ describe('Sort', () => {
             },
           })
           .then((res) => res.json())
+
+        expect(res.docs.map((post) => post.text)).toEqual([
+          'Post 10', // 5, 10
+          'Post 3', // 5, 3
+          'Post 2', // 10, 2
+          'Post 1', // 10, 1
+          'Post 12', // 20, 12
+          'Post 11', // 20, 11
+        ])
+      })
+    })
+
+    describe('Sort by multiple fields as array', () => {
+      it('should sort posts by multiple fields using qs-esm array params', async () => {
+        const query = qs.stringify({ sort: ['number2', '-number'] })
+
+        const res = await restClient.GET(`/posts?${query}`).then((res) => res.json())
 
         expect(res.docs.map((post) => post.text)).toEqual([
           'Post 10', // 5, 10

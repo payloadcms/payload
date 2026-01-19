@@ -68,6 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    'media-with-always-insert-fields': MediaWithAlwaysInsertField;
+    'media-with-client-uploads': MediaWithClientUpload;
+    'media-with-direct-access': MediaWithDirectAccess;
     'media-with-dynamic-prefix': MediaWithDynamicPrefix;
     'media-with-prefix': MediaWithPrefix;
     'media-with-signed-downloads': MediaWithSignedDownload;
@@ -80,6 +83,9 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-with-always-insert-fields': MediaWithAlwaysInsertFieldsSelect<false> | MediaWithAlwaysInsertFieldsSelect<true>;
+    'media-with-client-uploads': MediaWithClientUploadsSelect<false> | MediaWithClientUploadsSelect<true>;
+    'media-with-direct-access': MediaWithDirectAccessSelect<false> | MediaWithDirectAccessSelect<true>;
     'media-with-dynamic-prefix': MediaWithDynamicPrefixSelect<false> | MediaWithDynamicPrefixSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     'media-with-signed-downloads': MediaWithSignedDownloadsSelect<false> | MediaWithSignedDownloadsSelect<true>;
@@ -92,6 +98,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -157,6 +164,64 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-always-insert-fields".
+ */
+export interface MediaWithAlwaysInsertField {
+  id: string;
+  alt?: string | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-client-uploads".
+ */
+export interface MediaWithClientUpload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-direct-access".
+ */
+export interface MediaWithDirectAccess {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -268,6 +333,18 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'media-with-always-insert-fields';
+        value: string | MediaWithAlwaysInsertField;
+      } | null)
+    | ({
+        relationTo: 'media-with-client-uploads';
+        value: string | MediaWithClientUpload;
+      } | null)
+    | ({
+        relationTo: 'media-with-direct-access';
+        value: string | MediaWithDirectAccess;
+      } | null)
+    | ({
         relationTo: 'media-with-dynamic-prefix';
         value: string | MediaWithDynamicPrefix;
       } | null)
@@ -366,6 +443,61 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-always-insert-fields_select".
+ */
+export interface MediaWithAlwaysInsertFieldsSelect<T extends boolean = true> {
+  alt?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-client-uploads_select".
+ */
+export interface MediaWithClientUploadsSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-direct-access_select".
+ */
+export interface MediaWithDirectAccessSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -493,6 +625,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

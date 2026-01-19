@@ -128,7 +128,6 @@ export function DefaultListView(props: ListViewClientProps) {
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
-                serverURL,
               })
             : undefined,
       }

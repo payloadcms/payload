@@ -1,12 +1,12 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig, TabAsField } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   i18n: I18n<any, any>
   parentIndexPath: string
   parentSchemaPath: string
@@ -25,8 +25,7 @@ export const traverseFields = ({
     const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
-      parentPath: '',
+      parentIndexPath,
       parentSchemaPath,
     })
 
@@ -59,7 +58,7 @@ export const traverseFields = ({
             fields: block.fields,
             i18n,
             parentIndexPath: '',
-            parentSchemaPath: blockSchemaPath,
+            parentSchemaPath: schemaPath + '.' + block.slug,
             schemaMap,
           })
         })
@@ -73,7 +72,7 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
-          parentSchemaPath,
+          parentSchemaPath: schemaPath,
           schemaMap,
         })
 
@@ -95,14 +94,14 @@ export const traverseFields = ({
             fields: field.fields,
             i18n,
             parentIndexPath: indexPath,
-            parentSchemaPath,
+            parentSchemaPath: schemaPath,
             schemaMap,
           })
         }
 
         break
 
-      case 'richText':
+      case 'richText': {
         if (!field?.editor) {
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
@@ -122,35 +121,35 @@ export const traverseFields = ({
         }
 
         break
+      }
 
-      case 'tabs':
-        field.tabs.map((tab, tabIndex) => {
-          const isNamedTab = tabHasName(tab)
+      case 'tab': {
+        const isNamedTab = tabHasName(field)
 
-          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath: '',
-            parentSchemaPath,
-          })
-
-          schemaMap.set(tabSchemaPath, tab)
-
-          traverseFields({
-            config,
-            fields: tab.fields,
-            i18n,
-            parentIndexPath: isNamedTab ? '' : tabIndexPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-            schemaMap,
-          })
+        traverseFields({
+          config,
+          fields: field.fields,
+          i18n,
+          parentIndexPath: isNamedTab ? '' : indexPath,
+          parentSchemaPath: schemaPath,
+          schemaMap,
         })
 
         break
+      }
+
+      case 'tabs': {
+        traverseFields({
+          config,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
+          schemaMap,
+        })
+
+        break
+      }
     }
   }
 }

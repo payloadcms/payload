@@ -33,7 +33,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     config: {
       routes: { admin: adminRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -73,7 +72,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
         ? formatAdminURL({
             adminRoute,
             path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
-            serverURL,
           })
         : ''
     }

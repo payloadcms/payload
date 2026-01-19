@@ -20,7 +20,7 @@
 ```
 
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
-- `int.spec.ts` [Optional] - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
+- `int.spec.ts` [Optional] - This is the test file run by vitest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` [Optional] - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests.
 - `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types _community`.
 
@@ -34,11 +34,11 @@ An issue does not need to have failing tests — reproduction steps with your fo
 
 ### Running integration tests (Payload API tests)
 
-First install [Jest Runner for VSVode](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner).
+First install [Vitest Plugin for VSCode](https://marketplace.visualstudio.com/items?itemName=vitest.explorer).
 
 There are a couple ways run integration tests:
 
-- **Granularly** - you can run individual tests in vscode by installing the Jest Runner plugin and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
+- **Granularly** - you can run individual tests in vscode by installing the [Vitest Plugin](https://marketplace.visualstudio.com/items?itemName=vitest.explorer) and using that to run individual tests. Clicking the `debug` button will run the test in debug mode allowing you to set break points.
 
   <img src="https://raw.githubusercontent.com/payloadcms/payload/main/.github/assets/int-debug.png" />
 

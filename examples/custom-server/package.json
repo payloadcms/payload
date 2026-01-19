@@ -17,7 +17,7 @@
     "cross-env": "^7.0.3",
     "express": "^4.21.1",
     "graphql": "^16.8.1",
-    "next": "15.4.9",
+    "next": "15.4.10",
     "payload": "latest",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
