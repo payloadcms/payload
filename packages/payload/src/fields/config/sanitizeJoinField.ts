@@ -13,6 +13,7 @@ export const sanitizeJoinField = ({
   joinPath,
   joins,
   parentIsLocalized,
+  pathToField: incomingPathToField,
   polymorphicJoins,
   validateOnly,
 }: {
@@ -21,6 +22,7 @@ export const sanitizeJoinField = ({
   joinPath?: string
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+  pathToField: string[]
   polymorphicJoins?: SanitizedJoin[]
   validateOnly?: boolean
 }) => {
@@ -52,6 +54,7 @@ export const sanitizeJoinField = ({
         joinPath,
         joins,
         parentIsLocalized,
+        pathToField: [...incomingPathToField, sanitizedField.name],
         polymorphicJoins,
         validateOnly: true,
       })
@@ -64,11 +67,13 @@ export const sanitizeJoinField = ({
     return
   }
 
+  const pathToFieldString = incomingPathToField.join(' > ')
+
   const joinCollection = config.collections?.find(
     (collection) => collection.slug === field.collection,
   )
   if (!joinCollection) {
-    throw new InvalidFieldJoin(field)
+    throw new InvalidFieldJoin(field, pathToFieldString)
   }
 
   const relationshipField = getFieldByPath({
@@ -80,7 +85,7 @@ export const sanitizeJoinField = ({
     !relationshipField ||
     (relationshipField.field.type !== 'relationship' && relationshipField.field.type !== 'upload')
   ) {
-    throw new InvalidFieldJoin(join.field)
+    throw new InvalidFieldJoin(join.field, pathToFieldString)
   }
 
   if (relationshipField.pathHasLocalized) {

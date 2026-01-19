@@ -388,7 +388,7 @@ export const createClientField = ({
 
     case 'richText': {
       if (!incomingField?.editor) {
-        throw new MissingEditorProp(incomingField) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+        throw new MissingEditorProp({ fieldName: incomingField.name }) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
       if (typeof incomingField?.editor === 'function') {
