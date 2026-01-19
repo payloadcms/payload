@@ -90,6 +90,10 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'function') {
+              // Special handling for upload field - pass uploadCollections from top-level config
+              if (fieldKey === 'upload') {
+                return block(formConfig.uploadCollections || [])
+              }
               return block(fieldConfig)
             }
 

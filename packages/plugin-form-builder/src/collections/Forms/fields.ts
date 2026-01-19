@@ -715,7 +715,111 @@ const Message: Block = {
   },
 }
 
-export const fields = {
+const Upload = (uploadCollections: string[]): Block => {
+  return {
+    slug: 'upload',
+    fields: [
+      {
+        type: 'row',
+        fields: [
+          {
+            ...name,
+            admin: {
+              width: '50%',
+            },
+          },
+          {
+            ...label,
+            admin: {
+              width: '50%',
+            },
+          },
+        ],
+      },
+      {
+        name: 'uploadCollection',
+        type: 'select',
+        admin: {
+          description: 'Select which upload collection to store files in',
+        },
+        label: 'Upload Collection',
+        options: uploadCollections.map((slug) => ({
+          label: slug,
+          value: slug,
+        })),
+        required: true,
+      },
+      {
+        name: 'mimeTypes',
+        type: 'array',
+        admin: {
+          description:
+            'Restrict allowed file types (e.g., image/*, application/pdf). Leave empty to allow all types.',
+        },
+        fields: [
+          {
+            name: 'mimeType',
+            type: 'text',
+            label: 'MIME Type',
+            required: true,
+          },
+        ],
+        label: 'Allowed File Types',
+        labels: {
+          plural: 'MIME Types',
+          singular: 'MIME Type',
+        },
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            ...width,
+            admin: {
+              width: '50%',
+            },
+          },
+          {
+            name: 'maxFileSize',
+            type: 'number',
+            admin: {
+              description: 'Maximum file size in bytes. Leave empty for no limit.',
+              width: '50%',
+            },
+            label: 'Max File Size (bytes)',
+          },
+        ],
+      },
+      {
+        type: 'row',
+        fields: [
+          {
+            ...required,
+            admin: {
+              width: '50%',
+            },
+          },
+          {
+            name: 'multiple',
+            type: 'checkbox',
+            admin: {
+              width: '50%',
+            },
+            label: 'Allow Multiple Files',
+          },
+        ],
+      },
+    ],
+    labels: {
+      plural: 'Upload Fields',
+      singular: 'Upload',
+    },
+  }
+}
+
+export const fields: {
+  [key: string]: ((arg?: any) => Block) | Block
+} = {
   checkbox: Checkbox,
   country: Country,
   date: Date,
@@ -728,6 +832,5 @@ export const fields = {
   state: State,
   text: Text,
   textarea: TextArea,
-} as {
-  [key: string]: ((fieldConfig?: boolean | FieldConfig) => Block) | Block
+  upload: Upload,
 }
