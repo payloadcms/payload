@@ -1,5 +1,6 @@
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
@@ -39,7 +40,7 @@ test.describe('Bulk Edit', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
 
@@ -411,7 +412,7 @@ test.describe('Bulk Edit', () => {
   test('should not override un-edited values if it has a defaultValue', async () => {
     await deleteAllPosts()
 
-    const postData = {
+    const postData: RequiredDataFromCollectionSlug<'posts'> = {
       title: 'Post 1',
       array: [
         {
@@ -816,7 +817,7 @@ async function deleteAllPosts() {
 }
 
 async function createPost(
-  dataOverrides?: Partial<Post>,
+  dataOverrides?: RequiredDataFromCollectionSlug<'posts'> ,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
   return payload.create({
