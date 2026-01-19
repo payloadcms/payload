@@ -44,6 +44,26 @@ export const Pages: CollectionConfig = {
                 position: 'sidebar',
               },
             },
+            {
+              name: 'featuredMedia',
+              type: 'relationship',
+              relationTo: 'media',
+              hooks: {
+                afterChange: [
+                  ({ previousValue, value }) => {
+                    if (
+                      previousValue === value &&
+                      previousValue !== null &&
+                      previousValue !== undefined
+                    ) {
+                      console.log('IDENTICAL VALUES')
+                    }
+
+                    return value
+                  },
+                ],
+              },
+            },
           ],
         },
       ],

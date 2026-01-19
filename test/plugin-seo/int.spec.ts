@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
@@ -17,6 +17,7 @@ let payload: Payload
 describe('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
+  let mediaDoc2 = null
 
   beforeAll(async () => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -38,16 +39,44 @@ describe('@payloadcms/plugin-seo', () => {
       data: {
         title: 'Test page',
         slug: 'test-page',
+        featuredMedia: mediaDoc.id,
         meta: {
           title: 'Test page',
         },
       },
       depth: 0,
     })
+
+    mediaDoc2 = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    })
   })
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  it('should return correct value and previousValue data in hooks', async () => {
+    const consoleSpy = vi.spyOn(console, 'log')
+
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: {
+        featuredMedia: mediaDoc2.id,
+      },
+      depth: 0,
+    })
+
+    const hookCalls = consoleSpy.mock.calls.filter((call) =>
+      call.some((arg) => typeof arg === 'string' && arg.includes('IDENTICAL VALUES')),
+    )
+
+    expect(hookCalls.length).toBe(0)
+
+    consoleSpy.mockRestore()
   })
 
   it('should add meta title', async () => {
