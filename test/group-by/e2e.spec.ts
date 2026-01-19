@@ -1,18 +1,11 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { sortColumn, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
@@ -23,7 +16,14 @@ import {
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { sortColumn, toggleColumn } from '../helpers/e2e/columns/index.js'
+import { addListFilter } from '../helpers/e2e/filters/index.js'
+import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
+import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from '../helpers/e2e/groupBy/index.js'
+import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -685,6 +685,8 @@ test.describe('Group By', () => {
 
   test('can bulk edit across pages within a single table without affecting the others', async () => {
     await page.goto(url.list)
+    // Wait until it doesn't say loading anywhere on the page
+    await expect(page.locator('body')).not.toContainText('Loading')
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
 

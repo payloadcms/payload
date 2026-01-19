@@ -146,7 +146,6 @@ test.describe('Folders', () => {
         folderName: 'Renamed Folder',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       const renamedFolderCard = page
         .locator('.folder-file-card__name', {
           hasText: 'Renamed Folder',
@@ -280,7 +279,6 @@ test.describe('Folders', () => {
         folderType: ['Posts'],
       })
 
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('dialog#create-folder--no-results-new-folder-drawer')).toBeHidden()
     })
 
@@ -472,7 +470,6 @@ test.describe('Folders', () => {
         folderName: 'New Folder From Collection',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })
   })
 

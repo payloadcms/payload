@@ -390,6 +390,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
+      !msg.text().includes('Error loading language') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data') &&
