@@ -1635,6 +1635,39 @@ describe('Select', () => {
       expect(doc.version.text).toBe(post.text)
     })
 
+    it('should return a latest version with findByID and draft: true', async () => {
+      const doc = await payload.create({
+        collection: 'versioned-posts',
+        data: { text: 'draft-post', _status: 'draft' },
+        draft: true,
+      })
+
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: doc.id,
+        draft: true,
+        select: { text: true },
+      })
+      expect(res.text).toBe('draft-post')
+      await payload.update({
+        collection: 'versioned-posts',
+        id: doc.id,
+        data: { text: 'published', _status: 'published' },
+      })
+
+      const res_2 = await payload.findByID({
+        collection: 'versioned-posts',
+        id: doc.id,
+        draft: true,
+        select: { text: true },
+      })
+
+      expect(res_2).toStrictEqual({
+        text: 'published',
+        id: res_2.id,
+      })
+    })
+
     it('should create versions with complete data when updating with select', async () => {
       // First, update the post with select to only return the id field
       const updatedPost = await payload.update({

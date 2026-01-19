@@ -31,7 +31,8 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
+      "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
+      "@payload-config": ["./test/plugin-import-export/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],

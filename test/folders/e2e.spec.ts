@@ -99,6 +99,31 @@ test.describe('Folders', () => {
       await folderPill.click()
       await createFolderFromDoc({ folderName: 'New Folder From Doc', page })
     })
+
+    test('should create folder with collection that has translation function labels', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
+
+      const createButton = page
+        .locator('.list-header__title-and-actions .create-new-doc-in-folder__button')
+        .filter({ hasText: 'Create folder' })
+      await expect(createButton).toBeVisible()
+      await createButton.click()
+
+      // The folder drawer should open successfully without React serialization errors
+      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      await expect(drawer).toBeVisible()
+
+      const selectLocator = drawer.locator('#field-folderType')
+      await expect(selectLocator).toBeVisible()
+
+      // Should be able to open the select menu without errors
+      await openSelectMenu({ selectLocator })
+
+      const translatedLabelsOption = page.locator('.rs__option', {
+        hasText: 'Documents',
+      })
+      await expect(translatedLabelsOption).toBeVisible()
+    })
   })
 
   test.describe('Folder view actions', () => {

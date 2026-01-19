@@ -27,6 +27,7 @@ import {
   cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
+  globalWithDraftsSlug,
   hungarianLocale,
   localizedDateFieldsSlug,
   localizedPostsSlug,
@@ -61,6 +62,9 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  experimental: {
+    localizeStatus: true,
   },
   collections: [
     RichTextCollection,
@@ -428,6 +432,21 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: 'global-text',
+    },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: globalWithDraftsSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
     },
   ],
   localization: {
