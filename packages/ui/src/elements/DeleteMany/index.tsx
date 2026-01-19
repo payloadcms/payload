@@ -69,9 +69,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
       ? hasDeletePermissionFromProps
       : Boolean(collectionPermissions?.delete)
   const hasTrashPermission =
-    hasTrashPermissionFromProps !== undefined
-      ? hasTrashPermissionFromProps
-      : Boolean(collectionPermissions?.delete)
+    hasTrashPermissionFromProps !== undefined ? hasTrashPermissionFromProps : hasDeletePermission
 
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
 
