@@ -6,6 +6,7 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
@@ -221,7 +222,8 @@ test.describe('Folders', () => {
         .locator('dialog#move-folder-drawer-confirm-move')
         .getByRole('button', { name: 'Move' })
       await confirmMoveButton.click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('Item moved')
+      await closeAllToasts(page)
       const movedFolderCard = page.locator('.folder-list--folders .folder-file-card__name', {
         hasText: 'Move Me',
       })
