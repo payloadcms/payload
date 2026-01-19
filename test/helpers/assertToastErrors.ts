@@ -7,9 +7,7 @@ import { closeAllToasts } from '../helpers.js'
 export async function assertToastErrors({
   page,
   errors,
-  dismissAfterAssertion,
 }: {
-  dismissAfterAssertion?: boolean
   errors: string[]
   page: Page
 }): Promise<void> {
@@ -34,7 +32,5 @@ export async function assertToastErrors({
     }
   }
 
-  if (dismissAfterAssertion) {
-    await closeAllToasts(page)
-  }
+  await closeAllToasts(page)
 }

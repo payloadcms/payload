@@ -189,6 +189,12 @@ export async function saveDocAndAssert(
     | '#publish-locale'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
+  options?: {
+    /**
+     * If true, the all toasts will not be dismissed after the save operation.
+     */
+    disableDismissAllToasts?: boolean
+  },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
   if (selector === '#publish-locale') {
@@ -210,7 +216,9 @@ export async function saveDocAndAssert(
   // 2. some operation
   // 3. second saveDocAndAssert
   // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
-  await closeAllToasts(page)
+  if (!options?.disableDismissAllToasts) {
+    await closeAllToasts(page)
+  }
 }
 
 export async function closeAllToasts(page: Locator | Page): Promise<void> {
