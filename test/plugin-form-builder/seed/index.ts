@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { formsSlug, formSubmissionsSlug, pagesSlug } from '../shared.js'
+import { formsSlug, formSubmissionsSlug, mediaSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -160,6 +160,116 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         slug: 'contact',
         form: formID,
         title: 'Contact',
+      },
+    })
+
+    // Create a form with upload field for e2e testing
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Upload received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'fullName',
+            blockType: 'text',
+            label: 'Full Name',
+            required: true,
+          },
+          {
+            name: 'avatar',
+            blockType: 'upload',
+            label: 'Avatar',
+            uploadCollection: mediaSlug,
+            required: true,
+          },
+        ],
+        title: 'Upload Form',
+      },
+    })
+
+    // Create a form with optional upload and MIME type restrictions
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Document received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'description',
+            blockType: 'text',
+            label: 'Description',
+          },
+          {
+            name: 'image',
+            blockType: 'upload',
+            label: 'Image (PNG/JPEG only)',
+            uploadCollection: mediaSlug,
+            mimeTypes: [{ mimeType: 'image/png' }, { mimeType: 'image/jpeg' }],
+            required: false,
+          },
+        ],
+        title: 'Image Upload Form',
       },
     })
 
