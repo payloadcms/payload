@@ -146,9 +146,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           <div
             className={`${baseClass}__row-header`}
             id={`${scrollIdPrefix}-row-${rowIndex}`}
-            // TODO: due to a bug in Next.js or react, the useId() hook does not match the server side rendering, even though it should.
-            // Issue: https://github.com/vercel/next.js/issues/84029 - revisit this when the issue is fixed.
-            suppressHydrationWarning={true}
           >
             {isLoading ? (
               <ShimmerEffect height="1rem" width="8rem" />
