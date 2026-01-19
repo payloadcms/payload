@@ -275,6 +275,18 @@ export async function changeLocale(page: Page, newLocale: string) {
     const regexPattern = new RegExp(`locale=${newLocale}`)
 
     await expect(page).toHaveURL(regexPattern)
+
+    // Wait for form to finish re-initializing after locale change.
+    // When locale changes, the form fetches new data asynchronously.
+    // The Edit view exposes a data-ready attribute that indicates initialization is complete.
+    await expect(async () => {
+      const editView = page.locator('.collection-edit[data-ready="true"]')
+      const count = await editView.count()
+
+      if (count > 0) {
+        await expect(editView).toBeVisible()
+      }
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   }
 
   await closeLocaleSelector(page)

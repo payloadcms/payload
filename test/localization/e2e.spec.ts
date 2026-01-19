@@ -919,20 +919,20 @@ async function runCopy({ page, toLocale }: { page: Page; toLocale: string }) {
   await expect(page).toHaveURL(regexPattern)
 }
 
-async function createAndSaveDoc(page, url, values) {
+async function createAndSaveDoc(page: Page, url: AdminUrlUtil, values: Partial<LocalizedPost>) {
   await page.goto(url.create)
   await fillValues(values)
   await saveDocAndAssert(page)
 }
 
-async function openCopyToLocaleDrawer(page) {
+async function openCopyToLocaleDrawer(page: Page) {
   await page.locator('.doc-controls__popup button.popup-button').click()
   await page.locator('#copy-locale-data__button').click()
   await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 }
 
-async function setToLocale(page, locale) {
+async function setToLocale(page: Page, locale: string) {
   const toField = page.locator('#field-toLocale')
   await toField.click({ delay: 100 })
   const options = page.locator('.rs__option')

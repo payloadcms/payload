@@ -556,6 +556,7 @@ export function DefaultEditView({
       ]
         .filter(Boolean)
         .join(' ')}
+      data-ready={!isInitializing}
     >
       <OperationProvider operation={operation}>
         <Form
