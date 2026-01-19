@@ -2114,14 +2114,11 @@ describe('Uploads', () => {
     await page.locator('#field-prefix').fill('initial')
     await saveDocAndAssert(page)
 
-    await page.locator('button[data-close-button="true"]').click()
 
     // Change the file
     await page.locator('.file-details__remove').click()
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.jpg'))
     await saveDocAndAssert(page)
-
-    await page.locator('button[data-close-button="true"]').click()
 
     // Modify another field and save - this should work without errors
     await page.locator('#field-title').fill('updated title')
