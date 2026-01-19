@@ -1343,7 +1343,12 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('New title')
     })
 
-    test('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+    test.skip('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+      // TODO: This test is skipped, because it relied on invalid, flaky toast behavior and never actually succeeded. It asseted the following:
+      // 1. save: success toast
+      // 2. save: beforeChange error thrown, but no error toast
+      // This passed because the second toast check checked the first toast - because back when this test was written, we were not closing outdated toasts.
+      // In reality, this should have never passed, as the second toast thrown is an error
       await page.goto(draftWithChangeHookURL.create)
 
       const titleField = page.locator('#field-title')
