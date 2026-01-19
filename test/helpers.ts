@@ -285,17 +285,20 @@ export async function changeLocale(page: Page, newLocale: string) {
     // Wait for form to finish re-initializing after locale change.
     // When locale changes, the form fetches new data asynchronously.
     // The Edit view exposes a data-ready attribute that indicates initialization is complete.
-    await expect(async () => {
-      const editView = page.locator('.collection-edit[data-ready="true"]')
-      const count = await editView.count()
-
-      if (count > 0) {
-        await expect(editView).toBeVisible()
-      }
-    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    await waitForFormReady(page)
   }
 
   await closeLocaleSelector(page)
+}
+
+export async function waitForFormReady(page: Page) {
+  const editView = page.locator('.collection-edit')
+
+  if ((await editView.count()) === 0) {
+    return
+  }
+
+  await expect(editView).toHaveAttribute('data-ready', 'true', { timeout: POLL_TOPASS_TIMEOUT })
 }
 
 export function exactText(text: string) {

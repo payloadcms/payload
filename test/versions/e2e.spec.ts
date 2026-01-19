@@ -44,6 +44,7 @@ import {
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
+  waitForFormReady,
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -716,6 +717,7 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
+      await waitForFormReady(page)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -1608,6 +1610,7 @@ describe('Versions', () => {
     test('- with autosave - does not override local changes to form state after autosave runs', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
+      await waitForFormReady(page)
       const titleField = page.locator('#field-title')
 
       // press slower than the autosave interval, but not faster than the response and processing
