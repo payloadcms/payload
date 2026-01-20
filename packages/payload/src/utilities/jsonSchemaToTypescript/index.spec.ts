@@ -65,6 +65,15 @@ describe('jsonSchemaToTypescript', () => {
             relation: {
               $ref: '#/definitions/AnotherInterface',
             },
+            union: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'number' },
+                { type: 'boolean' },
+                { $ref: '#/definitions/AnotherInterface' },
+                { type: 'object', properties: { foo: { type: 'string' } }, required: ['foo'] },
+              ],
+            },
           },
           required: ['name', 'age'],
         },

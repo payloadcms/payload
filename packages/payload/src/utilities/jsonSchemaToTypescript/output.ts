@@ -15,6 +15,14 @@ export interface TestInterface {
     nestedProp: boolean
   }
   relation?: AnotherInterface
+  union?:
+    | {
+        foo: string
+      }
+    | AnotherInterface
+    | boolean
+    | number
+    | string
 }
 export interface AnotherInterface {
   isActive: boolean

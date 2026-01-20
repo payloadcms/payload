@@ -3,6 +3,7 @@ import type {
   Span,
   TsInterfaceBody,
   TsInterfaceDeclaration,
+  TsKeywordTypeKind,
   TsLiteralType,
   TsType,
   TsTypeElement,
@@ -55,7 +56,41 @@ const stringLiteral = (value: string): TsLiteralType => ({
   span: span(),
 })
 
-const resolveProperty = (schema: JSONSchema4): TsType => {
+const union = (types: TsType[]): TsType => ({
+  type: 'TsUnionType',
+  span: span(),
+  types,
+})
+
+const keyword = (kind: TsKeywordTypeKind): TsType => ({
+  type: 'TsKeywordType',
+  kind,
+  span: span(),
+})
+
+const object = (members: TsTypeElement[]): TsType => ({
+  type: 'TsTypeLiteral',
+  members,
+  span: span(),
+})
+
+const array = (elemType: TsType): TsType => ({
+  type: 'TsArrayType',
+  elemType,
+  span: span(),
+})
+
+const getTsType = (schema: JSONSchema4): TsType => {
+  if (schema.oneOf) {
+    const types: TsType[] = schema.oneOf.map((subSchema) => getTsType(subSchema))
+    return union(types)
+  }
+
+  if (schema.anyOf) {
+    const types: TsType[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
+    return union(types)
+  }
+
   if (schema.enum) {
     const enumTypes: TsType[] = schema.enum.map((enumValue) => {
       switch (typeof enumValue) {
@@ -70,11 +105,7 @@ const resolveProperty = (schema: JSONSchema4): TsType => {
       }
     })
 
-    return {
-      type: 'TsUnionType',
-      span: span(),
-      types: enumTypes,
-    }
+    return union(enumTypes)
   }
 
   if (schema.const) {
@@ -90,11 +121,7 @@ const resolveProperty = (schema: JSONSchema4): TsType => {
 
   switch (schema.type) {
     case 'any': {
-      return {
-        type: 'TsKeywordType',
-        kind: 'any',
-        span: span(),
-      }
+      return keyword('any')
     }
     case 'array': {
       if (!schema.items) {
@@ -107,32 +134,16 @@ const resolveProperty = (schema: JSONSchema4): TsType => {
 
       const itemsSchema = schema.items
 
-      return {
-        type: 'TsArrayType',
-        elemType: resolveProperty(itemsSchema),
-        span: span(),
-      }
+      return array(getTsType(itemsSchema))
     }
     case 'boolean': {
-      return {
-        type: 'TsKeywordType',
-        kind: 'boolean',
-        span: span(),
-      }
+      return keyword('boolean')
     }
     case 'integer': {
-      return {
-        type: 'TsKeywordType',
-        kind: 'number',
-        span: span(),
-      }
+      return keyword('number')
     }
     case 'number': {
-      return {
-        type: 'TsKeywordType',
-        kind: 'number',
-        span: span(),
-      }
+      return keyword('number')
     }
     case 'object': {
       const required = Array.isArray(schema.required) ? schema.required : []
@@ -140,18 +151,10 @@ const resolveProperty = (schema: JSONSchema4): TsType => {
 
       const elements: TsTypeElement[] = buildElements(required, properties)
 
-      return {
-        type: 'TsTypeLiteral',
-        members: elements,
-        span: span(),
-      }
+      return object(elements)
     }
     case 'string': {
-      return {
-        type: 'TsKeywordType',
-        kind: 'string',
-        span: span(),
-      }
+      return keyword('string')
     }
   }
 
@@ -185,7 +188,7 @@ const buildElements = (
       typeAnnotation: {
         type: 'TsTypeAnnotation',
         span: span(),
-        typeAnnotation: resolveProperty(value),
+        typeAnnotation: getTsType(value),
       },
     })
   }
