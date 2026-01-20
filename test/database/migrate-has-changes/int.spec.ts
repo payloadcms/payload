@@ -113,12 +113,14 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
     let modifiedPayload = await getUpdatedPayloadInstance()
 
     await expect(modifiedPayload.db.migrateHasChanges()).resolves.toBe(true)
+    await wait(250)
 
     console.log('Creating migration for new collection...')
     await modifiedPayload.db.createMigration({
       payload: modifiedPayload,
       migrationName: '_added_comments',
     })
+    await wait(250)
     await modifiedPayload.destroy()
 
     console.log('Checking for changes again...')
@@ -127,6 +129,7 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
 
     await expect(modifiedPayload.db.migrateHasChanges()).resolves.toBe(false)
 
+    await wait(250)
     await modifiedPayload.destroy()
 
     console.log('Modifying existing collection schema...')
@@ -139,6 +142,8 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
 
     await expect(modifiedPayload.db.migrateHasChanges()).resolves.toBe(true)
 
+    await wait(250)
+
     console.log('Creating migration for modified collection...')
 
     await acceptDrizzlePrompts(() =>
@@ -148,6 +153,7 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
       }),
     )
 
+    await wait(250)
     await modifiedPayload.destroy()
 
     console.log('Checking for changes again...')
