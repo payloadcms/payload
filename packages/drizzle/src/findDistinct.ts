@@ -69,10 +69,10 @@ export const findDistinct: FindDistinct = async function (this: DrizzleAdapter, 
     hasAggregates: Boolean(_order) && !joins.length,
     joins,
     query: ({ query }) => {
-      if (joins.length > 0) {
-        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
-      } else if (_order && orderBy.length > 0) {
+      if (_order && orderBy.length > 0 && !joins.length) {
         query = query.orderBy(orderBy[0].order(sql`_order`))
+      } else {
+        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
       }
 
       if (args.limit) {
