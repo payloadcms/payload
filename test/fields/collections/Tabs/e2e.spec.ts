@@ -131,7 +131,7 @@ describe('Tabs', () => {
 
   test('should render array data within named tabs', async () => {
     await navigateToDoc(page, url)
-    await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Name")')
+    await switchTab(page, '.tabs-field__tab-button:text-is("Tab with Name")')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
