@@ -23,6 +23,10 @@ describe('jsonSchemaToTypescript', () => {
       properties: {},
       type: 'object',
       definitions: {
+        SupportedTimezones: {
+          type: 'string',
+          enum: ['UTC', 'PST', 'EST', 'CST', 'MST'],
+        },
         TestInterface: {
           type: 'object',
           properties: {

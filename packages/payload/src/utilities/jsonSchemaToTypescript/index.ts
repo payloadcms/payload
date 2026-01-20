@@ -31,6 +31,26 @@ const getTsType = (schema: JSONSchema4): ts.TypeNode => {
     return ts.factory.createUnionTypeNode(types)
   }
 
+  if (schema.enum) {
+    // @ts-expect-error
+    const enumTypes: ts.TypeNode[] = schema.enum.map((enumValue) => {
+      switch (typeof enumValue) {
+        case 'boolean':
+          return ts.factory.createLiteralTypeNode(
+            enumValue ? ts.factory.createTrue() : ts.factory.createFalse(),
+          )
+        case 'number':
+          return ts.factory.createLiteralTypeNode(ts.factory.createNumericLiteral(enumValue))
+        case 'string':
+          return ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(enumValue))
+        default:
+          break
+      }
+    })
+
+    return ts.factory.createUnionTypeNode(enumTypes)
+  }
+
   switch (schema.type) {
     case 'any': {
       return ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
@@ -113,26 +133,6 @@ const getTsType = (schema: JSONSchema4): ts.TypeNode => {
     return ts.factory.createIntersectionTypeNode(types)
   }
 
-  if (schema.enum) {
-    // @ts-expect-error
-    const enumTypes: ts.TypeNode[] = schema.enum.map((enumValue) => {
-      switch (typeof enumValue) {
-        case 'boolean':
-          return ts.factory.createLiteralTypeNode(
-            enumValue ? ts.factory.createTrue() : ts.factory.createFalse(),
-          )
-        case 'number':
-          return ts.factory.createLiteralTypeNode(ts.factory.createNumericLiteral(enumValue))
-        case 'string':
-          return ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(enumValue))
-        default:
-          break
-      }
-    })
-
-    return ts.factory.createUnionTypeNode(enumTypes)
-  }
-
   console.error('Unsupported schema:', JSON.stringify(schema, null, 2))
 
   return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
@@ -181,7 +181,11 @@ const buildMembers = (
   return members
 }
 
-const buildInterface = (name: string, schema: JSONSchema4): ts.InterfaceDeclaration => {
+const buildInterface = (
+  name: string,
+  schema: JSONSchema4,
+  rootTitle?: string,
+): ts.InterfaceDeclaration => {
   const required: string[] = Array.isArray(schema.required) ? schema.required : []
 
   const members = buildMembers(required, schema.properties || {}, schema.additionalProperties)
@@ -203,12 +207,14 @@ const buildInterface = (name: string, schema: JSONSchema4): ts.InterfaceDeclarat
     )
   }
 
-  ts.addSyntheticLeadingComment(
-    interfaceDeclaration,
-    ts.SyntaxKind.MultiLineCommentTrivia,
-    `*\n * This interface was referenced by \`Config\`'s JSON-Schema\n * ${name} interface\n `,
-    true,
-  )
+  if (rootTitle) {
+    ts.addSyntheticLeadingComment(
+      interfaceDeclaration,
+      ts.SyntaxKind.MultiLineCommentTrivia,
+      `*\n * This interface was referenced by \`${rootTitle}\`'s JSON-Schema\n * via the \`definition\` "${name}"\n `,
+      true,
+    )
+  }
 
   return interfaceDeclaration
 }
@@ -225,7 +231,39 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
   }
 
   for (const [defName, defSchema] of Object.entries(schema.definitions)) {
-    statements.push(buildInterface(defName, defSchema))
+    if (defSchema.type === 'object') {
+      statements.push(buildInterface(defName, defSchema, schema.title))
+      continue
+    }
+
+    const tsType = getTsType(defSchema)
+
+    const typeAliasDeclaration = ts.factory.createTypeAliasDeclaration(
+      [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+      ts.factory.createIdentifier(formatDefinitionName(defName)),
+      undefined,
+      tsType,
+    )
+
+    if (defSchema.description) {
+      ts.addSyntheticLeadingComment(
+        typeAliasDeclaration,
+        ts.SyntaxKind.MultiLineCommentTrivia,
+        `*\n * ${defSchema.description}\n `,
+        true,
+      )
+    }
+
+    if (schema.title) {
+      ts.addSyntheticLeadingComment(
+        typeAliasDeclaration,
+        ts.SyntaxKind.MultiLineCommentTrivia,
+        `*\n * This type was referenced by \`${schema.title}\`'s JSON-Schema\n * via the \`definition\` "${defName}"\n `,
+        true,
+      )
+    }
+
+    statements.push(typeAliasDeclaration)
   }
 
   const sourceFile = ts.createSourceFile(

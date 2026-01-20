@@ -1,11 +1,14 @@
-/**
- * Config interface
- */
 export interface Config {
   [key: string]: unknown
 }
 /**
- * TestInterface interface
+ * This type was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SupportedTimezones"
+ */
+export type SupportedTimezones = 'CST' | 'EST' | 'MST' | 'PST' | 'UTC'
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestInterface"
  */
 export interface TestInterface {
   [key: string]: unknown
@@ -20,7 +23,7 @@ export interface TestInterface {
   eitherStringOrNull?: null | string
   eitherStringOrNumber?: number | string
   enumMixed?: 'two' | 1 | true
-  enumString?: string
+  enumString?: 'option1' | 'option2' | 'option3'
   intersection?: {
     [key: string]: unknown
     a: string
@@ -45,14 +48,16 @@ export interface TestInterface {
     | string
 }
 /**
- * AnotherInterface interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AnotherInterface"
  */
 export interface AnotherInterface {
   [key: string]: unknown
   isActive: boolean
 }
 /**
- * WithoutAdditionalProperties interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithoutAdditionalProperties"
  */
 export interface WithoutAdditionalProperties {
   id?: string

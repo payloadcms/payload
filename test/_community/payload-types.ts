@@ -1,6 +1,3 @@
-/**
- * Config interface
- */
 export interface Config {
     auth: {
         users: Users;
@@ -37,7 +34,7 @@ export interface Config {
     };
     locale: null;
     user: (Users & {
-        collection: string;
+        collection: "users";
     });
     jobs: {
         tasks: unknown;
@@ -47,11 +44,14 @@ export interface Config {
 /**
  * Supported timezones in IANA format.
  */
-export interface SupportedTimezones {
-    [key: string]: unknown;
-}
 /**
- * menu interface
+ * This type was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones"
+ */
+export type SupportedTimezones = "Pacific/Midway" | "Pacific/Niue" | "Pacific/Honolulu" | "Pacific/Rarotonga" | "America/Anchorage" | "Pacific/Gambier" | "America/Los_Angeles" | "America/Tijuana" | "America/Denver" | "America/Phoenix" | "America/Chicago" | "America/Guatemala" | "America/New_York" | "America/Bogota" | "America/Caracas" | "America/Santiago" | "America/Buenos_Aires" | "America/Sao_Paulo" | "Atlantic/South_Georgia" | "Atlantic/Azores" | "Atlantic/Cape_Verde" | "Europe/London" | "Europe/Berlin" | "Africa/Lagos" | "Europe/Athens" | "Africa/Cairo" | "Europe/Moscow" | "Asia/Riyadh" | "Asia/Dubai" | "Asia/Baku" | "Asia/Karachi" | "Asia/Tashkent" | "Asia/Calcutta" | "Asia/Dhaka" | "Asia/Almaty" | "Asia/Jakarta" | "Asia/Bangkok" | "Asia/Shanghai" | "Asia/Singapore" | "Asia/Tokyo" | "Asia/Seoul" | "Australia/Brisbane" | "Australia/Sydney" | "Pacific/Guam" | "Pacific/Noumea" | "Pacific/Auckland" | "Pacific/Fiji";
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu"
  */
 export interface Menu {
     id: string;
@@ -60,16 +60,18 @@ export interface Menu {
     createdAt?: string | null;
 }
 /**
- * menu_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "menu_select"
  */
-export interface MenuSelect {
-    globalText?: boolean;
-    updatedAt?: boolean;
-    createdAt?: boolean;
-    globalType?: boolean;
+export interface MenuSelect<T extends boolean = true> {
+    globalText?: T;
+    updatedAt?: T;
+    createdAt?: T;
+    globalType?: T;
 }
 /**
- * posts interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts"
  */
 export interface Posts {
     id: string;
@@ -83,7 +85,7 @@ export interface Posts {
                 [key: string]: unknown;
             }[];
             direction: ("ltr" | "rtl") | null;
-            format: string;
+            format: "left" | "start" | "center" | "right" | "end" | "justify" | "";
             indent: number;
             version: number;
         };
@@ -93,16 +95,18 @@ export interface Posts {
     createdAt: string;
 }
 /**
- * posts_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select"
  */
-export interface PostsSelect {
-    title?: boolean;
-    content?: boolean;
-    updatedAt?: boolean;
-    createdAt?: boolean;
+export interface PostsSelect<T extends boolean = true> {
+    title?: T;
+    content?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
- * media interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media"
  */
 export interface Media {
     id: string;
@@ -145,49 +149,51 @@ export interface Media {
     };
 }
 /**
- * media_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select"
  */
-export interface MediaSelect {
-    updatedAt?: boolean;
-    createdAt?: boolean;
-    url?: boolean;
-    thumbnailURL?: boolean;
-    filename?: boolean;
-    mimeType?: boolean;
-    filesize?: boolean;
-    width?: boolean;
-    height?: boolean;
-    focalX?: boolean;
-    focalY?: boolean;
-    sizes?: boolean | {
-        thumbnail?: boolean | {
-            url?: boolean;
-            width?: boolean;
-            height?: boolean;
-            mimeType?: boolean;
-            filesize?: boolean;
-            filename?: boolean;
+export interface MediaSelect<T extends boolean = true> {
+    updatedAt?: T;
+    createdAt?: T;
+    url?: T;
+    thumbnailURL?: T;
+    filename?: T;
+    mimeType?: T;
+    filesize?: T;
+    width?: T;
+    height?: T;
+    focalX?: T;
+    focalY?: T;
+    sizes?: T | {
+        thumbnail?: T | {
+            url?: T;
+            width?: T;
+            height?: T;
+            mimeType?: T;
+            filesize?: T;
+            filename?: T;
         };
-        medium?: boolean | {
-            url?: boolean;
-            width?: boolean;
-            height?: boolean;
-            mimeType?: boolean;
-            filesize?: boolean;
-            filename?: boolean;
+        medium?: T | {
+            url?: T;
+            width?: T;
+            height?: T;
+            mimeType?: T;
+            filesize?: T;
+            filename?: T;
         };
-        large?: boolean | {
-            url?: boolean;
-            width?: boolean;
-            height?: boolean;
-            mimeType?: boolean;
-            filesize?: boolean;
-            filename?: boolean;
+        large?: T | {
+            url?: T;
+            width?: T;
+            height?: T;
+            mimeType?: T;
+            filesize?: T;
+            filename?: T;
         };
     };
 }
 /**
- * payload-kv interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv"
  */
 export interface PayloadKv {
     id: string;
@@ -197,14 +203,16 @@ export interface PayloadKv {
     } | unknown[] | string | number | boolean | null;
 }
 /**
- * payload-kv_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select"
  */
-export interface PayloadKvSelect {
-    key?: boolean;
-    data?: boolean;
+export interface PayloadKvSelect<T extends boolean = true> {
+    key?: T;
+    data?: T;
 }
 /**
- * users interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users"
  */
 export interface Users {
     id: string;
@@ -225,26 +233,28 @@ export interface Users {
     password?: string | null;
 }
 /**
- * users_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select"
  */
-export interface UsersSelect {
-    updatedAt?: boolean;
-    createdAt?: boolean;
-    email?: boolean;
-    resetPasswordToken?: boolean;
-    resetPasswordExpiration?: boolean;
-    salt?: boolean;
-    hash?: boolean;
-    loginAttempts?: boolean;
-    lockUntil?: boolean;
-    sessions?: boolean | {
-        id?: boolean;
-        createdAt?: boolean;
-        expiresAt?: boolean;
+export interface UsersSelect<T extends boolean = true> {
+    updatedAt?: T;
+    createdAt?: T;
+    email?: T;
+    resetPasswordToken?: T;
+    resetPasswordExpiration?: T;
+    salt?: T;
+    hash?: T;
+    loginAttempts?: T;
+    lockUntil?: T;
+    sessions?: T | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
     };
 }
 /**
- * payload-locked-documents interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents"
  */
 export interface PayloadLockedDocuments {
     id: string;
@@ -267,17 +277,19 @@ export interface PayloadLockedDocuments {
     createdAt: string;
 }
 /**
- * payload-locked-documents_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select"
  */
-export interface PayloadLockedDocumentsSelect {
-    document?: boolean;
-    globalSlug?: boolean;
-    user?: boolean;
-    updatedAt?: boolean;
-    createdAt?: boolean;
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+    document?: T;
+    globalSlug?: T;
+    user?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
- * payload-preferences interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences"
  */
 export interface PayloadPreferences {
     id: string;
@@ -293,17 +305,19 @@ export interface PayloadPreferences {
     createdAt: string;
 }
 /**
- * payload-preferences_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select"
  */
-export interface PayloadPreferencesSelect {
-    user?: boolean;
-    key?: boolean;
-    value?: boolean;
-    updatedAt?: boolean;
-    createdAt?: boolean;
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+    user?: T;
+    key?: T;
+    value?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
- * payload-migrations interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations"
  */
 export interface PayloadMigrations {
     id: string;
@@ -313,20 +327,20 @@ export interface PayloadMigrations {
     createdAt: string;
 }
 /**
- * payload-migrations_select interface
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select"
  */
-export interface PayloadMigrationsSelect {
-    name?: boolean;
-    batch?: boolean;
-    updatedAt?: boolean;
-    createdAt?: boolean;
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+    name?: T;
+    batch?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
- * auth interface
+ * This type was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth"
  */
-export interface Auth {
-    [key: string]: unknown;
-}
+export type Auth = unknown;
 
 declare module 'payload' {
   // @ts-ignore 
