@@ -224,6 +224,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@parcel/watcher",
       "@sentry/cli",
       "@swc/core",
       "@vercel/git-hooks",
