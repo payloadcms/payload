@@ -53,6 +53,9 @@ describe('jsonSchemaToTypescript', () => {
               type: 'string',
               enum: ['option1', 'option2', 'option3'],
             },
+            enumMixed: {
+              enum: [1, 'two', true],
+            },
             constNumber: {
               const: 30,
             },

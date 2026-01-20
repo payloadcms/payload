@@ -8,7 +8,8 @@ export interface TestInterface {
   }[]
   constNumber?: 30
   constString?: 'hello'
-  enumString?: string
+  enumMixed?: 'two' | 1 | true
+  enumString?: 'option1' | 'option2' | 'option3'
   name: string
   object?: {
     nestedProp: boolean

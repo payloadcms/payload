@@ -3,6 +3,7 @@ import type {
   Span,
   TsInterfaceBody,
   TsInterfaceDeclaration,
+  TsLiteralType,
   TsType,
   TsTypeElement,
 } from '@swc/core'
@@ -24,39 +25,66 @@ const identifier = (value: string) => ({
   value,
 })
 
+const booleanLiteral = (value: boolean): TsLiteralType => ({
+  type: 'TsLiteralType',
+  literal: {
+    type: 'BooleanLiteral',
+    span: span(),
+    value,
+  },
+  span: span(),
+})
+
+const numericLiteral = (value: number): TsLiteralType => ({
+  type: 'TsLiteralType',
+  literal: {
+    type: 'NumericLiteral',
+    span: span(),
+    value,
+  },
+  span: span(),
+})
+
+const stringLiteral = (value: string): TsLiteralType => ({
+  type: 'TsLiteralType',
+  literal: {
+    type: 'StringLiteral',
+    span: span(),
+    value,
+  },
+  span: span(),
+})
+
 const resolveProperty = (schema: JSONSchema4): TsType => {
+  if (schema.enum) {
+    const enumTypes: TsType[] = schema.enum.map((enumValue) => {
+      switch (typeof enumValue) {
+        case 'boolean':
+          return booleanLiteral(enumValue)
+        case 'number':
+          return numericLiteral(enumValue)
+        case 'string':
+          return stringLiteral(enumValue)
+        default:
+          throw new Error(`Unsupported enum value type: ${typeof enumValue}`)
+      }
+    })
+
+    return {
+      type: 'TsUnionType',
+      span: span(),
+      types: enumTypes,
+    }
+  }
+
   if (schema.const) {
     switch (typeof schema.const) {
       case 'boolean':
-        return {
-          type: 'TsLiteralType',
-          literal: {
-            type: 'BooleanLiteral',
-            span: span(),
-            value: schema.const,
-          },
-          span: span(),
-        }
+        return booleanLiteral(schema.const)
       case 'number':
-        return {
-          type: 'TsLiteralType',
-          literal: {
-            type: 'NumericLiteral',
-            span: span(),
-            value: schema.const,
-          },
-          span: span(),
-        }
+        return numericLiteral(schema.const)
       case 'string':
-        return {
-          type: 'TsLiteralType',
-          literal: {
-            type: 'StringLiteral',
-            span: span(),
-            value: schema.const,
-          },
-          span: span(),
-        }
+        return stringLiteral(schema.const)
     }
   }
 
@@ -165,6 +193,27 @@ const buildElements = (
   return elements
 }
 
+const buildDefinition = (name: string, schema: JSONSchema4): TsInterfaceDeclaration => {
+  const required: string[] = Array.isArray(schema.required) ? schema.required : []
+
+  const interfaceBody: TsInterfaceBody = {
+    type: 'TsInterfaceBody',
+    body: buildElements(required, schema.properties || {}),
+    span: span(),
+  }
+
+  const tsInterface: TsInterfaceDeclaration = {
+    id: identifier(name),
+    type: 'TsInterfaceDeclaration',
+    body: interfaceBody,
+    declare: false,
+    extends: [],
+    span: span(),
+  }
+
+  return tsInterface
+}
+
 export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
   if (!schema.definitions) {
     schema.definitions = {}
@@ -173,47 +222,11 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
   const interfaces: TsInterfaceDeclaration[] = []
 
   if (schema.title && schema.type === 'object' && schema.properties) {
-    const required: string[] = Array.isArray(schema.required) ? schema.required : []
-
-    const interfaceBody: TsInterfaceBody = {
-      type: 'TsInterfaceBody',
-      body: buildElements(required, schema.properties),
-      span: span(),
-    }
-
-    const tsInterface: TsInterfaceDeclaration = {
-      id: identifier(schema.title),
-      type: 'TsInterfaceDeclaration',
-      body: interfaceBody,
-      declare: false,
-      extends: [],
-      span: span(),
-    }
-
-    interfaces.push(tsInterface)
+    interfaces.push(buildDefinition(schema.title, schema))
   }
 
   for (const [defName, defSchema] of Object.entries(schema.definitions)) {
-    if (defSchema.type === 'object' && defSchema.properties) {
-      const required: string[] = Array.isArray(defSchema.required) ? defSchema.required : []
-
-      const interfaceBody: TsInterfaceBody = {
-        type: 'TsInterfaceBody',
-        body: buildElements(required, defSchema.properties),
-        span: span(),
-      }
-
-      const tsInterface: TsInterfaceDeclaration = {
-        id: identifier(defName),
-        type: 'TsInterfaceDeclaration',
-        body: interfaceBody,
-        declare: false,
-        extends: [],
-        span: span(),
-      }
-
-      interfaces.push(tsInterface)
-    }
+    interfaces.push(buildDefinition(defName, defSchema))
   }
 
   const exports: ExportDeclaration[] = interfaces.map((iface) => ({
