@@ -882,7 +882,7 @@ export const Form: React.FC<FormProps> = (props) => {
       action={typeof action === 'function' ? void action : action}
       className={classes}
       /**
-       * data-ready signals if the form is ready to be used. This is used by our e2e tests
+       * data-form-ready signals if the form is ready to be used. This is used by our e2e tests
        * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
        * slow network conditions.
        */

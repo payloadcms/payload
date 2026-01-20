@@ -293,7 +293,7 @@ export async function changeLocale(page: Page, newLocale: string) {
 
     // Wait for form to finish re-initializing after locale change.
     // When locale changes, the form fetches new data asynchronously.
-    // The Edit view exposes a data-ready attribute that indicates initialization is complete.
+    // The Form exposes a data-form-ready attribute that indicates initialization is complete.
     await waitForFormReady(page)
   }
 
