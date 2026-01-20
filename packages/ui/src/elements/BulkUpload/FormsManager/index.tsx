@@ -164,7 +164,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
       },
-      method: 'post',
+      method: 'POST',
     })
 
     const json: SanitizedDocumentPermissions = await res.json()
