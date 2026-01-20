@@ -34,6 +34,9 @@ describe('jsonSchemaToTypescript', () => {
             constString: {
               const: 'hello',
             },
+            relation: {
+              $ref: '#/definitions/AnotherInterface',
+            },
           },
           required: ['name', 'age'],
         },

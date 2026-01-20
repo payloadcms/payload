@@ -98,6 +98,16 @@ const intoTsType = (schema: JSONSchema4): TsType => {
     }
   }
 
+  if (schema.$ref) {
+    const refType = schema.$ref.split('/').pop() || 'any'
+
+    return {
+      type: 'TsTypeReference',
+      span: span(),
+      typeName: identifier(refType),
+    }
+  }
+
   throw new Error(`Unsupported schema type: ${JSON.stringify(schema)}`)
 }
 
