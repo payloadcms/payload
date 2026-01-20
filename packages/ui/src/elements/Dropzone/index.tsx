@@ -76,8 +76,6 @@ export function Dropzone({
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         addFiles(e.dataTransfer.files)
         setDragging(false)
-
-        e.dataTransfer.clearData()
       }
     },
     [addFiles],
