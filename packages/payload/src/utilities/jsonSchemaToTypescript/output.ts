@@ -15,7 +15,7 @@ export interface TestInterface {
   eitherStringOrNull?: null | string
   eitherStringOrNumber?: number | string
   enumMixed?: 'two' | 1 | true
-  enumString?: 'option1' | 'option2' | 'option3'
+  enumString?: string
   intersection?: {
     [key: string]: unknown
     a: string

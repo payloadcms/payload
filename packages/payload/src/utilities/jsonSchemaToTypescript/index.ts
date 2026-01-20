@@ -1,10 +1,7 @@
 import type {
   ExportDeclaration,
   Expression,
-  Identifier,
-  NumericLiteral,
   Span,
-  StringLiteral,
   TsInterfaceBody,
   TsInterfaceDeclaration,
   TsKeywordTypeKind,
@@ -96,38 +93,6 @@ const array = (elemType: TsType): TsType => ({
 })
 
 const getTsType = (schema: JSONSchema4): TsType => {
-  if (schema.oneOf) {
-    const types: TsType[] = schema.oneOf.map((subSchema) => getTsType(subSchema))
-    return union(types)
-  }
-
-  if (schema.anyOf) {
-    const types: TsType[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
-    return union(types)
-  }
-
-  if (schema.allOf) {
-    const types: TsType[] = schema.allOf.map((subSchema) => getTsType(subSchema))
-    return intersection(types)
-  }
-
-  if (schema.enum) {
-    const enumTypes: TsType[] = schema.enum.map((enumValue) => {
-      switch (typeof enumValue) {
-        case 'boolean':
-          return booleanLiteral(enumValue)
-        case 'number':
-          return numericLiteral(enumValue)
-        case 'string':
-          return stringLiteral(enumValue)
-        default:
-          throw new Error(`Unsupported enum value type: ${typeof enumValue}`)
-      }
-    })
-
-    return union(enumTypes)
-  }
-
   if (schema.const) {
     switch (typeof schema.const) {
       case 'boolean':
@@ -206,11 +171,41 @@ const getTsType = (schema: JSONSchema4): TsType => {
     }
   }
 
+  if (schema.oneOf) {
+    const types: TsType[] = schema.oneOf.map((subSchema) => getTsType(subSchema))
+    return union(types)
+  }
+
+  if (schema.anyOf) {
+    const types: TsType[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
+    return union(types)
+  }
+
+  if (schema.allOf) {
+    const types: TsType[] = schema.allOf.map((subSchema) => getTsType(subSchema))
+    return intersection(types)
+  }
+
+  if (schema.enum) {
+    const enumTypes: TsType[] = schema.enum.map((enumValue) => {
+      switch (typeof enumValue) {
+        case 'boolean':
+          return booleanLiteral(enumValue)
+        case 'number':
+          return numericLiteral(enumValue)
+        case 'string':
+          return stringLiteral(enumValue)
+        default:
+          break
+      }
+    })
+
+    return union(enumTypes)
+  }
+
   console.error('Unsupported schema:', JSON.stringify(schema, null, 2))
 
   return keyword('unknown')
-
-  throw new Error(`Unsupported schema type: ${JSON.stringify(schema)}`)
 }
 
 const isIdentifierKey = (key: string): boolean => {
@@ -341,7 +336,7 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
 
   const result = printSync({
     type: 'Module',
-    body: exports,
+    body: [...exports],
     interpreter: '',
     span: span(),
   })
