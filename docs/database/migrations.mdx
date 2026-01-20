@@ -139,11 +139,13 @@ Flags:
 The `migrate:status` command will check the status of migrations and output a table of which migrations have been run,
 and which migrations have not yet run.
 
-`payload migrate:status`
-
 ```text
 npm run payload migrate:status
 ```
+
+Flags:
+
+- `--check`: Check if there are any schema changes that would require a new migration to be created. Exits with code 1 if there are changes, and code 0 if there are no changes. Useful for CI to ensure that all schema changes have corresponding migrations.
 
 ### Down
 
@@ -175,15 +177,6 @@ Drops all entities from the database and re-runs all migrations from scratch.
 
 ```text
 npm run payload migrate:fresh
-```
-
-### Has changes
-
-Check if there are any schema changes that would require a new migration to be created.
-Exits with code 0 if there are changes, and code 1 if there are no changes.
-
-```text
-npm run payload migrate:has-changes
 ```
 
 ## When to run migrations

@@ -22,7 +22,6 @@ export const availableCommands = [
   'migrate:reset',
   'migrate:status',
   'migrate:fresh',
-  'migrate:has-changes',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
@@ -117,18 +116,6 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
     case 'migrate:fresh':
       await adapter.migrateFresh({ forceAcceptWarning })
       break
-    case 'migrate:has-changes': {
-      const hasChanges = await adapter.migrateHasChanges()
-      if (hasChanges) {
-        payload.logger.info('Migrations have changes.')
-        process.exit(0)
-      }
-
-      payload.logger.info('No migration changes detected.')
-      process.exit(1)
-
-      break
-    }
     case 'migrate:refresh':
       await adapter.migrateRefresh()
       break
@@ -136,6 +123,17 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
       await adapter.migrateReset()
       break
     case 'migrate:status':
+      if (formattedArgs.includes('check')) {
+        const hasChanges = await adapter.migrateHasChanges()
+        if (hasChanges) {
+          payload.logger.info('Migrations have changes.')
+          process.exit(1)
+        }
+
+        payload.logger.info('No migration changes detected.')
+        process.exit(0)
+      }
+
       await adapter.migrateStatus()
       break
 

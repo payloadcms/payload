@@ -57,15 +57,15 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
     rmSync(path.join(dirname, 'migrations'), { recursive: true, force: true })
     const payload = await getPayload({ config })
 
-    const res = executeCLI('migrate:has-changes')
+    const res = executeCLI('migrate:status --check')
 
-    expect(res.status).toBe(0) // Should have changes as no migrations exist
+    expect(res.status).toBe(1) // Should have changes as no migrations exist
 
     await payload.db.createMigration({ payload, migrationName: '_initial' })
 
-    const res2 = executeCLI('migrate:has-changes')
+    const res2 = executeCLI('migrate:status --check')
 
-    expect(res2.status).toBe(1) // Should not have changes after initial migration
+    expect(res2.status).toBe(0) // Should not have changes after initial migration
   })
 
   // Only run this test when using the Drizzle adapter

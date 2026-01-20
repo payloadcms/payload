@@ -67,9 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    tickets: Ticket;
-    revenue: Revenue;
-    events: Event;
+    posts: Post;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -78,9 +76,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    tickets: TicketsSelect<false> | TicketsSelect<true>;
-    revenue: RevenueSelect<false> | RevenueSelect<true>;
-    events: EventsSelect<false> | EventsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -88,7 +84,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {};
@@ -122,24 +118,37 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets".
+ * via the `definition` "posts".
  */
-export interface Ticket {
-  id: string;
-  title: string;
-  description?: string | null;
-  status: 'open' | 'in-progress' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  assignee?: (string | null) | User;
+export interface Post {
+  id: number;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -160,79 +169,23 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue".
- */
-export interface Revenue {
-  id: string;
-  amount: number;
-  description: string;
-  date: string;
-  category: 'sales' | 'subscriptions' | 'services' | 'other';
-  source?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
- */
-export interface Event {
-  id: string;
-  title: string;
-  description?: string | null;
-  startDate: string;
-  endDate?: string | null;
-  location?: string | null;
-  type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
-  organizer?: (string | null) | User;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'tickets';
-        value: string | Ticket;
-      } | null)
-    | ({
-        relationTo: 'revenue';
-        value: string | Revenue;
-      } | null)
-    | ({
-        relationTo: 'events';
-        value: string | Event;
+        relationTo: 'posts';
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -242,10 +195,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -265,7 +218,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -273,43 +226,10 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets_select".
+ * via the `definition` "posts_select".
  */
-export interface TicketsSelect<T extends boolean = true> {
+export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  description?: T;
-  status?: T;
-  priority?: T;
-  assignee?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue_select".
- */
-export interface RevenueSelect<T extends boolean = true> {
-  amount?: T;
-  description?: T;
-  date?: T;
-  category?: T;
-  source?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_select".
- */
-export interface EventsSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  startDate?: T;
-  endDate?: T;
-  location?: T;
-  type?: T;
-  organizer?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -385,6 +305,5 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
