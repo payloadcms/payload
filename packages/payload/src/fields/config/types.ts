@@ -893,6 +893,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  // TODO: Deprecate this in front of a schemaPath property on every field
   id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
