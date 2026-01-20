@@ -28,6 +28,31 @@ describe('jsonSchemaToTypescript', () => {
           properties: {
             name: { type: 'string' },
             age: { type: 'number' },
+            object: {
+              type: 'object',
+              properties: {
+                nestedProp: { type: 'boolean' },
+              },
+              required: ['nestedProp'],
+            },
+            array: {
+              type: 'array',
+              items: { type: 'string' },
+            },
+            arrayWithObjects: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  itemProp: { type: 'number' },
+                },
+                required: ['itemProp'],
+              },
+            },
+            enumString: {
+              type: 'string',
+              enum: ['option1', 'option2', 'option3'],
+            },
             constNumber: {
               const: 30,
             },

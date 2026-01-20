@@ -24,7 +24,7 @@ const identifier = (value: string) => ({
   value,
 })
 
-const intoTsType = (schema: JSONSchema4): TsType => {
+const resolveProperty = (schema: JSONSchema4): TsType => {
   if (schema.const) {
     switch (typeof schema.const) {
       case 'boolean':
@@ -68,6 +68,23 @@ const intoTsType = (schema: JSONSchema4): TsType => {
         span: span(),
       }
     }
+    case 'array': {
+      if (!schema.items) {
+        throw new Error('Array schema must have items defined')
+      }
+
+      if (Array.isArray(schema.items)) {
+        throw new Error('Tuple types are not supported')
+      }
+
+      const itemsSchema = schema.items
+
+      return {
+        type: 'TsArrayType',
+        elemType: resolveProperty(itemsSchema),
+        span: span(),
+      }
+    }
     case 'boolean': {
       return {
         type: 'TsKeywordType',
@@ -86,6 +103,18 @@ const intoTsType = (schema: JSONSchema4): TsType => {
       return {
         type: 'TsKeywordType',
         kind: 'number',
+        span: span(),
+      }
+    }
+    case 'object': {
+      const required = Array.isArray(schema.required) ? schema.required : []
+      const properties = schema.properties || {}
+
+      const elements: TsTypeElement[] = buildElements(required, properties)
+
+      return {
+        type: 'TsTypeLiteral',
+        members: elements,
         span: span(),
       }
     }
@@ -112,7 +141,6 @@ const intoTsType = (schema: JSONSchema4): TsType => {
 }
 
 const buildElements = (
-  name: string,
   required: string[],
   properties: Record<string, JSONSchema4>,
 ): TsTypeElement[] => {
@@ -129,7 +157,7 @@ const buildElements = (
       typeAnnotation: {
         type: 'TsTypeAnnotation',
         span: span(),
-        typeAnnotation: intoTsType(value),
+        typeAnnotation: resolveProperty(value),
       },
     })
   }
@@ -149,7 +177,7 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
 
     const interfaceBody: TsInterfaceBody = {
       type: 'TsInterfaceBody',
-      body: buildElements(schema.title, required, schema.properties),
+      body: buildElements(required, schema.properties),
       span: span(),
     }
 
@@ -171,7 +199,7 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
 
       const interfaceBody: TsInterfaceBody = {
         type: 'TsInterfaceBody',
-        body: buildElements(defName, required, defSchema.properties),
+        body: buildElements(required, defSchema.properties),
         span: span(),
       }
 
