@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -26,7 +26,7 @@ type JSONFieldBaseClientProps = {
   readonly validate?: JSONFieldValidation
 }
 
-type JSONFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type JSONFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type JSONFieldClientProps = ClientFieldBase<JSONFieldClientWithoutType> &
   JSONFieldBaseClientProps

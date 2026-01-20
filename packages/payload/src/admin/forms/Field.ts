@@ -3,6 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
+import type { FieldPaths, ParentFieldPaths } from '../../fields/getFieldPaths.js'
 import type { TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
@@ -41,39 +42,7 @@ export type ClientComponentProps = {
   schemaPath?: string
 }
 
-// TODO: maybe we can come up with a better name?
-export type FieldPaths = {
-  /**
-   * @default ''
-   */
-  indexPath?: string
-  /**
-   * @default ''
-   */
-  parentPath?: string
-  /**
-   * The path built up to the point of the field
-   * excluding the field name.
-   *
-   * @default ''
-   */
-  parentSchemaPath?: string
-  /**
-   * A built up path to access FieldState in the form state.
-   * Nested fields will have a path that includes the parent field names
-   * if they are nested within a group, array, block or named tab.
-   *
-   * Collapsibles and unnamed tabs will have arbitrary paths
-   * that look like _index-0, _index-1, etc.
-   *
-   * Row fields will not have a path.
-   *
-   * @example 'parentGroupField.childTextField'
-   *
-   * @default field.name
-   */
-  path: string
-}
+export type FieldPathProps = FieldPaths & Pick<ParentFieldPaths, 'parentPath' | 'parentSchemaPath'>
 
 /**
  * TODO: This should be renamed to `FieldComponentServerProps` or similar

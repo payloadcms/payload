@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -32,7 +32,7 @@ type RadioFieldBaseClientProps = {
   readonly value?: string
 }
 
-type RadioFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type RadioFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type RadioFieldClientProps = ClientFieldBase<RadioFieldClientWithoutType> &
   RadioFieldBaseClientProps

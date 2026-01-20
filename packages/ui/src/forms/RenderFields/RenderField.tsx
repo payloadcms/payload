@@ -3,7 +3,7 @@
 import type {
   ClientComponentProps,
   ClientField,
-  FieldPaths,
+  FieldPathProps,
   SanitizedFieldPermissions,
 } from 'payload'
 
@@ -37,7 +37,7 @@ import { useFormFields } from '../../forms/Form/index.js'
 type RenderFieldProps = {
   clientFieldConfig: ClientField
   permissions: SanitizedFieldPermissions
-} & FieldPaths &
+} & FieldPathProps &
   Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
 
 export function RenderField({

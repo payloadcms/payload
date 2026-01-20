@@ -467,7 +467,7 @@ export type {
   ClientFieldBase,
   ClientFieldWithOptionalType,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerComponentProps,
   ServerFieldBase,

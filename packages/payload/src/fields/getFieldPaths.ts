@@ -1,9 +1,12 @@
 import type { ClientTab } from '../admin/types.js'
 import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
-type Args = {
+export type GetFieldPathsArgs = {
   field: ClientField | ClientTab | Field | Tab | TabAsFieldClient
   index: number
+} & ParentFieldPaths
+
+export type ParentFieldPaths = {
   parentIndexPath: string
   /**
    * Needed to generate data paths. Omit if you only need schema paths, e.g. within field schema maps.
@@ -12,7 +15,7 @@ type Args = {
   parentSchemaPath: string
 }
 
-type FieldPaths = {
+export type FieldPaths = {
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
@@ -21,6 +24,7 @@ type FieldPaths = {
   indexPath: string
   /**
    * Path for this field relative to its position in the data.
+   *
    */
   path: string
   /**
@@ -35,7 +39,7 @@ export function getFieldPaths({
   parentIndexPath,
   parentPath = '',
   parentSchemaPath,
-}: Args): FieldPaths {
+}: GetFieldPathsArgs): FieldPaths {
   const parentPathSegments = parentPath.split('.')
 
   const parentPathIsUnnamed =

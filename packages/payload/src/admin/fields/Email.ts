@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -26,7 +26,7 @@ type EmailFieldBaseClientProps = {
   readonly validate?: EmailFieldValidation
 }
 
-type EmailFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type EmailFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type EmailFieldClientProps = ClientFieldBase<EmailFieldClientWithoutType> &
   EmailFieldBaseClientProps

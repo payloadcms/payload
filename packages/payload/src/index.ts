@@ -1486,16 +1486,6 @@ export {
 
 export { sanitizeFields } from './fields/config/sanitize.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export type {
   AdminClient,
   ArrayField,
@@ -1604,7 +1594,19 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
+export type { FieldPaths } from './fields/getFieldPaths.js'
 
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'

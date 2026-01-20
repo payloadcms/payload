@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -27,7 +27,7 @@ type NumberFieldBaseClientProps = {
   readonly validate?: NumberFieldValidation
 }
 
-type NumberFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type NumberFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type NumberFieldClientProps = ClientFieldBase<NumberFieldClientWithoutType> &
   NumberFieldBaseClientProps
