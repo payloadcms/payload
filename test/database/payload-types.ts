@@ -126,6 +126,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
     header: Header;
     global: Global;
@@ -263,6 +264,8 @@ export interface Post {
   text?: string | null;
   number?: number | null;
   numberDefault?: number | null;
+  numbersHasMany?: number[] | null;
+  publishDate?: string | null;
   blocks?:
     | {
         nested?:
@@ -925,6 +928,8 @@ export interface PostsSelect<T extends boolean = true> {
   text?: T;
   number?: T;
   numberDefault?: T;
+  numbersHasMany?: T;
+  publishDate?: T;
   blocks?:
     | T
     | {

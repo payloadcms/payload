@@ -80,6 +80,11 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Hapus widget {{id}}',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
     autosaving: 'Terjadi masalah saat menyimpan otomatis dokumen ini.',
@@ -117,6 +122,7 @@ export const idTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Terjadi masalah saat mengunggah file.',
     restoringTitle:
       'Terjadi kesalahan saat memulihkan {{title}}. Harap periksa koneksi Anda dan coba lagi.',
+    revertingDocument: 'Ada masalah saat mengembalikan dokumen ini.',
     tokenInvalidOrExpired: 'Token tidak valid atau telah kedaluwarsa.',
     tokenNotProvided: 'Token tidak disediakan.',
     unableToCopy: 'Tidak dapat menyalin.',
@@ -550,6 +556,8 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',
     aboutToUnpublish: 'Anda akan membatalkan publikasi dokumen ini. Apakah Anda yakin?',
+    aboutToUnpublishIn:
+      'Anda akan menonaktifkan publikasi dokumen ini dalam {{locale}}. Apakah Anda yakin?',
     aboutToUnpublishSelection:
       'Anda akan membatalkan publikasi semua {{label}} dalam pilihan. Apakah Anda yakin?',
     autosave: 'Simpan Otomatis',
@@ -597,6 +605,8 @@ export const idTranslations: DefaultTranslationsObject = {
     restoring: 'Memulihkan...',
     reverting: 'Mengembalikan...',
     revertToPublished: 'Kembali ke yang dipublikasikan',
+    revertUnsuccessful:
+      'Pengembalian gagal. Tidak ada versi yang sebelumnya dipublikasikan ditemukan.',
     saveDraft: 'Simpan Draf',
     scheduledSuccessfully: 'Berhasil dijadwalkan.',
     schedulePublish: 'Jadwalkan Publikasi',
@@ -607,6 +617,9 @@ export const idTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublished: 'Belum dipublikasikan',
+    unpublishedSuccessfully: 'Berhasil tidak diterbitkan.',
+    unpublishIn: 'Batalkan Publikasi dalam {{locale}}',
     unpublishing: 'Membatalkan publikasi...',
     version: 'Versi',
     versionAgo: '{{distance}} yang lalu',

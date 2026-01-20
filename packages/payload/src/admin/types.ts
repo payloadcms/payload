@@ -81,6 +81,8 @@ export type {
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
 
+export type { CustomStatus } from './elements/Status.js'
+
 export type { Column } from './elements/Table.js'
 
 export type { CustomUpload } from './elements/Upload.js'
@@ -567,6 +569,7 @@ export type DocumentSlots = {
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Status?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
 }
@@ -589,6 +592,8 @@ export type {
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
+
+export { type WidgetServerProps } from './views/dashboard.js'
 
 export type {
   BeforeDocumentControlsClientProps,

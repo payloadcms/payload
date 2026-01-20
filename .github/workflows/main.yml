@@ -2,13 +2,10 @@ name: ci
 
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+    types: [opened, reopened, synchronize]
+
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -53,7 +50,7 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
-      - name: Log all filter results
+      - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
@@ -69,12 +66,15 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     runs-on: ubuntu-24.04
 
     steps:
@@ -96,7 +96,7 @@ jobs:
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -120,7 +120,7 @@ jobs:
   tests-types:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -144,7 +144,7 @@ jobs:
   tests-int:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}
     timeout-minutes: 45
     strategy:
@@ -152,6 +152,7 @@ jobs:
       matrix:
         database:
           - mongodb
+          - mongodb-atlas
           - documentdb
           - cosmosdb
           - firestore
@@ -163,28 +164,12 @@ jobs:
           - sqlite-uuid
 
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
     services:
-      postgres:
-        # Custom postgres 17 docker image that supports both pg-vector and postgis: https://github.com/payloadcms/postgis-vector
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'ghcr.io/payloadcms/postgis-vector:latest' || '' }}
-        env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
       redis:
         image: redis:latest
         ports:
@@ -210,50 +195,29 @@ jobs:
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
-
       - name: Configure Redis
         run: |
-          echo  "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+          echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: ${{ matrix.database }}
 
       - name: Integration Tests
         run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
 
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     name: e2e-${{ matrix.suite }}
     timeout-minutes: 45
     strategy:
@@ -272,8 +236,10 @@ jobs:
           - auth
           - auth-basic
           - bulk-edit
+          - dashboard
           - joins
           - field-error-states
+          - field-paths
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
@@ -325,7 +291,9 @@ jobs:
           - plugin-nested-docs
           - plugin-redirects
           - plugin-seo
+          - queues
           - sort
+          - server-url
           - trash
           - versions
           - uploads
@@ -348,7 +316,13 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: matrix.suite == 'plugin-cloud-storage'
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: mongodb
 
       - name: Store Playwright's Version
         run: |
@@ -419,6 +393,7 @@ jobs:
           - auth
           - auth-basic
           - bulk-edit
+          - dashboard
           - joins
           - field-error-states
           - fields-relationship
@@ -469,6 +444,7 @@ jobs:
           - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
+          - queues
           - sort
           - trash
           - versions
@@ -492,7 +468,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: matrix.suite == 'plugin-cloud-storage'
 
       - name: Store Playwright's Version
         run: |
@@ -541,7 +517,7 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -612,7 +588,8 @@ jobs:
 
       # Avoid dockerhub rate-limiting
       - name: Cache Docker images
-        uses: ScribeMD/docker-cache@0.5.0
+        # Use AndreKurait/docker-cache@0.6.0 instead of ScribeMD/docker-cache@0.5.0 to fix the following issue: https://github.com/ScribeMD/docker-cache/issues/837 ("Warning: Failed to restore: Cache service responded with 400")
+        uses: AndreKurait/docker-cache@0.6.0
         with:
           key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
 
@@ -671,7 +648,7 @@ jobs:
   tests-type-generation:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -698,14 +675,16 @@ jobs:
     if: always()
     runs-on: ubuntu-24.04
     needs:
-      - lint
-      - build
-      - build-and-test-templates
-      - tests-unit
-      - tests-int
-      - tests-e2e
-      - tests-types
-      - tests-type-generation
+      [
+        lint,
+        build,
+        build-and-test-templates,
+        tests-unit,
+        tests-int,
+        tests-e2e,
+        tests-types,
+        tests-type-generation,
+      ]
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}

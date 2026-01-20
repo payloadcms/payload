@@ -60,6 +60,7 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -121,6 +122,7 @@ export function DefaultEditView({
     config: {
       admin: { user: userSlug },
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -396,21 +398,16 @@ export function DefaultEditView({
       }
     },
     [
-      reportUpdate,
-      id,
-      entitySlug,
       user,
-      drawerSlug,
       collectionSlug,
       userSlug,
+      id,
       setLastUpdateTime,
       setData,
       onSaveFromContext,
       isEditing,
       depth,
       redirectAfterCreate,
-      setLivePreviewURL,
-      setPreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -425,11 +422,17 @@ export function DefaultEditView({
       docPermissions,
       operation,
       isLivePreviewEnabled,
-      isPreviewEnabled,
       typeofLivePreviewURL,
+      isPreviewEnabled,
       schemaPathSegments,
+      upload,
       isLockingEnabled,
+      reportUpdate,
+      drawerSlug,
+      entitySlug,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -558,7 +561,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router, serverURL })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -584,7 +587,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router, serverURL })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -619,6 +622,7 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}

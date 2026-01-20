@@ -51,7 +51,6 @@ export const DuplicateDocument: React.FC<Props> = ({
     config: {
       localization,
       routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -91,9 +90,12 @@ export const DuplicateDocument: React.FC<Props> = ({
 
       try {
         const res = await requests.post(
-          `${serverURL}${apiRoute}/${slug}/${id}/duplicate${qs.stringify(queryParams, {
-            addQueryPrefix: true,
-          })}`,
+          formatAdminURL({
+            apiRoute,
+            path: `/${slug}/${id}/duplicate${qs.stringify(queryParams, {
+              addQueryPrefix: true,
+            })}`,
+          }),
           {
             body: JSON.stringify(hasDraftsEnabled(collectionConfig) ? { _status: 'draft' } : {}),
             headers,
@@ -145,7 +147,6 @@ export const DuplicateDocument: React.FC<Props> = ({
       onDuplicate,
       redirectAfterDuplicate,
       router,
-      serverURL,
       setModified,
       singularLabel,
       slug,

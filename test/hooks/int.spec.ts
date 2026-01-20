@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -368,6 +369,111 @@ describe('Hooks', () => {
 
       expect(updatedDoc).toBeDefined()
     })
+
+    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+      const relationID = await payload.create({
+        collection: 'relations',
+        data: {
+          title: 'Relation for nested afterChange',
+        },
+      })
+
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
+          lexical: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'link',
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                      direction: null,
+                      format: '',
+                      indent: 0,
+                      type: 'link',
+                      version: 3,
+                      fields: {
+                        linkBlocks: [
+                          {
+                            id: '693ade72068ea07ba13edcab',
+                            blockType: 'nestedLinkBlock',
+                            nestedRelationship: relationID.id,
+                          },
+                        ],
+                      },
+                      id: '693ade70068ea07ba13edca9',
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693adf3c068ea07ba13edcae',
+                    blockName: '',
+                    nestedAfterChange: 'test',
+                    blockType: 'nestedBlock',
+                  },
+                },
+                {
+                  children: [],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'nested-after-change-hooks',
+          id: nestedAfterChangeDoc.id,
+          data: {
+            text: 'updated',
+          },
+        }),
+      ).resolves.not.toThrow()
+    })
   })
 
   describe('auth collection hooks', () => {
@@ -600,119 +706,6 @@ describe('Hooks', () => {
       const globalAndFieldString = globalString + fieldString
 
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
-    })
-
-    it('should pass correct field paths through field hooks', async () => {
-      const formatExpectedFieldPaths = (
-        fieldIdentifier: string,
-        {
-          path,
-          schemaPath,
-        }: {
-          path: string[]
-          schemaPath: string[]
-        },
-      ) => ({
-        [`${fieldIdentifier}_beforeValidate_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_beforeChange_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_afterRead_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_beforeDuplicate_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-      })
-
-      const originalDoc = await payload.create({
-        collection: fieldPathsSlug,
-        data: {
-          topLevelNamedField: 'Test',
-          array: [
-            {
-              fieldWithinArray: 'Test',
-              nestedArray: [
-                {
-                  fieldWithinNestedArray: 'Test',
-                  fieldWithinNestedRow: 'Test',
-                },
-              ],
-            },
-          ],
-          fieldWithinRow: 'Test',
-          fieldWithinUnnamedTab: 'Test',
-          namedTab: {
-            fieldWithinNamedTab: 'Test',
-          },
-          fieldWithinNestedUnnamedTab: 'Test',
-        },
-      })
-
-      // duplicate the doc to ensure that the beforeDuplicate hook is run
-      const doc = await payload.duplicate({
-        id: originalDoc.id,
-        collection: fieldPathsSlug,
-      })
-
-      expect(doc).toMatchObject({
-        ...formatExpectedFieldPaths('topLevelNamedField', {
-          path: ['topLevelNamedField'],
-          schemaPath: ['topLevelNamedField'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinArray', {
-          path: ['array', '0', 'fieldWithinArray'],
-          schemaPath: ['array', 'fieldWithinArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNestedArray', {
-          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
-          schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinRowWithinArray', {
-          path: ['array', '0', 'fieldWithinRowWithinArray'],
-          schemaPath: ['array', '_index-2', 'fieldWithinRowWithinArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinRow', {
-          path: ['fieldWithinRow'],
-          schemaPath: ['_index-2', 'fieldWithinRow'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinUnnamedTab', {
-          path: ['fieldWithinUnnamedTab'],
-          schemaPath: ['_index-3-0', 'fieldWithinUnnamedTab'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNestedUnnamedTab', {
-          path: ['fieldWithinNestedUnnamedTab'],
-          schemaPath: ['_index-3-0-1-0', 'fieldWithinNestedUnnamedTab'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNamedTab', {
-          path: ['namedTab', 'fieldWithinNamedTab'],
-          schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
-        }),
-      })
-    })
-
-    it('should assign value properly when missing in data', async () => {
-      const doc = await payload.create({
-        collection: valueHooksSlug,
-        data: {
-          slug: 'test',
-        },
-      })
-
-      const updatedDoc = await payload.update({
-        id: doc.id,
-        collection: valueHooksSlug,
-        data: {},
-      })
-
-      expect(updatedDoc.beforeValidate_value).toEqual('test')
-      expect(updatedDoc.beforeChange_value).toEqual('test')
     })
   })
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.67.0",
+  "version": "3.72.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -32,8 +32,8 @@
       "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./src/withPayload.js",
-      "default": "./src/withPayload.js"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
@@ -85,7 +85,7 @@
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
     "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
-    "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:cjs": "node ./bundleWithPayload.js",
     "build:debug": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles:debug && pnpm build:types && pnpm build:cjs && node createStubScss.js",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
@@ -108,7 +108,9 @@
     ]
   },
   "dependencies": {
-    "@dnd-kit/core": "6.0.8",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
+    "@dnd-kit/sortable": "10.0.0",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -143,7 +145,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.4.8",
+    "next": "^15.4.10",
     "payload": "workspace:*"
   },
   "engines": {
@@ -156,9 +158,9 @@
         "default": "./dist/prod/styles.css"
       },
       "./withPayload": {
-        "import": "./dist/withPayload.js",
+        "import": "./dist/withPayload/withPayload.js",
         "require": "./dist/cjs/withPayload.cjs",
-        "default": "./dist/withPayload.js"
+        "default": "./dist/withPayload/withPayload.js"
       },
       "./layouts": {
         "import": "./dist/exports/layouts.js",

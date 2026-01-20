@@ -38,6 +38,7 @@ import { SaveButton } from '../SaveButton/index.js'
 import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
+import { UnpublishButton } from '../UnpublishButton/index.js'
 
 const baseClass = 'doc-controls'
 
@@ -49,6 +50,7 @@ export const DocumentControls: React.FC<{
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
+    readonly Status?: React.ReactNode
   }
   readonly data?: Data
   readonly disableActions?: boolean
@@ -85,6 +87,7 @@ export const DocumentControls: React.FC<{
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,
       SaveDraftButton: CustomSaveDraftButton,
+      Status: CustomStatus,
     } = {},
     data,
     disableActions,
@@ -124,6 +127,7 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -209,7 +213,7 @@ export const DocumentControls: React.FC<{
                       .filter(Boolean)
                       .join(' ')}
                   >
-                    <Status />
+                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                   </li>
                 )}
                 {hasSavePermission &&
@@ -276,6 +280,7 @@ export const DocumentControls: React.FC<{
                         Fallback={<SaveDraftButton />}
                       />
                     )}
+                    <UnpublishButton />
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}

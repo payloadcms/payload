@@ -152,6 +152,7 @@ import type {
   NumberFieldSingleValidation,
   RelationshipFieldManyValidation,
   RelationshipFieldSingleValidation,
+  RichTextFieldValidation,
   SelectFieldManyValidation,
   SelectFieldSingleValidation,
   TextFieldManyValidation,
@@ -725,13 +726,39 @@ export type CheckboxFieldClient = {
 } & FieldBaseClient &
   Pick<CheckboxField, 'type'>
 
-type DateFieldTimezoneConfig = {
+type DateFieldTimezoneConfigBase = {
   /**
    * Make only the timezone required in the admin interface. This means a timezone is always required to be selected.
    */
   required?: boolean
   supportedTimezones?: Timezone[]
 } & Pick<TimezonesConfig, 'defaultTimezone'>
+
+type DateFieldTimezoneConfig = {
+  /**
+   * A function used to override the timezone field at a granular level.
+   * Passes the base select field to you to manipulate beyond the exposed options.
+   * @example
+   * ```ts
+   * {
+   *   type: 'date',
+   *   name: 'publishedAt',
+   *   timezone: {
+   *     override: ({ baseField }) => ({
+   *       ...baseField,
+   *       admin: {
+   *         ...baseField.admin,
+   *         hidden: false,
+   *       },
+   *     }),
+   *   },
+   * }
+   * ```
+   */
+  override?: (args: { baseField: SelectField }) => Field
+} & DateFieldTimezoneConfigBase
+
+type DateFieldTimezoneConfigClient = DateFieldTimezoneConfigBase
 
 export type DateField = {
   admin?: {
@@ -755,8 +782,13 @@ export type DateField = {
 export type DateFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
+  /**
+   * Enable timezone selection in the admin interface.
+   * Note: The `override` function is stripped on the client.
+   */
+  timezone?: DateFieldTimezoneConfigClient | true
 } & FieldBaseClient &
-  Pick<DateField, 'timezone' | 'type'>
+  Pick<DateField, 'type'>
 
 export type GroupBase = {
   admin?: {
@@ -861,6 +893,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  // TODO: Deprecate this in favor of a schemaPath property on every field
   id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
@@ -1036,6 +1069,9 @@ export type PolymorphicUploadField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
 
@@ -1248,6 +1284,9 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 
@@ -1316,7 +1355,8 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & FieldBase &
+  validate?: RichTextFieldValidation
+} & Omit<FieldBase, 'validate'> &
   TExtraProperties
 
 export type RichTextFieldClient<
@@ -1951,7 +1991,7 @@ export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 export type FieldWithMaxDepth = RelationshipField | UploadField
 export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
-export function fieldHasSubFields<TField extends ClientField | Field>(
+export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
   return (

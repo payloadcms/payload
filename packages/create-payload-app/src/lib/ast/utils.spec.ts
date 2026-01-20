@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { Project } from 'ts-morph'
 import {
   addImportDeclaration,

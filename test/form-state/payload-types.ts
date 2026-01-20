@@ -88,6 +88,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -162,6 +163,14 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  namedTab?: {
+    arrayInNamedTabInUnnamedTab?:
+      | {
+          textInArrayInNamedTabInUnnamedTab?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -319,6 +328,16 @@ export interface PostsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  namedTab?:
+    | T
+    | {
+        arrayInNamedTabInUnnamedTab?:
+          | T
+          | {
+              textInArrayInNamedTabInUnnamedTab?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -405,6 +424,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

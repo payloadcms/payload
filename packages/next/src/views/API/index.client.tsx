@@ -18,7 +18,7 @@ import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 
-import { hasDraftsEnabled } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
 import * as React from 'react'
 
 import { LocaleSelector } from './LocaleSelector/index.js'
@@ -51,7 +51,7 @@ export const APIViewClient: React.FC = () => {
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   let draftsEnabled: boolean = false
-  let docEndpoint: string = ''
+  let docEndpoint: `/${string}` = undefined
 
   if (collectionConfig) {
     draftsEnabled = hasDraftsEnabled(collectionConfig)
@@ -81,7 +81,11 @@ export const APIViewClient: React.FC = () => {
     trash: trashParam ? 'true' : 'false',
   }).toString()
 
-  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?${params}`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: `${docEndpoint}?${params}`,
+    serverURL: serverURL || window.location.origin,
+  })
 
   React.useEffect(() => {
     const fetchData = async () => {

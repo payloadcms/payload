@@ -8,5 +8,5 @@ const helperConfig = buildConfig({
 
 export default buildConfig({
   collections: [],
-  db: mongooseAdapter({ url: process.env.DATABASE_URI || '' }),
+  db: mongooseAdapter({ url: process.env.DATABASE_URL || '' }),
 })

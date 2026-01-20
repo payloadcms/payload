@@ -1,6 +1,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -44,15 +45,21 @@ export function CurrentFolderActions({ className }: Props) {
     })
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
-  const { routes, serverURL } = config
+  const { routes } = config
   const { closeModal, openModal } = useModal()
   const { i18n, t } = useTranslation()
 
   const deleteCurrentFolder = React.useCallback(async () => {
-    await fetch(`${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}?depth=0`, {
-      credentials: 'include',
-      method: 'DELETE',
-    })
+    await fetch(
+      formatAdminURL({
+        apiRoute: routes.api,
+        path: `/${folderCollectionSlug}/${folderID}?depth=0`,
+      }),
+      {
+        credentials: 'include',
+        method: 'DELETE',
+      },
+    )
     startRouteTransition(() => {
       router.push(getFolderRoute(breadcrumbs[breadcrumbs.length - 2]?.id || null))
     })
@@ -62,7 +69,6 @@ export function CurrentFolderActions({ className }: Props) {
     folderID,
     getFolderRoute,
     router,
-    serverURL,
     routes.api,
     startRouteTransition,
   ])
