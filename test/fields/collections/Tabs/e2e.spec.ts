@@ -142,12 +142,7 @@ describe('Tabs', () => {
     await wait(200)
 
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
-    const button = page.locator(conditionalTabSelector)
-    await expect(
-      async () => await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/),
-    ).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/)
 
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()
