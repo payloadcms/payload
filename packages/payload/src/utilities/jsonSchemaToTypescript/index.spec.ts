@@ -74,6 +74,30 @@ describe('jsonSchemaToTypescript', () => {
                 { type: 'object', properties: { foo: { type: 'string' } }, required: ['foo'] },
               ],
             },
+            eitherStringOrNumber: {
+              type: ['string', 'number'],
+            },
+            eitherStringOrNull: {
+              type: ['string', 'null'],
+            },
+            intersection: {
+              allOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    a: { type: 'string' },
+                  },
+                  required: ['a'],
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    b: { type: 'number' },
+                  },
+                  required: ['b'],
+                },
+              ],
+            },
           },
           required: ['name', 'age'],
         },

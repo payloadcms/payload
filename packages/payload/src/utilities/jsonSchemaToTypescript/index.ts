@@ -1,6 +1,10 @@
 import type {
   ExportDeclaration,
+  Expression,
+  Identifier,
+  NumericLiteral,
   Span,
+  StringLiteral,
   TsInterfaceBody,
   TsInterfaceDeclaration,
   TsKeywordTypeKind,
@@ -17,6 +21,11 @@ const span = (): Span => ({
   end: 0,
   start: 0,
 })
+
+const formatDefinitionName = (str: string): string => {
+  // eslint-disable-next-line regexp/no-unused-capturing-group
+  return str.replace(/(^\w|[_-]\w)/g, (match) => match.replace(/[_-]/, '').toUpperCase())
+}
 
 const identifier = (value: string) => ({
   type: 'Identifier' as const,
@@ -62,6 +71,12 @@ const union = (types: TsType[]): TsType => ({
   types,
 })
 
+const intersection = (types: TsType[]): TsType => ({
+  type: 'TsIntersectionType',
+  span: span(),
+  types,
+})
+
 const keyword = (kind: TsKeywordTypeKind): TsType => ({
   type: 'TsKeywordType',
   kind,
@@ -89,6 +104,11 @@ const getTsType = (schema: JSONSchema4): TsType => {
   if (schema.anyOf) {
     const types: TsType[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
     return union(types)
+  }
+
+  if (schema.allOf) {
+    const types: TsType[] = schema.allOf.map((subSchema) => getTsType(subSchema))
+    return intersection(types)
   }
 
   if (schema.enum) {
@@ -119,17 +139,27 @@ const getTsType = (schema: JSONSchema4): TsType => {
     }
   }
 
+  if (Array.isArray(schema.type)) {
+    const types: TsType[] = schema.type.map((type) =>
+      getTsType({
+        ...schema,
+        type,
+      }),
+    )
+    return union(types)
+  }
+
   switch (schema.type) {
     case 'any': {
       return keyword('any')
     }
     case 'array': {
       if (!schema.items) {
-        throw new Error('Array schema must have items defined')
+        break
       }
 
       if (Array.isArray(schema.items)) {
-        throw new Error('Tuple types are not supported')
+        break
       }
 
       const itemsSchema = schema.items
@@ -141,6 +171,9 @@ const getTsType = (schema: JSONSchema4): TsType => {
     }
     case 'integer': {
       return keyword('number')
+    }
+    case 'null': {
+      return keyword('null')
     }
     case 'number': {
       return keyword('number')
@@ -157,6 +190,7 @@ const getTsType = (schema: JSONSchema4): TsType => {
 
       return object(elements)
     }
+
     case 'string': {
       return keyword('string')
     }
@@ -168,11 +202,40 @@ const getTsType = (schema: JSONSchema4): TsType => {
     return {
       type: 'TsTypeReference',
       span: span(),
-      typeName: identifier(refType),
+      typeName: identifier(formatDefinitionName(refType)),
     }
   }
 
+  console.error('Unsupported schema:', JSON.stringify(schema, null, 2))
+
+  return keyword('unknown')
+
   throw new Error(`Unsupported schema type: ${JSON.stringify(schema)}`)
+}
+
+const isIdentifierKey = (key: string): boolean => {
+  return /^[A-Z_$][\w$]*$/i.test(key)
+}
+
+const getPropertyKeyType = (key: number | string): Expression => {
+  if (typeof key === 'number') {
+    return {
+      type: 'NumericLiteral',
+      span: span(),
+      value: key,
+    }
+  }
+
+  if (isIdentifierKey(key)) {
+    return identifier(key)
+  }
+
+  return {
+    type: 'StringLiteral',
+    raw: `'${key}'`,
+    span: span(),
+    value: key,
+  }
 }
 
 const buildElements = (
@@ -186,7 +249,7 @@ const buildElements = (
     elements.push({
       type: 'TsPropertySignature',
       computed: false,
-      key: identifier(key),
+      key: getPropertyKeyType(key),
       optional: !required.includes(key),
       readonly: false,
       span: span(),
@@ -201,10 +264,11 @@ const buildElements = (
   if (additionalProperties) {
     elements.push({
       type: 'TsIndexSignature',
-      ctxt: 0,
+
       params: [
         {
           type: 'Identifier',
+          // @ts-expect-error ctxt not in swc types for some reason
           ctxt: 0,
           optional: false,
           span: span(),
@@ -243,7 +307,7 @@ const buildDefinition = (name: string, schema: JSONSchema4): TsInterfaceDeclarat
   }
 
   const tsInterface: TsInterfaceDeclaration = {
-    id: identifier(name),
+    id: identifier(formatDefinitionName(name)),
     type: 'TsInterfaceDeclaration',
     body: interfaceBody,
     declare: false,

@@ -12,8 +12,17 @@ export interface TestInterface {
   }[]
   constNumber?: 30
   constString?: 'hello'
+  eitherStringOrNull?: null | string
+  eitherStringOrNumber?: number | string
   enumMixed?: 'two' | 1 | true
   enumString?: 'option1' | 'option2' | 'option3'
+  intersection?: {
+    [key: string]: unknown
+    a: string
+  } & {
+    [key: string]: unknown
+    b: number
+  }
   name: string
   object?: {
     [key: string]: unknown
