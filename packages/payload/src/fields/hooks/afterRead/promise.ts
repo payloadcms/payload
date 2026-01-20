@@ -1,7 +1,7 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
+import type { ParentFieldPaths, RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -52,13 +52,10 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  parentIndexPath: string
   /**
    * @todo make required in v4.0
    */
   parentIsLocalized?: boolean
-  parentPath: string
-  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -69,7 +66,8 @@ type Args = {
   siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-} & Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
+} & Required<ParentFieldPaths> &
+  Required<Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>>
 
 // This function is responsible for the following actions, in order:
 // - Remove hidden fields from response

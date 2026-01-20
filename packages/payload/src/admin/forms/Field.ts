@@ -33,13 +33,7 @@ export type ClientComponentProps = {
   permissions?: SanitizedFieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-  /**
-   * Used to extract field configs from a schemaMap.
-   * Does not include indexes.
-   *
-   * @default field.name
-   **/
-  schemaPath?: string
+  schemaPath?: FieldPaths['schemaPath']
 }
 
 export type FieldPathProps = FieldPaths & Pick<ParentFieldPaths, 'parentPath' | 'parentSchemaPath'>

@@ -3,6 +3,8 @@ import type {
   ArrayField,
   ClientComponentProps,
   ClientField,
+  FieldPaths,
+  ParentFieldPaths,
   Row,
   SanitizedFieldPermissions,
 } from 'payload'
@@ -37,19 +39,18 @@ type ArrayRowProps = {
   readonly isSortable?: boolean
   readonly labels: Partial<ArrayField['labels']>
   readonly moveRow: (fromIndex: number, toIndex: number) => void
-  readonly parentPath: string
   readonly pasteRow: (rowIndex: number) => void
-  readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly?: boolean
   readonly removeRow: (rowIndex: number) => void
   readonly row: Row
   readonly rowCount: number
   readonly rowIndex: number
-  readonly schemaPath: string
   readonly scrollIdPrefix: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
-} & Pick<ClientComponentProps, 'forceRender'> &
+} & Omit<FieldPaths, 'indexPath'> &
+  Pick<ClientComponentProps, 'forceRender'> &
+  Required<Pick<ParentFieldPaths, 'parentPath'>> &
   UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({

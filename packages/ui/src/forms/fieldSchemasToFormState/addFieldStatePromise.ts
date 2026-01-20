@@ -4,11 +4,13 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldPaths,
   FieldSchemaMap,
   FieldState,
   FlattenedBlock,
   FormState,
   FormStateWithoutComponents,
+  ParentFieldPaths,
   PayloadRequest,
   Row,
   SanitizedFieldPermissions,
@@ -69,7 +71,6 @@ export type AddFieldStatePromiseArgs = {
    * Whether the field schema should be included in the state
    */
   includeSchema?: boolean
-  indexPath: string
   mockRSCs?: BuildFormStateArgs['mockRSCs']
   /**
    * Whether to omit parent fields in the state. @default false
@@ -77,11 +78,8 @@ export type AddFieldStatePromiseArgs = {
   omitParents?: boolean
   operation: 'create' | 'update'
   parentIndexPath: string
-  parentPath: string
   parentPermissions: SanitizedFieldsPermissions
-  parentSchemaPath: string
   passesCondition: boolean
-  path: string
   preferences: DocumentPreferences
   previousFormState: FormState
   readOnly?: boolean
@@ -92,7 +90,6 @@ export type AddFieldStatePromiseArgs = {
    * just create your own req and pass in the locale and the user
    */
   req: PayloadRequest
-  schemaPath: string
   select?: SelectType
   selectMode?: SelectMode
   /**
@@ -104,7 +101,8 @@ export type AddFieldStatePromiseArgs = {
    */
   skipValidation?: boolean
   state: FormStateWithoutComponents
-}
+} & FieldPaths &
+  Required<Omit<ParentFieldPaths, 'parentIndexPath'>>
 
 /**
  * Flattens the fields schema and fields data.

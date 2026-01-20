@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
+import type { ParentFieldPaths, RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -42,13 +42,10 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  parentIndexPath: string
   /**
    * @todo make required in v4.0
    */
   parentIsLocalized?: boolean
-  parentPath: string
-  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
@@ -58,7 +55,7 @@ type Args = {
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-}
+} & Required<ParentFieldPaths>
 
 export const traverseFields = ({
   blockData,

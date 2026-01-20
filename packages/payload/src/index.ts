@@ -1606,7 +1606,7 @@ export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
 
-export type { FieldPaths } from './fields/getFieldPaths.js'
+export type { FieldPaths, ParentFieldPaths } from './fields/getFieldPaths.js'
 
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'

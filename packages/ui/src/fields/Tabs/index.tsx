@@ -3,6 +3,8 @@ import type {
   ClientComponentProps,
   ClientTab,
   DocumentPreferences,
+  FieldPaths,
+  ParentFieldPaths,
   SanitizedFieldPermissions,
   StaticDescription,
   TabsFieldClientComponent,
@@ -202,14 +204,12 @@ type ActiveTabProps = {
   readonly field: ClientTab
   readonly hidden: boolean
   readonly label?: string
-  readonly parentIndexPath: string
-  readonly parentPath: string
-  readonly parentSchemaPath: string
-  readonly path: string
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly: boolean
   readonly tabIndex: number
-} & Pick<ClientComponentProps, 'forceRender'>
+} & Pick<ClientComponentProps, 'forceRender'> &
+  Pick<FieldPaths, 'path'> &
+  Required<ParentFieldPaths>
 
 function TabContent({
   description,
