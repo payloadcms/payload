@@ -631,7 +631,7 @@ test.describe('Form State', () => {
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // Wait for the first request to be sent
-      expect(requestCount).toBe(1)
+      await expect.poll(() => requestCount).toBe(1)
 
       // Before the first request comes back, add the second row and expect an optimistic loading state
       await addArrayRowAsync(page, 'array')
@@ -642,7 +642,7 @@ test.describe('Form State', () => {
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // At this point there should have been a single request sent for the first row
-      expect(requestCount).toBe(1)
+      await expect.poll(() => requestCount).toBe(1)
 
       // Wait for the first request to finish
       await page.waitForResponse(
@@ -698,6 +698,8 @@ test.describe('Form State', () => {
         postsUrl.create,
         async () => {
           await addArrayRowAsync(page, 'array')
+          // Ensure title field is filled after the form debounce, to guarantee 2 requests are sent
+          await wait(500)
           await page.locator('#field-title').fill('Test 2')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
