@@ -90,7 +90,6 @@ export const getHandler = ({
         if (useSignedURL) {
           const command = new GetObjectCommand({ Bucket: bucket, Key: key })
           const signedUrl = await getSignedUrl(
-            // @ts-expect-error mismatch versions
             getStorageClient(),
             command,
             typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },

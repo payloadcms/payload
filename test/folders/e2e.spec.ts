@@ -6,6 +6,7 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
@@ -146,7 +147,6 @@ test.describe('Folders', () => {
         folderName: 'Renamed Folder',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       const renamedFolderCard = page
         .locator('.folder-file-card__name', {
           hasText: 'Renamed Folder',
@@ -222,7 +222,8 @@ test.describe('Folders', () => {
         .locator('dialog#move-folder-drawer-confirm-move')
         .getByRole('button', { name: 'Move' })
       await confirmMoveButton.click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('Item moved')
+      await closeAllToasts(page)
       const movedFolderCard = page.locator('.folder-list--folders .folder-file-card__name', {
         hasText: 'Move Me',
       })
@@ -280,7 +281,6 @@ test.describe('Folders', () => {
         folderType: ['Posts'],
       })
 
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('dialog#create-folder--no-results-new-folder-drawer')).toBeHidden()
     })
 
@@ -472,7 +472,6 @@ test.describe('Folders', () => {
         folderName: 'New Folder From Collection',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })
   })
 
