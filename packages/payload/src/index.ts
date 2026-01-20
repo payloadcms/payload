@@ -1349,11 +1349,6 @@ export {
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 
-export {
-  BASE_36_DIGITS,
-  generateKeyBetween,
-  generateNKeysBetween,
-} from './config/orderable/fractional-indexing.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'

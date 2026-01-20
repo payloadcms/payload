@@ -113,7 +113,7 @@ Orderable can also be added to [joins fields](../fields/join).
 If you need to generate order keys programmatically (e.g., when creating documents via the Local API with a specific order), you can import the utilities directly:
 
 ```ts
-import { generateKeyBetween, generateNKeysBetween } from 'payload'
+import { generateKeyBetween, generateNKeysBetween } from 'payload/shared'
 
 // Generate a key between two existing keys (or null for start/end)
 const newKey = generateKeyBetween('a0', 'a1')
