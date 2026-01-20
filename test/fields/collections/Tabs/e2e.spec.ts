@@ -79,7 +79,9 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)
     await page.locator('#field-numberInRow').fill(numberInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(300)
 
@@ -100,7 +102,8 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
     await page.locator('#field-textInRow').fill(textInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(500)
 
