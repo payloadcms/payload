@@ -301,13 +301,11 @@ export async function changeLocale(page: Page, newLocale: string) {
 }
 
 export async function waitForFormReady(page: Page) {
-  const editView = page.locator('.collection-edit')
-
-  if ((await editView.count()) === 0) {
-    return
-  }
-
-  await expect(editView).toHaveAttribute('data-ready', 'true', { timeout: POLL_TOPASS_TIMEOUT })
+  await expect
+    .poll(async () => (await page.locator('[data-form-ready="false"]').count()) === 0, {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    .toBe(true)
 }
 
 export function exactText(text: string) {
