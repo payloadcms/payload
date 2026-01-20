@@ -408,11 +408,14 @@ test.describe('Multi Tenant', () => {
       await page.keyboard.up('Shift')
       await page.locator('.toolbar-popup__button-link').click()
       await expect(page.locator('.lexical-link-edit-drawer')).toBeVisible()
+      await wait(1000)
       const linkRadio = page.locator('.radio-input__styled-radio').last()
       await expect(linkRadio).toBeVisible()
       await linkRadio.click({
         delay: 100,
       })
+      await wait(300)
+
       await page.locator('.drawer__content').locator('.rs__input').click()
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
