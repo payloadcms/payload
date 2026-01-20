@@ -160,8 +160,7 @@ describe('Block fields', () => {
 
     expect(rowCount).toEqual(5)
 
-    await page.click('#action-save')
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await saveDocAndAssert(page)
   })
 
   test('should initialize block rows with collapsed state', async () => {
@@ -290,7 +289,6 @@ describe('Block fields', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {

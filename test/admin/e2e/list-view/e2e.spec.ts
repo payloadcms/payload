@@ -1610,6 +1610,7 @@ describe('List View', () => {
 
       await mapAsync([...Array(20)], async (_, i) => {
         await payload.create({
+          disableTransaction: true,
           collection: listDrawerSlug,
           data: {
             title: `List Drawer Item ${i + 1}`,
@@ -2143,6 +2144,7 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -2158,6 +2160,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -2168,6 +2171,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
+    disableTransaction: true,
     data: {
       title,
       ...overrides,
@@ -2177,6 +2181,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
@@ -2187,6 +2192,7 @@ async function createArray() {
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
+    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,

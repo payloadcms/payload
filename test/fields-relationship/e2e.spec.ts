@@ -390,7 +390,6 @@ describe('Relationship Field', () => {
     await assertToastErrors({
       page,
       errors: [fieldLabel],
-      dismissAfterAssertion: true,
     })
     await wait(1000)
 
