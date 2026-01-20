@@ -145,7 +145,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.4.10 || ^16.1.1-canary.35",
+    "next": "^15.4.10 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0",
     "payload": "workspace:*"
   },
   "engines": {
