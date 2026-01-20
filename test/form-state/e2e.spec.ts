@@ -70,7 +70,6 @@ test.describe('Form State', () => {
 
   test('should disable fields during initialization', async () => {
     await page.goto(postsUrl.create, { waitUntil: 'commit' })
-    await waitForFormReady(page)
     await expect(page.locator('#field-title')).toBeDisabled()
   })
 
@@ -172,7 +171,7 @@ test.describe('Form State', () => {
       },
       {
         allowedNumberOfRequests: 1,
-        minimumNumberOfRequests: 1
+        minimumNumberOfRequests: 1,
       },
     )
   })
@@ -191,7 +190,7 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath === 'array',
+            body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
     })
 
@@ -210,9 +209,9 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath === 'array' &&
-          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-            'array.0.customTextField',
+            body[0].args.formState['array'].lastRenderedPath === 'array' &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField',
         ),
     })
 
@@ -232,11 +231,11 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath &&
-          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-            'array.0.customTextField' &&
-          body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-            'array.1.customTextField',
+            body[0].args.formState['array'].lastRenderedPath &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField' &&
+            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+              'array.1.customTextField',
         ),
     })
   })
@@ -595,7 +594,6 @@ test.describe('Form State', () => {
       // affect the request tracking of other tests depending on how fast they run
       await wait(1000)
 
-
       cdpSession = await throttleTest({
         page,
         context,
@@ -682,10 +680,10 @@ test.describe('Form State', () => {
         },
         {
           requestFilter(request) {
-              if( request.url() === postsUrl.create && request.method() === 'POST') {
-                return true
-              }
-              return false
+            if (request.url() === postsUrl.create && request.method() === 'POST') {
+              return true
+            }
+            return false
           },
           allowedNumberOfRequests: 2,
           minimumNumberOfRequests: 2,

@@ -793,7 +793,7 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       next:
-        specifier: ^15.4.10 || ^16.1.1-canary.35
+        specifier: ^15.4.10 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0
         version: 16.1.1-canary.35(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.77.4)
       path-to-regexp:
         specifier: 6.3.0
@@ -1749,7 +1749,7 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || ^16.1.1-canary.35
+        specifier: ^15.2.6 || ^15.3.6 || ^15.4.8 || ^15.5.7 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0
         version: 16.1.1-canary.35(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.2)
       object-to-formdata:
         specifier: 4.5.1
