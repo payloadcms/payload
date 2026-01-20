@@ -122,6 +122,7 @@ export const skTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nahrávaní súboru došlo k chybe.',
     restoringTitle:
       'Pri obnovovaní {{title}} sa vyskytla chyba. Skontrolujte prosím svoje pripojenie a skúste to znova.',
+    revertingDocument: 'Pri obnovení tohto dokumentu sa vyskytol problém.',
     tokenInvalidOrExpired: 'Token je neplatný alebo vypršal.',
     tokenNotProvided: 'Token nie je poskytnutý.',
     unableToCopy: 'Kopírovanie nie je možné.',
@@ -552,6 +553,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
     aboutToUnpublish: 'Chystáte sa zrušiť publikovanie tohto dokumentu. Ste si istý?',
+    aboutToUnpublishIn:
+      'Chystáte sa zrušiť publikovanie tohto dokumentu v {{locale}}. Ste si istý?',
     aboutToUnpublishSelection:
       'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
     autosave: 'Automatické uloženie',
@@ -599,6 +602,8 @@ export const skTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovovanie...',
     reverting: 'Vracanie...',
     revertToPublished: 'Vrátiť sa k publikovanému',
+    revertUnsuccessful:
+      'Vrátenie neúspešné. Nebola nájdená žiadna predchádzajúca publikovaná verzia.',
     saveDraft: 'Uložiť návrh',
     scheduledSuccessfully: 'Úspešne naplánované.',
     schedulePublish: 'Naplánovať publikovanie',
@@ -609,6 +614,9 @@ export const skTranslations: DefaultTranslationsObject = {
     specificVersion: 'Špecifická verzia',
     status: 'Stav',
     unpublish: 'Zrušiť publikovanie',
+    unpublished: 'Neuverejnené',
+    unpublishedSuccessfully: 'Úspešne nezverejnené.',
+    unpublishIn: 'Zrušiť publikovanie v {{locale}}',
     unpublishing: 'Zrušujem publikovanie...',
     version: 'Verzia',
     versionAgo: 'pred {{distance}}',

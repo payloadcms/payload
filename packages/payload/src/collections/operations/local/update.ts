@@ -96,7 +96,15 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   populate?: PopulateType
   /**
+   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   *
+   * @default undefined
+   */
+  publishAllLocales?: boolean
+  /**
    * Publish the document / documents with a specific locale.
+   *
+   * @default undefined
    */
   publishSpecificLocale?: string
   /**
@@ -120,6 +128,10 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   trash?: boolean
+  /**
+   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   */
+  unpublishAllLocales?: boolean
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -222,11 +234,13 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles = false,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     select,
     showHiddenFields,
     sort,
     trash = false,
+    unpublishAllLocales,
     where,
   } = options
 
@@ -255,12 +269,14 @@ async function updateLocal<
     overwriteExistingFiles,
     payload,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     req,
     select,
     showHiddenFields,
     sort,
     trash,
+    unpublishAllLocales,
     where,
   }
 

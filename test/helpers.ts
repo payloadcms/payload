@@ -190,6 +190,11 @@ export async function saveDocAndAssert(
   expectation: 'error' | 'success' = 'success',
 ): Promise<void> {
   await wait(500) // TODO: Fix this
+  if (selector === '#publish-locale') {
+    // open dropdown
+    const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
+    await chevronButton.click()
+  }
   await page.click(selector, { delay: 100 })
 
   if (expectation === 'success') {

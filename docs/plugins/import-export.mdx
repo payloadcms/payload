@@ -540,7 +540,7 @@ To preserve literal strings like "null" or "true", use a `fromCSV` function:
 
 When exporting with a specific locale selected, localized fields appear without a locale suffix:
 
-```csv
+```
 title,description
 "English Title","English Description"
 ```
@@ -549,7 +549,7 @@ title,description
 
 When exporting with locale set to `all`, each localized field gets a column per configured locale:
 
-```csv
+```
 title_en,title_es,title_de,description_en,description_es,description_de
 "English","Español","Deutsch","Desc EN","Desc ES","Desc DE"
 ```
@@ -558,14 +558,14 @@ title_en,title_es,title_de,description_en,description_es,description_de
 
 For single-locale import, data goes into the locale specified in the import settings:
 
-```csv
+```
 title,description
 "New Title","New Description"
 ```
 
 For multi-locale import, use locale suffixes in column names to import multiple locales at once:
 
-```csv
+```
 title_en,title_es
 "English Title","Título en Español"
 ```

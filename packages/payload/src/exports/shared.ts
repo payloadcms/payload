@@ -103,6 +103,7 @@ export {
   hasAutosaveEnabled,
   hasDraftsEnabled,
   hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
   hasScheduledPublishEnabled,
 } from '../utilities/getVersionsConfig.js'
 

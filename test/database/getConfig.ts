@@ -206,6 +206,15 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: 1,
         },
         {
+          name: 'numbersHasMany',
+          type: 'number',
+          hasMany: true,
+        },
+        {
+          name: 'publishDate',
+          type: 'date',
+        },
+        {
           type: 'blocks',
           name: 'blocks',
           blocks: [
