@@ -316,6 +316,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.adapter.rawTables = {}
     this.adapter.rawRelations = {}
     this.adapter.tableNameMap = new Map()
+    this.adapter.enums = {}
   }
 
   private async syncTransactionDrizzleInstance(req: PayloadRequest) {
@@ -546,8 +547,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
   }
 
   async getMigrationStatements(): Promise<{
-    add: string
-    remove: string
+    statements: string
     writeDrizzleSnapshot(filePath: string): void
   }> {
     const { generateDrizzleJson, generateMigration } = this.adapter.requireDrizzleKit()
@@ -572,13 +572,9 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     const sqlExecute = `await db.${this.executeMethod}(` + 'sql`'
 
     return {
-      add: this.sanitizeStatements({
+      statements: this.sanitizeStatements({
         sqlExecute,
-        statements: statements.filter((stmt) => !stmt.startsWith('DROP')),
-      }),
-      remove: this.sanitizeStatements({
-        sqlExecute,
-        statements: [...statements.filter((stmt) => stmt.startsWith('DROP'))],
+        statements,
       }),
       writeDrizzleSnapshot(filePath) {
         writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
@@ -767,13 +763,10 @@ const migrator = getBlocksToJsonMigrator(payload)
 migrator.setTempFolder(TEMP_FOLDER)
 await migrator.collectAndSaveEntitiesToBatches(req, { batchSize: BATCH_SIZE })
 
-${migrationStatements.add}
-payload.logger.info("Executed ADD statements for blocks-as-json migration")
+${migrationStatements.statements}
+payload.logger.info("Executed blocks to JSON migration statements.")
 
 await migrator.migrateEntitiesFromTempFolder(req, { clearBatches: true })
-
-${migrationStatements.remove}
-payload.logger.info("Executed REMOVE statements for blocks-as-json migration")
   `
 
     return {

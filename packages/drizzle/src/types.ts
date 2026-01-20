@@ -368,8 +368,7 @@ export interface BlocksToJsonMigrator {
     },
   ): Promise<void>
   getMigrationStatements(): Promise<{
-    add: string
-    remove: string
+    statements: string
     writeDrizzleSnapshot(filePath: string): void
   }>
   migrateEntitiesFromTempFolder(

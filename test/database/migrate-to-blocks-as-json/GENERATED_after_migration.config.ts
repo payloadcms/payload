@@ -117,6 +117,20 @@ export default buildConfig({
                   type: 'text',
                 },
                 {
+                  name: 'select',
+                  type: 'select',
+                  options: [
+                    {
+                      label: 'Option 1',
+                      value: 'option1',
+                    },
+                    {
+                      label: 'Option 2',
+                      value: 'option2',
+                    },
+                  ],
+                },
+                {
                   name: 'relation',
                   type: 'relationship',
                   // @ts-expect-error not generated

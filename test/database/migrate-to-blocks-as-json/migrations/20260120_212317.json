@@ -1126,6 +1126,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "select": {
+          "name": "select",
+          "type": "enum_posts_blocks_text_block_select",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
         "relation_id": {
           "name": "relation_id",
           "type": "integer",
@@ -3220,6 +3227,11 @@
       "schema": "public",
       "values": ["en", "fr"]
     },
+    "public.enum_posts_blocks_text_block_select": {
+      "name": "enum_posts_blocks_text_block_select",
+      "schema": "public",
+      "values": ["option1", "option2"]
+    },
     "public.enum_global_versioned_status": {
       "name": "enum_global_versioned_status",
       "schema": "public",
@@ -3246,6 +3258,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "701e5677-b271-4b4f-8a8f-20eeee5ae9ad",
+  "id": "39069bc5-759a-4d14-a396-7b9f39d5a708",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

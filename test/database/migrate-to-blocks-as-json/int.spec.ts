@@ -75,6 +75,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
             text: 'This is a text block',
             relation: relatedItem.id,
             manyRelations: [relatedItem.id],
+            select: 'option1',
           },
         ],
       },
@@ -203,6 +204,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
         text: 'This is a text block',
         relation: relatedItem.id,
         manyRelations: [relatedItem.id],
+        select: 'option1',
       },
     ])
 

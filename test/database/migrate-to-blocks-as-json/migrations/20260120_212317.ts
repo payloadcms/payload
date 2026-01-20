@@ -8,6 +8,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_posts_versioned_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__posts_versioned_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__posts_versioned_v_published_locale" AS ENUM('en', 'fr');
+  CREATE TYPE "public"."enum_posts_blocks_text_block_select" AS ENUM('option1', 'option2');
   CREATE TYPE "public"."enum_global_versioned_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__global_versioned_v_version_status" AS ENUM('draft', 'published');
   CREATE TYPE "public"."enum__global_versioned_v_published_locale" AS ENUM('en', 'fr');
@@ -99,6 +100,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_path" text NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
   	"text" varchar,
+  	"select" "enum_posts_blocks_text_block_select",
   	"relation_id" integer,
   	"block_name" varchar
   );
@@ -432,6 +434,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_posts_versioned_status";
   DROP TYPE "public"."enum__posts_versioned_v_version_status";
   DROP TYPE "public"."enum__posts_versioned_v_published_locale";
+  DROP TYPE "public"."enum_posts_blocks_text_block_select";
   DROP TYPE "public"."enum_global_versioned_status";
   DROP TYPE "public"."enum__global_versioned_v_version_status";
   DROP TYPE "public"."enum__global_versioned_v_published_locale";`)
