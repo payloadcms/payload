@@ -1,29 +1,29 @@
-#!
+/**
+ * Config interface
+ */
 export interface Config {
     auth: {
         users: Users;
     };
-    blocks: {
-    };
+    blocks: {};
     collections: {
         posts: Posts;
         media: Media;
-        'payload-kv': PayloadKv;
+        "payload-kv": PayloadKv;
         users: Users;
-        'payload-locked-documents': PayloadLockedDocuments;
-        'payload-preferences': PayloadPreferences;
-        'payload-migrations': PayloadMigrations;
+        "payload-locked-documents": PayloadLockedDocuments;
+        "payload-preferences": PayloadPreferences;
+        "payload-migrations": PayloadMigrations;
     };
-    collectionsJoins: {
-    };
+    collectionsJoins: {};
     collectionsSelect: {
         posts: PostsSelect;
         media: MediaSelect;
-        'payload-kv': PayloadKvSelect;
+        "payload-kv": PayloadKvSelect;
         users: UsersSelect;
-        'payload-locked-documents': PayloadLockedDocumentsSelect;
-        'payload-preferences': PayloadPreferencesSelect;
-        'payload-migrations': PayloadMigrationsSelect;
+        "payload-locked-documents": PayloadLockedDocumentsSelect;
+        "payload-preferences": PayloadPreferencesSelect;
+        "payload-migrations": PayloadMigrationsSelect;
     };
     db: {
         defaultIDType: string;
@@ -36,29 +36,41 @@ export interface Config {
         menu: MenuSelect;
     };
     locale: null;
-    user: Users & {
+    user: (Users & {
         collection: string;
-    };
+    });
     jobs: {
         tasks: unknown;
         workflows: unknown;
     };
 }
+/**
+ * Supported timezones in IANA format.
+ */
 export interface SupportedTimezones {
     [key: string]: unknown;
 }
+/**
+ * menu interface
+ */
 export interface Menu {
     id: string;
     globalText?: string | null;
     updatedAt?: string | null;
     createdAt?: string | null;
 }
+/**
+ * menu_select interface
+ */
 export interface MenuSelect {
     globalText?: boolean;
     updatedAt?: boolean;
     createdAt?: boolean;
     globalType?: boolean;
 }
+/**
+ * posts interface
+ */
 export interface Posts {
     id: string;
     title?: string | null;
@@ -70,7 +82,7 @@ export interface Posts {
                 version: number;
                 [key: string]: unknown;
             }[];
-            direction: "ltr" | "rtl" | null;
+            direction: ("ltr" | "rtl") | null;
             format: string;
             indent: number;
             version: number;
@@ -80,12 +92,18 @@ export interface Posts {
     updatedAt: string;
     createdAt: string;
 }
+/**
+ * posts_select interface
+ */
 export interface PostsSelect {
     title?: boolean;
     content?: boolean;
     updatedAt?: boolean;
     createdAt?: boolean;
 }
+/**
+ * media interface
+ */
 export interface Media {
     id: string;
     updatedAt: string;
@@ -126,6 +144,9 @@ export interface Media {
         };
     };
 }
+/**
+ * media_select interface
+ */
 export interface MediaSelect {
     updatedAt?: boolean;
     createdAt?: boolean;
@@ -165,6 +186,9 @@ export interface MediaSelect {
         };
     };
 }
+/**
+ * payload-kv interface
+ */
 export interface PayloadKv {
     id: string;
     key: string;
@@ -172,10 +196,16 @@ export interface PayloadKv {
         [key: string]: unknown;
     } | unknown[] | string | number | boolean | null;
 }
+/**
+ * payload-kv_select interface
+ */
 export interface PayloadKvSelect {
     key?: boolean;
     data?: boolean;
 }
+/**
+ * users interface
+ */
 export interface Users {
     id: string;
     updatedAt: string;
@@ -194,6 +224,9 @@ export interface Users {
     }[] | null;
     password?: string | null;
 }
+/**
+ * users_select interface
+ */
 export interface UsersSelect {
     updatedAt?: boolean;
     createdAt?: boolean;
@@ -210,18 +243,21 @@ export interface UsersSelect {
         expiresAt?: boolean;
     };
 }
+/**
+ * payload-locked-documents interface
+ */
 export interface PayloadLockedDocuments {
     id: string;
-    document?: {
+    document?: ({
         relationTo: "posts";
         value: string | Posts;
-    } | null | {
+    } | null) | ({
         relationTo: "media";
         value: string | Media;
-    } | null | {
+    } | null) | ({
         relationTo: "users";
         value: string | Users;
-    } | null;
+    } | null);
     globalSlug?: string | null;
     user: {
         relationTo: "users";
@@ -230,6 +266,9 @@ export interface PayloadLockedDocuments {
     updatedAt: string;
     createdAt: string;
 }
+/**
+ * payload-locked-documents_select interface
+ */
 export interface PayloadLockedDocumentsSelect {
     document?: boolean;
     globalSlug?: boolean;
@@ -237,6 +276,9 @@ export interface PayloadLockedDocumentsSelect {
     updatedAt?: boolean;
     createdAt?: boolean;
 }
+/**
+ * payload-preferences interface
+ */
 export interface PayloadPreferences {
     id: string;
     user: {
@@ -250,6 +292,9 @@ export interface PayloadPreferences {
     updatedAt: string;
     createdAt: string;
 }
+/**
+ * payload-preferences_select interface
+ */
 export interface PayloadPreferencesSelect {
     user?: boolean;
     key?: boolean;
@@ -257,6 +302,9 @@ export interface PayloadPreferencesSelect {
     updatedAt?: boolean;
     createdAt?: boolean;
 }
+/**
+ * payload-migrations interface
+ */
 export interface PayloadMigrations {
     id: string;
     name?: string | null;
@@ -264,16 +312,21 @@ export interface PayloadMigrations {
     updatedAt: string;
     createdAt: string;
 }
+/**
+ * payload-migrations_select interface
+ */
 export interface PayloadMigrationsSelect {
     name?: boolean;
     batch?: boolean;
     updatedAt?: boolean;
     createdAt?: boolean;
 }
+/**
+ * auth interface
+ */
 export interface Auth {
     [key: string]: unknown;
 }
-
 
 declare module 'payload' {
   // @ts-ignore 

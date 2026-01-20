@@ -1,126 +1,45 @@
-import type {
-  ExportDeclaration,
-  Expression,
-  Span,
-  TsInterfaceBody,
-  TsInterfaceDeclaration,
-  TsKeywordTypeKind,
-  TsLiteralType,
-  TsType,
-  TsTypeElement,
-} from '@swc/core'
 import type { JSONSchema4 } from 'json-schema'
 
-import { printSync } from '@swc/core'
-
-const span = (): Span => ({
-  ctxt: 0,
-  end: 0,
-  start: 0,
-})
+import * as ts from 'typescript'
 
 const formatDefinitionName = (str: string): string => {
   // eslint-disable-next-line regexp/no-unused-capturing-group
   return str.replace(/(^\w|[_-]\w)/g, (match) => match.replace(/[_-]/, '').toUpperCase())
 }
 
-const identifier = (value: string) => ({
-  type: 'Identifier' as const,
-  ctxt: 0,
-  optional: false,
-  span: span(),
-  value,
-})
-
-const booleanLiteral = (value: boolean): TsLiteralType => ({
-  type: 'TsLiteralType',
-  literal: {
-    type: 'BooleanLiteral',
-    span: span(),
-    value,
-  },
-  span: span(),
-})
-
-const numericLiteral = (value: number): TsLiteralType => ({
-  type: 'TsLiteralType',
-  literal: {
-    type: 'NumericLiteral',
-    span: span(),
-    value,
-  },
-  span: span(),
-})
-
-const stringLiteral = (value: string): TsLiteralType => ({
-  type: 'TsLiteralType',
-  literal: {
-    type: 'StringLiteral',
-    span: span(),
-    value,
-  },
-  span: span(),
-})
-
-const union = (types: TsType[]): TsType => ({
-  type: 'TsUnionType',
-  span: span(),
-  types,
-})
-
-const intersection = (types: TsType[]): TsType => ({
-  type: 'TsIntersectionType',
-  span: span(),
-  types,
-})
-
-const keyword = (kind: TsKeywordTypeKind): TsType => ({
-  type: 'TsKeywordType',
-  kind,
-  span: span(),
-})
-
-const object = (members: TsTypeElement[]): TsType => ({
-  type: 'TsTypeLiteral',
-  members,
-  span: span(),
-})
-
-const array = (elemType: TsType): TsType => ({
-  type: 'TsArrayType',
-  elemType,
-  span: span(),
-})
-
-const getTsType = (schema: JSONSchema4): TsType => {
+const getTsType = (schema: JSONSchema4): ts.TypeNode => {
   if (schema.const) {
     switch (typeof schema.const) {
       case 'boolean':
-        return booleanLiteral(schema.const)
+        return ts.factory.createLiteralTypeNode(
+          schema.const ? ts.factory.createTrue() : ts.factory.createFalse(),
+        )
       case 'number':
-        return numericLiteral(schema.const)
+        return ts.factory.createLiteralTypeNode(ts.factory.createNumericLiteral(schema.const))
       case 'string':
-        return stringLiteral(schema.const)
+        return ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(schema.const))
     }
   }
 
   if (Array.isArray(schema.type)) {
-    const types: TsType[] = schema.type.map((type) =>
+    const types: ts.TypeNode[] = schema.type.map((type) =>
       getTsType({
         ...schema,
         type,
       }),
     )
-    return union(types)
+    return ts.factory.createUnionTypeNode(types)
   }
 
   switch (schema.type) {
     case 'any': {
-      return keyword('any')
+      return ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword)
     }
     case 'array': {
       if (!schema.items) {
-        return array(keyword('unknown'))
+        return ts.factory.createArrayTypeNode(
+          ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword),
+        )
       }
 
       if (Array.isArray(schema.items)) {
@@ -129,199 +48,169 @@ const getTsType = (schema: JSONSchema4): TsType => {
 
       const itemsSchema = schema.items
 
-      return array(getTsType(itemsSchema))
+      return ts.factory.createArrayTypeNode(getTsType(itemsSchema))
     }
     case 'boolean': {
-      return keyword('boolean')
+      return ts.factory.createKeywordTypeNode(ts.SyntaxKind.BooleanKeyword)
     }
     case 'integer': {
-      return keyword('number')
+      return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)
     }
     case 'null': {
-      return keyword('null')
+      return ts.factory.createLiteralTypeNode(ts.factory.createNull())
     }
     case 'number': {
-      return keyword('number')
+      return ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)
     }
     case 'object': {
       const required = Array.isArray(schema.required) ? schema.required : []
       const properties = schema.properties || {}
 
-      const elements: TsTypeElement[] = buildElements(
-        required,
-        properties,
-        schema.additionalProperties,
-      )
+      const members = buildMembers(required, properties, schema.additionalProperties)
 
-      return object(elements)
+      return ts.factory.createTypeLiteralNode(members)
     }
 
     case 'string': {
-      return keyword('string')
+      return ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword)
     }
   }
 
   if (schema.$ref) {
     const refType = schema.$ref.split('/').pop() || 'any'
 
-    return {
-      type: 'TsTypeReference',
-      span: span(),
-      typeName: identifier(formatDefinitionName(refType)),
-    }
+    return ts.factory.createTypeReferenceNode(
+      ts.factory.createIdentifier(formatDefinitionName(refType)),
+    )
   }
 
   if (schema.oneOf) {
-    const types: TsType[] = schema.oneOf.map((subSchema) => getTsType(subSchema))
-    return union(types)
+    let hasNull = false
+    const filteredSchemas = schema.oneOf.filter((subSchema) => {
+      if (subSchema.type === 'null') {
+        hasNull = true
+        return false
+      }
+      return true
+    })
+
+    const types: ts.TypeNode[] = filteredSchemas.map((subSchema) => getTsType(subSchema))
+
+    if (hasNull) {
+      types.push(ts.factory.createLiteralTypeNode(ts.factory.createNull()))
+    }
+
+    return ts.factory.createUnionTypeNode(types)
   }
 
   if (schema.anyOf) {
-    const types: TsType[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
-    return union(types)
+    const types: ts.TypeNode[] = schema.anyOf.map((subSchema) => getTsType(subSchema))
+    return ts.factory.createUnionTypeNode(types)
   }
 
   if (schema.allOf) {
-    const types: TsType[] = schema.allOf.map((subSchema) => getTsType(subSchema))
-    return intersection(types)
+    const types: ts.TypeNode[] = schema.allOf.map((subSchema) => getTsType(subSchema))
+    return ts.factory.createIntersectionTypeNode(types)
   }
 
   if (schema.enum) {
-    const enumTypes: TsType[] = schema.enum.map((enumValue) => {
+    // @ts-expect-error
+    const enumTypes: ts.TypeNode[] = schema.enum.map((enumValue) => {
       switch (typeof enumValue) {
         case 'boolean':
-          return booleanLiteral(enumValue)
+          return ts.factory.createLiteralTypeNode(
+            enumValue ? ts.factory.createTrue() : ts.factory.createFalse(),
+          )
         case 'number':
-          return numericLiteral(enumValue)
+          return ts.factory.createLiteralTypeNode(ts.factory.createNumericLiteral(enumValue))
         case 'string':
-          return stringLiteral(enumValue)
+          return ts.factory.createLiteralTypeNode(ts.factory.createStringLiteral(enumValue))
         default:
           break
       }
     })
 
-    return union(enumTypes)
+    return ts.factory.createUnionTypeNode(enumTypes)
   }
 
   console.error('Unsupported schema:', JSON.stringify(schema, null, 2))
 
-  return keyword('unknown')
+  return ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
 }
 
 const isIdentifierKey = (key: string): boolean => {
   return /^[A-Z_$][\w$]*$/i.test(key)
 }
 
-const getPropertyKeyType = (key: number | string): Expression => {
-  if (typeof key === 'number') {
-    return {
-      type: 'NumericLiteral',
-      span: span(),
-      value: key,
-    }
-  }
-
-  if (isIdentifierKey(key)) {
-    return identifier(key)
-  }
-
-  return {
-    type: 'StringLiteral',
-    raw: `'${key}'`,
-    span: span(),
-    value: key,
-  }
-}
-
-const buildElements = (
+const buildMembers = (
   required: string[],
   properties: Record<string, JSONSchema4>,
   additionalProperties: boolean | JSONSchema4 = true,
-): TsTypeElement[] => {
-  const elements: TsTypeElement[] = []
+): ts.TypeElement[] => {
+  const members: ts.TypeElement[] = []
 
   for (const [key, value] of Object.entries(properties)) {
-    elements.push({
-      type: 'TsPropertySignature',
-      computed: false,
-      key: getPropertyKeyType(key),
-      optional: !required.includes(key),
-      readonly: false,
-      span: span(),
-      typeAnnotation: {
-        type: 'TsTypeAnnotation',
-        span: span(),
-        typeAnnotation: getTsType(value),
-      },
-    })
+    const propertySignature = ts.factory.createPropertySignature(
+      undefined,
+      isIdentifierKey(key) ? ts.factory.createIdentifier(key) : ts.factory.createStringLiteral(key),
+      !required.includes(key) ? ts.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+      getTsType(value),
+    )
+    members.push(propertySignature)
   }
 
   if (additionalProperties) {
-    elements.push({
-      type: 'TsIndexSignature',
-
-      params: [
-        {
-          type: 'Identifier',
-          // @ts-expect-error ctxt not in swc types for some reason
-          ctxt: 0,
-          optional: false,
-          span: span(),
-          typeAnnotation: {
-            type: 'TsTypeAnnotation',
-            span: span(),
-            typeAnnotation: keyword('string'),
-          },
-          value: 'key',
-        },
+    const indexSignature = ts.factory.createIndexSignature(
+      undefined,
+      [
+        ts.factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          ts.factory.createIdentifier('key'),
+          undefined,
+          ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+        ),
       ],
-      readonly: false,
-      span: span(),
-      static: false,
-      typeAnnotation: {
-        type: 'TsTypeAnnotation',
-        span: span(),
-        typeAnnotation:
-          typeof additionalProperties === 'boolean'
-            ? keyword('unknown')
-            : getTsType(additionalProperties),
-      },
-    })
+      typeof additionalProperties === 'boolean'
+        ? ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword)
+        : getTsType(additionalProperties),
+    )
+    members.push(indexSignature)
   }
 
-  return elements
+  return members
 }
 
-const buildDefinition = (name: string, schema: JSONSchema4): TsInterfaceDeclaration => {
+const buildInterface = (name: string, schema: JSONSchema4): ts.InterfaceDeclaration => {
   const required: string[] = Array.isArray(schema.required) ? schema.required : []
 
-  const interfaceBody: TsInterfaceBody = {
-    type: 'TsInterfaceBody',
-    body: buildElements(required, schema.properties || {}, schema.additionalProperties),
-    span: span(),
+  const members = buildMembers(required, schema.properties || {}, schema.additionalProperties)
+
+  const interfaceDeclaration = ts.factory.createInterfaceDeclaration(
+    [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
+    ts.factory.createIdentifier(formatDefinitionName(name)),
+    undefined,
+    undefined,
+    members,
+  )
+
+  if (schema.description) {
+    ts.addSyntheticLeadingComment(
+      interfaceDeclaration,
+      ts.SyntaxKind.MultiLineCommentTrivia,
+      `*\n * ${schema.description}\n `,
+      true,
+    )
   }
 
-  const tsInterface: TsInterfaceDeclaration = {
-    id: identifier(formatDefinitionName(name)),
-    type: 'TsInterfaceDeclaration',
-    body: interfaceBody,
-    declare: false,
-    extends: [],
-    leadingComments: [
-      {
-        type: 'CommentBlock',
-        span: span(),
-        value: schema.description
-          ? `*\n * ${schema.description}\n `
-          : `*\n * This interface was automatically generated from JSON Schema\n`,
-      },
-    ],
-    span: {
-      ...span(),
-    },
-  }
+  ts.addSyntheticLeadingComment(
+    interfaceDeclaration,
+    ts.SyntaxKind.MultiLineCommentTrivia,
+    `*\n * This interface was referenced by \`Config\`'s JSON-Schema\n * ${name} interface\n `,
+    true,
+  )
 
-  return tsInterface
+  return interfaceDeclaration
 }
 
 export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
@@ -329,28 +218,29 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
     schema.definitions = {}
   }
 
-  const interfaces: TsInterfaceDeclaration[] = []
+  const statements: ts.Statement[] = []
 
   if (schema.title && schema.type === 'object' && schema.properties) {
-    interfaces.push(buildDefinition(schema.title, schema))
+    statements.push(buildInterface(schema.title, schema))
   }
 
   for (const [defName, defSchema] of Object.entries(schema.definitions)) {
-    interfaces.push(buildDefinition(defName, defSchema))
+    statements.push(buildInterface(defName, defSchema))
   }
 
-  const exports: ExportDeclaration[] = interfaces.map((iface) => ({
-    type: 'ExportDeclaration' as const,
-    declaration: iface,
-    span: span(),
-  }))
+  const sourceFile = ts.createSourceFile(
+    'temp.ts',
+    '',
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TS,
+  )
 
-  const result = printSync({
-    type: 'Module',
-    body: [...exports],
-    interpreter: '',
-    span: span(),
-  })
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
 
-  return result.code
+  const result = statements
+    .map((statement) => printer.printNode(ts.EmitHint.Unspecified, statement, sourceFile))
+    .join('\n')
+
+  return result
 }

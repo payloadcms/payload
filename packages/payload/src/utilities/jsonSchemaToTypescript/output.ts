@@ -1,7 +1,12 @@
-#!
+/**
+ * Config interface
+ */
 export interface Config {
   [key: string]: unknown
 }
+/**
+ * TestInterface interface
+ */
 export interface TestInterface {
   [key: string]: unknown
   age: number
@@ -39,10 +44,16 @@ export interface TestInterface {
     | number
     | string
 }
+/**
+ * AnotherInterface interface
+ */
 export interface AnotherInterface {
   [key: string]: unknown
   isActive: boolean
 }
+/**
+ * WithoutAdditionalProperties interface
+ */
 export interface WithoutAdditionalProperties {
   id?: string
 }
