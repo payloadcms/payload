@@ -18,16 +18,36 @@ const skipWhitespace = (str: string) => str.trim().replace(/\s+/g, '')
 
 describe('jsonSchemaToTypescript', () => {
   it('should convert a simple JSON schema to TypeScript interface', async () => {
-    const schema: JSONSchema4 = {
+    const root: JSONSchema4 = {
+      title: 'Config',
+      properties: {},
       type: 'object',
-      properties: {
-        name: { type: 'string' },
-        age: { type: 'number' },
+      definitions: {
+        TestInterface: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            age: { type: 'number' },
+            constNumber: {
+              const: 30,
+            },
+            constString: {
+              const: 'hello',
+            },
+          },
+          required: ['name', 'age'],
+        },
+        AnotherInterface: {
+          type: 'object',
+          properties: {
+            isActive: { type: 'boolean' },
+          },
+          required: ['isActive'],
+        },
       },
-      required: ['name', 'age'],
     }
 
-    const result = jsonSchemaToTypescript(schema)
+    const result = jsonSchemaToTypescript(root)
 
     await write(result)
 

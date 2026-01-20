@@ -101,36 +101,50 @@ const intoTsType = (schema: JSONSchema4): TsType => {
   throw new Error(`Unsupported schema type: ${JSON.stringify(schema)}`)
 }
 
+const buildElements = (
+  name: string,
+  required: string[],
+  properties: Record<string, JSONSchema4>,
+): TsTypeElement[] => {
+  const elements: TsTypeElement[] = []
+
+  for (const [key, value] of Object.entries(properties)) {
+    elements.push({
+      type: 'TsPropertySignature',
+      computed: false,
+      key: identifier(key),
+      optional: !required.includes(key),
+      readonly: false,
+      span: span(),
+      typeAnnotation: {
+        type: 'TsTypeAnnotation',
+        span: span(),
+        typeAnnotation: intoTsType(value),
+      },
+    })
+  }
+
+  return elements
+}
+
 export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
+  if (!schema.definitions) {
+    schema.definitions = {}
+  }
+
   const interfaces: TsInterfaceDeclaration[] = []
 
-  if (schema.type === 'object' && schema.properties) {
-    const elements: TsTypeElement[] = []
-
-    for (const [key, value] of Object.entries(schema.properties)) {
-      elements.push({
-        type: 'TsPropertySignature',
-        computed: false,
-        key: identifier(key),
-        optional: false,
-        readonly: false,
-        span: span(),
-        typeAnnotation: {
-          type: 'TsTypeAnnotation',
-          span: span(),
-          typeAnnotation: intoTsType(value),
-        },
-      })
-    }
+  if (schema.title && schema.type === 'object' && schema.properties) {
+    const required: string[] = Array.isArray(schema.required) ? schema.required : []
 
     const interfaceBody: TsInterfaceBody = {
       type: 'TsInterfaceBody',
-      body: elements,
+      body: buildElements(schema.title, required, schema.properties),
       span: span(),
     }
 
     const tsInterface: TsInterfaceDeclaration = {
-      id: identifier('Root'),
+      id: identifier(schema.title),
       type: 'TsInterfaceDeclaration',
       body: interfaceBody,
       declare: false,
@@ -139,6 +153,29 @@ export const jsonSchemaToTypescript = (schema: JSONSchema4): string => {
     }
 
     interfaces.push(tsInterface)
+  }
+
+  for (const [defName, defSchema] of Object.entries(schema.definitions)) {
+    if (defSchema.type === 'object' && defSchema.properties) {
+      const required: string[] = Array.isArray(defSchema.required) ? defSchema.required : []
+
+      const interfaceBody: TsInterfaceBody = {
+        type: 'TsInterfaceBody',
+        body: buildElements(defName, required, defSchema.properties),
+        span: span(),
+      }
+
+      const tsInterface: TsInterfaceDeclaration = {
+        id: identifier(defName),
+        type: 'TsInterfaceDeclaration',
+        body: interfaceBody,
+        declare: false,
+        extends: [],
+        span: span(),
+      }
+
+      interfaces.push(tsInterface)
+    }
   }
 
   const exports: ExportDeclaration[] = interfaces.map((iface) => ({
