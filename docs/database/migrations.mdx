@@ -177,6 +177,15 @@ Drops all entities from the database and re-runs all migrations from scratch.
 npm run payload migrate:fresh
 ```
 
+### Has changes
+
+Check if there are any schema changes that would require a new migration to be created.
+Exits with code 0 if there are changes, and code 1 if there are no changes.
+
+```text
+npm run payload migrate:has-changes
+```
+
 ## When to run migrations
 
 Depending on which Database Adapter you use, your migration workflow might differ subtly.

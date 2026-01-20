@@ -25,6 +25,7 @@ import {
   migrate,
   migrateDown,
   migrateFresh,
+  migrateHasChanges,
   migrateRefresh,
   migrateReset,
   migrateStatus,
@@ -113,6 +114,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       limitedBoundParameters: true,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      migrateHasChanges,
       operators,
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
