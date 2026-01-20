@@ -801,6 +801,7 @@ test.describe('Multi Tenant', () => {
       await saveDocAndAssert(page)
 
       await page.goto(tenantsURL.list)
+      await wait(500)
 
       // Check the tenant selector
       await expect
