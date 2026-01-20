@@ -84,6 +84,13 @@ describe('jsonSchemaToTypescript', () => {
           },
           required: ['isActive'],
         },
+        WithoutAdditionalProperties: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            id: { type: 'string' },
+          },
+        },
       },
     }
 

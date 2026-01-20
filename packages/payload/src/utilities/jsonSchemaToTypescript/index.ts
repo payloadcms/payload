@@ -149,7 +149,11 @@ const getTsType = (schema: JSONSchema4): TsType => {
       const required = Array.isArray(schema.required) ? schema.required : []
       const properties = schema.properties || {}
 
-      const elements: TsTypeElement[] = buildElements(required, properties)
+      const elements: TsTypeElement[] = buildElements(
+        required,
+        properties,
+        schema.additionalProperties,
+      )
 
       return object(elements)
     }
@@ -174,6 +178,7 @@ const getTsType = (schema: JSONSchema4): TsType => {
 const buildElements = (
   required: string[],
   properties: Record<string, JSONSchema4>,
+  additionalProperties: boolean | JSONSchema4 = true,
 ): TsTypeElement[] => {
   const elements: TsTypeElement[] = []
 
@@ -193,6 +198,38 @@ const buildElements = (
     })
   }
 
+  if (additionalProperties) {
+    elements.push({
+      type: 'TsIndexSignature',
+      ctxt: 0,
+      params: [
+        {
+          type: 'Identifier',
+          ctxt: 0,
+          optional: false,
+          span: span(),
+          typeAnnotation: {
+            type: 'TsTypeAnnotation',
+            span: span(),
+            typeAnnotation: keyword('string'),
+          },
+          value: 'key',
+        },
+      ],
+      readonly: false,
+      span: span(),
+      static: false,
+      typeAnnotation: {
+        type: 'TsTypeAnnotation',
+        span: span(),
+        typeAnnotation:
+          typeof additionalProperties === 'boolean'
+            ? keyword('unknown')
+            : getTsType(additionalProperties),
+      },
+    })
+  }
+
   return elements
 }
 
@@ -201,7 +238,7 @@ const buildDefinition = (name: string, schema: JSONSchema4): TsInterfaceDeclarat
 
   const interfaceBody: TsInterfaceBody = {
     type: 'TsInterfaceBody',
-    body: buildElements(required, schema.properties || {}),
+    body: buildElements(required, schema.properties || {}, schema.additionalProperties),
     span: span(),
   }
 

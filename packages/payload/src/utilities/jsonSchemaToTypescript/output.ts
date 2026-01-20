@@ -1,9 +1,13 @@
 #!
-export interface Config {}
+export interface Config {
+  [key: string]: unknown
+}
 export interface TestInterface {
+  [key: string]: unknown
   age: number
   array?: string[]
   arrayWithObjects?: {
+    [key: string]: unknown
     itemProp: number
   }[]
   constNumber?: 30
@@ -12,11 +16,13 @@ export interface TestInterface {
   enumString?: 'option1' | 'option2' | 'option3'
   name: string
   object?: {
+    [key: string]: unknown
     nestedProp: boolean
   }
   relation?: AnotherInterface
   union?:
     | {
+        [key: string]: unknown
         foo: string
       }
     | AnotherInterface
@@ -25,5 +31,9 @@ export interface TestInterface {
     | string
 }
 export interface AnotherInterface {
+  [key: string]: unknown
   isActive: boolean
+}
+export interface WithoutAdditionalProperties {
+  id?: string
 }
