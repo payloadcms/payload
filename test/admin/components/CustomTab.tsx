@@ -1,13 +1,11 @@
 'use client'
 import React from 'react'
 
-export const CustomTab: React.FC = () => {
+export const CustomTab: React.FC<{ content: string; heading: string }> = ({ content, heading }) => {
   return (
     <div>
-      <h3>Custom Tab</h3>
-      <p style={{ paddingTop: '10px' }}>
-        This is a custom sidebar tab. Where you can render your tab content.
-      </p>
+      <h3>{heading}</h3>
+      <p style={{ paddingTop: '10px' }}>{content}</p>
     </div>
   )
 }

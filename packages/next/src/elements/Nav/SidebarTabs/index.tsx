@@ -9,6 +9,7 @@ import React from 'react'
 import type { NavProps } from '../index.js'
 
 import { DefaultNavClient } from '../index.client.js'
+import { DEFAULT_NAV_TAB_SLUG } from './constants.js'
 import { SidebarTabsClient } from './index.client.js'
 import './index.scss'
 
@@ -36,72 +37,81 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
     viewType,
   } = props
 
-  // Built-in default nav tab (collections and globals)
-  const defaultNavTab = {
-    slug: 'nav',
-    content: <DefaultNavClient groups={groups} navPreferences={navPreferences} />,
-    icon: <ListViewIcon />,
-    isDefaultActive: true,
-    label: i18n.t('general:collections'),
+  // Determine which tab should be active on initial load
+  const initialActiveTabID =
+    navPreferences.activeTab ||
+    tabs.find((tab) => tab.isDefaultActive)?.slug ||
+    DEFAULT_NAV_TAB_SLUG
+
+  // Build initial tab contents - always include nav, conditionally include active custom tab
+  const initialTabContents: Record<string, React.ReactNode> = {
+    [DEFAULT_NAV_TAB_SLUG]: <DefaultNavClient groups={groups} navPreferences={navPreferences} />,
   }
 
-  // User-provided custom tabs
-  const customTabs = tabs.map((tab) => {
-    const iconComponent = RenderServerComponent({
-      clientProps: {
-        documentSubViewType,
-        viewType,
-      },
-      Component: tab.icon,
-      importMap: payload.importMap,
-      serverProps: {
-        i18n,
-        locale,
-        params,
-        payload,
-        permissions,
-        searchParams,
-        user,
-      },
-    })
-
-    const contentComponent = RenderServerComponent({
-      clientProps: {
-        documentSubViewType,
-        viewType,
-      },
-      Component: tab.component,
-      importMap: payload.importMap,
-      serverProps: {
-        i18n,
-        locale,
-        params,
-        payload,
-        permissions,
-        searchParams,
-        user,
-      },
-    })
-
-    // Resolve label to string on server side
-    const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
-
-    return {
-      slug: tab.slug,
-      content: contentComponent,
-      icon: iconComponent,
-      isDefaultActive: tab.isDefaultActive,
-      label: labelText,
+  if (initialActiveTabID !== DEFAULT_NAV_TAB_SLUG) {
+    const activeTab = tabs.find((t) => t.slug === initialActiveTabID)
+    if (activeTab) {
+      initialTabContents[activeTab.slug] = RenderServerComponent({
+        clientProps: {
+          documentSubViewType,
+          viewType,
+        },
+        Component: activeTab.component,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        },
+      })
     }
-  })
-
-  const renderedTabs = [defaultNavTab, ...customTabs]
+  }
 
   return (
     <SidebarTabsClient
       baseClass={baseClass}
-      navPreferences={navPreferences}
-      renderedTabs={renderedTabs}
+      initialActiveTabID={initialActiveTabID}
+      initialTabContents={initialTabContents}
+      tabs={[
+        {
+          slug: DEFAULT_NAV_TAB_SLUG,
+          icon: <ListViewIcon />,
+          isDefaultActive: true,
+          label: i18n.t('general:collections'),
+        },
+        ...tabs.map((tab) => {
+          const iconComponent = RenderServerComponent({
+            clientProps: {
+              documentSubViewType,
+              viewType,
+            },
+            Component: tab.icon,
+            importMap: payload.importMap,
+            serverProps: {
+              i18n,
+              locale,
+              params,
+              payload,
+              permissions,
+              searchParams,
+              user,
+            },
+          })
+
+          const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
+
+          return {
+            slug: tab.slug,
+            icon: iconComponent,
+            isDefaultActive: tab.isDefaultActive,
+            label: labelText,
+          }
+        }),
+      ]}
     />
   )
 }

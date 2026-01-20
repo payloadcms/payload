@@ -1,13 +1,12 @@
 'use client'
 
-import type { NavPreferences } from 'payload'
-
-import { usePreferences } from '@payloadcms/ui'
+import { usePreferences, useServerFunctions } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
-export type RenderedTab = {
-  content: React.ReactNode
+import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
+
+export type TabMetadata = {
   icon: React.ReactNode
   isDefaultActive?: boolean
   label: string
@@ -16,37 +15,67 @@ export type RenderedTab = {
 
 export type SidebarTabsClientProps = {
   baseClass: string
-  navPreferences: NavPreferences
-  renderedTabs: RenderedTab[]
+  initialActiveTabID: string
+  initialTabContents: Record<string, React.ReactNode>
+  tabs: TabMetadata[]
 }
 
 export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   baseClass,
-  navPreferences,
-  renderedTabs,
+  initialActiveTabID,
+  initialTabContents,
+  tabs,
 }) => {
   const { setPreference } = usePreferences()
+  const { serverFunction } = useServerFunctions()
 
-  // Use preference if available, otherwise find default active tab
-  const defaultTab =
-    navPreferences.activeTab ||
-    renderedTabs.find((tab) => tab.isDefaultActive)?.slug ||
-    renderedTabs[0]?.slug
+  const [activeTabID, setActiveTabID] = useState(initialActiveTabID)
+  const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
+  const [loadingTab, setLoadingTab] = useState<null | string>(null)
 
-  const [activeTab, setActiveTab] = useState(defaultTab)
+  const loadTabContent = useCallback(
+    async (tabSlug: string) => {
+      if (tabContent[tabSlug]) {
+        return
+      }
+
+      setLoadingTab(tabSlug)
+
+      try {
+        const result = (await serverFunction({
+          name: 'render-tab',
+          args: { tabSlug } as RenderTabServerFnArgs,
+        })) as RenderTabServerFnReturnType
+
+        setTabContent((prev) => ({
+          ...prev,
+          [tabSlug]: result.component,
+        }))
+      } catch (_) {
+        setTabContent((prev) => ({
+          ...prev,
+          [tabSlug]: null,
+        }))
+      } finally {
+        setLoadingTab(null)
+      }
+    },
+    [serverFunction, tabContent],
+  )
 
   const handleTabChange = (slug: string) => {
-    setActiveTab(slug)
+    setActiveTabID(slug)
     void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
+    void loadTabContent(slug)
   }
 
-  const activeTabData = renderedTabs.find((tab) => tab.slug === activeTab)
+  const activeContent = tabContent[activeTabID]
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__tabs`}>
-        {renderedTabs.map((tab) => {
-          const isActive = tab.slug === activeTab
+        {tabs.map((tab) => {
+          const isActive = tab.slug === activeTabID
 
           return (
             <button
@@ -62,7 +91,9 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           )
         })}
       </div>
-      <div className={`${baseClass}__content`}>{activeTabData?.content}</div>
+      <div className={`${baseClass}__content`}>
+        {loadingTab === activeTabID ? null : activeContent}
+      </div>
     </div>
   )
 }
