@@ -23,6 +23,7 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug, tabsSlug } from './shared.js'
 
@@ -52,6 +53,11 @@ test.describe('Bulk Edit', () => {
 
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'bulkEdit',
+    })
+    await page.goto(postsUrl.admin)
   })
 
   test('should not show "select all across pages" button if already selected all', async () => {
@@ -817,7 +823,7 @@ async function deleteAllPosts() {
 }
 
 async function createPost(
-  dataOverrides?: RequiredDataFromCollectionSlug<'posts'> ,
+  dataOverrides?: RequiredDataFromCollectionSlug<'posts'>,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
   return payload.create({
