@@ -120,7 +120,7 @@ const getTsType = (schema: JSONSchema4): TsType => {
     }
     case 'array': {
       if (!schema.items) {
-        break
+        return array(keyword('unknown'))
       }
 
       if (Array.isArray(schema.items)) {
@@ -307,7 +307,18 @@ const buildDefinition = (name: string, schema: JSONSchema4): TsInterfaceDeclarat
     body: interfaceBody,
     declare: false,
     extends: [],
-    span: span(),
+    leadingComments: [
+      {
+        type: 'CommentBlock',
+        span: span(),
+        value: schema.description
+          ? `*\n * ${schema.description}\n `
+          : `*\n * This interface was automatically generated from JSON Schema\n`,
+      },
+    ],
+    span: {
+      ...span(),
+    },
   }
 
   return tsInterface
