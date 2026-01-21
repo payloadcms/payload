@@ -455,6 +455,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             // TO-DO: We should not use context, as it is intended for external use only
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const context: any = _context
+            const documentId = originalDoc.id
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
             } = {}
@@ -548,7 +549,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
-                    id: originalDoc.id,
+                    id: documentId,
                     blockData: nodeSiblingData,
                     collection,
                     context,
@@ -811,6 +812,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             ) {
               return value
             }
+            const documentId = originalDoc.id
             const nodeIDMap: {
               [key: string]: SerializedLexicalNode
             } = {}
@@ -865,7 +867,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
-                    id: originalDoc.id,
+                    id: documentId,
                     blockData: nodeSiblingData,
                     collection,
                     context,

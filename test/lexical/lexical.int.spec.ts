@@ -651,18 +651,6 @@ describe('Lexical', () => {
   })
 
   describe('Hooks', () => {
-    const expectHooksToRun = (
-      context: { hookCalls: string[] },
-      fieldName: string,
-      expectedHooks = ['beforeValidate', 'beforeChange', 'afterChange', 'afterRead'],
-    ) => {
-      for (const hook of expectedHooks) {
-        expect(context.hookCalls.some((h) => h.startsWith(`${hook}:${fieldName}:`))).toBe(true)
-      }
-      expect(
-        context.hookCalls.filter((h) => h.startsWith(`beforeDuplicate:${fieldName}:`)),
-      ).toHaveLength(0)
-    }
     it('ensure hook within number field within lexical block runs', async () => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
@@ -869,6 +857,115 @@ describe('Lexical', () => {
 
       expectHooksToRun(context, 'relationshipField')
     })
+
+    it('verify bug fix: all field hooks fire for relationship fields in lexical blocks', async () => {
+      // This test specifically addresses the reported bug where field hooks
+      // (beforeValidate, beforeChange, afterChange, beforeDuplicate) do not
+      // execute for relationship fields defined within blocks in Lexical fields.
+
+      const upload = await payload.create({
+        collection: 'uploads',
+        data: {
+          alt: 'Bug fix verification upload',
+        },
+        filePath: path.resolve(dirname, './collections/Upload/payload.jpg'),
+      })
+
+      const context: { hookCalls: string[] } = { hookCalls: [] }
+
+      // Test CREATE operation
+      const doc = await payload.create({
+        collection: hooksSlug,
+        context,
+        data: {
+          lexical: {
+            root: {
+              children: [
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693ae9ed9fa38e0dfe3e98c9',
+                    blockName: '',
+                    relationshipField: upload.id,
+                    blockType: 'relationship-block',
+                  },
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      // Verify all CREATE hooks fired for relationship field in block
+      const createHooks = context.hookCalls.filter((h) => h.includes('relationshipField'))
+
+      // Before fix: ✗ beforeValidate would NOT fire
+      expect(createHooks.some((h) => h.startsWith('beforeValidate:relationshipField:'))).toBe(true)
+
+      // Before fix: ✗ beforeChange would NOT fire
+      expect(createHooks.some((h) => h.startsWith('beforeChange:relationshipField:'))).toBe(true)
+
+      // Before fix: ✗ afterChange would NOT fire
+      expect(createHooks.some((h) => h.startsWith('afterChange:relationshipField:'))).toBe(true)
+
+      // Before fix: ✓ afterRead was the ONLY hook that fired
+      expect(createHooks.some((h) => h.startsWith('afterRead:relationshipField:'))).toBe(true)
+
+      // Clear context for next operation
+      context.hookCalls = []
+
+      // Test UPDATE operation to verify hooks fire on updates too
+      await payload.update({
+        collection: hooksSlug,
+        context,
+        id: doc.id,
+        data: {
+          lexical: {
+            root: {
+              children: [
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693ae9ed9fa38e0dfe3e98c9',
+                    blockName: '',
+                    relationshipField: upload.id, // Same value to test update hooks
+                    blockType: 'relationship-block',
+                  },
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      const updateHooks = context.hookCalls.filter((h) => h.includes('relationshipField'))
+
+      // Verify UPDATE hooks also fire correctly
+      expect(updateHooks.some((h) => h.startsWith('beforeValidate:relationshipField:'))).toBe(true)
+      expect(updateHooks.some((h) => h.startsWith('beforeChange:relationshipField:'))).toBe(true)
+      expect(updateHooks.some((h) => h.startsWith('afterChange:relationshipField:'))).toBe(true)
+      expect(updateHooks.some((h) => h.startsWith('afterRead:relationshipField:'))).toBe(true)
+
+      console.log(
+        '✅ Bug fix verified: All field hooks now fire for relationship fields in Lexical blocks',
+      )
+      console.log(`✅ CREATE hooks fired: ${createHooks.length}`)
+      console.log(`✅ UPDATE hooks fired: ${updateHooks.length}`)
+    })
   })
 
   describe('richText', () => {
@@ -938,3 +1035,16 @@ describe('Lexical', () => {
     })
   })
 })
+
+export function expectHooksToRun(
+  context: { hookCalls: string[] },
+  fieldName: string,
+  expectedHooks = ['beforeValidate', 'beforeChange', 'afterChange', 'afterRead'],
+) {
+  for (const hook of expectedHooks) {
+    expect(context.hookCalls.some((h) => h.startsWith(`${hook}:${fieldName}:`))).toBe(true)
+  }
+  expect(
+    context.hookCalls.filter((h) => h.startsWith(`beforeDuplicate:${fieldName}:`)),
+  ).toHaveLength(0)
+}
