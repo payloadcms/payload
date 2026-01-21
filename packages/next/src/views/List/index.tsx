@@ -201,6 +201,13 @@ export const renderListView = async (
         })) as QueryPreset
 
         if (queryPreset) {
+          // apply columns, groupBy and where from preset
+          query.columns = queryPreset.columns
+            ? transformColumnsToSearchParams(queryPreset.columns)
+            : undefined
+          query.groupBy = queryPreset.groupBy || ''
+          query.where = queryPreset.where || {}
+
           queryPresetPermissions = await getDocumentPermissions({
             id: queryPreset.id,
             collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),

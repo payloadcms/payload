@@ -304,6 +304,32 @@ describe('Query Presets', () => {
     })
   })
 
+  test('should apply preset from URL query param', async () => {
+    // Navigate directly to the list view with a preset query param
+    await page.goto(`${pagesUrl.list}?preset=${everyoneID}`)
+
+    // Verify the preset is selected in the preset selector
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText(seededData.everyone.title),
+      }),
+    ).toBeVisible()
+
+    // Verify the where query is in the URL
+    await assertURLParams({
+      page,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
+      preset: everyoneID,
+    })
+
+    // Verify the actual results are filtered correctly
+    // The seeded preset filters for text: { equals: 'example page' }
+    const tableRows = page.locator('.collection-list .table tbody tr')
+    await expect(tableRows).toHaveCount(1)
+    await expect(tableRows.first()).toContainText('example page')
+  })
+
   test('should only show "edit" and "delete" controls when there is an active preset', async () => {
     await page.goto(pagesUrl.list)
     await expect(page.locator('#edit-preset')).toBeHidden()
