@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/kv-redis",
-  "version": "3.70.0",
+  "version": "3.72.0",
   "description": "Redis KV adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {

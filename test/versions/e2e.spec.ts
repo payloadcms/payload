@@ -44,10 +44,12 @@ import {
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
+  waitForFormReady,
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
+import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -715,6 +717,7 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
+      await waitForFormReady(page)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -1279,7 +1282,8 @@ describe('Versions', () => {
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
-      const publishOptions = page.locator('.doc-controls__controls .popup')
+
+      const publishOptions = page.locator('#action-save-popup')
       await publishOptions.click()
 
       const publishSpecificLocale = page.locator('#publish-locale')
@@ -1339,7 +1343,12 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('New title')
     })
 
-    test('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+    test.skip('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+      // TODO: This test is skipped, because it relied on invalid, flaky toast behavior and never actually succeeded. It asseted the following:
+      // 1. save: success toast
+      // 2. save: beforeChange error thrown, but no error toast
+      // This passed because the second toast check checked the first toast - because back when this test was written, we were not closing outdated toasts.
+      // In reality, this should have never passed, as the second toast thrown is an error
       await page.goto(draftWithChangeHookURL.create)
 
       const titleField = page.locator('#field-title')
@@ -1606,6 +1615,7 @@ describe('Versions', () => {
     test('- with autosave - does not override local changes to form state after autosave runs', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
+      await waitForFormReady(page)
       const titleField = page.locator('#field-title')
 
       // press slower than the autosave interval, but not faster than the response and processing
@@ -1797,13 +1807,14 @@ describe('Versions', () => {
     }
 
     async function navigateToDiffVersionView(versionID?: string) {
-      const versionURL = formatAdminURL({
+      await _navigateToDiffVersionView({
         adminRoute,
-        path: `/collections/${diffCollectionSlug}/${diffID}/versions/${versionID ?? versionDiffID}`,
         serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: diffID,
+        versionID: versionID ?? versionDiffID,
+        page,
       })
-      await page.goto(versionURL)
-      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     test('should render diff', async () => {

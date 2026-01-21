@@ -1,6 +1,13 @@
-import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type {
+  Field,
+  Job,
+  MaybePromise,
+  PayloadRequest,
+  StringKeyOf,
+  TypedJobs,
+} from '../../../index.js'
 import type { ScheduleConfig } from './index.js'
-import type { SingleTaskStatus } from './workflowTypes.js'
+import type { ConcurrencyConfig, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -99,8 +106,6 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
-
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -151,7 +156,7 @@ export type TaskCallbackArgs = {
 
 export type ShouldRestoreFn = (
   args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
-) => boolean | Promise<boolean>
+) => MaybePromise<boolean>
 export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 
 export type RetryConfig = {
@@ -213,6 +218,19 @@ export type RetryConfig = {
 export type TaskConfig<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
 > = {
+  /**
+   * Job concurrency controls for preventing race conditions.
+   *
+   * Can be an object with full options, or a shorthand function that just returns the key
+   * (in which case exclusive defaults to true).
+   */
+  concurrency?: ConcurrencyConfig<
+    TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+      ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
+      : TTaskSlugOrInputOutput extends TaskInputOutput
+        ? TTaskSlugOrInputOutput['input']
+        : object
+  >
   /**
    * The function that should be responsible for running the job.
    * You can either pass a string-based path to the job function file, or the job function itself.

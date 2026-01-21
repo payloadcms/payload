@@ -699,7 +699,16 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+export type ErrorResult = {
+  data?: any
+  errors: {
+    data?: Record<string, unknown>
+    field?: string
+    message?: string
+    name?: string
+  }[]
+  stack?: string
+}
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
@@ -1140,6 +1149,22 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
+  /**
+   * Experimental features may be unstable or change in future versions.
+   */
+  experimental?: {
+    /**
+     * Enable per-locale status for documents.
+     *
+     * Requires:
+     * - `localization` enabled
+     * - `versions.drafts` enabled
+     * - `versions.drafts.localizeStatus` set at collection or global level
+     *
+     * @experimental
+     */
+    localizeStatus?: boolean
+  }
   /**
    * Options for folder view within the admin panel
    *

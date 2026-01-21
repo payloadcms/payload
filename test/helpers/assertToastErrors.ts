@@ -2,12 +2,12 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+import { closeAllToasts } from '../helpers.js'
+
 export async function assertToastErrors({
   page,
   errors,
-  dismissAfterAssertion,
 }: {
-  dismissAfterAssertion?: boolean
   errors: string[]
   page: Page
 }): Promise<void> {
@@ -32,12 +32,5 @@ export async function assertToastErrors({
     }
   }
 
-  if (dismissAfterAssertion) {
-    const closeButtons = page.locator('.payload-toast-container button.payload-toast-close-button')
-    const count = await closeButtons.count()
-
-    for (let i = 0; i < count; i++) {
-      await closeButtons.nth(i).click()
-    }
-  }
+  await closeAllToasts(page)
 }

@@ -17,7 +17,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { jsonFieldsSlug } from '../../slugs.js'
 import { jsonDoc } from './shared.js'
 
@@ -71,15 +71,86 @@ describe('JSON', () => {
     await expect(jsonCell).toHaveText(JSON.stringify(jsonDoc.json))
   })
 
+  test('should truncate long JSON values in list view', async () => {
+    // Create a document with very long JSON (>150 chars, should truncate)
+    const longJsonData = {
+      veryLongProperty:
+        'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
+      anotherProperty: 'Additional data to ensure we exceed the limit',
+      nested: { deep: { value: 'More nested data' } },
+    }
+
+    const longDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: longJsonData },
+    })
+
+    // Create a document with short JSON (<100 chars)
+    const shortJsonData = { short: 'value' }
+
+    const shortDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: shortJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify long JSON is truncated with ellipsis
+    const longJsonCell = page.locator(`tr[data-id="${longDoc.id}"] .cell-json`)
+
+    await expect(async () => {
+      const longCellText = await longJsonCell.textContent()
+      expect(longCellText).toContain('…')
+      expect(longCellText?.length).toBeLessThanOrEqual(101) // 100 chars + ellipsis
+    }).toPass()
+
+    // Verify short JSON is displayed fully without truncation
+    const shortJsonCell = page.locator(`tr[data-id="${shortDoc.id}"] .cell-json`)
+
+    await expect(shortJsonCell).toHaveText(JSON.stringify(shortJsonData))
+    await expect(async () => {
+      const shortCellText = await shortJsonCell.textContent()
+      expect(shortCellText).not.toContain('…')
+    }).toPass()
+  })
+
+  test('should not truncate slightly long JSON values (>100 but <=150 chars)', async () => {
+    // Create JSON that's between 100-150 chars (should NOT truncate due to 1.5x rule)
+    // This string is ~120 characters when stringified
+    const slightlyLongJsonData = {
+      property1: 'This value is specifically designed to be over one hundred characters',
+      property2: 'but under 150 total',
+    }
+
+    const stringified = JSON.stringify(slightlyLongJsonData)
+    expect(stringified.length).toBeGreaterThan(100)
+    expect(stringified.length).toBeLessThanOrEqual(150)
+
+    const doc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: slightlyLongJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify the JSON is displayed fully without truncation
+    const jsonCell = page.locator(`tr[data-id="${doc.id}"] .cell-json`)
+
+    await expect(jsonCell).toHaveText(stringified)
+    await expect(async () => {
+      const cellText = jsonCell
+      await expect(cellText).not.toContainText('…')
+      await expect(cellText).toHaveText(stringified)
+    }).toPass()
+  })
+
   test('should create', async () => {
     const input = '{"foo": "bar"}'
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
-    await jsonFieldInputArea.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page)
     const jsonField = page.locator('.json-field').first()
@@ -91,11 +162,9 @@ describe('JSON', () => {
 
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const json = page.locator('.group-field .json-field .inputarea')
-    await json.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page, '.form-submit button')
     await expect(page.locator('.group-field .json-field')).toContainText(
@@ -107,11 +176,10 @@ describe('JSON', () => {
     const input = '{"target": "foo"}'
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
-    await jsonFieldInputArea.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page)
     const jsonField = page.locator('.json-field').first()

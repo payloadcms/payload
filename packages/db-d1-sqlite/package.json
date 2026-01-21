@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-d1-sqlite",
-  "version": "3.70.0",
+  "version": "3.72.0",
   "description": "The officially supported D1 SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {

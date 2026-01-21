@@ -98,10 +98,9 @@ if (!suiteName) {
 
   console.log(`${allSuitesInFolder.join('\n')}\n`)
 
-  for (const file of allSuitesInFolder) {
-    clearWebpackCache()
-    executePlaywright(file, baseTestFolder, false, suiteConfigPath)
-  }
+  // Run all spec files in the folder with a single dev server and playwright invocation
+  // This avoids port conflicts when multiple spec files exist in the same folder
+  executePlaywright(allSuitesInFolder, baseTestFolder, false, suiteConfigPath)
 }
 
 console.log('\nRESULTS:')
@@ -114,12 +113,13 @@ console.log('\n')
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
 function executePlaywright(
-  suitePath: string,
+  suitePaths: string | string[],
   baseTestFolder: string,
   bail = false,
   suiteConfigPath?: string,
 ) {
-  console.log(`Executing ${suitePath}...`)
+  const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
+  console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
@@ -148,12 +148,12 @@ function executePlaywright(
     },
   })
 
-  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
+  const cmd = slash(`${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}`)
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
   })
-  const suite = path.basename(path.dirname(suitePath))
+  const suite = path.basename(path.dirname(paths[0]!))
   const results = { code, suiteName: suite }
 
   if (code) {

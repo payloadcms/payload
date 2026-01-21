@@ -34,6 +34,20 @@ export const toolSchemas = {
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
         ),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships (default: 0)'),
+      draft: z
+        .boolean()
+        .optional()
+        .describe(
+          'Optional: Whether the document should be queried from the versions table/collection or not.',
+        ),
       fallbackLocale: z
         .string()
         .optional()
@@ -76,6 +90,14 @@ export const toolSchemas = {
     description: 'Create a document in a collection.',
     parameters: z.object({
       data: z.string().describe('JSON string containing the data for the new document'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships in response (default: 0)'),
       draft: z
         .boolean()
         .optional()
