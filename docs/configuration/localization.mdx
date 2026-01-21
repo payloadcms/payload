@@ -276,11 +276,13 @@ query {
 }
 ```
 
+Alternatively, you can also localize a whole operation using the same `?locale=` and `?fallback-locale=` URL query parameters used on the REST API.
+
 <Banner>
-  In GraphQL, specifying the locale at the top level of a query will
-  automatically apply it throughout all nested relationship fields. You can
-  override this behavior by re-specifying locale arguments in nested related
-  document queries.
+  In GraphQL, specifying the locale at the top level of a query or using the
+  URL query parameters will automatically apply it throughout all nested
+  relationship fields. You can override this behavior by re-specifying locale
+  arguments in nested related document queries.
 </Banner>
 
 #### Local API
