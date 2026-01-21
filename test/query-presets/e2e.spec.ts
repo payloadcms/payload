@@ -6,6 +6,7 @@ import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
+import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -24,7 +25,6 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
 import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
-import { seedData } from './seed.js'
 import { pagesSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -38,8 +38,6 @@ let payload: PayloadTestSDK<Config>
 let serverURL: string
 let everyoneID: string | undefined
 let context: BrowserContext
-let user: any
-let ownerUser: any
 
 let seededData: {
   everyone: PayloadQueryPreset
@@ -60,29 +58,6 @@ describe('Query Presets', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
-
-    user = await payload
-      .login({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-      ?.then((res) => res.user) // TODO: this type is wrong
-
-    ownerUser = await payload
-      .find({
-        collection: 'users',
-        where: {
-          name: {
-            equals: 'Owner',
-          },
-        },
-        limit: 1,
-        depth: 0,
-      })
-      ?.then((res) => res.docs[0])
   })
 
   beforeEach(async () => {
@@ -92,62 +67,56 @@ describe('Query Presets', () => {
     //   delay: 'Fast 4G',
     // })
 
-    // clear and reseed everything
-    try {
-      await payload.delete({
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'querypresets',
+    })
+  })
+
+  beforeEach(async () => {
+    // @ts-expect-error - initialization
+    seededData = {}
+
+    seededData.everyone = await payload
+      .find({
         collection: 'payload-query-presets',
         where: {
-          id: {
-            exists: true,
+          title: {
+            equals: 'Everyone',
           },
         },
+        limit: 1,
+        depth: 0,
       })
+      ?.then((res) => res.docs[0]!)
 
-      const [, everyone, onlyMe, specificUsers] = await Promise.all([
-        payload.delete({
-          collection: 'payload-preferences',
-          where: {
-            and: [
-              {
-                key: { equals: 'pages-list' },
-              },
-              {
-                'user.relationTo': {
-                  equals: 'users',
-                },
-              },
-              {
-                'user.value': {
-                  equals: user.id,
-                },
-              },
-            ],
+    seededData.onlyMe = await payload
+      .find({
+        collection: 'payload-query-presets',
+        where: {
+          title: {
+            equals: 'Only Me',
           },
-        }),
-        payload.create({
-          collection: 'payload-query-presets',
-          data: seedData.everyone({ ownerUserID: ownerUser?.id || '' }),
-        }),
-        payload.create({
-          collection: 'payload-query-presets',
-          data: seedData.onlyMe({ ownerUserID: ownerUser?.id || '' }),
-        }),
-        payload.create({
-          collection: 'payload-query-presets',
-          data: seedData.specificUsers({ ownerUserID: ownerUser?.id || '', adminUserID: user.id }),
-        }),
-      ])
+        },
+        limit: 1,
+        depth: 0,
+      })
+      ?.then((res) => res.docs[0]!)
 
-      seededData = {
-        everyone,
-        onlyMe,
-        specificUsers,
-      }
+    seededData.specificUsers = await payload
+      .find({
+        collection: 'payload-query-presets',
+        where: {
+          title: {
+            equals: 'Specific Users',
+          },
+        },
+        limit: 1,
+        depth: 0,
+      })
+      ?.then((res) => res.docs[0]!)
 
-      everyoneID = everyone.id
-    } catch (error) {
-      console.error('Error in beforeEach:', error)
-    }
+    everyoneID = seededData.everyone.id
   })
 
   test('can create and view preset with no filters or columns', async () => {
