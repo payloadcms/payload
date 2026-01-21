@@ -2148,6 +2148,17 @@ describe('Versions', () => {
       ).toHaveText(String(draftDocs?.docs?.[2]?.title))
     })
 
+    test('correctly renders diff for relationship fields with maxDepth: 0', async () => {
+      await navigateToDiffVersionView()
+
+      const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
+
+      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(
+        zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText('dev@payloadcms.com')
+    })
+
     test('correctly renders diff for richtext fields', async () => {
       await navigateToDiffVersionView()
 
