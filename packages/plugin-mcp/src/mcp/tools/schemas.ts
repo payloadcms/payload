@@ -22,6 +22,12 @@ export const toolSchemas = {
         .describe(
           'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
         ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional JSON string for selecting specific fields (e.g., \'{"siteName": true}\')',
+        ),
     }),
   },
 
@@ -73,6 +79,12 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional JSON string for selecting specific fields (e.g., \'{"title": true, "slug": true}\')',
+        ),
       sort: z
         .string()
         .optional()

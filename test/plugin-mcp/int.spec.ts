@@ -386,6 +386,11 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[2].inputSchema.properties.where.description).toContain(
         'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
       )
+      expect(json.result.tools[2].inputSchema.properties.select).toBeDefined()
+      expect(json.result.tools[2].inputSchema.properties.select.type).toBe('string')
+      expect(json.result.tools[2].inputSchema.properties.select.description).toContain(
+        'Optional JSON string for selecting specific fields',
+      )
 
       expect(json.result.tools[3].inputSchema).toBeDefined()
       expect(json.result.tools[3].inputSchema.required).not.toBeDefined()
@@ -496,6 +501,9 @@ describe('@payloadcms/plugin-mcp', () => {
       const findGlobalTool = json.result.tools.find((t: any) => t.name === 'findSiteSettings')
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Payload global')
+      expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
+      expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(findGlobalTool.inputSchema.properties.select.description).toContain('selecting')
 
       const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
       expect(updateGlobalTool).toBeDefined()
@@ -778,6 +786,49 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
     })
 
+    it('should call findPosts with select and return only requested fields', async () => {
+      await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Select Test Post',
+          content: 'Content that should be omitted',
+        },
+      })
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              limit: 1,
+              page: 1,
+              select: '{"title": true}',
+              where: '{"title": {"contains": "Select Test Post"}}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content).toHaveLength(2)
+      const responseText: string = json.result.content[0].text
+      expect(responseText).toContain('Collection: "posts"')
+      expect(responseText).toContain('"title": "Select Test Post (MCP Hook Override)"')
+      expect(responseText).not.toContain('"content": "Content that should be omitted"')
+    })
+
     it('should call updatePosts', async () => {
       const post = await payload.create({
         collection: 'posts',
@@ -938,6 +989,50 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain('Global "site-settings"')
       expect(json.result.content[0].text).toContain('```json')
+    })
+
+    it('should find site-settings global with select', async () => {
+      await payload.updateGlobal({
+        slug: 'site-settings',
+        data: {
+          siteName: 'MCP Site',
+          siteDescription: 'Should be excluded by select',
+          maintenanceMode: false,
+          contactEmail: 'test@example.com',
+        },
+      })
+
+      const apiKey = await getApiKey(false, false, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findSiteSettings',
+            arguments: {
+              select: '{"siteName": true}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
+      const responseText: string = json.result.content[0].text
+      expect(responseText).toContain('"siteName": "MCP Site"')
+      expect(responseText).not.toContain('siteDescription')
+      expect(responseText).not.toContain('contactEmail')
+      expect(responseText).not.toContain('maintenanceMode')
     })
 
     it('should update site-settings global', async () => {
