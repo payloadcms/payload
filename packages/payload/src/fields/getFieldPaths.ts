@@ -7,28 +7,40 @@ export type GetFieldPathsArgs = {
 } & ParentFieldPaths
 
 export type ParentFieldPaths = {
+  /**
+   * Like `indexPath`, but relative to this field's parent.
+   */
   parentIndexPath: string
   /**
-   * Needed to generate data paths. Omit if you only need schema paths, e.g. within field schema maps.
+   * Like `path`, but relative to this field's parent.
    */
   parentPath?: string
+  /**
+   * Like `schemaPath`, but relative to this field's parent.
+   */
   parentSchemaPath: string
 }
 
+/**
+ * A group of paths related to a field's position within the schema and data.
+ */
 export type FieldPaths = {
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
-   * It will always be complete and accurate.
    */
   indexPath: string
   /**
    * Path for this field relative to its position in the data.
-   *
+   * Arrays and block rows will be represented by their indexes.
+   * @example path: 'array.0.group.text'
    */
   path: string
   /**
-   * Path for this field relative to its position in the schema.
+   * The path for this field relative to its position in the Payload config.
+   * Unnamed fields such as tabs will use `_index-` prefixes to represent their position.
+   * @example schemaPath: '_index-0-0.text'
+   * This translates an unnamed field in the first position (e.g. tabs) > another unnamed field in the first position (e.g. tab) > text field.
    */
   schemaPath: string
 }
