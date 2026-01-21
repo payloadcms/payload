@@ -185,7 +185,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   _sanitized?: boolean
   access?: {
     read?: Access
-    readDrafts?: Access
     readVersions?: Access
     update?: Access
   }
