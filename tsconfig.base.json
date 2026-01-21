@@ -32,7 +32,7 @@
     ],
     "paths": {
       "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
-      "@payload-config": ["./test/plugin-import-export/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
