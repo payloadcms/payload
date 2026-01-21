@@ -15,6 +15,15 @@ import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
+/**
+ * Note: This generates pages at build time and will require database access to build.
+ * If you don’t want to statically generate pages at buildtime and instead wish to generate at runtime, use the following:
+ * 
+ * export async function generateStaticParams() {
+ *   return []
+ * }
+**/
+
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({
