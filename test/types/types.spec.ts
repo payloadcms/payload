@@ -1017,39 +1017,244 @@ describe('Types testing', () => {
   })
 
   describe('strictDraftTypes flag', () => {
-    test('draft find query returns optional required fields when flag is enabled', async () => {
-      const result = await payload.find({
-        collection: 'draft-posts',
-        draft: true,
+    describe('query operations', () => {
+      test('draft find query returns optional required fields when flag is enabled', async () => {
+        const result = await payload.find({
+          collection: 'draft-posts',
+          draft: true,
+        })
+
+        const doc = result.docs[0]!
+
+        // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+        expect(doc.description).type.toBe<string | undefined>()
+        expect(doc.title).type.toBe<string | undefined>()
+
+        // Only id is required in draft queries - other system fields are also optional
+        expect(doc.id).type.not.toBe<undefined>()
+        expect(doc.createdAt).type.toBe<string | undefined>()
+        expect(doc.updatedAt).type.toBe<string | undefined>()
       })
 
-      const doc = result.docs[0]!
+      test('non-draft find query returns required fields as required', async () => {
+        const result = await payload.find({
+          collection: 'draft-posts',
+        })
 
-      // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
-      expect(doc.description).type.toBe<string | undefined>()
-      expect(doc.title).type.toBe<string | undefined>()
+        const doc = result.docs[0]!
 
-      // Only id is required in draft queries - other system fields are also optional
-      expect(doc.id).type.not.toBe<undefined>()
-      expect(doc.createdAt).type.toBe<string | undefined>()
-      expect(doc.updatedAt).type.toBe<string | undefined>()
+        // Without draft mode, required fields should remain required
+        expect(doc.description).type.toBe<string>()
+        expect(doc.title).type.toBe<string>()
+
+        // System fields should also be present and required (not undefined)
+        expect(doc.id).type.not.toBe<undefined>()
+        expect(doc.createdAt).type.toBe<string>()
+        expect(doc.updatedAt).type.toBe<string>()
+      })
     })
 
-    test('non-draft find query returns required fields as required', async () => {
-      const result = await payload.find({
-        collection: 'draft-posts',
+    describe('create operations', () => {
+      test('create with draft:true on draft-enabled collection allows partial data', () => {
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test', // Only one required field
+            },
+            draft: true,
+          }),
+        ).type.not.toRaiseError()
       })
 
-      const doc = result.docs[0]!
+      test('create with draft:false on draft-enabled collection requires all required fields', () => {
+        // Missing description - should error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
 
-      // Without draft mode, required fields should remain required
-      expect(doc.description).type.toBe<string>()
-      expect(doc.title).type.toBe<string>()
+        // All required fields present - should not error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+            },
+            draft: false,
+          }),
+        ).type.not.toRaiseError()
+      })
 
-      // System fields should also be present and required (not undefined)
-      expect(doc.id).type.not.toBe<undefined>()
-      expect(doc.createdAt).type.toBe<string>()
-      expect(doc.updatedAt).type.toBe<string>()
+      test('create without draft property on draft-enabled collection requires all required fields', () => {
+        // Missing description - should error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+            },
+          }),
+        ).type.toRaiseError()
+
+        // All required fields present - should not error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create on non-draft collection forbids draft property', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+            draft: true,
+          }),
+        ).type.toRaiseError()
+
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
+
+        // Without draft property - should not error
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create with invalid property should error regardless of draft mode', () => {
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+              invalidProperty: 'should error',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
+
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              invalidProperty: 'should error',
+            },
+            draft: true,
+          }),
+        ).type.toRaiseError()
+      })
+
+      test('create on pages (non-draft) collection with all fields should work', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Page Title',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create on pages (non-draft) with missing optional fields should work', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Page Title',
+              // category is optional relationship, can be omitted
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      // Additional operations tests
+      test('find with draft:true on non-draft collection should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on collections without drafts
+        await payload.find({ collection: 'pages', draft: true })
+      })
+
+      test('find with draft:false on non-draft collection should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on collections without drafts
+        await payload.find({ collection: 'pages', draft: false })
+      })
+
+      test('find with draft:true on draft-enabled collection should work', async () => {
+        await payload.find({ collection: 'draft-posts', draft: true })
+      })
+
+      test('findByID with draft:true on non-draft collection should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on collections without drafts
+        await payload.findByID({ collection: 'pages', id: 1, draft: true })
+      })
+
+      test('findByID with draft:true on draft-enabled collection should work', async () => {
+        await payload.findByID({ collection: 'draft-posts', id: 1, draft: true })
+      })
+
+      test('update with draft:true on non-draft collection should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on collections without drafts
+        await payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: true })
+      })
+
+      test('update with draft:true on draft-enabled collection should work', async () => {
+        await payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true })
+      })
+
+      test('duplicate with draft:true on non-draft collection should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on collections without drafts
+        await payload.duplicate({ collection: 'pages', id: 1, draft: true })
+      })
+
+      test('duplicate with draft:true on draft-enabled collection should work', async () => {
+        await payload.duplicate({ collection: 'draft-posts', id: 1, draft: true })
+      })
+
+      test('global findOne with draft:true on non-draft global should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on globals without drafts
+        await payload.findGlobal({ slug: 'menu', draft: true })
+      })
+
+      test('global findOne with draft:true on draft-enabled global should work', async () => {
+        await payload.findGlobal({ slug: 'settings', draft: true })
+      })
+
+      test('global update with draft:true on non-draft global should error', async () => {
+        // @ts-expect-error - draft property should be forbidden on globals without drafts
+        await payload.updateGlobal({ slug: 'menu', data: {}, draft: true })
+      })
+
+      test('global update with draft:true on draft-enabled global should work', async () => {
+        await payload.updateGlobal({ slug: 'settings', data: {}, draft: true })
+      })
     })
+
   })
 })

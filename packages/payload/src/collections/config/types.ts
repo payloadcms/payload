@@ -38,6 +38,7 @@ import type {
   CollectionAdminCustom,
   CollectionCustom,
   CollectionSlug,
+  GeneratedTypes,
   JsonObject,
   RequestContext,
   TypedAuthOperations,
@@ -67,6 +68,46 @@ import type {
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
+
+/**
+ * Collection slugs that do NOT have drafts enabled.
+ * Used to disallow draft option only for collections that definitely don't have drafts.
+ * In generated types, only collections with versions + drafts include the internal `_status` field.
+ */
+export type CollectionsWithoutDrafts = {
+  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any }
+    ? never
+    : TSlug
+}[CollectionSlug]
+
+/**
+ * Reusable type for draft flag in read/query operations.
+ * When strictDraftTypes is enabled:
+ * - For collections without drafts: draft property is forbidden
+ * - For collections with drafts or generic slugs: draft property is allowed
+ */
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends CollectionsWithoutDrafts
+    ? {
+        /**
+         * This collection does not have drafts enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
 
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]

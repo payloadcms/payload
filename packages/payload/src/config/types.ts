@@ -1476,8 +1476,11 @@ export type Config = {
     >
 
     /**
-     * Enable strict type safety for draft mode queries.
-     * When enabled, find operations with draft: true will type required fields as optional.
+     * Enable strict type safety for draft mode queries and create operations.
+     * When enabled:
+     * - Find operations with draft: true will type required fields as optional
+     * - The `draft` property is forbidden for collections without drafts in create operations
+     * - Discriminated unions enforce proper data requirements for draft-enabled collections
      * @default false
      * @todo Remove in v4. Strict draft types will become the default behavior.
      */
