@@ -869,62 +869,6 @@ describe('Lexical', () => {
 
       expectHooksToRun(context, 'relationshipField')
     })
-
-    // TODO: This test is skipped because Payload's duplicate() operation doesn't currently
-    // call field hooks for richtext fields. The beforeDuplicate implementation is complete
-    // and correct - it will work once Payload core adds support for calling field hooks
-    // during duplication operations.
-    it.skip('ensure beforeDuplicate hook runs on relationship field within lexical block', async () => {
-      const upload = await payload.create({
-        collection: 'uploads',
-        data: {
-          alt: 'Test upload',
-        },
-        filePath: path.resolve(dirname, './collections/Upload/payload.jpg'),
-      })
-
-      const consoleSpy = vi.spyOn(console, 'log')
-
-      const originalDoc = await payload.create({
-        collection: hooksSlug,
-        data: {
-          lexical: {
-            root: {
-              children: [
-                {
-                  type: 'blocks',
-                  fields: {
-                    id: '693ade70068ea07ba13edca8',
-                    blockType: 'relationship-block',
-                    relationshipField: upload.id,
-                  },
-                  format: '',
-                  version: 1,
-                },
-              ],
-              direction: null,
-              format: '',
-              indent: 0,
-              type: 'root',
-              version: 1,
-            },
-          },
-        },
-      })
-
-      await payload.duplicate({
-        collection: hooksSlug,
-        id: originalDoc.id,
-      })
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'beforeDuplicate hook fired:',
-        'relationshipField',
-        expect.anything(),
-      )
-
-      consoleSpy.mockRestore()
-    })
   })
 
   describe('richText', () => {
