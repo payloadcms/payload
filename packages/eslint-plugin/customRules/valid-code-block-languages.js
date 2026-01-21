@@ -100,9 +100,6 @@ const SUPPORTED_LANGUAGES = [
   // Config formats
   'jsonc',
   'json5',
-  'xml',
-  'svg',
-  'graphql',
   'gql',
   'prisma',
 
@@ -149,9 +146,6 @@ const SUPPORTED_LANGUAGES = [
   'vyper',
   'move',
   'cairo',
-
-  // Specific to Payload docs (commonly used)
-  'graphql',
 ]
 
 // De-duplicate the list
