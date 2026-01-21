@@ -322,7 +322,7 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
       await page.waitForURL(url)
@@ -1610,6 +1610,7 @@ describe('List View', () => {
 
       await mapAsync([...Array(20)], async (_, i) => {
         await payload.create({
+          disableTransaction: true,
           collection: listDrawerSlug,
           data: {
             title: `List Drawer Item ${i + 1}`,
@@ -1841,6 +1842,36 @@ describe('List View', () => {
       await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+    })
+
+    test('should not show sort chevrons for virtual: true fields', async () => {
+      const post = await createPost({ title: 'Test Post' })
+      await createVirtualDoc({ post: post.id, textField: 'test text' })
+
+      await page.goto(virtualsUrl.list)
+
+      await openListColumns(page, {})
+      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+
+      // Check that virtualText (virtual: true) does NOT have sort buttons
+      const virtualTextHeading = page.locator('#heading-virtualText')
+      await expect(virtualTextHeading).toBeVisible()
+      await expect(virtualTextHeading.locator('.sort-column__buttons')).toHaveCount(0)
+
+      // Check that textField (regular field) DOES have sort buttons as a control
+      const textFieldHeading = page.locator('#heading-textField')
+      await expect(textFieldHeading).toBeVisible()
+      await expect(textFieldHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__desc')).toBeVisible()
+
+      // Check that virtualTitleFromPost (virtual: 'post.title') DOES have sort buttons
+      const virtualTitleHeading = page.locator('#heading-virtualTitleFromPost')
+      await expect(virtualTitleHeading).toBeVisible()
+      await expect(virtualTitleHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__desc')).toBeVisible()
     })
   })
 
@@ -2113,6 +2144,7 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -2128,6 +2160,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -2138,6 +2171,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
+    disableTransaction: true,
     data: {
       title,
       ...overrides,
@@ -2147,6 +2181,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
@@ -2157,6 +2192,7 @@ async function createArray() {
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
+    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,

@@ -121,6 +121,7 @@ export const koTranslations: DefaultTranslationsObject = {
     problemUploadingFile: '파일 업로드 중에 문제가 발생했습니다.',
     restoringTitle:
       '{{title}} 복원 중 오류가 발생했습니다. 연결 상태를 확인하고 다시 시도해 주세요.',
+    revertingDocument: '이 문서를 되돌리는 동안 문제가 발생했습니다.',
     tokenInvalidOrExpired: '토큰이 유효하지 않거나 만료되었습니다.',
     tokenNotProvided: '토큰이 제공되지 않았습니다.',
     unableToCopy: '복사할 수 없습니다.',
@@ -548,6 +549,7 @@ export const koTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       '이 문서의 변경 사항을 게시된 상태로 되돌리려고 합니다. 계속하시겠습니까?',
     aboutToUnpublish: '이 문서를 게시 해제하려고 합니다. 계속하시겠습니까?',
+    aboutToUnpublishIn: '당신은 이 문서를 {{locale}}에서 비공개하려고 합니다. 확실합니까?',
     aboutToUnpublishSelection: '선택한 {{label}}을(를) 게시 해제하려고 합니다. 계속하시겠습니까?',
     autosave: '자동 저장',
     autosavedSuccessfully: '자동 저장이 완료되었습니다.',
@@ -594,6 +596,7 @@ export const koTranslations: DefaultTranslationsObject = {
     restoring: '복원 중...',
     reverting: '되돌리는 중...',
     revertToPublished: '게시된 상태로 되돌리기',
+    revertUnsuccessful: '되돌리기 실패. 이전에 게시된 버전을 찾을 수 없습니다.',
     saveDraft: '초안 저장',
     scheduledSuccessfully: '성공적으로 예약되었습니다.',
     schedulePublish: '발행 일정',
@@ -604,6 +607,9 @@ export const koTranslations: DefaultTranslationsObject = {
     specificVersion: '특정 버전',
     status: '상태',
     unpublish: '게시 해제',
+    unpublished: '미발행',
+    unpublishedSuccessfully: '성공적으로 게시하지 않았습니다.',
+    unpublishIn: '{{locale}}에서 게시 취소',
     unpublishing: '게시 해제 중...',
     version: '버전',
     versionAgo: '{{distance}} 전',

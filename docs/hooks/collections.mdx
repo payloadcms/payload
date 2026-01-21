@@ -81,12 +81,12 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 
 The following arguments are provided to the `beforeOperation` hook:
 
-| Option           | Description                                                                                                                                                                                                                                                                               |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against. Available options include: `autosave`, `count`, `countVersions`, `create`, `delete`, `forgotPassword`, `login`, `read`, `readDistinct`, `refresh`, `resetPassword`, `restoreVersion`, and `update`. |
-| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                                                                                                                                                           |
-| **`operation`**  | The name of the operation that this hook is running within.                                                                                                                                                                                                                               |
-| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                     |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                       |
+| **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeValidate
 
@@ -273,8 +273,6 @@ The following arguments are provided to the `afterDelete` hook:
 ### afterOperation
 
 The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
-
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'

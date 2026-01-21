@@ -66,8 +66,11 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
@@ -236,6 +239,7 @@ jobs:
           - dashboard
           - joins
           - field-error-states
+          - field-paths
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks

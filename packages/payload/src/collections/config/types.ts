@@ -2,7 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload, ViewTypes } from '../../admin/types.js'
+import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -80,16 +80,31 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 /**
- * Helper type for draft data - makes all fields optional except auto-generated ones
+ * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
  * When creating a draft, required fields don't need to be provided as validation is skipped
+ * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'>
->
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
 >
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required
+ * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
+ */
+export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Pick<TData, 'id'>
+
+export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  QueryDraftDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
@@ -356,6 +371,10 @@ export type CollectionAdminOptions = {
        */
       SaveDraftButton?: CustomComponent
       /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
+      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
@@ -501,6 +520,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Configuration for bulk operations
+   */
   /** Extension point to add your custom data. Server only. */
   custom?: CollectionCustom
   /**
@@ -618,7 +640,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   * Under the hood, a field with {@link https://payloadcms.com/docs/configuration/collections#fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
    *

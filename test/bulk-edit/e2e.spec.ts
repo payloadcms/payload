@@ -1,5 +1,6 @@
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
@@ -22,7 +23,8 @@ import {
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -39,7 +41,7 @@ test.describe('Bulk Edit', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
 
@@ -51,12 +53,19 @@ test.describe('Bulk Edit', () => {
 
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'bulkEdit',
+    })
+    await page.goto(postsUrl.admin)
   })
 
   test('should not show "select all across pages" button if already selected all', async () => {
     await deleteAllPosts()
     await createPost({ title: 'Post 1' })
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('input#select-all').check()
     await expect(page.locator('button#select-all-across-pages')).toBeHidden()
   })
@@ -64,11 +73,16 @@ test.describe('Bulk Edit', () => {
   test('should update selection state after deselecting item following select all', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
     await page.locator('input#select-all').check()
     await page.locator('button#select-all-across-pages').click()
 
@@ -90,6 +104,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToDelete1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToDelete2}")`)).toBeVisible()
@@ -120,6 +136,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish2}")`)).toBeVisible()
@@ -154,6 +172,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToUnpublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToUnpublish2}")`)).toBeVisible()
@@ -177,11 +197,15 @@ test.describe('Bulk Edit', () => {
 
     const updatedPostTitle = 'Post (Updated)'
 
-    Array.from({ length: 3 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     for (let i = 1; i <= 3; i++) {
       const invertedIndex = 4 - i
@@ -225,6 +249,8 @@ test.describe('Bulk Edit', () => {
     const description = 'published document'
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish2}")`)).toBeVisible()
@@ -270,6 +296,8 @@ test.describe('Bulk Edit', () => {
     const description = 'draft document'
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await selectTableRow(page, titleOfPostToDraft1)
     await selectTableRow(page, titleOfPostToDraft2)
@@ -297,11 +325,15 @@ test.describe('Bulk Edit', () => {
   test('should delete all on page', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 3 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(3)
 
     await page.locator('input#select-all').check()
@@ -318,11 +350,15 @@ test.describe('Bulk Edit', () => {
   test('should delete all with filters and across pages', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator('.page-controls__page-info')).toContainText('1-5 of 6')
 
@@ -344,11 +380,15 @@ test.describe('Bulk Edit', () => {
   test('should update all with filters and across pages', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('#search-filter-input').fill('Post')
     await page.waitForURL(/search=Post/)
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
@@ -378,7 +418,7 @@ test.describe('Bulk Edit', () => {
   test('should not override un-edited values if it has a defaultValue', async () => {
     await deleteAllPosts()
 
-    const postData = {
+    const postData: RequiredDataFromCollectionSlug<'posts'> = {
       title: 'Post 1',
       array: [
         {
@@ -408,6 +448,8 @@ test.describe('Bulk Edit', () => {
     const { id: postID } = await createPost(postData)
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     const { modal } = await selectAllAndEditMany(page)
 
@@ -446,6 +488,8 @@ test.describe('Bulk Edit', () => {
     await createPost()
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await selectAllAndEditMany(page)
 
@@ -477,6 +521,8 @@ test.describe('Bulk Edit', () => {
     await createPost()
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     const { modal } = await selectAllAndEditMany(page)
 
@@ -495,6 +541,8 @@ test.describe('Bulk Edit', () => {
     await createPost()
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await selectAllAndEditMany(page)
 
@@ -526,11 +574,15 @@ test.describe('Bulk Edit', () => {
     await deleteAllPosts()
 
     const postCount = 3
-    Array.from({ length: postCount }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` }, { draft: true })
-    })
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}` }, { draft: true })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('input#select-all').check()
 
     await page.locator('.list-selection__button[aria-label="Publish"]').click()
@@ -553,11 +605,15 @@ test.describe('Bulk Edit', () => {
     await deleteAllPosts()
 
     const postCount = 3
-    Array.from({ length: postCount }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}`, _status: 'published' })
-    })
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}`, _status: 'published' })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('input#select-all').check()
 
     await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
@@ -581,11 +637,15 @@ test.describe('Bulk Edit', () => {
     const bulkEditValue = 'test'
 
     const postCount = 3
-    Array.from({ length: postCount }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('input#select-all').check()
 
     await page.locator('.list-selection__button[aria-label="Edit"]').click()
@@ -636,6 +696,8 @@ test.describe('Bulk Edit', () => {
     })
 
     await page.goto(tabsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await addListFilter({
       page,
       fieldLabel: 'ID',
@@ -682,6 +744,41 @@ test.describe('Bulk Edit', () => {
       .poll(() => updatedDoc?.tabTab?.tabTabArray?.[0]?.tabTabArrayText)
       .toEqual('nestedText')
   })
+
+  test('should preserve beforeInput components when selecting multiple fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select multiple fields with beforeInput components
+    await selectInput({
+      selectLocator: modal.locator('.field-select'),
+      options: [
+        'Field With Before Input A1',
+        'Field With Before Input A2',
+        'Field With Before Input B',
+      ],
+      multiSelect: true,
+    })
+
+    // All fields should be visible
+    await expect(modal.locator('#field-fieldWithBeforeInputA1')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputA2')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputB')).toBeVisible()
+
+    // All beforeInput components should be visible (2 of type A, 1 of type B)
+    const beforeInputsA = modal.locator('[data-testid="before-input-a"]')
+    await expect(beforeInputsA).toHaveCount(2)
+
+    const beforeInputB = modal.locator('[data-testid="before-input-b"]')
+    await expect(beforeInputB).toHaveCount(1)
+    await expect(beforeInputB).toBeVisible()
+  })
 })
 
 async function selectFieldToEdit(
@@ -726,7 +823,7 @@ async function deleteAllPosts() {
 }
 
 async function createPost(
-  dataOverrides?: Partial<Post>,
+  dataOverrides?: RequiredDataFromCollectionSlug<'posts'>,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
   return payload.create({

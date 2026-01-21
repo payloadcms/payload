@@ -4,6 +4,7 @@ import type { CollectionConfig } from 'payload'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import path from 'path'
+import { getRangeRequestInfo } from 'payload/internal'
 
 type StaticHandlerArgs = {
   baseUrl: string
@@ -26,11 +27,26 @@ export const getStaticHandler = (
       const uploadedAtString = uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`
 
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize: size, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
       let headers = new Headers(incomingHeaders)
+
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
+      }
 
       headers.append('Cache-Control', `public, max-age=${cacheControlMaxAge}`)
       headers.append('Content-Disposition', contentDisposition)
-      headers.append('Content-Length', String(size))
       headers.append('Content-Type', contentType)
       headers.append('ETag', ETag)
 
@@ -53,22 +69,21 @@ export const getStaticHandler = (
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate',
           Pragma: 'no-cache',
+          ...(rangeResult.type === 'partial' && {
+            Range: `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`,
+          }),
         },
       })
 
-      const blob = await response.blob()
-
-      if (!blob) {
+      if (!response.ok || !response.body) {
         return new Response(null, { status: 204, statusText: 'No Content' })
       }
 
-      const bodyBuffer = await blob.arrayBuffer()
-
       headers.append('Last-Modified', uploadedAtString)
 
-      return new Response(bodyBuffer, {
+      return new Response(response.body, {
         headers,
-        status: 200,
+        status: rangeResult.status,
       })
     } catch (err: unknown) {
       if (err instanceof BlobNotFoundError) {

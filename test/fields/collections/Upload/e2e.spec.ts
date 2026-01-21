@@ -175,7 +175,7 @@ describe('Upload', () => {
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-1\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 
@@ -214,7 +214,7 @@ describe('Upload', () => {
     ).toContainText('payload-1.png')
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-1\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 

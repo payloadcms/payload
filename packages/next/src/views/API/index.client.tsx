@@ -38,6 +38,7 @@ export const APIViewClient: React.FC = () => {
       defaultDepth,
       localization,
       routes: { api: apiRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -83,6 +84,7 @@ export const APIViewClient: React.FC = () => {
   const fetchURL = formatAdminURL({
     apiRoute,
     path: `${docEndpoint}?${params}`,
+    serverURL: serverURL || window.location.origin,
   })
 
   React.useEffect(() => {

@@ -342,13 +342,13 @@ export async function checkFocusIndicators(
         const hasVisibleOutline = (style: string, width: string, color: string) =>
           Boolean(
             style &&
-              style !== 'none' &&
-              width &&
-              width !== '0px' &&
-              color &&
-              color !== 'transparent' &&
-              color !== 'rgba(0, 0, 0, 0)' &&
-              !color.includes('rgba(0, 0, 0, 0)'),
+            style !== 'none' &&
+            width &&
+            width !== '0px' &&
+            color &&
+            color !== 'transparent' &&
+            color !== 'rgba(0, 0, 0, 0)' &&
+            !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Helper to check if a style has a visible box-shadow
@@ -383,13 +383,13 @@ export async function checkFocusIndicators(
         const hasVisibleBorderCheck = (bdr: string, width: string, color: string) =>
           Boolean(
             bdr &&
-              bdr !== 'none' &&
-              width &&
-              width !== '0px' &&
-              color &&
-              color !== 'transparent' &&
-              color !== 'rgba(0, 0, 0, 0)' &&
-              !color.includes('rgba(0, 0, 0, 0)'),
+            bdr !== 'none' &&
+            width &&
+            width !== '0px' &&
+            color &&
+            color !== 'transparent' &&
+            color !== 'rgba(0, 0, 0, 0)' &&
+            !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Check if element has a visible focus indicator on the element itself
@@ -727,13 +727,14 @@ export async function checkFocusIndicators(
 export async function assertAllElementsHaveFocusIndicators(
   options: CheckFocusIndicatorsOptions,
 ): Promise<void> {
-  const result = await checkFocusIndicators(options)
+  await expect(async () => {
+    const result = await checkFocusIndicators(options)
 
-  if (result.elementsWithoutIndicators > 0) {
-    console.error('Elements without focus indicators:', result.elementsWithoutIndicatorDetails)
-  }
+    if (result.elementsWithoutIndicators > 0) {
+      console.error('Elements without focus indicators:', result.elementsWithoutIndicatorDetails)
+    }
 
-  await expect(() => {
+    expect(result.totalFocusableElements).toBeGreaterThan(0)
     expect(result.elementsWithoutIndicators).toBe(0)
   }).toPass()
 }

@@ -650,6 +650,7 @@ describe('Relationships', () => {
             },
           })
 
+          // eslint-disable-next-line vitest/no-standalone-expect
           expect(query1.totalDocs).toStrictEqual(1)
         })
 
@@ -1561,6 +1562,31 @@ describe('Relationships', () => {
         expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
       })
+
+      it('should allow a localized hasMany relationship inside a block', async () => {
+        const director1 = await payload.create({
+          collection: 'directors',
+          data: { name: 'director-1' },
+        })
+        const director2 = await payload.create({
+          collection: 'directors',
+          data: { name: 'director-2' },
+        })
+        const result = await payload.create({
+          collection: 'blocks',
+          data: {
+            blocks: [
+              {
+                blockType: 'some',
+                directors: [director1.id, director2.id],
+              },
+            ],
+          },
+        })
+
+        expect(result.blocks[0]?.directors[0].id).toBe(director1.id)
+        expect(result.blocks[0]?.directors[1].id).toBe(director2.id)
+      })
     })
   })
 
@@ -1658,6 +1684,7 @@ describe('Relationships', () => {
         })
         .then((res) => res.json())
 
+      // eslint-disable-next-line vitest/no-standalone-expect
       expect(queryOne.docs).toHaveLength(1)
     })
 
