@@ -2174,6 +2174,27 @@ describe('Versions', () => {
       await expect(richtextWithCustomDiff.locator('p')).toHaveText('Test')
     })
 
+    test('correctly renders internal links in richtext fields', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtext"]')
+
+      const oldDiff = richtext.locator('.html-diff__diff-old')
+      const newDiff = richtext.locator('.html-diff__diff-new')
+
+      const oldInternalLink = oldDiff.locator('a:has-text("an internal link")')
+      const newInternalLink = newDiff.locator('a:has-text("an updated internal link")')
+
+      await expect(oldInternalLink).toHaveCount(1)
+      await expect(newInternalLink).toHaveCount(1)
+
+      await expect(oldInternalLink).not.toHaveAttribute('href', '#')
+      await expect(newInternalLink).not.toHaveAttribute('href', '#')
+
+      await expect(oldInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
+      await expect(newInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
+    })
+
     test('correctly renders diff for row fields', async () => {
       await navigateToDiffVersionView()
 
