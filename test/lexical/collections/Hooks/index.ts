@@ -17,8 +17,12 @@ const hooks = Object.fromEntries(
     name,
     [
       (args: any) => {
-        const { value, field } = args
-        console.log(`${name} hook fired:`, field.name, value)
+        const { value, field, context } = args
+        if (!context.hookCalls) {
+          context.hookCalls = []
+        }
+        context.hookCalls.push(`${name}:${field.name}:${value}`)
+        return value
       },
     ],
   ]),

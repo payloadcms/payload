@@ -548,7 +548,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
-                    id,
+                    id: originalDoc.id,
                     blockData: nodeSiblingData,
                     collection,
                     context,
@@ -865,7 +865,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
-                    id,
+                    id: originalDoc.id,
                     blockData: nodeSiblingData,
                     collection,
                     context,

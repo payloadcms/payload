@@ -651,10 +651,18 @@ describe('Lexical', () => {
   })
 
   describe('Hooks', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
+    const expectHooksToRun = (
+      context: { hookCalls: string[] },
+      fieldName: string,
+      expectedHooks = ['beforeValidate', 'beforeChange', 'afterChange', 'afterRead'],
+    ) => {
+      for (const hook of expectedHooks) {
+        expect(context.hookCalls.some((h) => h.startsWith(`${hook}:${fieldName}:`))).toBe(true)
+      }
+      expect(
+        context.hookCalls.filter((h) => h.startsWith(`beforeDuplicate:${fieldName}:`)),
+      ).toHaveLength(0)
+    }
     it('ensure hook within number field within lexical block runs', async () => {
       const lexicalDocEN = await payload.create({
         collection: 'lexical-localized-fields',
@@ -687,10 +695,11 @@ describe('Lexical', () => {
     })
 
     it('ensure all hooks run on relationship field with lexical block', async () => {
-      const consoleSpy = vi.spyOn(console, 'log')
+      const context: { hookCalls: string[] } = { hookCalls: [] }
 
       await payload.create({
         collection: hooksSlug,
+        context,
         data: {
           lexical: {
             root: {
@@ -727,17 +736,13 @@ describe('Lexical', () => {
         },
       })
 
-      expect(consoleSpy).toHaveBeenCalledWith('beforeValidate hook fired:', 'textInBlock', 'test')
-      expect(consoleSpy).toHaveBeenCalledWith('beforeChange hook fired:', 'textInBlock', 'test')
-      expect(consoleSpy).toHaveBeenCalledWith('afterChange hook fired:', 'textInBlock', 'test')
-      expect(consoleSpy).toHaveBeenCalledWith('afterRead hook fired:', 'textInBlock', 'test')
-      expect(consoleSpy).not.toHaveBeenCalledWith(
-        'beforeDuplicate hook fired:',
-        'textInBlock',
-        expect.anything(),
-      )
-
-      consoleSpy.mockRestore()
+      expect(context.hookCalls).toContain('beforeValidate:textInBlock:test')
+      expect(context.hookCalls).toContain('beforeChange:textInBlock:test')
+      expect(context.hookCalls).toContain('afterChange:textInBlock:test')
+      expect(context.hookCalls).toContain('afterRead:textInBlock:test')
+      expect(
+        context.hookCalls.filter((h) => h.startsWith('beforeDuplicate:textInBlock:')),
+      ).toHaveLength(0)
     })
 
     it('ensure all hooks run on relationship field within lexical block', async () => {
@@ -749,10 +754,11 @@ describe('Lexical', () => {
         filePath: path.resolve(dirname, './collections/Upload/payload.jpg'),
       })
 
-      const consoleSpy = vi.spyOn(console, 'log')
+      const context: { hookCalls: string[] } = { hookCalls: [] }
 
       await payload.create({
         collection: hooksSlug,
+        context,
         data: {
           lexical: {
             root: {
@@ -789,33 +795,7 @@ describe('Lexical', () => {
         },
       })
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'beforeValidate hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'beforeChange hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'afterChange hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'afterRead hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).not.toHaveBeenCalledWith(
-        'beforeDuplicate hook fired:',
-        'relationshipField',
-        expect.anything(),
-      )
-
-      consoleSpy.mockRestore()
+      expectHooksToRun(context, 'relationshipField')
     })
 
     it('ensure all hooks run on relationship field within link blocks in lexical', async () => {
@@ -827,10 +807,11 @@ describe('Lexical', () => {
         filePath: path.resolve(dirname, './collections/Upload/payload.jpg'),
       })
 
-      const consoleSpy = vi.spyOn(console, 'log')
+      const context: { hookCalls: string[] } = { hookCalls: [] }
 
       await payload.create({
         collection: hooksSlug,
+        context,
         data: {
           lexical: {
             root: {
@@ -886,28 +867,7 @@ describe('Lexical', () => {
         },
       })
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'beforeValidate hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'beforeChange hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'afterChange hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'afterRead hook fired:',
-        'relationshipField',
-        expect.any(String),
-      )
-
-      consoleSpy.mockRestore()
+      expectHooksToRun(context, 'relationshipField')
     })
 
     // TODO: This test is skipped because Payload's duplicate() operation doesn't currently
@@ -960,7 +920,7 @@ describe('Lexical', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         'beforeDuplicate hook fired:',
         'relationshipField',
-        expect.any(String),
+        expect.anything(),
       )
 
       consoleSpy.mockRestore()
