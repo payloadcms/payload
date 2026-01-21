@@ -47,11 +47,11 @@
     "next": "15.4.10",
     "next-sitemap": "^4.2.3",
     "payload": "workspace:*",
-    "prism-react-renderer": "^2.3.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "7.45.4",
     "sharp": "0.34.2",
+    "shiki": "^3.20.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
