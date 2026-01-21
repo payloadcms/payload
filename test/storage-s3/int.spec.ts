@@ -133,6 +133,36 @@ describe('@payloadcms/storage-s3', () => {
     expect(response.status).toBe(404)
   })
 
+  it('should return 304 with empty body when the ETag matches', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/temp.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
+      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+
+    const etag = response.headers.get('ETag')
+    expect(etag).toBeDefined()
+
+    const responseNotModified = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      {
+        headers: {
+          'X-Disable-Signed-URL': 'true',
+          'If-None-Match': etag!,
+        },
+      },
+    )
+    expect(responseNotModified.status).toBe(304)
+    const body = await responseNotModified.text()
+    expect(body).toBe('')
+  })
+
   describe('disablePayloadAccessControl', () => {
     it('should return direct S3 URL with encoded filename when uploading file with spaces', async () => {
       const upload = await payload.create({
