@@ -2148,6 +2148,17 @@ describe('Versions', () => {
       ).toHaveText(String(draftDocs?.docs?.[2]?.title))
     })
 
+    test('correctly renders diff for relationship fields with maxDepth: 0', async () => {
+      await navigateToDiffVersionView()
+
+      const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
+
+      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(
+        zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText('dev@payloadcms.com')
+    })
+
     test('correctly renders diff for richtext fields', async () => {
       await navigateToDiffVersionView()
 
@@ -2172,6 +2183,27 @@ describe('Versions', () => {
       const richtextWithCustomDiff = page.locator('[data-field-path="richtextWithCustomDiff"]')
 
       await expect(richtextWithCustomDiff.locator('p')).toHaveText('Test')
+    })
+
+    test('correctly renders internal links in richtext fields', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtext"]')
+
+      const oldDiff = richtext.locator('.html-diff__diff-old')
+      const newDiff = richtext.locator('.html-diff__diff-new')
+
+      const oldInternalLink = oldDiff.locator('a:has-text("an internal link")')
+      const newInternalLink = newDiff.locator('a:has-text("an updated internal link")')
+
+      await expect(oldInternalLink).toHaveCount(1)
+      await expect(newInternalLink).toHaveCount(1)
+
+      await expect(oldInternalLink).not.toHaveAttribute('href', '#')
+      await expect(newInternalLink).not.toHaveAttribute('href', '#')
+
+      await expect(oldInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
+      await expect(newInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
     })
 
     test('correctly renders diff for row fields', async () => {

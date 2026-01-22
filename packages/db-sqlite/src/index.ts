@@ -58,7 +58,7 @@ import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
-import type { Args, SQLiteAdapter } from './types.js'
+import type { Args, SQLiteAdapter, WalConfig } from './types.js'
 
 import { connect } from './connect.js'
 
@@ -87,26 +87,36 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       not_like: notLike,
     } as unknown as Operators
 
-    const executeMethod = 'run'
-    const sanitizeStatements = ({
-      sqlExecute,
-      statements,
-    }: {
-      sqlExecute: string
-      statements: string[]
-    }) => {
-      return statements
-        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
-        .join('\n')
+    let wal: false | WalConfig = false
+
+    const defaultJournalSizeLimit = 67108864 // 64MB
+
+    if (args.wal && !args.client.url.startsWith('file:')) {
+      payload.logger.warn(
+        '[db-sqlite] WAL mode is not supported for in-memory or TCP database connections. Disabling WAL.',
+      )
+      args.wal = false
     }
 
-    const adapter = createDatabaseAdapter<SQLiteAdapter>({
+    if (!args.wal) {
+      wal = false
+    } else if (args.wal === true) {
+      wal = { journalSizeLimit: defaultJournalSizeLimit, synchronous: 'FULL' }
+    } else {
+      wal = {
+        journalSizeLimit: args.wal.journalSizeLimit ?? defaultJournalSizeLimit,
+        synchronous: args.wal.synchronous ?? 'FULL',
+      }
+    }
+
+    return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       blocksAsJSON: args.blocksAsJSON ?? false,
+      busyTimeout: args.busyTimeout ?? 0,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       client: undefined,
       clientConfig: args.client,
@@ -130,6 +140,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       logger: args.logger,
       operators,
       prodMigrations: args.prodMigrations,
+      wal,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},

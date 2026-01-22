@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
@@ -20,6 +20,7 @@ export const findResourceTool = (
     page: number = 1,
     sort?: string,
     where?: string,
+    select?: string,
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
@@ -62,6 +63,26 @@ export const findResourceTool = (
         }
       }
 
+      // Parse select clause if provided
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // If ID is provided, use findByID
       if (id) {
         try {
@@ -69,6 +90,7 @@ export const findResourceTool = (
             id,
             collection: collectionSlug,
             depth,
+            ...(selectClause && { select: selectClause }),
             overrideAccess: false,
             req,
             user,
@@ -129,6 +151,7 @@ ${JSON.stringify(doc, null, 2)}`,
         page,
         req,
         user,
+        ...(selectClause && { select: selectClause }),
         ...(locale && { locale }),
         ...(fallbackLocale && { fallbackLocale }),
         ...(draft !== undefined && { draft }),
@@ -202,8 +225,19 @@ Page: ${result.page} of ${result.totalPages}
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
       `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
       toolSchemas.findResources.parameters.shape,
-      async ({ id, depth, draft, fallbackLocale, limit, locale, page, sort, where }) => {
-        return await tool(id, limit, page, sort, where, depth, locale, fallbackLocale, draft)
+      async ({ id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where }) => {
+        return await tool(
+          id,
+          limit,
+          page,
+          sort,
+          where,
+          select,
+          depth,
+          locale,
+          fallbackLocale,
+          draft,
+        )
       },
     )
   }
