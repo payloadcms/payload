@@ -116,7 +116,7 @@ export const renderListView = async (
     !permissions?.collections?.[collectionSlug]?.read ||
     (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility)
   ) {
-    return notFound()
+    throw new Error('not-found')
   }
 
   const query: ListQuery = queryFromArgs || queryFromReq
@@ -436,6 +436,11 @@ export const ListView: React.FC<RenderListViewArgs> = async (args) => {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
-    console.error(error) // eslint-disable-line no-console
+    // Pass through Next.js errors
+    if (error.message === 'not-found') {
+      notFound()
+    } else {
+      console.error(error) // eslint-disable-line no-console
+    }
   }
 }
