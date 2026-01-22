@@ -290,7 +290,7 @@ export function DeleteMany_v4({
         const permanentlyDelete = shouldPermanentlyDelete({
           deletePermanently,
           hasDeletePermission,
-          hasTrashPermission,
+          hasTrashPermission: Boolean(collectionConfig.trash) && hasTrashPermission,
           isTrashView: viewType === 'trash',
         })
 
