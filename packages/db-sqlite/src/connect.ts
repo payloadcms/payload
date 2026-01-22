@@ -19,10 +19,6 @@ export const connect: Connect = async function connect(
     if (!this.client) {
       this.client = createClient(this.clientConfig)
 
-      if (this.busyTimeout > 0) {
-        await this.client.execute(`PRAGMA busy_timeout = ${this.busyTimeout};`)
-      }
-
       if (this.wal) {
         const result = await this.client.execute('PRAGMA journal_mode;')
 

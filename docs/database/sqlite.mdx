@@ -51,7 +51,6 @@ export default buildConfig({
 | `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                      |
 | `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
 | `blocksAsJSON`             | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
-| `busyTimeout`              | Maximum time in milliseconds to wait when the database is locked. Default is `0`.                                                                                                |
 | `wal`                      | Enable Write-Ahead Logging (WAL) mode for improved performance and concurrency. [More Details](#wal-mode)                                                                        |
 
 ## Access to Drizzle
