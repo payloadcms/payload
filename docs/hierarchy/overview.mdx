@@ -539,6 +539,55 @@ When versioning with drafts is enabled, hierarchy updates both published and dra
 
 Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
 
+### Parent Changes with `publishSpecificLocale`
+
+**Use with caution:** When using `publishSpecificLocale`, avoid changing the `parent` field in drafts. This is because:
+
+- The `parent` field is **not localized** (tree structure must be consistent across locales)
+- Publishing a specific locale publishes the draft's parent value for **all locales**
+- This causes paths to be recalculated for all locales based on the new parent
+- Only the published locale's paths will be correct; other locales will have incorrect paths
+
+**Problematic scenario:**
+
+```ts
+// 1. Create published document
+await payload.create({
+  collection: 'pages',
+  data: { title: 'Page', parent: 'parent-1' },
+})
+
+// 2. Create draft with different parent
+await payload.update({
+  collection: 'pages',
+  id: 'doc-id',
+  data: { parent: 'parent-2' }, // Draft has different parent
+  draft: true,
+})
+
+// 3. Publish only French
+await payload.update({
+  collection: 'pages',
+  id: 'doc-id',
+  publishSpecificLocale: 'fr', // ❌ Problem: parent changes to 'parent-2' for ALL locales
+})
+// Result: French paths correct, but English/German paths now incorrect
+```
+
+**Recommendation:** When moving documents in the hierarchy (changing parent), always use `publishAllLocales` (default behavior):
+
+```ts
+// ✅ Safe: publishes all locales at once
+await payload.update({
+  collection: 'pages',
+  id: 'doc-id',
+  data: { parent: 'new-parent' },
+  // publishAllLocales is default
+})
+```
+
+**Note:** Title changes work fine with `publishSpecificLocale` since path fields (`_h_slugPath`, `_h_titlePath`) are localized.
+
 ## Best Practices
 
 ### Use Consistent Title Fields

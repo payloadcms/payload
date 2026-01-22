@@ -18,6 +18,7 @@ export const buildParentField = ({
     hasMany: false,
     index: true,
     label: 'Parent',
+    localized: false,
     relationTo: collectionSlug,
   }
 

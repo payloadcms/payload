@@ -68,6 +68,12 @@ export const hierarchyCollectionAfterChange =
       return
     }
 
+    // Skip hierarchy processing if this update is coming from updateDescendants
+    // to avoid infinite recursion and overwriting hierarchy fields
+    if (req.context?.hierarchyUpdating) {
+      return
+    }
+
     const { newParentID, parentChanged, titleChanged } = getTreeChanges({
       doc,
       parentFieldName,

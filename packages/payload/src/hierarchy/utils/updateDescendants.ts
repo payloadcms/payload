@@ -47,6 +47,7 @@ export async function updateDescendants({
   let currentPage = 1
   let hasNextPage = true
 
+  // Query published descendants
   while (hasNextPage) {
     const idsQuery = await req.payload.find({
       collection: collection.slug,
@@ -85,10 +86,11 @@ export async function updateDescendants({
       selectFields._status = true
     }
 
+    // Query all descendants (both published and draft-only)
+    // Don't specify draft parameter to get all documents
     const descendantDocsQuery = await req.payload.find({
       collection: collection.slug,
       depth: 0,
-      draft: false,
       limit: batchSize,
       locale: 'all',
       req,
@@ -113,7 +115,7 @@ export async function updateDescendants({
         limit: batchSize,
         locale: 'all',
         req,
-        select: selectFields,
+        // Don't use select - we need all fields to ensure draft version data is returned
         where: {
           id: {
             in: batchIDs,
@@ -206,19 +208,75 @@ export async function updateDescendants({
             ]
           }
 
-          // Update published version
+          // Update main collection directly via database
           updatePromises.push(
-            req.payload.update({
+            req.payload.db.updateOne({
               id: affectedDoc.id,
               collection: collection.slug,
               data: updateData,
-              depth: 0,
-              draft: false,
               locale,
-              overrideAccess: true,
               req,
             }),
           )
+
+          // If document is draft-only (no published version), also update version record
+          // Do this once per document, not per locale
+          if (affectedDoc._status === 'draft' && locale === localeCodes[0]) {
+            // Build update data with all locales
+            const versionUpdateData: Record<string, any> = {
+              _h_depth: newParentTree.length,
+              _h_parentTree: newParentTree,
+            }
+
+            if (generatePaths && newTreePaths) {
+              versionUpdateData[slugPathFieldName] = newTreePaths.slugPath
+              versionUpdateData[titlePathFieldName] = newTreePaths.titlePath
+            }
+
+            updatePromises.push(
+              (async () => {
+                // Query for the latest draft version
+                const { docs: draftVersions } = await req.payload.db.findVersions({
+                  collection: collection.slug,
+                  limit: 1,
+                  pagination: false,
+                  req,
+                  sort: '-updatedAt',
+                  where: {
+                    parent: {
+                      equals: affectedDoc.id,
+                    },
+                    'version._status': {
+                      equals: 'draft',
+                    },
+                  },
+                })
+
+                const [latestDraftVersion] = draftVersions
+
+                if (latestDraftVersion) {
+                  // Update the draft version with new hierarchy fields
+                  await req.payload.db.updateVersion({
+                    id: latestDraftVersion.id,
+                    collection: collection.slug,
+                    req,
+                    versionData: {
+                      autosave: latestDraftVersion.autosave,
+                      createdAt: latestDraftVersion.createdAt,
+                      latest: latestDraftVersion.latest,
+                      parent: latestDraftVersion.parent,
+                      publishedLocale: latestDraftVersion.publishedLocale,
+                      updatedAt: new Date().toISOString(),
+                      version: {
+                        ...latestDraftVersion.version,
+                        ...versionUpdateData,
+                      },
+                    },
+                  })
+                }
+              })(),
+            )
+          }
 
           // Update draft version if document is published with drafts enabled
           if (shouldUpdateBothVersions) {
@@ -236,6 +294,14 @@ export async function updateDescendants({
               )[locale]
             }
 
+            // Create a new req with hierarchyUpdating flag to skip hierarchy hook
+            const draftReq = {
+              ...req,
+              context: {
+                ...req.context,
+                hierarchyUpdating: true,
+              },
+            }
             updatePromises.push(
               req.payload.update({
                 id: affectedDoc.id,
@@ -245,7 +311,7 @@ export async function updateDescendants({
                 draft: true,
                 locale,
                 overrideAccess: true,
-                req,
+                req: draftReq,
               }),
             )
           }
@@ -264,18 +330,63 @@ export async function updateDescendants({
           updateData[titlePathFieldName] = newTreePaths.titlePath
         }
 
-        // Update published version
+        // Update main collection directly via database
         updatePromises.push(
-          req.payload.update({
+          req.payload.db.updateOne({
             id: affectedDoc.id,
             collection: collection.slug,
             data: updateData,
-            depth: 0,
-            draft: false,
-            overrideAccess: true,
+            locale: 'all',
             req,
           }),
         )
+
+        // If document is draft-only (no published version), also update version record
+        if (affectedDoc._status === 'draft') {
+          updatePromises.push(
+            (async () => {
+              // Query for the latest draft version
+              const { docs: draftVersions } = await req.payload.db.findVersions({
+                collection: collection.slug,
+                limit: 1,
+                pagination: false,
+                req,
+                sort: '-updatedAt',
+                where: {
+                  parent: {
+                    equals: affectedDoc.id,
+                  },
+                  'version._status': {
+                    equals: 'draft',
+                  },
+                },
+              })
+
+              const [latestDraftVersion] = draftVersions
+
+              if (latestDraftVersion) {
+                // Update the draft version with new hierarchy fields
+                await req.payload.db.updateVersion({
+                  id: latestDraftVersion.id,
+                  collection: collection.slug,
+                  req,
+                  versionData: {
+                    autosave: latestDraftVersion.autosave,
+                    createdAt: latestDraftVersion.createdAt,
+                    latest: latestDraftVersion.latest,
+                    parent: latestDraftVersion.parent,
+                    publishedLocale: latestDraftVersion.publishedLocale,
+                    updatedAt: new Date().toISOString(),
+                    version: {
+                      ...latestDraftVersion.version,
+                      ...updateData,
+                    },
+                  },
+                })
+              }
+            })(),
+          )
+        }
 
         // Update draft version if document is published with drafts enabled
         if (shouldUpdateBothVersions) {
@@ -289,6 +400,14 @@ export async function updateDescendants({
             draftUpdateData[titlePathFieldName] = draftTreePaths.titlePath
           }
 
+          // Create a new req with hierarchyUpdating flag to skip hierarchy hook
+          const draftReq = {
+            ...req,
+            context: {
+              ...req.context,
+              hierarchyUpdating: true,
+            },
+          }
           updatePromises.push(
             req.payload.update({
               id: affectedDoc.id,
@@ -297,7 +416,7 @@ export async function updateDescendants({
               depth: 0,
               draft: true,
               overrideAccess: true,
-              req,
+              req: draftReq,
             }),
           )
         }

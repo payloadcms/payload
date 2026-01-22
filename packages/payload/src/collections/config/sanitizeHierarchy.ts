@@ -51,6 +51,12 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
         `Hierarchy parent field "${parentFieldName}" in collection "${collectionConfig.slug}" must have hasMany set to false`,
       )
     }
+
+    if (existingParentField.localized === true) {
+      throw new Error(
+        `Hierarchy parent field "${parentFieldName}" in collection "${collectionConfig.slug}" cannot be localized. The parent relationship must be consistent across all locales.`,
+      )
+    }
   } else {
     // Auto-create parent field if it doesn't exist
     const parentField = buildParentField({
