@@ -110,6 +110,9 @@ export const renderListView = async (
     },
     visibleEntities,
   } = initPageResult
+  const {
+    routes: { admin: adminRoute },
+  } = config
 
   if (
     !collectionConfig ||
@@ -140,7 +143,41 @@ export const renderListView = async (
     },
   })
 
-  query.preset = collectionPreferences?.preset
+  let queryPreset: QueryPreset | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined
+
+  if (collectionPreferences?.preset) {
+    try {
+      queryPreset = (await payload.findByID({
+        id: collectionPreferences?.preset,
+        collection: 'payload-query-presets',
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })) as QueryPreset
+
+      if (queryPreset) {
+        queryPresetPermissions = (
+          await getDocumentPermissions({
+            id: queryPreset.id,
+            collectionConfig: req.payload.collections['payload-query-presets'].config,
+            data: queryPreset,
+            req,
+          })
+        )?.docPermissions
+      }
+    } catch (err) {
+      req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
+    }
+  }
+
+  query.preset = queryPreset?.id
+  if (queryPreset?.where) {
+    query.where = queryPreset.where
+  }
+
+  const columnPreference = queryPreset?.columns ?? collectionPreferences?.columns
+  query.columns = transformColumnsToSearchParams(columnPreference)
 
   query.page = isNumber(query?.page) ? Number(query.page) : 0
 
@@ -150,14 +187,6 @@ export const renderListView = async (
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
-  query.groupBy = collectionPreferences?.groupBy
-
-  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
-
-  const {
-    routes: { admin: adminRoute },
-  } = config
-
   const baseFilterConstraint = await (
     collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
   )?.({
@@ -166,9 +195,6 @@ export const renderListView = async (
     req,
     sort: query.sort,
   })
-
-  let queryPreset: QueryPreset | undefined
-  let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
   let whereWithMergedSearch = mergeListSearchAndWhere({
     collectionConfig,
@@ -186,29 +212,6 @@ export const renderListView = async (
           },
         },
       ],
-    }
-  }
-
-  if (collectionPreferences?.preset) {
-    try {
-      queryPreset = (await payload.findByID({
-        id: collectionPreferences?.preset,
-        collection: 'payload-query-presets',
-        depth: 0,
-        overrideAccess: false,
-        user,
-      })) as QueryPreset
-
-      if (queryPreset) {
-        queryPresetPermissions = await getDocumentPermissions({
-          id: queryPreset.id,
-          collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),
-          data: queryPreset,
-          req,
-        })?.then(({ docPermissions }) => docPermissions)
-      }
-    } catch (err) {
-      req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
     }
   }
 
@@ -234,7 +237,7 @@ export const renderListView = async (
     clientConfig,
     collectionConfig: clientCollectionConfig,
     collectionSlug,
-    columns: collectionPreferences?.columns,
+    columns: columnPreference,
     i18n,
     permissions,
   })

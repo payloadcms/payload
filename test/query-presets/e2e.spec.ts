@@ -709,4 +709,30 @@ describe('Query Presets', () => {
     // Verify reset button is hidden again after reset
     await expect(page.locator('#reset-preset')).toBeHidden()
   })
+
+  test('should apply preset from URL query param', async ({ page }) => {
+    // Navigate directly to the list view with a preset query param
+    await page.goto(`${pagesUrl.list}?preset=${seededData.everyone.id}`)
+
+    // Verify the where query is in the URL
+    await assertURLParams({
+      page,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
+      preset: seededData.everyone.id,
+    })
+
+    // Verify the preset is selected in the preset selector
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText(seededData.everyone.title),
+      }),
+    ).toBeVisible()
+
+    // Verify the actual results are filtered correctly
+    // The seeded preset filters for text: { equals: 'example page' }
+    const tableRows = page.locator('.collection-list .table tbody tr')
+    await expect(tableRows).toHaveCount(1)
+    await expect(tableRows.first()).toContainText('example page')
+  })
 })
