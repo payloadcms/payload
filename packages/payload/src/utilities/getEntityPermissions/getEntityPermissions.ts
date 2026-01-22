@@ -104,9 +104,8 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     throw new Error('ID is required when fetching data for a collection')
   }
 
-  // When fetchData is true, attempt to fetch the full document to ensure field permissions get complete data
-  // Then merge any simulated fields from _data on top (e.g., _status for checking publish permissions)
-  // If fetch fails (e.g., document doesn't exist yet), fall back to _data
+  // Always fetch full doc when fetchData is true to ensure field permissions get complete data
+  // Then merge simulated fields from _data on top (e.g., _status for permission checks)
   let fetchedData: JsonObject | undefined = undefined
 
   if (fetchData) {
@@ -133,15 +132,12 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
         })
       }
     } catch (error) {
-      // Document doesn't exist yet (e.g., custom ID that hasn't been saved)
-      // Fall back to using _data
+      // Doc doesn't exist yet (e.g., custom ID), fall back to _data
       fetchedData = undefined
     }
   }
 
-  // Merge simulated fields from _data on top of fetched data
-  // This allows document-level permissions to use simulated values (e.g., _status: 'published')
-  // while field-level permissions get the complete document structure
+  // Merge simulated fields on top of fetched data for doc-level permission checks
   const data: JsonObject | undefined = fetchedData ? { ...fetchedData, ...(_data || {}) } : _data
 
   const isLoggedIn = !!user
