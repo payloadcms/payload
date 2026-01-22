@@ -125,7 +125,7 @@ export async function updateDescendants({
       draftDocsMap = new Map(draftDocsQuery.docs.map((doc) => [doc.id, doc]))
     }
 
-    const updatePromises: Promise<JsonObject & TypeWithID>[] = []
+    const updatePromises: Promise<any>[] = []
     descendantDocsQuery.docs.forEach((affectedDoc) => {
       const parentDocIndex = affectedDoc._h_parentTree?.indexOf(parentDocID) ?? -1
       const unchangedParentTree =
@@ -254,7 +254,6 @@ export async function updateDescendants({
                   collection: collection.slug,
                   req,
                   versionData: {
-                    autosave: latestDraftVersion.autosave,
                     createdAt: latestDraftVersion.createdAt,
                     latest: latestDraftVersion.latest,
                     parent: latestDraftVersion.parent,
@@ -366,7 +365,6 @@ export async function updateDescendants({
                   collection: collection.slug,
                   req,
                   versionData: {
-                    autosave: latestDraftVersion.autosave,
                     createdAt: latestDraftVersion.createdAt,
                     latest: latestDraftVersion.latest,
                     parent: latestDraftVersion.parent,

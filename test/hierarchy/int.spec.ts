@@ -933,4 +933,502 @@ describe('Hierarchy', () => {
       expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
     })
   })
+
+  describe('Localization', () => {
+    it('should generate localized paths for each locale', async () => {
+      // Create parent with default locale (en)
+      const parent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Clothing',
+          parent: null,
+        },
+      })
+
+      // Update parent for Spanish
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Ropa' },
+        locale: 'es',
+      })
+
+      // Update parent for German
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Kleidung' },
+        locale: 'de',
+      })
+
+      // Create child with default locale (en)
+      const child = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Shirts',
+          parent: parent.id,
+        },
+      })
+
+      // Update child for Spanish
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Camisas' },
+        locale: 'es',
+      })
+
+      // Update child for German
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Hemden' },
+        locale: 'de',
+      })
+
+      // Fetch with locale: 'all' to get all locales
+      const childWithAllLocales = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        locale: 'all',
+      })
+
+      // Verify paths are localized
+      expect(childWithAllLocales._h_slugPath).toEqual({
+        en: 'clothing/shirts',
+        es: 'ropa/camisas',
+        de: 'kleidung/hemden',
+      })
+
+      expect(childWithAllLocales._h_titlePath).toEqual({
+        en: 'Clothing/Shirts',
+        es: 'Ropa/Camisas',
+        de: 'Kleidung/Hemden',
+      })
+    })
+
+    it('should update localized paths when parent moves', async () => {
+      // Create parent with default locale (en)
+      const parent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Clothing',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Ropa' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Kleidung' },
+        locale: 'de',
+      })
+
+      // Create child with default locale (en)
+      const child = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Shirts',
+          parent: parent.id,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Camisas' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Hemden' },
+        locale: 'de',
+      })
+
+      // Create new parent with default locale (en)
+      const newParent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Apparel',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Indumentaria' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Bekleidung' },
+        locale: 'de',
+      })
+
+      // Move parent under newParent
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { parent: newParent.id },
+      })
+
+      // Fetch child with all locales
+      const updatedChild = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        locale: 'all',
+      })
+
+      expect(updatedChild._h_slugPath).toEqual({
+        en: 'apparel/clothing/shirts',
+        es: 'indumentaria/ropa/camisas',
+        de: 'bekleidung/kleidung/hemden',
+      })
+
+      expect(updatedChild._h_titlePath).toEqual({
+        en: 'Apparel/Clothing/Shirts',
+        es: 'Indumentaria/Ropa/Camisas',
+        de: 'Bekleidung/Kleidung/Hemden',
+      })
+    })
+
+    it('should update localized paths when title changes', async () => {
+      // Create parent with default locale (en)
+      const parent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Clothing',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Ropa' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Kleidung' },
+        locale: 'de',
+      })
+
+      // Create child with default locale (en)
+      const child = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Shirts',
+          parent: parent.id,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Camisas' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Hemden' },
+        locale: 'de',
+      })
+
+      // Update parent title for all locales
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Apparel' },
+        locale: 'en',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Indumentaria' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Bekleidung' },
+        locale: 'de',
+      })
+
+      // Fetch child with all locales
+      const updatedChild = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        locale: 'all',
+      })
+
+      expect(updatedChild._h_slugPath).toEqual({
+        en: 'apparel/shirts',
+        es: 'indumentaria/camisas',
+        de: 'bekleidung/hemden',
+      })
+
+      expect(updatedChild._h_titlePath).toEqual({
+        en: 'Apparel/Shirts',
+        es: 'Indumentaria/Camisas',
+        de: 'Bekleidung/Hemden',
+      })
+    })
+
+    it('should handle localized drafts with different titles per locale', async () => {
+      // Create parent with default locale (en)
+      const parent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Clothing',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Ropa' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Kleidung' },
+        locale: 'de',
+      })
+
+      // Create child with default locale (en)
+      const child = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Shirts',
+          parent: parent.id,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Camisas' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Hemden' },
+        locale: 'de',
+      })
+
+      // Publish
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { _status: 'published' },
+        draft: false,
+      })
+
+      // Create draft with different title for each locale
+      for (const locale of ['en', 'es', 'de']) {
+        const titleMap = {
+          en: 'T-Shirts',
+          es: 'Playeras',
+          de: 'T-Shirts',
+        }
+        await payload.update({
+          collection: 'products',
+          id: child.id,
+          data: {
+            name: titleMap[locale],
+          },
+          draft: true,
+          locale,
+        })
+      }
+
+      // Create newParent with default locale (en)
+      const newParent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Apparel',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Indumentaria' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Bekleidung' },
+        locale: 'de',
+      })
+
+      // Move parent under newParent
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { parent: newParent.id },
+      })
+
+      // Verify published version
+      const publishedChild = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        locale: 'all',
+      })
+
+      expect(publishedChild._h_slugPath).toEqual({
+        en: 'apparel/clothing/shirts',
+        es: 'indumentaria/ropa/camisas',
+        de: 'bekleidung/kleidung/hemden',
+      })
+
+      // Verify draft version
+      const draftChild = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(draftChild._h_slugPath).toEqual({
+        en: 'apparel/clothing/t-shirts',
+        es: 'indumentaria/ropa/playeras',
+        de: 'bekleidung/kleidung/t-shirts',
+      })
+    })
+
+    it('should handle draft-only documents with localized paths', async () => {
+      // Create parent as draft for default locale first
+      const parent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Future',
+          parent: null,
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Update other locales for parent
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Futuro' },
+        draft: true,
+        locale: 'es',
+      })
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { name: 'Zukunft' },
+        draft: true,
+        locale: 'de',
+      })
+
+      // Create child as draft
+      const child = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Plans',
+          parent: parent.id,
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Update other locales for child
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Planes' },
+        draft: true,
+        locale: 'es',
+      })
+      await payload.update({
+        collection: 'products',
+        id: child.id,
+        data: { name: 'Pläne' },
+        draft: true,
+        locale: 'de',
+      })
+
+      // Create new parent (published) with default locale
+      const newParent = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Roadmap',
+          parent: null,
+        },
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Hoja de Ruta' },
+        locale: 'es',
+      })
+
+      await payload.update({
+        collection: 'products',
+        id: newParent.id,
+        data: { name: 'Fahrplan' },
+        locale: 'de',
+      })
+
+      // Move parent
+      await payload.update({
+        collection: 'products',
+        id: parent.id,
+        data: { parent: newParent.id },
+        draft: true,
+        locale: 'en',
+      })
+
+      const draftChild = await payload.findByID({
+        collection: 'products',
+        id: child.id,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(draftChild._h_slugPath).toEqual({
+        en: 'roadmap/future/plans',
+        es: 'hoja-de-ruta/futuro/planes',
+        de: 'fahrplan/zukunft/plane',
+      })
+
+      expect(draftChild._h_titlePath).toEqual({
+        en: 'Roadmap/Future/Plans',
+        es: 'Hoja de Ruta/Futuro/Planes',
+        de: 'Fahrplan/Zukunft/Pläne',
+      })
+    })
+  })
 })

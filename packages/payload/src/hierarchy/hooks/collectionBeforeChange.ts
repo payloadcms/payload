@@ -1,6 +1,18 @@
+/**
+ * beforeChange Hook Responsibilities:
+ * - Update hierarchy fields for THIS document only
+ * - Handle ONLY the current request locale
+ * - Compute: _h_depth, _h_parentTree, paths (if enabled)
+ * - Set values on `data` object so they are persisted to database
+ * - Validate circular references
+ *
+ * Does NOT handle:
+ * - Other locales (handled by afterChange when parent changes)
+ * - Descendants (handled by afterChange)
+ */
+
 import type { CollectionBeforeChangeHook } from '../../index.js'
 
-import { computeTreeData } from '../utils/computeTreeData.js'
 import { getTreeChanges } from '../utils/getTreeChanges.js'
 
 type Args = {
@@ -66,8 +78,10 @@ export const hierarchyCollectionBeforeChange =
 
     const { newParentID, parentChanged, titleChanged } = getTreeChanges({
       doc: fullDoc,
+      isTitleLocalized,
       parentFieldName,
       previousDoc: originalDoc,
+      reqLocale,
       slugify,
       titleFieldName,
     })
@@ -90,7 +104,10 @@ export const hierarchyCollectionBeforeChange =
         },
       })
 
-      if (newParentDoc._h_parentTree && newParentDoc._h_parentTree.includes(fullDoc.id)) {
+      if (
+        Array.isArray(newParentDoc._h_parentTree) &&
+        newParentDoc._h_parentTree.includes(fullDoc.id)
+      ) {
         throw new Error(
           'Circular reference detected: the new parent is a descendant of this document',
         )
@@ -101,97 +118,80 @@ export const hierarchyCollectionBeforeChange =
 
     // Only process if parent changed/created, or if title changed and paths are enabled
     if (parentChangedOrCreate || (titleChanged && generatePaths)) {
-      // Fetch document with all locales to pass to computeTreeData
-      // For creates, we don't have a document yet, so we construct one from data
-      let docWithLocales = fullDoc
-      if (operation === 'update' && fullDoc.id) {
-        docWithLocales = await req.payload.findByID({
-          id: fullDoc.id,
+      // Compute parent tree and depth
+      let newParentTree: Array<number | string> = []
+      if (newParentID) {
+        const parentDoc = await req.payload.findByID({
+          id: newParentID,
           collection: collection.slug,
           depth: 0,
-          locale: 'all',
           req,
+          select: {
+            _h_parentTree: true,
+          },
         })
-        // Merge the update data, handling localized fields correctly
-        const safeReqLocale =
-          reqLocale ||
-          (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en')
-
-        // For localized title field, nest the value under the current locale
-        if (isTitleLocalized && data[titleFieldName] !== undefined) {
-          docWithLocales[titleFieldName] = {
-            ...docWithLocales[titleFieldName],
-            [safeReqLocale]: data[titleFieldName],
-          }
-        }
-
-        // Merge other non-localized fields
-        for (const key in data) {
-          if (key !== titleFieldName) {
-            docWithLocales[key] = data[key]
-          }
-        }
+        newParentTree = [
+          ...(Array.isArray(parentDoc._h_parentTree) ? parentDoc._h_parentTree : []),
+          newParentID,
+        ]
       }
 
-      // Compute tree data for current locale only
-      const updatedTreeData = await computeTreeData({
-        collection,
-        docWithLocales,
-        fieldIsLocalized: isTitleLocalized,
-        localeCodes:
-          isTitleLocalized && req.payload.config.localization
-            ? [reqLocale || req.payload.config.localization.defaultLocale]
-            : undefined,
-        newParentID,
-        parentChanged: parentChangedOrCreate,
-        parentFieldName,
-        previousDocWithLocales: originalDoc || {},
-        req,
-        reqLocale:
-          reqLocale ||
-          (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en'),
-        slugify,
-        slugPathFieldName,
-        titleFieldName,
-        titlePathFieldName,
-      })
-
-      // Update data with new values (non-localized fields only)
-      data._h_depth = updatedTreeData._h_parentTree?.length ?? 0
-      data._h_parentTree = updatedTreeData._h_parentTree
+      // Update non-localized hierarchy fields
+      data._h_depth = newParentTree.length
+      data._h_parentTree = newParentTree
 
       if (parentChanged) {
         data[parentFieldName] = newParentID
       }
 
+      // Compute and set path fields if enabled
       if (generatePaths) {
+        const currentTitle = data[titleFieldName]
+        if (!currentTitle) {
+          return data
+        }
+
+        const currentSlug = slugify(currentTitle)
+
+        // Fetch parent's paths if document has a parent
+        let parentSlugPath = ''
+        let parentTitlePath = ''
+
+        if (newParentID) {
+          const parentDoc = await req.payload.findByID({
+            id: newParentID,
+            collection: collection.slug,
+            depth: 0,
+            locale: reqLocale,
+            req,
+            select: {
+              [slugPathFieldName]: true,
+              [titlePathFieldName]: true,
+            },
+          })
+
+          if (isTitleLocalized) {
+            parentSlugPath = parentDoc[slugPathFieldName] || ''
+            parentTitlePath = parentDoc[titlePathFieldName] || ''
+          } else {
+            parentSlugPath = parentDoc[slugPathFieldName] || ''
+            parentTitlePath = parentDoc[titlePathFieldName] || ''
+          }
+        }
+
+        // Compute this document's paths
+        const computedSlugPath = parentSlugPath ? `${parentSlugPath}/${currentSlug}` : currentSlug
+        const computedTitlePath = parentTitlePath
+          ? `${parentTitlePath}/${currentTitle}`
+          : currentTitle
+
+        // Set path fields - Payload will nest under locale key if localized
+        data[slugPathFieldName] = computedSlugPath
+        data[titlePathFieldName] = computedTitlePath
+
+        // Store current locale in context for afterChange
         if (isTitleLocalized) {
-          // For localized fields, set as strings (non-localized format)
-          // Payload will nest them under the locale key during DB write
-          const safeReqLocale =
-            reqLocale ||
-            (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en')
-
-          const computedSlugPath =
-            typeof updatedTreeData.slugPath === 'object'
-              ? updatedTreeData.slugPath[safeReqLocale]
-              : updatedTreeData.slugPath
-
-          const computedTitlePath =
-            typeof updatedTreeData.titlePath === 'object'
-              ? updatedTreeData.titlePath[safeReqLocale]
-              : updatedTreeData.titlePath
-
-          // Set as strings - Payload will nest under locale key
-          data[slugPathFieldName] = computedSlugPath
-          data[titlePathFieldName] = computedTitlePath
-
-          // Store in context so afterChange knows to only update OTHER locales when parent changes
-          req.context.hierarchyCurrentLocale = safeReqLocale
-        } else {
-          // For non-localized fields, set directly
-          data[slugPathFieldName] = updatedTreeData.slugPath
-          data[titlePathFieldName] = updatedTreeData.titlePath
+          req.context.hierarchyCurrentLocale = reqLocale
         }
       }
     }

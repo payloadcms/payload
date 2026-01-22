@@ -72,6 +72,11 @@ export function deriveParentPathsFromPrevious({
       }
     }
 
+    // If we couldn't derive any paths, return undefined so caller can fetch parent
+    if (Object.keys(derivedSlugPath).length === 0 || Object.keys(derivedTitlePath).length === 0) {
+      return undefined
+    }
+
     return {
       slugPath: derivedSlugPath,
       titlePath: derivedTitlePath,

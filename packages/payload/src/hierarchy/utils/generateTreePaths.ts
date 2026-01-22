@@ -50,10 +50,25 @@ export function generateTreePaths({
             ? treeData?.parentTitlePath?.[locale]
             : ''
 
-        let title = docWithLocales[titleFieldName]?.[locale]
+        let title: string | undefined
 
-        if (reqLocale !== locale && previousDocWithLocales?.[titleFieldName]?.[locale]) {
-          title = previousDocWithLocales[titleFieldName][locale]
+        // Handle case where titleField is a string (current locale only) vs object (all locales)
+        const titleValue = docWithLocales[titleFieldName]
+        if (typeof titleValue === 'string') {
+          // Title is a string - this is the value for reqLocale only
+          if (locale === reqLocale) {
+            title = titleValue
+          } else if (previousDocWithLocales?.[titleFieldName]?.[locale]) {
+            // For other locales, use previous value
+            title = previousDocWithLocales[titleFieldName][locale]
+          }
+        } else if (typeof titleValue === 'object' && titleValue !== null) {
+          // Title is an object with locale keys
+          title = titleValue[locale]
+
+          if (reqLocale !== locale && previousDocWithLocales?.[titleFieldName]?.[locale]) {
+            title = previousDocWithLocales[titleFieldName][locale]
+          }
         }
 
         if (title) {

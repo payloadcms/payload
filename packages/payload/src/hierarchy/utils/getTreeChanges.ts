@@ -4,8 +4,10 @@ import { extractID } from '../../utilities/extractID.js'
 
 type GetTreeChanges = {
   doc: Document
+  isTitleLocalized?: boolean
   parentFieldName: string
   previousDoc: Document
+  reqLocale?: string
   slugify: (text: string) => string
   titleFieldName: string
 }
@@ -18,23 +20,47 @@ type GetTreeChangesResult = {
 
 export function getTreeChanges({
   doc,
+  isTitleLocalized,
   parentFieldName,
   previousDoc,
+  reqLocale,
   slugify,
   titleFieldName,
 }: GetTreeChanges): GetTreeChangesResult {
   const prevParentID = extractID(previousDoc[parentFieldName]) || null
   const newParentID = extractID(doc[parentFieldName]) || null
-  const prevTitleData = previousDoc[titleFieldName]
+
+  // Extract locale-specific title values for comparison
+  let prevTitle: string | undefined
+  let newTitle: string | undefined
+
+  if (isTitleLocalized && reqLocale) {
+    // For localized fields, extract the specific locale value
+    const prevTitleField = previousDoc[titleFieldName]
+    const newTitleField = doc[titleFieldName]
+
+    prevTitle =
+      prevTitleField && typeof prevTitleField === 'object' ? prevTitleField[reqLocale] : undefined
+
+    // New title is non-localized string in beforeChange hook
+    newTitle = typeof newTitleField === 'string' ? newTitleField : undefined
+  } else {
+    // For non-localized fields, use values directly
+    prevTitle = previousDoc[titleFieldName]
+    newTitle = doc[titleFieldName]
+  }
+
+  const prevTitleData = prevTitle
     ? {
-        slug: slugify(previousDoc[titleFieldName]),
-        title: previousDoc[titleFieldName],
+        slug: slugify(prevTitle),
+        title: prevTitle,
       }
     : undefined
-  const newTitleData = doc[titleFieldName]
+
+  const newTitleData = newTitle
     ? {
-        slug: slugify(doc[titleFieldName]),
-        title: doc[titleFieldName],
+        slug: slugify(newTitle),
+        title: newTitle,
       }
     : undefined
 

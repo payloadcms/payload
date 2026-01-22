@@ -95,13 +95,45 @@ export const Organizations: CollectionConfig = {
   },
 }
 
+// Products collection with localized title field
+export const Products: CollectionConfig = {
+  slug: 'products',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+      localized: true,
+    },
+    {
+      name: 'description',
+      type: 'text',
+      localized: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+  },
+  versions: {
+    drafts: true,
+  },
+}
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Categories, Departments, Organizations],
+  collections: [Pages, Categories, Departments, Organizations, Products],
+  localization: {
+    locales: ['en', 'es', 'de'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -121,4 +153,5 @@ export {
   Departments as DepartmentsCollection,
   Organizations as OrganizationsCollection,
   Pages as PagesCollection,
+  Products as ProductsCollection,
 }
