@@ -191,7 +191,7 @@ export const renderListView = async (
     if (
       !isClientNavigation &&
       urlHasNoParams &&
-      (query.preset || query.sort || query.groupBy || query.columns?.length)
+      (query.preset || query.limit || query.sort || query.groupBy || query.columns?.length)
     ) {
       const params = new URLSearchParams()
       if (query.preset) {
@@ -210,7 +210,6 @@ export const renderListView = async (
         params.set('columns', JSON.stringify(query.columns))
       }
 
-      console.log('Redirecting')
       redirect(
         formatAdminURL({
           adminRoute,
