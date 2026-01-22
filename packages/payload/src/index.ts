@@ -678,15 +678,19 @@ export class BasePayload {
           const jobAutorunCron = new Cron(
             cronConfig.cron ?? DEFAULT_CRON,
             async () => {
+              const randomID = Math.random().toString(36).substring(2, 15)
+              console.log(`[${randomID}] Running cron job...`)
               if (
                 _internal_jobSystemGlobals.shouldAutoSchedule &&
                 !cronConfig.disableScheduling &&
                 this.config.jobs.scheduling
               ) {
+                console.log(`[${randomID}] Handling schedules...`)
                 await this.jobs.handleSchedules({
                   allQueues: cronConfig.allQueues,
                   queue: cronConfig.queue,
                 })
+                console.log(`[${randomID}] Schedules handled.`)
               }
 
               if (!_internal_jobSystemGlobals.shouldAutoRun) {
@@ -694,20 +698,24 @@ export class BasePayload {
               }
 
               if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                console.log(`[${randomID}] Checking if should auto run...`)
                 const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
                 if (!shouldAutoRun) {
+                  console.log(`[${randomID}] Should auto run is false, stopping cron job.`)
                   jobAutorunCron.stop()
                   return
                 }
               }
 
-              await this.jobs.run({
+              console.log(`[${randomID}] Running jobs...`)
+              const result = await this.jobs.run({
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
                 queue: cronConfig.queue,
                 silent: cronConfig.silent,
               })
+              console.log(`[${randomID}] Jobs run.`, result)
             },
             {
               // Do not run consecutive crons if previous crons still ongoing
