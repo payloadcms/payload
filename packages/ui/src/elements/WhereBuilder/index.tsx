@@ -103,6 +103,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           field: field.field,
           operator: incomingOperator,
         })
+
+        // Skip if nothing changed
+        const existingValue = existingCondition[String(field.value)]?.[validOperator]
+        if (existingValue === value) {
+          return
+        }
+
         const newRowCondition = {
           [String(field.value)]: { [validOperator]: value },
         }

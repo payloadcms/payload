@@ -676,6 +676,26 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header').first()).toBeVisible()
   })
 
+  test('should not show save button after page reload with preset applied', async () => {
+    await page.goto(pagesUrl.list)
+
+    // 1. Apply query preset
+    await selectPreset({ page, presetTitle: seededData.onlyMe.title })
+
+    // 2. Reload page
+    await page.reload()
+    await expect(page.locator('button#select-preset')).toContainText(seededData.onlyMe.title)
+
+    // 3. #save-preset button should NOT show (no modifications yet)
+    await expect(page.locator('#save-preset')).toBeHidden()
+
+    // 4. Make a change
+    await toggleColumn(page, { columnLabel: 'ID' })
+
+    // 5. #save-preset button should show
+    await expect(page.locator('#save-preset')).toBeVisible()
+  })
+
   test('should reset groupBy when clicking reset button on modified preset', async () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
