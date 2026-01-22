@@ -52,6 +52,11 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Maximum time in milliseconds to wait when the database is locked.
+   * @default 0
+   */
+  busyTimeout?: number
   client: Config
 } & BaseSQLiteArgs
 
@@ -123,6 +128,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
 export type SQLiteAdapter = {
+  busyTimeout: number
   client: Client
   clientConfig: Args['client']
   drizzle: Drizzle
@@ -199,6 +205,7 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
+    busyTimeout: number
     drizzle: Drizzle
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name

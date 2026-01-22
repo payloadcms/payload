@@ -18,6 +18,10 @@ export const connect: Connect = async function connect(
   try {
     if (!this.client) {
       this.client = createClient(this.clientConfig)
+
+      if (this.busyTimeout > 0) {
+        await this.client.execute(`PRAGMA busy_timeout = ${this.busyTimeout};`)
+      }
     }
 
     const logger = this.logger || false
