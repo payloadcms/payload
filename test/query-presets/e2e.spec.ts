@@ -1,7 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
@@ -36,7 +35,6 @@ let page: Page
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
-let everyoneID: string | undefined
 let context: BrowserContext
 
 let seededData: {
@@ -71,52 +69,46 @@ describe('Query Presets', () => {
       serverURL,
       snapshotKey: 'querypresets',
     })
-  })
+    await ensureCompilationIsDone({ page, serverURL })
 
-  beforeEach(async () => {
-    // @ts-expect-error - initialization
-    seededData = {}
-
-    seededData.everyone = await payload
-      .find({
-        collection: 'payload-query-presets',
-        where: {
-          title: {
-            equals: 'Everyone',
+    seededData = {
+      everyone: (
+        await payload.find({
+          collection: 'payload-query-presets',
+          where: {
+            title: {
+              equals: 'Everyone',
+            },
           },
-        },
-        limit: 1,
-        depth: 0,
-      })
-      ?.then((res) => res.docs[0]!)
-
-    seededData.onlyMe = await payload
-      .find({
-        collection: 'payload-query-presets',
-        where: {
-          title: {
-            equals: 'Only Me',
+          limit: 1,
+          depth: 0,
+        })
+      ).docs[0]!,
+      onlyMe: (
+        await payload.find({
+          collection: 'payload-query-presets',
+          where: {
+            title: {
+              equals: 'Only Me',
+            },
           },
-        },
-        limit: 1,
-        depth: 0,
-      })
-      ?.then((res) => res.docs[0]!)
-
-    seededData.specificUsers = await payload
-      .find({
-        collection: 'payload-query-presets',
-        where: {
-          title: {
-            equals: 'Specific Users',
+          limit: 1,
+          depth: 0,
+        })
+      ).docs[0]!,
+      specificUsers: (
+        await payload.find({
+          collection: 'payload-query-presets',
+          where: {
+            title: {
+              equals: 'Specific Users',
+            },
           },
-        },
-        limit: 1,
-        depth: 0,
-      })
-      ?.then((res) => res.docs[0]!)
-
-    everyoneID = seededData.everyone.id
+          limit: 1,
+          depth: 0,
+        })
+      ).docs[0]!,
+    }
   })
 
   test('can create and view preset with no filters or columns', async () => {
@@ -186,7 +178,7 @@ describe('Query Presets', () => {
     await assertURLParams({
       page,
       columns: seededData.everyone.columns,
-      preset: everyoneID,
+      preset: seededData.everyone.id,
     })
   })
 
@@ -257,7 +249,7 @@ describe('Query Presets', () => {
       page,
       columns: seededData.everyone.columns,
       where: seededData.everyone.where,
-      preset: everyoneID,
+      preset: seededData.everyone.id,
     })
 
     // for good measure, also soft navigate away and back
@@ -269,7 +261,7 @@ describe('Query Presets', () => {
       page,
       columns: seededData.everyone.columns,
       where: seededData.everyone.where,
-      preset: everyoneID,
+      preset: seededData.everyone.id,
     })
   })
 
