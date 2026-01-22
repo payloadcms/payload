@@ -78,13 +78,12 @@ export const Condition: React.FC<Props> = (props) => {
   const isInitialMount = React.useRef(true)
   const previousValue = React.useRef(value)
   // Track if the filter has ever had a non-empty value (for removal logic)
-  const hasHadNonEmptyValue = React.useRef(
-    value !== null && value !== undefined && value !== '',
-  )
+  const hasHadNonEmptyValue = React.useRef(value !== null && value !== undefined && value !== '')
 
   const updateValue = useEffectEvent((debouncedValue: Value) => {
     if (operator) {
-      const isEmpty = debouncedValue === null || debouncedValue === undefined || debouncedValue === ''
+      const isEmpty =
+        debouncedValue === null || debouncedValue === undefined || debouncedValue === ''
 
       // If the value is now empty but previously had a value, remove the condition
       // This prevents filtering for "equals empty string" which returns 0 results

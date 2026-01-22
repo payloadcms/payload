@@ -499,9 +499,7 @@ describe('List View', () => {
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
       // Wait for the filter to be removed from URL before adding a new one
-      await expect
-        .poll(() => !page.url().includes('where'), { timeout: 5000 })
-        .toBe(true)
+      await expect.poll(() => !page.url().includes('where'), { timeout: 5000 }).toBe(true)
 
       await addListFilter({
         page,

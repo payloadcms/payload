@@ -37,10 +37,6 @@ export const addListFilter = async ({
 
   if (initializedEmpty) {
     await addFirst.click()
-    // Wait for navigation to complete (URL will have where param)
-    await page.waitForURL(/where/)
-    // Wait for the filter row to appear after re-render
-    await expect(whereBuilder.locator('.where-builder__or-filters > li').first()).toBeVisible()
   }
 
   const filters = whereBuilder.locator('.where-builder__or-filters > li')

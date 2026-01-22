@@ -1,9 +1,9 @@
 'use client'
-import type { Operator } from 'payload'
+import type { Operator, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
@@ -45,7 +45,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { query, setQuery } = useListQuery()
 
   // Parse conditions from URL
-  const conditions = useMemo(() => {
+  const urlConditions = useMemo(() => {
     const whereFromSearch = query.where
 
     if (whereFromSearch) {
@@ -66,6 +66,17 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     return []
   }, [query.where])
 
+  // Local conditions state - allows adding filters without immediately updating URL
+  const [localConditions, setLocalConditions] = useState<Where['or'] | null>(null)
+
+  // Use local conditions if set, otherwise use URL conditions
+  const conditions = localConditions ?? urlConditions
+
+  // Sync local conditions with URL when URL changes (e.g., after navigation)
+  React.useEffect(() => {
+    setLocalConditions(null)
+  }, [urlConditions])
+
   const addCondition: AddCondition = React.useCallback(
     ({ andIndex, field, orIndex, relation }) => {
       const newConditions = [...conditions]
@@ -75,7 +86,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
           [String(field.value)]: {
-            [defaultOperator]: '',
+            [defaultOperator]: undefined,
           },
         })
       } else {
@@ -83,21 +94,29 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           and: [
             {
               [String(field.value)]: {
-                [defaultOperator]: '',
+                [defaultOperator]: undefined,
               },
             },
           ],
         })
       }
 
-      setQuery({ where: { or: newConditions } })
+      // Update local state
+      setLocalConditions(newConditions)
+
+      // For checkbox fields, don't sync empty values to URL (causes MongoDB cast error)
+      // For other fields, sync to URL so the filter is immediately persisted
+      const isCheckboxField = field?.field?.type === 'checkbox'
+      if (!isCheckboxField) {
+        setQuery({ where: { or: newConditions } })
+      }
     },
     [conditions, setQuery],
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
     ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
-      const existingCondition = conditions[orIndex].and[andIndex]
+      const existingCondition = conditions[orIndex]?.and?.[andIndex]
 
       if (typeof existingCondition === 'object' && field?.value) {
         const { validOperator } = getValidFieldOperators({
@@ -110,7 +129,20 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
         const newConditions = [...conditions]
         newConditions[orIndex].and[andIndex] = newRowCondition
-        setQuery({ where: { or: newConditions } })
+
+        // Update local state first
+        setLocalConditions(newConditions)
+
+        // Determine if the value is empty
+        const isEmpty = value === undefined || value === null || value === ''
+
+        // For checkbox fields, don't sync empty values to URL (causes MongoDB cast error)
+        // For other fields, always sync to URL even with empty values
+        const isCheckboxField = field?.field?.type === 'checkbox'
+
+        if (!isEmpty || !isCheckboxField) {
+          setQuery({ where: { or: newConditions } })
+        }
       }
     },
     [conditions, setQuery],
@@ -125,6 +157,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.splice(orIndex, 1)
       }
 
+      // Update both local state and URL
+      setLocalConditions(newConditions.length > 0 ? newConditions : null)
       setQuery({ where: newConditions.length > 0 ? { or: newConditions } : null })
     },
     [conditions, setQuery],
