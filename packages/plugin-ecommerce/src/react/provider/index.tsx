@@ -36,8 +36,6 @@ const defaultContext: EcommerceContextType = {
         decimals: 2,
         label: 'US Dollar',
         symbol: '$',
-        symbolPosition: 'before',
-        symbolSeparator: '',
       },
     ],
   },
@@ -46,8 +44,6 @@ const defaultContext: EcommerceContextType = {
     decimals: 2,
     label: 'US Dollar',
     symbol: '$',
-    symbolPosition: 'before',
-    symbolSeparator: '',
   },
   decrementItem: async () => {},
   incrementItem: async () => {},
@@ -83,8 +79,6 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         decimals: 2,
         label: 'US Dollar',
         symbol: '$',
-        symbolPosition: 'before',
-        symbolSeparator: '',
       },
     ],
   },
@@ -1132,12 +1126,13 @@ export const useCurrency = () => {
         return value.toString()
       }
 
-      const { code, decimals } = currencyToUse
+      const { code, decimals, symbolDisplay } = currencyToUse
 
       const locale = options?.locale || 'en'
 
       return new Intl.NumberFormat(locale, {
         currency: code,
+        currencyDisplay: symbolDisplay || 'symbol',
         maximumFractionDigits: decimals,
         minimumFractionDigits: decimals,
         style: 'currency',
