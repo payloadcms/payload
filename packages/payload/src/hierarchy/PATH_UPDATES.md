@@ -438,7 +438,7 @@ Since we only update `_h_*` internal fields (not `parent` or `title`), the hiera
 - 50 descendants × 3 locales = **150 update operations**
 - Each operation: hooks fire, version created
 
-## Scenario 8: Draft State (TODO: Not yet implemented)
+## Scenario 8: Draft State (IMPLEMENTED ✅)
 
 **Setup:**
 
@@ -457,45 +457,114 @@ Since we only update `_h_*` internal fields (not `parent` or `title`), the hiera
   version: {
     title: 'Apparel', // Draft change
     _status: 'draft',
-    _h_slugPath: 'products/clothing', // Still old path!
+    _h_slugPath: 'products/apparel', // Has its own path based on draft title
   }
 }
 ```
 
-**Problem:**
-When parent moves:
+**Challenge:**
+Draft versions live in the `_<collection>_versions` table, not the main collection. Hierarchy fields need to be updated in both places when changes occur.
 
-1. Published doc updated: `_h_slugPath: 'accessories/clothing'` ✅
-2. Draft version NOT updated: `_h_slugPath: 'products/clothing'` ❌
+**Implementation:**
 
-**Solution (needs implementation):**
+### Part 1: Draft-Only Title Changes
+
+When a user updates only the title of a draft document:
+
+```ts
+await payload.update({
+  collection: 'pages',
+  id: child.id,
+  data: { title: 'Apparel' }, // Changed from 'Clothing'
+  draft: true,
+})
+```
+
+**Flow:**
+
+1. Hook: `collectionAfterChange` triggered
+2. Detects: `operation === 'update' && doc._status === 'draft' && titleChanged && !parentChanged`
+3. Skip main collection update (draft doesn't live there)
+4. Query for latest draft version from versions table:
+   ```ts
+   const { docs: draftVersions } = await req.payload.db.findVersions({
+     collection: collection.slug,
+     where: {
+       parent: { equals: doc.id },
+       'version._status': { equals: 'draft' },
+     },
+     sort: '-updatedAt',
+     limit: 1,
+   })
+   ```
+5. Update draft version record with new hierarchy fields:
+   ```ts
+   await req.payload.db.updateVersion({
+     collection: collection.slug,
+     id: latestDraftVersion.id,
+     versionData: {
+       ...latestDraftVersion,
+       updatedAt: new Date().toISOString(),
+       version: {
+         ...latestDraftVersion.version,
+         ...updateData, // Includes _h_slugPath, _h_titlePath, etc.
+       },
+     },
+   })
+   ```
+
+**Result:** Draft version now has `_h_slugPath: 'products/apparel'` using draft title.
+
+### Part 2: Updating Descendants with Both Published and Draft
+
+When a parent moves, descendants need both versions updated:
 
 ```ts
 // Detect published documents with drafts
 const isPublished = affectedDoc._status === 'published'
-const hasVersions = collection.versions
+const draftDoc = draftDocsMap?.get(affectedDoc.id)
+const hasDraft = draftDoc && draftDoc._status === 'draft'
+const shouldUpdateBothVersions = needsDraftQuery && isPublished && hasDraft
+```
 
-if (isPublished && hasVersions) {
-  // Update published version
-  await payload.update({
-    id: affectedDoc.id,
-    draft: false,
-    data: updateData,
-  })
+**Flow:**
 
-  // Update draft version
-  await payload.update({
-    id: affectedDoc.id,
-    draft: true,
-    data: updateData,
-  })
-}
+1. Query published versions: `payload.find({ draft: false })`
+2. Query draft versions: `payload.find({ draft: true })`
+3. Build map of draft docs by ID
+4. For each descendant:
+   - Calculate paths for published version using published title
+   - Calculate paths for draft version using draft title (if exists)
+   - Update published: `payload.update({ draft: false, data: updateData })`
+   - Update draft: `payload.update({ draft: true, data: draftUpdateData })`
+
+**Example:**
+
+```ts
+// Published version
+await payload.update({
+  id: child.id,
+  draft: false,
+  data: {
+    _h_slugPath: 'categories/products/clothing', // Uses published title
+  },
+})
+
+// Draft version
+await payload.update({
+  id: child.id,
+  draft: true,
+  data: {
+    _h_slugPath: 'categories/products/apparel', // Uses draft title
+  },
+})
 ```
 
 **Impact:**
 
 - 1 descendant with draft = **2 updates** (published + draft)
-- 1 descendant with draft × 3 locales = **6 updates**
+- 1 descendant with draft × 3 locales = **6 updates** (2 versions × 3 locales)
+- 50 descendants with drafts × 3 locales = **300 updates**
 
 ## Performance Summary
 
@@ -519,9 +588,11 @@ File: `packages/payload/src/hierarchy/hooks/collectionAfterChange.ts`
 1. Get request locale
 2. Skip if `locale === 'all'`
 3. Detect changes (parent, title)
-4. **Validate circular references** (new!)
+4. **Validate circular references**
 5. Compute tree data
-6. Update current document via `db.updateOne`
+6. Update current document:
+   - **Draft-only title change?** Skip main collection, update draft version via `db.updateVersion`
+   - **Otherwise:** Update main collection via `db.updateOne`
 7. Update descendants via `updateDescendants`
 8. Return mutated doc object
 
@@ -547,9 +618,11 @@ File: `packages/payload/src/hierarchy/utils/updateDescendants.ts`
 
 1. **Collect IDs:** Query all descendants, capture IDs upfront (prevents race conditions)
 2. **Batch process:** 100 docs at a time
-3. **Adjust paths:** Call `adjustDescendantTreePaths` per doc
-4. **Update per locale:** If localized, loop through locales and call `payload.update` per locale
-5. **Hooks fire:** Each update triggers full hook chain + versions
+3. **Query versions:** If drafts enabled, query both published and draft versions
+4. **Adjust paths:** Call `adjustDescendantTreePaths` per doc (published) and per draft doc (if exists)
+5. **Update per locale:** If localized, loop through locales and call `payload.update` per locale
+6. **Update both versions:** If document is published with draft, call `payload.update` twice (draft: false, then draft: true)
+7. **Hooks fire:** Each update triggers full hook chain + versions
 
 ### Adjusting Paths: `adjustDescendantTreePaths`
 
@@ -671,11 +744,14 @@ But this would be a breaking change to Payload's hook API.
 - **Problem:** If `req.locale === 'all'`, hook can't determine which locale to process
 - **Solution:** Early return with comment explaining defensive check
 
-### 4. Draft State (NOT HANDLED ❌)
+### 4. Draft State (HANDLED ✅)
 
-- **Problem:** Descendants with draft versions only update published version
-- **Impact:** Draft versions get stale paths
-- **Needs:** Detection via `_status` field + dual updates
+- **Problem:** Descendants with draft versions only updated published version
+- **Solution:**
+  - Draft-only title changes: Update draft version record via `db.updateVersion`
+  - Descendant updates: Query both published and draft versions, update both separately
+  - Detection via `_status` field + `hasDraftsEnabled()` utility
+- **Implementation:** See Scenario 8 for details
 
 ### 5. Deep Trees (HANDLED ✅)
 
