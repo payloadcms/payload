@@ -26,7 +26,7 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe(
-          'Optional JSON string for selecting specific fields (e.g., \'{"siteName": true}\')',
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
     }),
   },
@@ -83,7 +83,7 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe(
-          'Optional JSON string for selecting specific fields (e.g., \'{"title": true, "slug": true}\')',
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
       sort: z
         .string()
@@ -124,6 +124,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
     }),
   },
@@ -166,6 +172,12 @@ export const toolSchemas = {
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       where: z
         .string()
         .optional()
@@ -227,6 +239,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
         ),
     }),
   },

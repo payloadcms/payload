@@ -335,6 +335,11 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[1].inputSchema.properties.locale.description).toBe(
         'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
       )
+      expect(json.result.tools[1].inputSchema.properties.select).toBeDefined()
+      expect(json.result.tools[1].inputSchema.properties.select.type).toBe('string')
+      expect(json.result.tools[1].inputSchema.properties.select.description).toContain(
+        'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
+      )
 
       expect(json.result.tools[2].inputSchema).toBeDefined()
       expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
@@ -389,7 +394,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[2].inputSchema.properties.select).toBeDefined()
       expect(json.result.tools[2].inputSchema.properties.select.type).toBe('string')
       expect(json.result.tools[2].inputSchema.properties.select.description).toContain(
-        'Optional JSON string for selecting specific fields',
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
 
       expect(json.result.tools[3].inputSchema).toBeDefined()
@@ -503,11 +508,45 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findGlobalTool.description).toContain('Payload global')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
       expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
-      expect(findGlobalTool.inputSchema.properties.select.description).toContain('selecting')
+      expect(findGlobalTool.inputSchema.properties.select.description).toContain(
+        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+      )
 
       const updateGlobalTool = json.result.tools.find((t: any) => t.name === 'updateSiteSettings')
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Payload global')
+      expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
+      expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
+        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
+      )
+    })
+
+    it('should list updatePosts when API key permits update and include select schema', async () => {
+      const apiKey = await getApiKey(true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const updateToolSchema = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      expect(updateToolSchema).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
+      expect(updateToolSchema.inputSchema.properties.select.description).toContain(
+        'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+      )
     })
   })
 
@@ -740,8 +779,39 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
     })
 
+    it('should call createPosts with select to limit returned fields', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              title: 'Select Create Post',
+              content: 'Content should be omitted',
+              select: '{"title": true}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('"title": "Select Create Post"')
+      expect(json.result.content[0].text).not.toContain('Content should be omitted')
+    })
+
     it('should call findPosts', async () => {
-      const post = await payload.create({
+      await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Finding',
@@ -875,6 +945,48 @@ describe('@payloadcms/plugin-mcp', () => {
       )
     })
 
+    it('should call updatePosts with select to limit returned fields', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Select Update Post',
+          content: 'Original content',
+        },
+      })
+
+      const apiKey = await getApiKey(true, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: post.id,
+              title: 'Select Update Post Edited',
+              content: 'Updated but should be omitted',
+              select: '{"title": true}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      const responseText: string = json.result.content[0].text
+      expect(responseText).toContain('"title": "Select Update Post Edited"')
+      expect(responseText).not.toContain('Updated but should be omitted')
+      expect(responseText).not.toContain('"content":')
+    })
+
     it('should call deletePosts', async () => {
       const post = await payload.create({
         collection: 'posts',
@@ -921,7 +1033,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
   describe('payloadAPI context', () => {
     it('should call operations with the payloadAPI context as MCP', async () => {
-      const post = await payload.create({
+      await payload.create({
         collection: 'posts',
         data: {
           title: 'Test Post for Finding',
@@ -1065,6 +1177,43 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toBeDefined()
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain('Global "site-settings" updated successfully')
+    })
+
+    it('should update site-settings global with select', async () => {
+      const apiKey = await getApiKey(false, false, true, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updateSiteSettings',
+            arguments: {
+              siteName: 'MCP Test Site Select',
+              siteDescription: 'Should not appear',
+              maintenanceMode: false,
+              select: '{"siteName": true}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
+      const responseText: string = json.result.content[0].text
+      expect(responseText).toContain('"siteName": "MCP Test Site Select"')
+      expect(responseText).not.toContain('siteDescription')
+      expect(responseText).not.toContain('maintenanceMode')
+      expect(responseText).not.toContain('contactEmail')
     })
   })
 
