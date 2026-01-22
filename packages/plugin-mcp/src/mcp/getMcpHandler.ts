@@ -506,7 +506,7 @@ export const getMCPHandler = (
         serverInfo: serverOptions.serverInfo,
       },
       {
-        basePath: MCPHandlerOptions.basePath || '/api',
+        basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
         maxDuration: MCPHandlerOptions.maxDuration || 60,
         // INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
         // redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
