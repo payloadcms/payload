@@ -15,7 +15,7 @@ export type SortHeaderProps = {
 const baseClass = 'sort-header'
 
 function useSort() {
-  const { handleSortChange, orderableFieldName, query } = useListQuery()
+  const { orderableFieldName, query, setQuery } = useListQuery()
   const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
   const isActive = querySort === orderableFieldName
 
@@ -25,7 +25,7 @@ function useSort() {
       return
     }
     // If NOT sorted by the "_order" field, sort by that field.
-    void handleSortChange(orderableFieldName)
+    setQuery({ sort: orderableFieldName })
   }
 
   return { handleSortPress, isActive }

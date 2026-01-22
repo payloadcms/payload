@@ -46,7 +46,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     resolvedFilterOptions,
   } = props
 
-  const { handleSearchChange, query } = useListQuery()
+  const { query, setQuery } = useListQuery()
 
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -220,7 +220,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         ].filter(Boolean)}
         key={collectionSlug}
         label={searchLabelTranslated.current}
-        onSearchChange={handleSearchChange}
+        onSearchChange={(search) => setQuery({ search: search || null, page: 1 })}
         searchQueryParam={query?.search}
       />
       {enableColumns && (

@@ -10,13 +10,8 @@ import './index.scss'
 const baseClass = 'condition-value-text'
 
 export const Text: React.FC<Props> = (props) => {
-  const {
-    disabled,
-    field: { hasMany },
-    onChange,
-    operator,
-    value,
-  } = props
+  const { disabled, field, onChange, operator, value } = props
+  const hasMany = field?.hasMany
   const { t } = useTranslation()
 
   const isMulti = ['in', 'not_in'].includes(operator) || hasMany

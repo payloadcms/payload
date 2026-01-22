@@ -56,7 +56,7 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
     [fields, fieldPermissions, i18n],
   )
 
-  const { query, refineListData } = useListQuery()
+  const { query, setQuery } = useListQuery()
 
   const groupByFieldName = query.groupBy?.replace(/^-/, '')
 
@@ -74,10 +74,8 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           <button
             className={`${baseClass}__clear-button`}
             id="group-by--reset"
-            onClick={async () => {
-              await refineListData({
-                groupBy: '',
-              })
+            onClick={() => {
+              setQuery({ groupBy: null })
             }}
             type="button"
           >
@@ -95,19 +93,15 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           id="group-by--field-select"
           isClearable
           isMulti={false}
-          onChange={async (v: { value: string } | null) => {
-            const value = v === null ? undefined : v.value
-
-            // value is being cleared
+          onChange={(v: { value: string } | null) => {
             if (v === null) {
-              await refineListData({
-                groupBy: '',
-                page: 1,
-              })
+              setQuery({ groupBy: null, page: 1 })
+              return
             }
 
-            await refineListData({
-              groupBy: value ? (query.groupBy?.startsWith('-') ? `-${value}` : value) : undefined,
+            const value = v.value
+            setQuery({
+              groupBy: query.groupBy?.startsWith('-') ? `-${value}` : value,
               page: 1,
             })
           }}
@@ -126,12 +120,12 @@ export const GroupByBuilder: React.FC<Props> = ({ collectionSlug, fields }) => {
           id="group-by--sort"
           isClearable={false}
           name="direction"
-          onChange={async ({ value }: { value: string }) => {
+          onChange={({ value }: { value: string }) => {
             if (!groupByFieldName) {
               return
             }
 
-            await refineListData({
+            setQuery({
               groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
               page: 1,
             })

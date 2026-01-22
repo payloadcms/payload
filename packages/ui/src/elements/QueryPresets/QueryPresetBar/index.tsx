@@ -34,7 +34,7 @@ export const QueryPresetBar: React.FC<{
   collectionSlug?: string
   queryPresetPermissions: SanitizedCollectionPermission
 }> = ({ activePreset, collectionSlug, queryPresetPermissions }) => {
-  const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
+  const { modified, query, setQuery, setModified: setQueryModified } = useListQuery()
 
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
@@ -84,31 +84,29 @@ export const QueryPresetBar: React.FC<{
     })
 
   const handlePresetChange = useCallback(
-    async (preset: QueryPreset) => {
-      await refineListData(
-        {
-          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
-          groupBy: preset.groupBy || '',
-          preset: preset.id,
-          where: preset.where,
-        },
-        false,
-      )
+    (preset: QueryPreset) => {
+      setQuery({
+        columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : null,
+        groupBy: preset.groupBy || null,
+        preset: preset.id,
+        where: preset.where,
+      })
+      // When applying a preset, the query now matches the preset - not modified
+      setQueryModified(false)
     },
-    [refineListData],
+    [setQuery, setQueryModified],
   )
 
-  const resetQueryPreset = useCallback(async () => {
-    await refineListData(
-      {
-        columns: [],
-        groupBy: '',
-        preset: '',
-        where: {},
-      },
-      false,
-    )
-  }, [refineListData])
+  const resetQueryPreset = useCallback(() => {
+    setQuery({
+      columns: null,
+      groupBy: null,
+      preset: null,
+      where: null,
+    })
+    // When clearing a preset, there's nothing to be modified from
+    setQueryModified(false)
+  }, [setQuery, setQueryModified])
 
   const handleDeletePreset = useCallback(async () => {
     try {
@@ -233,15 +231,14 @@ export const QueryPresetBar: React.FC<{
             <ListSelectionButton
               id="reset-preset"
               key="reset"
-              onClick={async () => {
-                await refineListData(
-                  {
-                    columns: transformColumnsToSearchParams(activePreset.columns),
-                    groupBy: activePreset.groupBy || '',
-                    where: activePreset.where,
-                  },
-                  false,
-                )
+              onClick={() => {
+                setQuery({
+                  columns: transformColumnsToSearchParams(activePreset.columns),
+                  groupBy: activePreset.groupBy || null,
+                  where: activePreset.where,
+                })
+                // After resetting to preset values, query matches preset - not modified
+                setQueryModified(false)
               }}
               type="button"
             >

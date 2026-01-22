@@ -4,7 +4,6 @@ import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
-import type { IListQueryContext } from '../../providers/ListQuery/types.js'
 
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
@@ -21,8 +20,8 @@ export const PageControlsComponent: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
   data: PaginatedDocs
-  handlePageChange?: IListQueryContext['handlePageChange']
-  handlePerPageChange?: IListQueryContext['handlePerPageChange']
+  handlePageChange?: (page: number) => void
+  handlePerPageChange?: (limit: number) => void
   limit?: number
 }> = ({
   AfterPageControls,
@@ -79,21 +78,15 @@ export const PageControls: React.FC<{
   AfterPageControls?: React.ReactNode
   collectionConfig: ClientCollectionConfig
 }> = ({ AfterPageControls, collectionConfig }) => {
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
+  const { data, defaultLimit: initialLimit, query, setQuery } = useListQuery()
 
   return (
     <PageControlsComponent
       AfterPageControls={AfterPageControls}
       collectionConfig={collectionConfig}
       data={data}
-      handlePageChange={handlePageChange}
-      handlePerPageChange={handlePerPageChange}
+      handlePageChange={(page) => setQuery({ page })}
+      handlePerPageChange={(limit) => setQuery({ limit, page: 1 })}
       limit={isNumber(query.limit) ? query.limit : initialLimit}
     />
   )

@@ -3,8 +3,6 @@ import type { ClientCollectionConfig, PaginatedDocs } from 'payload'
 
 import React, { useCallback } from 'react'
 
-import type { IListQueryContext } from '../../providers/ListQuery/types.js'
-
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { PageControlsComponent } from './index.js'
 
@@ -21,11 +19,11 @@ export const GroupByPageControls: React.FC<{
   data: PaginatedDocs
   groupByValue?: number | string
 }> = ({ AfterPageControls, collectionConfig, data, groupByValue }) => {
-  const { refineListData } = useListQuery()
+  const { setQuery } = useListQuery()
 
-  const handlePageChange: IListQueryContext['handlePageChange'] = useCallback(
-    async (page) => {
-      await refineListData({
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setQuery({
         queryByGroup: {
           [groupByValue]: {
             page,
@@ -33,12 +31,12 @@ export const GroupByPageControls: React.FC<{
         },
       })
     },
-    [refineListData, groupByValue],
+    [setQuery, groupByValue],
   )
 
-  const handlePerPageChange: IListQueryContext['handlePerPageChange'] = useCallback(
-    async (limit) => {
-      await refineListData({
+  const handlePerPageChange = useCallback(
+    (limit: number) => {
+      setQuery({
         queryByGroup: {
           [groupByValue]: {
             limit,
@@ -47,7 +45,7 @@ export const GroupByPageControls: React.FC<{
         },
       })
     },
-    [refineListData, groupByValue],
+    [setQuery, groupByValue],
   )
 
   return (

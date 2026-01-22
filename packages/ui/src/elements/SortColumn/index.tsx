@@ -21,7 +21,7 @@ const baseClass = 'sort-column'
 
 export const SortColumn: React.FC<SortColumnProps> = (props) => {
   const { name, appearance, disable = false, Label, label } = props
-  const { handleSortChange, query } = useListQuery()
+  const { query, setQuery } = useListQuery()
   const { t } = useTranslation()
 
   const { sort } = query
@@ -56,7 +56,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(asc)}
+            onClick={() => setQuery({ sort: asc })}
             type="button"
           >
             <ChevronIcon direction="up" />
@@ -67,7 +67,7 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
               label,
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(desc)}
+            onClick={() => setQuery({ sort: desc })}
             type="button"
           >
             <ChevronIcon />

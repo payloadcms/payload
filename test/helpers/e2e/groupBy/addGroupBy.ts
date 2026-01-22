@@ -16,7 +16,7 @@ export const addGroupBy = async (
   await field.locator('.rs__option', { hasText: exactText(fieldLabel) })?.click()
   await expect(field.locator('.react-select--single-value')).toHaveText(fieldLabel)
 
-  await expect(page).toHaveURL(new RegExp(`&groupBy=${fieldPath}`))
+  await expect(page).toHaveURL(new RegExp(`[?&]groupBy=${fieldPath}`))
   await expect(page.locator('body')).not.toContainText('Loading')
 
   return { groupByContainer, field }

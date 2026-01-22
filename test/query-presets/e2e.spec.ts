@@ -1,7 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'

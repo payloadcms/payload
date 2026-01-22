@@ -19,7 +19,7 @@ export function QueryPresetToggler({
 }: {
   activePreset: QueryPreset
   openPresetListDrawer: () => void
-  resetPreset: () => Promise<void>
+  resetPreset: () => void
 }) {
   const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
@@ -52,14 +52,14 @@ export function QueryPresetToggler({
           <div
             className={`${baseClass}__clear`}
             id="clear-preset"
-            onClick={async (e) => {
+            onClick={(e) => {
               e.stopPropagation()
-              await resetPreset()
+              resetPreset()
             }}
-            onKeyDown={async (e) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
-                await resetPreset()
+                resetPreset()
               }
             }}
             role="button"

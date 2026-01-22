@@ -68,7 +68,7 @@ export type AddCondition = ({
   field: ReducedField
   orIndex: number
   relation: 'and' | 'or'
-}) => Promise<void> | void
+}) => void
 
 export type UpdateCondition = ({
   type,
@@ -84,12 +84,6 @@ export type UpdateCondition = ({
   orIndex: number
   type: 'field' | 'operator' | 'value'
   value: Value
-}) => Promise<void> | void
+}) => void
 
-export type RemoveCondition = ({
-  andIndex,
-  orIndex,
-}: {
-  andIndex: number
-  orIndex: number
-}) => Promise<void> | void
+export type RemoveCondition = ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void

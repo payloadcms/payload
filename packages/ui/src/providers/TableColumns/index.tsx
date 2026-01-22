@@ -18,7 +18,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   LinkedCellOverride,
 }) => {
   const { getEntityConfig } = useConfig()
-  const { query: currentQuery, refineListData } = useListQuery()
+  const { query: currentQuery, setQuery } = useListQuery()
 
   const { admin: { defaultColumns } = {} } = getEntityConfig({
     collectionSlug,
@@ -44,11 +44,11 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         setOptimisticColumnState(newColumnState)
       })
 
-      await refineListData({
+      setQuery({
         columns: transformColumnsToSearchParams(newColumnState),
       })
     },
-    [refineListData, columnState, setOptimisticColumnState],
+    [setQuery, columnState, setOptimisticColumnState],
   )
 
   const moveColumn = useCallback(
@@ -62,11 +62,11 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         setOptimisticColumnState(newColumnState)
       })
 
-      await refineListData({
+      setQuery({
         columns: transformColumnsToSearchParams(newColumnState),
       })
     },
-    [columnState, refineListData, setOptimisticColumnState],
+    [columnState, setQuery, setOptimisticColumnState],
   )
 
   const setActiveColumns = useCallback(
@@ -82,14 +82,14 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         }
       })
 
-      await refineListData({ columns: newColumnState })
+      setQuery({ columns: newColumnState })
     },
-    [currentQuery, refineListData],
+    [currentQuery, setQuery],
   )
 
-  const resetColumnsState = React.useCallback(async () => {
-    await refineListData({ columns: defaultColumns || [] })
-  }, [defaultColumns, refineListData])
+  const resetColumnsState = React.useCallback(() => {
+    setQuery({ columns: defaultColumns || [] })
+  }, [defaultColumns, setQuery])
 
   return (
     <TableColumnContext

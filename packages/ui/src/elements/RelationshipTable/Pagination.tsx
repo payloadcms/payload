@@ -6,7 +6,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { Pagination } from '../Pagination/index.js'
 
 export const RelationshipTablePagination: React.FC = () => {
-  const { data, handlePageChange } = useListQuery()
+  const { data, setQuery } = useListQuery()
 
   return (
     <Pagination
@@ -15,9 +15,7 @@ export const RelationshipTablePagination: React.FC = () => {
       limit={data.limit}
       nextPage={data.nextPage || 2}
       numberOfNeighbors={1}
-      onChange={(e) => {
-        void handlePageChange(e)
-      }}
+      onChange={(page) => setQuery({ page })}
       page={data.page || 1}
       prevPage={data.prevPage || undefined}
       totalPages={data.totalPages}

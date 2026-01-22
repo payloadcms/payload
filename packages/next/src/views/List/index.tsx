@@ -15,7 +15,7 @@ import type {
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { notFound } from 'next/navigation.js'
+import { notFound, redirect } from 'next/navigation.js'
 import {
   appendUploadSelectFields,
   combineWhereConstraints,
@@ -124,35 +124,101 @@ export const renderListView = async (
       ? JSON.parse(query.queryByGroup)
       : query?.queryByGroup
 
+  // IMPORTANT: Copy the original query keys BEFORE we mutate the query object
+  const originalQueryKeys = Object.keys(queryFromArgs || queryFromReq || {})
+  const isClientNavigation = (queryFromArgs || queryFromReq)?.__clear === '1'
+
+  // When client navigates with __clear, URL is source of truth - save to preferences
+  // When no __clear (initial load), only save URL params that are present (don't overwrite with undefined)
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: `collection-${collectionSlug}`,
     req,
-    value: {
-      columns: columnsFromQuery,
-      groupBy: query?.groupBy,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      preset: query?.preset,
-      sort: query?.sort as string,
-    },
+    value: isClientNavigation
+      ? {
+          // On client navigation, explicitly set each value from URL (empty = clear)
+          columns: columnsFromQuery?.length ? columnsFromQuery : null,
+          groupBy: query?.groupBy || null,
+          limit: isNumber(query?.limit) ? Number(query.limit) : null,
+          preset: query?.preset || null,
+          sort: (query?.sort as string) || null,
+        }
+      : {
+          // On initial load, only update preferences for values present in URL
+          columns: columnsFromQuery?.length ? columnsFromQuery : undefined,
+          groupBy: query?.groupBy || undefined,
+          limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+          preset: query?.preset || undefined,
+          sort: (query?.sort as string) || undefined,
+        },
   })
 
-  query.preset = collectionPreferences?.preset
+  // On client navigation, use URL params; otherwise use preferences
+  query.preset = isClientNavigation ? query?.preset : collectionPreferences?.preset
 
   query.page = isNumber(query?.page) ? Number(query.page) : 0
 
-  query.limit = collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+  query.limit = isClientNavigation
+    ? isNumber(query?.limit)
+      ? Number(query.limit)
+      : collectionConfig.admin.pagination.defaultLimit
+    : collectionPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
 
-  query.sort =
-    collectionPreferences?.sort ||
-    (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+  query.sort = isClientNavigation
+    ? (query?.sort as string) ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+    : collectionPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
-  query.groupBy = collectionPreferences?.groupBy
+  query.groupBy = isClientNavigation ? query?.groupBy : collectionPreferences?.groupBy
 
-  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
+  query.columns = isClientNavigation
+    ? query?.columns?.length
+      ? query.columns
+      : []
+    : transformColumnsToSearchParams(collectionPreferences?.columns || [])
 
   const {
     routes: { admin: adminRoute },
   } = config
+
+  // Redirect to canonical URL only on initial page load (when URL has no query params)
+  // If the URL has __clear param, the client is navigating intentionally - don't redirect
+  if (!drawerSlug) {
+    // Filter out __clear (signal param) and queryByGroup (default param that's always present)
+    const filteredKeys = originalQueryKeys.filter((k) => k !== '__clear' && k !== 'queryByGroup')
+    const urlHasNoParams = filteredKeys.length === 0
+
+    if (
+      !isClientNavigation &&
+      urlHasNoParams &&
+      (query.preset || query.sort || query.groupBy || query.columns?.length)
+    ) {
+      const params = new URLSearchParams()
+      if (query.preset) {
+        params.set('preset', String(query.preset))
+      }
+      if (query.limit) {
+        params.set('limit', String(query.limit))
+      }
+      if (query.sort) {
+        params.set('sort', String(query.sort))
+      }
+      if (query.groupBy) {
+        params.set('groupBy', String(query.groupBy))
+      }
+      if (query.columns?.length) {
+        params.set('columns', JSON.stringify(query.columns))
+      }
+
+      console.log('Redirecting')
+      redirect(
+        formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}?${params.toString()}`,
+        }),
+      )
+    }
+  }
 
   if (collectionConfig) {
     if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
@@ -440,6 +506,10 @@ export const ListView: React.FC<RenderListViewArgs> = async (args) => {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
+    // Re-throw Next.js redirect errors - they must propagate
+    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+      throw error
+    }
     if (error.message === 'not-found') {
       notFound()
     } else {

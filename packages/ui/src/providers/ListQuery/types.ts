@@ -1,19 +1,4 @@
-import type {
-  ClientCollectionConfig,
-  ListQuery,
-  PaginatedDistinctDocs,
-  PaginatedDocs,
-  Sort,
-  Where,
-} from 'payload'
-
-type ContextHandlers = {
-  handlePageChange?: (page: number) => Promise<void>
-  handlePerPageChange?: (limit: number) => Promise<void>
-  handleSearchChange?: (search: string) => Promise<void>
-  handleSortChange?: (sort: string) => Promise<void>
-  handleWhereChange?: (where: Where) => Promise<void>
-}
+import type { ClientCollectionConfig, ListQuery, PaginatedDocs, Sort } from 'payload'
 
 export type OnListQueryChange = (query: ListQuery) => void
 
@@ -43,6 +28,11 @@ export type IListQueryContext = {
   modified: boolean
   orderableFieldName?: string
   query: ListQuery
-  refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
+  /**
+   * Update query params. Pass null to remove a param.
+   * @example setQuery({ page: 2 })
+   * @example setQuery({ preset: null }) // removes preset
+   */
+  setQuery: (params: Partial<ListQuery>) => void
   setModified: (modified: boolean) => void
-} & ContextHandlers
+}

@@ -74,21 +74,36 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
+  // Track if this is the initial mount to avoid unnecessary updates
+  const isInitialMount = React.useRef(true)
+  const previousValue = React.useRef(value)
+
+  const updateValue = useEffectEvent((debouncedValue: Value) => {
     if (operator) {
-      await updateCondition({
+      updateCondition({
         type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
+        // Keep empty string as-is to preserve the filter in URL
+        // Only convert null to empty string
+        value: debouncedValue === null ? '' : debouncedValue,
       })
     }
   })
 
   useEffect(() => {
-    void updateValue(debouncedValue)
+    // Skip the initial mount to avoid immediately removing new empty filters
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
+    // Only update if the value actually changed from what was passed in
+    if (debouncedValue !== previousValue.current) {
+      previousValue.current = debouncedValue
+      updateValue(debouncedValue)
+    }
   }, [debouncedValue])
 
   const disabled =
@@ -96,22 +111,22 @@ export const Condition: React.FC<Props> = (props) => {
     reducedField?.field?.admin?.disableListFilter
 
   const handleFieldChange = useCallback(
-    async (field: Option<string>) => {
-      setInternalValue(undefined)
-      await updateCondition({
+    (field: Option<string>) => {
+      setInternalValue('')
+      updateCondition({
         type: 'field',
         andIndex,
         field: reducedFields.find((option) => option.value === field.value),
         operator,
         orIndex,
-        value: undefined,
+        value: '',
       })
     },
     [andIndex, operator, orIndex, reducedFields, updateCondition],
   )
 
   const handleOperatorChange = useCallback(
-    async (operator: Option<Operator>) => {
+    (operator: Option<Operator>) => {
       const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
       const isValidValue =
@@ -122,16 +137,16 @@ export const Condition: React.FC<Props> = (props) => {
       if (!isValidValue) {
         // if the current value is not valid for the new operator
         // reset the value before passing it to updateCondition
-        setInternalValue(undefined)
+        setInternalValue('')
       }
 
-      await updateCondition({
+      updateCondition({
         type: 'operator',
         andIndex,
         field: reducedField,
         operator: operator.value,
         orIndex,
-        value: isValidValue ? value : undefined,
+        value: isValidValue ? value : '',
       })
     },
     [andIndex, reducedField, orIndex, updateCondition, value],
