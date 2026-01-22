@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { OrderableRow } from './OrderableRow.js'
@@ -36,6 +37,7 @@ export const OrderableTable: React.FC<Props> = ({
 }) => {
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
+  const { code: localeCode } = useLocale()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
@@ -123,7 +125,7 @@ export const OrderableTable: React.FC<Props> = ({
       const response = await fetch(
         formatAdminURL({
           apiRoute: config.routes.api,
-          path: '/reorder',
+          path: `/reorder?locale=${localeCode}`,
         }),
         {
           body: JSON.stringify(jsonBody),
