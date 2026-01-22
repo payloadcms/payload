@@ -44,6 +44,7 @@ import {
   initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
+  waitForFormReady,
   // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -716,6 +717,7 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
+      await waitForFormReady(page)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -1341,7 +1343,12 @@ describe('Versions', () => {
       await expect(page.locator('#field-title')).toHaveValue('New title')
     })
 
-    test('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+    test.skip('- can save draft with error thrown in beforeChange hook and continue editing without being shown publishing validation', async () => {
+      // TODO: This test is skipped, because it relied on invalid, flaky toast behavior and never actually succeeded. It asseted the following:
+      // 1. save: success toast
+      // 2. save: beforeChange error thrown, but no error toast
+      // This passed because the second toast check checked the first toast - because back when this test was written, we were not closing outdated toasts.
+      // In reality, this should have never passed, as the second toast thrown is an error
       await page.goto(draftWithChangeHookURL.create)
 
       const titleField = page.locator('#field-title')
@@ -1608,6 +1615,7 @@ describe('Versions', () => {
     test('- with autosave - does not override local changes to form state after autosave runs', async () => {
       const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
       await page.goto(url.create)
+      await waitForFormReady(page)
       const titleField = page.locator('#field-title')
 
       // press slower than the autosave interval, but not faster than the response and processing
@@ -2140,6 +2148,17 @@ describe('Versions', () => {
       ).toHaveText(String(draftDocs?.docs?.[2]?.title))
     })
 
+    test('correctly renders diff for relationship fields with maxDepth: 0', async () => {
+      await navigateToDiffVersionView()
+
+      const zeroDepthRelationship = page.locator('[data-field-path="zeroDepthRelationship"]')
+
+      await expect(zeroDepthRelationship.locator('.html-diff__diff-old')).toBeEmpty()
+      await expect(
+        zeroDepthRelationship.locator('.html-diff__diff-new .relationship-diff__info'),
+      ).toHaveText('dev@payloadcms.com')
+    })
+
     test('correctly renders diff for richtext fields', async () => {
       await navigateToDiffVersionView()
 
@@ -2164,6 +2183,27 @@ describe('Versions', () => {
       const richtextWithCustomDiff = page.locator('[data-field-path="richtextWithCustomDiff"]')
 
       await expect(richtextWithCustomDiff.locator('p')).toHaveText('Test')
+    })
+
+    test('correctly renders internal links in richtext fields', async () => {
+      await navigateToDiffVersionView()
+
+      const richtext = page.locator('[data-field-path="richtext"]')
+
+      const oldDiff = richtext.locator('.html-diff__diff-old')
+      const newDiff = richtext.locator('.html-diff__diff-new')
+
+      const oldInternalLink = oldDiff.locator('a:has-text("an internal link")')
+      const newInternalLink = newDiff.locator('a:has-text("an updated internal link")')
+
+      await expect(oldInternalLink).toHaveCount(1)
+      await expect(newInternalLink).toHaveCount(1)
+
+      await expect(oldInternalLink).not.toHaveAttribute('href', '#')
+      await expect(newInternalLink).not.toHaveAttribute('href', '#')
+
+      await expect(oldInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
+      await expect(newInternalLink).toHaveAttribute('href', /\/admin\/collections\/text\/\d+/)
     })
 
     test('correctly renders diff for row fields', async () => {

@@ -316,6 +316,7 @@ describe('Auth', () => {
         await page.goto(url.list)
 
         await page.locator('.table .row-1 .cell-custom a').click()
+        await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
         await expect(textInput).toBeVisible()

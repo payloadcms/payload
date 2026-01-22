@@ -108,6 +108,20 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'simple-localized',
+      fields: [
+        {
+          type: 'text',
+          localized: true,
+          name: 'text',
+        },
+        {
+          type: 'number',
+          name: 'number',
+        },
+      ],
+    },
+    {
       slug: 'categories-custom-id',
       versions: { drafts: true },
       fields: [

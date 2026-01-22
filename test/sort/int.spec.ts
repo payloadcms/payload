@@ -526,7 +526,7 @@ describe('Sort', () => {
 
         expect(orderable1._order).toBeDefined()
         expect(orderable2._order).toBeDefined()
-        expect(parseInt(orderable1._order, 16)).toBeLessThan(parseInt(orderable2._order, 16))
+        expect(parseInt(orderable1._order, 36)).toBeLessThan(parseInt(orderable2._order, 36))
         expect(ordered.docs[0].id).toStrictEqual(orderable1.id)
         expect(ordered.docs[1].id).toStrictEqual(orderable2.id)
       })
@@ -556,8 +556,8 @@ describe('Sort', () => {
           },
         })
 
-        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
-          parseInt(ordered.docs[1]._order, 16),
+        expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 36),
         )
       })
 
@@ -589,8 +589,8 @@ describe('Sort', () => {
 
         expect(ordered.docs).toHaveLength(2)
 
-        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
-          parseInt(ordered.docs[1]._order, 16),
+        expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 36),
         )
       })
 
@@ -606,7 +606,7 @@ describe('Sort', () => {
           data: {},
         })
         expect(docDuplicated.title).toBe('new document')
-        expect(parseInt(doc._order!, 16)).toBeLessThan(parseInt(docDuplicated._order!, 16))
+        expect(parseInt(doc._order!, 36)).toBeLessThan(parseInt(docDuplicated._order!, 36))
 
         await restClient.POST('/reorder', {
           body: JSON.stringify({
@@ -626,8 +626,8 @@ describe('Sort', () => {
           collection: 'orderable',
           id: docDuplicated.id,
         })
-        expect(parseInt(docAfterReorder._order!, 16)).toBeGreaterThan(
-          parseInt(docDuplicatedAfterReorder._order!, 16),
+        expect(parseInt(docAfterReorder._order!, 36)).toBeGreaterThan(
+          parseInt(docDuplicatedAfterReorder._order!, 36),
         )
       })
 
@@ -700,6 +700,148 @@ describe('Sort', () => {
         // and before the target (a0) since (a0) is the smallest fractional index
         expect(orderableIndex).toBeGreaterThan(aAIndex)
         expect(orderableIndex).toBeLessThan(a0Index)
+      })
+
+      it('should generate case-insensitive-safe keys when moving to first position', async () => {
+        const collection = orderableSlug
+
+        const { docs: allDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 1,
+        })
+        expect(allDocs).toHaveLength(1)
+        const firstDoc = allDocs[0]!
+
+        const newDoc = await payload.create({
+          collection,
+          data: { title: 'Move to first test' },
+        })
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [newDoc.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: firstDoc.id,
+              key: firstDoc._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const newDocAfter = await payload.findByID({ collection, id: newDoc.id })
+
+        expect(newDocAfter._order).toMatch(/^\d/)
+        expect(parseInt(newDocAfter._order!, 36)).toBeLessThan(parseInt(firstDoc._order!, 36))
+      })
+
+      it('should allow multiple reorders to absolute first position', async () => {
+        const collection = orderableSlug
+
+        const { docs: initialDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 1,
+        })
+        expect(initialDocs).toHaveLength(1)
+        const originalFirst = initialDocs[0]!
+
+        const docA = await payload.create({
+          collection,
+          data: { title: 'Multi first A' },
+        })
+
+        const docB = await payload.create({
+          collection,
+          data: { title: 'Multi first B' },
+        })
+
+        await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [docA.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: originalFirst.id,
+              key: originalFirst._order,
+            },
+          }),
+        })
+
+        const docAAfter = await payload.findByID({ collection, id: docA.id })
+        expect(docAAfter._order).toMatch(/^\d/)
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [docB.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: docA.id,
+              key: docAAfter._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const docBAfter = await payload.findByID({ collection, id: docB.id })
+
+        expect(docBAfter._order).toMatch(/^\d/)
+        expect(parseInt(docBAfter._order!, 36)).toBeLessThan(parseInt(docAAfter._order!, 36))
+      })
+
+      it('should handle moving doc from first position and back', async () => {
+        const collection = orderableSlug
+
+        const { docs: initialDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 2,
+        })
+        expect(initialDocs.length).toBeGreaterThanOrEqual(2)
+        const firstDoc = initialDocs[0]!
+        const secondDoc = initialDocs[1]!
+
+        await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [firstDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: secondDoc.id,
+              key: secondDoc._order,
+            },
+          }),
+        })
+
+        const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id })
+        expect(parseInt(firstDocMoved._order!, 36)).toBeGreaterThan(parseInt(secondDoc._order!, 36))
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [firstDoc.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: secondDoc.id,
+              key: secondDoc._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const firstDocBack = await payload.findByID({ collection, id: firstDoc.id })
+        expect(parseInt(firstDocBack._order!, 36)).toBeLessThan(parseInt(secondDoc._order!, 36))
       })
     })
 
@@ -775,7 +917,7 @@ describe('Sort', () => {
           depth: 1,
         })
         const orders = (related.orderableJoinField1 as { docs: Orderable[] }).docs.map((doc) =>
-          parseInt(doc._orderable_orderableJoinField1_order, 16),
+          parseInt(doc._orderable_orderableJoinField1_order, 36),
         ) as [number, number, number]
         expect(orders[0]).toBeLessThan(orders[1])
         expect(orders[1]).toBeLessThan(orders[2])
