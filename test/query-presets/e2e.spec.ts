@@ -1,5 +1,3 @@
-import type { BrowserContext, Page } from '@playwright/test'
-
 import { expect, test } from '@playwright/test'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
@@ -31,11 +29,9 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe, beforeEach } = test
 
-let page: Page
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
-let context: BrowserContext
 
 let seededData: {
   everyone: PayloadQueryPreset
@@ -50,68 +46,41 @@ describe('Query Presets', () => {
 
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
 
-    context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  beforeEach(async () => {
-    // await throttleTest({
-    //   page,
-    //   context,
-    //   delay: 'Fast 4G',
-    // })
+  beforeEach(async ({ page }) => {
+    initPageConsoleErrorCatch(page)
 
     await reInitializeDB({
       serverURL,
       snapshotKey: 'querypresets',
     })
+
     await ensureCompilationIsDone({ page, serverURL })
 
+    const allDocs = (
+      await payload.find({
+        collection: 'payload-query-presets',
+        where: {
+          title: {
+            in: ['Everyone', 'Only Me', 'Specific Users'],
+          },
+        },
+        limit: 3,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs
+
     seededData = {
-      everyone: (
-        await payload.find({
-          collection: 'payload-query-presets',
-          where: {
-            title: {
-              equals: 'Everyone',
-            },
-          },
-          limit: 1,
-          depth: 0,
-        })
-      ).docs[0]!,
-      onlyMe: (
-        await payload.find({
-          collection: 'payload-query-presets',
-          where: {
-            title: {
-              equals: 'Only Me',
-            },
-          },
-          limit: 1,
-          depth: 0,
-        })
-      ).docs[0]!,
-      specificUsers: (
-        await payload.find({
-          collection: 'payload-query-presets',
-          where: {
-            title: {
-              equals: 'Specific Users',
-            },
-          },
-          limit: 1,
-          depth: 0,
-        })
-      ).docs[0]!,
+      everyone: allDocs.find((doc) => doc.title === 'Everyone')!,
+      onlyMe: allDocs.find((doc) => doc.title === 'Only Me')!,
+      specificUsers: allDocs.find((doc) => doc.title === 'Specific Users')!,
     }
   })
 
-  test('can create and view preset with no filters or columns', async () => {
+  test('can create and view preset with no filters or columns', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     const presetTitle = 'Empty Preset'
@@ -170,7 +139,7 @@ describe('Query Presets', () => {
     await expect(columnsCell).toContainText('No columns selected')
   })
 
-  test('should select preset and apply filters', async () => {
+  test('should select preset and apply filters', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
@@ -182,7 +151,7 @@ describe('Query Presets', () => {
     })
   })
 
-  test('should clear selected preset and reset filters', async () => {
+  test('should clear selected preset and reset filters', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
@@ -206,7 +175,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  test('should delete a preset, clear selection, and reset changes', async () => {
+  test('should delete a preset, clear selection, and reset changes', async ({ page }) => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
@@ -238,7 +207,9 @@ describe('Query Presets', () => {
     ).toBeHidden()
   })
 
-  test('should save last used preset to preferences and load on initial render', async () => {
+  test('should save last used preset to preferences and load on initial render', async ({
+    page,
+  }) => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.everyone.title })
@@ -265,7 +236,9 @@ describe('Query Presets', () => {
     })
   })
 
-  test('should only show "edit" and "delete" controls when there is an active preset', async () => {
+  test('should only show "edit" and "delete" controls when there is an active preset', async ({
+    page,
+  }) => {
     await page.goto(pagesUrl.list)
     await expect(page.locator('#edit-preset')).toBeHidden()
     await expect(page.locator('#delete-preset')).toBeHidden()
@@ -274,7 +247,9 @@ describe('Query Presets', () => {
     await expect(page.locator('#delete-preset')).toBeVisible()
   })
 
-  test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async () => {
+  test('should only show "reset" and "save" controls when there is an active preset and changes have been made', async ({
+    page,
+  }) => {
     await page.goto(pagesUrl.list)
 
     await expect(page.locator('#reset-preset')).toBeHidden()
@@ -294,7 +269,9 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  test('should conditionally render "update for everyone" label based on if preset is shared', async () => {
+  test('should conditionally render "update for everyone" label based on if preset is shared', async ({
+    page,
+  }) => {
     await page.goto(pagesUrl.list)
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
@@ -322,7 +299,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  test('should reset active changes', async () => {
+  test('should reset active changes', async ({ page }) => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
@@ -338,7 +315,9 @@ describe('Query Presets', () => {
     await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
-  test.skip('should only enter modified state when changes are made to an active preset', async () => {
+  test.skip('should only enter modified state when changes are made to an active preset', async ({
+    page,
+  }) => {
     await page.goto(pagesUrl.list)
     await expect(page.locator('.list-controls__modified')).toBeHidden()
     await selectPreset({ page, presetTitle: seededData.everyone.title })
@@ -357,7 +336,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.list-controls__modified')).toBeHidden()
   })
 
-  test('can edit a preset through the document drawer', async () => {
+  test('can edit a preset through the document drawer', async ({ page }) => {
     const presetTitle = 'New Preset'
 
     await page.goto(pagesUrl.list)
@@ -380,7 +359,9 @@ describe('Query Presets', () => {
     await expect(page.locator('button#select-preset')).toHaveText(newTitle)
   })
 
-  test('should not display query presets when admin.enableQueryPresets is not true', async () => {
+  test('should not display query presets when admin.enableQueryPresets is not true', async ({
+    page,
+  }) => {
     // go to users list view and ensure the query presets select is not visible
     const usersURL = new AdminUrlUtil(serverURL, 'users')
     await page.goto(usersURL.list)
@@ -388,11 +369,11 @@ describe('Query Presets', () => {
   })
 
   // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
-  test.skip('can save a preset', () => {
+  test.skip('can save a preset', ({ page }) => {
     // select a preset, make a change to the presets, click "save for everyone" or "save", and ensure the changes persist
   })
 
-  test('can create new preset', async () => {
+  test('can create new preset', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     const presetTitle = 'New Preset'
@@ -415,7 +396,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  test('only shows query presets related to the underlying collection', async () => {
+  test('only shows query presets related to the underlying collection', async ({ page }) => {
     // no results on `posts` collection
     const postsURL = new AdminUrlUtil(serverURL, 'posts')
     await page.goto(postsURL.list)
@@ -430,7 +411,7 @@ describe('Query Presets', () => {
     await drawer.locator('.collection-list__no-results').isHidden()
   })
 
-  test('should display single relationship value in query preset modal', async () => {
+  test('should display single relationship value in query preset modal', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     // Get a post to use for filtering
@@ -478,7 +459,7 @@ describe('Query Presets', () => {
     await expect(whereFieldContent).toContainText(testPost?.id ?? '')
   })
 
-  test('should display multiple relationship values in query preset modal', async () => {
+  test('should display multiple relationship values in query preset modal', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     // Get posts to use for filtering
@@ -553,7 +534,7 @@ describe('Query Presets', () => {
     await expect(whereFieldContent).toContainText(',')
   })
 
-  test('should save groupBy when creating a new preset', async () => {
+  test('should save groupBy when creating a new preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
     await page.goto(postsUrl.list)
 
@@ -579,7 +560,7 @@ describe('Query Presets', () => {
     await expect(page).toHaveURL(/groupBy=text/)
   })
 
-  test('should apply groupBy when selecting a preset', async () => {
+  test('should apply groupBy when selecting a preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // First, create a preset with groupBy
@@ -608,7 +589,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header').first()).toBeVisible()
   })
 
-  test('should clear groupBy when deselecting a preset', async () => {
+  test('should clear groupBy when deselecting a preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset with groupBy
@@ -635,7 +616,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header')).toHaveCount(0)
   })
 
-  test('should update groupBy when saving changes to an active preset', async () => {
+  test('should update groupBy when saving changes to an active preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset without groupBy
@@ -668,7 +649,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header').first()).toBeVisible()
   })
 
-  test('should not show save button after page reload with preset applied', async () => {
+  test('should not show save button after page reload with preset applied', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
     // 1. Apply query preset
@@ -688,7 +669,7 @@ describe('Query Presets', () => {
     await expect(page.locator('#save-preset')).toBeVisible()
   })
 
-  test('should reset groupBy when clicking reset button on modified preset', async () => {
+  test('should reset groupBy when clicking reset button on modified preset', async ({ page }) => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
 
     // Create a preset with groupBy
