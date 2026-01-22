@@ -1,6 +1,6 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { type ListQuery, type Where } from 'payload'
+import type { ListQuery } from 'payload'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -22,7 +22,6 @@ function sanitizeQueryForURL(query: ListQuery): ListQuery {
   const sanitized: ListQuery = {}
 
   for (const [key, value] of Object.entries(query)) {
-    // Skip null, undefined, empty strings, empty arrays
     if (value === null || value === undefined || value === '') {
       continue
     }
@@ -38,10 +37,36 @@ function sanitizeQueryForURL(query: ListQuery): ListQuery {
   return sanitized
 }
 
+/**
+ * Build URL search string from query params
+ */
+function buildUrlSearch(query: ListQuery, includeClientFlag = true): string {
+  const urlParams: Record<string, unknown> = {
+    ...query,
+    columns: query.columns
+      ? Array.isArray(query.columns)
+        ? JSON.stringify(query.columns)
+        : query.columns
+      : undefined,
+    queryByGroup: query.queryByGroup
+      ? typeof query.queryByGroup === 'object'
+        ? JSON.stringify(query.queryByGroup)
+        : query.queryByGroup
+      : undefined,
+  }
+
+  if (includeClientFlag) {
+    urlParams.__clear = '1'
+  }
+
+  return qs.stringify(urlParams, { addQueryPrefix: true })
+}
+
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
   collectionSlug,
   data,
+  initialParams,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
   orderableFieldName,
@@ -52,32 +77,42 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const [modified, setModified] = useState(false)
   const { getEntityConfig } = useConfig()
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const hasSyncedInitialParams = useRef(false)
 
-  // Track pending where changes that haven't been reflected in URL yet
-  // This is needed because router.replace is async and components may read query.where
-  // before the URL has been updated
-  const [pendingWhere, setPendingWhere] = useState<null | Where>(null)
-
-  // Parse current query from URL
-  // Filter out __clear since it's just a signal param, not actual query state
+  // Parse current query from URL (filter out __clear signal param)
   const urlQuery = useMemo<ListQuery>(() => {
     const parsed = parseSearchParams(rawSearchParams)
     delete (parsed as Record<string, unknown>).__clear
     return sanitizeQueryForURL(parsed)
   }, [rawSearchParams])
 
-  // Clear pending where when URL is updated (navigation completed)
-  useEffect(() => {
-    setPendingWhere(null)
-  }, [urlQuery.where])
-
-  // Merge URL query with pending changes
+  // Merge URL query with initial params from server
+  // Initial params are used when URL has no params (first load with preferences)
   const query = useMemo<ListQuery>(() => {
-    if (pendingWhere !== null) {
-      return { ...urlQuery, where: pendingWhere }
+    const urlHasParams = Object.keys(urlQuery).length > 0
+    if (urlHasParams || !initialParams) {
+      return urlQuery
     }
-    return urlQuery
-  }, [urlQuery, pendingWhere])
+    return sanitizeQueryForURL(initialParams)
+  }, [urlQuery, initialParams])
+
+  // Sync initial params to URL on mount (without causing navigation/refresh)
+  useEffect(() => {
+    if (
+      !hasSyncedInitialParams.current &&
+      modifySearchParams &&
+      initialParams &&
+      Object.keys(urlQuery).length === 0 &&
+      typeof window !== 'undefined'
+    ) {
+      hasSyncedInitialParams.current = true
+      const sanitized = sanitizeQueryForURL(initialParams)
+      if (Object.keys(sanitized).length > 0) {
+        const newUrl = buildUrlSearch(sanitized, false)
+        window.history.replaceState(window.history.state, '', newUrl)
+      }
+    }
+  }, [initialParams, modifySearchParams, urlQuery])
 
   const contextRef = useRef({} as IListQueryContext)
   contextRef.current.modified = modified
@@ -85,53 +120,27 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const { onQueryChange } = useListDrawerContext()
 
   /**
-   * Single function to update query params.
+   * Update query params.
    * - Merges new params with current query
-   * - Removes null/undefined values (to clear params, pass null)
+   * - Removes null/undefined values (pass null to clear a param)
    * - Updates URL via router.replace
-   * - Automatically resets page to 1 when filters change
+   * - Resets page to 1 when filters change
    */
   const setQuery = useCallback(
     (newParams: Partial<ListQuery>) => {
       setModified(true)
 
-      // Merge current query with new params
       const merged: ListQuery = { ...query, ...newParams }
 
-      // Reset page to 1 when filters change (where, sort, or search)
+      // Reset page when filters change
       if ('where' in newParams || 'sort' in newParams || 'search' in newParams) {
         merged.page = 1
       }
 
-      // Sanitize to remove null/undefined/empty values
       const sanitized = sanitizeQueryForURL(merged)
 
-      // Track pending where changes so components can read them before URL updates
-      if ('where' in newParams) {
-        setPendingWhere(sanitized.where ?? null)
-      }
-
       if (modifySearchParams) {
-        // Build URL with clean params
-        // Only stringify arrays - if already a string, use as-is to avoid double-encoding
-        const urlParams: Record<string, unknown> = {
-          ...sanitized,
-          columns: sanitized.columns
-            ? Array.isArray(sanitized.columns)
-              ? JSON.stringify(sanitized.columns)
-              : sanitized.columns
-            : undefined,
-          queryByGroup: sanitized.queryByGroup
-            ? typeof sanitized.queryByGroup === 'object'
-              ? JSON.stringify(sanitized.queryByGroup)
-              : sanitized.queryByGroup
-            : undefined,
-          // Always signal to server that this is a client-side navigation - don't apply preferences
-          __clear: '1',
-        }
-
-        const newUrl = qs.stringify(urlParams, { addQueryPrefix: true })
-
+        const newUrl = buildUrlSearch(sanitized)
         startRouteTransition(() => router.replace(newUrl))
       } else if (
         typeof onQueryChange === 'function' ||
@@ -141,14 +150,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         onChangeFn(sanitized)
       }
     },
-    [
-      query,
-      modifySearchParams,
-      onQueryChange,
-      onQueryChangeFromProps,
-      startRouteTransition,
-      router,
-    ],
+    [query, modifySearchParams, onQueryChange, onQueryChangeFromProps, startRouteTransition, router],
   )
 
   /**

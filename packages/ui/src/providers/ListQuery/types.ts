@@ -6,6 +6,11 @@ export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: ClientCollectionConfig['slug']
   readonly data: PaginatedDocs | undefined
+  /**
+   * Params resolved from preferences/defaults that should be synced to URL on initial load.
+   * Client will use history.replaceState to add these to URL without causing a navigation.
+   */
+  readonly initialParams?: ListQuery
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
   readonly orderableFieldName?: string

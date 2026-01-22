@@ -15,7 +15,7 @@ import type {
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { notFound, redirect } from 'next/navigation.js'
+import { notFound } from 'next/navigation.js'
 import {
   appendUploadSelectFields,
   combineWhereConstraints,
@@ -33,6 +33,28 @@ import { handleGroupBy } from './handleGroupBy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
+
+/**
+ * Remove null, undefined, and empty values from query object
+ */
+function sanitizeQueryForURL(query: ListQuery): ListQuery {
+  const sanitized: ListQuery = {}
+
+  for (const [key, value] of Object.entries(query)) {
+    if (value === null || value === undefined || value === '') {
+      continue
+    }
+    if (Array.isArray(value) && value.length === 0) {
+      continue
+    }
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) {
+      continue
+    }
+    ;(sanitized as Record<string, unknown>)[key] = value
+  }
+
+  return sanitized
+}
 
 /**
  * @internal
@@ -181,43 +203,21 @@ export const renderListView = async (
     routes: { admin: adminRoute },
   } = config
 
-  // Redirect to canonical URL only on initial page load (when URL has no query params)
-  // If the URL has __clear param, the client is navigating intentionally - don't redirect
-  if (!drawerSlug) {
-    // Filter out __clear (signal param) and queryByGroup (default param that's always present)
-    const filteredKeys = originalQueryKeys.filter((k) => k !== '__clear' && k !== 'queryByGroup')
-    const urlHasNoParams = filteredKeys.length === 0
+  // Build initial params to sync to URL on client
+  // These are the resolved params from preferences/defaults that should appear in the URL
+  const filteredKeys = originalQueryKeys.filter((k) => k !== '__clear' && k !== 'queryByGroup')
+  const urlHasNoParams = filteredKeys.length === 0
 
-    if (
-      !isClientNavigation &&
-      urlHasNoParams &&
-      (query.preset || query.limit || query.sort || query.groupBy || query.columns?.length)
-    ) {
-      const params = new URLSearchParams()
-      if (query.preset) {
-        params.set('preset', String(query.preset))
-      }
-      if (query.limit) {
-        params.set('limit', String(query.limit))
-      }
-      if (query.sort) {
-        params.set('sort', String(query.sort))
-      }
-      if (query.groupBy) {
-        params.set('groupBy', String(query.groupBy))
-      }
-      if (query.columns?.length) {
-        params.set('columns', JSON.stringify(query.columns))
-      }
-
-      redirect(
-        formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}?${params.toString()}`,
-        }),
-      )
-    }
-  }
+  const initialParams =
+    !isClientNavigation && urlHasNoParams && !drawerSlug
+      ? sanitizeQueryForURL({
+          columns: query.columns,
+          groupBy: query.groupBy,
+          limit: query.limit,
+          preset: query.preset,
+          sort: query.sort,
+        })
+      : undefined
 
   if (collectionConfig) {
     if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
@@ -461,9 +461,9 @@ export const renderListView = async (
           <ListQueryProvider
             collectionSlug={collectionSlug}
             data={data}
+            initialParams={initialParams}
             modifySearchParams={!isInDrawer}
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-            query={query}
           >
             {RenderServerComponent({
               clientProps: {
