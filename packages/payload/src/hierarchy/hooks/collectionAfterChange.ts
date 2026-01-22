@@ -84,10 +84,11 @@ export const hierarchyCollectionAfterChange =
       return
     }
 
-    // Skip descendant updates for draft operations
-    // Draft operations should only update the current document (handled by beforeChange)
-    // Descendant cascade happens on publish
-    if (req.context?.draft === true) {
+    // Detect draft operations by checking document status
+    // Skip descendant updates for draft-only operations
+    const isDraftOperation = doc._status === 'draft' && operation === 'update'
+
+    if (isDraftOperation) {
       return
     }
 
