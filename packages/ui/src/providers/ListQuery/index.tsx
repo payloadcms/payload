@@ -1,6 +1,7 @@
 'use client'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import type { ListQuery } from 'payload'
+
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
@@ -150,7 +151,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         onChangeFn(sanitized)
       }
     },
-    [query, modifySearchParams, onQueryChange, onQueryChangeFromProps, startRouteTransition, router],
+    [
+      query,
+      modifySearchParams,
+      onQueryChange,
+      onQueryChangeFromProps,
+      startRouteTransition,
+      router,
+    ],
   )
 
   /**

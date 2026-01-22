@@ -41,11 +41,11 @@ export type IListQueryContext = {
   modified: boolean
   orderableFieldName?: string
   query: ListQuery
+  setModified: (modified: boolean) => void
   /**
    * Update query params. Pass null to remove a param.
    * @example setQuery({ page: 2 })
    * @example setQuery({ preset: null }) // removes preset
    */
   setQuery: (params: Partial<ListQuery>) => void
-  setModified: (modified: boolean) => void
 }
