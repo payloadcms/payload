@@ -255,11 +255,54 @@ export const hierarchyCollectionAfterChange =
           select: selectFields,
         })
       } else {
-        // For draft-only title changes, we still need the updated tree data for descendants
-        // but we don't update the draft itself here
+        // For draft-only title changes, we need to update the draft version in the versions table
+        // with the new hierarchy fields so descendants can use this data
         updatedDocWithLocales = {
           ...docWithLocales,
           ...updateData,
+        }
+
+        // Update the draft version in the versions table if drafts are enabled
+        if (hasDraftsEnabled(collection)) {
+          // Query for the latest draft version
+          const { docs: draftVersions } = await req.payload.db.findVersions({
+            collection: collection.slug,
+            limit: 1,
+            pagination: false,
+            req,
+            sort: '-updatedAt',
+            where: {
+              parent: {
+                equals: doc.id,
+              },
+              'version._status': {
+                equals: 'draft',
+              },
+            },
+          })
+
+          const [latestDraftVersion] = draftVersions
+
+          if (latestDraftVersion) {
+            // Update the draft version with new hierarchy fields
+            await req.payload.db.updateVersion({
+              id: latestDraftVersion.id,
+              collection: collection.slug,
+              req,
+              versionData: {
+                autosave: latestDraftVersion.autosave,
+                createdAt: latestDraftVersion.createdAt,
+                latest: latestDraftVersion.latest,
+                parent: latestDraftVersion.parent,
+                publishedLocale: latestDraftVersion.publishedLocale,
+                updatedAt: new Date().toISOString(),
+                version: {
+                  ...latestDraftVersion.version,
+                  ...updateData,
+                },
+              },
+            })
+          }
         }
       }
 
@@ -308,6 +351,11 @@ export const hierarchyCollectionAfterChange =
         const updatedParentTree = updatedDocWithLocales._h_parentTree
         doc._h_parentTree = updatedParentTree
         doc._h_depth = updatedParentTree ? updatedParentTree.length : 0
+
+        // Ensure parent field is set to ID, not populated object
+        if (parentChanged) {
+          doc[parentFieldName] = newParentID
+        }
       }
 
       return doc
