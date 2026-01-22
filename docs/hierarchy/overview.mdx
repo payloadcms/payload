@@ -492,6 +492,47 @@ Hierarchy automatically prevents circular references. You cannot:
 
 These operations will throw an error before any changes are made.
 
+### Draft Version Handling
+
+When versioning with drafts is enabled, hierarchy updates both published and draft versions to keep them in sync:
+
+- ✅ **Published version updated** - Main document paths reflect new hierarchy
+- ✅ **Draft version updated** - Draft changes preserved with correct paths
+- ✅ **Independent paths** - Draft can have different path based on draft title
+
+**Example:**
+
+```ts
+// Published version has one path
+{
+  _status: 'published',
+  title: 'Clothing',
+  _h_slugPath: 'products/clothing',
+}
+
+// Draft version has its own path based on draft title
+{
+  _status: 'draft',
+  title: 'Apparel',  // Draft change
+  _h_slugPath: 'products/apparel',  // Uses draft title
+}
+
+// When parent moves to 'categories':
+// Published: 'categories/products/clothing' ✅
+// Draft: 'categories/products/apparel' ✅
+```
+
+**How it works:**
+
+1. **Draft-only title changes** update the draft version record in the versions table
+2. **Parent moves** update both published and draft descendants separately
+3. **Each version maintains its own paths** based on its own title
+
+**Performance Impact:**
+
+- Published document with draft = 2× updates (one per version)
+- With localization (3 locales) = 6× updates (2 versions × 3 locales)
+
 ## Limitations
 
 ### Locale 'all' Not Supported
