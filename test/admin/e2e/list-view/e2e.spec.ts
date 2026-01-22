@@ -355,15 +355,25 @@ describe('List View', () => {
         value: 'post1',
       })
 
-      const encodedQueryString =
-        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+      const encodedWhereKey = encodeURIComponent('where[or][0][and][0][relationship][equals]')
 
-      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+      // Wait for URL to have the filter with a value
+      await page.waitForURL(new RegExp(`[?&]${encodedWhereKey}=[^&]+`))
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-      await page.waitForURL(new RegExp(encodedQueryString))
+      // After removing, the condition should be removed from the URL
+      await expect
+        .poll(
+          () => {
+            const url = page.url()
+            return !url.includes('where')
+          },
+          { timeout: 5000 },
+        )
+        .toBe(true)
 
+      // But the where builder should remain visible (not closed)
       await expect(
         page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
       ).toBeVisible()
@@ -487,6 +497,12 @@ describe('List View', () => {
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
+
+      // Wait for the filter to be removed from URL before adding a new one
+      await expect
+        .poll(() => !page.url().includes('where'), { timeout: 5000 })
+        .toBe(true)
+
       await addListFilter({
         page,
         fieldLabel: 'Array > Text',
@@ -531,15 +547,23 @@ describe('List View', () => {
         value: 'post1',
       })
 
-      const encodedQueryString =
-        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+      const encodedWhereKey = encodeURIComponent('where[or][0][and][0][relationship][equals]')
 
-      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+      // Wait for URL to have the filter with a value
+      await page.waitForURL(new RegExp(`[?&]${encodedWhereKey}=[^&]+`))
 
       await whereBuilder.locator('.condition__value .clear-indicator').click()
 
-      await page.waitForURL(new RegExp(encodedQueryString))
-      expect(true).toBe(true)
+      // After clearing, the condition should be removed from the URL entirely
+      await expect
+        .poll(
+          () => {
+            const url = page.url()
+            return !url.includes(encodedWhereKey)
+          },
+          { timeout: 5000 },
+        )
+        .toBe(true)
     })
 
     test('should refresh relationship values when a different field is selected', async () => {
@@ -882,6 +906,8 @@ describe('List View', () => {
 
       const options = whereBuilder.locator('.condition__value .rs__option')
 
+      // Wait for options to be filtered (API search)
+      await expect(options.first()).toContainText('4', { timeout: 10000 })
       await expect(options).toHaveCount(10)
 
       for (const option of await options.all()) {
@@ -890,6 +916,9 @@ describe('List View', () => {
 
       await page.keyboard.press('Backspace')
       await page.keyboard.type('5')
+
+      // Wait for options to be filtered (API search)
+      await expect(options.first()).toContainText('5', { timeout: 10000 })
       await expect(options).toHaveCount(10)
 
       for (const option of await options.all()) {
@@ -1141,10 +1170,11 @@ describe('List View', () => {
         user,
       })
 
-      // wait for the URL search params to populate
-      await page.waitForURL(/posts\?/)
+      // Reload the page to ensure preferences are cleared
+      await page.reload()
+      await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
-      // The `columns` search params should _not_ appear in the URL
+      // The `columns` search params should _not_ appear in the URL when there are no preferences
       expect(page.url()).not.toMatch(/columns=/)
     })
 
@@ -1594,9 +1624,17 @@ describe('List View', () => {
       await page.locator('.per-page .popup-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
       await page.waitForURL(/limit=5/)
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
+      expect(firstPageIds.length).toBeGreaterThan(0)
+      const firstId = firstPageIds[0]!
+
       await goToNextPage(page)
+
+      // Wait for the content to actually change - the first row should be different
+      await expect(page.locator('.cell-id').first()).not.toHaveText(firstId, { timeout: 5000 })
+
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])

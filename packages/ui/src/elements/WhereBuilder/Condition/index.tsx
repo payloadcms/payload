@@ -77,9 +77,27 @@ export const Condition: React.FC<Props> = (props) => {
   // Track if this is the initial mount to avoid unnecessary updates
   const isInitialMount = React.useRef(true)
   const previousValue = React.useRef(value)
+  // Track if the filter has ever had a non-empty value (for removal logic)
+  const hasHadNonEmptyValue = React.useRef(
+    value !== null && value !== undefined && value !== '',
+  )
 
   const updateValue = useEffectEvent((debouncedValue: Value) => {
     if (operator) {
+      const isEmpty = debouncedValue === null || debouncedValue === undefined || debouncedValue === ''
+
+      // If the value is now empty but previously had a value, remove the condition
+      // This prevents filtering for "equals empty string" which returns 0 results
+      if (isEmpty && hasHadNonEmptyValue.current) {
+        removeCondition({ andIndex, orIndex })
+        return
+      }
+
+      // Track that we've had a non-empty value
+      if (!isEmpty) {
+        hasHadNonEmptyValue.current = true
+      }
+
       updateCondition({
         type: 'value',
         andIndex,

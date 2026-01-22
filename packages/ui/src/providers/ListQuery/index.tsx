@@ -71,6 +71,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
    * - Merges new params with current query
    * - Removes null/undefined values (to clear params, pass null)
    * - Updates URL via router.replace
+   * - Automatically resets page to 1 when filters change
    */
   const setQuery = useCallback(
     (newParams: Partial<ListQuery>) => {
@@ -78,6 +79,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       // Merge current query with new params
       const merged: ListQuery = { ...query, ...newParams }
+
+      // Reset page to 1 when filters change (where, sort, or search)
+      if ('where' in newParams || 'sort' in newParams || 'search' in newParams) {
+        merged.page = 1
+      }
 
       // Sanitize to remove null/undefined/empty values
       const sanitized = sanitizeQueryForURL(merged)
