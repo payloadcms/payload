@@ -24,6 +24,7 @@ import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
 import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
@@ -495,8 +496,7 @@ describe('Access Control', () => {
       await page.locator('#field-name').fill('name')
       await expect(page.locator('#field-name')).toHaveValue('name')
       await expect(page.locator('#action-save')).toBeVisible()
-      await page.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await saveDocAndAssert(page)
       await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('#field-name')).toBeDisabled()
     })
@@ -550,16 +550,14 @@ describe('Access Control', () => {
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill('anonymous@email.com')
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
 
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill(devUser.email)
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeEnabled()
         await expect(page.locator('#action-save')).toBeVisible()
       })
@@ -777,6 +775,9 @@ describe('Access Control', () => {
     test('public users should not have access to access admin', async () => {
       await page.goto(url.logout)
 
+      const client = new RESTClient({ defaultSlug: 'users', serverURL })
+      await client.logout()
+
       const user = await payload.login({
         collection: publicUsersSlug,
         data: {
@@ -795,8 +796,6 @@ describe('Access Control', () => {
           secure: true,
         },
       ])
-
-      await page.reload()
 
       await page.goto(url.admin)
 

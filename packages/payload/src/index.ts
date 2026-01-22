@@ -1148,6 +1148,7 @@ export const getPayload = async (
       await reload(config, cached.payload, false, options)
 
       resolve()
+      cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
@@ -1188,6 +1189,14 @@ export const getPayload = async (
         )
 
         cached.ws.onmessage = (event) => {
+          if (cached.reload instanceof Promise) {
+            // If there is an in-progress reload in the same getPayload
+            // cache instance, do not set reload to true again, which would
+            // trigger another reload.
+            // Instead, wait for the in-progress reload to finish.
+            return
+          }
+
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
@@ -1812,6 +1821,11 @@ export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+export { localizeStatus } from './versions/migrations/localizeStatus/index.js'
+export type {
+  MongoLocalizeStatusArgs,
+  SqlLocalizeStatusArgs,
+} from './versions/migrations/localizeStatus/index.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'

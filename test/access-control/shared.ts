@@ -10,7 +10,7 @@ export const blocksFieldAccessSlug = 'blocks-field-access'
 
 export const userRestrictedCollectionSlug = 'user-restricted-collection'
 export const fullyRestrictedSlug = 'fully-restricted'
-export const createNotUpdateCollectionSlug = 'create-not-update-collection'
+export const createNotUpdateCollectionSlug = 'can-create-not-update-collection'
 export const userRestrictedGlobalSlug = 'user-restricted-global'
 export const readNotUpdateGlobalSlug = 'read-not-update-global'
 export const restrictedVersionsSlug = 'restricted-versions'

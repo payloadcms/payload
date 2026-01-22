@@ -8,6 +8,7 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
@@ -30,9 +31,9 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   req,
   select,
 }: Arguments<T>): Promise<T> => {
-  const { locale } = req
+  const { locale, payload } = req
 
-  const queryToBuild: Where = {
+  let queryToBuild: Where = {
     and: [
       {
         'version._status': {
@@ -40,6 +41,35 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
         },
       },
     ],
+  }
+
+  if (hasLocalizeStatusEnabled(entity)) {
+    if (locale === 'all') {
+      queryToBuild = {
+        and: [
+          {
+            or: (
+              (payload.config.localization && payload.config.localization.localeCodes) ||
+              []
+            ).map((localeCode) => ({
+              [`version._status.${localeCode}`]: {
+                equals: 'draft',
+              },
+            })),
+          },
+        ],
+      }
+    } else if (locale) {
+      queryToBuild = {
+        and: [
+          {
+            [`version._status.${locale}`]: {
+              equals: 'draft',
+            },
+          },
+        ],
+      }
+    }
   }
 
   if (entityType === 'collection') {

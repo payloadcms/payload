@@ -167,6 +167,69 @@ All field types with a `name` property support the `localized` property—even t
   strategy.
 </Banner>
 
+## Status Localization
+
+Payload allows you to localize the `status` field for **draft enabled** collections and globals. This lets you manage publication status independently for each locale, ensures the admin UI always shows the status for the selected locale, and unpublish content in a single locale.
+
+<Banner type="warning">
+  **Important:** This feature is **experimental** and currently in beta, you may
+  encounter some limitations or bugs. Please test thoroughly before using in
+  production.
+</Banner>
+
+**Two-Step Setup Required:** To enable localized status, you need to set **two** configuration options:
+
+1. Enable the experimental flag in your main config
+2. Enable it for specific collections or globals
+
+### Step 1: Enable Experimental Flag
+
+First, enable the experimental flag in your main Payload config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // highlight-start
+  experimental: {
+    localizeStatus: true, // Required to enable the feature globally
+  },
+  // highlight-end
+  // ... rest of your config
+})
+```
+
+### Step 2: Enable for Collections/Globals
+
+Then, enable it for specific collections or globals:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  versions: {
+    drafts: {
+      // highlight-start
+      localizeStatus: true, // Enable for this specific collection
+      // highlight-end
+    },
+  },
+}
+```
+
+When enabled, the `status` field will be stored as an object keyed by locales:
+
+```ts
+status: {
+  en: 'published',
+  es: 'draft',
+  de: 'published',
+}
+```
+
+`localizeStatus` is disabled by default, in which case the `status` field returns a single string (`'draft'` or `'published'`) representing the latest document status across all locales.
+
 ## Retrieving Localized Docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be

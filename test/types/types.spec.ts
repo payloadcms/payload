@@ -963,7 +963,7 @@ describe('Types testing', () => {
           radioField: 'option-1',
         },
       })
-      expect(result).type.toBe<JsonObject & LocalConfig['collections']['posts'] & TypeWithID>()
+      expect(result).type.toBe<LocalConfig['collections']['posts']>()
     })
 
     test('SDK create data should be typed and reject invalid properties', () => {
@@ -982,6 +982,26 @@ describe('Types testing', () => {
           },
         }),
       ).type.toRaiseError()
+    })
+
+    test('SDK with select in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        collection: 'posts',
+        id: 'id',
+        select: { title: true, namedGroup: true },
+      })
+      expect(result).type.toBe<Pick<Post, 'id' | 'namedGroup' | 'title'>>()
+    })
+
+    test('SDK with select excluding field in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        collection: 'posts',
+        id: 'id',
+        select: { richText: false },
+      })
+      expect(result).type.toBe<Omit<Post, 'richText'>>()
     })
   })
 

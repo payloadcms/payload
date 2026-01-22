@@ -1,18 +1,12 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { sortColumn, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
@@ -23,7 +17,19 @@ import {
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { sortColumn, toggleColumn } from '../helpers/e2e/columns/index.js'
+import { addListFilter } from '../helpers/e2e/filters/index.js'
+import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
+import {
+  addGroupBy,
+  clearGroupBy,
+  closeGroupBy,
+  openGroupBy,
+} from '../helpers/e2e/groupBy/index.js'
+import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -684,9 +690,15 @@ test.describe('Group By', () => {
   })
 
   test('can bulk edit across pages within a single table without affecting the others', async () => {
+    // TODO: This test is flaky, only in CI.
     await page.goto(url.list)
+    await wait(500)
+    // Wait until it doesn't say loading anywhere on the page
+    await expect(page.locator('body')).not.toContainText('Loading')
+    await wait(500)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await wait(500)
 
     const firstTable = page.locator('.table-wrap').first()
     const secondTable = page.locator('.table-wrap').nth(1)
@@ -696,20 +708,30 @@ test.describe('Group By', () => {
 
     // click the select all checkbox, then the "select all across pages" button
     await firstTable.locator('input#select-all').check()
+    await wait(500)
+
     await firstTable.locator('button#select-all-across-pages').click()
+    await wait(500)
 
     // now edit all titles and ensure that only the first table gets updated, not the second
     await firstTable.locator('.list-selection .edit-many__toggle').click()
+    await wait(500)
+
     const modal = page.locator('[id$="-edit-posts"]').first()
 
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
+    await wait(500)
+
     await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await wait(500)
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
     await field.fill('Bulk edit across all pages')
+    await wait(500)
+
     await modal.locator('.form-submit button[type="submit"].edit-many__save').click()
 
     await expect(
