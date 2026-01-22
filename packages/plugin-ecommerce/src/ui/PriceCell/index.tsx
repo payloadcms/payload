@@ -5,7 +5,7 @@ import { useTranslation } from '@payloadcms/ui'
 
 import type { CurrenciesConfig, Currency } from '../../types/index.js'
 
-import { convertFromBaseValue } from '../utilities.js'
+import { useCurrency } from '../../react/provider/index.js'
 
 type Props = {
   cellData?: number
@@ -18,7 +18,7 @@ type Props = {
 export const PriceCell: React.FC<Props> = (args) => {
   const { t } = useTranslation()
   const { cellData, currenciesConfig, currency: currencyFromProps, rowData } = args
-
+  const { formatCurrency } = useCurrency()
   const currency = currencyFromProps || currenciesConfig.supportedCurrencies[0]
 
   if (!currency) {
@@ -42,15 +42,7 @@ export const PriceCell: React.FC<Props> = (args) => {
 
   return (
     <div className="priceCell">
-      {currency.symbolPosition === 'before'
-        ? `<span className="currencySymbol">${currency.symbol}</span>`
-        : ''}
-      {currency.symbolPosition === 'before' && currency.symbolSeparator}
-      <span className="priceValue">{convertFromBaseValue({ baseValue: cellData, currency })}</span>
-      {currency.symbolPosition === 'after' && currency.symbolSeparator}
-      {currency.symbolPosition === 'after'
-        ? `<span className="currencySymbol">${currency.symbol}</span>`
-        : ''}
+      <span className="priceValue">{formatCurrency(cellData, { currency })}</span>
     </div>
   )
 }
