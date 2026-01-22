@@ -109,7 +109,20 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       }
     }
 
-    return createDatabaseAdapter<SQLiteAdapter>({
+    const executeMethod = 'run'
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => {
+      return statements
+        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+        .join('\n')
+    }
+
+    const adapter = createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
