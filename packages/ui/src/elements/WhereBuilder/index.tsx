@@ -67,7 +67,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   }, [query.where])
 
   // Local conditions state - allows adding filters without immediately updating URL
-  const [localConditions, setLocalConditions] = useState<Where['or'] | null>(null)
+  const [localConditions, setLocalConditions] = useState<null | Where['or']>(null)
 
   // Use local conditions if set, otherwise use URL conditions
   const conditions = localConditions ?? urlConditions
@@ -101,17 +101,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         })
       }
 
-      // Update local state
+      // Only update local state - don't sync to URL until a value is set
+      // This prevents unnecessary navigations that can detach DOM elements during user interaction
       setLocalConditions(newConditions)
-
-      // For checkbox fields, don't sync empty values to URL (causes MongoDB cast error)
-      // For other fields, sync to URL so the filter is immediately persisted
-      const isCheckboxField = field?.field?.type === 'checkbox'
-      if (!isCheckboxField) {
-        setQuery({ where: { or: newConditions } })
-      }
     },
-    [conditions, setQuery],
+    [conditions],
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
@@ -133,14 +127,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         // Update local state first
         setLocalConditions(newConditions)
 
-        // Determine if the value is empty
-        const isEmpty = value === undefined || value === null || value === ''
+        // Only sync to URL when value is non-empty
+        // This prevents navigations during user interaction (which can detach DOM elements)
+        // and prevents MongoDB cast errors for checkbox fields with empty values
+        const hasValue = value !== undefined && value !== null && value !== ''
 
-        // For checkbox fields, don't sync empty values to URL (causes MongoDB cast error)
-        // For other fields, always sync to URL even with empty values
-        const isCheckboxField = field?.field?.type === 'checkbox'
-
-        if (!isEmpty || !isCheckboxField) {
+        if (hasValue) {
           setQuery({ where: { or: newConditions } })
         }
       }

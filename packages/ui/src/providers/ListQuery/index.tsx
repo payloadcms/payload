@@ -1,8 +1,8 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { type ListQuery } from 'payload'
+import { type ListQuery, type Where } from 'payload'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { IListQueryContext, ListQueryProps } from './types.js'
 
@@ -53,13 +53,31 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const { getEntityConfig } = useConfig()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  // Parse current query from URL - this is the source of truth
+  // Track pending where changes that haven't been reflected in URL yet
+  // This is needed because router.replace is async and components may read query.where
+  // before the URL has been updated
+  const [pendingWhere, setPendingWhere] = useState<null | Where>(null)
+
+  // Parse current query from URL
   // Filter out __clear since it's just a signal param, not actual query state
-  const query = useMemo<ListQuery>(() => {
+  const urlQuery = useMemo<ListQuery>(() => {
     const parsed = parseSearchParams(rawSearchParams)
     delete (parsed as Record<string, unknown>).__clear
     return sanitizeQueryForURL(parsed)
   }, [rawSearchParams])
+
+  // Clear pending where when URL is updated (navigation completed)
+  useEffect(() => {
+    setPendingWhere(null)
+  }, [urlQuery.where])
+
+  // Merge URL query with pending changes
+  const query = useMemo<ListQuery>(() => {
+    if (pendingWhere !== null) {
+      return { ...urlQuery, where: pendingWhere }
+    }
+    return urlQuery
+  }, [urlQuery, pendingWhere])
 
   const contextRef = useRef({} as IListQueryContext)
   contextRef.current.modified = modified
@@ -87,6 +105,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       // Sanitize to remove null/undefined/empty values
       const sanitized = sanitizeQueryForURL(merged)
+
+      // Track pending where changes so components can read them before URL updates
+      if ('where' in newParams) {
+        setPendingWhere(sanitized.where ?? null)
+      }
 
       if (modifySearchParams) {
         // Build URL with clean params
