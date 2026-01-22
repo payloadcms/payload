@@ -26,6 +26,50 @@ Here's a quick guide to help you choose the right approach:
 | **Collection Hook** | Job triggered by document changes                    | Send email when post is published, generate PDF when order is created |
 | **Manual Queue**    | Job triggered by user action or API call             | User clicks "Generate Report" button                                  |
 
+## Complete Setup Requirements
+
+<Banner type="error">
+  **Critical:** To use scheduled jobs, you need TWO configurations working
+  together. Configuring only one will not work.
+</Banner>
+
+### 1. Schedule Configuration (This Page)
+
+Define the `schedule` property on your task or workflow to automatically queue jobs:
+
+```ts
+{
+  slug: 'myTask',
+  schedule: [{ cron: '0 9 * * *', queue: 'daily' }],
+  handler: async () => { /* ... */ }
+}
+```
+
+This handles the **QUEUING**—it adds jobs to the database on a schedule.
+
+### 2. Runner Configuration (See [Queues](/docs/jobs-queue/queues))
+
+Configure how queued jobs are executed:
+
+```ts
+jobs: {
+  autoRun: [{ cron: '* * * * *', queue: 'daily' }]
+}
+```
+
+This handles the **RUNNING**—it executes the job handler functions.
+
+### Quick Checklist
+
+Before wondering why your scheduled jobs aren't working, verify:
+
+- ✅ **Task has `schedule` property?** → Jobs will be queued automatically
+- ✅ **Config has `autoRun` or another runner?** → Queued jobs will be executed
+- ✅ **Both use the same `queue` name?** → Jobs will flow from schedule to execution
+- ✅ **Not on serverless platform?** → `autoRun` requires a long-running server
+
+If any checkbox is missing, your scheduled jobs won't work properly.
+
 **Example comparison:**
 
 ```ts
