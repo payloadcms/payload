@@ -88,6 +88,7 @@ export async function updateDescendants({
     const descendantDocsQuery = await req.payload.find({
       collection: collection.slug,
       depth: 0,
+      draft: false,
       limit: batchSize,
       locale: 'all',
       req,

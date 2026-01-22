@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook, SelectIncludeType } from '../../index.js'
 
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { computeTreeData } from '../utils/computeTreeData.js'
 import { getTreeChanges } from '../utils/getTreeChanges.js'
 import { updateDescendants } from '../utils/updateDescendants.js'
@@ -82,8 +83,19 @@ export const hierarchyCollectionAfterChange =
         throw new Error('Document cannot be its own parent')
       }
 
-      // Prevent circular references (check if new parent is a descendant)
-      if (doc._h_parentTree && doc._h_parentTree.includes(newParentID)) {
+      // Prevent circular references by checking if the new parent is a descendant of this document
+      // We need to query the new parent to get its current _h_parentTree
+      const newParentDoc = await req.payload.findByID({
+        id: newParentID,
+        collection: collection.slug,
+        depth: 0,
+        req,
+        select: {
+          _h_parentTree: true,
+        },
+      })
+
+      if (newParentDoc._h_parentTree && newParentDoc._h_parentTree.includes(doc.id)) {
         throw new Error(
           'Circular reference detected: the new parent is a descendant of this document',
         )
@@ -104,6 +116,7 @@ export const hierarchyCollectionAfterChange =
             : undefined,
         newParentID,
         parentChanged: parentChangedOrCreate,
+        parentFieldName,
         previousDocWithLocales,
         req,
         reqLocale:
@@ -223,15 +236,32 @@ export const hierarchyCollectionAfterChange =
         selectFields[titlePathFieldName] = true
       }
 
-      // NOTE: using the db directly, no hooks or access control here
-      const updatedDocWithLocales = await req.payload.db.updateOne({
-        id: doc.id,
-        collection: collection.slug,
-        data: updateData,
-        locale: 'all',
-        req,
-        select: selectFields,
-      })
+      // Skip updating hierarchy fields for draft-only title changes
+      // Draft hierarchy fields are managed in the versions collection and updated when published
+      // We only update for: creates, parent changes, or published documents
+      const shouldSkipHierarchyUpdate =
+        operation === 'update' && doc._status === 'draft' && !parentChanged && titleChanged
+
+      let updatedDocWithLocales = docWithLocales
+
+      if (!shouldSkipHierarchyUpdate) {
+        // NOTE: using the db directly, no hooks or access control here
+        updatedDocWithLocales = await req.payload.db.updateOne({
+          id: doc.id,
+          collection: collection.slug,
+          data: updateData,
+          locale: 'all',
+          req,
+          select: selectFields,
+        })
+      } else {
+        // For draft-only title changes, we still need the updated tree data for descendants
+        // but we don't update the draft itself here
+        updatedDocWithLocales = {
+          ...docWithLocales,
+          ...updateData,
+        }
+      }
 
       // Update all descendants in batches to handle unlimited tree sizes
       await updateDescendants({

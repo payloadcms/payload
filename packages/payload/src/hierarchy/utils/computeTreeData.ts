@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { Document, PayloadRequest } from '../../index.js'
 import type { HierarchyDataT } from '../types.js'
 
+import { extractID } from '../../utilities/extractID.js'
 import { deriveParentPathsFromPrevious } from './deriveParentPathsFromPrevious.js'
 import { generateTreePaths } from './generateTreePaths.js'
 
@@ -12,6 +13,7 @@ type FetchParentAndComputeTreeArgs = {
   localeCodes?: string[]
   newParentID: null | number | string | undefined
   parentChanged: boolean
+  parentFieldName: string
   previousDocWithLocales: Document
   req: PayloadRequest
   reqLocale: string
@@ -40,6 +42,7 @@ export async function computeTreeData({
   localeCodes,
   newParentID,
   parentChanged,
+  parentFieldName,
   previousDocWithLocales,
   req,
   reqLocale,
@@ -84,9 +87,37 @@ export async function computeTreeData({
       titlePathFieldName,
     })
 
-    parentSlugPath = derivedPaths?.slugPath
-    parentTitlePath = derivedPaths?.titlePath
-    newParentTree = docWithLocales._h_parentTree
+    // If derivation failed (e.g., previous doc lacks hierarchy fields), fetch parent directly
+    // This can happen with draft versions where previousDoc doesn't have the hierarchy data
+    if (!derivedPaths && docWithLocales[parentFieldName]) {
+      const parentID = extractID(docWithLocales[parentFieldName])
+      if (parentID) {
+        const parentDoc = await req.payload.findByID({
+          id: parentID,
+          collection: collection.slug,
+          depth: 0,
+          locale: 'all',
+          select: {
+            _h_parentTree: true,
+            [slugPathFieldName]: true,
+            [titlePathFieldName]: true,
+          },
+        })
+
+        newParentTree = [...(parentDoc?._h_parentTree || []), parentID]
+        parentSlugPath = parentDoc ? parentDoc[slugPathFieldName] : undefined
+        parentTitlePath = parentDoc ? parentDoc[titlePathFieldName] : undefined
+      } else {
+        // No parent - root document
+        newParentTree = []
+        parentSlugPath = undefined
+        parentTitlePath = undefined
+      }
+    } else {
+      parentSlugPath = derivedPaths?.slugPath
+      parentTitlePath = derivedPaths?.titlePath
+      newParentTree = docWithLocales._h_parentTree || []
+    }
   }
 
   // Generate the new tree paths using the parent paths we fetched or derived
