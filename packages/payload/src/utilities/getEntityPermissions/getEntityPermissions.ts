@@ -105,34 +105,45 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
   }
 
   const hasData = _data && Object.keys(_data).length > 0
-  const data: JsonObject | undefined = hasData
-    ? _data
-    : fetchData
-      ? await (async () => {
-          if (entityType === 'global') {
-            return req.payload.findGlobal({
-              slug: entity.slug,
-              depth: 0,
-              fallbackLocale: null,
-              locale,
-              overrideAccess: true,
-              req,
-            })
-          }
 
-          if (entityType === 'collection') {
-            return req.payload.findByID({
-              id: id!,
-              collection: entity.slug,
-              depth: 0,
-              fallbackLocale: null,
-              locale,
-              overrideAccess: true,
-              req,
-              trash: true,
-            })
-          }
-        })()
+  // When fetchData is true, always fetch the full document from the database
+  // This ensures field permissions get the correct document structure
+  const fetchedData: JsonObject | undefined = fetchData
+    ? await (async () => {
+        if (entityType === 'global') {
+          return req.payload.findGlobal({
+            slug: entity.slug,
+            depth: 0,
+            fallbackLocale: null,
+            locale,
+            overrideAccess: true,
+            req,
+          })
+        }
+
+        if (entityType === 'collection') {
+          return req.payload.findByID({
+            id: id!,
+            collection: entity.slug,
+            depth: 0,
+            fallbackLocale: null,
+            locale,
+            overrideAccess: true,
+            req,
+            trash: true,
+          })
+        }
+      })()
+    : undefined
+
+  // If data was passed (e.g., with simulated _status), merge it with fetched data
+  // This allows top-level permissions to use simulated fields while field permissions get full document
+  const data: JsonObject | undefined = fetchedData
+    ? hasData
+      ? { ...fetchedData, ..._data }
+      : fetchedData
+    : hasData
+      ? _data
       : undefined
 
   const isLoggedIn = !!user
