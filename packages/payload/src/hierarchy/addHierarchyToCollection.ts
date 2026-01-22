@@ -2,6 +2,7 @@ import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
 import { hierarchyCollectionAfterChange } from './hooks/collectionAfterChange.js'
+import { hierarchyCollectionBeforeChange } from './hooks/collectionBeforeChange.js'
 import { defaultSlugify } from './utils/defaultSlugify.js'
 import { findUseAsTitleField } from './utils/findUseAsTitle.js'
 
@@ -94,6 +95,18 @@ export const addHierarchyToCollection = ({
     afterChange: [
       ...(collectionConfig.hooks?.afterChange || []),
       hierarchyCollectionAfterChange({
+        generatePaths,
+        isTitleLocalized: localized,
+        parentFieldName,
+        slugify,
+        slugPathFieldName,
+        titleFieldName,
+        titlePathFieldName,
+      }),
+    ],
+    beforeChange: [
+      ...(collectionConfig.hooks?.beforeChange || []),
+      hierarchyCollectionBeforeChange({
         generatePaths,
         isTitleLocalized: localized,
         parentFieldName,

@@ -141,100 +141,95 @@ export const hierarchyCollectionAfterChange =
       if (generatePaths && operation === 'update' && previousDoc) {
         // Compute the previous paths by combining parent path + document's title
         const previousTitle = previousDoc[titleFieldName]
-        const previousSlug = slugify(previousTitle)
 
-        if (previousDoc[parentFieldName]) {
-          // Document has a parent - fetch parent's path and combine with document's old title
-          const previousParentDoc = await req.payload.findByID({
-            id: previousDoc[parentFieldName],
-            collection: collection.slug,
-            depth: 0,
-            req,
-          })
-
-          if (isTitleLocalized && req.payload.config.localization) {
-            const slugPathByLocale: Record<string, string> = {}
-            const titlePathByLocale: Record<string, string> = {}
-
-            for (const locale of req.payload.config.localization.localeCodes) {
-              const parentSlugPath = previousParentDoc[slugPathFieldName][locale] || ''
-              const parentTitlePath = previousParentDoc[titlePathFieldName][locale] || ''
-              const docTitle =
-                typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
-              const docSlug = slugify(docTitle)
-
-              slugPathByLocale[locale] = parentSlugPath ? `${parentSlugPath}/${docSlug}` : docSlug
-              titlePathByLocale[locale] = parentTitlePath
-                ? `${parentTitlePath}/${docTitle}`
-                : docTitle
-            }
-
-            previousDocWithPaths = {
-              ...previousDocWithLocales,
-              [slugPathFieldName]: slugPathByLocale,
-              [titlePathFieldName]: titlePathByLocale,
-            }
-          } else {
-            const parentSlugPath = previousParentDoc[slugPathFieldName] || ''
-            const parentTitlePath = previousParentDoc[titlePathFieldName] || ''
-
-            previousDocWithPaths = {
-              ...previousDocWithLocales,
-              [slugPathFieldName]: parentSlugPath
-                ? `${parentSlugPath}/${previousSlug}`
-                : previousSlug,
-              [titlePathFieldName]: parentTitlePath
-                ? `${parentTitlePath}/${previousTitle}`
-                : previousTitle,
-            }
-          }
+        // Skip if previousTitle is undefined (happens when setting a locale for the first time)
+        if (!previousTitle) {
+          // Use current document paths as previous (no change for this locale yet)
+          previousDocWithPaths = previousDocWithLocales
         } else {
-          // Document is a root (no parent) - just use the document's old title as the path
-          if (isTitleLocalized && req.payload.config.localization) {
-            const slugPathByLocale: Record<string, string> = {}
-            const titlePathByLocale: Record<string, string> = {}
+          const previousSlug = slugify(previousTitle)
 
-            for (const locale of req.payload.config.localization.localeCodes) {
-              const docTitle =
-                typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
-              const docSlug = slugify(docTitle)
+          if (previousDoc[parentFieldName]) {
+            // Document has a parent - fetch parent's path and combine with document's old title
+            const previousParentDoc = await req.payload.findByID({
+              id: previousDoc[parentFieldName],
+              collection: collection.slug,
+              depth: 0,
+              req,
+            })
 
-              slugPathByLocale[locale] = docSlug
-              titlePathByLocale[locale] = docTitle
-            }
+            if (isTitleLocalized && req.payload.config.localization) {
+              const slugPathByLocale: Record<string, string> = {}
+              const titlePathByLocale: Record<string, string> = {}
 
-            previousDocWithPaths = {
-              ...previousDocWithLocales,
-              [slugPathFieldName]: slugPathByLocale,
-              [titlePathFieldName]: titlePathByLocale,
+              for (const locale of req.payload.config.localization.localeCodes) {
+                const parentSlugPath = previousParentDoc[slugPathFieldName][locale] || ''
+                const parentTitlePath = previousParentDoc[titlePathFieldName][locale] || ''
+                const docTitle =
+                  typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
+                const docSlug = slugify(docTitle)
+
+                slugPathByLocale[locale] = parentSlugPath ? `${parentSlugPath}/${docSlug}` : docSlug
+                titlePathByLocale[locale] = parentTitlePath
+                  ? `${parentTitlePath}/${docTitle}`
+                  : docTitle
+              }
+
+              previousDocWithPaths = {
+                ...previousDocWithLocales,
+                [slugPathFieldName]: slugPathByLocale,
+                [titlePathFieldName]: titlePathByLocale,
+              }
+            } else {
+              const parentSlugPath = previousParentDoc[slugPathFieldName] || ''
+              const parentTitlePath = previousParentDoc[titlePathFieldName] || ''
+
+              previousDocWithPaths = {
+                ...previousDocWithLocales,
+                [slugPathFieldName]: parentSlugPath
+                  ? `${parentSlugPath}/${previousSlug}`
+                  : previousSlug,
+                [titlePathFieldName]: parentTitlePath
+                  ? `${parentTitlePath}/${previousTitle}`
+                  : previousTitle,
+              }
             }
           } else {
-            previousDocWithPaths = {
-              ...previousDocWithLocales,
-              [slugPathFieldName]: previousSlug,
-              [titlePathFieldName]: previousTitle,
+            // Document is a root (no parent) - just use the document's old title as the path
+            if (isTitleLocalized && req.payload.config.localization) {
+              const slugPathByLocale: Record<string, string> = {}
+              const titlePathByLocale: Record<string, string> = {}
+
+              for (const locale of req.payload.config.localization.localeCodes) {
+                const docTitle =
+                  typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
+                const docSlug = slugify(docTitle)
+
+                slugPathByLocale[locale] = docSlug
+                titlePathByLocale[locale] = docTitle
+              }
+
+              previousDocWithPaths = {
+                ...previousDocWithLocales,
+                [slugPathFieldName]: slugPathByLocale,
+                [titlePathFieldName]: titlePathByLocale,
+              }
+            } else {
+              previousDocWithPaths = {
+                ...previousDocWithLocales,
+                [slugPathFieldName]: previousSlug,
+                [titlePathFieldName]: previousTitle,
+              }
             }
           }
         }
       }
 
-      // Build update data
-      const updateData: Record<string, any> = {
-        _h_depth: updatedTreeData._h_parentTree?.length ?? 0,
-        _h_parentTree: updatedTreeData._h_parentTree,
-        [parentFieldName]: newParentID,
-      }
-
-      // Only include path fields if generatePaths is true
-      if (generatePaths) {
-        updateData[slugPathFieldName] = updatedTreeData.slugPath
-        updateData[titlePathFieldName] = updatedTreeData.titlePath
-      }
-
-      // Build select fields
+      // Build select fields for querying updated document
       const selectFields: SelectIncludeType = {
         _h_depth: true,
         _h_parentTree: true,
+        [titleFieldName]: true, // Include title field for path computation
       }
 
       if (generatePaths) {
@@ -242,74 +237,102 @@ export const hierarchyCollectionAfterChange =
         selectFields[titlePathFieldName] = true
       }
 
-      // Skip updating hierarchy fields for draft-only title changes
-      // Draft hierarchy fields are managed in the versions collection and updated when published
-      // We only update for: creates, parent changes, or published documents
-      const shouldSkipHierarchyUpdate =
-        operation === 'update' && doc._status === 'draft' && !parentChanged && titleChanged
+      // Fetch the updated document with all locales to pass to descendants
+      // The current locale's hierarchy fields were already updated by beforeChange hook
+      let updatedDocWithLocales = await req.payload.findByID({
+        id: doc.id,
+        collection: collection.slug,
+        depth: 0,
+        locale: 'all',
+        req,
+        select: selectFields,
+      })
 
-      let updatedDocWithLocales = docWithLocales
+      // For localized fields, compute paths for OTHER locales when parent changes
+      // Current locale was already handled by beforeChange hook
+      if (
+        generatePaths &&
+        isTitleLocalized &&
+        req.payload.config.localization &&
+        parentChangedOrCreate
+      ) {
+        const localeCodes = req.payload.config.localization.localeCodes
+        const currentLocale = req.context.hierarchyCurrentLocale
 
-      if (!shouldSkipHierarchyUpdate) {
-        // NOTE: using the db directly, no hooks or access control here
-        updatedDocWithLocales = await req.payload.db.updateOne({
+        // Start with existing paths to preserve locales not being updated
+        const currentSlugPaths = updatedDocWithLocales[slugPathFieldName] || {}
+        const currentTitlePaths = updatedDocWithLocales[titlePathFieldName] || {}
+
+        const slugPathByLocale: Record<string, string> = { ...currentSlugPaths }
+        const titlePathByLocale: Record<string, string> = { ...currentTitlePaths }
+
+        // Compute paths for OTHER locales (current locale was handled by beforeChange)
+        for (const locale of localeCodes) {
+          // Skip current locale - already handled by beforeChange
+          if (locale === currentLocale) {
+            continue
+          }
+
+          // Only compute if this locale has title data
+          const titleValue = updatedDocWithLocales[titleFieldName]
+          const hasTitleForLocale =
+            titleValue && typeof titleValue === 'object' && titleValue[locale]
+
+          if (hasTitleForLocale) {
+            const localeTreeData = await computeTreeData({
+              collection,
+              docWithLocales: updatedDocWithLocales,
+              fieldIsLocalized: isTitleLocalized,
+              localeCodes: [locale],
+              newParentID,
+              parentChanged: parentChangedOrCreate,
+              parentFieldName,
+              previousDocWithLocales,
+              req,
+              reqLocale: locale,
+              slugify,
+              slugPathFieldName,
+              titleFieldName,
+              titlePathFieldName,
+            })
+
+            // Extract the locale-specific string values
+            const localeSlugPath =
+              typeof localeTreeData.slugPath === 'object'
+                ? localeTreeData.slugPath[locale]
+                : localeTreeData.slugPath
+            const localeTitlePath =
+              typeof localeTreeData.titlePath === 'object'
+                ? localeTreeData.titlePath[locale]
+                : localeTreeData.titlePath
+
+            slugPathByLocale[locale] = localeSlugPath
+            titlePathByLocale[locale] = localeTitlePath
+          }
+        }
+
+        // Update all locales at once via db.updateOne with locale: 'all'
+        // db operations expect localized data (objects with locale keys)
+        await req.payload.db.updateOne({
           id: doc.id,
           collection: collection.slug,
-          data: updateData,
+          data: {
+            [slugPathFieldName]: slugPathByLocale,
+            [titlePathFieldName]: titlePathByLocale,
+          },
+          locale: 'all',
+          req,
+        })
+
+        // Re-fetch to get the updated paths for all locales
+        updatedDocWithLocales = await req.payload.findByID({
+          id: doc.id,
+          collection: collection.slug,
+          depth: 0,
           locale: 'all',
           req,
           select: selectFields,
         })
-      } else {
-        // For draft-only title changes, we need to update the draft version in the versions table
-        // with the new hierarchy fields so descendants can use this data
-        updatedDocWithLocales = {
-          ...docWithLocales,
-          ...updateData,
-        }
-
-        // Update the draft version in the versions table if drafts are enabled
-        if (hasDraftsEnabled(collection)) {
-          // Query for the latest draft version
-          const { docs: draftVersions } = await req.payload.db.findVersions({
-            collection: collection.slug,
-            limit: 1,
-            pagination: false,
-            req,
-            sort: '-updatedAt',
-            where: {
-              parent: {
-                equals: doc.id,
-              },
-              'version._status': {
-                equals: 'draft',
-              },
-            },
-          })
-
-          const [latestDraftVersion] = draftVersions
-
-          if (latestDraftVersion) {
-            // Update the draft version with new hierarchy fields
-            await req.payload.db.updateVersion({
-              id: latestDraftVersion.id,
-              collection: collection.slug,
-              req,
-              versionData: {
-                autosave: latestDraftVersion.autosave,
-                createdAt: latestDraftVersion.createdAt,
-                latest: latestDraftVersion.latest,
-                parent: latestDraftVersion.parent,
-                publishedLocale: latestDraftVersion.publishedLocale,
-                updatedAt: new Date().toISOString(),
-                version: {
-                  ...latestDraftVersion.version,
-                  ...updateData,
-                },
-              },
-            })
-          }
-        }
       }
 
       // Update all descendants in batches to handle unlimited tree sizes
@@ -331,39 +354,8 @@ export const hierarchyCollectionAfterChange =
         titlePathFieldName,
       })
 
-      // Update doc with new values
-      if (generatePaths) {
-        // Ensure we have a valid locale for accessing localized fields
-        const safeLocale =
-          reqLocale ||
-          (req.payload.config.localization ? req.payload.config.localization.defaultLocale : 'en')
-
-        const updatedSlugPath = isTitleLocalized
-          ? updatedDocWithLocales[slugPathFieldName][safeLocale]
-          : updatedDocWithLocales[slugPathFieldName]
-        const updatedTitlePath = isTitleLocalized
-          ? updatedDocWithLocales[titlePathFieldName][safeLocale]
-          : updatedDocWithLocales[titlePathFieldName]
-
-        if (updatedSlugPath) {
-          doc[slugPathFieldName] = updatedSlugPath
-        }
-        if (updatedTitlePath) {
-          doc[titlePathFieldName] = updatedTitlePath
-        }
-      }
-
-      if (parentChangedOrCreate) {
-        const updatedParentTree = updatedDocWithLocales._h_parentTree
-        doc._h_parentTree = updatedParentTree
-        doc._h_depth = updatedParentTree ? updatedParentTree.length : 0
-
-        // Ensure parent field is set to ID, not populated object
-        if (parentChanged) {
-          doc[parentFieldName] = newParentID
-        }
-      }
-
+      // No need to modify doc - beforeChange hook already set the correct values
+      // which were persisted in the initial DB write
       return doc
     }
   }

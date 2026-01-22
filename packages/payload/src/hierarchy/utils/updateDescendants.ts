@@ -187,99 +187,94 @@ export async function updateDescendants({
         })
       }
 
-      // For localized fields, we need to update each locale separately
-      // because payload.update() expects a single locale at a time
+      // For localized fields, build the full localized object and update with locale: 'all'
+      // db operations expect localized data (objects with locale keys)
       if (fieldIsLocalized && localeCodes) {
-        for (const locale of localeCodes) {
-          // Build update data for this specific locale
-          // NOTE: We do NOT update the parent field - descendants keep their existing parent!
-          // We only update the tree metadata (_h_parentTree, _h_depth, paths)
-          const updateData: Record<string, any> = {
+        // Build update data for tree metadata (non-localized)
+        const updateData: Record<string, any> = {
+          _h_depth: newParentTree.length,
+          _h_parentTree: newParentTree,
+        }
+
+        // Add localized path fields if needed
+        if (generatePaths && newTreePaths) {
+          updateData[slugPathFieldName] = newTreePaths.slugPath
+          updateData[titlePathFieldName] = newTreePaths.titlePath
+        }
+
+        // Update main collection directly via database with locale: 'all'
+        updatePromises.push(
+          req.payload.db.updateOne({
+            id: affectedDoc.id,
+            collection: collection.slug,
+            data: updateData,
+            locale: 'all',
+            req,
+          }),
+        )
+
+        // If document is draft-only (no published version), also update version record
+        if (affectedDoc._status === 'draft') {
+          // Build update data with all locales
+          const versionUpdateData: Record<string, any> = {
             _h_depth: newParentTree.length,
             _h_parentTree: newParentTree,
           }
 
           if (generatePaths && newTreePaths) {
-            updateData[slugPathFieldName] = (newTreePaths.slugPath as Record<string, string>)[
-              locale
-            ]
-            updateData[titlePathFieldName] = (newTreePaths.titlePath as Record<string, string>)[
-              locale
-            ]
+            versionUpdateData[slugPathFieldName] = newTreePaths.slugPath
+            versionUpdateData[titlePathFieldName] = newTreePaths.titlePath
           }
 
-          // Update main collection directly via database
           updatePromises.push(
-            req.payload.db.updateOne({
-              id: affectedDoc.id,
-              collection: collection.slug,
-              data: updateData,
-              locale,
-              req,
-            }),
-          )
+            (async () => {
+              // Query for the latest draft version
+              const { docs: draftVersions } = await req.payload.db.findVersions({
+                collection: collection.slug,
+                limit: 1,
+                pagination: false,
+                req,
+                sort: '-updatedAt',
+                where: {
+                  parent: {
+                    equals: affectedDoc.id,
+                  },
+                  'version._status': {
+                    equals: 'draft',
+                  },
+                },
+              })
 
-          // If document is draft-only (no published version), also update version record
-          // Do this once per document, not per locale
-          if (affectedDoc._status === 'draft' && locale === localeCodes[0]) {
-            // Build update data with all locales
-            const versionUpdateData: Record<string, any> = {
-              _h_depth: newParentTree.length,
-              _h_parentTree: newParentTree,
-            }
+              const [latestDraftVersion] = draftVersions
 
-            if (generatePaths && newTreePaths) {
-              versionUpdateData[slugPathFieldName] = newTreePaths.slugPath
-              versionUpdateData[titlePathFieldName] = newTreePaths.titlePath
-            }
-
-            updatePromises.push(
-              (async () => {
-                // Query for the latest draft version
-                const { docs: draftVersions } = await req.payload.db.findVersions({
+              if (latestDraftVersion) {
+                // Update the draft version with new hierarchy fields
+                await req.payload.db.updateVersion({
+                  id: latestDraftVersion.id,
                   collection: collection.slug,
-                  limit: 1,
-                  pagination: false,
                   req,
-                  sort: '-updatedAt',
-                  where: {
-                    parent: {
-                      equals: affectedDoc.id,
-                    },
-                    'version._status': {
-                      equals: 'draft',
+                  versionData: {
+                    autosave: latestDraftVersion.autosave,
+                    createdAt: latestDraftVersion.createdAt,
+                    latest: latestDraftVersion.latest,
+                    parent: latestDraftVersion.parent,
+                    publishedLocale: latestDraftVersion.publishedLocale,
+                    updatedAt: new Date().toISOString(),
+                    version: {
+                      ...latestDraftVersion.version,
+                      ...versionUpdateData,
                     },
                   },
                 })
+              }
+            })(),
+          )
+        }
 
-                const [latestDraftVersion] = draftVersions
-
-                if (latestDraftVersion) {
-                  // Update the draft version with new hierarchy fields
-                  await req.payload.db.updateVersion({
-                    id: latestDraftVersion.id,
-                    collection: collection.slug,
-                    req,
-                    versionData: {
-                      autosave: latestDraftVersion.autosave,
-                      createdAt: latestDraftVersion.createdAt,
-                      latest: latestDraftVersion.latest,
-                      parent: latestDraftVersion.parent,
-                      publishedLocale: latestDraftVersion.publishedLocale,
-                      updatedAt: new Date().toISOString(),
-                      version: {
-                        ...latestDraftVersion.version,
-                        ...versionUpdateData,
-                      },
-                    },
-                  })
-                }
-              })(),
-            )
-          }
-
-          // Update draft version if document is published with drafts enabled
-          if (shouldUpdateBothVersions) {
+        // Update draft version if document is published with drafts enabled
+        // payload.update expects non-localized data, so we need to call it for each locale
+        if (shouldUpdateBothVersions) {
+          for (const locale of localeCodes) {
             const draftUpdateData: Record<string, any> = {
               _h_depth: newParentTree.length,
               _h_parentTree: newParentTree,
