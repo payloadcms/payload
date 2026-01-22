@@ -84,6 +84,13 @@ export const hierarchyCollectionAfterChange =
       return
     }
 
+    // Skip descendant updates for draft operations
+    // Draft operations should only update the current document (handled by beforeChange)
+    // Descendant cascade happens on publish
+    if (req.context?.draft === true) {
+      return
+    }
+
     const { newParentID, parentChanged, titleChanged } = getTreeChanges({
       doc,
       isTitleLocalized,
