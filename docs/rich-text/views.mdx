@@ -1,0 +1,532 @@
+---
+title: Views
+label: Views
+order: 90
+desc: Customize how Lexical nodes render in the admin panel and frontend using view overrides.
+keywords: lexical, rich text, views, rendering, custom components, admin panel, frontend
+---
+
+Views allow you to customize how the Lexical editor behaves and how nodes render in both the admin panel editor and frontend applications. This powerful feature enables you to create different rendering modes for the same content, perfect for scenarios like:
+
+- Preview modes that match your frontend design
+- Debug views showing additional metadata
+- Simplified editing experiences with hidden UI elements
+- Different visual themes per view
+- A/B testing different designs
+
+## Overview
+
+The view system works by overriding three aspects of the editor per view:
+
+1. **Node Rendering**: Customize how individual node types render
+2. **Admin Configuration**: Control UI elements like gutter, add block button, etc.
+3. **Lexical Editor Config**: Override theme classes and other editor-level settings
+
+You can define multiple named views and switch between them using the built-in view selector, without changing the underlying data structure.
+
+### Key Concepts
+
+- **View Map**: A collection of named views (e.g., `default`, `frontend`, `debug`)
+- **Node Map**: Overrides for specific node types within a view
+- **View Configuration**: Each view can override `nodes`, `admin`, and `lexical` editor config
+- **Dual Usage**: The same view definitions work in both the admin panel editor and JSX converters for frontend rendering
+
+## Defining Views
+
+Views are defined using the `views` property on your rich text field configuration. The value is an import path string that points to your views file and specifies the named export using a `#` separator.
+
+### Step 1: Create Your Views File
+
+Create a client component file that exports your view maps:
+
+```tsx
+// collections/Posts/views.tsx
+'use client'
+import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
+
+export const postViews: LexicalEditorViewMap = {
+  // The 'default' view is used when the field is first loaded
+  default: {
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#333'
+          return heading
+        },
+      },
+    },
+  },
+  // Additional custom views
+  frontend: {
+    admin: {
+      hideGutter: true,
+    },
+    lexical: {
+      theme: {
+        link: 'frontend-link',
+        paragraph: 'frontend-paragraph',
+      },
+    },
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#3b82f6'
+          heading.style.borderBottom = '2px solid #60a5fa'
+          return heading
+        },
+      },
+      blocks: {
+        myBlock: {
+          Component: ({ node, isEditor, isJSXConverter }) => {
+            const text = isEditor ? node.__fields?.text : node.fields?.text
+
+            return (
+              <div
+                style={{
+                  background:
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  padding: '24px',
+                  borderRadius: '12px',
+                }}
+              >
+                {text}
+              </div>
+            )
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+### Step 2: Reference Views in Your Collection
+
+In your collection config, reference the views using an import path with the `#exportName` syntax:
+
+```ts
+// collections/Posts/index.ts
+import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        // Path relative to the config file, with #exportName to specify which export to use
+        views: './views#postViews',
+      }),
+    },
+  ],
+}
+```
+
+## View Configuration Options
+
+Each view can customize three aspects of the editor:
+
+### Admin Configuration
+
+Override admin UI settings for a specific view:
+
+```tsx
+{
+  myView: {
+    admin: {
+      hideGutter: true,
+      hideAddBlockButton: false,
+      hideDraggableBlockElement: false,
+      hideInsertParagraphAtEnd: false,
+      placeholder: 'Start typing in this view...',
+    },
+    nodes: {
+      // ... node overrides
+    },
+  },
+}
+```
+
+Available admin options:
+
+- `hideGutter`: Controls if the gutter (left padding and gray vertical line) should be hidden
+- `hideAddBlockButton`: Controls if the add block button should be hidden
+- `hideDraggableBlockElement`: Controls if draggable block handles should be hidden
+- `hideInsertParagraphAtEnd`: Controls if the insert paragraph button at the end should be hidden
+- `placeholder`: Custom placeholder text when the editor is empty
+
+### Lexical Editor Configuration
+
+Override Lexical editor settings like theme classes and editor behavior:
+
+```tsx
+{
+  myView: {
+    lexical: {
+      theme: {
+        link: 'custom-link-class',
+        paragraph: 'custom-paragraph-class',
+        heading: {
+          h1: 'custom-h1-class',
+          h2: 'custom-h2-class',
+        },
+      },
+    },
+    nodes: {
+      // ... node overrides
+    },
+  },
+}
+```
+
+The `lexical` property accepts any standard [Lexical Editor Config](https://lexical.dev/docs/api/interfaces/lexical.EditorConfig) options, allowing you to customize themes, namespace, and other editor-level settings per view.
+
+### Node Overrides
+
+Each node type can be customized using three different approaches:
+
+### Component
+
+Use a React component for full control over rendering. Works in both admin panel and JSX converters.
+
+```tsx
+{
+  myView: {
+    nodes: {
+      myNode: {
+        Component: ({ node, editor, config, isEditor, isJSXConverter }) => {
+          // isEditor: true when rendering in admin panel, false in JSX converter
+          // isJSXConverter: true when rendering for frontend, false in admin panel
+
+          const nodeData = isEditor
+            ? node.__fields // Access Lexical node fields in editor
+            : node.fields    // Access serialized fields in JSX converter
+
+          return <div>{nodeData.text}</div>
+        },
+      },
+    },
+  },
+}
+```
+
+### createDOM
+
+Use native DOM manipulation for ElementNodes. Only works in the admin panel editor.
+
+```tsx
+{
+  myView: {
+    nodes: {
+      heading: {
+        createDOM(args) {
+          const { node, editor, config, isEditor, isJSXConverter } = args
+          const heading = document.createElement(node.getTag())
+          heading.style.color = '#3b82f6'
+          return heading
+        },
+      },
+    },
+  },
+}
+```
+
+### html
+
+Provide raw HTML as a string or function. Works in both admin panel and JSX converters.
+
+```tsx
+{
+  myView: {
+    nodes: {
+      link: {
+        html: ({ node, isEditor, isJSXConverter }) => {
+          const url = isEditor ? node.__url : node.url
+          return `<a href="${url}">Click here</a>`
+        },
+      },
+    },
+  },
+}
+```
+
+**Note**: If both `createDOM` and `html` are provided for a DecoratorNode, `html` will only be used in JSX converters, not in the admin panel editor where `createDOM` takes precedence.
+
+## Node Type Reference
+
+All node overrides are placed within the `nodes` property of a view.
+
+### Built-in Nodes
+
+Override built-in Lexical nodes:
+
+```tsx
+{
+  myView: {
+    nodes: {
+      heading: { /* overrides */ },
+      paragraph: { /* overrides */ },
+      link: { /* overrides */ },
+      list: { /* overrides */ },
+      listitem: { /* overrides */ },
+      quote: { /* overrides */ },
+      horizontalrule: { /* overrides */ },
+      // ... other built-in nodes
+    },
+  },
+}
+```
+
+### Blocks
+
+Override specific block types:
+
+```tsx
+{
+  myView: {
+    nodes: {
+      blocks: {
+        myBlockType: {
+          Component: ({ node }) => {
+            // node.__fields in editor, node.fields in JSX converter
+            return <div>Custom block</div>
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+### Inline Blocks
+
+Override specific inline block types:
+
+```tsx
+{
+  myView: {
+    nodes: {
+      inlineBlocks: {
+        myInlineBlockType: {
+          Component: ({ node }) => <span>Custom inline block</span>,
+        },
+      },
+    },
+  },
+}
+```
+
+## Using Views in the Admin Panel
+
+When views are defined, a view selector automatically appears next to the field label in the admin panel. Users can switch between views to see how content renders in different modes.
+
+### Accessing Current View
+
+Use the `useRichTextView` hook to access the current view:
+
+```tsx
+'use client'
+import { useRichTextView } from '@payloadcms/richtext-lexical/client'
+
+function MyCustomComponent() {
+  const { currentView, views, currentViewMap } = useRichTextView()
+
+  return (
+    <div>
+      <p>Current view: {currentView}</p>
+      {/* currentViewMap contains the active view config */}
+      {currentViewMap?.nodes?.heading && (
+        <p>Custom heading rendering is active</p>
+      )}
+      {currentViewMap?.admin?.hideGutter && (
+        <p>Gutter is hidden in this view</p>
+      )}
+    </div>
+  )
+}
+```
+
+## Using Views in Frontend (JSX Converters)
+
+Pass the node map from your view to JSX converters to render content with the same customizations:
+
+```tsx
+import { convertLexicalToJSX } from '@payloadcms/richtext-lexical'
+import { myViews } from './views'
+
+export function BlogPost({ post }) {
+  return (
+    <div>
+      {convertLexicalToJSX({
+        editorState: post.content,
+        nodeMap: myViews.frontend.nodes, // Use the frontend view's node map
+      })}
+    </div>
+  )
+}
+```
+
+## Advanced Example
+
+Here's a complete example showing different rendering modes:
+
+```tsx
+'use client'
+import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
+
+export const articleViews: LexicalEditorViewMap = {
+  default: {
+    nodes: {
+      heading: {
+        createDOM({ node }) {
+          const heading = document.createElement(node.getTag())
+          heading.className = 'editor-heading'
+          return heading
+        },
+      },
+    },
+  },
+
+  frontend: {
+    admin: {
+      hideGutter: true,
+    },
+    lexical: {
+      theme: {
+        heading: {
+          h1: 'article-heading article-h1',
+          h2: 'article-heading article-h2',
+        },
+        link: 'article-link',
+      },
+    },
+    nodes: {
+      heading: {
+        createDOM({ node }) {
+          const heading = document.createElement(node.getTag())
+          heading.className = 'article-heading'
+          heading.style.color = '#1a202c'
+          heading.style.marginBottom = '1rem'
+          return heading
+        },
+      },
+
+      blocks: {
+        imageBlock: {
+          Component: ({ node, isEditor, isJSXConverter }) => {
+            const fields = isEditor ? node.__fields : node.fields
+
+            return (
+              <figure className="article-image">
+                <img src={fields.image?.url} alt={fields.caption || ''} />
+                {fields.caption && <figcaption>{fields.caption}</figcaption>}
+              </figure>
+            )
+          },
+        },
+
+        quoteBlock: {
+          Component: ({ node, isEditor }) => {
+            const fields = isEditor ? node.__fields : node.fields
+
+            return (
+              <blockquote className="article-quote">
+                <p>{fields.quote}</p>
+                {fields.author && <cite>— {fields.author}</cite>}
+              </blockquote>
+            )
+          },
+        },
+      },
+
+      link: {
+        html: ({ node, isEditor }) => {
+          const fields = isEditor ? node.fields : node.fields
+          const url = fields.url
+          const text = fields.text
+
+          return `<a href="${url}" class="article-link">${text}</a>`
+        },
+      },
+    },
+  },
+
+  debug: {
+    admin: {
+      placeholder: 'Debug mode - showing raw data',
+    },
+    nodes: {
+      blocks: {
+        imageBlock: {
+          Component: ({ node, isEditor }) => {
+            const fields = isEditor ? node.__fields : node.fields
+
+            return (
+              <div style={{ border: '2px dashed red', padding: '1rem' }}>
+                <pre>{JSON.stringify(fields, null, 2)}</pre>
+              </div>
+            )
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+## TypeScript Types
+
+Key types for working with views:
+
+```ts
+import type {
+  LexicalEditorViewMap,
+  LexicalEditorNodeMap,
+  NodeMapValue,
+  LexicalFieldAdminClientProps,
+} from '@payloadcms/richtext-lexical'
+import type { EditorConfig as LexicalEditorConfig } from 'lexical'
+
+// Full view map
+type LexicalEditorViewMap = {
+  [viewKey: string]: {
+    admin?: LexicalFieldAdminClientProps
+    lexical?: LexicalEditorConfig
+    nodes: LexicalEditorNodeMap
+  }
+}
+
+// Admin configuration options
+type LexicalFieldAdminClientProps = {
+  hideGutter?: boolean
+  hideAddBlockButton?: boolean
+  hideDraggableBlockElement?: boolean
+  hideInsertParagraphAtEnd?: boolean
+  placeholder?: string
+}
+
+// Node overrides for a single view
+type LexicalEditorNodeMap = {
+  [nodeType: string]:
+    | NodeMapValue
+    | {
+        [blockType: string]: NodeMapValue
+      }
+}
+
+// Single node override
+type NodeMapValue<T = any> = {
+  Component?: (
+    args: WithinEditorArgs | JSXConverterArgs<T>,
+  ) => React.ReactElement | null
+  createDOM?: (args: WithinEditorArgs | JSXConverterArgs<T>) => HTMLElement
+  html?: string | ((args: WithinEditorArgs | JSXConverterArgs<T>) => string)
+}
+```
