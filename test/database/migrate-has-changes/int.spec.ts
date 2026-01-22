@@ -53,7 +53,7 @@ describe('Database Migrate Has Changes', { db: 'drizzle' }, () => {
     await expect(payload.db.migrateHasChanges()).resolves.toBe(false)
   })
 
-  it('test bin', async () => {
+  it('should exit with code 1 when migrations are missing and code 0 after initial migration is created', async () => {
     rmSync(path.join(dirname, 'migrations'), { recursive: true, force: true })
     const payload = await getPayload({ config })
 
