@@ -11,7 +11,7 @@ import type {
   R2UploadedPart,
 } from '../types.js'
 
-const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHandlerParams>({
+export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHandlerParams>({
   handler: async ({
     apiRoute,
     collectionSlug,
@@ -41,7 +41,9 @@ const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHan
             : `${bytes} bytes`
     try {
       const multipart = await fetch(endpoint(), { method: 'POST' })
-      if (!multipart.ok) {throw new Error('Failed to initialize multipart upload')}
+      if (!multipart.ok) {
+        throw new Error('Failed to initialize multipart upload')
+      }
 
       const multipartUpload = (await multipart.json()) as Pick<
         R2MultipartUpload,
@@ -71,7 +73,9 @@ const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHan
           'Content-Type': 'application/octet-stream',
         }
         const uploaded = await fetch(endpoint(), { body, headers, method: 'POST' })
-        if (!uploaded.ok) {throw new Error(`Failed to upload part ${part} / ${partTotal}`)}
+        if (!uploaded.ok) {
+          throw new Error(`Failed to upload part ${part} / ${partTotal}`)
+        }
 
         multipartUploadedParts.push((await uploaded.json()) as R2UploadedPart)
 
@@ -81,7 +85,9 @@ const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHan
           const body = JSON.stringify(multipartUploadedParts)
           const headers = { 'Content-Type': 'application/json' }
           const complete = await fetch(endpoint(), { body, headers, method: 'POST' })
-          if (!complete.ok) {throw new Error(`Failed to complete multipart upload`)}
+          if (!complete.ok) {
+            throw new Error(`Failed to complete multipart upload`)
+          }
 
           PayloadToast.success('Upload complete!', { id: toast })
           return { key: await complete.text() }
@@ -95,5 +101,3 @@ const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUploadHan
     }
   },
 })
-
-export default R2ClientUploadHandler

@@ -54,7 +54,7 @@ export const r2Storage: R2StoragePlugin =
       R2StorageClientUploadHandlerParams,
       R2StorageOptions['collections'][keyof R2StorageOptions['collections']]
     >({
-      clientHandler: '@payloadcms/storage-r2/client/R2ClientUploadHandler',
+      clientHandler: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
       collections: r2StorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
