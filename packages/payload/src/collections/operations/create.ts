@@ -261,12 +261,12 @@ export const createOperation = async <
         )
       }
 
-      if (typeof resultWithLocales._status !== 'object' || resultWithLocales._status === null) {
-        resultWithLocales._status = {}
+      if (typeof dataWithLocales._status !== 'object' || dataWithLocales._status === null) {
+        dataWithLocales._status = {}
       }
 
       for (const localeCode of accessibleLocaleCodes) {
-        resultWithLocales._status[localeCode] = 'published'
+        dataWithLocales._status[localeCode] = 'published'
       }
     }
 

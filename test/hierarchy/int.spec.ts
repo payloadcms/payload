@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Page } from './payload-types.js'
@@ -12,11 +13,11 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
-let restClient: NextRESTClient
+let _restClient: NextRESTClient
 
 describe('Hierarchy', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient: _restClient } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
@@ -50,10 +51,12 @@ describe('Hierarchy', () => {
       const pagesCollection = payload.collections.pages.config
 
       expect(pagesCollection.hierarchy).not.toBe(false)
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (pagesCollection.hierarchy !== false) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(pagesCollection.hierarchy.parentFieldName).toBe('parent')
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(pagesCollection.hierarchy.slugPathFieldName).toBe('_h_slugPath')
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(pagesCollection.hierarchy.titlePathFieldName).toBe('_h_titlePath')
       }
     })
@@ -62,10 +65,12 @@ describe('Hierarchy', () => {
       const deptsCollection = payload.collections.departments.config
 
       expect(deptsCollection.hierarchy).not.toBe(false)
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (deptsCollection.hierarchy !== false) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.parentFieldName).toBe('parentDept')
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.slugPathFieldName).toBe('_breadcrumbSlug')
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.titlePathFieldName).toBe('_breadcrumbTitle')
       }
     })
@@ -236,6 +241,103 @@ describe('Hierarchy', () => {
     })
   })
 
+  describe('Circular Reference Prevention', () => {
+    beforeEach(async () => {
+      await payload.delete({ collection: 'pages', where: {} })
+    })
+
+    afterEach(async () => {
+      await payload.delete({ collection: 'pages', where: {} })
+    })
+
+    it('should prevent self-referential parent', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: { parent: null, title: 'Test Page' },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'pages',
+          id: page.id,
+          data: { parent: page.id },
+        }),
+      ).rejects.toThrow('Document cannot be its own parent')
+    })
+
+    it('should prevent circular reference with direct child', async () => {
+      const parentPage = await payload.create({
+        collection: 'pages',
+        data: { parent: null, title: 'Parent' },
+      })
+
+      const childPage = await payload.create({
+        collection: 'pages',
+        data: { parent: parentPage.id, title: 'Child' },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'pages',
+          id: parentPage.id,
+          data: { parent: childPage.id },
+        }),
+      ).rejects.toThrow('Circular reference detected')
+    })
+
+    it('should prevent circular reference with grandchild', async () => {
+      const grandparent = await payload.create({
+        collection: 'pages',
+        data: { parent: null, title: 'Grandparent' },
+      })
+
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { parent: grandparent.id, title: 'Parent' },
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { parent: parent.id, title: 'Child' },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'pages',
+          id: grandparent.id,
+          data: { parent: child.id },
+        }),
+      ).rejects.toThrow('Circular reference detected')
+    })
+
+    it('should allow moving to a non-circular parent', async () => {
+      const page1 = await payload.create({
+        collection: 'pages',
+        data: { parent: null, title: 'Page 1' },
+      })
+
+      const page2 = await payload.create({
+        collection: 'pages',
+        data: { parent: null, title: 'Page 2' },
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { parent: page1.id, title: 'Child' },
+      })
+
+      // Moving child from page1 to page2 should work
+      const updated = await payload.update({
+        collection: 'pages',
+        id: child.id,
+        data: { parent: page2.id },
+      })
+
+      expect(updated.parent).toBe(page2.id)
+      expect(updated._h_parentTree).toEqual([page2.id])
+    })
+  })
+
   describe('Query Patterns', () => {
     beforeEach(async () => {
       // Clear existing data before each test
@@ -397,12 +499,15 @@ describe('Hierarchy', () => {
       }
 
       // Verify the deepest level
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (currentParent) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(currentParent._h_depth).toBe(9)
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(currentParent._h_parentTree).toHaveLength(9)
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(currentParent._h_slugPath).toContain('/')
         const pathSegments = currentParent._h_slugPath?.split('/')
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(pathSegments).toHaveLength(10) // level-0 through level-9
       }
     })
@@ -486,7 +591,9 @@ describe('Hierarchy', () => {
       // Check hierarchy config
       expect(orgsCollection.hierarchy).not.toBe(false)
       if (orgsCollection.hierarchy !== false) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(orgsCollection.hierarchy.generatePaths).toBe(false)
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(orgsCollection.hierarchy.parentFieldName).toBe('parentOrg')
       }
     })
@@ -647,6 +754,183 @@ describe('Hierarchy', () => {
       })
 
       expect(depthOne.docs).toHaveLength(2) // child1, child2
+    })
+  })
+
+  describe('Draft Versions', () => {
+    it('should update both published and draft versions when moving parent', async () => {
+      // Create published page with draft changes
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Products', parent: null },
+      })
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Clothing', parent: parent.id },
+      })
+
+      // Publish child
+      await payload.update({
+        collection: 'pages',
+        id: child.id,
+        data: { _status: 'published' },
+        draft: false,
+      })
+
+      // Create draft with title change
+      await payload.update({
+        collection: 'pages',
+        id: child.id,
+        data: { title: 'Apparel' }, // Draft change
+        draft: true,
+      })
+
+      // Move parent
+      const newParent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Categories', parent: null },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: parent.id,
+        data: { parent: newParent.id },
+      })
+
+      // Verify published version has new path
+      const publishedChild = await payload.findByID({
+        collection: 'pages',
+        id: child.id,
+      })
+
+      expect(publishedChild._h_slugPath).toBe('categories/products/clothing')
+
+      // Verify draft version ALSO has new path
+      const draftChild = await payload.findByID({
+        collection: 'pages',
+        id: child.id,
+        draft: true,
+      })
+
+      expect(draftChild._h_slugPath).toBe('categories/products/apparel') // Uses draft title
+    })
+
+    it('should update only published version when no draft exists', async () => {
+      // Create and publish parent
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Services', parent: null, _status: 'published' },
+      })
+
+      // Create and publish child (no draft changes)
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Consulting', parent: parent.id, _status: 'published' },
+      })
+
+      // Move parent
+      const newParent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Offerings', parent: null },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: parent.id,
+        data: { parent: newParent.id },
+      })
+
+      // Verify published version has new path
+      const publishedChild = await payload.findByID({
+        collection: 'pages',
+        id: child.id,
+      })
+
+      expect(publishedChild._h_slugPath).toBe('offerings/services/consulting')
+      expect(publishedChild._status).toBe('published')
+
+      // Verify that fetching draft returns the same as published (no separate draft created)
+      const draftChild = await payload.findByID({
+        collection: 'pages',
+        id: child.id,
+        draft: true,
+      })
+
+      // When no draft exists, draft: true returns the most recent version (published)
+      expect(draftChild._h_slugPath).toBe('offerings/services/consulting')
+      expect(draftChild._status).toBe('published')
+    })
+
+    it('should handle draft-only documents (never published)', async () => {
+      // Create parent as draft
+      const parent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Future', parent: null },
+        draft: true,
+      })
+
+      // Create child as draft
+      const child = await payload.create({
+        collection: 'pages',
+        data: { title: 'Plans', parent: parent.id },
+        draft: true,
+      })
+
+      // Move parent
+      const newParent = await payload.create({
+        collection: 'pages',
+        data: { title: 'Roadmap', parent: null },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: parent.id,
+        data: { parent: newParent.id },
+        draft: true,
+      })
+
+      // Verify draft version has new path
+      const draftChild = await payload.findByID({
+        collection: 'pages',
+        id: child.id,
+        draft: true,
+      })
+
+      expect(draftChild._h_slugPath).toBe('roadmap/future/plans')
+      expect(draftChild._status).toBe('draft')
+    })
+
+    it('should handle collections without versioning', async () => {
+      // Categories collection has no versioning enabled
+      const parent = await payload.create({
+        collection: 'categories',
+        data: { name: 'Electronics', parentCategory: null },
+      })
+
+      const child = await payload.create({
+        collection: 'categories',
+        data: { name: 'Phones', parentCategory: parent.id },
+      })
+
+      const newParent = await payload.create({
+        collection: 'categories',
+        data: { name: 'Tech', parentCategory: null },
+      })
+
+      // Should not throw error even though collection has no versioning
+      await payload.update({
+        collection: 'categories',
+        id: parent.id,
+        data: { parentCategory: newParent.id },
+      })
+
+      const updatedChild = await payload.findByID({
+        collection: 'categories',
+        id: child.id,
+      })
+
+      expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
     })
   })
 })

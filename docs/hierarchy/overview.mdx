@@ -457,33 +457,46 @@ Descendants are processed in batches of 100, handling unlimited tree depths with
 **Direct Database Updates:**
 Descendant updates use `db.updateOne()` directly for performance. Trade-off: Descendants don't trigger `afterChange` hooks during cascade updates.
 
-## Limitations
+## Important Behaviors
 
-### 1. Locale 'all' Not Supported
+### Automatic Descendant Updates
 
-Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
+When you move or rename a document, all its descendants are automatically updated to maintain tree integrity. These updates:
 
-### 2. Descendant Hooks Not Triggered
+- ✅ **Trigger all hooks** - `afterChange` hooks fire for each descendant
+- ✅ **Create versions** - If versioning is enabled, each descendant gets a new version
+- ✅ **Respect access control** - Updates use `overrideAccess: true` since parent access was already checked
 
-When a parent moves or changes title, descendants are updated directly without triggering their `afterChange` hooks (for performance).
+**Performance Note:** Moving a document with many descendants (100+) will take longer due to processing each descendant individually. This tradeoff ensures Payload's hooks and versioning work as expected.
 
-### 3. No Built-in Circular Reference Prevention
-
-Add validation to your parent field to prevent circular references:
+**Example:**
 
 ```ts
-{
-  name: 'parent',
-  type: 'relationship',
-  relationTo: 'pages',
-  validate: async (value, { id }) => {
-    if (value === id) {
-      return 'Document cannot be its own parent'
-    }
-    return true
-  }
-}
+// Moving a folder with 50 descendant pages
+await payload.update({
+  collection: 'pages',
+  id: 'folder-id',
+  data: { parent: 'new-parent' },
+})
+// Result:
+// - Folder: ✅ Updated, hooks fire, version created
+// - 50 descendants: ✅ All updated, hooks fire, versions created
 ```
+
+### Circular Reference Protection
+
+Hierarchy automatically prevents circular references. You cannot:
+
+- Set a document as its own parent
+- Set a descendant as a parent (e.g., grandchild → parent → grandchild)
+
+These operations will throw an error before any changes are made.
+
+## Limitations
+
+### Locale 'all' Not Supported
+
+Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
 
 ## Best Practices
 

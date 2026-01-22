@@ -58,7 +58,11 @@ export const hierarchyCollectionAfterChange =
       req.locale ||
       (req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined)
 
-    // handle this better later
+    // Skip hierarchy processing when locale is 'all'
+    // This is a defensive check: req.locale should not be 'all' in normal operations,
+    // as it's only used internally for database operations that update all locales at once.
+    // If this check triggers, it indicates the operation is updating all locales simultaneously,
+    // and processing each locale individually could cause conflicts.
     if (reqLocale === 'all') {
       return
     }
@@ -70,6 +74,21 @@ export const hierarchyCollectionAfterChange =
       slugify,
       titleFieldName,
     })
+
+    // Validate circular references when parent is changing
+    if (parentChanged && newParentID) {
+      // Prevent self-referential parent
+      if (newParentID === doc.id) {
+        throw new Error('Document cannot be its own parent')
+      }
+
+      // Prevent circular references (check if new parent is a descendant)
+      if (doc._h_parentTree && doc._h_parentTree.includes(newParentID)) {
+        throw new Error(
+          'Circular reference detected: the new parent is a descendant of this document',
+        )
+      }
+    }
 
     const parentChangedOrCreate = parentChanged || operation === 'create'
 
@@ -95,6 +114,90 @@ export const hierarchyCollectionAfterChange =
         titleFieldName,
         titlePathFieldName,
       })
+
+      // Build previousDocWithPaths by computing what the paths were before this update
+      // We can't fetch from the database because this is an afterChange hook and the document
+      // has already been updated. Instead, we compute the old paths from the previousDoc data.
+      let previousDocWithPaths = previousDocWithLocales
+      if (generatePaths && operation === 'update' && previousDoc) {
+        // Compute the previous paths by combining parent path + document's title
+        const previousTitle = previousDoc[titleFieldName]
+        const previousSlug = slugify(previousTitle)
+
+        if (previousDoc[parentFieldName]) {
+          // Document has a parent - fetch parent's path and combine with document's old title
+          const previousParentDoc = await req.payload.findByID({
+            id: previousDoc[parentFieldName],
+            collection: collection.slug,
+            depth: 0,
+            req,
+          })
+
+          if (isTitleLocalized && req.payload.config.localization) {
+            const slugPathByLocale: Record<string, string> = {}
+            const titlePathByLocale: Record<string, string> = {}
+
+            for (const locale of req.payload.config.localization.localeCodes) {
+              const parentSlugPath = previousParentDoc[slugPathFieldName][locale] || ''
+              const parentTitlePath = previousParentDoc[titlePathFieldName][locale] || ''
+              const docTitle =
+                typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
+              const docSlug = slugify(docTitle)
+
+              slugPathByLocale[locale] = parentSlugPath ? `${parentSlugPath}/${docSlug}` : docSlug
+              titlePathByLocale[locale] = parentTitlePath
+                ? `${parentTitlePath}/${docTitle}`
+                : docTitle
+            }
+
+            previousDocWithPaths = {
+              ...previousDocWithLocales,
+              [slugPathFieldName]: slugPathByLocale,
+              [titlePathFieldName]: titlePathByLocale,
+            }
+          } else {
+            const parentSlugPath = previousParentDoc[slugPathFieldName] || ''
+            const parentTitlePath = previousParentDoc[titlePathFieldName] || ''
+
+            previousDocWithPaths = {
+              ...previousDocWithLocales,
+              [slugPathFieldName]: parentSlugPath
+                ? `${parentSlugPath}/${previousSlug}`
+                : previousSlug,
+              [titlePathFieldName]: parentTitlePath
+                ? `${parentTitlePath}/${previousTitle}`
+                : previousTitle,
+            }
+          }
+        } else {
+          // Document is a root (no parent) - just use the document's old title as the path
+          if (isTitleLocalized && req.payload.config.localization) {
+            const slugPathByLocale: Record<string, string> = {}
+            const titlePathByLocale: Record<string, string> = {}
+
+            for (const locale of req.payload.config.localization.localeCodes) {
+              const docTitle =
+                typeof previousTitle === 'string' ? previousTitle : previousTitle[locale] || ''
+              const docSlug = slugify(docTitle)
+
+              slugPathByLocale[locale] = docSlug
+              titlePathByLocale[locale] = docTitle
+            }
+
+            previousDocWithPaths = {
+              ...previousDocWithLocales,
+              [slugPathFieldName]: slugPathByLocale,
+              [titlePathFieldName]: titlePathByLocale,
+            }
+          } else {
+            previousDocWithPaths = {
+              ...previousDocWithLocales,
+              [slugPathFieldName]: previousSlug,
+              [titlePathFieldName]: previousTitle,
+            }
+          }
+        }
+      }
 
       // Build update data
       const updateData: Record<string, any> = {
@@ -143,7 +246,7 @@ export const hierarchyCollectionAfterChange =
         parentDocID: doc.id,
         parentDocWithLocales: updatedDocWithLocales,
         parentFieldName,
-        previousParentDocWithLocales: previousDocWithLocales,
+        previousParentDocWithLocales: previousDocWithPaths,
         req,
         slugPathFieldName,
         titlePathFieldName,

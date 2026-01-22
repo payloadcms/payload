@@ -29,6 +29,9 @@ export const Pages: CollectionConfig = {
   hierarchy: {
     parentFieldName: 'parent',
   },
+  versions: {
+    drafts: true,
+  },
 }
 
 // Categories collection with hierarchy enabled (using defaults)
