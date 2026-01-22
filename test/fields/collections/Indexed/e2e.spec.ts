@@ -100,7 +100,6 @@ describe('Radio', () => {
     await assertToastErrors({
       page,
       errors: ['uniqueText'],
-      dismissAfterAssertion: true,
     })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')

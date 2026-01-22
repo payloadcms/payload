@@ -18,6 +18,17 @@ import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
 export interface R2StorageOptions {
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
   bucket: R2Bucket
   /**
    * Do uploads directly on the client, to bypass limits on Cloudflare/Vercel.
@@ -99,6 +110,7 @@ export const r2Storage: R2StoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: r2StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

@@ -79,6 +79,11 @@ export const azTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
+  dashboard: {
+    addWidget: 'Vidjet əlavə et',
+    deleteWidget: 'Vidgeti silin {{id}}',
+    searchWidgets: 'Widgetləri axtarın...',
+  },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
     autosaving: 'Bu sənədin avto yadda saxlanılması zamanı problem yarandı.',
@@ -116,6 +121,7 @@ export const azTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faylın yüklənməsi zamanı problem yarandı.',
     restoringTitle:
       '{{title}} bərpa olunarkən xəta baş verdi. Zəhmət olmasa, internet bağlantınızı yoxlayın və yenidən cəhd edin.',
+    revertingDocument: 'Bu sənədi qaytarmaq zamanı problem yarandı.',
     tokenInvalidOrExpired: 'Token ya yanlışdır və ya müddəti bitib.',
     tokenNotProvided: 'Token təqdim edilməyib.',
     unableToCopy: 'Kopyalama mümkün deyil.',
@@ -340,6 +346,7 @@ export const azTranslations: DefaultTranslationsObject = {
     loading: 'Yüklənir',
     locale: 'Lokal',
     locales: 'Dillər',
+    lock: 'Kilid',
     menu: 'Menyu',
     moreOptions: 'Daha çox seçimlər',
     move: 'Hərəkət et',
@@ -430,6 +437,7 @@ export const azTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} zibilə köçürüldü.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
+    unlock: 'Açın',
     unsavedChanges:
       'Sizin saxlanılmamış dəyişiklikləriniz var. Davam etmədən əvvəl saxlayın və ya atın.',
     unsavedChangesDuplicate:
@@ -550,6 +558,7 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Bu sənədin dəyişikliklərini dərc edilmiş vəziyyətinə qaytarmağa hazırsınız. Əminsiniz?',
     aboutToUnpublish: 'Bu sənədi dərcdən çıxartmağa hazırsınız. Əminsiniz?',
+    aboutToUnpublishIn: 'Siz bu sənədi {{locale}} dilində yayından çıxarmaq üzərəsiniz. Əminsiniz?',
     aboutToUnpublishSelection:
       'Seçimdə olan bütün {{label}}-i dərcdən çıxartmağa hazırsınız. Əminsiniz?',
     autosave: 'Avtomatik yadda saxlama',
@@ -597,6 +606,7 @@ export const azTranslations: DefaultTranslationsObject = {
     restoring: 'Bərpa olunur...',
     reverting: 'Qayıdılır...',
     revertToPublished: 'Dərc edilmişə qayıt',
+    revertUnsuccessful: 'Bərpa uğursuz oldu. Əvvəlki nəşr olunmuş versiya tapılmadı.',
     saveDraft: 'Qaralamayı yadda saxla',
     scheduledSuccessfully: 'Uğurla cədvələ qoyuldu.',
     schedulePublish: 'Nəşr Cədvəli',
@@ -607,6 +617,9 @@ export const azTranslations: DefaultTranslationsObject = {
     specificVersion: 'Xüsusi Versiya',
     status: 'Status',
     unpublish: 'Dərcdən çıxart',
+    unpublished: 'Nəşr edilməmiş',
+    unpublishedSuccessfully: 'Uğurla yayımlanmadı.',
+    unpublishIn: '{{locale}} dilində yayınlamanı ləğv et',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',
     versionAgo: '{{distance}} əvvəl',

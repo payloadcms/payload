@@ -7,10 +7,12 @@ import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -18,6 +20,7 @@ import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
   changeLocale,
+  closeAllToasts,
   closeLocaleSelector,
   ensureCompilationIsDone,
   findTableRow,
@@ -35,6 +38,7 @@ import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArray
 import { noLocalizedFieldsCollectionSlug } from './collections/NoLocalizedFields/index.js'
 import { richTextSlug } from './collections/RichText/index.js'
 import {
+  allFieldsLocalizedSlug,
   arrayWithFallbackCollectionSlug,
   defaultLocale,
   englishTitle,
@@ -68,6 +72,7 @@ let urlArray: AdminUrlUtil
 let arrayWithFallbackURL: AdminUrlUtil
 let noLocalizedFieldsURL: AdminUrlUtil
 let urlBlocks: AdminUrlUtil
+let urlAllFieldsLocalized: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -96,6 +101,7 @@ describe('Localization', () => {
     arrayWithFallbackURL = new AdminUrlUtil(serverURL, arrayWithFallbackCollectionSlug)
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
     urlBlocks = new AdminUrlUtil(serverURL, blocksCollectionSlug)
+    urlAllFieldsLocalized = new AdminUrlUtil(serverURL, allFieldsLocalizedSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -113,6 +119,8 @@ describe('Localization', () => {
     //   context,
     //   delay: 'Fast 4G',
     // })
+    await page.goto(url.admin)
+    await changeLocale(page, 'en')
   })
 
   describe('localizer', () => {
@@ -120,20 +128,21 @@ describe('Localization', () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
+      await expect(page.locator('.popup__content')).toBeVisible()
     })
 
     test('should filter locale with filterAvailableLocales', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
-      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+      await expect(page.locator('.popup__content')).toBeVisible()
+      await expect(page.locator('.popup__content')).not.toContainText('FILTERED')
     })
 
     test('should filter version locale selector with filterAvailableLocales', async () => {
       await page.goto(urlPostsWithDrafts.create)
       await page.locator('#field-title').fill('title')
-      await page.locator('#action-save').click()
+      await saveDocAndAssert(page)
 
       await page.locator('text=Versions').click()
       const firstVersion = await findTableRow(page, 'Currently Published')
@@ -153,11 +162,9 @@ describe('Localization', () => {
 
       await page.locator('.localizer button.popup-button').first().click()
 
-      await expect(page.locator('.localizer .popup')).toHaveClass(/popup--active/)
+      await expect(page.locator('.popup__content')).toBeVisible()
 
-      const activeOption = page.locator(
-        `.localizer .popup.popup--active .popup-button-list__button--selected`,
-      )
+      const activeOption = page.locator(`.popup__content .popup-button-list__button--selected`)
 
       await expect(activeOption).toBeVisible()
       const tagName = await activeOption.evaluate((node) => node.tagName)
@@ -301,8 +308,8 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
-      await page.locator('#action-save').click()
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+      await saveDocAndAssert(page)
+
       const collectionUrl = page.url()
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-localizedCheckbox')).toBeEnabled()
@@ -544,7 +551,7 @@ describe('Localization', () => {
       await openLocaleSelector(page)
 
       const localeToSelect = page
-        .locator('.localizer .popup.popup--active .popup-button-list__button')
+        .locator('.popup__content .popup-button-list__button')
         .locator('.localizer__locale-code', {
           hasText: `${spanishLocale}`,
         })
@@ -619,7 +626,6 @@ describe('Localization', () => {
       await checkbox.click()
       await expect(checkbox).toBeChecked()
       await saveDocAndAssert(page)
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })
 
     test('should save correct data when fallback checkbox is checked', async () => {
@@ -634,7 +640,11 @@ describe('Localization', () => {
       await saveDocAndAssert(page)
 
       const id = page.url().split('/').pop()
-      const apiURL = `${serverURL}/api/${arrayWithFallbackCollectionSlug}/${id}`
+      const apiURL = formatAdminURL({
+        apiRoute: '/api',
+        path: `/${arrayWithFallbackCollectionSlug}/${id}`,
+        serverURL,
+      })
       await page.goto(apiURL)
       const data = await page.evaluate(() => {
         return JSON.parse(document.querySelector('body')?.innerText || '{}')
@@ -659,8 +669,9 @@ describe('Localization', () => {
     })
 
     test('blocks - should show fallback checkbox for non-default locale', async () => {
-      await changeLocale(page, 'en')
+      // Navigate to page first (previous test may have left page on API endpoint)
       await page.goto(urlBlocks.create)
+      await changeLocale(page, 'en')
       const titleLocator = page.locator('#field-title')
       await titleLocator.fill('Block Test')
       await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
@@ -678,8 +689,11 @@ describe('Localization', () => {
       await expect(fallbackCheckbox).toBeVisible()
     })
 
-    test('blocks - should successfully save with the fallback', async () => {
+    test.fixme('blocks - should successfully save with the fallback', async () => {
+      // TODO: Fix this test. It never succeeded.
+      // The only reason it passed after a retry was because after it fails, it will set the locale to pt. When it then retries, it will incorrectly start with pt instead of en.
       await page.goto(urlBlocks.create)
+
       await addBlock({ page, blockToSelect: 'Block Inside Block', fieldName: 'content' })
       const rowTextInput = page.locator(`#field-content__0__text`)
       await rowTextInput.fill('text')
@@ -712,13 +726,42 @@ describe('Localization', () => {
       await page.goto(urlPostsWithDrafts.create)
       await changeLocale(page, 'es')
       await fillValues({ title: 'Created In Spanish' })
-      const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
-      await chevronButton.click()
       await saveDocAndAssert(page, '#publish-locale')
 
       await expect(page.locator('#field-title')).toHaveValue('Created In Spanish')
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
+    })
+
+    test('blocks - ensure publish locale popup is visible on smaller screen sizes', async () => {
+      // This verifies that the Popup component is not hidden behind overflow: hidden of the parent element,
+      // which is set for smaller screen sizes.
+      // This was an issue until createPortal was introduced in the Popup component.
+      await page.setViewportSize({ width: 480, height: 720 })
+      await page.goto(urlBlocks.create)
+      await page.locator('.form-submit .popup-button').click()
+
+      const popup = page.locator('.popup__content')
+      await expect(popup).toBeVisible()
+
+      // Verify popup is actually visible (not clipped by overflow: hidden)
+      // by checking if elementFromPoint at popup's center returns the popup or its child
+      const box = await popup.boundingBox()
+      expect(box).not.toBeNull()
+
+      const centerX = box!.x + box!.width / 2
+      const centerY = box!.y + box!.height / 2
+
+      const isActuallyVisible = await page.evaluate(
+        ({ selector, x, y }) => {
+          const popup = document.querySelector(selector)
+          const elementAtPoint = document.elementFromPoint(x, y)
+          return popup?.contains(elementAtPoint) ?? false
+        },
+        { selector: '.popup__content', x: centerX, y: centerY },
+      )
+
+      expect(isActuallyVisible).toBe(true)
     })
   })
 
@@ -763,16 +806,86 @@ describe('Localization', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'successfully duplicated',
       )
+      // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
+      await closeAllToasts(page)
 
       await expect.poll(() => page.url()).not.toContain(id)
       await page.waitForURL((url) => !url.toString().includes(id))
 
+      // Wait for page to be ready after duplicate redirect
+      await expect(page.locator('.localizer button.popup-button')).toBeVisible()
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
       await changeLocale(page, spanishLocale)
       await expect(page.locator('#field-title')).toBeEmpty()
       await changeLocale(page, 'pt')
       await expect(page.locator('#field-title')).toHaveValue('Portuguese Title')
+    })
+  })
+
+  describe('localize status', () => {
+    describe('versions list', () => {
+      test('should show currently published doc in version list', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Currently Published')
+      })
+
+      test('should only show published status when viewing the published locale', async () => {
+        await changeLocale(page, defaultLocale)
+        await page.goto(urlAllFieldsLocalized.create)
+
+        // publish en
+        await page.locator('#field-text').fill('EN Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
+
+        // draft en
+        await page.locator('#field-text').fill('EN Draft')
+        await saveDocAndAssert(page, '#action-save-draft')
+
+        await changeLocale(page, spanishLocale)
+
+        // publish es
+        await page.locator('#field-text').fill('ES Published')
+        await saveDocAndAssert(page, '#publish-locale')
+
+        await page.goto(urlAllFieldsLocalized.versions(docID))
+        await changeLocale(page, defaultLocale)
+
+        const firstRow = page.locator('tbody tr').first()
+        await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
+      })
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.localizer'],
+        exclude: ['main'],
+      })
+
+      expect(scanResults.violations.length).toBe(0)
     })
   })
 })
@@ -805,20 +918,20 @@ async function runCopy({ page, toLocale }: { page: Page; toLocale: string }) {
   await expect(page).toHaveURL(regexPattern)
 }
 
-async function createAndSaveDoc(page, url, values) {
+async function createAndSaveDoc(page: Page, url: AdminUrlUtil, values: Partial<LocalizedPost>) {
   await page.goto(url.create)
   await fillValues(values)
   await saveDocAndAssert(page)
 }
 
-async function openCopyToLocaleDrawer(page) {
+async function openCopyToLocaleDrawer(page: Page) {
   await page.locator('.doc-controls__popup button.popup-button').click()
   await page.locator('#copy-locale-data__button').click()
   await expect(page.locator('#copy-locale')).toBeVisible()
   await expect(page.locator('.copy-locale-data__content')).toBeVisible()
 }
 
-async function setToLocale(page, locale) {
+async function setToLocale(page: Page, locale: string) {
   const toField = page.locator('#field-toLocale')
   await toField.click({ delay: 100 })
   const options = page.locator('.rs__option')

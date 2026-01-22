@@ -1,9 +1,9 @@
 import type { Payload } from 'payload'
 
-/* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { withoutAutoRun } from './utilities.js'
@@ -31,7 +31,7 @@ describePostgres('queues - postgres logs', () => {
   })
 
   afterAll(async () => {
-    await payload.destroy()
+    await payload?.destroy()
   })
 
   it('ensure running jobs uses minimal db calls', async () => {
@@ -44,7 +44,7 @@ describePostgres('queues - postgres logs', () => {
       })
 
       // Count every console log (= db call)
-      const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
       const res = await payload.jobs.run({})
 
@@ -52,7 +52,7 @@ describePostgres('queues - postgres logs', () => {
         jobStatus: { '1': { status: 'success' } },
         remainingJobsFromQueried: 0,
       })
-      expect(consoleCount).toHaveBeenCalledTimes(14) // Should be 14 sql calls if the optimizations are used. If not, this would be 22 calls
+      expect(consoleCount).toHaveBeenCalledTimes(15) // Should be 15 sql calls if the optimizations are used. If not, this would be 23 calls
       consoleCount.mockRestore()
     })
   })

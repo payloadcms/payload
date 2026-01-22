@@ -18,7 +18,7 @@ const baseClass = 'lexical-upload-diff'
 export const UploadDiffHTMLConverterAsync: (args: {
   i18n: I18nClient
   req: PayloadRequest
-}) => HTMLConvertersAsync<SerializedUploadNode> = ({ i18n, req }) => {
+}) => HTMLConvertersAsync<SerializedUploadNode> = () => {
   return {
     upload: async ({ node, populate, providedCSSString }) => {
       const uploadNode = node as UploadDataImproved
@@ -42,7 +42,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
         return ''
       }
 
-      const relatedCollection = req.payload.collections[uploadNode.relationTo]?.config
+      const alt = (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || ''
 
       const thumbnailSRC: string =
         ('thumbnailURL' in uploadDoc && (uploadDoc?.thumbnailURL as string)) || uploadDoc?.url || ''
@@ -66,11 +66,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
         >
           <div className={`${baseClass}__card`}>
             <div className={`${baseClass}__thumbnail`}>
-              {thumbnailSRC?.length ? (
-                <img alt={uploadDoc?.filename} src={thumbnailSRC} />
-              ) : (
-                <File />
-              )}
+              {thumbnailSRC?.length ? <img alt={alt} src={thumbnailSRC} /> : <File />}
             </div>
             <div className={`${baseClass}__info`} data-enable-match="false">
               <strong>{uploadDoc?.filename}</strong>

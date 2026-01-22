@@ -29,8 +29,9 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -45,11 +46,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
   select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
+  unpublishAllLocales?: boolean
 }
 
 export const updateByIDOperation = async <
@@ -67,18 +70,11 @@ export const updateByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'update',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'update',
+    })
 
     if (args.publishSpecificLocale) {
       args.req.locale = args.publishSpecificLocale
@@ -95,6 +91,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -106,6 +103,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
+      unpublishAllLocales,
     } = args
 
     if (!id) {
@@ -203,7 +201,6 @@ export const updateByIDOperation = async <
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
-      accessResults,
       autosave,
       collectionConfig,
       config,
@@ -218,10 +215,12 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
+      unpublishAllLocales,
     })
 
     await unlinkTempFiles({

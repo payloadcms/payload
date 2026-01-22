@@ -245,6 +245,12 @@ export interface User {
   id: string;
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
+  loginMetadata?:
+    | {
+        info?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   namedSaveToJWT?: string | null;
   richText?: {
     root: {
@@ -538,6 +544,12 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   adminOnlyField?: T;
   roles?: T;
+  loginMetadata?:
+    | T
+    | {
+        info?: T;
+        id?: T;
+      };
   namedSaveToJWT?: T;
   richText?: T;
   group?:
@@ -723,6 +735,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

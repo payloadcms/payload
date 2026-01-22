@@ -8,7 +8,8 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -29,18 +30,11 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req!.context,
-            operation: 'countVersions',
-            req: args.req!,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'countVersions',
+    })
 
     const {
       collection: { config: collectionConfig },

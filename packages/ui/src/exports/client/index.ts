@@ -32,8 +32,10 @@ export { OrderableTable } from '../../elements/Table/OrderableTable.js'
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
 export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
 export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
+export { QueryPresetsGroupByCell } from '../../elements/QueryPresets/cells/GroupByCell/index.js'
 export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
+export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
@@ -182,6 +184,7 @@ export {
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
+export { ItemsDrawer } from '../../elements/ItemsDrawer/index.js'
 
 // fields
 export { HiddenField } from '../../fields/Hidden/index.js'

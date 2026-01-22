@@ -80,6 +80,11 @@ export const rsTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако нисте затражили промену лозинке игноришите ову поруку и лозинка ће остати непромењена.',
   },
+  dashboard: {
+    addWidget: 'Dodaj Widget',
+    deleteWidget: 'Obriši vidžet {{id}}',
+    searchWidgets: 'Pretraži widgete...',
+  },
   error: {
     accountAlreadyActivated: 'Овај налог је већ активиран.',
     autosaving: 'Настао је проблем при аутоматском чувању овог документа.',
@@ -117,6 +122,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Постоји проблем при учитавању датотеке.',
     restoringTitle:
       'Došlo je do greške prilikom vraćanja {{title}}. Proverite svoju vezu i pokušajte ponovo.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Токен је невалидан или је истекао.',
     tokenNotProvided: 'Token nije dostavljen.',
     unableToCopy: 'Није могуће копирати.',
@@ -339,6 +345,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     loading: 'Учитавање',
     locale: 'Језик',
     locales: 'Преводи',
+    lock: 'Zaključaj',
     menu: 'Мени',
     moreOptions: 'Više opcija',
     move: 'Pomeri',
@@ -428,6 +435,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
+    unlock: 'Otključaj',
     unsavedChanges: 'Imate nesačuvane izmene. Sačuvajte ili odbacite pre nego što nastavite.',
     unsavedChangesDuplicate: 'Имате несачуване промене. Да ли желите наставити са дуплицирањем?',
     untitled: 'Без наслова',
@@ -543,6 +551,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     aboutToRestoreGlobal: 'Вратићете глобални {{label}} у стање у којем је био {{versionDate}}.',
     aboutToRevertToPublished: 'Вратићете промене у документу у објављено стање. Да ли сте сигурни?',
     aboutToUnpublish: 'Поништићете објаву овог документа. Да ли сте сигурни?',
+    aboutToUnpublishIn: 'На путу сте да повучете овај документ у {{locale}}. Да ли сте сигурни?',
     aboutToUnpublishSelection:
       'Управо ћете поништити објаву свих {{label}} у одабиру. Да ли сте сигурни?',
     autosave: 'Аутоматско чување',
@@ -590,6 +599,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     restoring: 'Враћање...',
     reverting: 'Враћање...',
     revertToPublished: 'Врати на објављено',
+    revertUnsuccessful: 'Povratak nije uspeo. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Сачувај нацрт',
     scheduledSuccessfully: 'Успешно заказано.',
     schedulePublish: 'Planiranje publikovanja',
@@ -600,6 +610,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Статус',
     unpublish: 'Поништи објаву',
+    unpublished: 'Необјављено',
+    unpublishedSuccessfully: 'Успешно необјављено.',
+    unpublishIn: 'Otkaži objavljivanje na {{locale}}',
     unpublishing: 'Поништавање објаве...',
     version: 'Верзија',
     versionAgo: 'pre {{distance}}',

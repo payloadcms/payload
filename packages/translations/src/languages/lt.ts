@@ -80,6 +80,11 @@ export const ltTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
+  dashboard: {
+    addWidget: 'Pridėti valdiklį',
+    deleteWidget: 'Ištrinti valdiklį {{id}}',
+    searchWidgets: 'Ieškokite valdiklių...',
+  },
   error: {
     accountAlreadyActivated: 'Ši paskyra jau aktyvuota.',
     autosaving: 'Šio dokumento automatinio išsaugojimo metu kilo problema.',
@@ -117,6 +122,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Failo įkelti nepavyko dėl problemos.',
     restoringTitle:
       'Įvyko klaida atkuriant {{title}}. Prašome patikrinti savo ryšį ir bandyti dar kartą.',
+    revertingDocument: 'Šio dokumento grąžinimo metu kilo problema.',
     tokenInvalidOrExpired: 'Žetonas yra neteisingas arba jo galiojimas pasibaigė.',
     tokenNotProvided: 'Žetonas nesuteiktas.',
     unableToCopy: 'Nepavyko nukopijuoti.',
@@ -341,6 +347,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     loading: 'Kraunama',
     locale: 'Lokalė',
     locales: 'Lokalės',
+    lock: 'Užraktas',
     menu: 'Meniu',
     moreOptions: 'Daugiau parinkčių',
     move: 'Judėti',
@@ -430,6 +437,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} perkeltas į šiukšlinę.',
     true: 'Tiesa',
     unauthorized: 'Neleistinas',
+    unlock: 'Atrakinti',
     unsavedChanges: 'Turite neišsaugotų pakeitimų. Išsaugokite arba atmestkite prieš tęsdami.',
     unsavedChangesDuplicate: 'Jūs turite neišsaugotų pakeitimų. Ar norėtumėte tęsti dubliavimą?',
     untitled: 'Neužpavadinamas',
@@ -551,6 +559,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Jūs ketinate atšaukti šio dokumento pakeitimus ir grįžti prie publikuotos versijos. Ar esate įsitikinęs?',
     aboutToUnpublish: 'Jūs ketinate panaikinti šio dokumento publikavimą. Ar esate tikri?',
+    aboutToUnpublishIn: 'Jūs ketinate nepublikuoti šio dokumento {{locale}}. Ar esate tikras?',
     aboutToUnpublishSelection:
       'Jūs ketinate atšaukti visų {{label}} pasirinkime. Ar esate įsitikinęs?',
     autosave: 'Automatinis išsaugojimas',
@@ -598,6 +607,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     restoring: 'Atkuriamas...',
     reverting: 'Grįžtama...',
     revertToPublished: 'Grįžti prie publikuotojo',
+    revertUnsuccessful: 'Grįžtama nepavyko. Ankstesnės publikuotos versijos nerasta.',
     saveDraft: 'Išsaugoti juodraštį',
     scheduledSuccessfully: 'Sėkmingai suplanuota.',
     schedulePublish: 'Suplanuokite publikaciją',
@@ -608,6 +618,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifinė versija',
     status: 'Būsena',
     unpublish: 'Nebepublikuoti',
+    unpublished: 'Nepublikuota',
+    unpublishedSuccessfully: 'Sėkmingai nepaskelbta.',
+    unpublishIn: 'Nepublikuoti {{locale}}',
     unpublishing: 'Nebepublikuojama...',
     version: 'Versija',
     versionAgo: 'prieš {{distance}}',

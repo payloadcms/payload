@@ -284,6 +284,63 @@ describe('Relationship Field', () => {
     await expect(values).toHaveText([relationOneDoc.id, relationTwoDoc.id])
   })
 
+  test('should paginate polymorphic relationship correctly and not send NaN page parameter', async () => {
+    const relationOneIDs: string[] = []
+    const relationTwoIDs: string[] = []
+
+    // Create 15 relationOne docs to simulate pagination in the dropdown
+    for (let i = 0; i < 15; i++) {
+      const doc = await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: `relation-one-${i}`,
+        },
+      })
+      relationOneIDs.push(doc.id)
+    }
+
+    // Create 15 relationOne docs to simulate pagination in the dropdown
+    for (let i = 0; i < 15; i++) {
+      const doc = await payload.create({
+        collection: relationTwoSlug,
+        data: {
+          name: `relation-two-${i}`,
+        },
+      })
+      relationTwoIDs.push(doc.id)
+    }
+
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationshipHasManyMultiple')
+
+    await field.click({ delay: 100 })
+
+    const menu = page.locator('.rs__menu-list')
+    await expect(menu).toBeVisible()
+    await wait(300)
+
+    const options = page.locator('.rs__option')
+    await expect(options.first()).toBeVisible()
+
+    // Hover over the menu and use mouse wheel to scroll and trigger pagination
+    await menu.hover()
+
+    // Scroll down multiple times using mouse wheel to trigger onMenuScrollToBottom
+    for (let i = 0; i < 5; i++) {
+      await menu.hover()
+      await page.mouse.wheel(0, 500)
+      await wait(300)
+    }
+
+    // Check that we can see the 14th doc from relationTwo (which would be on page 2)
+    // Before the fix, page 2 of relationTwo wouldn't load because page parameter was NaN
+    const fourteenthRelationTwoDoc = relationTwoIDs[13] // Index 13 = 14th doc (page 2, item 4)
+
+    // The 14th relationTwo doc should be visible in the dropdown
+    await expect(options.locator(`text=${fourteenthRelationTwoDoc}`)).toBeVisible()
+  })
+
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await wait(300)
@@ -333,7 +390,6 @@ describe('Relationship Field', () => {
     await assertToastErrors({
       page,
       errors: [fieldLabel],
-      dismissAfterAssertion: true,
     })
     await wait(1000)
 

@@ -35,6 +35,14 @@ export const getIsLocked = async ({
   const entityHasLockingEnabled =
     entityConfig?.lockDocuments !== undefined ? entityConfig?.lockDocuments : true
 
+  // Check if the locked-documents collection exists
+  if (!req.payload.collections?.['payload-locked-documents']) {
+    // If the collection doesn't exist, locking is not available
+    return {
+      isLocked: false,
+    }
+  }
+
   if (!entityHasLockingEnabled || !isEditing) {
     return {
       isLocked: false,

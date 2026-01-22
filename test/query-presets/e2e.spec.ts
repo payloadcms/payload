@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
+import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -589,5 +590,161 @@ describe('Query Presets', () => {
     await expect(whereFieldContent).toContainText(testPost1?.id ?? '')
     await expect(whereFieldContent).toContainText(testPost2?.id ?? '')
     await expect(whereFieldContent).toContainText(',')
+  })
+
+  test('should save groupBy when creating a new preset', async () => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+    await page.goto(postsUrl.list)
+
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
+    // Create a new preset
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'GroupBy Test Preset'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    // Verify groupBy field displays the current groupBy value (read-only)
+    const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+    await expect(groupByField).toBeVisible()
+    await expect(groupByField).toContainText('Text')
+    await expect(groupByField).toContainText('ascending')
+
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    await expect(page).toHaveURL(/groupBy=text/)
+  })
+
+  test('should apply groupBy when selecting a preset', async () => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+
+    // First, create a preset with groupBy
+    await page.goto(postsUrl.list)
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'GroupBy Apply Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    // Clear the preset
+    await clearSelectedPreset({ page })
+
+    await page.goto(postsUrl.list)
+    await expect(page).not.toHaveURL(/groupBy=/)
+
+    await selectPreset({ page, presetTitle })
+
+    await expect(page).toHaveURL(/groupBy=text/)
+
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+  })
+
+  test('should clear groupBy when deselecting a preset', async () => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+
+    // Create a preset with groupBy
+    await page.goto(postsUrl.list)
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'GroupBy Clear Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    // Verify groupBy is in URL and grouped view is active
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+
+    await clearSelectedPreset({ page })
+
+    // Verify groupBy is removed from URL and grouped view is gone
+    await expect(page).not.toHaveURL(/groupBy=/)
+    await expect(page.locator('.group-by-header')).toHaveCount(0)
+  })
+
+  test('should update groupBy when saving changes to an active preset', async () => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+
+    // Create a preset without groupBy
+    await page.goto(postsUrl.list)
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'GroupBy Update Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
+    await page.locator('#save-preset').click()
+
+    // Wait for the modified indicator to disappear (indicates save completed)
+    await expect(page.locator('.list-controls__modified')).toBeHidden()
+
+    // Clear and reselect the preset to verify groupBy was saved
+    await clearSelectedPreset({ page })
+    await page.goto(postsUrl.list)
+    await selectPreset({ page, presetTitle })
+
+    // Verify groupBy is applied from the preset
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+  })
+
+  test('should reset groupBy when clicking reset button on modified preset', async () => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+
+    // Create a preset with groupBy
+    await page.goto(postsUrl.list)
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'GroupBy Reset Test'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    // Verify groupBy is in URL and grouped view is visible
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+
+    // Verify reset button is not visible initially
+    await expect(page.locator('#reset-preset')).toBeHidden()
+
+    // Clear the groupBy (modify the preset)
+    await clearGroupBy(page)
+    await expect(page).not.toHaveURL(/groupBy=/)
+    await expect(page.locator('.group-by-header')).toHaveCount(0)
+
+    // Verify reset button becomes visible after modification
+    await expect(page.locator('#reset-preset')).toBeVisible()
+
+    await page.locator('#reset-preset').click()
+
+    // Verify groupBy is restored from preset
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+
+    // Verify reset button is hidden again after reset
+    await expect(page.locator('#reset-preset')).toBeHidden()
   })
 })

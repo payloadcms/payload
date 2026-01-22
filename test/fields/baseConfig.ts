@@ -15,6 +15,7 @@ import ConditionalLogic from './collections/ConditionalLogic/index.js'
 import { CustomRowID } from './collections/CustomID/CustomRowID.js'
 import { CustomTabID } from './collections/CustomID/CustomTabID.js'
 import { CustomID } from './collections/CustomID/index.js'
+import { CustomIDNested } from './collections/CustomIDNested/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
@@ -31,6 +32,7 @@ import SlugField from './collections/SlugField/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
+import TextareaFields from './collections/Textarea/index.js'
 import UIFields from './collections/UI/index.js'
 import Uploads from './collections/Upload/index.js'
 import Uploads2 from './collections/Upload2/index.js'
@@ -64,6 +66,7 @@ export const collections: CollectionConfig[] = [
   CollapsibleFields,
   ConditionalLogic,
   CustomID,
+  CustomIDNested,
   CustomTabID,
   CustomRowID,
   DateFields,
@@ -81,6 +84,7 @@ export const collections: CollectionConfig[] = [
   TabsFields2,
   TabsFields,
   TextFields,
+  TextareaFields,
   Uploads,
   Uploads2,
   Uploads3,

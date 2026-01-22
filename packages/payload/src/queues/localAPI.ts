@@ -66,6 +66,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
            * @default true
            */
           overrideAccess?: boolean
+          /**
+           * The queue to add the job to.
+           * If not specified, the job will be added to the default queue.
+           *
+           * @default 'default'
+           */
           queue?: string
           req?: PayloadRequest
           task: TTaskOrWorkflowSlug extends keyof TypedJobs['tasks'] ? TTaskOrWorkflowSlug : never
@@ -84,6 +90,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
            * @default true
            */
           overrideAccess?: boolean
+          /**
+           * The queue to add the job to.
+           * If not specified, the job will be added to the default queue.
+           *
+           * @default 'default'
+           */
           queue?: string
           req?: PayloadRequest
           task?: never
@@ -144,6 +156,71 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     if (args.meta) {
       data.meta = args.meta
+    }
+
+    // Compute concurrency key from workflow or task config (only if feature is enabled)
+    if (payload.config.jobs?.enableConcurrencyControl) {
+      let concurrencyKey: null | string = null
+      let supersedes = false
+      const queueName = queue || 'default'
+
+      if (args.workflow) {
+        const workflow = payload.config.jobs?.workflows?.find(({ slug }) => slug === args.workflow)
+        if (workflow?.concurrency) {
+          const concurrencyConfig = workflow.concurrency
+          if (typeof concurrencyConfig === 'function') {
+            concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
+          } else {
+            concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+            supersedes = concurrencyConfig.supersedes ?? false
+          }
+        }
+      } else if (args.task) {
+        const task = payload.config.jobs?.tasks?.find(({ slug }) => slug === args.task)
+        if (task?.concurrency) {
+          const concurrencyConfig = task.concurrency
+          if (typeof concurrencyConfig === 'function') {
+            concurrencyKey = concurrencyConfig({ input: args.input, queue: queueName })
+          } else {
+            concurrencyKey = concurrencyConfig.key({ input: args.input, queue: queueName })
+            supersedes = concurrencyConfig.supersedes ?? false
+          }
+        }
+      }
+
+      if (concurrencyKey) {
+        data.concurrencyKey = concurrencyKey
+
+        // If supersedes is enabled, delete older pending jobs with the same key
+        if (supersedes) {
+          if (payload.config.jobs.runHooks) {
+            await payload.delete({
+              collection: jobsCollectionSlug,
+              depth: 0,
+              disableTransaction: true,
+              where: {
+                and: [
+                  { concurrencyKey: { equals: concurrencyKey } },
+                  { processing: { equals: false } },
+                  { completedAt: { exists: false } },
+                ],
+              },
+            })
+          } else {
+            await payload.db.deleteMany({
+              collection: jobsCollectionSlug,
+              req,
+              where: {
+                and: [
+                  { concurrencyKey: { equals: concurrencyKey } },
+                  { processing: { equals: false } },
+                  { completedAt: { exists: false } },
+                ],
+              },
+            })
+          }
+        }
+      }
     }
 
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
