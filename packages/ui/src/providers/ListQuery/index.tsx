@@ -122,12 +122,34 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     ],
   )
 
+  /**
+   * @deprecated Use `setQuery({ page: number })` instead
+   */
+  const handlePageChange = useCallback(
+    (page: number) => {
+      setQuery({ page })
+    },
+    [setQuery],
+  )
+
+  /**
+   * @deprecated Use `setQuery({ limit: number })` instead
+   */
+  const handlePerPageChange = useCallback(
+    (limit: number) => {
+      setQuery({ limit })
+    },
+    [setQuery],
+  )
+
   return (
     <ListQueryContext
       value={{
         collectionSlug,
         data,
         defaultLimit: data?.limit,
+        handlePageChange,
+        handlePerPageChange,
         isGroupingBy: Boolean(collectionConfig?.admin?.groupBy && query?.groupBy),
         orderableFieldName,
         query,

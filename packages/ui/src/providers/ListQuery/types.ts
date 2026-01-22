@@ -22,6 +22,14 @@ export type IListQueryContext = {
   defaultLimit?: number
   defaultSort?: Sort
   /**
+   * @deprecated Use `setQuery({ page: number })` instead
+   */
+  handlePageChange?: (page: number) => void
+  /**
+   * @deprecated Use `setQuery({ limit: number })` instead
+   */
+  handlePerPageChange?: (limit: number) => void
+  /**
    * @experimental This prop is subject to change. Use at your own risk.
    */
   isGroupingBy: boolean
