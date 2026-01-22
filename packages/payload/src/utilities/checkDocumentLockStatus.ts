@@ -99,8 +99,6 @@ export const checkDocumentLockStatus = async ({
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
     collection: lockedDocumentsCollectionSlug,
-    // Not passing req fails on postgres
-    req: payload.db.name === 'mongoose' ? undefined : req,
     where: lockedDocumentQuery,
   })
 }
