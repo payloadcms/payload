@@ -1,4 +1,5 @@
 import type {
+  Browser,
   BrowserContext,
   CDPSession,
   ChromiumBrowserContext,
@@ -54,18 +55,32 @@ const networkConditions = {
 export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
-  page,
+  page: pageFromArgs,
   serverURL,
   noAutoLogin,
+  browser,
   readyURL,
 }: {
+  /**
+   * Provide a browser if you need this utility to create and close a temporary page for you.
+   */
+  browser?: Browser
   customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
-  page: Page
+  page?: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
+  if (!pageFromArgs && !browser) {
+    throw new Error('Either page or browser must be provided')
+  }
+  if (pageFromArgs && browser) {
+    throw new Error('Either page or browser must be provided, not both')
+  }
+
+  const page = pageFromArgs ?? (await browser!.newPage())
+
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
@@ -105,6 +120,9 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      if (browser) {
+        await page.close()
+      }
       return
     } catch (error) {
       console.error(`Compilation not done yet`)
@@ -121,6 +139,9 @@ export async function ensureCompilationIsDone({
   }
 
   if (noAutoLogin) {
+    if (browser) {
+      await page.close()
+    }
     return
   }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
@@ -128,6 +149,10 @@ export async function ensureCompilationIsDone({
   })
 
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
+
+  if (browser) {
+    await page.close()
+  }
 }
 
 /**
