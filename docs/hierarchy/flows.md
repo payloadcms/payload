@@ -1,24 +1,42 @@
 # Hierarchy Data Flows
 
-High-level visual diagrams showing how hierarchy data is created and maintained.
+High-level visual flows showing how hierarchy data is created and maintained.
+
+---
 
 ## Flow 1: Creating a Root Page
 
-```mermaid
-graph TD
-    A[User creates root page] -->|title: 'Products'<br/>parent: null| B[Document Created]
+**User Action:**
 
-    B --> C[Final State]
-
-    C --> D["id: '1'<br/>title: 'Products'<br/>parent: null<br/>_h_parentTree: []<br/>_h_depth: 0<br/>_h_slugPath: 'products'<br/>_h_titlePath: 'Products'"]
-
-    style D fill:#e1f5e1
+```ts
+await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'Products',
+    parent: null,
+  },
+})
 ```
 
-**What happens:**
+**Result:**
 
-- Document created with no parent → root document
-- `_h_parentTree` is empty array (no ancestors)
+```
+┌─────────────────────────────────────┐
+│ Document Created (id: '1')          │
+├─────────────────────────────────────┤
+│ title: 'Products'                   │
+│ parent: null                        │
+│ _h_parentTree: []                   │
+│ _h_depth: 0                         │
+│ _h_slugPath: 'products'             │
+│ _h_titlePath: 'Products'            │
+└─────────────────────────────────────┘
+```
+
+**What happened:**
+
+- No parent → root document
+- `_h_parentTree` is empty (no ancestors)
 - `_h_depth` is 0 (root level)
 - Paths are just the slugified/actual title
 
@@ -26,190 +44,479 @@ graph TD
 
 ## Flow 2: Creating a Child Page
 
-```mermaid
-graph TD
-    A[Existing: Products page] --> B[User creates child page]
+**User Action:**
 
-    B -->|title: 'Clothing'<br/>parent: '1'| C[System fetches parent data]
-
-    C --> D["Parent data:<br/>_h_parentTree: []<br/>_h_slugPath: 'products'<br/>_h_titlePath: 'Products'"]
-
-    D --> E[Calculate child's hierarchy data]
-
-    E --> F[Child Document Created]
-
-    F --> G["id: '2'<br/>title: 'Clothing'<br/>parent: '1'<br/>_h_parentTree: ['1']<br/>_h_depth: 1<br/>_h_slugPath: 'products/clothing'<br/>_h_titlePath: 'Products/Clothing'"]
-
-    style G fill:#e1f5e1
+```ts
+await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'Clothing',
+    parent: '1', // Products
+  },
+})
 ```
 
-**What happens:**
+**Steps:**
 
-- System fetches parent's hierarchy data
-- `_h_parentTree` = parent's tree + parent ID = `['1']`
+1. **System fetches parent data:**
+
+```
+┌─────────────────────────────────────┐
+│ Parent: Products (id: '1')          │
+├─────────────────────────────────────┤
+│ _h_parentTree: []                   │
+│ _h_slugPath: 'products'             │
+│ _h_titlePath: 'Products'            │
+└─────────────────────────────────────┘
+```
+
+2. **System calculates child hierarchy:**
+
+- `_h_parentTree` = parent's tree + parent ID = `[] + ['1']` = `['1']`
 - `_h_depth` = length of tree = `1`
-- Paths = parent path + `/` + child slug/title
+- `_h_slugPath` = parent slug + `/` + child slug = `'products/clothing'`
+- `_h_titlePath` = parent title + `/` + child title = `'Products/Clothing'`
+
+**Result:**
+
+```
+┌─────────────────────────────────────┐
+│ Document Created (id: '2')          │
+├─────────────────────────────────────┤
+│ title: 'Clothing'                   │
+│ parent: '1'                         │
+│ _h_parentTree: ['1']                │
+│ _h_depth: 1                         │
+│ _h_slugPath: 'products/clothing'    │
+│ _h_titlePath: 'Products/Clothing'   │
+└─────────────────────────────────────┘
+```
 
 ---
 
 ## Flow 3: Creating a Grandchild Page
 
-```mermaid
-graph TD
-    A["Existing:<br/>Products → Clothing"] --> B[User creates grandchild page]
+**User Action:**
 
-    B -->|title: 'Shirts'<br/>parent: '2'| C[System fetches parent data]
-
-    C --> D["Parent (Clothing) data:<br/>_h_parentTree: ['1']<br/>_h_slugPath: 'products/clothing'<br/>_h_titlePath: 'Products/Clothing'"]
-
-    D --> E[Calculate grandchild's hierarchy data]
-
-    E --> F[Grandchild Document Created]
-
-    F --> G["id: '3'<br/>title: 'Shirts'<br/>parent: '2'<br/>_h_parentTree: ['1', '2']<br/>_h_depth: 2<br/>_h_slugPath: 'products/clothing/shirts'<br/>_h_titlePath: 'Products/Clothing/Shirts'"]
-
-    style G fill:#e1f5e1
+```ts
+await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'Shirts',
+    parent: '2', // Clothing
+  },
+})
 ```
 
-**What happens:**
+**Steps:**
 
-- System fetches parent (Clothing) hierarchy data
-- `_h_parentTree` = parent's tree + parent ID = `['1', '2']`
+1. **System fetches parent data:**
+
+```
+┌─────────────────────────────────────┐
+│ Parent: Clothing (id: '2')          │
+├─────────────────────────────────────┤
+│ _h_parentTree: ['1']                │
+│ _h_slugPath: 'products/clothing'    │
+│ _h_titlePath: 'Products/Clothing'   │
+└─────────────────────────────────────┘
+```
+
+2. **System calculates grandchild hierarchy:**
+
+- `_h_parentTree` = parent's tree + parent ID = `['1'] + ['2']` = `['1', '2']`
 - `_h_depth` = length of tree = `2`
-- Paths = parent path + `/` + grandchild slug/title
+- `_h_slugPath` = `'products/clothing/shirts'`
+- `_h_titlePath` = `'Products/Clothing/Shirts'`
+
+**Result:**
+
+```
+┌──────────────────────────────────────────────┐
+│ Document Created (id: '3')                   │
+├──────────────────────────────────────────────┤
+│ title: 'Shirts'                              │
+│ parent: '2'                                  │
+│ _h_parentTree: ['1', '2']                    │
+│ _h_depth: 2                                  │
+│ _h_slugPath: 'products/clothing/shirts'      │
+│ _h_titlePath: 'Products/Clothing/Shirts'     │
+└──────────────────────────────────────────────┘
+```
 
 ---
 
 ## Flow 4: Moving a Child to Another Parent
 
-```mermaid
-graph TD
-    A["BEFORE STATE:<br/><br/>Categories (id: 4)<br/>├─ parent: null<br/>├─ _h_parentTree: []<br/>├─ _h_slugPath: 'categories'<br/><br/>Products (id: 1)<br/>├─ parent: null<br/>├─ _h_parentTree: []<br/>├─ _h_slugPath: 'products'<br/><br/>Clothing (id: 2)<br/>├─ parent: '1'<br/>├─ _h_parentTree: ['1']<br/>├─ _h_slugPath: 'products/clothing'<br/><br/>Shirts (id: 3)<br/>├─ parent: '2'<br/>├─ _h_parentTree: ['1', '2']<br/>├─ _h_slugPath: 'products/clothing/shirts'"]
+**Setup - Tree structure:**
 
-    A --> B[User moves Clothing<br/>from Products to Categories]
-
-    B -->|Update Clothing:<br/>parent: '4'| C[System detects parent change]
-
-    C --> D[Fetch new parent data]
-
-    D --> E["Categories data:<br/>_h_parentTree: []<br/>_h_slugPath: 'categories'"]
-
-    E --> F[Update Clothing document]
-
-    F --> G[Find all descendants of Clothing]
-
-    G --> H["Found: Shirts (id: 3)<br/>Current: _h_parentTree: ['1', '2']<br/>Current: _h_slugPath: 'products/clothing/shirts'"]
-
-    H --> I[Update Shirts with new tree data]
-
-    I --> J["AFTER STATE:<br/><br/>Categories (id: 4)<br/>├─ parent: null<br/>├─ _h_parentTree: []<br/>├─ _h_slugPath: 'categories'<br/><br/>Products (id: 1)<br/>├─ parent: null<br/>├─ _h_parentTree: []<br/>├─ _h_slugPath: 'products'<br/><br/>Clothing (id: 2) ✨<br/>├─ parent: '4'<br/>├─ _h_parentTree: ['4']<br/>├─ _h_slugPath: 'categories/clothing'<br/><br/>Shirts (id: 3) ✨<br/>├─ parent: '2' (unchanged!)<br/>├─ _h_parentTree: ['4', '2']<br/>├─ _h_slugPath: 'categories/clothing/shirts'"]
-
-    style J fill:#e1f5e1
+```
+Categories (id: 4)          Products (id: 1)
+                            └── Clothing (id: 2)
+                                └── Shirts (id: 3)
 ```
 
-**What happens:**
+**BEFORE STATE:**
 
-1. **Clothing is updated:**
+```
+┌─────────────────────────────────────┐
+│ Categories (id: '4')                │
+├─────────────────────────────────────┤
+│ parent: null                        │
+│ _h_parentTree: []                   │
+│ _h_slugPath: 'categories'           │
+└─────────────────────────────────────┘
 
-   - `parent` changes from `'1'` → `'4'`
-   - `_h_parentTree` changes from `[]` → `['4']`
-   - `_h_slugPath` changes from `'products/clothing'` → `'categories/clothing'`
+┌─────────────────────────────────────┐
+│ Products (id: '1')                  │
+├─────────────────────────────────────┤
+│ parent: null                        │
+│ _h_parentTree: []                   │
+│ _h_slugPath: 'products'             │
+└─────────────────────────────────────┘
 
-2. **System finds descendants:**
+┌─────────────────────────────────────┐
+│ Clothing (id: '2')                  │
+├─────────────────────────────────────┤
+│ parent: '1'                         │
+│ _h_parentTree: ['1']                │
+│ _h_slugPath: 'products/clothing'    │
+└─────────────────────────────────────┘
+
+┌──────────────────────────────────────────────┐
+│ Shirts (id: '3')                             │
+├──────────────────────────────────────────────┤
+│ parent: '2'                                  │
+│ _h_parentTree: ['1', '2']                    │
+│ _h_slugPath: 'products/clothing/shirts'      │
+└──────────────────────────────────────────────┘
+```
+
+**User Action:**
+
+```ts
+// Move Clothing from Products to Categories
+await payload.update({
+  collection: 'pages',
+  id: '2',
+  data: { parent: '4' },
+})
+```
+
+**What Happens:**
+
+1. **System detects parent change** for Clothing (id: '2')
+
+2. **System fetches new parent** (Categories):
+
+   - `_h_parentTree: []`
+   - `_h_slugPath: 'categories'`
+
+3. **System updates Clothing:**
+
+   - Calculate new tree: `[] + ['4']` = `['4']`
+   - Calculate new path: `'categories' + '/' + 'clothing'` = `'categories/clothing'`
+
+4. **System finds descendants:**
 
    - Query: `where: { _h_parentTree: { in: ['2'] } }`
-   - Found: Shirts (has `'2'` in its tree)
+   - Found: Shirts (id: '3')
 
-3. **Shirts is updated (IMPORTANT: parent field stays '2'):**
-   - `parent` stays `'2'` (Shirts is still under Clothing!)
-   - `_h_parentTree` changes from `['1', '2']` → `['4', '2']`
-   - `_h_slugPath` changes from `'products/clothing/shirts'` → `'categories/clothing/shirts'`
+5. **System updates Shirts:**
+   - **IMPORTANT:** `parent` field stays `'2'` (Shirts is still directly under Clothing!)
+   - New tree: Take Clothing's new tree `['4']` + add Shirts' unchanged part `['2']` = `['4', '2']`
+   - New path: `'categories/clothing/shirts'`
 
-**Key insight:** Descendants don't change their immediate parent, only their ancestor tree and paths are updated to reflect the new location in the hierarchy.
+**AFTER STATE:**
+
+```
+┌─────────────────────────────────────┐
+│ Categories (id: '4')                │
+├─────────────────────────────────────┤
+│ parent: null                        │
+│ _h_parentTree: []                   │
+│ _h_slugPath: 'categories'           │
+└─────────────────────────────────────┘
+    │
+    └── Clothing (id: '2') ✨ UPDATED
+        └── Shirts (id: '3') ✨ UPDATED
+
+┌─────────────────────────────────────┐
+│ Products (id: '1')                  │
+├─────────────────────────────────────┤
+│ parent: null                        │
+│ _h_parentTree: []                   │
+│ _h_slugPath: 'products'             │
+└─────────────────────────────────────┘
+    (now empty - Clothing moved away)
+
+┌─────────────────────────────────────┐
+│ Clothing (id: '2') ✨               │
+├─────────────────────────────────────┤
+│ parent: '4'          ← CHANGED      │
+│ _h_parentTree: ['4'] ← CHANGED      │
+│ _h_slugPath: 'categories/clothing'  │
+│                      ← CHANGED      │
+└─────────────────────────────────────┘
+
+┌──────────────────────────────────────────────┐
+│ Shirts (id: '3') ✨                          │
+├──────────────────────────────────────────────┤
+│ parent: '2'          ← UNCHANGED!            │
+│ _h_parentTree: ['4', '2']    ← CHANGED       │
+│ _h_slugPath: 'categories/clothing/shirts'    │
+│                              ← CHANGED       │
+└──────────────────────────────────────────────┘
+```
+
+**Key Insight:**
+
+- Descendants DON'T change their immediate `parent` relationship
+- Only their `_h_parentTree` and paths are updated to reflect new position
+- Shirts still knows its parent is Clothing (parent: '2')
+- But now it knows the full ancestor chain includes Categories (tree: ['4', '2'])
 
 ---
 
 ## Flow 5: Moving with Draft Versions
 
-```mermaid
-graph TD
-    A["BEFORE STATE:<br/><br/>Published Collection:<br/>Clothing (id: 2)<br/>├─ _status: 'published'<br/>├─ title: 'Clothing'<br/>├─ _h_slugPath: 'products/clothing'<br/><br/>Versions Table (_pages_versions):<br/>Version Record<br/>├─ parent: '2'<br/>├─ version:<br/>│   ├─ _status: 'draft'<br/>│   ├─ title: 'Apparel'<br/>│   └─ _h_slugPath: 'products/apparel'"]
+**Setup:**
 
-    A --> B[User moves Products to Categories]
-
-    B --> C[System detects Clothing is descendant]
-
-    C --> D[Check: Clothing has both published + draft?]
-
-    D --> E[YES: Update both versions separately]
-
-    E --> F[Update published version<br/>draft: false]
-
-    E --> G[Update draft version<br/>draft: true]
-
-    F --> H["AFTER STATE:<br/><br/>Published Collection:<br/>Clothing (id: 2) ✨<br/>├─ _status: 'published'<br/>├─ title: 'Clothing'<br/>├─ _h_slugPath: 'categories/products/clothing'<br/><br/>Versions Table (_pages_versions):<br/>Version Record ✨<br/>├─ parent: '2'<br/>├─ version:<br/>│   ├─ _status: 'draft'<br/>│   ├─ title: 'Apparel'<br/>│   └─ _h_slugPath: 'categories/products/apparel'"]
-
-    G --> H
-
-    style H fill:#e1f5e1
+```
+Products (id: '1')
+└── Clothing (id: '2') - has both published and draft versions
 ```
 
-**What happens:**
+**BEFORE STATE:**
 
-1. **System queries both versions:**
+_Main Collection (published data):_
 
-   - Published: `payload.find({ draft: false })` → Gets published Clothing
-   - Draft: `payload.find({ draft: true })` → Gets draft Clothing
+```
+┌─────────────────────────────────────┐
+│ Clothing (id: '2')                  │
+├─────────────────────────────────────┤
+│ _status: 'published'                │
+│ title: 'Clothing'                   │
+│ _h_slugPath: 'products/clothing'    │
+└─────────────────────────────────────┘
+```
 
-2. **Both versions are updated separately:**
+_Versions Table (\_pages_versions):_
 
-   - Published update uses published title: `'categories/products/clothing'`
-   - Draft update uses draft title: `'categories/products/apparel'`
+```
+┌─────────────────────────────────────┐
+│ Version Record                      │
+├─────────────────────────────────────┤
+│ parent: '2'                         │
+│ version: {                          │
+│   _status: 'draft',                 │
+│   title: 'Apparel',                 │
+│   _h_slugPath: 'products/apparel'   │
+│ }                                   │
+└─────────────────────────────────────┘
+```
 
-3. **Each version maintains its own path:**
-   - Published path based on published data
-   - Draft path based on draft data
-   - Both are in sync with new parent location
+**User Action:**
+
+```ts
+// Move Products to Categories
+await payload.update({
+  collection: 'pages',
+  id: '1',
+  data: { parent: '4' },
+})
+```
+
+**What Happens:**
+
+1. **System detects Clothing is a descendant**
+
+2. **System checks:** Does Clothing have both published + draft?
+
+   - Published query: `payload.find({ draft: false })` → Yes, found
+   - Draft query: `payload.find({ draft: true })` → Yes, found
+
+3. **System updates BOTH versions separately:**
+
+   **Update 1: Published version** (`draft: false`)
+
+   - Uses published title: 'Clothing'
+   - Calculates path: `'categories/products/clothing'`
+
+   **Update 2: Draft version** (`draft: true`)
+
+   - Uses draft title: 'Apparel'
+   - Calculates path: `'categories/products/apparel'`
+
+**AFTER STATE:**
+
+_Main Collection (published data):_
+
+```
+┌─────────────────────────────────────────────┐
+│ Clothing (id: '2') ✨                       │
+├─────────────────────────────────────────────┤
+│ _status: 'published'                        │
+│ title: 'Clothing'                           │
+│ _h_slugPath: 'categories/products/clothing' │
+│                                  ← CHANGED  │
+└─────────────────────────────────────────────┘
+```
+
+_Versions Table (\_pages_versions):_
+
+```
+┌─────────────────────────────────────────────┐
+│ Version Record ✨                            │
+├─────────────────────────────────────────────┤
+│ parent: '2'                                 │
+│ version: {                                  │
+│   _status: 'draft',                         │
+│   title: 'Apparel',                         │
+│   _h_slugPath: 'categories/products/apparel'│
+│                                  ← CHANGED  │
+│ }                                           │
+└─────────────────────────────────────────────┘
+```
+
+**Key Insight:**
+
+- Both versions stay in sync with new parent location
+- But each version maintains its own path based on its own title
+- Published uses 'Clothing' → `'categories/products/clothing'`
+- Draft uses 'Apparel' → `'categories/products/apparel'`
 
 ---
 
 ## Flow 6: Draft-Only Title Change
 
-```mermaid
-graph TD
-    A["BEFORE STATE:<br/><br/>Published Collection:<br/>Clothing (id: 2)<br/>├─ _status: 'published'<br/>├─ title: 'Clothing'<br/>├─ _h_slugPath: 'products/clothing'<br/><br/>Versions Table (_pages_versions):<br/>Version Record<br/>├─ parent: '2'<br/>├─ version:<br/>│   ├─ _status: 'draft'<br/>│   ├─ title: 'Clothing'<br/>│   └─ _h_slugPath: 'products/clothing'"]
+**BEFORE STATE:**
 
-    A --> B[User changes draft title to 'Apparel']
+_Main Collection (published data):_
 
-    B -->|payload.update<br/>draft: true<br/>title: 'Apparel'| C[System detects:<br/>Draft-only title change]
-
-    C --> D[Skip main collection update<br/>Draft doesn't live there!]
-
-    D --> E[Query latest draft version<br/>from _pages_versions table]
-
-    E --> F[Calculate new hierarchy fields<br/>based on new title]
-
-    F --> G[Update draft version record<br/>using db.updateVersion]
-
-    G --> H["AFTER STATE:<br/><br/>Published Collection:<br/>Clothing (id: 2)<br/>├─ _status: 'published'<br/>├─ title: 'Clothing'<br/>├─ _h_slugPath: 'products/clothing'<br/>(UNCHANGED!)<br/><br/>Versions Table (_pages_versions):<br/>Version Record ✨<br/>├─ parent: '2'<br/>├─ version:<br/>│   ├─ _status: 'draft'<br/>│   ├─ title: 'Apparel'<br/>│   └─ _h_slugPath: 'products/apparel'"]
-
-    style H fill:#e1f5e1
+```
+┌─────────────────────────────────────┐
+│ Clothing (id: '2')                  │
+├─────────────────────────────────────┤
+│ _status: 'published'                │
+│ title: 'Clothing'                   │
+│ _h_slugPath: 'products/clothing'    │
+└─────────────────────────────────────┘
 ```
 
-**What happens:**
+_Versions Table (\_pages_versions):_
 
-1. **System skips main collection:**
+```
+┌─────────────────────────────────────┐
+│ Version Record                      │
+├─────────────────────────────────────┤
+│ parent: '2'                         │
+│ version: {                          │
+│   _status: 'draft',                 │
+│   title: 'Clothing',                │
+│   _h_slugPath: 'products/clothing'  │
+│ }                                   │
+└─────────────────────────────────────┘
+```
+
+**User Action:**
+
+```ts
+// Change draft title (not published)
+await payload.update({
+  collection: 'pages',
+  id: '2',
+  data: { title: 'Apparel' },
+  draft: true,
+})
+```
+
+**What Happens:**
+
+1. **System detects:** Draft-only title change
+
+   - `operation === 'update'`
+   - `doc._status === 'draft'`
+   - `titleChanged === true`
+   - `parentChanged === false`
+
+2. **System skips main collection update**
 
    - Draft documents don't live in main collection
    - Only versions table needs updating
 
-2. **Query draft version:**
+3. **System queries versions table:**
 
-   - Find latest version record where `version._status === 'draft'`
+```ts
+db.findVersions({
+  where: {
+    parent: { equals: '2' },
+    'version._status': { equals: 'draft' },
+  },
+})
+```
 
-3. **Update version record directly:**
-   - Use `db.updateVersion()` to write to versions table
-   - Update `version.version._h_slugPath` based on new draft title
-   - Published version remains unchanged
+4. **System updates draft version record:**
 
-**Key insight:** Draft-only changes only affect the versions table, not the main collection. This ensures draft and published versions can have independent paths.
+```ts
+db.updateVersion({
+  versionData: {
+    version: {
+      ...existing,
+      _h_slugPath: 'products/apparel', // New path with new title
+    },
+  },
+})
+```
+
+**AFTER STATE:**
+
+_Main Collection (published data):_
+
+```
+┌─────────────────────────────────────┐
+│ Clothing (id: '2')                  │
+├─────────────────────────────────────┤
+│ _status: 'published'                │
+│ title: 'Clothing'                   │
+│ _h_slugPath: 'products/clothing'    │
+└─────────────────────────────────────┘
+     ↑
+  UNCHANGED - Published version not affected
+```
+
+_Versions Table (\_pages_versions):_
+
+```
+┌─────────────────────────────────────┐
+│ Version Record ✨                    │
+├─────────────────────────────────────┤
+│ parent: '2'                         │
+│ version: {                          │
+│   _status: 'draft',                 │
+│   title: 'Apparel',      ← CHANGED │
+│   _h_slugPath: 'products/apparel'   │
+│                          ← CHANGED │
+│ }                                   │
+└─────────────────────────────────────┘
+```
+
+**Key Insight:**
+
+- Draft-only changes ONLY affect versions table
+- Main collection (published data) is completely untouched
+- This allows draft and published to have independent paths
+- When draft is eventually published, its data becomes the new published data
+
+---
+
+## Summary Table
+
+| Action             | What Gets Updated                             | Key Fields Changed                                                  |
+| ------------------ | --------------------------------------------- | ------------------------------------------------------------------- |
+| Create root        | 1 new document                                | `_h_parentTree: []`, `_h_depth: 0`, paths                           |
+| Create child       | 1 new document                                | `_h_parentTree: [parent]`, `_h_depth: 1`, paths                     |
+| Create grandchild  | 1 new document                                | `_h_parentTree: [gp, p]`, `_h_depth: 2`, paths                      |
+| Move document      | 1 document + all descendants                  | `parent`, `_h_parentTree`, paths (descendants keep their `parent`!) |
+| Move with drafts   | Published + draft versions of all descendants | Both versions get separate updates                                  |
+| Draft title change | Only draft version record                     | Only `version.version` in versions table                            |
