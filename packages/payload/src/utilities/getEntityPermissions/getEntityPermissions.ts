@@ -104,47 +104,45 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     throw new Error('ID is required when fetching data for a collection')
   }
 
-  const hasData = _data && Object.keys(_data).length > 0
+  // When fetchData is true, attempt to fetch the full document to ensure field permissions get complete data
+  // Then merge any simulated fields from _data on top (e.g., _status for checking publish permissions)
+  // If fetch fails (e.g., document doesn't exist yet), fall back to _data
+  let fetchedData: JsonObject | undefined = undefined
 
-  // When fetchData is true, always fetch the full document from the database
-  // This ensures field permissions get the correct document structure
-  const fetchedData: JsonObject | undefined = fetchData
-    ? await (async () => {
-        if (entityType === 'global') {
-          return req.payload.findGlobal({
-            slug: entity.slug,
-            depth: 0,
-            fallbackLocale: null,
-            locale,
-            overrideAccess: true,
-            req,
-          })
-        }
+  if (fetchData) {
+    try {
+      if (entityType === 'global') {
+        fetchedData = await req.payload.findGlobal({
+          slug: entity.slug,
+          depth: 0,
+          fallbackLocale: null,
+          locale,
+          overrideAccess: true,
+          req,
+        })
+      } else if (entityType === 'collection') {
+        fetchedData = await req.payload.findByID({
+          id: id!,
+          collection: entity.slug,
+          depth: 0,
+          fallbackLocale: null,
+          locale,
+          overrideAccess: true,
+          req,
+          trash: true,
+        })
+      }
+    } catch (error) {
+      // Document doesn't exist yet (e.g., custom ID that hasn't been saved)
+      // Fall back to using _data
+      fetchedData = undefined
+    }
+  }
 
-        if (entityType === 'collection') {
-          return req.payload.findByID({
-            id: id!,
-            collection: entity.slug,
-            depth: 0,
-            fallbackLocale: null,
-            locale,
-            overrideAccess: true,
-            req,
-            trash: true,
-          })
-        }
-      })()
-    : undefined
-
-  // If data was passed (e.g., with simulated _status), merge it with fetched data
-  // This allows top-level permissions to use simulated fields while field permissions get full document
-  const data: JsonObject | undefined = fetchedData
-    ? hasData
-      ? { ...fetchedData, ..._data }
-      : fetchedData
-    : hasData
-      ? _data
-      : undefined
+  // Merge simulated fields from _data on top of fetched data
+  // This allows document-level permissions to use simulated values (e.g., _status: 'published')
+  // while field-level permissions get the complete document structure
+  const data: JsonObject | undefined = fetchedData ? { ...fetchedData, ...(_data || {}) } : _data
 
   const isLoggedIn = !!user
 
