@@ -58,6 +58,7 @@ export type Args = {
    */
   busyTimeout?: number
   client: Config
+  wal?: boolean | Partial<WalConfig>
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -127,11 +128,34 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
+export type WalConfig = {
+  /**
+   * Maximum size of the WAL file before it is written back to the main database.
+   * @default 67108864 (64MB)
+   */
+  journalSizeLimit: number
+
+  /**
+   * Controls how often data is synced to disk:
+   * - 'EXTRA': Highest data safety
+   * - 'FULL': Safe and balanced
+   * - 'NORMAL': Moderate safety, better performance
+   * - 'OFF': Fastest, but risk of data loss
+   *
+   * @default 'FULL'
+   */
+  synchronous: 'EXTRA' | 'FULL' | 'NORMAL' | 'OFF'
+}
+
 export type SQLiteAdapter = {
   busyTimeout: number
   client: Client
   clientConfig: Args['client']
   drizzle: Drizzle
+  /**
+   * Write-Ahead Logging (WAL) configuration. If false or not set, WAL mode is disabled.
+   */
+  wal: false | WalConfig
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 
