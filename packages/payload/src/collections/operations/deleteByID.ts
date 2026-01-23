@@ -26,7 +26,7 @@ import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublis
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
@@ -37,10 +37,10 @@ export type Arguments = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<FindOptions<CollectionSlug, SelectType>, 'select'>
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
-  incomingArgs: Arguments,
+  incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
