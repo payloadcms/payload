@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
+import type { CollectionSlug, FindOptions, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -56,10 +56,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
   publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,

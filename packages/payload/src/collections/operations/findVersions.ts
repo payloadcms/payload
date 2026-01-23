@@ -3,6 +3,7 @@ import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
+import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -27,12 +28,11 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,

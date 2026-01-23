@@ -35,10 +35,9 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments,

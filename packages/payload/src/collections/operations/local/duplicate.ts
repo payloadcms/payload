@@ -76,10 +76,6 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Specifies which locales to include when duplicating localized fields. Non-localized data is always duplicated.
    * By default, all locales are duplicated.
    */
@@ -93,7 +89,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,
