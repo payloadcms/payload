@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload, RequestContext } from '../../../index.js'
+import type { FindOptions, Payload, RequestContext } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,

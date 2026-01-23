@@ -1,5 +1,6 @@
 import type { CollectionSlug } from '../../index.js'
 import type {
+  FindOptions,
   PayloadRequest,
   PopulateType,
   SelectType,
