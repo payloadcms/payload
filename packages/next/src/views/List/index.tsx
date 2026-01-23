@@ -175,6 +175,7 @@ export const renderListView = async (
   if (queryPreset?.where) {
     query.where = queryPreset.where
   }
+  query.groupBy = queryPreset?.groupBy ?? collectionPreferences?.groupBy
 
   const columnPreference = queryPreset?.columns ?? collectionPreferences?.columns
   query.columns = transformColumnsToSearchParams(columnPreference)
