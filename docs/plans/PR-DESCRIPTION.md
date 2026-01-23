@@ -80,30 +80,151 @@ Admin shows parent at `/shop` but children still at `/products/*` - hierarchy ap
 
 ### Why We Couldn't Fix It With Stored Paths
 
-We explored every possible solution:
+We explored every possible solution. Each creates worse problems than it solves:
 
-**Option 1: Cascade to published descendants**
+**Option 1: Cascade to published descendants immediately**
 
-- Published URLs change when you edit a draft
-- SEO disaster: `/products/shoes` becomes `/shop/shoes` on live site before you're ready
-- Version history corrupted
+When parent draft changes from "Products" → "Shop", immediately update all descendant published documents:
 
-**Option 2: Auto-create draft versions of descendants**
+```typescript
+// Before
+Published: { id: 2, _h_slugPath: "products/shoes" }
 
-- User edits 1 page, suddenly has 100+ auto-generated drafts
-- Storage explosion (100+ version records per parent edit)
-- Cleanup nightmare if parent draft discarded
+// After (when parent draft saved)
+Published: { id: 2, _h_slugPath: "shop/shoes" }  // ❌ Published changed!
+```
 
-**Option 3: Defer cascade until publish**
+Problems:
 
-- Search broken: searching "shop/shoes" returns nothing (stored path still says "products/shoes")
-- Breadcrumbs wrong: shows "Products > Shoes" when viewing Shop draft
-- Filters broken: "Show pages under Shop" returns empty
-- Preview URLs wrong
-- API responses have stale data
-- Problems persist indefinitely if draft never publishes
+- ❌ **Live site breaks:** User edits a draft, published URLs change immediately
+- ❌ **SEO disaster:** Google sees `/products/shoes` → `/shop/shoes` change before you're ready
+- ❌ **Confusing UX:** "Why did my published page URL change when I only saved a draft?"
+- ❌ **Version corruption:** Published version now has paths referencing draft parent data
+- ❌ **No preview:** Can't preview draft changes without affecting production
+- ❌ **Audit trail broken:** Version history shows published docs changing when parent draft saved
 
-**Root cause:** Stored paths create a data consistency problem with drafts. You cannot have both accurate draft hierarchy AND stored path fields - they're fundamentally incompatible.
+**Example:** E-commerce site editing category structure. Save a draft renaming "Products" to "Shop". All 500 product URLs on the live site instantly change from `/products/*` to `/shop/*`. Customer bookmarks break. Google search results point to dead URLs. All because you saved a draft.
+
+**Option 2: Auto-create draft versions for all descendants**
+
+When parent draft changes, automatically create draft versions of ALL descendants with updated paths:
+
+```typescript
+// User action
+User saves: 1 draft (parent "Products" → "Shop")
+
+// System reaction
+System creates: 500 drafts (all descendant products)
+
+Draft list now shows:
+- Shop (user edited) ✓
+- Running Shoes (auto-generated) ❓
+- Basketball Shoes (auto-generated) ❓
+- Tennis Shoes (auto-generated) ❓
+... 497 more auto-generated drafts
+```
+
+Problems:
+
+- ❌ **Scale:** 500 products under "Products" means 500 auto-generated drafts
+- ❌ **Draft explosion:** User edited 1 page, now has 500 drafts in their queue
+- ❌ **Storage cost:** Creates 500+ version records (with full document copies) just for parent slug change
+- ❌ **Confusing UX:** "Why do I have 500 drafts I never touched?"
+- ❌ **Cleanup complexity:** User discards parent draft - should we discard all 500 auto-drafts? What if user edited one of them?
+- ❌ **Nested edits:** User edits a child draft after auto-generation. Which path wins when parent draft changes again?
+- ❌ **Performance:** Creating 500 draft versions on every parent edit is prohibitively expensive
+- ❌ **Draft semantics broken:** Drafts supposed to represent intentional edits, not cascading side effects
+
+**Example:** Content editor restructures site navigation by editing a top-level category draft. System auto-creates 2,000 drafts across the site. Editor's draft queue is now unmanageable. Another editor opens a product page, sees it has a draft they didn't create, gets confused about what's been changed.
+
+**Option 3: Defer cascade until parent publishes**
+
+Don't update descendants until parent draft is published. Descendants keep old paths while parent draft exists:
+
+```typescript
+// Draft context
+Parent: { title: "Shop", _h_slugPath: "shop" }           // ✓ Updated
+Child:  { title: "Shoes", _h_slugPath: "products/shoes" } // ✗ Stale (no update yet)
+
+// When parent publishes, then cascade happens
+```
+
+**Concrete problems:**
+
+**Search broken:**
+
+```
+User searches admin for "shop/shoes" → 0 results
+(Child's stored path is still "products/shoes")
+```
+
+**Breadcrumbs wrong:**
+
+```
+Admin breadcrumb component reads child._h_titlePath:
+Shows: "Products > Shoes"
+Expected: "Shop > Shoes"
+```
+
+**List view inconsistent:**
+
+```
+| Title | Path            | Status    |
+|-------|-----------------|-----------|
+| Shop  | /shop           | Draft     | ✓
+| Shoes | /products/shoes | Published | ✗
+```
+
+Hierarchy looks broken - parent moved but children didn't follow.
+
+**Filters fail:**
+
+```sql
+-- "Show all pages under Shop"
+WHERE _h_slugPath LIKE 'shop/%'
+→ Returns 0 results (all children still have 'products/%')
+```
+
+**Preview URLs wrong:**
+
+```typescript
+// Draft preview for "Shoes" page
+const previewUrl = doc._h_slugPath // "products/shoes"
+// Expected: "shop/shoes"
+// Actual: "products/shoes" (stale stored path)
+```
+
+**API responses inconsistent:**
+
+```typescript
+// Frontend fetches draft data
+GET /api/pages/shoes?draft=true
+Response: { _h_slugPath: "products/shoes" }  // ✗ Stale
+Expected: { _h_slugPath: "shop/shoes" }
+```
+
+**Localized drafts break per locale:**
+
+```typescript
+// User edits Spanish draft: "Productos" → "Tienda"
+Parent ES: { _h_slugPath: { es: "tienda" } }      // ✓ Updated
+Child ES:  { _h_slugPath: { es: "productos/..." } } // ✗ Stale
+
+// Spanish users search "tienda/zapatos" → 0 results
+```
+
+**Problems persist indefinitely:**
+
+- If draft never publishes, admin UI stays broken forever
+- Multiple editors: Editor A creates parent draft, Editor B can't find child pages by new path
+- Draft workflows broken: Can't preview full site with draft hierarchy
+- Trust issues: "Can I trust anything I see in the admin panel?"
+
+**Option 4: Hybrid approaches**
+
+We considered combinations like "update draft versions only" or "mark paths as stale with UI warnings". All inherit the same core problems from options above.
+
+**Root cause:** Storing paths as database fields creates a data consistency problem with drafts. You cannot have accurate draft hierarchy AND stored path fields simultaneously - they are **fundamentally incompatible**.
 
 ## The Solution: Computed Paths
 
