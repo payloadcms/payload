@@ -172,12 +172,14 @@ export const renderListView = async (
   }
 
   query.preset = queryPreset?.id
-  if (queryPreset?.where) {
+  if (queryPreset?.where && !query.where) {
     query.where = queryPreset.where
   }
-  query.groupBy = queryPreset?.groupBy ?? collectionPreferences?.groupBy
+  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
 
-  const columnPreference = queryPreset?.columns ?? collectionPreferences?.columns
+  const columnPreference = query.columns
+    ? transformColumnsToPreferences(query.columns)
+    : (queryPreset?.columns ?? collectionPreferences?.columns)
   query.columns = transformColumnsToSearchParams(columnPreference)
 
   query.page = isNumber(query?.page) ? Number(query.page) : 0
