@@ -1,5 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { ParentFieldPaths, RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
@@ -19,14 +19,11 @@ type Args<T> = {
   fieldIndex: number
   id?: number | string
   overrideAccess: boolean
-  parentIndexPath: string
   parentIsLocalized: boolean
-  parentPath: string
-  parentSchemaPath: string
   req: PayloadRequest
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-}
+} & Required<ParentFieldPaths>
 
 export const promise = async <T>({
   id,

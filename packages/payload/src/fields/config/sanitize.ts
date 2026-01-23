@@ -7,6 +7,7 @@ import type {
 } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
+import type { ParentFieldPaths } from '../getFieldPaths.js'
 import type { Field } from './types.js'
 
 import {
@@ -35,12 +36,7 @@ import {
   reservedVerifyFieldNames,
 } from './reservedFieldNames.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import {
-  fieldAffectsData as _fieldAffectsData,
-  fieldIsLocalized,
-  fieldIsVirtual,
-  tabHasName,
-} from './types.js'
+import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -57,16 +53,9 @@ type Args = {
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
-  /**
-   * A string of '-' separated indexes representing where
-   * to find this field in a given field schema array.
-   */
-  parentIndexPath?: string
+  parentIndexPath?: ParentFieldPaths['parentIndexPath']
   parentIsLocalized: boolean
-  /**
-   * Path for parent fields relative to their position in the schema.
-   */
-  parentSchemaPath?: string
+  parentSchemaPath?: ParentFieldPaths['parentSchemaPath']
   polymorphicJoins?: SanitizedJoin[]
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.

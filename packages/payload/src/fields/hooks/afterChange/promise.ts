@@ -4,6 +4,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
+import type { ParentFieldPaths } from '../../getFieldPaths.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -23,17 +24,14 @@ type Args = {
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  parentIndexPath: string
   parentIsLocalized: boolean
-  parentPath: string
-  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-}
+} & Required<ParentFieldPaths>
 
 // This function is responsible for the following actions, in order:
 // - Execute field hooks

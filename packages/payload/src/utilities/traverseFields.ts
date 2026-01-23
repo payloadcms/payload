@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
+import type { ParentFieldPaths } from '../fields/getFieldPaths.js'
 
 import {
   fieldAffectsData,
@@ -28,7 +29,7 @@ const traverseArrayOrBlocksField = ({
   fillEmpty: boolean
   leavesFirst: boolean
   parentIsLocalized: boolean
-  parentPath: string
+  parentPath: NonNullable<ParentFieldPaths['parentPath']>
   parentRef?: unknown
 }) => {
   if (fillEmpty) {
@@ -111,7 +112,7 @@ export type TraverseFieldsCallback = (args: {
    */
   next?: () => void
   parentIsLocalized: boolean
-  parentPath: string
+  parentPath: NonNullable<ParentFieldPaths['parentPath']>
   /**
    * The parent reference object
    */

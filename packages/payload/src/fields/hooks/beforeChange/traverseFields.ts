@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { ParentFieldPaths, RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
@@ -36,13 +36,10 @@ type Args = {
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   overrideAccess: boolean
-  parentIndexPath: string
   /**
    * @todo make required in v4.0
    */
   parentIsLocalized?: boolean
-  parentPath: string
-  parentSchemaPath: string
   req: PayloadRequest
   siblingData: JsonObject
   /**
@@ -54,7 +51,7 @@ type Args = {
    */
   siblingDocWithLocales: JsonObject
   skipValidation?: boolean
-}
+} & Required<ParentFieldPaths>
 
 /**
  * This function is responsible for the following actions, in order:
