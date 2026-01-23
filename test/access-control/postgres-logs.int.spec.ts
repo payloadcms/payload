@@ -118,8 +118,8 @@ describePostgres('Access Control - postgres logs', () => {
           data: doc,
         })
 
-        // 1 doc fetch + 1 where query (cached across all operations)
-        expect(consoleCount).toHaveBeenCalledTimes(2)
+        // 1 db call across all operations due to cache
+        expect(consoleCount).toHaveBeenCalledTimes(1)
 
         consoleCount.mockRestore()
 
@@ -162,7 +162,7 @@ describePostgres('Access Control - postgres logs', () => {
           req,
         })
 
-        // 1 doc fetch + 3 unique where queries (one per operation)
+        // 3 access control operations with unique where + 1 for the document fetch, since we're not passing data.
         expect(consoleCount).toHaveBeenCalledTimes(4)
         consoleCount.mockRestore()
 
@@ -206,8 +206,8 @@ describePostgres('Access Control - postgres logs', () => {
           data: doc,
         })
 
-        // 1 doc fetch + 3 unique where queries (one per operation)
-        expect(consoleCount).toHaveBeenCalledTimes(4)
+        // 3 access control operations with unique where, no data fetch since we're passing data
+        expect(consoleCount).toHaveBeenCalledTimes(3)
         consoleCount.mockRestore()
 
         expect(permissions).toEqual({

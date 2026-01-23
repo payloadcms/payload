@@ -104,41 +104,36 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     throw new Error('ID is required when fetching data for a collection')
   }
 
-  // Always fetch full doc when fetchData is true to ensure field permissions get complete data
-  // Then merge simulated fields from _data on top (e.g., _status for permission checks)
-  let fetchedData: JsonObject | undefined = undefined
+  const hasData = _data && Object.keys(_data).length > 0
+  const data: JsonObject | undefined = hasData
+    ? _data
+    : fetchData
+      ? await (async () => {
+          if (entityType === 'global') {
+            return req.payload.findGlobal({
+              slug: entity.slug,
+              depth: 0,
+              fallbackLocale: null,
+              locale,
+              overrideAccess: true,
+              req,
+            })
+          }
 
-  if (fetchData) {
-    try {
-      if (entityType === 'global') {
-        fetchedData = await req.payload.findGlobal({
-          slug: entity.slug,
-          depth: 0,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: true,
-          req,
-        })
-      } else if (entityType === 'collection') {
-        fetchedData = await req.payload.findByID({
-          id: id!,
-          collection: entity.slug,
-          depth: 0,
-          fallbackLocale: null,
-          locale,
-          overrideAccess: true,
-          req,
-          trash: true,
-        })
-      }
-    } catch (error) {
-      // Doc doesn't exist yet (e.g., custom ID), fall back to _data
-      fetchedData = undefined
-    }
-  }
-
-  // Merge simulated fields on top of fetched data for doc-level permission checks
-  const data: JsonObject | undefined = fetchedData ? { ...fetchedData, ...(_data || {}) } : _data
+          if (entityType === 'collection') {
+            return req.payload.findByID({
+              id: id!,
+              collection: entity.slug,
+              depth: 0,
+              fallbackLocale: null,
+              locale,
+              overrideAccess: true,
+              req,
+              trash: true,
+            })
+          }
+        })()
+      : undefined
 
   const isLoggedIn = !!user
 
