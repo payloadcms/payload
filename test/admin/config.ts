@@ -139,6 +139,34 @@ export default buildConfigWithDefaults({
           path: customParamViewPath,
         },
       },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Custom Tab',
+            icon: '@payloadcms/ui#FolderIcon',
+            component: {
+              path: '/components/CustomTab.tsx#CustomTab',
+              clientProps: {
+                heading: 'Folders',
+                content: 'Example folders tab content.',
+              },
+            },
+          },
+          {
+            slug: 'custom-tab-2',
+            label: 'Custom Tab',
+            icon: '@payloadcms/ui#GearIcon',
+            component: {
+              path: '/components/CustomTab.tsx#CustomTab',
+              clientProps: {
+                heading: 'Settings',
+                content: 'Exmaple settings tab content.',
+              },
+            },
+          },
+        ],
+      },
     },
     meta: {
       description: 'This is a custom meta description',

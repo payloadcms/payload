@@ -6,15 +6,16 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { DefaultNavClient } from './index.client.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
+import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
 
 import { getNavPrefs } from './getNavPrefs.js'
-import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = {
   req?: PayloadRequest
@@ -47,6 +48,8 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     globals,
   } = payload.config
 
+  // Group collections and globals for nav display
+  // These groups are passed to SidebarTabs -> CollectionsTab to avoid recomputing
   const groups = groupNavItems(
     [
       ...collections
@@ -73,6 +76,9 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   )
 
   const navPreferences = await getNavPrefs(req)
+
+  const sidebarTabs =
+    payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []
 
   const LogoutComponent = RenderServerComponent({
     clientProps: {
@@ -137,7 +143,24 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             user,
           },
         })}
-        <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+        {sidebarTabs.length > 0 ? (
+          <SidebarTabs
+            documentSubViewType={documentSubViewType}
+            groups={groups}
+            i18n={i18n}
+            locale={locale}
+            navPreferences={navPreferences}
+            params={params}
+            payload={payload}
+            permissions={permissions}
+            searchParams={searchParams}
+            tabs={sidebarTabs}
+            user={user}
+            viewType={viewType}
+          />
+        ) : (
+          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+        )}
         {RenderServerComponent({
           clientProps: {
             documentSubViewType,

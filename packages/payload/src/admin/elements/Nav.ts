@@ -1,4 +1,5 @@
 export type NavPreferences = {
+  activeTab?: string
   groups: NavGroupPreferences
   open: boolean
 }
