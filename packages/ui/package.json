@@ -162,19 +162,19 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.27.2",
-    "@babel/core": "7.27.3",
-    "@babel/preset-env": "7.27.2",
-    "@babel/preset-react": "7.27.1",
-    "@babel/preset-typescript": "7.27.1",
+    "@babel/cli": "7.28.6",
+    "@babel/core": "7.28.6",
+    "@babel/preset-env": "7.28.6",
+    "@babel/preset-react": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "esbuild": "0.27.1",
-    "esbuild-sass-plugin": "3.3.1",
+    "babel-plugin-react-compiler": "1.0.0",
+    "esbuild": "0.27.2",
+    "esbuild-sass-plugin": "3.6.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
