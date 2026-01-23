@@ -28,7 +28,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 }) => {
   // TODO: Investigate if this is still needed
   'use no memo'
-  // TODO: Investigate if this is still needed
 
   const router = useRouter()
   const rawSearchParams = useSearchParams()
@@ -37,20 +36,20 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const { getEntityConfig } = useConfig()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const searchParams = useMemo<ListQuery>(
+  const contextRef = useRef({} as IListQueryContext)
+  contextRef.current.modified = modified
+
+  const { onQueryChange: onQueryChangeFromContext } = useListDrawerContext()
+  const onQueryChange = onQueryChangeFromContext || onQueryChangeFromProps
+
+  const queryFromURL = useMemo<ListQuery>(
     () => sanitizeQuery(parseSearchParams(rawSearchParams)),
     [rawSearchParams],
   )
 
-  const contextRef = useRef({} as IListQueryContext)
-
-  contextRef.current.modified = modified
-
-  const { onQueryChange } = useListDrawerContext()
-
   const [query, setQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
-      return searchParams
+      return queryFromURL
     } else {
       return {
         limit: queryFromProps.limit,
@@ -62,11 +61,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (incomingQuery: ListQuery, modified?: boolean) => {
-      if (modified !== undefined) {
-        setModified(modified)
-      } else {
-        setModified(true)
-      }
+      setModified(modified ?? true)
 
       const newQuery = mergeQuery(query, incomingQuery, {
         defaults: {
@@ -76,24 +71,16 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       })
 
       if (modifySearchParams) {
-        startRouteTransition(() =>
-          router.replace(
-            `${qs.stringify(
-              {
-                ...newQuery,
-                columns: JSON.stringify(newQuery.columns),
-                queryByGroup: JSON.stringify(newQuery.queryByGroup),
-              },
-              { addQueryPrefix: true },
-            )}`,
-          ),
-        )
-      } else if (
-        typeof onQueryChange === 'function' ||
-        typeof onQueryChangeFromProps === 'function'
-      ) {
-        const onChangeFn = onQueryChange || onQueryChangeFromProps
-        onChangeFn(newQuery)
+        const search = `?${qs.stringify({
+          ...newQuery,
+          columns: JSON.stringify(newQuery.columns),
+          queryByGroup: JSON.stringify(newQuery.queryByGroup),
+        })}`
+        if (window.location.search !== search) {
+          startRouteTransition(() => router.replace(search))
+        }
+      } else if (typeof onQueryChange === 'function') {
+        onQueryChange(newQuery)
       }
 
       setQuery(newQuery)
@@ -104,7 +91,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       queryFromProps.sort,
       modifySearchParams,
       onQueryChange,
-      onQueryChangeFromProps,
       startRouteTransition,
       router,
     ],
@@ -146,7 +132,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
-  const mergeQueryFromPropsAndSyncToURL = useEffectEvent(() => {
+  /**
+   * The server component may pass props to this client component, e.g. from
+   * fetching the query from preferences.
+   * This effect is responsible for syncing the props back to the URL, without
+   * triggering a re-render.
+   */
+  const syncPropsToURL = useEffectEvent(() => {
     const newQuery = sanitizeQuery({ ...(query || {}), ...(queryFromProps || {}) })
 
     const search = `?${qs.stringify({
@@ -157,8 +149,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
     if (window.location.search !== search) {
       setQuery(newQuery)
-
-      // Important: do not use router.replace here to avoid re-rendering on initial load
+      // Important: do not use router.replace here to avoid re-rendering.
       window.history.replaceState(null, '', search)
     }
   })
@@ -166,8 +157,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   // If `query` is updated externally, update the local state
   // E.g. when HMR runs, these properties may be different
   useEffect(() => {
-    if (modifySearchParams) {
-      mergeQueryFromPropsAndSyncToURL()
+    if (modifySearchParams && queryFromProps) {
+      syncPropsToURL()
     }
   }, [modifySearchParams, queryFromProps])
 

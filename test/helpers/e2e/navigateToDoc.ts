@@ -1,5 +1,8 @@
 import type { Page } from '@playwright/test'
-import type { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
+
+import type { AdminUrlUtil } from '../adminUrlUtil.js'
+
+import { waitForFormReady } from '../../helpers.js'
 
 export const goToFirstCell = async (page: Page, serverURL: string) => {
   const cellLink = page.locator(`tbody tr:first-child td a`).first()
@@ -13,6 +16,7 @@ export const navigateToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
   const regex = new RegExp(`^${urlUtil.list}(?:\\?.*)?$`)
   await page.waitForURL(regex)
   await goToFirstCell(page, urlUtil.serverURL)
+  await waitForFormReady(page)
 }
 
 export const navigateToTrashedDoc = async (page: Page, urlUtil: AdminUrlUtil) => {

@@ -32,5 +32,7 @@
     // of the test run buttons in vscode will be different from CI, which can result to tests passing
     // locally, and suddenly failing in CI.
     "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
-  }
+  },
+  "vitest.commandLine": "pnpm vitest",
+  "vitest.workspaceConfig": "./vitest.config.ts"
 }

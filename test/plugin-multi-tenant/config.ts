@@ -51,7 +51,12 @@ export default buildConfigWithDefaults({
       },
     },
   },
-  onInit: seed,
+  onInit: async (payload) => {
+    // IMPORTANT: This should only seed, not clear the database.
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
+  },
   plugins: [
     multiTenantPlugin<ConfigType>({
       // debug: true,

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
-import { formatAdminURL, wait  } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
@@ -123,16 +123,12 @@ describe('Field Error States', () => {
       await page.locator('#field-failValidation').check()
       await page.locator('#field-validatedField').fill('This will fail')
 
-      await page.click('#action-save-draft')
-      const errorToast = page.locator('.payload-toast-container .toast-error').first()
-      await expect(errorToast).toBeVisible()
-      await errorToast.locator('button[aria-label="Close toast"]').click()
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
 
       const saveDraftButton = page.locator('#action-save-draft')
       await expect(saveDraftButton).toBeEnabled()
 
-      await page.click('#action-save-draft')
-      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
     test('should keep save draft button enabled after successful save when form is modified again', async () => {

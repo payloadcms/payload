@@ -108,6 +108,20 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'simple-localized',
+      fields: [
+        {
+          type: 'text',
+          localized: true,
+          name: 'text',
+        },
+        {
+          type: 'number',
+          name: 'number',
+        },
+      ],
+    },
+    {
       slug: 'categories-custom-id',
       versions: { drafts: true },
       fields: [
@@ -204,6 +218,15 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'numberDefault',
           type: 'number',
           defaultValue: 1,
+        },
+        {
+          name: 'numbersHasMany',
+          type: 'number',
+          hasMany: true,
+        },
+        {
+          name: 'publishDate',
+          type: 'date',
         },
         {
           type: 'blocks',

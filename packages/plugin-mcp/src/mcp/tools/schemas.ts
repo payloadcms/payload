@@ -22,6 +22,12 @@ export const toolSchemas = {
         .describe(
           'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
         ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
     }),
   },
 
@@ -34,6 +40,14 @@ export const toolSchemas = {
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
         ),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships (default: 0)'),
       draft: z
         .boolean()
         .optional()
@@ -65,6 +79,12 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       sort: z
         .string()
         .optional()
@@ -82,6 +102,14 @@ export const toolSchemas = {
     description: 'Create a document in a collection.',
     parameters: z.object({
       data: z.string().describe('JSON string containing the data for the new document'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships in response (default: 0)'),
       draft: z
         .boolean()
         .optional()
@@ -96,6 +124,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
     }),
   },
@@ -138,6 +172,12 @@ export const toolSchemas = {
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       where: z
         .string()
         .optional()
@@ -199,6 +239,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
         ),
     }),
   },

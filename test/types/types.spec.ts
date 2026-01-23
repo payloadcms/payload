@@ -1,10 +1,16 @@
 import type {
   BulkOperationResult,
+  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  GeneratedTypes,
   JoinQuery,
+  JsonObject,
   PaginatedDocs,
+  PayloadTypesShape,
   SelectType,
+  TypedCollectionSelect,
+  TypeWithID,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -19,10 +25,12 @@ import {
   type SerializedTextNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  Config as LocalConfig,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -163,6 +171,23 @@ describe('Types testing', () => {
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalField')
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalNumber')
     })
+  })
+
+  test('ResolveFallback allows generic indexing', () => {
+    type Select<
+      T extends PayloadTypesShape,
+      S extends CollectionSlug<T>,
+    > = TypedCollectionSelect<T>[S]
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
+  })
+
+  test('TypedCollectionSelect resolves correctly with concrete types', () => {
+    type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
+    expect<SelectUsers>().type.not.toBeNever()
+
+    // Test with Config - should also work
+    type SelectPosts = TypedCollectionSelect<LocalConfig>['posts']
+    expect<SelectPosts>().type.not.toBeNever()
   })
 
   describe('fields', () => {
@@ -886,6 +911,97 @@ describe('Types testing', () => {
         })
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
+    })
+  })
+
+  describe('sdk', () => {
+    test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
+      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+    })
+
+    test('ensure SDK without generic automatically uses GeneratedTypes', () => {
+      const _sdk = new PayloadSDK({ baseURL: '' })
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct collection types', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct data for collection in create', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post',
+          richText: {
+            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+          },
+          selectField: 'option-1',
+          radioField: 'option-1',
+        },
+      })
+      expect(result).type.toBe<LocalConfig['collections']['posts']>()
+    })
+
+    test('SDK create data should be typed and reject invalid properties', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            title: 'Test Post',
+            richText: {
+              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            },
+            selectField: 'option-1',
+            radioField: 'option-1',
+            invalidProperty: 'should error',
+          },
+        }),
+      ).type.toRaiseError()
+    })
+
+    test('SDK with select in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        collection: 'posts',
+        id: 'id',
+        select: { title: true, namedGroup: true },
+      })
+      expect(result).type.toBe<Pick<Post, 'id' | 'namedGroup' | 'title'>>()
+    })
+
+    test('SDK with select excluding field in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        collection: 'posts',
+        id: 'id',
+        select: { richText: false },
+      })
+      expect(result).type.toBe<Omit<Post, 'richText'>>()
     })
   })
 

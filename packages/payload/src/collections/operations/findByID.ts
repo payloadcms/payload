@@ -24,6 +24,7 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -81,7 +82,7 @@ export const findByIDOperation = async <
       disableErrors,
       draft: replaceWithVersion = false,
       flattenLocales,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       overrideAccess = false,
       populate,
@@ -91,6 +92,9 @@ export const findByIDOperation = async <
       showHiddenFields,
       trash = false,
     } = args
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -149,6 +153,17 @@ export const findByIDOperation = async <
     // Find by ID
     // /////////////////////////////////////
 
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       draftsEnabled: replaceWithVersion,
@@ -157,7 +172,7 @@ export const findByIDOperation = async <
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      select,
+      select: dbSelect,
       where: fullWhere,
     }
 
