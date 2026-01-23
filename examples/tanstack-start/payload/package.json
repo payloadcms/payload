@@ -1,0 +1,69 @@
+{
+  "name": "payload-app",
+  "version": "1.0.0",
+  "description": "A blank template to get started with Payload 3.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+  },
+  "dependencies": {
+    "@payloadcms/next": "3.73.0",
+    "@payloadcms/richtext-lexical": "3.73.0",
+    "@payloadcms/ui": "3.73.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "16.4.7",
+    "graphql": "^16.8.1",
+    "next": "15.4.10",
+    "payload": "3.73.0",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "sharp": "0.34.2",
+    "@payloadcms/db-mongodb": "3.73.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "^22.5.4",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
+    "@vitejs/plugin-react": "4.5.2",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.4.7",
+    "jsdom": "26.1.0",
+    "playwright": "1.56.1",
+    "playwright-core": "1.56.1",
+    "prettier": "^3.4.2",
+    "typescript": "5.7.3",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "3.2.3"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}
