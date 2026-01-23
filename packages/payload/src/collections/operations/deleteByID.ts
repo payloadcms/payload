@@ -1,6 +1,5 @@
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type {
-  FindOptions,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -38,7 +37,7 @@ export type Arguments = {
   req: PayloadRequest
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+} & Pick<FindOptions<CollectionSlug, SelectType>, 'select'>
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
   incomingArgs: Arguments,
