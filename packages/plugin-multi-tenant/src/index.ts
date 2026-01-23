@@ -42,7 +42,6 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    const basePath = pluginConfig.basePath || defaults.basePath
 
     /**
      * Add defaults for admin properties
@@ -469,7 +468,6 @@ export const multiTenantPlugin =
       incomingConfig.admin.components.actions.push({
         path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
         serverProps: {
-          basePath,
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
           tenantsArrayFieldName,
