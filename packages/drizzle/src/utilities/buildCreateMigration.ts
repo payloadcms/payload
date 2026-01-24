@@ -22,7 +22,7 @@ export const buildCreateMigration = ({
   const dirname = path.dirname(filename)
   return async function createMigration(
     this: DrizzleAdapter,
-    { file, forceAcceptWarning, migrationName, payload, skipEmpty },
+    { check, file, forceAcceptWarning, migrationName, payload, skipEmpty },
   ) {
     const dir = payload.db.migrationDir
     if (!fs.existsSync(dir)) {
@@ -110,7 +110,7 @@ export const buildCreateMigration = ({
       }
 
       if (!upSQL?.length && !downSQL?.length && !forceAcceptWarning) {
-        if (skipEmpty) {
+        if (skipEmpty || check) {
           process.exit(0)
         }
 
@@ -131,6 +131,12 @@ export const buildCreateMigration = ({
         if (!shouldCreateBlankMigration) {
           process.exit(0)
         }
+      }
+
+      // abort if only checking for changes
+      if (check) {
+        payload.logger.error({ msg: 'Schema changes detected, a new migration is needed' })
+        process.exit(1)
       }
 
       // write schema
