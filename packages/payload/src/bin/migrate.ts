@@ -57,6 +57,10 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
   const skipEmpty = formattedArgs.includes('skipEmpty')
+  const nonInteractive =
+    formattedArgs.includes('nonInteractive') ||
+    formattedArgs.includes('noninteractive') ||
+    parsedArgs.nonInteractive === true
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -102,6 +106,7 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
           file,
           forceAcceptWarning,
           migrationName: args[1],
+          nonInteractive,
           payload,
           skipEmpty,
         })
