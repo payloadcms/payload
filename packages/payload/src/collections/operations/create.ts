@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
+import type { CollectionSlug, FindOptions, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -29,11 +29,17 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+} from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -47,12 +53,12 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,
@@ -77,18 +83,11 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'create',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'create',
+    })
 
     if (args.publishSpecificLocale) {
       args.req.locale = args.publishSpecificLocale
@@ -105,6 +104,7 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales: publishAllLocalesArg,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -120,7 +120,14 @@ export const createOperation = async <
 
     let { data } = args
 
-    const isSavingDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const publishAllLocales =
+      !draft &&
+      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
+
+    if (isSavingDraft) {
+      data._status = 'draft'
+    }
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -130,7 +137,6 @@ export const createOperation = async <
         id: duplicateFromID,
         collectionConfig,
         draftArg: isSavingDraft,
-        isSavingDraft,
         overrideAccess,
         req,
         selectedLocales,
@@ -232,11 +238,36 @@ export const createOperation = async <
       operation: 'create',
       overrideAccess,
       req,
-      skipValidation:
-        isSavingDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (
+      config.localization &&
+      collectionConfig.versions &&
+      collectionConfig.versions.drafts &&
+      collectionConfig.versions.drafts.localizeStatus &&
+      publishAllLocales
+    ) {
+      let accessibleLocaleCodes = config.localization.localeCodes
+
+      if (config.localization.filterAvailableLocales) {
+        const filteredLocales = await config.localization.filterAvailableLocales({
+          locales: config.localization.locales,
+          req,
+        })
+        accessibleLocaleCodes = filteredLocales.map((locale) =>
+          typeof locale === 'string' ? locale : locale.code,
+        )
+      }
+
+      if (typeof resultWithLocales._status !== 'object' || resultWithLocales._status === null) {
+        resultWithLocales._status = {}
+      }
+
+      for (const localeCode of accessibleLocaleCodes) {
+        resultWithLocales._status[localeCode] = 'published'
+      }
+    }
 
     // /////////////////////////////////////
     // Write files to local storage
@@ -296,6 +327,7 @@ export const createOperation = async <
         payload,
         publishSpecificLocale,
         req,
+        returning: false,
       })
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.62.0",
+  "version": "3.73.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -45,6 +45,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
+    },
     "./shared": {
       "import": "./src/exports/shared.ts",
       "types": "./src/exports/shared.ts",
@@ -59,6 +64,15 @@
       "import": "./src/exports/i18n/*.ts",
       "types": "./src/exports/i18n/*.ts",
       "default": "./src/exports/i18n/*.ts"
+    },
+    "./migrations": {
+      "import": "./src/exports/migrations.ts",
+      "types": "./src/exports/migrations.ts",
+      "default": "./src/exports/migrations.ts"
+    },
+    "./__testing__/predefinedMigration": {
+      "import": "./src/__testing__/predefinedMigration.js",
+      "default": "./src/__testing__/predefinedMigration.js"
     }
   },
   "main": "./src/index.ts",
@@ -73,6 +87,7 @@
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm bundle:types && echo skipping esbuild",
     "build:bundle-for-analysis": "node ./bundle.js esbuild",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "bundle:types": "rollup -c rollup.dts.config.mjs",
@@ -81,7 +96,6 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "pretest": "pnpm build"
   },
   "dependencies": {
@@ -109,11 +123,12 @@
     "pino-pretty": "13.1.2",
     "pluralize": "8.0.0",
     "qs-esm": "7.0.2",
+    "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
     "tsx": "4.20.3",
-    "undici": "7.10.0",
+    "undici": "7.18.2",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },
@@ -125,11 +140,12 @@
     "@types/minimist": "1.2.2",
     "@types/nodemailer": "7.0.2",
     "@types/pluralize": "0.0.33",
+    "@types/range-parser": "1.2.7",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
@@ -150,6 +166,11 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
+      },
       "./node": {
         "import": "./dist/exports/node.js",
         "types": "./dist/exports/node.d.ts",
@@ -164,6 +185,15 @@
         "import": "./dist/exports/i18n/*.js",
         "types": "./dist/exports/i18n/*.d.ts",
         "default": "./dist/exports/i18n/*.js"
+      },
+      "./migrations": {
+        "import": "./dist/exports/migrations.js",
+        "types": "./dist/exports/migrations.d.ts",
+        "default": "./dist/exports/migrations.js"
+      },
+      "./__testing__/predefinedMigration": {
+        "import": "./dist/__testing__/predefinedMigration.js",
+        "default": "./dist/__testing__/predefinedMigration.js"
       }
     },
     "main": "./dist/index.js",

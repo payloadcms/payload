@@ -309,7 +309,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="render links"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com')
 
@@ -333,7 +333,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="link to relationships"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute(
         'href',
@@ -418,7 +418,7 @@ describe('Rich Text', () => {
       await wait(500)
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
-      const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
+      const removeButton = page.locator('.popup__content').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
       await wait(500)
       await removeButton.click()

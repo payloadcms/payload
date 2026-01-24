@@ -81,12 +81,12 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 
 The following arguments are provided to the `beforeOperation` hook:
 
-| Option           | Description                                                                                                                                                                                                                                                                               |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against. Available options include: `autosave`, `count`, `countVersions`, `create`, `delete`, `forgotPassword`, `login`, `read`, `readDistinct`, `refresh`, `resetPassword`, `restoreVersion`, and `update`. |
-| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                                                                                                                                                           |
-| **`operation`**  | The name of the operation that this hook is running within.                                                                                                                                                                                                                               |
-| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                     |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                       |
+| **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeValidate
 
@@ -100,8 +100,11 @@ Please do note that this does not run before client-side validation. If you rend
 
 ```ts
 import type { CollectionBeforeValidateHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeValidateHook: CollectionBeforeValidateHook = async ({ data }) => {
+const beforeValidateHook: CollectionBeforeValidateHook<Post> = async ({
+  data, // Typed as Partial<Post>
+}) => {
   return data
 }
 ```
@@ -123,8 +126,11 @@ Immediately before validation, beforeChange hooks will run during create and upd
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeChangeHook: CollectionBeforeChangeHook = async ({ data }) => {
+const beforeChangeHook: CollectionBeforeChangeHook<Post> = async ({
+  data, // Typed as Partial<Post>
+}) => {
   return data
 }
 ```
@@ -146,8 +152,12 @@ After a document is created or updated, the `afterChange` hook runs. This hook i
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterChangeHook: CollectionAfterChangeHook = async ({ doc }) => {
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -170,8 +180,11 @@ Runs before `find` and `findByID` operations are transformed for output by `afte
 
 ```ts
 import type { CollectionBeforeReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeReadHook: CollectionBeforeReadHook = async ({ doc }) => {
+const beforeReadHook: CollectionBeforeReadHook<Post> = async ({
+  doc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -192,8 +205,11 @@ Runs as the last step before documents are returned. Flattens locales, hides pro
 
 ```ts
 import type { CollectionAfterReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterReadHook: CollectionAfterReadHook = async ({ doc }) => {
+const afterReadHook: CollectionAfterReadHook<Post> = async ({
+  doc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -257,8 +273,6 @@ The following arguments are provided to the `afterDelete` hook:
 ### afterOperation
 
 The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
-
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'
@@ -496,4 +510,18 @@ import type {
   CollectionRefreshHook,
   CollectionMeHook,
 } from 'payload'
+```
+
+You can also pass a generic type to each hook for strongly-typed `doc`, `previousDoc`, and `data` properties:
+
+```ts
+import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
+
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
+}) => {
+  return doc
+}
 ```

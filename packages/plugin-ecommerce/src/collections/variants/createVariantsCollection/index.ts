@@ -8,10 +8,7 @@ import { variantsCollectionBeforeChange as beforeChange } from './hooks/beforeCh
 import { validateOptions } from './hooks/validateOptions.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-    adminOrPublishedStatus: NonNullable<AccessConfig['adminOrPublishedStatus']>
-  }
+  access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
   currenciesConfig?: CurrenciesConfig
   /**
    * Enables inventory tracking for variants. Defaults to true.
@@ -25,15 +22,20 @@ type Props = {
    * Slug of the variant options collection, defaults to 'variantOptions'.
    */
   variantOptionsSlug?: string
+  /**
+   * Slug of the variant types collection, defaults to 'variantTypes'.
+   */
+  variantTypesSlug?: string
 }
 
 export const createVariantsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOnly, adminOrPublishedStatus },
+    access,
     currenciesConfig,
     inventory = true,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
+    variantTypesSlug = 'variantTypes',
   } = props || {}
   const { supportedCurrencies } = currenciesConfig || {}
 
@@ -71,11 +73,15 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
           },
         },
       },
+      custom: {
+        productsSlug,
+        variantTypesSlug,
+      },
       hasMany: true,
       label: 'Variant options',
       relationTo: variantOptionsSlug,
       required: true,
-      validate: validateOptions(),
+      validate: validateOptions({ productsCollectionSlug: productsSlug }),
     },
     ...(inventory ? [inventoryField()] : []),
   ]
@@ -95,10 +101,10 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
   const baseConfig: CollectionConfig = {
     slug: 'variants',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: adminOrPublishedStatus,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: access.adminOrPublishedStatus,
+      update: access.isAdmin,
     },
     admin: {
       description: ({ t }) =>

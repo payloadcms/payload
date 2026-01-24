@@ -512,9 +512,11 @@ Using server functions helps prevent direct exposure of Local API operations to 
 Example of restricting access based on user role:
 
 ```ts
+import { UnauthorizedError } from 'payload'
+
 export async function deletePost(postId, user) {
   if (!user || user.role !== 'admin') {
-    throw new Error('Unauthorized')
+    throw new UnauthorizedError()
   }
 
   const payload = await getPayload({ config })

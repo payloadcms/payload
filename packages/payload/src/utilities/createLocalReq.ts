@@ -39,9 +39,10 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
     const urlToUse =
-      req?.url || req.payload?.config?.serverURL
+      req?.url ||
+      (req.payload?.config?.serverURL
         ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
-        : fallbackURL
+        : fallbackURL)
 
     try {
       urlObject = new URL(urlToUse)
@@ -123,7 +124,6 @@ export const createLocalReq: CreateLocalReq = async (
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   if (!req.headers) {
-    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.headers = new Headers()
   }
 

@@ -6,7 +6,7 @@ export const TabsFields2: CollectionConfig = {
   slug: tabsFields2Slug,
   fields: [
     {
-      name: 'tabsInArray',
+      name: 'arrayWithTabs',
       type: 'array',
       fields: [
         {

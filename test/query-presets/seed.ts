@@ -164,7 +164,7 @@ export const seed = async (_payload: Payload) => {
           collection: pagesSlug,
           data: {
             text: 'example page',
-            postsRelationship: [post1?.id, post2?.id],
+            postsRelationship: [post1.id, post2.id],
           },
         }),
       () =>

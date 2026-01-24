@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -45,6 +44,7 @@ import type { InitializedEmailAdapter } from './email/types.js'
 import type { DataFromGlobalSlug, Globals, SelectFromGlobalSlug } from './globals/config/types.js'
 import type {
   ApplyDisableErrors,
+  DraftTransformCollectionWithSelect,
   JsonObject,
   SelectType,
   TransformCollectionWithSelect,
@@ -67,7 +67,8 @@ import {
   duplicateLocal,
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
-import { findLocal, type Options as FindOptions } from './collections/operations/local/find.js'
+import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+export type { FindOptions }
 import {
   findByIDLocal,
   type Options as FindByIDOptions,
@@ -119,6 +120,7 @@ import {
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
+export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -139,6 +141,7 @@ import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { _internal_jobSystemGlobals } from './queues/utilities/getCurrentDate.js'
+import { formatAdminURL } from './utilities/formatAdminURL.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
@@ -162,8 +165,35 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-export interface GeneratedTypes {
-  authUntyped: {
+
+/**
+ * Shape constraint for PayloadTypes.
+ * Matches the structure of generated Config types.
+ *
+ * By defining the actual shape, we can use simple property access (T['collections'])
+ * instead of conditional types throughout the codebase.
+ */
+export interface PayloadTypesShape {
+  auth: Record<string, unknown>
+  blocks: Record<string, unknown>
+  collections: Record<string, unknown>
+  collectionsJoins: Record<string, unknown>
+  collectionsSelect: Record<string, unknown>
+  db: { defaultIDType: unknown }
+  fallbackLocale: unknown
+  globals: Record<string, unknown>
+  globalsSelect: Record<string, unknown>
+  jobs: unknown
+  locale: unknown
+  user: unknown
+}
+
+/**
+ * Untyped fallback types. Uses the SAME property names as generated types.
+ * PayloadTypes merges GeneratedTypes with these fallbacks.
+ */
+export interface UntypedPayloadTypes {
+  auth: {
     [slug: string]: {
       forgotPassword: {
         email: string
@@ -181,33 +211,31 @@ export interface GeneratedTypes {
       }
     }
   }
-
-  blocksUntyped: {
+  blocks: {
     [slug: string]: JsonObject
   }
-  collectionsJoinsUntyped: {
-    [slug: string]: {
-      [schemaPath: string]: CollectionSlug
-    }
-  }
-  collectionsSelectUntyped: {
-    [slug: string]: SelectType
-  }
-
-  collectionsUntyped: {
+  collections: {
     [slug: string]: JsonObject & TypeWithID
   }
-  dbUntyped: {
-    defaultIDType: number | string
+  collectionsJoins: {
+    [slug: string]: {
+      [schemaPath: string]: string
+    }
   }
-  globalsSelectUntyped: {
+  collectionsSelect: {
     [slug: string]: SelectType
   }
-
-  globalsUntyped: {
+  db: {
+    defaultIDType: number | string
+  }
+  fallbackLocale: 'false' | 'none' | 'null' | ({} & string)[] | ({} & string) | false | null
+  globals: {
     [slug: string]: JsonObject
   }
-  jobsUntyped: {
+  globalsSelect: {
+    [slug: string]: SelectType
+  }
+  jobs: {
     tasks: {
       [slug: string]: {
         input?: JsonObject
@@ -220,106 +248,89 @@ export interface GeneratedTypes {
       }
     }
   }
-  localeUntyped: null | string
-  userUntyped: UntypedUser
+  locale: null | string
+  user: UntypedUser
 }
 
-// Helper type to resolve the correct type using conditional types
-type ResolveCollectionType<T> = 'collections' extends keyof T
-  ? T['collections']
-  : // @ts-expect-error
-    T['collectionsUntyped']
+/**
+ * Interface to be module-augmented by the `payload-types.ts` file.
+ * When augmented, its properties take precedence over UntypedPayloadTypes.
+ */
+export interface GeneratedTypes {}
 
-type ResolveBlockType<T> = 'blocks' extends keyof T
-  ? T['blocks']
-  : // @ts-expect-error
-    T['blocksUntyped']
+/**
+ * Check if GeneratedTypes has been augmented (has any keys).
+ */
+type IsAugmented = keyof GeneratedTypes extends never ? false : true
 
-type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
-  ? T['collectionsSelect']
-  : // @ts-expect-error
-    T['collectionsSelectUntyped']
+/**
+ * PayloadTypes merges GeneratedTypes with UntypedPayloadTypes.
+ * - When augmented: uses augmented properties, fills gaps with untyped fallbacks
+ * - When not augmented: uses only UntypedPayloadTypes
+ */
+export type PayloadTypes = IsAugmented extends true
+  ? GeneratedTypes & Omit<UntypedPayloadTypes, keyof GeneratedTypes>
+  : UntypedPayloadTypes
 
-type ResolveCollectionJoinsType<T> = 'collectionsJoins' extends keyof T
-  ? T['collectionsJoins']
-  : // @ts-expect-error
-    T['collectionsJoinsUntyped']
+export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
-type ResolveGlobalType<T> = 'globals' extends keyof T
-  ? T['globals']
-  : // @ts-expect-error
-    T['globalsUntyped']
+export type TypedBlock = PayloadTypes['blocks']
 
-type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
-  ? T['globalsSelect']
-  : // @ts-expect-error
-    T['globalsSelectUntyped']
-
-// Applying helper types to GeneratedTypes
-export type TypedCollection = ResolveCollectionType<GeneratedTypes>
-
-export type TypedBlock = ResolveBlockType<GeneratedTypes>
-
-export type TypedUploadCollection = NonNever<{
-  [K in keyof TypedCollection]:
+export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
+  [TSlug in keyof T['collections']]:
     | 'filename'
     | 'filesize'
     | 'mimeType'
-    | 'url' extends keyof TypedCollection[K]
-    ? TypedCollection[K]
+    | 'url' extends keyof T['collections'][TSlug]
+    ? T['collections'][TSlug]
     : never
 }>
 
-export type TypedCollectionSelect = ResolveCollectionSelectType<GeneratedTypes>
+export type TypedCollectionSelect<T extends PayloadTypesShape = PayloadTypes> =
+  T['collectionsSelect']
 
-export type TypedCollectionJoins = ResolveCollectionJoinsType<GeneratedTypes>
+export type TypedCollectionJoins<T extends PayloadTypesShape = PayloadTypes> = T['collectionsJoins']
 
-export type TypedGlobal = ResolveGlobalType<GeneratedTypes>
+export type TypedGlobal<T extends PayloadTypesShape = PayloadTypes> = T['globals']
 
-export type TypedGlobalSelect = ResolveGlobalSelectType<GeneratedTypes>
+export type TypedGlobalSelect<T extends PayloadTypesShape = PayloadTypes> = T['globalsSelect']
 
 // Extract string keys from the type
 export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
-export type CollectionSlug = StringKeyOf<TypedCollection>
+export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  T['collections']
+>
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
-export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
+export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
+  TypedUploadCollection<T>
+>
 
-type ResolveDbType<T> = 'db' extends keyof T
-  ? T['db']
-  : // @ts-expect-error
-    T['dbUntyped']
+export type DefaultDocumentIDType = PayloadTypes['db']['defaultIDType']
 
-export type DefaultDocumentIDType = ResolveDbType<GeneratedTypes>['defaultIDType']
-export type GlobalSlug = StringKeyOf<TypedGlobal>
+export type GlobalSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['globals']>
 
-// now for locale and user
+export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale']
 
-// @ts-expect-error
-type ResolveLocaleType<T> = 'locale' extends keyof T ? T['locale'] : T['localeUntyped']
-// @ts-expect-error
-type ResolveUserType<T> = 'user' extends keyof T ? T['user'] : T['userUntyped']
-
-export type TypedLocale = ResolveLocaleType<GeneratedTypes>
+export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
  * @todo rename to `User` in 4.0
  */
-export type TypedUser = ResolveUserType<GeneratedTypes>
+export type TypedUser = PayloadTypes['user']
 
-// @ts-expect-error
-type ResolveAuthOperationsType<T> = 'auth' extends keyof T ? T['auth'] : T['authUntyped']
-export type TypedAuthOperations = ResolveAuthOperationsType<GeneratedTypes>
+export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-// @ts-expect-error
-type ResolveJobOperationsType<T> = 'jobs' extends keyof T ? T['jobs'] : T['jobsUntyped']
-export type TypedJobs = ResolveJobOperationsType<GeneratedTypes>
+export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
 
-type HasPayloadJobsType = 'collections' extends keyof GeneratedTypes
-  ? 'payload-jobs' extends keyof TypedCollection
+export type TypedJobs = PayloadTypes['jobs']
+
+// Check if payload-jobs exists in the AUGMENTED types (not the fallback with index signature)
+type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
+  ? 'payload-jobs' extends keyof C
     ? true
     : false
   : false
@@ -449,10 +460,22 @@ export class BasePayload {
    * @param options
    * @returns documents satisfying query
    */
-  find = async <TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
-    options: FindOptions<TSlug, TSelect>,
-  ): Promise<PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>> => {
-    return findLocal<TSlug, TSelect>(this, options)
+  find = async <
+    TSlug extends CollectionSlug,
+    TSelect extends SelectFromCollectionSlug<TSlug>,
+    TDraft extends boolean = false,
+  >(
+    options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
+  ): Promise<
+    PaginatedDocs<
+      TDraft extends true
+        ? PayloadTypes extends { strictDraftTypes: true }
+          ? DraftTransformCollectionWithSelect<TSlug, TSelect>
+          : TransformCollectionWithSelect<TSlug, TSelect>
+        : TransformCollectionWithSelect<TSlug, TSelect>
+    >
+  > => {
+    return findLocal<TSlug, TSelect, TDraft>(this, options)
   }
 
   /**
@@ -540,9 +563,19 @@ export class BasePayload {
     return forgotPasswordLocal<TSlug>(this, options)
   }
 
-  getAdminURL = (): string => `${this.config.serverURL}${this.config.routes.admin}`
+  getAdminURL = (): string =>
+    formatAdminURL({
+      adminRoute: this.config.routes.admin,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
-  getAPIURL = (): string => `${this.config.serverURL}${this.config.routes.api}`
+  getAPIURL = (): string =>
+    formatAdminURL({
+      apiRoute: this.config.routes.api,
+      path: '',
+      serverURL: this.config.serverURL,
+    })
 
   globals!: Globals
 
@@ -1000,9 +1033,13 @@ export const reload = async (
     })
   }
 
-  // Generate component map
+  // Generate import map
   if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
+    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
+    // We don't want to throw an error in this case, as it would break the user's frontend.
+    // => just skip it => ignoreResolveError: true
     await generateImportMap(config, {
+      ignoreResolveError: true,
       log: true,
     })
   }
@@ -1098,9 +1135,21 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload, !options.importMap, options)
+
+      // Reload the payload instance after a config change (triggered by HMR in development).
+      // The second parameter (false) forces import map regeneration rather than deciding based on options.importMap.
+      //
+      // Why we always regenerate import map: getPayload() may be called from multiple sources (admin panel, frontend, etc.)
+      // that share the same cache but may pass different importMap values. Since call order is unpredictable,
+      // we cannot rely on options.importMap to determine if regeneration is needed.
+      //
+      // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
+      // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
+      // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
+      await reload(config, cached.payload, false, options)
 
       resolve()
+      cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
@@ -1112,12 +1161,12 @@ export const getPayload = async (
     return cached.payload
   }
 
-  if (!cached.promise) {
-    // no need to await options.config here, as it's already awaited in the BasePayload.init
-    cached.promise = new BasePayload().init(options)
-  }
-
   try {
+    if (!cached.promise) {
+      // no need to await options.config here, as it's already awaited in the BasePayload.init
+      cached.promise = new BasePayload().init(options)
+    }
+
     cached.payload = await cached.promise
 
     if (
@@ -1141,10 +1190,22 @@ export const getPayload = async (
         )
 
         cached.ws.onmessage = (event) => {
+          if (cached.reload instanceof Promise) {
+            // If there is an in-progress reload in the same getPayload
+            // cache instance, do not set reload to true again, which would
+            // trigger another reload.
+            // Instead, wait for the in-progress reload to finish.
+            return
+          }
+
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
-            if ('action' in data && data.action === 'serverComponentChanges') {
+            if (
+              // On Next.js 15, we need to check for data.action. On Next.js 16, we need to check for data.type.
+              data.type === 'serverComponentChanges' ||
+              data.action === 'serverComponentChanges'
+            ) {
               cached.reload = true
             }
           }
@@ -1388,7 +1449,9 @@ export type {
   Upsert,
   UpsertArgs,
 } from './database/types.js'
+export type { DynamicMigrationTemplate } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+
 export {
   APIError,
   APIErrorName,
@@ -1412,17 +1475,19 @@ export {
   MissingFile,
   NotFound,
   QueryError,
+  UnauthorizedError,
   UnverifiedEmail,
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-
 export type { ValidationFieldError } from './errors/index.js'
+
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
 
-export { slugField, type SlugFieldProps } from './fields/baseFields/slug/index.js'
+export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
   createClientField,
@@ -1432,6 +1497,14 @@ export {
 } from './fields/config/client.js'
 
 export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { sanitizeFields } from './fields/config/sanitize.js'
 
@@ -1648,9 +1721,9 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
-
 export type {
   BaseJob,
+  ConcurrencyConfig,
   JobLog,
   JobTaskStatus,
   RunningJob,
@@ -1659,6 +1732,8 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+
+export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 
@@ -1702,6 +1777,7 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export { dynamicImport } from './utilities/dynamicImport.js'
 export {
   findUp,
   findUpSync,
@@ -1742,13 +1818,19 @@ export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
-
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
+export { localizeStatus } from './versions/migrations/localizeStatus/index.js'
+export type {
+  MongoLocalizeStatusArgs,
+  SqlLocalizeStatusArgs,
+} from './versions/migrations/localizeStatus/index.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
+
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

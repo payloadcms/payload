@@ -2,6 +2,7 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type {
   Block,
@@ -79,6 +80,8 @@ export type {
   SaveDraftButtonServerProps,
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
+
+export type { CustomStatus } from './elements/Status.js'
 
 export type { Column } from './elements/Table.js'
 
@@ -566,6 +569,7 @@ export type DocumentSlots = {
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Status?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
 }
@@ -582,11 +586,14 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
+  SlugifyServerFunctionArgs,
 } from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
+
+export { type WidgetServerProps } from './views/dashboard.js'
 
 export type {
   BeforeDocumentControlsClientProps,
@@ -717,7 +724,10 @@ export type ClientFieldSchemaMap = Map<
 >
 
 export type DocumentEvent = {
+  doc?: TypeWithID
+  drawerSlug?: string
   entitySlug: string
   id?: number | string
+  operation: 'create' | 'update'
   updatedAt: string
 }

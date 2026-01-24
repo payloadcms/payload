@@ -1,9 +1,11 @@
 import type {
   CollectionSlug,
+  FindOptions,
   JoinQuery,
   Payload,
   RequestContext,
   SelectType,
+  TypedFallbackLocale,
   TypedLocale,
 } from '../../../index.js'
 import type {
@@ -62,7 +64,7 @@ export type Options<
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale | TypedLocale[]
+  fallbackLocale?: TypedFallbackLocale
   /**
    * The ID of the document to find.
    */
@@ -96,10 +98,6 @@ export type Options<
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -117,7 +115,8 @@ export type Options<
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindByIDArgs, 'flattenLocales'>
+} & Pick<FindByIDArgs, 'flattenLocales'> &
+  Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,

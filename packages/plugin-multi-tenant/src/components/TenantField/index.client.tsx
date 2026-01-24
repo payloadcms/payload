@@ -32,8 +32,9 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { setValue, showError, value } = useField<(number | string)[] | (number | string)>()
   const modified = useFormModified()
   const { isValid: isFormValid, setModified } = useForm()
-  const { id: docID } = useDocumentInfo()
-  const { openModal } = useModal()
+  const { id: docID, collectionSlug } = useDocumentInfo()
+  const { isModalOpen, openModal } = useModal()
+  const isEditManyModalOpen = collectionSlug ? isModalOpen(`edit-${collectionSlug}`) : false
   const isConfirmingRef = React.useRef<boolean>(false)
   const prevModified = React.useRef(modified)
   const prevValue = React.useRef<typeof value>(value)
@@ -117,8 +118,8 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
 
   if (showField) {
-    if (debug) {
-      return <TenantFieldInModal debug={debug} fieldArgs={fieldArgs} unique={unique} />
+    if (debug || isEditManyModalOpen) {
+      return <TenantRelationshipField debug={debug} fieldArgs={fieldArgs} unique={unique} />
     }
 
     if (!unique) {
@@ -129,16 +130,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
           afterModalOpen={afterModalOpen}
           onConfirm={onConfirm}
         >
-          <TenantFieldInModal
-            debug={debug}
-            fieldArgs={{
-              ...fieldArgs,
-              field: {
-                ...fieldArgs.field,
-              },
-            }}
-            unique={unique}
-          />
+          <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
         </AssignTenantFieldModal>
       )
     }
@@ -149,7 +141,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   return null
 }
 
-const TenantFieldInModal: React.FC<{
+const TenantRelationshipField: React.FC<{
   debug?: boolean
   fieldArgs: RelationshipFieldClientProps
   unique?: boolean

@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -23,14 +23,16 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
   collection: Collection
@@ -46,12 +48,11 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 
@@ -68,18 +69,11 @@ export const findOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req!.context,
-            operation: 'read',
-            req: args.req!,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'read',
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -88,7 +82,7 @@ export const findOperation = async <
       depth,
       disableErrors,
       draft: draftsEnabled,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       limit,
       overrideAccess,
@@ -103,6 +97,10 @@ export const findOperation = async <
     } = args
 
     const req = args.req!
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
     const { fallbackLocale, locale, payload } = req
 
     const select = sanitizeSelect({
@@ -169,7 +167,7 @@ export const findOperation = async <
       req,
     })
 
-    if (collectionConfig.versions?.drafts && draftsEnabled) {
+    if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({

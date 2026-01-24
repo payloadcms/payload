@@ -22,12 +22,6 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
 ) {
   const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
-  const options = {
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
-
   const data = {
     autosave,
     createdAt,
@@ -49,6 +43,12 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     fields,
     operation: 'write',
   })
+
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
 
   let [doc] = await Model.create([data], options, req)
 

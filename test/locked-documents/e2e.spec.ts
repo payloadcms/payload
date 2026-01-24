@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
+import {  expect,test } from '@playwright/test'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
@@ -25,13 +24,15 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, afterAll, describe } = test
+const { beforeAll, describe,beforeEach } = test
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -61,6 +62,13 @@ describe('Locked Documents', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'lockedDocumentsTest',
+    })
   })
 
   describe('disabled locking', () => {
@@ -96,9 +104,9 @@ describe('Locked Documents', () => {
     let testDoc: Test
     let testLockedDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
-        text: 'hello',
+        text: 'hello locked',
       })
 
       anotherPostDoc = await createPostDoc({
@@ -149,37 +157,7 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: testLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: anotherPostDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: testDoc.id,
-      })
-    })
 
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
@@ -246,9 +224,10 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk publish on unlocked documents on all pages', async () => {
-      await mapAsync([...Array(10)], async () => {
+
+      await mapAsync([...Array(9)], async () => {
         await createPostDoc({
-          text: 'Ready for delete',
+          text: 'Ready for unpublish',
         })
       })
 
@@ -266,6 +245,13 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(10)], async () => {
+        await createPostDoc({
+          text: 'Ready for publish',
+          _status: 'published'
+        })
+      })
+
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
@@ -278,6 +264,12 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk edit on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(8)], async () => {
+        await createPostDoc({
+          text: 'doc',
+          _status: 'draft'
+        })
+      })
       await page.goto(postsUrl.list)
 
       const bulkText = 'Bulk update title'
@@ -313,9 +305,9 @@ describe('Locked Documents', () => {
 
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
+      await expect(page.locator('.row-10 .cell-text')).toContainText('hello locked')
 
-      await goToNextPage(page)
-      await expect(page.locator('.row-1 .cell-text')).toContainText('hello')
+
     })
   })
 
@@ -329,7 +321,7 @@ describe('Locked Documents', () => {
     let testDoc: Test
     let user2: User
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -388,47 +380,7 @@ describe('Locked Documents', () => {
       testDoc = await createTestDoc({ text: 'hello' })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredLockedDocOne.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredLockedDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredDocOne.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: testDoc.id,
-      })
-    })
 
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
       await page.goto(testsUrl.list)
@@ -639,7 +591,7 @@ describe('Locked Documents', () => {
     let serverComponentDoc: ServerComponent
     let lockedServerComponentDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'new post doc',
       })
@@ -729,52 +681,7 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredTestLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredTestDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredPostLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: expiredPostDoc.id,
-      })
-    })
 
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       await page.goto(postsUrl.list)
@@ -909,7 +816,7 @@ describe('Locked Documents', () => {
     let serverComponentDoc: ServerComponent
     let lockedServerComponentsDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -959,37 +866,7 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentsDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentDoc.id,
-      })
-    })
 
     test('should update user data if incoming user takes over from document modal', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
@@ -1051,7 +928,7 @@ describe('Locked Documents', () => {
     let serverComponentsDoc: ServerComponent
     let lockedServerComponentsDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -1101,32 +978,7 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentsDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentsDoc.id,
-      })
-    })
 
     test('should update user data if incoming user takes over from within document', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
@@ -1194,7 +1046,7 @@ describe('Locked Documents', () => {
     let serverComponentsDoc: ServerComponent
     let user2: User
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -1214,22 +1066,7 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentsDoc.id,
-      })
-    })
     test('should show Document Take Over modal for previous user if taken over', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -1447,7 +1284,7 @@ describe('Locked Documents', () => {
     let lockedMenuGlobal: PayloadLockedDocument
     let lockedAdminGlobal: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       user2 = await payload.create({
         collection: 'users',
         data: {
@@ -1482,27 +1319,12 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
 
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedAdminGlobal.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedMenuGlobal.id,
-      })
-    })
 
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-menu .locked svg')).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
@@ -1516,10 +1338,15 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: lockedMenuGlobal.id,
+      })
+
       await page.goto(globalUrl.global('menu'))
 
       const textInput = page.locator('#field-globalText')
@@ -1529,13 +1356,13 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if lock expired', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1543,7 +1370,7 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await payload.delete({
         collection: lockedDocumentCollection,
@@ -1566,7 +1393,7 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1574,7 +1401,7 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await page.locator('.card-admin a').click()
 
