@@ -872,15 +872,15 @@ describe('Collections - Uploads', () => {
     describe('filters', () => {
       it.each`
         url                                  | collection            | errorContains
-        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
-        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'unsafe'}
-        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'unsafe'}
-        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
-        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'unsafe'}
-        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'unsafe'}
-        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}
-        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'unsafe'}
-        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'unsafe'}
+        ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://[::1]/file.png'}           | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://10.0.0.1/file.png'}        | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://192.168.1.1/file.png'}     | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://172.16.0.1/file.png'}      | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://169.254.1.1/file.png'}     | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://224.0.0.1/file.png'}       | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://0.0.0.0/file.png'}         | ${mediaSlug}          | ${'safeFetch'}
+        ${'http://255.255.255.255/file.png'} | ${mediaSlug}          | ${'safeFetch'}
         ${'http://127.0.0.1/file.png'}       | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
         ${'http://[::1]/file.png'}           | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
         ${'http://10.0.0.1/file.png'}        | ${allowListMediaSlug} | ${'There was a problem while uploading the file.'}
@@ -960,7 +960,7 @@ describe('Collections - Uploads', () => {
         ).rejects.toThrow(
           expect.objectContaining({
             name: 'FileRetrievalError',
-            message: expect.not.stringContaining('unsafe'),
+            message: expect.not.stringContaining('safeFetch'),
           }),
         )
       })
@@ -978,7 +978,7 @@ describe('Collections - Uploads', () => {
         ).rejects.toThrow(
           expect.objectContaining({
             name: 'FileRetrievalError',
-            message: expect.not.stringContaining('unsafe'),
+            message: expect.not.stringContaining('safeFetch'),
           }),
         )
       })
