@@ -67,7 +67,8 @@ import {
   duplicateLocal,
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
-import { findLocal, type Options as FindOptions } from './collections/operations/local/find.js'
+import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+export type { FindOptions }
 import {
   findByIDLocal,
   type Options as FindByIDOptions,
