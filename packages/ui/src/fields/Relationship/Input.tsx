@@ -99,6 +99,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
   const [errorLoading, setErrorLoading] = useState('')
   const [search, setSearch] = useState('')
+  const [enableClientSort, setEnableClientSort] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
@@ -246,6 +247,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 fieldToSort = sortOptions[relation]
               }
 
+              setEnableClientSort(fieldToSort === 'id')
+
               const query: {
                 [key: string]: unknown
                 where: Where
@@ -375,7 +378,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           setIsLoading(false)
         },
         search: searchArg,
-        sort: true,
+        sort: enableClientSort,
         ...(hasManyArg === true
           ? {
               hasMany: hasManyArg,
@@ -478,7 +481,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             docs,
             i18n,
             ids: idsToLoad,
-            sort: true,
+            sort: enableClientSort,
           })
         }
       }
