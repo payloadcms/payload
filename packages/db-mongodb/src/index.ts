@@ -56,6 +56,7 @@ import { queryDrafts } from './queryDrafts.js'
 import { beginTransaction } from './transactions/beginTransaction.js'
 import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
+import { parseParams } from './queries/parseParams.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
 import { updateJobs } from './updateJobs.js'
@@ -332,6 +333,7 @@ export function mongooseAdapter({
       migrateFresh,
       migrationDir,
       packageName: '@payloadcms/db-mongodb',
+      parseParams,
       payload,
       prodMigrations,
       queryDrafts,
