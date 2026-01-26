@@ -716,10 +716,10 @@ describe('Query Presets', () => {
 
     // Verify the where query is in the URL
     await assertURLParams({
-      columns: seededData.everyone.columns,
       page,
-      preset: seededData.everyone.id,
+      columns: seededData.everyone.columns,
       where: seededData.everyone.where,
+      preset: seededData.everyone.id,
     })
 
     // Verify the preset is selected in the preset selector
