@@ -204,6 +204,36 @@ export const seed = async (_payload: Payload) => {
             },
           },
         }),
+      () =>
+        _payload.create({
+          collection: 'default-columns',
+          data: {
+            field1: 'field1',
+            field2: 'field2',
+            defaultColumnField: 'defaultColumnField',
+          },
+        }),
+      // Create basic query preset for default columns
+      () =>
+        _payload.create({
+          collection: 'payload-query-presets',
+          user: adminUser,
+          overrideAccess: false,
+          data: {
+            relatedCollection: 'default-columns',
+            title: 'Default Columns',
+            where: {
+              field1: {
+                exists: true,
+              },
+            },
+            access: {
+              read: {
+                constraint: 'everyone',
+              },
+            },
+          },
+        }),
     ],
     false,
   )
