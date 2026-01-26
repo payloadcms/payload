@@ -41,19 +41,16 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
 /**
- * Global slugs that do NOT have drafts enabled.
- * Used to disallow draft option only for globals that definitely don't have drafts.
- * In generated types, only globals with versions + drafts include the internal `_status` field.
+ * Global slugs that do not have drafts enabled.
+ * Detects globals without drafts by checking for the absence of the `_status` field.
  */
 export type GlobalsWithoutDrafts = {
   [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
 }[GlobalSlug]
 
 /**
- * Reusable type for draft flag in global operations.
- * When strictDraftTypes is enabled:
- * - For globals without drafts: draft property is forbidden
- * - For globals with drafts or generic slugs: draft property is allowed
+ * Conditionally allows or forbids the `draft` property based on global configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
  */
 export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
   strictDraftTypes: true
@@ -61,7 +58,7 @@ export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes e
   ? TSlug extends GlobalsWithoutDrafts
     ? {
         /**
-         * This global does not have drafts enabled.
+         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
          */
         draft?: never
       }
