@@ -17,7 +17,9 @@ export const beforeChangeCart: (args: Props) => CollectionBeforeChangeHook =
       data.secret = secret
 
       // Store in context so afterRead hook can include it in the creation response
-      if (!req.context) { req.context = {} }
+      if (!req.context) {
+        req.context = {}
+      }
       req.context.newCartSecret = secret
     }
 

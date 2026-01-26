@@ -8,6 +8,7 @@ import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { AfterReadCollection } from './collections/AfterRead/index.js'
 import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
 import {
   BeforeDelete2Collection,
@@ -18,7 +19,6 @@ import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
-import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterChangeHooks from './collections/NestedAfterChangeHook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
@@ -50,8 +50,8 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
     BeforeDeleteCollection,
     BeforeDelete2Collection,
-    FieldPaths,
     ValueCollection,
+    AfterReadCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [

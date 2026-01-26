@@ -42,7 +42,6 @@ export const QueryPresetBar: React.FC<{
   const {
     config: {
       routes: { api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()

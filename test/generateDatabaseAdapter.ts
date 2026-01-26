@@ -95,6 +95,16 @@ export const allDatabaseAdapters = {
     },
     readReplicas: [process.env.POSTGRES_REPLICA_URL],
   })
+        `,
+  'content-api': `
+import { contentAPIAdapter } from '@payloadcms/figma'
+export const databaseAdapter = contentAPIAdapter({
+  auth: {
+    mode: 'devJwt',
+  },
+  url: process.env.CONTENT_API_URL || 'http://localhost:8080',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+})
   `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
@@ -122,7 +132,7 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -159,4 +169,14 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
 
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
+}
+
+export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
+
+export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
+  if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
+    return dbAdapter
+  }
+  return 'mongodb'
 }

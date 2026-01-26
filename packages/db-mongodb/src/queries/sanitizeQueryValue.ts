@@ -198,7 +198,6 @@ export const sanitizeQueryValue = ({
 
     if (operator === 'exists') {
       formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
-
       return buildExistsQuery(formattedValue, path)
     }
   }
@@ -308,7 +307,51 @@ export const sanitizeQueryValue = ({
       }, [])
     }
 
+    // Handle hasMany relationships with equals operator and array values
+    // For array equality checking
     if (
+      ['equals', 'not_equals'].includes(operator) &&
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany
+    ) {
+      if (typeof relationTo === 'string') {
+        const customIDType = payload.collections[relationTo]?.customIDType
+
+        // Convert array values to proper types (ObjectId or custom ID type)
+        formattedValue = formattedValue.map((v) => {
+          if (customIDType === 'number') {
+            const parsed = parseFloat(v)
+            return Number.isNaN(parsed) ? v : parsed
+          }
+          if (!Types.ObjectId.isValid(v)) {
+            return v
+          }
+          return new Types.ObjectId(v)
+        })
+      } else {
+        // Polymorphic hasMany - convert array of {relationTo, value} objects
+        formattedValue = formattedValue.map((item) => {
+          if (typeof item === 'object' && 'value' in item) {
+            const relTo = item.relationTo
+            const customIDType = payload.collections[relTo]?.customIDType
+            if (customIDType === 'number') {
+              const parsed = parseFloat(item.value)
+              return { relationTo: relTo, value: Number.isNaN(parsed) ? item.value : parsed }
+            }
+            if (Types.ObjectId.isValid(item.value)) {
+              return { relationTo: relTo, value: new Types.ObjectId(item.value) }
+            }
+            return item
+          }
+          // Non-polymorphic format - just IDs
+          if (Types.ObjectId.isValid(item)) {
+            return new Types.ObjectId(item)
+          }
+          return item
+        })
+      }
+    } else if (
       ['contains', 'equals', 'like', 'not_equals'].includes(operator) &&
       (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
     ) {
@@ -416,12 +459,20 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      // _id can't be empty string, will error Cast to ObjectId failed for value ""
-      return buildExistsQuery(
-        formattedValue,
-        path,
-        !['checkbox', 'relationship', 'upload'].includes(field.type),
+      let treatEmptyString = !['array', 'blocks', 'checkbox', 'relationship', 'upload'].includes(
+        field.type,
       )
+
+      if (field.type === 'text' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'number' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'select' && field.hasMany) {
+        treatEmptyString = false
+      }
+
+      // _id can't be empty string, will error Cast to ObjectId failed for value ""
+      return buildExistsQuery(formattedValue, path, treatEmptyString)
     }
   }
 

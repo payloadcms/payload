@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test'
 
-import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
 import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
@@ -39,6 +38,11 @@ let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 let url: AdminUrlUtil
 
+async function goToListView(page: Page) {
+  await page.goto(url.list)
+  await expect(page.locator('body')).not.toContainText('Loading...')
+}
+
 describe('Date', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -72,7 +76,7 @@ describe('Date', () => {
   })
 
   test('should display formatted date in list view table cell', async () => {
-    await page.goto(url.list)
+    await goToListView(page)
     const formattedDateCell = page.locator('.row-1 .cell-timeOnly')
     await expect(formattedDateCell).toContainText(' Aug ')
 
@@ -81,13 +85,13 @@ describe('Date', () => {
   })
 
   test('should display formatted date in useAsTitle', async () => {
-    await page.goto(url.list)
+    await goToListView(page)
     await page.locator('.row-1 .cell-default a').click()
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
   })
 
   test('should retain date format in useAsTitle after modifying value', async () => {
-    await page.goto(url.list)
+    await goToListView(page)
     await page.locator('.row-1 .cell-default a').click()
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
 
@@ -775,7 +779,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
     })
 
     test('displayed value in list view should remain unchanged', async () => {
-      await page.goto(url.list)
+      await goToListView(page)
 
       const dateTimeLocator = page.locator('.cell-timezoneGroup__dayAndTime').first()
 
@@ -791,7 +795,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
     })
 
     test('date field with hidden timezone column should display date correctly in list view', async () => {
-      await page.goto(url.list)
+      await goToListView(page)
 
       // The date field value should still be displayed correctly
       const dateTimeLocator = page.locator('.cell-dateWithTimezoneWithDisabledColumns').first()

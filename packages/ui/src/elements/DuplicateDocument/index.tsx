@@ -51,7 +51,6 @@ export const DuplicateDocument: React.FC<Props> = ({
     config: {
       localization,
       routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -148,7 +147,6 @@ export const DuplicateDocument: React.FC<Props> = ({
       onDuplicate,
       redirectAfterDuplicate,
       router,
-      serverURL,
       setModified,
       singularLabel,
       slug,

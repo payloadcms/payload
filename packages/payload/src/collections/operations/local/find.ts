@@ -1,9 +1,9 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
-  GeneratedTypes,
   JoinQuery,
   Payload,
+  PayloadTypes,
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
@@ -25,7 +25,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * the Collection slug to operate against.
    */
@@ -103,7 +103,50 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
+   * By default, Payload's APIs will return all fields for a given collection or global.
+   * But you may not need all of that data for all of your queries.
+   * Sometimes, you might want just a few fields from the response.
+   *
+   * With the Select API, you can define exactly which fields you'd like to retrieve.
+   * This can impact performance by reducing database load and response size.
+   *
+   *
+   * **Example: Select specific fields**
+   * ```ts
+   * const post = await payload.findByID({
+   *   collection: 'posts',
+   *   id: '1',
+   *   select: { title: true, content: true },
+   * })
+   *
+   * console.log(post) // { id: '1', title: 'My Post', content: 'This is my post' }
+   * ```
+   *
+   * **Example: Select all fields except `content`**
+   *
+   * ```ts
+   * const post = await payload.findByID({
+   *   collection: 'posts',
+   *   id: '1',
+   *   select: { content: false },
+   * })
+   *
+   * console.log(post) // { id: '1', title: 'My Post', number: 3 }
+   * ```
+   *
+   * **Example: Empty select returns only `id`**
+   *
+   * ```ts
+   * const post = await payload.findByID({
+   *   collection: 'posts',
+   *   id: '1',
+   *   select: {},
+   * })
+   *
+   * console.log(post) // { id: '1' }
+   * ```
+   *
+   * @see https://payloadcms.com/docs/queries/select
    */
   select?: TSelect
   /**
@@ -142,11 +185,11 @@ export async function findLocal<
   TDraft extends boolean = false,
 >(
   payload: Payload,
-  options: { draft?: TDraft } & Options<TSlug, TSelect>,
+  options: { draft?: TDraft } & FindOptions<TSlug, TSelect>,
 ): Promise<
   PaginatedDocs<
     TDraft extends true
-      ? GeneratedTypes extends { strictDraftTypes: true }
+      ? PayloadTypes extends { strictDraftTypes: true }
         ? DraftTransformCollectionWithSelect<TSlug, TSelect>
         : TransformCollectionWithSelect<TSlug, TSelect>
       : TransformCollectionWithSelect<TSlug, TSelect>

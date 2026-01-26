@@ -120,6 +120,7 @@ export const etTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faili üleslaadimisel tekkis probleem.',
     restoringTitle:
       'Ilmnes viga, kui {{title}} taastati. Kontrollige oma ühendust ja proovige uuesti.',
+    revertingDocument: 'Selle dokumendi taastamisel tekkis probleem.',
     tokenInvalidOrExpired: 'Võti on kas vigane või aegunud.',
     tokenNotProvided: 'Võtit ei esitatud.',
     unableToCopy: 'Kopeerimine ebaõnnestus.',
@@ -547,6 +548,7 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Olete taastamas selle dokumendi muudatusi avaldatud seisundisse. Olete kindel?',
     aboutToUnpublish: 'Olete tühistamas selle dokumendi avaldamist. Olete kindel?',
+    aboutToUnpublishIn: 'Te oled selle dokumenti {{locale}} avaldamas. Oled sa kindel?',
     aboutToUnpublishSelection: 'Olete tühistamas kõigi valitud {{label}} avaldamist. Olete kindel?',
     autosave: 'Automaatne salvestamine',
     autosavedSuccessfully: 'Automaatselt salvestatud.',
@@ -593,6 +595,7 @@ export const etTranslations: DefaultTranslationsObject = {
     restoring: 'Taastamine...',
     reverting: 'Taastamine...',
     revertToPublished: 'Taasta avaldatud seisund',
+    revertUnsuccessful: 'Tagasipöördumine ebaõnnestus. Eelnevalt avaldatud versiooni ei leitud.',
     saveDraft: 'Salvesta mustand',
     scheduledSuccessfully: 'Planeeritud edukalt.',
     schedulePublish: 'Planeeri avaldamine',
@@ -603,6 +606,9 @@ export const etTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spetsiifiline versioon',
     status: 'Olek',
     unpublish: 'Tühista avaldamine',
+    unpublished: 'Avaldamata',
+    unpublishedSuccessfully: 'Edukalt avaldamata.',
+    unpublishIn: 'Tühista avaldamine {{locale}}',
     unpublishing: 'Avaldamise tühistamine...',
     version: 'Versioon',
     versionAgo: '{{distance}} tagasi',
