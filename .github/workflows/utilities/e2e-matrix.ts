@@ -13,7 +13,7 @@ export interface TestConfig {
 }
 
 interface MatrixEntry {
-  'test-file': string
+  suite: string
   shard: number
   'total-shards': number
 }
@@ -28,7 +28,7 @@ function generateMatrix(testConfigs: TestConfig[]): Matrix {
   for (const { file, shards } of testConfigs) {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
-        'test-file': file,
+        suite: file,
         shard,
         'total-shards': shards,
       })
