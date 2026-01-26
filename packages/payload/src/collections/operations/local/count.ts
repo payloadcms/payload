@@ -19,10 +19,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   /**
-   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
-   */
-  depth?: number
-  /**
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
