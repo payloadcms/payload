@@ -125,7 +125,6 @@
     "qs-esm": "7.0.2",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
-    "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
     "tsx": "4.20.3",
     "undici": "7.18.2",

@@ -748,6 +748,43 @@ describe('Versions', () => {
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
+    test('collections — should keep publish button hidden after saving draft when access control prevents update', async () => {
+      const draftDoc = await payload.create({
+        collection: disablePublishSlug,
+        data: {
+          _status: 'draft',
+          title: 'draft title',
+        },
+      })
+
+      await page.goto(disablePublishURL.edit(String(draftDoc.id)))
+
+      // Verify publish button is hidden on initial load
+      await expect(page.locator('#action-save')).not.toBeAttached()
+
+      await page.locator('#field-title').fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify publish button is still hidden after saving as draft
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('collections — should hide unpublish button when access control prevents update', async () => {
+      const publishedDoc = await payload.create({
+        collection: disablePublishSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
+
+      // Verify unpublish button is hidden when user doesn't have publish permission
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+    })
+
     test('collections — should show custom error message when unpublishing fails', async () => {
       const publishedDoc = await payload.create({
         collection: errorOnUnpublishSlug,
@@ -1100,6 +1137,40 @@ describe('Versions', () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('globals — should keep publish button hidden after saving draft when access control prevents update', async () => {
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+
+      // Verify publish button is hidden on initial load
+      await expect(page.locator('#action-save')).not.toBeAttached()
+
+      // Update the title and save as draft
+      await page.locator('#field-title').fill('updated global title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify publish button is still hidden after saving as draft
+      // This is the key regression test - before the fix, the button would appear after save
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('globals — should hide unpublish button when access control prevents update', async () => {
+      // Then publish it with override access to create a published version
+      await payload.updateGlobal({
+        slug: disablePublishGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'published global',
+        },
+        overrideAccess: true,
+      })
+
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+
+      // Verify unpublish button is hidden when user doesn't have publish permission
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
     test('global — should show versions drawer when SelectComparison more option is clicked', async () => {
