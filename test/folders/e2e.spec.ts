@@ -31,6 +31,8 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

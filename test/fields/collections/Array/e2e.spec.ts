@@ -31,6 +31,8 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
+test.describe.configure({ mode: 'serial' })
+
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let page: Page

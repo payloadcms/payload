@@ -65,6 +65,9 @@ import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
 import { openNav } from '../../../helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')

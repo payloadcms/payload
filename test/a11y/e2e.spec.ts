@@ -16,6 +16,8 @@ import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -163,31 +165,37 @@ test.describe('A11y', () => {
       })
     })
 
-    test.fixme('Posts create view - breadcrumbs should have visible focus indicators', async ({}, testInfo) => {
-      await page.goto(postsUrl.create)
+    test.fixme(
+      'Posts create view - breadcrumbs should have visible focus indicators',
+      async ({}, testInfo) => {
+        await page.goto(postsUrl.create)
 
-      await expect(page.locator('#field-title')).toBeVisible()
+        await expect(page.locator('#field-title')).toBeVisible()
 
-      await assertAllElementsHaveFocusIndicators({
-        page,
-        selector: '.app-header__controls-wrapper',
-        testInfo,
-      })
-    })
+        await assertAllElementsHaveFocusIndicators({
+          page,
+          selector: '.app-header__controls-wrapper',
+          testInfo,
+        })
+      },
+    )
 
-    test.fixme('Navigation sidebar - should have visible focus indicators', async ({}, testInfo) => {
-      await page.goto(postsUrl.admin)
+    test.fixme(
+      'Navigation sidebar - should have visible focus indicators',
+      async ({}, testInfo) => {
+        await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.nav')).toBeVisible()
+        await expect(page.locator('.nav')).toBeVisible()
 
-      await openNav(page)
+        await openNav(page)
 
-      await assertAllElementsHaveFocusIndicators({
-        page,
-        selector: '.nav',
-        testInfo,
-      })
-    })
+        await assertAllElementsHaveFocusIndicators({
+          page,
+          selector: '.nav',
+          testInfo,
+        })
+      },
+    )
 
     test.fixme('Account page - should have visible focus indicators', async ({}, testInfo) => {
       await page.goto(postsUrl.account)

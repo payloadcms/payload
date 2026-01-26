@@ -17,6 +17,8 @@ import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { radioFieldsSlug } from '../../slugs.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')

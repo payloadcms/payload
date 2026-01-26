@@ -20,6 +20,8 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

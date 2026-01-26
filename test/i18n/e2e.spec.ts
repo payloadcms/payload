@@ -20,6 +20,8 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
+test.describe.configure({ mode: 'serial' })
+
 let payload: PayloadTestSDK<Config>
 
 const filename = fileURLToPath(import.meta.url)

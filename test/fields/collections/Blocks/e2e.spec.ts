@@ -35,6 +35,8 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
+test.describe.configure({ mode: 'serial' })
+
 let client: RESTClient
 let page: Page
 let serverURL: string

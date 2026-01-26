@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import {  expect,test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
@@ -29,10 +29,12 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe,beforeEach } = test
+const { beforeAll, describe, beforeEach } = test
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -157,8 +159,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
 
@@ -224,7 +224,6 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk publish on unlocked documents on all pages', async () => {
-
       await mapAsync([...Array(9)], async () => {
         await createPostDoc({
           text: 'Ready for unpublish',
@@ -248,7 +247,7 @@ describe('Locked Documents', () => {
       await mapAsync([...Array(10)], async () => {
         await createPostDoc({
           text: 'Ready for publish',
-          _status: 'published'
+          _status: 'published',
         })
       })
 
@@ -267,7 +266,7 @@ describe('Locked Documents', () => {
       await mapAsync([...Array(8)], async () => {
         await createPostDoc({
           text: 'doc',
-          _status: 'draft'
+          _status: 'draft',
         })
       })
       await page.goto(postsUrl.list)
@@ -306,8 +305,6 @@ describe('Locked Documents', () => {
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-10 .cell-text')).toContainText('hello locked')
-
-
     })
   })
 
@@ -379,8 +376,6 @@ describe('Locked Documents', () => {
 
       testDoc = await createTestDoc({ text: 'hello' })
     })
-
-
 
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
       await page.goto(testsUrl.list)
@@ -681,8 +676,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       await page.goto(postsUrl.list)
 
@@ -866,8 +859,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should update user data if incoming user takes over from document modal', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -978,8 +969,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should update user data if incoming user takes over from within document', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -1065,7 +1054,6 @@ describe('Locked Documents', () => {
         },
       })
     })
-
 
     test('should show Document Take Over modal for previous user if taken over', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
@@ -1318,8 +1306,6 @@ describe('Locked Documents', () => {
         },
       })
     })
-
-
 
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)

@@ -47,6 +47,9 @@ import {
   userRestrictedCollectionSlug,
   userRestrictedGlobalSlug,
 } from './shared.js'
+
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

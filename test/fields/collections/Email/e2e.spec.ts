@@ -18,6 +18,8 @@ import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { emailFieldsSlug } from '../../slugs.js'
 import { emailDoc } from './shared.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')

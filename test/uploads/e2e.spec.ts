@@ -56,6 +56,9 @@ import {
   withoutMetadataSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
+
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -2113,7 +2116,6 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await page.locator('#field-prefix').fill('initial')
     await saveDocAndAssert(page)
-
 
     // Change the file
     await page.locator('.file-details__remove').click()

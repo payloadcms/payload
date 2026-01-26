@@ -19,6 +19,8 @@ import { reInitializeDB } from '../../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
 import { LexicalHelpers, type PasteMode } from '../../utils.js'
 
+test.describe.configure({ mode: 'serial' })
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../../')
