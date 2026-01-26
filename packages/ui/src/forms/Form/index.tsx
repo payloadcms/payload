@@ -54,6 +54,7 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { isOnlyErrorStateChange } from './isOnlyErrorStateChange.js'
 
 const baseClass = 'form'
 
@@ -165,6 +166,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
+  const serverErrorsJustAddedRef = useRef(false)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -405,12 +407,6 @@ export const Form: React.FC<FormProps> = (props) => {
           res = await action(formData)
         }
 
-        if (!modifiedWhileProcessingRef.current) {
-          setModified(false)
-        } else {
-          modifiedWhileProcessingRef.current = false
-        }
-
         setDisabled(false)
 
         if (typeof handleResponse === 'function') {
@@ -429,6 +425,13 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         if (res.status < 400) {
+          // Only reset modified state on successful submission
+          if (!modifiedWhileProcessingRef.current) {
+            setModified(false)
+          } else {
+            modifiedWhileProcessingRef.current = false
+          }
+
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json, {
               context,
@@ -509,6 +512,9 @@ export const Form: React.FC<FormProps> = (props) => {
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
             })
+
+            // Prevent the immediate onChange from clearing these server errors
+            serverErrorsJustAddedRef.current = true
 
             nonFieldErrors.forEach((err) => {
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
@@ -854,7 +860,23 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      const formStateChanged = isFirstRenderRef.current || !dequal(formState, prevFormState.current)
+
+      // Skip onChange immediately after server errors are added to prevent clearing them
+      // But if the form state has changed due to user edits (not just error state), allow onChange to proceed
+      if (serverErrorsJustAddedRef.current && formStateChanged) {
+        if (isOnlyErrorStateChange(prevFormState.current, formState)) {
+          // Only error state changed, skip this onChange
+          serverErrorsJustAddedRef.current = false
+          prevFormState.current = formState
+          return
+        } else {
+          // User made actual changes, clear the flag and allow onChange
+          serverErrorsJustAddedRef.current = false
+        }
+      }
+
+      if (formStateChanged && modified) {
         executeOnChange(submitted)
       }
 

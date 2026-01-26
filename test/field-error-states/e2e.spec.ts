@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { Payload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
@@ -17,13 +18,14 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
-const { beforeAll, describe } = test
+const { afterAll, beforeAll, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Field Error States', () => {
   let serverURL: string
   let page: Page
+  let usersURL: AdminUrlUtil
   let validateDraftsOff: AdminUrlUtil
   let validateDraftsOn: AdminUrlUtil
   let validateDraftsOnAutosave: AdminUrlUtil
@@ -31,10 +33,12 @@ describe('Field Error States', () => {
   let prevValueRelation: AdminUrlUtil
   let errorFieldsURL: AdminUrlUtil
   let adminRoute: string
+  let payload: Payload
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ serverURL, payload } = await initPayloadE2ENoConfig({ dirname }))
+    usersURL = new AdminUrlUtil(serverURL, collectionSlugs.users!)
     validateDraftsOff = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOff!)
     validateDraftsOn = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOn!)
     validateDraftsOnAutosave = new AdminUrlUtil(
@@ -213,6 +217,96 @@ describe('Field Error States', () => {
 
       await expect(page.locator('#field-group .group-field__header .error-pill')).toBeHidden()
       await saveDocAndAssert(page, '#action-save')
+    })
+  })
+
+  describe('password change validation', () => {
+    const testUserEmail = 'test@example.com'
+    let testUserId: string
+
+    beforeAll(async () => {
+      // Clean up any existing test user from previous runs
+      const existingUsers = await payload.find({
+        collection: 'users',
+        where: {
+          email: {
+            equals: testUserEmail,
+          },
+        },
+      })
+
+      if (existingUsers.docs.length > 0 && existingUsers.docs[0]?.id) {
+        await payload.delete({
+          collection: 'users',
+          id: existingUsers.docs[0].id,
+        })
+      }
+
+      // Create test user
+      const { id } = await payload.create({
+        collection: 'users',
+        data: {
+          email: testUserEmail,
+          password: 'test',
+        },
+      })
+
+      testUserId = id
+    })
+
+    afterAll(async () => {
+      // Clean up test user
+      if (testUserId) {
+        await payload.delete({
+          collection: 'users',
+          id: testUserId,
+        })
+      }
+    })
+
+    test('should keep password fields visible when validation fails', async () => {
+      await page.goto(usersURL.edit(testUserId))
+
+      const emailField = page.locator('#field-email')
+      await expect(emailField).toBeVisible()
+      await expect(emailField).toBeEnabled()
+
+      const changePasswordButton = page.locator('#change-password')
+      await expect(changePasswordButton).toBeVisible()
+      await expect(changePasswordButton).toBeEnabled()
+      await changePasswordButton.click()
+
+      const passwordField = page.locator('#field-password')
+      const confirmPasswordField = page.locator('#field-confirm-password')
+
+      await expect(passwordField).toBeVisible()
+      await expect(passwordField).toBeEnabled()
+      await expect(confirmPasswordField).toBeVisible()
+      await expect(confirmPasswordField).toBeEnabled()
+
+      // Password fields not registered in form state soon enough without this wait even if visible
+      await wait(500)
+
+      await passwordField.fill('hello')
+      await confirmPasswordField.fill('hello')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const passwordError = page.locator('.field-type.password .field-error')
+      await expect(passwordError).toBeVisible()
+      await expect(passwordError).toContainText('Password must be at least 8 characters long')
+
+      // Wait for the debounced onChange to run (250ms debounce + some buffer)
+      // Without the fix, onChange would clear the error during this time
+      await wait(500)
+
+      // Verify error tooltip is still visible after onChange would have run
+      await expect(passwordError).toBeVisible()
+      await expect(passwordError).toContainText('Password must be at least 8 characters long')
+
+      await expect(passwordField).toBeVisible()
+      await expect(confirmPasswordField).toBeVisible()
+      await expect(page.locator('#cancel-change-password')).toBeVisible()
     })
   })
 })
