@@ -1,5 +1,5 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -49,10 +49,10 @@ export type FindByIDArgs = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,

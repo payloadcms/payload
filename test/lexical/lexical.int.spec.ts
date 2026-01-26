@@ -21,6 +21,7 @@ import type { LexicalField, LexicalMigrateField, RichTextField } from './payload
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { it } from '../helpers/vitest.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
@@ -1026,12 +1027,99 @@ describe('Lexical', () => {
       expect(child.doc.relationTo).toEqual('array-fields')
 
       if (payload.db.defaultIDType === 'number') {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('number')
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('string')
       }
 
       expect(child.doc.value.items).toHaveLength(6)
+    })
+
+    it('should disallow unsafe query paths', async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children from': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children."unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.(unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.unsafe="': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: 'select(' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: '"unsafe' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `'unsafe` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe\\` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe=` },
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 })

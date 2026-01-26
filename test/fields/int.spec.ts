@@ -3580,6 +3580,91 @@ describe('Fields', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0].id).toBe(json_1.id)
       })
+
+      it('should disallow unsafe query paths', async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.select from': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json."unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.(unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.unsafe="': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+      })
+
+      it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: 'select(' },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: '"unsafe' },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `'unsafe` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe\\` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe=` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+      })
     })
   })
 

@@ -23,6 +23,7 @@ export function UnpublishButton() {
     data: dataFromProps,
     globalSlug,
     hasPublishedDoc,
+    hasPublishPermission,
     incrementVersionCount,
     isTrashed,
     setHasPublishedDoc,
@@ -57,7 +58,7 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ; (async () => {
+      ;(async () => {
         let url
         let method
 
@@ -147,7 +148,7 @@ export function UnpublishButton() {
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
-  const canUnpublish = hasPublishedDoc && !isTrashed
+  const canUnpublish = hasPublishPermission && hasPublishedDoc && !isTrashed
   const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
 
   return (
@@ -166,21 +167,21 @@ export function UnpublishButton() {
             SubMenuPopupContent={
               canUnpublishCurrentLocale
                 ? ({ close }) => {
-                  return (
-                    <PopupList.ButtonGroup>
-                      <PopupList.Button
-                        id="action-unpublish-locale"
-                        onClick={() => {
-                          setUnpublishAll(false)
-                          toggleModal(unPublishModalSlug)
-                          close()
-                        }}
-                      >
-                        {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )
-                }
+                    return (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button
+                          id="action-unpublish-locale"
+                          onClick={() => {
+                            setUnpublishAll(false)
+                            toggleModal(unPublishModalSlug)
+                            close()
+                          }}
+                        >
+                          {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )
+                  }
                 : undefined
             }
             type="button"
