@@ -79,7 +79,7 @@
     "@stripe/stripe-js": "7.3.1",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "babel-plugin-react-compiler": "1.0.0",
     "better-sqlite3": "11.10.0",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
