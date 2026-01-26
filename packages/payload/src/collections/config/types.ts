@@ -70,21 +70,16 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
 /**
- * Collection slugs that do NOT have drafts enabled.
- * Used to disallow draft option only for collections that definitely don't have drafts.
- * In generated types, only collections with versions + drafts include the internal `_status` field.
+ * Collection slugs that do not have drafts enabled.
+ * Detects collections without drafts by checking for the absence of the `_status` field.
  */
 export type CollectionsWithoutDrafts = {
-  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any }
-    ? never
-    : TSlug
+  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any } ? never : TSlug
 }[CollectionSlug]
 
 /**
- * Reusable type for draft flag in read/query operations.
- * When strictDraftTypes is enabled:
- * - For collections without drafts: draft property is forbidden
- * - For collections with drafts or generic slugs: draft property is allowed
+ * Conditionally allows or forbids the `draft` property based on collection configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
  */
 export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
   strictDraftTypes: true
@@ -92,7 +87,7 @@ export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = Generate
   ? TSlug extends CollectionsWithoutDrafts
     ? {
         /**
-         * This collection does not have drafts enabled.
+         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
          */
         draft?: never
       }

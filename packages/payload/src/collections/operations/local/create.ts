@@ -111,55 +111,55 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   user?: Document
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  GeneratedTypes extends { strictDraftTypes: true }
-    ? // Strict mode: enforce draft constraints
-      CollectionsWithoutDrafts extends TSlug
+export type Options<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+> = GeneratedTypes extends { strictDraftTypes: true }
+  ? CollectionsWithoutDrafts extends TSlug
+    ? {
+        /**
+         * The data for the document to create.
+         */
+        data: DataFromCollectionSlug<TSlug>
+        /**
+         * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      } & BaseOptions<TSlug, TSelect>
+    : TSlug extends CollectionsWithoutDrafts
       ? {
-          // Generic case: relaxed for backward compatibility
+          data: RequiredDataFromCollectionSlug<TSlug>
           /**
-           * The data for the document to create.
+           * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
            */
-          data: DataFromCollectionSlug<TSlug>
-          /**
-           * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-           */
-          draft?: boolean
+          draft?: never
         } & BaseOptions<TSlug, TSelect>
-      : TSlug extends CollectionsWithoutDrafts
-        ? {
-            // Concrete non-draft collection: require full data, forbid draft
-            data: RequiredDataFromCollectionSlug<TSlug>
-            draft?: never
-          } & BaseOptions<TSlug, TSelect>
-        : {
-            // Concrete draft-enabled collection: discriminated union for strictness
-          } & (
-              | {
-                  /**
-                   * The data for the document to create.
-                   */
-                  data: RequiredDataFromCollectionSlug<TSlug>
-                  /**
-                   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-                   * Omit this property or set to `false` to create a published document.
-                   */
-                  draft?: false
-                }
-              | {
-                  /**
-                   * The data for the document to create.
-                   * When creating a draft, required fields are optional as validation is skipped by default.
-                   */
-                  data: DraftDataFromCollectionSlug<TSlug>
-                  /**
-                   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-                   */
-                  draft: true
-                }
-            ) &
-            BaseOptions<TSlug, TSelect>
-    : // Non-strict mode: backward compatible (original behavior)
+      : (
+          | {
+              /**
+               * The data for the document to create.
+               */
+              data: RequiredDataFromCollectionSlug<TSlug>
+              /**
+               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+               * Omit this property or set to `false` to create a published document.
+               */
+              draft?: false
+            }
+          | {
+              /**
+               * The data for the document to create.
+               * When creating a draft, required fields are optional as validation is skipped by default.
+               */
+              data: DraftDataFromCollectionSlug<TSlug>
+              /**
+               * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+               */
+              draft: true
+            }
+        ) &
+          BaseOptions<TSlug, TSelect>
+  :
       | ({
           /**
            * The data for the document to create.
