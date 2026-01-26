@@ -67,6 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    relation: Relation;
+    'posts-versioned': PostsVersioned;
+    'posts-batches': PostsBatch;
     posts: Post;
     'payload-kv': PayloadKv;
     users: User;
@@ -76,6 +79,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    relation: RelationSelect<false> | RelationSelect<true>;
+    'posts-versioned': PostsVersionedSelect<false> | PostsVersionedSelect<true>;
+    'posts-batches': PostsBatchesSelect<false> | PostsBatchesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -86,10 +92,16 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
+  globals: {
+    'global-versioned': GlobalVersioned;
+    global: Global;
+  };
+  globalsSelect: {
+    'global-versioned': GlobalVersionedSelect<false> | GlobalVersionedSelect<true>;
+    global: GlobalSelect<false> | GlobalSelect<true>;
+  };
+  locale: 'en' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -118,11 +130,92 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation".
+ */
+export interface Relation {
+  id: number;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-versioned".
+ */
+export interface PostsVersioned {
+  id: number;
+  title?: string | null;
+  content?:
+    | {
+        text?: string | null;
+        relation?: (number | null) | Relation;
+        manyRelations?: (number | Relation)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-batches".
+ */
+export interface PostsBatch {
+  id: number;
+  title?: string | null;
+  content?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: number;
   title?: string | null;
+  content?:
+    | (
+        | {
+            text?: string | null;
+            relation?: (number | null) | Relation;
+            manyRelations?: (number | Relation)[] | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block_second';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block_third';
+          }
+      )[]
+    | null;
+  localizedContent?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlockLocalized';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -175,6 +268,18 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'relation';
+        value: number | Relation;
+      } | null)
+    | ({
+        relationTo: 'posts-versioned';
+        value: number | PostsVersioned;
+      } | null)
+    | ({
+        relationTo: 'posts-batches';
+        value: number | PostsBatch;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
@@ -226,10 +331,100 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_select".
+ */
+export interface RelationSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-versioned_select".
+ */
+export interface PostsVersionedSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              relation?: T;
+              manyRelations?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-batches_select".
+ */
+export interface PostsBatchesSelect<T extends boolean = true> {
+  title?: T;
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              relation?: T;
+              manyRelations?: T;
+              id?: T;
+              blockName?: T;
+            };
+        block_second?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        block_third?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  localizedContent?:
+    | T
+    | {
+        textBlockLocalized?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -294,6 +489,82 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-versioned".
+ */
+export interface GlobalVersioned {
+  id: number;
+  content?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global".
+ */
+export interface Global {
+  id: number;
+  content?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textBlock';
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-versioned_select".
+ */
+export interface GlobalVersionedSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global_select".
+ */
+export interface GlobalSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

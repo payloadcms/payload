@@ -1,5 +1,11 @@
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  FindOptions,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -68,10 +74,6 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -94,7 +96,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,

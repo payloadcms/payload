@@ -1,4 +1,4 @@
-import type { Operators } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -9,6 +9,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -109,7 +110,20 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       }
     }
 
-    return createDatabaseAdapter<SQLiteAdapter>({
+    const executeMethod = 'run'
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => {
+      return statements
+        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+        .join('\n')
+    }
+
+    const adapter = createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -172,13 +186,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
-        executeMethod: 'run',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return statements
-            .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
-            .join('\n')
-        },
+        sanitizeStatements,
       }),
       createVersion,
       defaultIDType: payloadIDType,
@@ -218,6 +228,14 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       updateVersion,
       upsert,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {

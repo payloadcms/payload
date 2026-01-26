@@ -1,3 +1,4 @@
+import type { FindOptions } from '../../../collections/operations/local/find.js'
 import type {
   GlobalSlug,
   Payload,
@@ -68,10 +69,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -84,7 +81,8 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<GlobalFindOneArgs, 'flattenLocales'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<GlobalFindOneArgs, 'flattenLocales'>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,

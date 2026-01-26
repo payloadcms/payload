@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -8,6 +9,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -96,7 +98,19 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       {} as Record<string, boolean>,
     )
 
-    return createDatabaseAdapter<PostgresAdapter>({
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }): string => {
+      return `${sqlExecute}\n ${statements.join('\n')}\`)`
+    }
+
+    const executeMethod = 'execute'
+
+    const adapter = createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -105,11 +119,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
-        executeMethod: 'execute',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return `${sqlExecute}\n ${statements.join('\n')}\`)`
-        },
+        sanitizeStatements,
       }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
@@ -213,6 +225,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateVersion,
       upsert,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {

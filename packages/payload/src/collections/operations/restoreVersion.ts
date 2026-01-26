@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { FindOneArgs } from '../../database/types.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
+import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -22,7 +23,6 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-
 export type Arguments = {
   collection: Collection
   currentDepth?: number
@@ -34,9 +34,8 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const restoreVersionOperation = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,

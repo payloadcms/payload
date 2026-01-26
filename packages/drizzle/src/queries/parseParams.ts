@@ -9,6 +9,7 @@ import { validOperatorSet } from 'payload/shared'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
@@ -187,9 +188,9 @@ export function parseParams({
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    formattedValue = `(${val.map((v) => `${v}`).join(',')})`
+                    formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
                   } else {
-                    formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
+                    formattedValue = `'${operatorKeys[operator].wildcard}${escapeSQLValue(val)}${operatorKeys[operator].wildcard}'`
                   }
                   if (operator === 'exists') {
                     formattedValue = ''

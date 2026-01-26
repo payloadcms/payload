@@ -36,6 +36,7 @@ export { commitTransaction } from './transactions/commitTransaction.js'
 export { rollbackTransaction } from './transactions/rollbackTransaction.js'
 export type {
   BaseRawColumn,
+  BlocksToJsonMigrator,
   BuildDrizzleTable,
   BuildQueryJoinAliases,
   ChainedMethods,
@@ -82,6 +83,11 @@ export { updateVersion } from './updateVersion.js'
 export { upsert } from './upsert.js'
 export { upsertRow } from './upsertRow/index.js'
 export { acceptDrizzlePrompts } from './utilities/acceptDrizzlePrompts.js'
+export {
+  buildDynamicPredefinedBlocksToJsonMigration,
+  createBlocksToJsonMigrator,
+  getBlocksToJsonMigrator,
+} from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'

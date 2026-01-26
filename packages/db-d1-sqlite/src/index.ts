@@ -1,4 +1,4 @@
-import type { Operators } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -9,6 +9,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -85,7 +86,21 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       not_like: notLike,
     } as unknown as Operators
 
-    return createDatabaseAdapter<SQLiteD1Adapter>({
+    const executeMethod = 'run'
+
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => {
+      return statements
+        .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
+        .join('\n')
+    }
+
+    const adapter = createDatabaseAdapter<SQLiteD1Adapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -150,13 +165,9 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
-        executeMethod: 'run',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return statements
-            .map((statement) => `${sqlExecute}${statement?.replaceAll('`', '\\`')}\`)`)
-            .join('\n')
-        },
+        sanitizeStatements,
       }),
       createVersion,
       defaultIDType: payloadIDType,
@@ -194,6 +205,14 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       updateVersion,
       upsert: updateOne,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {
