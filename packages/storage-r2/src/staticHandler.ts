@@ -68,7 +68,25 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
       }
 
       // Add R2-specific headers
-      if (!isMiniflare) {
+      if (isMiniflare) {
+        // In development with Miniflare, manually set headers from httpMetadata
+        const metadata = obj.httpMetadata
+        if (metadata?.cacheControl) {
+          headers.set('Cache-Control', metadata.cacheControl)
+        }
+        if (metadata?.contentDisposition) {
+          headers.set('Content-Disposition', metadata.contentDisposition)
+        }
+        if (metadata?.contentEncoding) {
+          headers.set('Content-Encoding', metadata.contentEncoding)
+        }
+        if (metadata?.contentLanguage) {
+          headers.set('Content-Language', metadata.contentLanguage)
+        }
+        if (metadata?.contentType) {
+          headers.set('Content-Type', metadata.contentType)
+        }
+      } else {
         obj.writeHttpMetadata(headers)
       }
 

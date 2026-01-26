@@ -13,15 +13,12 @@ type Args = {
   collections: R2StorageOptions['collections']
 }
 
-const defaultAccess: Args['access'] = ({ req }) => !!req.user
-
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
 export const getHandleMultiPartUpload =
-  ({ access = defaultAccess, bucket, collections }: Args): PayloadHandler =>
+  ({ access, bucket, collections }: Args): PayloadHandler =>
   async (req) => {
     const params = Object.fromEntries(req.searchParams) as R2StorageMultipartUploadHandlerParams
     const collectionSlug = params.collection
-    const filename = params.fileName
     const filetype = params.fileType
 
     const collectionConfig = collections[collectionSlug]
@@ -29,12 +26,32 @@ export const getHandleMultiPartUpload =
       throw new APIError(`Collection ${collectionSlug} was not found in R2 Storage options`)
     }
 
-    if (!(await access({ collectionSlug, req }))) {
-      throw new Forbidden()
+    // Check custom access if provided, otherwise check collection's create access
+    if (access) {
+      if (!(await access({ collectionSlug, req }))) {
+        throw new Forbidden(req.t)
+      }
+    } else {
+      // Use the collection's create access control
+      const collection = req.payload.collections[collectionSlug]
+      if (!collection) {
+        throw new APIError(`Collection ${collectionSlug} not found`)
+      }
+
+      const createAccess = collection.config.access?.create
+      if (createAccess) {
+        const hasAccess = await createAccess({ req })
+        if (!hasAccess) {
+          throw new Forbidden(req.t)
+        }
+      } else if (!req.user) {
+        // No custom access and no user - deny by default
+        throw new Forbidden(req.t)
+      }
     }
 
     const prefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const fileKey = path.posix.join(prefix, filename)
+    const fileKey = path.posix.join(prefix, params.fileName)
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey
