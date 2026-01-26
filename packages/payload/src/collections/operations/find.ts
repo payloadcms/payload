@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -48,12 +48,11 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 
@@ -346,7 +345,7 @@ export const findOperation = async <
                 findMany: true,
                 query: fullWhere,
                 req,
-              })) || doc
+              })) || docRef
           }
 
           return docRef

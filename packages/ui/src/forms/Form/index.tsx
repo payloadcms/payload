@@ -881,6 +881,12 @@ export const Form: React.FC<FormProps> = (props) => {
     <El
       action={typeof action === 'function' ? void action : action}
       className={classes}
+      /**
+       * data-form-ready signals if the form is ready to be used. This is used by our e2e tests
+       * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
+       * slow network conditions.
+       */
+      data-form-ready={!processing && isMounted && !initializing}
       method={method}
       noValidate
       onSubmit={(e) => void contextRef.current.submit({}, e)}

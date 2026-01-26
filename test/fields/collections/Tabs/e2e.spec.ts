@@ -79,7 +79,9 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)
     await page.locator('#field-numberInRow').fill(numberInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(300)
 
@@ -100,7 +102,8 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
     await page.locator('#field-textInRow').fill(textInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(500)
 
@@ -128,7 +131,7 @@ describe('Tabs', () => {
 
   test('should render array data within named tabs', async () => {
     await navigateToDoc(page, url)
-    await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Name")')
+    await switchTab(page, '.tabs-field__tab-button:text-is("Tab with Name")')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
@@ -139,12 +142,7 @@ describe('Tabs', () => {
     await wait(200)
 
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
-    const button = page.locator(conditionalTabSelector)
-    await expect(
-      async () => await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/),
-    ).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/)
 
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()

@@ -893,6 +893,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  // TODO: Deprecate this in favor of a schemaPath property on every field
   id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
@@ -1717,7 +1718,7 @@ export type JoinField = {
    * If true, enables custom ordering for the collection with the relationship, and joined documents can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   * Under the hood, a field with {@link https://payloadcms.com/docs/configuration/collections#fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
    *

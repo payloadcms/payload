@@ -8,6 +8,7 @@ import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { AfterReadCollection } from './collections/AfterRead/index.js'
 import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
 import {
   BeforeDelete2Collection,
@@ -50,6 +51,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     BeforeDeleteCollection,
     BeforeDelete2Collection,
     ValueCollection,
+    AfterReadCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [

@@ -153,6 +153,7 @@ export interface Page {
   title: string;
   excerpt?: string | null;
   slug: string;
+  featuredMedia?: (string | null) | Media;
   meta: {
     title: string;
     description?: string | null;
@@ -337,6 +338,7 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   slug?: T;
+  featuredMedia?: T;
   meta?:
     | T
     | {
@@ -445,6 +447,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

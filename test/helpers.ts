@@ -1,4 +1,5 @@
 import type {
+  Browser,
   BrowserContext,
   CDPSession,
   ChromiumBrowserContext,
@@ -54,18 +55,32 @@ const networkConditions = {
 export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
-  page,
+  page: pageFromArgs,
   serverURL,
   noAutoLogin,
+  browser,
   readyURL,
 }: {
+  /**
+   * Provide a browser if you need this utility to create and close a temporary page for you.
+   */
+  browser?: Browser
   customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
-  page: Page
+  page?: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
+  if (!pageFromArgs && !browser) {
+    throw new Error('Either page or browser must be provided')
+  }
+  if (pageFromArgs && browser) {
+    throw new Error('Either page or browser must be provided, not both')
+  }
+
+  const page = pageFromArgs ?? (await browser!.newPage())
+
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
@@ -105,6 +120,9 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      if (browser) {
+        await page.close()
+      }
       return
     } catch (error) {
       console.error(`Compilation not done yet`)
@@ -121,6 +139,9 @@ export async function ensureCompilationIsDone({
   }
 
   if (noAutoLogin) {
+    if (browser) {
+      await page.close()
+    }
     return
   }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
@@ -128,6 +149,10 @@ export async function ensureCompilationIsDone({
   })
 
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
+
+  if (browser) {
+    await page.close()
+  }
 }
 
 /**
@@ -177,6 +202,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
     await page.keyboard.up('Control')
   }
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  await closeAllToasts(page)
 }
 
 export async function saveDocAndAssert(
@@ -188,6 +214,12 @@ export async function saveDocAndAssert(
     | '#publish-locale'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
+  options?: {
+    /**
+     * If true, the all toasts will not be dismissed after the save operation.
+     */
+    disableDismissAllToasts?: boolean
+  },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
   if (selector === '#publish-locale') {
@@ -202,6 +234,26 @@ export async function saveDocAndAssert(
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+  }
+
+  // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
+  // 1. saveDocAndAssert
+  // 2. some operation
+  // 3. second saveDocAndAssert
+  // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
+  if (!options?.disableDismissAllToasts) {
+    await closeAllToasts(page)
+  }
+}
+
+export async function closeAllToasts(page: Locator | Page): Promise<void> {
+  const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
+  let count = await page.locator(toastCloseSelector).count()
+
+  while (count > 0) {
+    await page.locator(toastCloseSelector).first().click()
+    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
+    count--
   }
 }
 
@@ -263,9 +315,22 @@ export async function changeLocale(page: Page, newLocale: string) {
     const regexPattern = new RegExp(`locale=${newLocale}`)
 
     await expect(page).toHaveURL(regexPattern)
+
+    // Wait for form to finish re-initializing after locale change.
+    // When locale changes, the form fetches new data asynchronously.
+    // The Form exposes a data-form-ready attribute that indicates initialization is complete.
+    await waitForFormReady(page)
   }
 
   await closeLocaleSelector(page)
+}
+
+export async function waitForFormReady(page: Page) {
+  await expect
+    .poll(async () => (await page.locator('[data-form-ready="false"]').count()) === 0, {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    .toBe(true)
 }
 
 export function exactText(text: string) {
@@ -348,6 +413,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
+      !msg.text().includes('Error loading language') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data') &&

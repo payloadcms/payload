@@ -196,7 +196,7 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
    * @param options
    * @returns documents satisfying query
    */
-  find<TSlug extends CollectionSlug<T>, TSelect extends SelectType>(
+  find<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: FindOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
@@ -211,7 +211,7 @@ export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   findByID<
     TSlug extends CollectionSlug<T>,
     TDisableErrors extends boolean,
-    TSelect extends SelectType,
+    TSelect extends SelectFromCollectionSlug<T, TSlug>,
   >(
     options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
     init?: RequestInit,

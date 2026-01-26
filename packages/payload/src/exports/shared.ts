@@ -5,11 +5,17 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
+
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
+export {
+  BASE_36_DIGITS,
+  generateKeyBetween,
+  generateNKeysBetween,
+} from '../config/orderable/fractional-indexing.js'
 
 export { serverProps } from '../config/types.js'
 
