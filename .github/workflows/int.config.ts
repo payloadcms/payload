@@ -1,4 +1,4 @@
-import { createIntConfig } from './utilities/int-matrix.js'
+import { createIntConfig } from './utilities/int-matrix.ts'
 
 createIntConfig({
   databases: [
