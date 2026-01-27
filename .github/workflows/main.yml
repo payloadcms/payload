@@ -309,9 +309,31 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        # --fully-parallel enables test-level sharding (not just file-level).
-        # Parallelism is controlled per-test via test.describe.configure({ mode }) in each test file.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel
+        # E2E Test Execution Strategy:
+        #
+        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # - shards: Number of CI runners to split this suite across
+        # - parallel: Whether tests within the suite can run concurrently (default: false)
+        #
+        # Flags explained:
+        # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
+        #   not just files). There is an arbitrary limitation that disables sharding if fullyParallel
+        #   is not set.
+        # - --workers=1: Forces serial execution within each shard. Added when parallel=false.
+        #
+        # How it works:
+        # - Most suites: parallel=false → tests run serially (--workers=1) but are sharded across runners
+        # - Parallel suites (e.g. LexicalFullyFeatured): parallel=true → tests run concurrently within each shard
+        #
+        # Local vs CI behavior:
+        # - Locally: playwright.config.ts has workers=16. Without --fully-parallel, Playwright
+        #   runs tests serially by default (one test at a time per file). Suites with
+        #   test.describe.configure({ mode: 'parallel' }) opt into parallel execution.
+        # - CI: We must use --fully-parallel to enable test-level sharding across runners.
+        #   However, --fully-parallel would also run all tests in parallel within each shard.
+        #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
+        #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1

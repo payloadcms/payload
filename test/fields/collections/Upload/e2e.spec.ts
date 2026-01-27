@@ -22,8 +22,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')

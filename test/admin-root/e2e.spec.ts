@@ -16,8 +16,6 @@ import { login } from '../helpers/e2e/auth/login.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 let context: BrowserContext
@@ -42,12 +40,12 @@ test.describe('Admin Panel (Root)', () => {
       customRoutes: {
         admin: adminRoute,
       },
+      noAutoLogin: true,
       page,
       serverURL,
-      noAutoLogin: true,
     })
 
-    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
+    await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 
     await ensureCompilationIsDone({
       customRoutes: {

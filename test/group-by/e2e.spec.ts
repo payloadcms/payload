@@ -33,8 +33,6 @@ import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const { beforeEach } = test
 
 const filename = fileURLToPath(import.meta.url)
