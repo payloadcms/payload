@@ -53,7 +53,7 @@ export default createE2EConfig([
   { file: 'group-by', shards: 1 },
   { file: 'folders', shards: 1 },
   { file: 'hooks', shards: 1 },
-  { file: 'lexical__collections___LexicalFullyFeatured', shards: 1, parallel: true },
+  { file: 'lexical__collections___LexicalFullyFeatured', shards: 1, parallel: false },
   { file: 'lexical__collections___LexicalFullyFeatured__db', shards: 1 },
   { file: 'lexical__collections__LexicalHeadingFeature', shards: 1 },
   { file: 'lexical__collections__LexicalJSXConverter', shards: 1 },
