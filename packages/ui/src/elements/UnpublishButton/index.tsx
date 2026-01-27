@@ -2,6 +2,7 @@
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -73,12 +74,20 @@ export function UnpublishButton() {
         )
 
         if (collectionSlug) {
-          url = `${serverURL}${api}/${collectionSlug}/${id}${queryString}`
+          url = formatAdminURL({
+            apiRoute: api,
+            path: `/${collectionSlug}${id ? `/${id}` : ''}${queryString}`,
+            serverURL,
+          })
           method = 'patch'
         }
 
         if (globalSlug) {
-          url = `${serverURL}${api}/globals/${globalSlug}${queryString}`
+          url = formatAdminURL({
+            apiRoute: api,
+            path: `/globals/${globalSlug}${queryString}`,
+            serverURL,
+          })
           method = 'post'
         }
 
