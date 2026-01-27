@@ -251,9 +251,42 @@ jobs:
           matrix=$(node .github/workflows/e2e.config.ts)
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
+  # Prepare prod test environment once, shared by all E2E shards
+  e2e-prep:
+    name: E2E Prep
+    runs-on: ubuntu-24.04
+    needs: [e2e-matrix]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+
+      - name: Prepare prod test environment
+        run: pnpm prepare-run-test-against-prod:ci
+
+      - name: Cache prepared test environment
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
+
   tests-e2e:
     runs-on: ubuntu-24.04
-    needs: e2e-matrix
+    needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
@@ -275,6 +308,17 @@ jobs:
         with:
           path: ./*
           key: ${{ github.sha }}
+
+      - name: Restore prepared test environment
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -333,7 +377,10 @@ jobs:
         #   However, --fully-parallel would also run all tests in parallel within each shard.
         #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
         #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        #
+        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and caches the result.
+        # This job restores that cache, so we use test:e2e:prod:run which skips preparation.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -555,7 +602,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -720,4 +767,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
+          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
