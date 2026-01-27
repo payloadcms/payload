@@ -53,11 +53,22 @@ export default createE2EConfig([
   { file: 'group-by', shards: 1 },
   { file: 'folders', shards: 1 },
   { file: 'hooks', shards: 1 },
+  // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+  // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
   { file: 'lexical__collections___LexicalFullyFeatured', shards: 1, parallel: false },
   { file: 'lexical__collections___LexicalFullyFeatured__db', shards: 1 },
-  { file: 'lexical__collections__LexicalHeadingFeature', shards: 1 },
-  { file: 'lexical__collections__LexicalJSXConverter', shards: 1 },
-  { file: 'lexical__collections__LexicalLinkFeature', shards: 1 },
+  // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+  // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+  { file: 'lexical__collections__LexicalHeadingFeature', shards: 1, parallel: false },
+  // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+  // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+  { file: 'lexical__collections__LexicalJSXConverter', shards: 1, parallel: false },
+  // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+  // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+  { file: 'lexical__collections__LexicalLinkFeature', shards: 1, parallel: false },
+  // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+  // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+  { file: 'lexical__collections__LexicalListsFeature', shards: 1, parallel: false },
   { file: 'lexical__collections__OnDemandForm', shards: 1 },
   { file: 'lexical__collections__Lexical__e2e__main', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks', shards: 2 },
