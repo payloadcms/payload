@@ -192,6 +192,14 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.bulkControls) {
+    components.BulkUploadControls = RenderServerComponent({
+      Component: collectionConfig.upload.admin.components.bulkControls,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   return components
 }
 

@@ -49,6 +49,10 @@ export function iterateCollections({
       addToImportMap(collection.upload?.admin?.components?.controls)
     }
 
+    if (collection.upload?.admin?.components?.bulkControls) {
+      addToImportMap(collection.upload?.admin?.components?.bulkControls)
+    }
+
     if (collection.admin?.components?.views?.edit) {
       for (const editViewConfig of Object.values(collection.admin?.components?.views?.edit)) {
         if ('Component' in editViewConfig) {
