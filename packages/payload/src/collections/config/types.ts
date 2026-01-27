@@ -186,6 +186,10 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
