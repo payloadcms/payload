@@ -14,5 +14,5 @@ createIntConfig({
     'sqlite',
     'sqlite-uuid',
   ],
-  shards: 2,
+  shards: 3,
 })
