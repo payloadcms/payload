@@ -1,5 +1,6 @@
 export const slugify = (val?: string): string | undefined =>
   val
-    ?.replace(/ /g, '-')
+    ?.trim()
+    .replace(/ /g, '-')
     .replace(/[^\w-]+/g, '')
     .toLowerCase()
