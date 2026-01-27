@@ -33,6 +33,7 @@ const {
   'fully-parallel': fullyParallel,
   part,
   shard,
+  workers,
 } = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
@@ -106,7 +107,15 @@ if (!suiteName) {
 
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
-  executePlaywright(allSuitesInFolder, baseTestFolder, false, suiteConfigPath, shard, fullyParallel)
+  executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -125,6 +134,7 @@ function executePlaywright(
   suiteConfigPath?: string,
   shardArg?: string,
   fullyParallelArg?: boolean,
+  workersArg?: number,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -158,8 +168,9 @@ function executePlaywright(
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
