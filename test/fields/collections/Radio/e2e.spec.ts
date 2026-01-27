@@ -17,8 +17,6 @@ import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { radioFieldsSlug } from '../../slugs.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -98,9 +96,9 @@ describe('Radio', () => {
       await page.locator('#field-radio').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       // On this page there's a known custom label without a clear name, expect 1 violation
@@ -113,8 +111,8 @@ describe('Radio', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

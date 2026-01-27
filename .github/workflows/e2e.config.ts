@@ -7,9 +7,9 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
-import { createE2EConfig } from './utilities/e2e-matrix.ts'
+import { createE2EConfig, TestConfig } from './utilities/e2e-matrix.ts'
 
-export default createE2EConfig([
+export const e2eTestConfigs: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
@@ -53,7 +53,7 @@ export default createE2EConfig([
   { file: 'group-by', shards: 1 },
   { file: 'folders', shards: 1 },
   { file: 'hooks', shards: 1 },
-  { file: 'lexical__collections___LexicalFullyFeatured', shards: 1 },
+  { file: 'lexical__collections___LexicalFullyFeatured', shards: 1, parallel: true },
   { file: 'lexical__collections___LexicalFullyFeatured__db', shards: 1 },
   { file: 'lexical__collections__LexicalHeadingFeature', shards: 1 },
   { file: 'lexical__collections__LexicalJSXConverter', shards: 1 },
@@ -82,4 +82,7 @@ export default createE2EConfig([
   { file: 'trash', shards: 1 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-])
+]
+
+// When run directly, output the matrix JSON
+createE2EConfig(e2eTestConfigs)

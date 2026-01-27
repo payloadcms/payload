@@ -17,8 +17,6 @@ import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { usersSlug } from './collections/Users/index.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

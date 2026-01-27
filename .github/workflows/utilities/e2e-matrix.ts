@@ -10,12 +10,15 @@ export interface TestConfig {
   file: string
   /** Number of shards to split this test file into */
   shards: number
+  /** Whether tests can run in parallel (default: false) */
+  parallel?: boolean
 }
 
 interface MatrixEntry {
   suite: string
   shard: number
   'total-shards': number
+  parallel: boolean
 }
 
 interface Matrix {
@@ -25,12 +28,13 @@ interface Matrix {
 function generateMatrix(testConfigs: TestConfig[]): Matrix {
   const include: MatrixEntry[] = []
 
-  for (const { file, shards } of testConfigs) {
+  for (const { file, shards, parallel = false } of testConfigs) {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
         suite: file,
         shard,
         'total-shards': shards,
+        parallel,
       })
     }
   }

@@ -24,8 +24,6 @@ import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
 import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
 import { pagesSlug } from './slugs.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

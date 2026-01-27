@@ -33,8 +33,6 @@ import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const { describe, beforeEach, afterEach } = test
 
 const filename = fileURLToPath(import.meta.url)

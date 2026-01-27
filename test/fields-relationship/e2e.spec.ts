@@ -49,8 +49,6 @@ import {
   versionedRelationshipFieldSlug,
 } from './slugs.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 

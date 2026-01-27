@@ -16,8 +16,6 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 
-test.describe.configure({ mode: 'serial' })
-
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -30,7 +28,7 @@ let id: string
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -180,10 +178,10 @@ describe('SEO Plugin', () => {
       await secondTab.click()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['#field-meta'],
         page,
         testInfo,
-        include: ['#field-meta'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -198,8 +196,8 @@ describe('SEO Plugin', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '#field-meta',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

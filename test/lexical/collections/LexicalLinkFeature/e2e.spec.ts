@@ -17,7 +17,7 @@ const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
 // PLEASE do not reset the database or perform any operations that modify it in this file.
-test.describe.configure({ mode: 'parallel' })
+// test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
