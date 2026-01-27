@@ -713,6 +713,7 @@ export class BasePayload {
                 allQueues: cronConfig.allQueues,
                 limit: cronConfig.limit ?? DEFAULT_LIMIT,
                 queue: cronConfig.queue,
+                randomID,
                 silent: cronConfig.silent,
               })
               console.log(`[${randomID}] Jobs run.`, result)

@@ -49,6 +49,7 @@ export type RunJobsArgs = {
    * @default jobs from the `default` queue will be executed.
    */
   queue?: string
+  randomID?: string
   req: PayloadRequest
   /**
    * By default, jobs are run in parallel.
@@ -87,6 +88,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     overrideAccess,
     processingOrder,
     queue = 'default',
+    randomID,
     req,
     req: {
       payload,
@@ -98,6 +100,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     silent = false,
     where: whereFromProps,
   } = args
+  console.log(`[${randomID}] 2 - runJobs started`, {
+    id,
+    allQueues,
+    limit,
+    queue,
+    sequential,
+  })
 
   if (!overrideAccess) {
     /**
@@ -109,6 +118,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       throw new Forbidden(req.t)
     }
   }
+  console.log(`[${randomID}] 3 - access check passed`)
+
   const and: Where[] = [
     {
       completedAt: {
@@ -152,6 +163,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   if (whereFromProps) {
     and.push(whereFromProps)
   }
+  console.log(`[${args?.randomID}] 4`)
 
   // Only enforce concurrency controls if the feature is enabled
   if (jobsConfig.enableConcurrencyControl) {
@@ -193,11 +205,18 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
+  console.log(`[${randomID}] 5 - concurrency control done, querying jobs`, {
+    id,
+    enableConcurrencyControl: jobsConfig.enableConcurrencyControl,
+  })
+
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
   // the same job being picked up by another worker
   let jobs: Job[] = []
 
   if (id) {
+    console.log(`[${randomID}] 5.1 - fetching single job by ID: ${id}`)
+
     // Only one job to run
     const job = await updateJob({
       id,
@@ -209,10 +228,14 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       req,
       returning: true,
     })
+    console.log(`[${randomID}] 5.2 - single job fetched`, { found: !!job })
+
     if (job) {
       jobs = [job]
     }
   } else {
+    console.log(`[${randomID}] 5.3 - fetching multiple jobs with limit: ${limit}`)
+
     let defaultProcessingOrder: Sort =
       payload.collections[jobsCollectionSlug]?.config.defaultSort ?? 'createdAt'
 
@@ -245,13 +268,20 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       sort: processingOrder ?? defaultProcessingOrder,
       where: { and },
     })
+    console.log(`[${randomID}] 5.4 - multiple jobs fetched`, { count: updatedDocs?.length ?? 0 })
 
     if (updatedDocs) {
       jobs = updatedDocs
     }
   }
+  console.log(`[${randomID}] 6 - jobs to process`, {
+    count: jobs.length,
+    jobIds: jobs.map((j) => j.id),
+  })
 
   if (!jobs.length) {
+    console.log(`[${randomID}] 7 - no jobs found, returning early`)
+
     return {
       noJobsRemaining: true,
       remainingJobsFromQueried: 0,
@@ -295,13 +325,17 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     // Use only the filtered jobs going forward
     jobs = jobsToRun
   }
+  console.log(`[${randomID}] 8 - concurrency dedup done`, { jobsToRun: jobs.length })
 
   if (!jobs.length) {
+    console.log(`[${randomID}] 9 - all jobs were duplicates, returning early`)
+
     return {
       noJobsRemaining: false,
       remainingJobsFromQueried: 0,
     }
   }
+  console.log(`[${randomID}] 10 - preparing to run ${jobs.length} jobs`)
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
@@ -319,6 +353,11 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     { existingJobs: [] as Job[], newJobs: [] as Job[] },
   )
 
+  console.log(`[${randomID}] 11 - job breakdown`, {
+    existingJobCount: existingJobs.length,
+    newJobCount: newJobs.length,
+  })
+
   if (!silent || (typeof silent === 'object' && !silent.info)) {
     payload.logger.info({
       msg: `Running ${jobs.length} jobs.`,
@@ -335,6 +374,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     id: number | string
     result: RunJobResult
   }> => {
+    console.log(`[${randomID}] job:${job.id} - starting`, {
+      taskSlug: job.taskSlug,
+      totalTried: job.totalTried,
+      workflowSlug: job.workflowSlug,
+    })
+
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -353,6 +398,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           }
 
     if (!workflowConfig) {
+      console.log(`[${randomID}] job:${job.id} - no workflow config found, skipping`)
       return {
         id: job.id,
         result: {
@@ -401,6 +447,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
 
       if (typeof workflowHandler === 'function') {
+        console.log(`[${randomID}] job:${job.id} - running function handler`)
         const result = await runJob({
           job,
           req: jobReq,
@@ -410,12 +457,15 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           workflowHandler,
         })
 
+        console.log(`[${randomID}] job:${job.id} - completed`, { status: result.status })
+
         if (result.status === 'success') {
           successfullyCompletedJobs.push(job.id)
         }
 
         return { id: job.id, result }
       } else {
+        console.log(`[${randomID}] job:${job.id} - running JSON handler`)
         const result = await runJSONJob({
           job,
           req: jobReq,
@@ -425,6 +475,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           workflowHandler,
         })
 
+        console.log(`[${randomID}] job:${job.id} - completed`, { status: result.status })
+
         if (result.status === 'success') {
           successfullyCompletedJobs.push(job.id)
         }
@@ -433,6 +485,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     } catch (error) {
       if (error instanceof JobCancelledError) {
+        console.log(`[${randomID}] job:${job.id} - cancelled`, { message: error.message })
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
           !job.hasError ||
@@ -468,12 +521,22 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           },
         }
       }
+      console.log(`[${randomID}] job:${job.id} - error thrown`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
       throw error
     }
   }
 
+  console.log(`[${randomID}] 12 - starting job execution`, {
+    jobCount: jobs.length,
+    sequential,
+  })
+
   let resultsArray: { id: number | string; result: RunJobResult }[] = []
   if (sequential) {
+    console.log(`[${randomID}] 12.1 - running jobs sequentially`)
+
     for (const job of jobs) {
       const result = await runSingleJob(job)
       if (result) {
@@ -481,6 +544,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     }
   } else {
+    console.log(`[${randomID}] 12.2 - running jobs in parallel`)
     const jobPromises = jobs.map(runSingleJob)
     resultsArray = (await Promise.all(jobPromises)) as {
       id: number | string
@@ -488,7 +552,15 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }[]
   }
 
+  console.log(`[${randomID}] 13 - all jobs executed`, {
+    resultsCount: resultsArray.length,
+    successfulCount: successfullyCompletedJobs.length,
+  })
+
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {
+    console.log(`[${randomID}] 14 - deleting completed jobs`, {
+      count: successfullyCompletedJobs.length,
+    })
     try {
       if (jobsConfig.runHooks) {
         await payload.delete({
@@ -531,6 +603,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       remainingJobsFromQueried++ // Can be retried
     }
   }
+
+  console.log(`[${randomID}] 15 - runJobs complete`, {
+    remainingJobsFromQueried,
+    successCount: successfullyCompletedJobs.length,
+    totalProcessed: Object.keys(resultsObject).length,
+  })
 
   return {
     jobStatus: resultsObject,

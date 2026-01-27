@@ -282,6 +282,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      * @default jobs from the `default` queue will be executed.
      */
     queue?: string
+    randomID?: string
     req?: PayloadRequest
     /**
      * By default, jobs are run in parallel.
@@ -299,6 +300,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     silent?: RunJobsSilent
     where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
+    console.log(`[${args?.randomID}] 1`)
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
     return await runJobs({
@@ -307,6 +309,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       overrideAccess: args?.overrideAccess !== false,
       processingOrder: args?.processingOrder,
       queue: args?.queue,
+      randomID: args?.randomID,
       req: newReq,
       sequential: args?.sequential,
       silent: args?.silent,
