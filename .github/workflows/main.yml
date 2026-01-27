@@ -169,7 +169,7 @@ jobs:
   tests-int:
     runs-on: ubuntu-24.04
     needs: int-matrix
-    name: int-${{ matrix.database }} (${{ matrix.shard }}/${{ matrix.total-shards }})
+    name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
