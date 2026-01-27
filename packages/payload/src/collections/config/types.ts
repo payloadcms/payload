@@ -200,6 +200,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
 }) => any
