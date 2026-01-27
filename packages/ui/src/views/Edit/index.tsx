@@ -209,7 +209,7 @@ export function DefaultEditView({
           ? documentLockState.current?.user?.id
           : documentLockState.current?.user
 
-      if (lockedState) {
+      if (lockedState && lockedState.user) {
         const lockedUserID =
           typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
             ? lockedState.user

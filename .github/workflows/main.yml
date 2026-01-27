@@ -214,89 +214,39 @@ jobs:
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
 
-  tests-e2e:
+  # Generate the E2E test matrix from TypeScript config
+  e2e-matrix:
+    name: Setup E2E Matrix
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
-    name: e2e-${{ matrix.suite }}
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/e2e.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  tests-e2e:
+    runs-on: ubuntu-24.04
+    needs: e2e-matrix
+    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - a11y
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - dashboard
-          - joins
-          - field-error-states
-          - field-paths
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - fields__collections__UploadPoly
-          - fields__collections__UploadMultiPoly
-          - group-by
-          - folders
-          - hooks
-          - lexical__collections___LexicalFullyFeatured
-          - lexical__collections___LexicalFullyFeatured__db
-          - lexical__collections__LexicalHeadingFeature
-          - lexical__collections__LexicalJSXConverter
-          - lexical__collections__LexicalLinkFeature
-          - lexical__collections__OnDemandForm
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-multi-tenant
-          - plugin-nested-docs
-          - plugin-redirects
-          - plugin-seo
-          - queues
-          - sort
-          - server-url
-          - trash
-          - versions
-          - uploads
+      matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
@@ -347,15 +297,39 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }}
+        # E2E Test Execution Strategy:
+        #
+        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # - shards: Number of CI runners to split this suite across
+        # - parallel: Whether tests within the suite can run concurrently (default: false)
+        #
+        # Flags explained:
+        # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
+        #   not just files). There is an arbitrary limitation that disables sharding if fullyParallel
+        #   is not set.
+        # - --workers=1: Forces serial execution within each shard. Added when parallel=false.
+        #
+        # How it works:
+        # - Most suites: parallel=false → tests run serially (--workers=1) but are sharded across runners
+        # - Parallel suites (e.g. LexicalFullyFeatured): parallel=true → tests run concurrently within each shard
+        #
+        # Local vs CI behavior:
+        # - Locally: playwright.config.ts has workers=16. Without --fully-parallel, Playwright
+        #   runs tests serially by default (one test at a time per file). Suites with
+        #   test.describe.configure({ mode: 'parallel' }) opt into parallel execution.
+        # - CI: We must use --fully-parallel to enable test-level sharding across runners.
+        #   However, --fully-parallel would also run all tests in parallel within each shard.
+        #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
+        #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1

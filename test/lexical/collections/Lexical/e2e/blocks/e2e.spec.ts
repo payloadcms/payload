@@ -445,7 +445,7 @@ describe('lexicalBlocks', () => {
 
       await blockTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error',{disableDismissAllToasts: true})
+      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
@@ -542,11 +542,11 @@ describe('lexicalBlocks', () => {
         .getByText('Some text below relationship node 1')
         .first()
       await expect(spanInSubEditor).toBeVisible()
-      await spanInSubEditor.click({delay: 100}) // Use click, because focus does not work
+      await spanInSubEditor.click({ delay: 100 }) // Use click, because focus does not work
 
       // Now go to the END of the span while selecting the text
       for (let i = 0; i < 18; i++) {
-        await page.keyboard.press('Shift+ArrowRight', {delay: 50})
+        await page.keyboard.press('Shift+ArrowRight', { delay: 50 })
       }
       // The following text should now be selectedelationship node 1
 
