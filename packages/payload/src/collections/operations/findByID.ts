@@ -314,6 +314,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
