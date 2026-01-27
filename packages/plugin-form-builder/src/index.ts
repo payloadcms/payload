@@ -24,6 +24,7 @@ export const formBuilderPlugin =
         state: true,
         text: true,
         textarea: true,
+        upload: false,
         ...incomingFormConfig.fields,
       },
     }

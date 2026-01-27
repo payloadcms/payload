@@ -117,6 +117,17 @@ type PayloadRequestData = {
     size: number
     tempFilePath?: string
   }
+  /** All files from multipart form data, keyed by field name */
+  files?: Record<
+    string,
+    {
+      data: Buffer
+      mimetype: string
+      name: string
+      size: number
+      tempFilePath?: string
+    }
+  >
 }
 export interface PayloadRequest
   extends CustomPayloadRequestProperties,

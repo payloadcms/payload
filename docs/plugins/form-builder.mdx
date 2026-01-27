@@ -88,6 +88,9 @@ formBuilderPlugin({
     message: true,
     date: false,
     payment: false,
+    upload: {
+      uploadCollections: ['media', 'documents'], // Required when using upload
+    },
   },
 })
 ```
@@ -441,6 +444,181 @@ Each of the `priceConditions` are executed by the `getPaymentTotal` utility that
 | `valueType`        | string       | The type of value to use to determine the price. |
 | `value`            | string       | The value to use to determine the price.         |
 
+### Upload
+
+Add this field to your form to collect file uploads. Files are stored in a specified upload-enabled collection, and the file ID is stored as the submission value. This field is disabled by default and must be explicitly enabled.
+
+| Property           | Type     | Description                                                                                  |
+| ------------------ | -------- | -------------------------------------------------------------------------------------------- |
+| `name`             | string   | The name of the field.                                                                       |
+| `label`            | string   | The label of the field.                                                                      |
+| `uploadCollection` | string   | The slug of the upload-enabled collection to store files in.                                 |
+| `mimeTypes`        | array    | An array of allowed MIME types (e.g., `image/*`, `application/pdf`). Empty allows all types. |
+| `maxFileSize`      | number   | Maximum file size in bytes. Leave empty for no limit.                                        |
+| `width`            | string   | The width of the field on the front-end.                                                     |
+| `required`         | checkbox | Whether or not the field is required when submitted.                                         |
+| `multiple`         | checkbox | Whether to allow multiple file uploads.                                                      |
+
+#### Enabling Upload Fields
+
+To use upload fields, you must provide the upload config with the available upload collections:
+
+```ts
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    upload: {
+      uploadCollections: ['media', 'documents'], // Required - available upload collections
+    },
+  },
+})
+```
+
+#### Frontend Implementation
+
+The simplest way to handle upload fields is to submit files directly with the form as `multipart/form-data`. The form builder will automatically upload files to the appropriate collection and store the file IDs in the submission.
+
+```ts
+async function submitFormWithFiles(
+  formId: string,
+  fields: FormField[],
+  values: Record<string, any>,
+) {
+  const formData = new FormData()
+
+  // Build submission data for non-file fields
+  const submissionData = []
+
+  for (const field of fields) {
+    if (field.blockType === 'upload') {
+      // Files are appended to FormData separately using the field name
+      if (values[field.name]) {
+        formData.append(field.name, values[field.name])
+      }
+    } else if (values[field.name] !== undefined) {
+      submissionData.push({ field: field.name, value: values[field.name] })
+    }
+  }
+
+  // Add the form ID and non-file submission data as JSON
+  formData.append(
+    '_payload',
+    JSON.stringify({
+      form: formId,
+      submissionData,
+    }),
+  )
+
+  const response = await fetch('/api/form-submissions', {
+    method: 'POST',
+    body: formData,
+  })
+
+  return response.json()
+}
+```
+
+The server will:
+
+1. Validate MIME types and file sizes against the field configuration
+2. Upload files to the specified upload collection
+3. Store the created file IDs in the submission data
+
+#### Alternative: Pre-upload Files
+
+If you prefer more control over the upload process (e.g., for progress tracking or resumable uploads), you can upload files separately and submit their IDs:
+
+```ts
+// 1. Upload file to the upload collection
+async function uploadFile(file: File, collectionSlug: string) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`/api/${collectionSlug}`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  return response.json() // { doc: { id, filename, ... } }
+}
+
+// 2. Submit form with file ID
+async function submitFormWithFileIds(
+  formId: string,
+  fields: FormField[],
+  values: Record<string, any>,
+) {
+  const submissionData = []
+
+  for (const field of fields) {
+    if (field.blockType === 'upload' && values[field.name]) {
+      // Upload file first
+      const uploadResult = await uploadFile(
+        values[field.name],
+        field.uploadCollection,
+      )
+      submissionData.push({ field: field.name, value: uploadResult.doc.id })
+    } else {
+      submissionData.push({ field: field.name, value: values[field.name] })
+    }
+  }
+
+  await fetch('/api/form-submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ form: formId, submissionData }),
+  })
+}
+```
+
+#### Using Presigned URLs for Large Files
+
+If your upload collection uses a storage adapter with `clientUploads` enabled (e.g., S3, Azure, GCS), you can upload files directly to cloud storage using presigned URLs for better performance with large files:
+
+```ts
+async function uploadWithPresignedUrl(
+  file: File,
+  collectionSlug: string,
+  serverHandlerPath: string = '/storage-s3-generate-signed-url',
+) {
+  // 1. Get presigned URL from Payload
+  const signedUrlResponse = await fetch(`/api${serverHandlerPath}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      collectionSlug,
+      filename: file.name,
+      filesize: file.size,
+      mimeType: file.type,
+    }),
+  })
+  const { url } = await signedUrlResponse.json()
+
+  // 2. Upload directly to cloud storage
+  await fetch(url, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+      'Content-Length': file.size.toString(),
+    },
+  })
+
+  // 3. Create document in Payload (file already in storage)
+  const docResponse = await fetch(`/api/${collectionSlug}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filename: file.name,
+      mimeType: file.type,
+      filesize: file.size,
+    }),
+  })
+  return docResponse.json()
+}
+```
+
 ### Field Overrides
 
 You can provide your own custom fields by passing a new [Payload Block](https://payloadcms.com/docs/fields/blocks#block-configs) object into `fields`. You can override or extend any existing fields by first importing the `fields` from the plugin:
@@ -556,6 +734,9 @@ import type {
   FieldsConfig,
   BeforeEmail,
   HandlePayment,
+  UploadField,
+  UploadFieldConfig,
+  UploadFieldMimeType,
   ...
 } from "@payloadcms/plugin-form-builder/types";
 ```
