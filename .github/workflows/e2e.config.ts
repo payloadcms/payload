@@ -7,9 +7,9 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
-import { createE2EConfig, TestConfig } from './utilities/e2e-matrix.ts'
+import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-export const e2eTestConfigs: TestConfig[] = [
+export default createE2EConfig([
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
@@ -82,7 +82,4 @@ export const e2eTestConfigs: TestConfig[] = [
   { file: 'trash', shards: 1 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-]
-
-// When run directly, output the matrix JSON
-createE2EConfig(e2eTestConfigs)
+])
