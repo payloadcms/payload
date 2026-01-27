@@ -72,7 +72,7 @@ export const Departments: CollectionConfig = {
   },
 }
 
-// Organizations collection with generatePaths disabled
+// Organizations collection with hierarchy
 export const Organizations: CollectionConfig = {
   slug: 'organizations',
   admin: {
@@ -90,7 +90,6 @@ export const Organizations: CollectionConfig = {
     },
   ],
   hierarchy: {
-    generatePaths: false,
     parentFieldName: 'parentOrg',
   },
 }
@@ -129,6 +128,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [Pages, Categories, Departments, Organizations, Products],
+  debug: true,
   localization: {
     locales: ['en', 'es', 'de'],
     defaultLocale: 'en',

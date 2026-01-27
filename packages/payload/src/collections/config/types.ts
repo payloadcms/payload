@@ -174,13 +174,11 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   data: Partial<T>
   doc: T
-  docWithLocales: T
   /**
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
   previousDoc: T
-  previousDocWithLocales: T
   req: PayloadRequest
 }) => any
 
@@ -198,7 +196,6 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  docWithLocales: T
   findMany?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest

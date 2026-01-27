@@ -313,7 +313,6 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
-            docWithLocales,
             query: findOneArgs.where,
             req,
           })) || result

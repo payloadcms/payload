@@ -13,7 +13,7 @@ import { buildParentField } from '../../hierarchy/buildParentField.js'
  * @param config
  * @returns
  */
-export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Config): void => {
+export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: Config): void => {
   if (!collectionConfig.hierarchy) {
     return
   }
@@ -67,42 +67,23 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, config: Co
     collectionConfig.fields.unshift(parentField)
   }
 
+  // Apply defaults for optional fields
+  const slugPathFieldName = collectionConfig.hierarchy.slugPathFieldName || '_h_slugPath'
+  const titlePathFieldName = collectionConfig.hierarchy.titlePathFieldName || '_h_titlePath'
+
   // Apply hierarchy to collection (adds fields and hooks)
-  const generatePaths = collectionConfig.hierarchy.generatePaths ?? true
-
-  const hierarchyOptions: {
-    collectionConfig: typeof collectionConfig
-    config: typeof config
-    generatePaths: boolean
-    parentFieldName: string
-    slugify?: (text: string) => string
-    slugPathFieldName?: string
-    titlePathFieldName?: string
-  } = {
+  addHierarchyToCollection({
     collectionConfig,
-    config,
-    generatePaths,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
-  }
+    slugPathFieldName,
+    titlePathFieldName,
+  })
 
-  if (collectionConfig.hierarchy.slugify) {
-    hierarchyOptions.slugify = collectionConfig.hierarchy.slugify
-  }
-  if (collectionConfig.hierarchy.slugPathFieldName) {
-    hierarchyOptions.slugPathFieldName = collectionConfig.hierarchy.slugPathFieldName
-  }
-  if (collectionConfig.hierarchy.titlePathFieldName) {
-    hierarchyOptions.titlePathFieldName = collectionConfig.hierarchy.titlePathFieldName
-  }
-
-  addHierarchyToCollection(hierarchyOptions)
-
-  // Set sanitized hierarchy config with defaults
+  // Set sanitized hierarchy config
   collectionConfig.hierarchy = {
-    generatePaths,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
-    slugPathFieldName: hierarchyOptions.slugPathFieldName || '_h_slugPath',
-    titlePathFieldName: hierarchyOptions.titlePathFieldName || '_h_titlePath',
+    slugPathFieldName,
+    titlePathFieldName,
     ...(collectionConfig.hierarchy.slugify && { slugify: collectionConfig.hierarchy.slugify }),
   }
 }

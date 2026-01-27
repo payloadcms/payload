@@ -421,7 +421,6 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           doc: result,
-          docWithLocales: resultWithLocales,
           req,
         })) || result
     }
@@ -454,10 +453,8 @@ export const updateDocument = async <
           context: req.context,
           data,
           doc: result,
-          docWithLocales: resultWithLocales,
           operation: 'update',
           previousDoc: originalDoc,
-          previousDocWithLocales: docWithLocales,
           req,
         })) || result
     }

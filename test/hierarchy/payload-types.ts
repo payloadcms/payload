@@ -71,6 +71,7 @@ export interface Config {
     categories: Category;
     departments: Department;
     organizations: Organization;
+    products: Product;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +84,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -92,10 +94,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'de';
   user: User & {
     collection: 'users';
   };
@@ -133,10 +135,9 @@ export interface Page {
   content?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  _h_parentTree?: (string | Page)[] | null;
-  _h_depth?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -150,8 +151,6 @@ export interface Category {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  _h_parentTree?: (string | Category)[] | null;
-  _h_depth?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -163,10 +162,8 @@ export interface Department {
   deptName: string;
   updatedAt: string;
   createdAt: string;
-  _breadcrumbSlug?: string | null;
-  _breadcrumbTitle?: string | null;
-  _h_parentTree?: (string | Department)[] | null;
-  _h_depth?: number | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -179,8 +176,23 @@ export interface Organization {
   description?: string | null;
   updatedAt: string;
   createdAt: string;
-  _h_parentTree?: (string | Organization)[] | null;
-  _h_depth?: number | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  parent?: (string | null) | Product;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -247,6 +259,10 @@ export interface PayloadLockedDocument {
         value: string | Organization;
       } | null)
     | ({
+        relationTo: 'products';
+        value: string | Product;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -302,10 +318,9 @@ export interface PagesSelect<T extends boolean = true> {
   content?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-  _h_parentTree?: T;
-  _h_depth?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -318,8 +333,6 @@ export interface CategoriesSelect<T extends boolean = true> {
   createdAt?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-  _h_parentTree?: T;
-  _h_depth?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -330,10 +343,8 @@ export interface DepartmentsSelect<T extends boolean = true> {
   deptName?: T;
   updatedAt?: T;
   createdAt?: T;
-  _breadcrumbSlug?: T;
-  _breadcrumbTitle?: T;
-  _h_parentTree?: T;
-  _h_depth?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -345,8 +356,22 @@ export interface OrganizationsSelect<T extends boolean = true> {
   description?: T;
   updatedAt?: T;
   createdAt?: T;
-  _h_parentTree?: T;
-  _h_depth?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

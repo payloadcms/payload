@@ -1,83 +1,46 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Config } from '../config/types.js'
 
-import { hierarchyCollectionAfterChange } from './hooks/collectionAfterChange.js'
+import { hierarchyCollectionAfterRead } from './hooks/collectionAfterRead.js'
 import { hierarchyCollectionBeforeChange } from './hooks/collectionBeforeChange.js'
-import { defaultSlugify } from './utils/defaultSlugify.js'
+import { hierarchyCollectionBeforeDelete } from './hooks/collectionBeforeDelete.js'
 import { findUseAsTitleField } from './utils/findUseAsTitle.js'
 
 export const addHierarchyToCollection = ({
   collectionConfig,
-  config,
-  generatePaths = true,
   parentFieldName,
-  slugify = defaultSlugify,
-  slugPathFieldName = '_h_slugPath',
-  titlePathFieldName = '_h_titlePath',
+  slugPathFieldName,
+  titlePathFieldName,
 }: {
   collectionConfig: CollectionConfig
-  config: Config
-  generatePaths?: boolean
   parentFieldName: string
-  slugify?: (text: string) => string
-  slugPathFieldName?: string
-  titlePathFieldName?: string
+  slugPathFieldName: string
+  titlePathFieldName: string
 }) => {
-  const { localized, titleFieldName } = findUseAsTitleField(collectionConfig)
-  const localizeField: boolean = Boolean(config.localization && localized)
+  const { titleFieldName } = findUseAsTitleField(collectionConfig)
 
-  // Conditionally add path fields
-  if (generatePaths) {
-    collectionConfig.fields.push(
-      {
-        name: slugPathFieldName,
-        type: 'text',
-        admin: {
-          readOnly: true,
-          // hidden: true,
-        },
-        index: true,
-        label: ({ t }) => t('general:prefixSlugPathFieldName'),
-        localized: localizeField,
-      },
-      {
-        name: titlePathFieldName,
-        type: 'text',
-        admin: {
-          readOnly: true,
-          // hidden: true,
-        },
-        index: true,
-        label: ({ t }) => t('general:prefixTitlePathFieldName'),
-        localized: localizeField,
-      },
-    )
-  }
-
-  // Always add parentTree and depth fields
+  // Add virtual path fields (computed in afterRead)
   collectionConfig.fields.push(
     {
-      name: '_h_parentTree',
-      type: 'relationship',
+      name: slugPathFieldName,
+      type: 'text',
       admin: {
-        allowEdit: false,
-        hidden: true,
-        isSortable: false,
         readOnly: true,
+        // hidden: true,
       },
-      hasMany: true,
       index: true,
-      maxDepth: 0,
-      relationTo: collectionConfig.slug,
+      label: 'Slug Path',
+      virtual: true,
     },
     {
-      name: '_h_depth',
-      type: 'number',
+      name: titlePathFieldName,
+      type: 'text',
       admin: {
-        hidden: true,
         readOnly: true,
+        // hidden: true,
       },
       index: true,
+      label: 'Title Path',
+      virtual: true,
     },
   )
 
@@ -92,29 +55,17 @@ export const addHierarchyToCollection = ({
 
   collectionConfig.hooks = {
     ...(collectionConfig.hooks || {}),
-    afterChange: [
-      ...(collectionConfig.hooks?.afterChange || []),
-      hierarchyCollectionAfterChange({
-        generatePaths,
-        isTitleLocalized: localized,
-        parentFieldName,
-        slugify,
-        slugPathFieldName,
-        titleFieldName,
-        titlePathFieldName,
-      }),
+    afterRead: [
+      ...(collectionConfig.hooks?.afterRead || []),
+      hierarchyCollectionAfterRead({ parentFieldName, slugPathFieldName, titlePathFieldName }),
     ],
     beforeChange: [
       ...(collectionConfig.hooks?.beforeChange || []),
-      hierarchyCollectionBeforeChange({
-        generatePaths,
-        isTitleLocalized: localized,
-        parentFieldName,
-        slugify,
-        slugPathFieldName,
-        titleFieldName,
-        titlePathFieldName,
-      }),
+      hierarchyCollectionBeforeChange({ parentFieldName }),
+    ],
+    beforeDelete: [
+      ...(collectionConfig.hooks?.beforeDelete || []),
+      hierarchyCollectionBeforeDelete({ parentFieldName }),
     ],
   }
 }
