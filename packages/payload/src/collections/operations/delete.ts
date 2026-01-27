@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -39,11 +39,10 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
   where: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const deleteOperation = async <
   TSlug extends CollectionSlug,

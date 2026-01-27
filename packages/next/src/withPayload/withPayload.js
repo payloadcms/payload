@@ -202,6 +202,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'sharp',
           'libsql',
           'require-in-the-middle',
+          'json-schema-to-typescript',
         ],
         plugins: [
           ...(incomingWebpackConfig?.plugins || []),
@@ -260,6 +261,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'sharp',
         'libsql',
         'require-in-the-middle',
+        'json-schema-to-typescript',
         // Prevents turbopack build errors by the thread-stream package which is installed by pino
         'pino',
       ],

@@ -17,10 +17,9 @@ inputs:
     description: The cache key override for the pnpm install cache
 
 outputs:
-  pnpm-store-path:
-    description: The resolved pnpm store path
   pnpm-install-cache-key:
     description: The cache key used for pnpm install cache
+    value: ${{ steps.compute-output.outputs.pnpm-install-cache-key }}
 
 runs:
   using: composite
@@ -79,6 +78,7 @@ runs:
 
     - name: Compute Cache Key
       shell: bash
+      id: compute-cache-key
       run: |
         if [ -n "${{ inputs.pnpm-install-cache-key }}" ]; then
           PNPM_INSTALL_CACHE_KEY="${{ inputs.pnpm-install-cache-key }}"
@@ -107,3 +107,4 @@ runs:
     - run: |
         echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
       shell: bash
+      id: compute-output

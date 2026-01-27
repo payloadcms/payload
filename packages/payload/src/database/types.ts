@@ -724,8 +724,15 @@ export type DBIdentifierName =
     }) => string)
   | string
 
+export type DynamicMigrationTemplate = (args: { filePath: string; payload: Payload }) => Promise<{
+  downSQL?: string
+  imports?: string
+  upSQL?: string
+}>
+
 export type MigrationTemplateArgs = {
   downSQL?: string
+  dynamic?: DynamicMigrationTemplate
   imports?: string
   packageName?: string
   upSQL?: string

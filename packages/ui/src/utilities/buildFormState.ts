@@ -22,7 +22,7 @@ import { handlePreview } from './handlePreview.js'
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
-  user: ClientUser | number | string
+  user?: ClientUser | number | string
 }
 
 type BuildFormStateSuccessResult = {
