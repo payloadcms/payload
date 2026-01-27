@@ -1,27 +1,29 @@
-import type { MongooseQueryOptions, QueryOptions } from 'mongoose'
-import type { Document, FindOne, PayloadRequest } from 'payload'
+import type { AggregateOptions, QueryOptions } from 'mongoose'
+
+import { type FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
+import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, joins, locale, req = {} as PayloadRequest, select, where },
+  { collection: collectionSlug, draftsEnabled, joins, locale, req, select, where = {} },
 ) {
-  const Model = this.collections[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const options: MongooseQueryOptions = {
-    ...(await withSession(this, req)),
-    lean: true,
-  }
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
@@ -33,32 +35,54 @@ export const findOne: FindOne = async function findOne(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
-    collection,
+    collection: collectionSlug,
     collectionConfig,
+    draftsEnabled,
     joins,
-    limit: 1,
     locale,
     projection,
     query,
   })
 
+  const session = await getSession(this, req)
+  const options: AggregateOptions & QueryOptions = {
+    lean: true,
+    session,
+  }
+
   let doc
   if (aggregate) {
-    ;[doc] = await Model.aggregate(aggregate, options)
+    const { docs } = await aggregatePaginate({
+      adapter: this,
+      joinAggregation: aggregate,
+      limit: 1,
+      Model,
+      pagination: false,
+      projection,
+      query,
+      session,
+    })
+    doc = docs[0]
   } else {
     ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)
+  }
+
+  if (doc && !this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: [doc] as Record<string, unknown>[],
+      joins,
+      locale,
+    })
   }
 
   if (!doc) {
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  transform({ adapter: this, data: doc, fields: collectionConfig.fields, operation: 'read' })
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
-  return result
+  return doc
 }

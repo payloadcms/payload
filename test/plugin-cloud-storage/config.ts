@@ -1,9 +1,9 @@
-import type { Adapter } from '@payloadcms/plugin-cloud-storage/types'
+import type { Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { azureBlobStorageAdapter } from '@payloadcms/plugin-cloud-storage/azure'
-import { gcsAdapter } from '@payloadcms/plugin-cloud-storage/gcs'
-import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3'
+import { azureStorage } from '@payloadcms/storage-azure'
+import { gcsStorage } from '@payloadcms/storage-gcs'
+import { s3Storage } from '@payloadcms/storage-s3'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -12,13 +12,22 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
+import { RestrictedMedia } from './collections/RestrictedMedia.js'
+import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import {
+  mediaSlug,
+  mediaWithPrefixSlug,
+  prefix,
+  restrictedMediaSlug,
+  testMetadataSlug,
+} from './shared.js'
 import { createTestBucket } from './utils.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let adapter: Adapter
+let storagePlugin: Plugin = {} as Plugin
 let uploadOptions
 
 // Load config to work with emulated services
@@ -27,20 +36,31 @@ dotenv.config({
 })
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'azure') {
-  adapter = azureBlobStorageAdapter({
+  storagePlugin = azureStorage({
+    collections: {
+      [mediaSlug]: true,
+      [mediaWithPrefixSlug]: {
+        prefix,
+      },
+      [restrictedMediaSlug]: true,
+    },
     allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-    baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
-    connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
-    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+    baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
+    connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
+    containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
   })
-  // uploadOptions = {
-  //   useTempFiles: true,
-  // }
 }
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
-  adapter = gcsAdapter({
-    bucket: process.env.GCS_BUCKET,
+  storagePlugin = gcsStorage({
+    collections: {
+      [mediaSlug]: true,
+      [mediaWithPrefixSlug]: {
+        prefix,
+      },
+      [restrictedMediaSlug]: true,
+    },
+    bucket: process.env.GCS_BUCKET!,
     options: {
       apiEndpoint: process.env.GCS_ENDPOINT,
       projectId: process.env.GCS_PROJECT_ID,
@@ -57,12 +77,19 @@ if (
     useTempFiles: true,
   }
 
-  adapter = s3Adapter({
-    bucket: process.env.S3_BUCKET,
+  storagePlugin = s3Storage({
+    collections: {
+      [mediaSlug]: true,
+      [mediaWithPrefixSlug]: {
+        prefix,
+      },
+      [restrictedMediaSlug]: true,
+    },
+    bucket: process.env.S3_BUCKET ?? '',
     config: {
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
       },
       endpoint: process.env.S3_ENDPOINT,
       forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
@@ -72,19 +99,50 @@ if (
 }
 
 if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'r2') {
-  adapter = s3Adapter({
-    bucket: process.env.R2_BUCKET,
+  s3Storage({
+    collections: {
+      [mediaSlug]: true,
+      [mediaWithPrefixSlug]: {
+        prefix,
+      },
+    },
+    bucket: process.env.R2_BUCKET ?? '',
     config: {
       credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
       },
-      endpoint: process.env.R2_ENDPOINT,
-      forcePathStyle: process.env.R2_FORCE_PATH_STYLE === 'true',
-      region: process.env.R2_REGION,
+      endpoint: process.env.S3_ENDPOINT,
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+      region: process.env.S3_REGION,
     },
   })
 }
+
+const testMetadataPlugin = cloudStoragePlugin({
+  collections: {
+    [testMetadataSlug]: {
+      adapter: () => ({
+        name: 'test-metadata-adapter',
+        handleUpload: ({ file, data }) => {
+          const metadata = {
+            ...data,
+            customStorageId: `storage-${Date.now()}`,
+            uploadTimestamp: new Date().toISOString(),
+            storageProvider: 'test-adapter',
+            bucketName: 'test-bucket',
+            objectKey: data.filename || file.filename, // Use the processed filename from data
+            processingStatus: 'completed',
+            uploadVersion: '1.0.0',
+          }
+          return metadata
+        },
+        handleDelete: () => Promise.resolve(),
+        staticHandler: () => new Response('Not found', { status: 404 }),
+      }),
+    },
+  },
+})
 
 export default buildConfigWithDefaults({
   admin: {
@@ -92,7 +150,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, MediaWithPrefix, Users],
+  collections: [Media, MediaWithPrefix, RestrictedMedia, TestMetadata, Users],
   onInit: async (payload) => {
     /*const client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,
@@ -126,19 +184,7 @@ export default buildConfigWithDefaults({
       `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
     )
   },
-  plugins: [
-    cloudStoragePlugin({
-      collections: {
-        [mediaSlug]: {
-          adapter,
-        },
-        [mediaWithPrefixSlug]: {
-          adapter,
-          prefix,
-        },
-      },
-    }),
-  ],
+  plugins: [storagePlugin, testMetadataPlugin],
   upload: uploadOptions,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

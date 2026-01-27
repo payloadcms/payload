@@ -1,12 +1,13 @@
-import crypto from 'crypto'
-import fs from 'fs'
+/* eslint-disable no-console */
+import fs from 'fs/promises'
 import process from 'node:process'
-import path from 'path'
 
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 
 import { iterateConfig } from './iterateConfig.js'
-import { parsePayloadComponent } from './parsePayloadComponent.js'
+import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
+import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'
+import { resolveImportMapFilePath } from './utilities/resolveImportMapFilePath.js'
 
 type ImportIdentifier = string
 type ImportSpecifier = string
@@ -37,59 +38,18 @@ export type ImportMap = {
   [path: UserImportPath]: any
 }
 
-export function addPayloadComponentToImportMap({
-  baseDir,
-  importMap,
-  imports,
-  payloadComponent,
-}: {
-  baseDir: string
-  importMap: InternalImportMap
-  imports: Imports
-  payloadComponent: PayloadComponent
-}) {
-  if (!payloadComponent) {
-    return
-  }
-  const { exportName, path: componentPath } = parsePayloadComponent(payloadComponent)
-
-  if (importMap[componentPath + '#' + exportName]) {
-    return
-  }
-
-  const importIdentifier =
-    exportName + '_' + crypto.createHash('md5').update(componentPath).digest('hex')
-
-  // e.g. if baseDir is /test/fields and componentPath is /components/Field.tsx
-  // then path needs to be /test/fields/components/Field.tsx NOT /users/username/project/test/fields/components/Field.tsx
-  // so we need to append baseDir to componentPath
-
-  if (componentPath.startsWith('.') || componentPath.startsWith('/')) {
-    const normalizedBaseDir = baseDir.replace(/\\/g, '/')
-
-    const finalPath = normalizedBaseDir.startsWith('/../')
-      ? `${normalizedBaseDir}${componentPath.slice(1)}`
-      : path.posix.join(normalizedBaseDir, componentPath.slice(1))
-
-    imports[importIdentifier] = {
-      path:
-        componentPath.startsWith('.') || componentPath.startsWith('/') ? finalPath : componentPath,
-      specifier: exportName,
-    }
-  } else {
-    imports[importIdentifier] = {
-      path: componentPath,
-      specifier: exportName,
-    }
-  }
-  importMap[componentPath + '#' + exportName] = importIdentifier
-}
-
-export type AddToImportMap = (payloadComponent: PayloadComponent | PayloadComponent[]) => void
+export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
 
 export async function generateImportMap(
   config: SanitizedConfig,
-  options?: { force?: boolean; log: boolean },
+  options?: {
+    force?: boolean /**
+     * If true, will not throw an error if the import map file path cannot be resolved
+    Instead, it will return silently.
+     */
+    ignoreResolveError?: boolean
+    log: boolean
+  },
 ): Promise<void> {
   const shouldLog = options?.log ?? true
 
@@ -100,49 +60,29 @@ export async function generateImportMap(
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
 
+  // Determine the root directory of the project - usually the directory where the src or app folder is located
   const rootDir = process.env.ROOT_DIR ?? process.cwd()
 
-  // get componentsBaseDir.
-  // E.g.:
-  // config.admin.importMap.baseDir = /test/fields/
-  // rootDir: /
-  // componentsBaseDir = /test/fields/
+  const baseDir = config.admin.importMap.baseDir ?? process.cwd()
 
-  // or
+  const importMapFilePath = await resolveImportMapFilePath({
+    adminRoute: config.routes.admin,
+    importMapFile: config?.admin?.importMap?.importMapFile,
+    rootDir,
+  })
 
-  // E.g.:
-  // config.admin.importMap.baseDir = /test/fields/
-  // rootDir: /test
-  // componentsBaseDir = /fields/
-
-  // or
-  // config.admin.importMap.baseDir = /
-  // rootDir: /
-  // componentsBaseDir = /
-
-  // E.g.:
-  // config.admin.importMap.baseDir = /test/fields/
-  // rootDir: /test/fields/prod
-  // componentsBaseDir = ../
-
-  // Check if rootDir is a subdirectory of baseDir
-  const baseDir = config.admin.importMap.baseDir
-  const isSubdirectory = path.relative(baseDir, rootDir).startsWith('..')
-
-  let componentsBaseDir
-
-  if (isSubdirectory) {
-    // Get the relative path from rootDir to baseDir
-    componentsBaseDir = path.relative(rootDir, baseDir)
-  } else {
-    // If rootDir is not a subdirectory, just return baseDir relative to rootDir
-    componentsBaseDir = `/${path.relative(rootDir, baseDir)}`
+  if (importMapFilePath instanceof Error) {
+    if (options?.ignoreResolveError) {
+      return
+    } else {
+      throw importMapFilePath
+    }
   }
 
-  // Ensure result has a trailing slash
-  if (!componentsBaseDir.endsWith('/')) {
-    componentsBaseDir += '/'
-  }
+  const importMapToBaseDirPath = getImportMapToBaseDirPath({
+    baseDir,
+    importMapPath: importMapFilePath,
+  })
 
   const addToImportMap: AddToImportMap = (payloadComponent) => {
     if (!payloadComponent) {
@@ -157,16 +97,16 @@ export async function generateImportMap(
     if (Array.isArray(payloadComponent)) {
       for (const component of payloadComponent) {
         addPayloadComponentToImportMap({
-          baseDir: componentsBaseDir,
           importMap,
+          importMapToBaseDirPath,
           imports,
           payloadComponent: component,
         })
       }
     } else {
       addPayloadComponentToImportMap({
-        baseDir: componentsBaseDir,
         importMap,
+        importMapToBaseDirPath,
         imports,
         payloadComponent,
       })
@@ -183,43 +123,26 @@ export async function generateImportMap(
 
   await writeImportMap({
     componentMap: importMap,
-    config,
-    fileName: 'importMap.js',
     force: options?.force,
     importMap: imports,
+    importMapFilePath,
     log: shouldLog,
-    rootDir,
   })
 }
 
 export async function writeImportMap({
   componentMap,
-  config,
-  fileName,
   force,
   importMap,
+  importMapFilePath,
   log,
-  rootDir,
 }: {
   componentMap: InternalImportMap
-  config: SanitizedConfig
-  fileName: string
   force?: boolean
   importMap: Imports
+  importMapFilePath: string
   log?: boolean
-  rootDir: string
 }) {
-  let importMapFolderPath = ''
-  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${config.routes.admin}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
-  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
-  } else {
-    throw new Error(
-      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)} and ${path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)}`,
-    )
-  }
-
   const imports: string[] = []
   for (const [identifier, { path, specifier }] of Object.entries(importMap)) {
     imports.push(`import { ${specifier} as ${identifier} } from '${path}'`)
@@ -237,11 +160,9 @@ ${mapKeys.join(',\n')}
 }
 `
 
-  const importMapFilePath = path.resolve(importMapFolderPath, fileName)
-
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
+    const currentImportMap = await fs.readFile(importMapFilePath, 'utf-8')
 
     if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
       if (log) {
@@ -255,5 +176,5 @@ ${mapKeys.join(',\n')}
     console.log('Writing import map to', importMapFilePath)
   }
 
-  await fs.promises.writeFile(importMapFilePath, importMapOutputFile)
+  await fs.writeFile(importMapFilePath, importMapOutputFile)
 }

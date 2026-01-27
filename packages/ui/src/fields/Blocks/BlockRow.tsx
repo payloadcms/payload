@@ -1,12 +1,5 @@
 'use client'
-import type {
-  ClientBlock,
-  ClientField,
-  Labels,
-  Row,
-  SanitizedFieldPermissions,
-  SanitizedFieldsPermissions,
-} from 'payload'
+import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -17,8 +10,11 @@ import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -28,16 +24,19 @@ const baseClass = 'blocks-field'
 type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[] | ClientBlock[]
+  copyRow: (rowIndex: number) => void
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
   hasMaxRows?: boolean
+  isLoading?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
   parentPath: string
+  pasteRow: (rowIndex: number) => void
   path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
@@ -54,16 +53,19 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   attributes,
   block,
   blocks,
+  copyRow,
   duplicateRow,
   errorCount,
   fields,
   hasMaxRows,
+  isLoading: isLoadingFromProps,
   isSortable,
   Label,
   labels,
   listeners,
   moveRow,
   parentPath,
+  pasteRow,
   path,
   permissions,
   readOnly,
@@ -76,10 +78,14 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
+
+  const showBlockName = !block.admin?.disableBlockName
 
   const classNames = [
     `${baseClass}__row`,
@@ -88,16 +94,39 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+  let blockPermissions: RenderFieldsProps['permissions'] = true
 
   if (permissions === true) {
     blockPermissions = true
   } else {
-    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug] || permissions?.blocks
     if (permissionsBlockSpecific === true) {
       blockPermissions = true
+    } else if (permissionsBlockSpecific?.fields) {
+      blockPermissions = permissionsBlockSpecific.fields
     } else {
-      blockPermissions = permissionsBlockSpecific?.fields
+      // Check if we should fall back to read-only mode based on permission structure
+      // This handles cases where field-level access control exists but block permissions were sanitized
+      if (typeof permissions === 'object' && permissions && !permissionsBlockSpecific) {
+        // If permissions object exists but has no block-specific permissions,
+        // check if it has any restrictive characteristics
+        const hasReadPermission = permissions.read === true
+        const missingCreateOrUpdate = !permissions.create || !permissions.update
+        const hasRestrictiveStructure =
+          hasReadPermission &&
+          (missingCreateOrUpdate ||
+            (typeof permissions === 'object' &&
+              Object.keys(permissions).length === 1 &&
+              permissions.read))
+
+        if (hasRestrictiveStructure) {
+          blockPermissions = { read: true }
+        } else {
+          blockPermissions = permissionsBlockSpecific?.fields
+        }
+      } else {
+        blockPermissions = permissionsBlockSpecific?.fields
+      }
     }
   }
 
@@ -117,12 +146,14 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               addRow={addRow}
               blocks={blocks}
               blockType={row.blockType}
+              copyRow={copyRow}
               duplicateRow={duplicateRow}
               fields={block.fields}
               hasMaxRows={hasMaxRows}
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}
               rowIndex={rowIndex}
@@ -141,18 +172,32 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          Label || (
+          isLoading ? (
+            <ShimmerEffect height="1rem" width="8rem" />
+          ) : (
             <div className={`${baseClass}__block-header`}>
-              <span className={`${baseClass}__block-number`}>
-                {String(rowIndex + 1).padStart(2, '0')}
-              </span>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                pillStyle="white"
-              >
-                {getTranslation(block.labels.singular, i18n)}
-              </Pill>
-              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+              <RowLabel
+                CustomComponent={Label}
+                label={
+                  <>
+                    <span className={`${baseClass}__block-number`}>
+                      {String(rowIndex + 1).padStart(2, '0')}
+                    </span>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                      pillStyle="white"
+                      size="small"
+                    >
+                      {getTranslation(block.labels.singular, i18n)}
+                    </Pill>
+                    {showBlockName && (
+                      <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                    )}
+                  </>
+                }
+                path={path}
+                rowNumber={rowIndex}
+              />
               {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
             </div>
           )
@@ -161,16 +206,20 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          margins="small"
-          parentIndexPath=""
-          parentPath={path}
-          parentSchemaPath={schemaPath}
-          permissions={blockPermissions}
-          readOnly={readOnly}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={blockPermissions}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )

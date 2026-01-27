@@ -1,7 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export const isValidID = (
   value: number | string,
@@ -15,11 +14,13 @@ export const isValidID = (
     return false
   }
 
-  if (typeof value === 'number' && !Number.isNaN(value)) {
+  if (type === 'number' && typeof value === 'number' && !Number.isNaN(value)) {
     return true
   }
 
   if (type === 'ObjectID') {
     return ObjectId.isValid(String(value))
   }
+
+  return false
 }

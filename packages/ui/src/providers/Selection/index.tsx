@@ -1,11 +1,14 @@
 'use client'
-import type { ClientUser, Where } from 'payload'
+import type { Where } from 'payload'
 
+import { useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { useAuth } from '../Auth/index.js'
+import { useListQuery } from '../ListQuery/index.js'
 import { useLocale } from '../Locale/index.js'
-import { useSearchParams } from '../SearchParams/index.js'
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -19,51 +22,84 @@ type SelectionContext = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   getQueryParams: (additionalParams?: Where) => string
+  getSelectedIds: () => (number | string)[]
   selectAll: SelectAllStatus
   selected: Map<number | string, boolean>
+  selectedIDs: (number | string)[]
   setSelection: (id: number | string) => void
+  /**
+   * Selects all rows on the current page within the current query.
+   * If `allAvailable` is true, does not select specific IDs so that the query itself affects all rows across all pages.
+   */
   toggleAll: (allAvailable?: boolean) => void
   totalDocs: number
 }
 
-const Context = createContext({} as SelectionContext)
+const Context = createContext({
+  count: undefined,
+  getQueryParams: (additionalParams?: Where) => '',
+  getSelectedIds: () => [],
+  selectAll: undefined,
+  selected: new Map(),
+  selectedIDs: [],
+  setSelection: (id: number | string) => {},
+  toggleAll: (toggleAll: boolean) => {},
+  totalDocs: undefined,
+} satisfies SelectionContext)
 
 type Props = {
   readonly children: React.ReactNode
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly docs: any[]
   readonly totalDocs: number
-  user: ClientUser
 }
 
-export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs, user }) => {
+const reduceActiveSelections = (selected: Map<number | string, boolean>): (number | string)[] => {
+  const ids = []
+
+  for (const [key, value] of selected) {
+    if (value) {
+      ids.push(key)
+    }
+  }
+
+  return ids
+}
+
+export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalDocs }) => {
   const contextRef = useRef({} as SelectionContext)
+  const { user } = useAuth()
 
   const { code: locale } = useLocale()
 
   const [selected, setSelected] = useState<SelectionContext['selected']>(() => {
     const rows = new Map()
+
     docs.forEach(({ id }) => {
       rows.set(id, false)
     })
+
     return rows
   })
 
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None)
   const [count, setCount] = useState(0)
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
+  const { query } = useListQuery()
 
-  const toggleAll = useCallback(
+  const toggleAll: SelectionContext['toggleAll'] = useCallback(
     (allAvailable = false) => {
       const rows = new Map()
       if (allAvailable) {
         setSelectAll(SelectAllStatus.AllAvailable)
+
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
             rows.set(id, true)
           }
         })
       } else if (
+        // Reset back to `None` if we previously had any type of selection
         selectAll === SelectAllStatus.AllAvailable ||
         selectAll === SelectAllStatus.AllInPage
       ) {
@@ -81,7 +117,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     [docs, selectAll, user?.id],
   )
 
-  const setSelection = useCallback(
+  const setSelection: SelectionContext['setSelection'] = useCallback(
     (id) => {
       const doc = docs.find((doc) => doc.id === id)
 
@@ -92,17 +128,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
-      let newMap = new Map()
+      const newMap = new Map(selected.set(id, isSelected))
 
-      if (isSelected) {
-        newMap = new Map(selected.set(id, isSelected))
-      } else {
-        newMap = new Map(selected.set(id, false))
+      // If previously selected all and now deselecting, adjust status
+      if (selectAll === SelectAllStatus.AllAvailable && !isSelected) {
+        setSelectAll(SelectAllStatus.Some)
       }
 
       setSelected(newMap)
     },
-    [selected, docs, user?.id],
+    [selected, docs, selectAll, user?.id],
   )
 
   const getQueryParams = useCallback(
@@ -110,10 +145,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       let where: Where
 
       if (selectAll === SelectAllStatus.AllAvailable) {
-        const params = searchParams?.where as Where
+        const params = parseSearchParams(searchParams)?.where as Where
 
         where = params || {
-          id: { not_equals: '' },
+          id: {
+            not_equals: '',
+          },
         }
       } else {
         const ids = []
@@ -147,6 +184,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     },
     [selectAll, selected, locale, searchParams],
   )
+
+  const getSelectedIds = useCallback(() => reduceActiveSelections(selected), [selected])
 
   useEffect(() => {
     if (selectAll === SelectAllStatus.AllAvailable) {
@@ -190,17 +229,26 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
     setCount(newCount)
   }, [selectAll, selected, totalDocs])
 
+  useEffect(() => {
+    setSelectAll(SelectAllStatus.None)
+    setSelected(new Map())
+  }, [query])
+
+  const selectedIDs = useMemo(() => reduceActiveSelections(selected), [selected])
+
   contextRef.current = {
     count,
     getQueryParams,
+    getSelectedIds,
     selectAll,
     selected,
+    selectedIDs,
     setSelection,
     toggleAll,
     totalDocs,
   }
 
-  return <Context.Provider value={contextRef.current}>{children}</Context.Provider>
+  return <Context value={contextRef.current}>{children}</Context>
 }
 
-export const useSelection = (): SelectionContext => useContext(Context)
+export const useSelection = (): SelectionContext => use(Context)

@@ -15,12 +15,12 @@ export const createMigration: CreateMigration = function createMigration({
   }
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
-  const formattedDate = yyymmdd.replace(/\D/g, '')
-  const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
+  const formattedDate = yyymmdd!.replace(/\D/g, '')
+  const formattedTime = hhmmss!.split('.')[0]!.replace(/\D/g, '')
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
+  const formattedName = migrationName!.replace(/\W/g, '_')
   const fileName = `${timestamp}_${formattedName}.ts`
   const filePath = `${dir}/${fileName}`
   fs.writeFileSync(filePath, migrationTemplate)

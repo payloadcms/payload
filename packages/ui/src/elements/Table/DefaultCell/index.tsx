@@ -2,27 +2,30 @@
 import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
+import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
+import { isValidReactElement } from '../../../utilities/isValidReactElement.js'
+import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
-    collectionConfig,
+    collectionSlug,
     field,
     field: { admin },
     link,
+    linkURL,
     onClick: onClickFromProps,
     rowData,
+    viewType,
   } = props
 
   const { i18n } = useTranslation()
@@ -31,7 +34,10 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     config: {
       routes: { admin: adminRoute },
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -57,12 +63,18 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   if (link) {
     wrapElementProps.prefetch = false
     WrapElement = Link
-    wrapElementProps.href = collectionConfig?.slug
-      ? formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
-        })
-      : ''
+
+    // Use custom linkURL if provided, otherwise use default URL generation
+    if (linkURL) {
+      wrapElementProps.href = linkURL
+    } else {
+      wrapElementProps.href = collectionConfig?.slug
+        ? formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
+          })
+        : ''
+    }
   }
 
   if (typeof onClick === 'function') {
@@ -77,12 +89,13 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     }
   }
 
-  if ('name' in field && field.name === 'id') {
+  if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
         <CodeCell
           cellData={`ID: ${cellData}`}
           collectionConfig={collectionConfig}
+          collectionSlug={collectionSlug}
           field={{
             ...field,
             type: 'code',
@@ -94,12 +107,17 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
+  const displayedValue = getDisplayedFieldValue(cellData, field, i18n)
+
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
     typeof cellData !== 'undefined' && cellComponents[field.type]
 
   let CellComponent: React.ReactNode = null
 
-  if (DefaultCellComponent) {
+  // Handle JSX labels before using DefaultCellComponent
+  if (isValidReactElement(displayedValue)) {
+    CellComponent = displayedValue
+  } else if (DefaultCellComponent) {
     CellComponent = <DefaultCellComponent cellData={cellData} rowData={rowData} {...props} />
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
@@ -123,16 +141,34 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     } else {
       return (
         <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined' || cellData === null) &&
+          {(displayedValue === '' ||
+            typeof displayedValue === 'undefined' ||
+            displayedValue === null) &&
             i18n.t('general:noLabel', {
               label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
             })}
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && cellData !== null && JSON.stringify(cellData)}
+          {typeof displayedValue === 'string' && displayedValue}
+          {typeof displayedValue === 'number' && displayedValue}
+          {typeof displayedValue === 'object' &&
+            displayedValue !== null &&
+            JSON.stringify(displayedValue)}
         </WrapElement>
       )
     }
+  }
+
+  if ((field.type === 'select' || field.type === 'radio') && field.options.length && cellData) {
+    const classes = Array.isArray(cellData)
+      ? cellData.map((value) => `selected--${value}`).join(' ')
+      : `selected--${cellData}`
+
+    const className = [wrapElementProps.className, classes].filter(Boolean).join(' ')
+
+    return (
+      <WrapElement {...wrapElementProps} className={className}>
+        {CellComponent}
+      </WrapElement>
+    )
   }
 
   return <WrapElement {...wrapElementProps}>{CellComponent}</WrapElement>

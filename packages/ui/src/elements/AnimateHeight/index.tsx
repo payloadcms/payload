@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useRef } from 'react'
 
 import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
@@ -11,6 +12,7 @@ export const AnimateHeight: React.FC<{
   id?: string
 }> = ({ id, children, className, duration = 300, height }) => {
   const [open, setOpen] = React.useState(() => Boolean(height))
+
   const prevIsOpen = useRef(open)
 
   const [childrenDisplay, setChildrenDisplay] = React.useState<CSSStyleDeclaration['display']>(
@@ -22,6 +24,9 @@ export const AnimateHeight: React.FC<{
   )
 
   const [isAnimating, setIsAnimating] = React.useState(false)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let displayTimer: number
@@ -64,10 +69,9 @@ export const AnimateHeight: React.FC<{
     }
   }, [height, duration])
 
-  const containerRef = useRef<HTMLDivElement>(null)
-
   usePatchAnimateHeight({
     containerRef,
+    contentRef,
     duration,
     open,
   })
@@ -91,7 +95,9 @@ export const AnimateHeight: React.FC<{
         transition: `height ${duration}ms ease`,
       }}
     >
-      <div {...(childrenDisplay ? { style: { display: childrenDisplay } } : {})}>{children}</div>
+      <div ref={contentRef} {...(childrenDisplay ? { style: { display: childrenDisplay } } : {})}>
+        {children}
+      </div>
     </div>
   )
 }

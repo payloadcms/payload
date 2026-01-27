@@ -1,16 +1,22 @@
-import type { Init, SanitizedCollectionConfig } from 'payload'
+import type { Init } from 'payload'
 
-import { uniqueIndex } from 'drizzle-orm/pg-core'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
+import type { BasePostgresAdapter } from './types.js'
 
-import type { BaseExtraConfig, BasePostgresAdapter } from './types.js'
-
-import { createTableName } from '../createTableName.js'
+import { buildDrizzleRelations } from '../schema/buildDrizzleRelations.js'
+import { buildRawSchema } from '../schema/buildRawSchema.js'
 import { executeSchemaHooks } from '../utilities/executeSchemaHooks.js'
-import { buildTable } from './schema/build.js'
+import { buildDrizzleTable } from './schema/buildDrizzleTable.js'
+import { setColumnID } from './schema/setColumnID.js'
 
 export const init: Init = async function init(this: BasePostgresAdapter) {
+  this.rawRelations = {}
+  this.rawTables = {}
+
+  buildRawSchema({
+    adapter: this,
+    setColumnID,
+  })
+
   await executeSchemaHooks({ type: 'beforeSchemaInit', adapter: this })
 
   if (this.payload.config.localization) {
@@ -20,99 +26,20 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
     )
   }
 
-  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    createTableName({
-      adapter: this,
-      config: collection,
-    })
+  for (const tableName in this.rawTables) {
+    buildDrizzleTable({ adapter: this, rawTable: this.rawTables[tableName] })
+  }
 
-    if (collection.versions) {
-      createTableName({
-        adapter: this,
-        config: collection,
-        versions: true,
-        versionsCustomName: true,
-      })
-    }
-  })
-  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
-
-    const baseExtraConfig: BaseExtraConfig = {}
-
-    if (collection.upload.filenameCompoundIndex) {
-      const indexName = `${tableName}_filename_compound_idx`
-
-      baseExtraConfig.filename_compound_index = (cols) => {
-        const colsConstraint = collection.upload.filenameCompoundIndex.map((f) => {
-          return cols[f]
-        })
-        return uniqueIndex(indexName).on(colsConstraint[0], ...colsConstraint.slice(1))
-      }
-    }
-
-    buildTable({
-      adapter: this,
-      baseExtraConfig,
-      disableNotNull: !!collection?.versions?.drafts,
-      disableUnique: false,
-      fields: collection.flattenedFields,
-      tableName,
-      timestamps: collection.timestamps,
-      versions: false,
-    })
-
-    if (collection.versions) {
-      const versionsTableName = this.tableNameMap.get(
-        `_${toSnakeCase(collection.slug)}${this.versionsSuffix}`,
-      )
-      const versionFields = buildVersionCollectionFields(this.payload.config, collection, true)
-
-      buildTable({
-        adapter: this,
-        disableNotNull: !!collection.versions?.drafts,
-        disableUnique: true,
-        fields: versionFields,
-        tableName: versionsTableName,
-        timestamps: true,
-        versions: true,
-      })
-    }
-  })
-
-  this.payload.config.globals.forEach((global) => {
-    const tableName = createTableName({ adapter: this, config: global })
-
-    buildTable({
-      adapter: this,
-      disableNotNull: !!global?.versions?.drafts,
-      disableUnique: false,
-      fields: global.flattenedFields,
-      tableName,
-      timestamps: false,
-      versions: false,
-    })
-
-    if (global.versions) {
-      const versionsTableName = createTableName({
-        adapter: this,
-        config: global,
-        versions: true,
-        versionsCustomName: true,
-      })
-      const versionFields = buildVersionGlobalFields(this.payload.config, global, true)
-
-      buildTable({
-        adapter: this,
-        disableNotNull: !!global.versions?.drafts,
-        disableUnique: true,
-        fields: versionFields,
-        tableName: versionsTableName,
-        timestamps: true,
-        versions: true,
-      })
-    }
+  buildDrizzleRelations({
+    adapter: this,
   })
 
   await executeSchemaHooks({ type: 'afterSchemaInit', adapter: this })
+
+  this.schema = {
+    pgSchema: this.pgSchema,
+    ...this.tables,
+    ...this.relations,
+    ...this.enums,
+  }
 }

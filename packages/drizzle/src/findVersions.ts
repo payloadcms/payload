@@ -1,4 +1,4 @@
-import type { FindVersions, PayloadRequest, SanitizedCollectionConfig } from 'payload'
+import type { FindVersions, SanitizedCollectionConfig } from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
 import toSnakeCase from 'to-snake-case'
@@ -9,18 +9,7 @@ import { findMany } from './find/findMany.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: DrizzleAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    select,
-    skip,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
@@ -41,7 +30,6 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     req,
     select,
-    skip,
     sort,
     tableName,
     where,

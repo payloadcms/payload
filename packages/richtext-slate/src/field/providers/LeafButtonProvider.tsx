@@ -24,17 +24,17 @@ export const LeafButtonProvider: React.FC<
   const { children, ...rest } = props
 
   return (
-    <LeafButtonContext.Provider
+    <LeafButtonContext
       value={{
         ...rest,
       }}
     >
       {children}
-    </LeafButtonContext.Provider>
+    </LeafButtonContext>
   )
 }
 
 export const useLeafButton = () => {
-  const path = React.useContext(LeafButtonContext)
+  const path = React.use(LeafButtonContext)
   return path
 }

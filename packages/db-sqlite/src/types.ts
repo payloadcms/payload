@@ -1,10 +1,12 @@
 import type { Client, Config, ResultSet } from '@libsql/client'
 import type { extendDrizzleTable, Operators } from '@payloadcms/drizzle'
+import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
   AnySQLiteColumn,
+  SQLiteColumn,
   SQLiteInsertOnConflictDoUpdateConfig,
   SQLiteTableWithColumns,
   SQLiteTransactionConfig,
@@ -32,27 +34,32 @@ export type Args = {
    */
   afterSchemaInit?: SQLiteSchemaHook[]
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  allowIDOnCreate?: boolean
+  /**
+   * Enable [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for Primary Keys.
+   * This ensures that the same ID cannot be reused from previously deleted rows.
+   */
+  autoIncrement?: boolean
+  /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Maximum time in milliseconds to wait when the database is locked.
+   * @default 0
+   */
+  busyTimeout?: number
   client: Config
-  idType?: 'serial' | 'uuid'
-  localesSuffix?: string
-  logger?: DrizzleConfig['logger']
-  migrationDir?: string
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  push?: boolean
-  relationshipsSuffix?: string
-  schemaName?: string
-  transactionOptions?: false | SQLiteTransactionConfig
-  versionsSuffix?: string
-}
+  wal?: boolean | Partial<WalConfig>
+} & BaseSQLiteArgs
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -68,6 +75,7 @@ export type GenericTable = SQLiteTableWithColumns<{
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
 export type CountDistinct = (args: {
+  column?: SQLiteColumn<any>
   db: LibSQLDatabase
   joins: BuildQueryJoinAliases
   tableName: string
@@ -104,61 +112,115 @@ type SQLiteDrizzleAdapter = Omit<
   | 'drizzle'
   | 'dropDatabase'
   | 'execute'
+  | 'idType'
   | 'insert'
   | 'operators'
   | 'relations'
 >
 
+export interface GeneratedDatabaseSchema {
+  schemaUntyped: Record<string, unknown>
+}
+
+type ResolveSchemaType<T> = 'schema' extends keyof T
+  ? T['schema']
+  : GeneratedDatabaseSchema['schemaUntyped']
+
+type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+
+export type WalConfig = {
+  /**
+   * Maximum size of the WAL file before it is written back to the main database.
+   * @default 67108864 (64MB)
+   */
+  journalSizeLimit: number
+
+  /**
+   * Controls how often data is synced to disk:
+   * - 'EXTRA': Highest data safety
+   * - 'FULL': Safe and balanced
+   * - 'NORMAL': Moderate safety, better performance
+   * - 'OFF': Fastest, but risk of data loss
+   *
+   * @default 'FULL'
+   */
+  synchronous: 'EXTRA' | 'FULL' | 'NORMAL' | 'OFF'
+}
+
 export type SQLiteAdapter = {
-  afterSchemaInit: SQLiteSchemaHook[]
-  beforeSchemaInit: SQLiteSchemaHook[]
+  busyTimeout: number
   client: Client
   clientConfig: Args['client']
-  countDistinct: CountDistinct
-  defaultDrizzleSnapshot: any
-  deleteWhere: DeleteWhere
-  drizzle: { $client: Client } & LibSQLDatabase<
-    Record<string, GenericRelation | GenericTable> & Record<string, unknown>
-  >
-  dropDatabase: DropDatabase
-  execute: Execute<unknown>
+  drizzle: Drizzle
   /**
-   * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
-   * Used for returning properly formed errors from unique fields
+   * Write-Ahead Logging (WAL) configuration. If false or not set, WAL mode is disabled.
    */
-  fieldConstraints: Record<string, Record<string, string>>
-  idType: Args['idType']
-  initializing: Promise<void>
-  insert: Insert
-  localesSuffix?: string
-  logger: DrizzleConfig['logger']
-  operators: Operators
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
-  push: boolean
-  rejectInitializing: () => void
-  relations: Record<string, GenericRelation>
-  relationshipsSuffix?: string
-  resolveInitializing: () => void
-  schema: Record<string, GenericRelation | GenericTable>
-  schemaName?: Args['schemaName']
-  tableNameMap: Map<string, string>
-  tables: Record<string, GenericTable>
-  transactionOptions: SQLiteTransactionConfig
-  versionsSuffix?: string
-} & SQLiteDrizzleAdapter
+  wal: false | WalConfig
+} & BaseSQLiteAdapter &
+  SQLiteDrizzleAdapter
 
 export type IDType = 'integer' | 'numeric' | 'text'
 
 export type MigrateUpArgs = {
+  /**
+   * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateUpArgs, sql } from '@payloadcms/db-sqlite'
+   *
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: Drizzle
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * import { type MigrateUpArgs } from '@payloadcms/db-sqlite'
+   *
+   * export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
   payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
   req: PayloadRequest
 }
 export type MigrateDownArgs = {
+  /**
+   * The SQLite Drizzle instance that you can use to execute SQL directly within the current transaction.
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs, sql } from '@payloadcms/db-sqlite'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const { rows: posts } = await db.run(sql`SELECT * FROM posts`)
+   * }
+   * ```
+   */
+  db: Drizzle
+  /**
+   * The Payload instance that you can use to execute Local API methods
+   * To use the current transaction you must pass `req` to arguments
+   * @example
+   * ```ts
+   * import { type MigrateDownArgs } from '@payloadcms/db-sqlite'
+   *
+   * export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+   *   const posts = await payload.find({ collection: 'posts', req })
+   * }
+   * ```
+   */
   payload: Payload
+  /**
+   * The `PayloadRequest` object that contains the current transaction
+   */
   req: PayloadRequest
 }
 
@@ -167,7 +229,8 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
-    drizzle: LibSQLDatabase
+    busyTimeout: number
+    drizzle: Drizzle
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name
      * Used for returning properly formed errors from unique fields

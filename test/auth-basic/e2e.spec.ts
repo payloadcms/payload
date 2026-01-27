@@ -4,6 +4,7 @@ import type { SanitizedConfig } from 'payload'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -68,26 +69,29 @@ const createFirstUser = async ({
     .not.toContain('create-first-user')
 }
 
-describe('auth-basic', () => {
+describe('Auth (Basic)', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
-  let apiURL: string
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, 'users')
 
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    const {
+      routes: { admin },
+    } = getRoutes({})
+    adminRoute = admin
 
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: `${serverURL}/admin/**`,
+      readyURL: formatAdminURL({ path: '/**', serverURL, adminRoute }),
       noAutoLogin: true,
     })
 
@@ -110,7 +114,7 @@ describe('auth-basic', () => {
     await ensureCompilationIsDone({
       page,
       serverURL,
-      readyURL: `${serverURL}/admin/create-first-user`,
+      readyURL: formatAdminURL({ path: '/create-first-user', serverURL, adminRoute }),
     })
   })
 

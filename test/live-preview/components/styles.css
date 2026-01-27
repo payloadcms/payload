@@ -1,0 +1,13 @@
+.custom-live-preview {
+  width: 80%;
+  display: none;
+  overflow: hidden;
+
+  &.custom-live-preview--is-live-previewing {
+    display: block;
+  }
+
+  .live-preview-window {
+    width: 100%;
+  }
+}

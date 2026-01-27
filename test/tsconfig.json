@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
     "noEmit": true,
     "rootDir": ".",
-    "declaration": true,
-    "declarationMap": true,
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -15,9 +18,7 @@
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
-    "types": ["jest", "node", "@types/jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -27,7 +28,7 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./fields/config.ts"]
+      "@payload-config": ["./_community/config.ts"]
     }
   },
   "exclude": [

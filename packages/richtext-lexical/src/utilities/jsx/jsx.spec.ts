@@ -1,14 +1,26 @@
+import { describe, it, expect } from 'vitest'
 import { extractPropsFromJSXPropsString } from './extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from './jsx.js'
 
 describe('jsx', () => {
   describe('prop string to object', () => {
-    const INPUT_AND_OUTPUT = [
+    const INPUT_AND_OUTPUT: {
+      input: string
+      inputFromOutput?: string
+      output: Record<string, any>
+    }[] = [
       {
         input: 'key="value"',
         output: {
           key: 'value',
         },
+      },
+      {
+        input: "key='value'",
+        output: {
+          key: 'value',
+        },
+        inputFromOutput: 'key="value"',
       },
       {
         input: 'key={[1, 2, 3]}',
@@ -110,6 +122,32 @@ describe('jsx', () => {
           packageId: 'myId',
           uniqueId: 'some unique id!',
           update: true,
+        },
+      },
+      {
+        // Test if unquoted property keys in objects within arrays are supprted. This is
+        // supported through the more lenient JSOX parser, instead of using JSON.parse()
+        input: 'key={[1, 2, { hello: "there" }]}',
+        inputFromOutput: 'key={[1, 2, { "hello": "there" }]}',
+        output: {
+          key: [1, 2, { hello: 'there' }],
+        },
+      },
+      {
+        // Test if ` strings work
+        input: `key={[1, 2, { hello: \`there\` }]}`,
+        inputFromOutput: 'key={[1, 2, { "hello": "there" }]}',
+        output: {
+          key: [1, 2, { hello: 'there' }],
+        },
+      },
+      {
+        // Test if multiline ` strings work
+        input: `key={[1, 2, { hello: \`Hello
+there\` }]}`,
+        inputFromOutput: 'key={[1, 2, { "hello": "Hello\\nthere" }]}',
+        output: {
+          key: [1, 2, { hello: 'Hello\nthere' }],
         },
       },
     ]

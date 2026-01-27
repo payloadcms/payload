@@ -1,5 +1,5 @@
 'use client'
-import type { OptionObject, StaticDescription, StaticLabel } from 'payload'
+import type { LabelFunction, OptionObject, StaticDescription, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -22,7 +22,9 @@ export type SelectInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly filterOption?: ReactSelectAdapterProps['filterOption']
   readonly hasMany?: boolean
+  readonly id?: string
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
@@ -30,8 +32,10 @@ export type SelectInputProps = {
   readonly localized?: boolean
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
+  readonly onInputChange?: ReactSelectAdapterProps['onInputChange']
   readonly options?: OptionObject[]
   readonly path: string
+  readonly placeholder?: LabelFunction | string
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
@@ -41,12 +45,14 @@ export type SelectInputProps = {
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
+    id,
     AfterInput,
     BeforeInput,
     className,
     Description,
     description,
     Error,
+    filterOption,
     hasMany = false,
     isClearable = true,
     isSortable = true,
@@ -54,8 +60,10 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Label,
     localized,
     onChange,
+    onInputChange,
     options,
     path,
+    placeholder,
     readOnly,
     required,
     showError,
@@ -81,6 +89,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
+  } else {
+    // If value is not present then render nothing, allowing select fields to reset to their initial 'Select an option' state
+    valueToRender = null
   }
 
   return (
@@ -111,14 +122,18 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         {BeforeInput}
         <ReactSelect
           disabled={readOnly}
+          filterOption={filterOption}
+          id={id}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={onChange}
+          onInputChange={onInputChange}
           options={options.map((option) => ({
             ...option,
             label: getTranslation(option.label, i18n),
           }))}
+          placeholder={placeholder}
           showError={showError}
           value={valueToRender as OptionObject}
         />

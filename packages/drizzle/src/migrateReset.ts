@@ -1,7 +1,6 @@
-import type { PayloadRequest } from 'payload'
-
 import {
   commitTransaction,
+  createLocalReq,
   getMigrations,
   initTransaction,
   killTransaction,
@@ -10,6 +9,7 @@ import {
 
 import type { DrizzleAdapter } from './types.js'
 
+import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 
 /**
@@ -26,7 +26,9 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
     return
   }
 
-  const req = { payload } as PayloadRequest
+  const req = await createLocalReq({}, payload)
+
+  existingMigrations.reverse()
 
   // Rollback all migrations in order
   for (const migration of existingMigrations) {
@@ -39,12 +41,13 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
       const start = Date.now()
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       await initTransaction(req)
-      await migrationFile.down({ payload, req })
+      const db = await getTransaction(this, req)
+      await migrationFile.down({ db, payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
 
-      const tableExists = await migrationTableExists(this)
+      const tableExists = await migrationTableExists(this, db)
       if (tableExists) {
         await payload.delete({
           id: migration.id,

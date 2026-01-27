@@ -12,7 +12,6 @@ const baseClass = 'file-details'
 import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 export type StaticFileDetailsProps = {
-  collectionSlug: string
   customUploadActions?: React.ReactNode[]
   doc: {
     sizes?: FileSizes
@@ -20,48 +19,51 @@ export type StaticFileDetailsProps = {
   enableAdjustments?: boolean
   handleRemove?: () => void
   hasImageSizes?: boolean
+  hideRemoveFile?: boolean
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 
 export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
   const {
-    collectionSlug,
     customUploadActions,
     doc,
     enableAdjustments,
     handleRemove,
     hasImageSizes,
+    hideRemoveFile,
     imageCacheTag,
     uploadConfig,
   } = props
 
-  const { id, filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
+  const { filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
+
+  const previewAllowed = uploadConfig.displayPreview ?? true
 
   return (
     <div className={baseClass}>
       <header>
-        <Thumbnail
-          // size="small"
-          className={`${baseClass}__thumbnail`}
-          doc={doc}
-          fileSrc={thumbnailURL || url}
-          imageCacheTag={imageCacheTag}
-          uploadConfig={uploadConfig}
-        />
+        {previewAllowed && (
+          <Thumbnail
+            // size="small"
+            className={`${baseClass}__thumbnail`}
+            doc={doc}
+            fileSrc={thumbnailURL || url}
+            imageCacheTag={imageCacheTag}
+            uploadConfig={uploadConfig}
+          />
+        )}
         <div className={`${baseClass}__main-detail`}>
           <FileMeta
-            collection={collectionSlug}
             filename={filename as string}
             filesize={filesize as number}
             height={height as number}
-            id={id as string}
             mimeType={mimeType as string}
             url={url as string}
             width={width as number}
           />
 
-          {(enableAdjustments || customUploadActions) && (
+          {(enableAdjustments || (hasImageSizes && doc.filename) || customUploadActions) && (
             <UploadActions
               customActions={customUploadActions}
               enableAdjustments={Boolean(enableAdjustments)}
@@ -70,7 +72,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             />
           )}
         </div>
-        {handleRemove && (
+        {!hideRemoveFile && handleRemove && (
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__remove`}

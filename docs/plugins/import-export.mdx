@@ -1,0 +1,606 @@
+---
+title: Import Export Plugin
+label: Import Export
+order: 40
+desc: Add Import and export functionality to create CSV and JSON data exports
+keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-import-export](https://img.shields.io/npm/v/@payloadcms/plugin-import-export)
+
+<Banner type="warning">
+  **Note**: This plugin is in **beta** as some aspects of it may change on any
+  minor releases. It is under development.
+</Banner>
+
+This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
+
+## Core Features
+
+- Export data as CSV or JSON format via the admin UI
+- Download the export directly through the browser
+- Create a file upload of the export data
+- Use the jobs queue for large exports
+- Import collection data
+- Preview data before exporting or importing
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+pnpm add @payloadcms/plugin-import-export
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const config = buildConfig({
+  collections: [Pages, Media],
+  plugins: [
+    importExportPlugin({
+      collections: ['users', 'pages'],
+      // see below for a list of available options
+    }),
+  ],
+})
+
+export default config
+```
+
+## Options
+
+| Property                   | Type     | Description                                                                                                                 |
+| -------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `collections`              | array    | Collections to include Import/Export controls in. Array of collection configs with per-collection options. Defaults to all. |
+| `debug`                    | boolean  | If true, enables debug logging.                                                                                             |
+| `overrideExportCollection` | function | Function to override the default export collection. Receives `{ collection }` and returns modified collection config.       |
+| `overrideImportCollection` | function | Function to override the default import collection. Receives `{ collection }` and returns modified collection config.       |
+
+### Per-Collection Configuration
+
+Each item in the `collections` array can have the following properties:
+
+| Property | Type                    | Description                                                           |
+| -------- | ----------------------- | --------------------------------------------------------------------- |
+| `slug`   | string                  | The collection slug to configure.                                     |
+| `export` | boolean \| ExportConfig | Set to `false` to disable export, or provide export-specific options. |
+| `import` | boolean \| ImportConfig | Set to `false` to disable import, or provide import-specific options. |
+
+### ExportConfig Options
+
+| Property             | Type     | Description                                                     |
+| -------------------- | -------- | --------------------------------------------------------------- |
+| `batchSize`          | number   | Documents per batch during export. Default: `100`.              |
+| `disableDownload`    | boolean  | Disable download button for this collection.                    |
+| `disableJobsQueue`   | boolean  | Run exports synchronously for this collection.                  |
+| `disableSave`        | boolean  | Disable save button for this collection.                        |
+| `format`             | string   | Force format (`csv` or `json`) for this collection.             |
+| `overrideCollection` | function | Override the export collection config for this specific target. |
+
+### ImportConfig Options
+
+| Property               | Type     | Description                                                     |
+| ---------------------- | -------- | --------------------------------------------------------------- |
+| `batchSize`            | number   | Documents per batch during import. Default: `100`.              |
+| `defaultVersionStatus` | string   | Default status for imported docs (`draft` or `published`).      |
+| `disableJobsQueue`     | boolean  | Run imports synchronously for this collection.                  |
+| `overrideCollection`   | function | Override the import collection config for this specific target. |
+
+### Example Configuration
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+export default buildConfig({
+  plugins: [
+    importExportPlugin({
+      debug: true,
+
+      // Override default export collection (e.g., add access control)
+      // This will be used by all collections unless they further override the config
+      overrideExportCollection: ({ collection }) => {
+        collection.access = {
+          ...collection.access,
+          read: ({ req }) => req.user?.role === 'admin',
+        }
+        return collection
+      },
+
+      // Per-collection settings
+      collections: [
+        {
+          slug: 'pages',
+          export: {
+            format: 'csv',
+            disableDownload: true,
+          },
+          import: {
+            defaultVersionStatus: 'draft',
+          },
+        },
+        {
+          slug: 'posts',
+          export: false, // Disable export for posts
+        },
+      ],
+    }),
+  ],
+})
+```
+
+## Collection-Specific Import and Export targets
+
+By default, the plugin creates a single `exports` collection and a single `imports` collection that handle all import/export operations across your enabled collections. However, you can create separate import and export targets for specific collections by overriding the collection slug.
+
+When you change the slug using the `overrideCollection` function at the per-collection level, this creates an entirely separate uploads collection for that specific source collection. This is useful when you need:
+
+- Different access control rules for different data types
+- Separate storage locations for exports
+- Isolated import queues for specific workflows
+- Different admin UI organization
+
+### Example: Separate Export Targets
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+export default buildConfig({
+  plugins: [
+    importExportPlugin({
+      collections: [
+        {
+          slug: 'users',
+          export: {
+            // Create a separate 'user-exports' collection for user data
+            overrideCollection: ({ collection }) => {
+              return {
+                ...collection,
+                slug: 'user-exports',
+                labels: {
+                  singular: 'User Export',
+                  plural: 'User Exports',
+                },
+                access: {
+                  // Only super admins can access user exports
+                  read: ({ req }) => req.user?.role === 'superadmin',
+                  create: ({ req }) => req.user?.role === 'superadmin',
+                },
+              }
+            },
+          },
+          import: {
+            // Create a separate 'user-imports' collection
+            overrideCollection: ({ collection }) => {
+              return {
+                ...collection,
+                slug: 'user-imports',
+                labels: {
+                  singular: 'User Import',
+                  plural: 'User Imports',
+                },
+                access: {
+                  read: ({ req }) => req.user?.role === 'superadmin',
+                  create: ({ req }) => req.user?.role === 'superadmin',
+                },
+              }
+            },
+          },
+        },
+        {
+          slug: 'pages',
+          // Pages will use the default 'exports' and 'imports' collections
+        },
+        {
+          slug: 'posts',
+          // Posts will also use the default collections
+        },
+      ],
+    }),
+  ],
+})
+```
+
+In this example:
+
+- User exports are stored in `user-exports` collection with restricted access
+- User imports are tracked in `user-imports` collection
+- Pages and posts share the default `exports` and `imports` collections
+
+### Combining Top-Level and Per-Collection Overrides
+
+You can combine the top-level `overrideExportCollection` / `overrideImportCollection` functions with per-collection overrides. The top-level override is applied first, then the per-collection override:
+
+```ts
+importExportPlugin({
+  // Apply to ALL export collections (both default and custom slugs)
+  overrideExportCollection: ({ collection }) => {
+    return {
+      ...collection,
+      admin: {
+        ...collection.admin,
+        group: 'Data Management',
+      },
+    }
+  },
+
+  collections: [
+    {
+      slug: 'sensitive-data',
+      export: {
+        // This override is applied AFTER the top-level override
+        overrideCollection: ({ collection }) => {
+          return {
+            ...collection,
+            slug: 'sensitive-exports',
+            access: {
+              read: () => false, // Completely restrict read access
+              create: ({ req }) => req.user?.role === 'admin',
+            },
+          }
+        },
+      },
+    },
+  ],
+})
+```
+
+## Field Options
+
+In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
+
+| Property   | Type     | Description                                                                                                                   |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
+| `toCSV`    | function | Custom function used to modify the outgoing CSV data by manipulating the data, siblingData or by returning the desired value. |
+| `fromCSV`  | function | Custom function used to transform incoming CSV data during import.                                                            |
+
+### Disabling Fields
+
+To completely exclude a field from import and export operations:
+
+```ts
+{
+  name: 'internalField',
+  type: 'text',
+  custom: {
+    'plugin-import-export': {
+      disabled: true,
+    },
+  },
+}
+```
+
+When a field is disabled:
+
+- It will not appear in export CSV/JSON files
+- It will be ignored during import operations
+- Nested fields inside disabled parent fields are also excluded
+
+### Customizing Export Data with toCSV
+
+To manipulate the data that a field exports, you can add `toCSV` custom functions. This allows you to modify the outgoing CSV data by manipulating the row object or by returning the desired value.
+
+The `toCSV` function receives an object with the following properties:
+
+| Property     | Type    | Description                                                       |
+| ------------ | ------- | ----------------------------------------------------------------- |
+| `columnName` | string  | The CSV column name given to the field.                           |
+| `doc`        | object  | The top level document.                                           |
+| `row`        | object  | The object data that can be manipulated to assign data to the CSV |
+| `siblingDoc` | object  | The document data at the level where it belongs.                  |
+| `value`      | unknown | The data for the field.                                           |
+
+Example - splitting a relationship into multiple columns:
+
+```ts
+const pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          toCSV: ({ value, columnName, row }) => {
+            // Add both `author_id` and the `author_email` to the CSV export
+            if (
+              value &&
+              typeof value === 'object' &&
+              'id' in value &&
+              'email' in value
+            ) {
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
+            }
+          },
+        },
+      },
+    },
+  ],
+}
+```
+
+### Customizing Import Data with fromCSV
+
+To transform data during import, add `fromCSV` custom functions. This allows you to transform incoming CSV data before it's saved to the database.
+
+The `fromCSV` function receives an object with the following properties:
+
+| Property      | Type    | Description                                 |
+| ------------- | ------- | ------------------------------------------- |
+| `columnName`  | string  | The CSV column name for the field.          |
+| `data`        | object  | The full document data being built.         |
+| `siblingData` | object  | The data at the sibling level of the field. |
+| `value`       | unknown | The raw CSV value for the field.            |
+
+Return values:
+
+- Return a value to use that value for the field
+- Return `undefined` to skip setting the field (keeps existing value)
+- Return `null` to explicitly set the field to null
+
+Example - reconstructing a relationship from split columns:
+
+```ts
+const pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      custom: {
+        'plugin-import-export': {
+          fromCSV: ({ data, columnName }) => {
+            // Reconstruct the relationship from the split columns created by toCSV
+            const id = data[`${columnName}_id`]
+            if (id) {
+              return id // Return just the ID for the relationship
+            }
+            return undefined // Skip if no ID provided
+          },
+        },
+      },
+    },
+  ],
+}
+```
+
+### Virtual Fields
+
+Virtual fields (fields with `virtual: true`) are handled differently during import and export:
+
+- **Export**: Virtual fields ARE included in exports. They contain computed values from hooks.
+- **Import**: Virtual fields are SKIPPED during import. Since they're computed, they cannot be imported.
+
+## Exporting Data
+
+There are four possible ways that the plugin allows for exporting documents, the first two are available in the admin UI from the list view of a collection:
+
+1. Direct download - Using a `POST` to `/api/exports/download` and streams the response as a file download
+2. File storage - Goes to the `exports` collection as an uploads enabled collection
+3. Local API - A create call to the uploads collection: `payload.create({ slug: 'uploads', ...parameters })`
+4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters })`
+
+By default, a user can use the Export drawer to create a file download by choosing `Save` or stream a downloadable file directly without persisting it by using the `Download` button. Either option can be disabled to provide the export experience you desire for your use-case.
+
+The UI for creating exports provides options so that users can be selective about which documents to include and also which columns or fields to include.
+
+### Selection Modes
+
+When opening the export drawer from a collection's list view, you can choose which documents to export:
+
+| Mode                  | Description                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| Use all documents     | Export the entire collection (respects any limit you set)    |
+| Use current filters   | Export only documents matching your active list view filters |
+| Use current selection | Export only the documents you've checked in the list view    |
+
+It is necessary to add access control to the uploads collection configuration using the `overrideExportCollection` function if you have enabled this plugin on collections with data that some authenticated users should not have access to.
+
+<Banner type="warning">
+  **Note**: Users who have read access to the upload collection may be able to
+  download data that is normally not readable due to [access
+  control](../access-control/overview).
+</Banner>
+
+The following parameters are used by the export function to handle requests:
+
+| Property         | Type     | Description                                                                                                       |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `format`         | string   | Either `csv` or `json` to determine the shape of data exported                                                    |
+| `limit`          | number   | The max number of documents to export. Leave empty to export all matching documents.                              |
+| `page`           | number   | The page of documents to start from (used with limit for pagination).                                             |
+| `sort`           | string   | The field to use for ordering documents (e.g., `createdAt`, `-title` for descending).                             |
+| `depth`          | number   | How deeply to populate relationships. Default: `1`. Set to `0` to export IDs only.                                |
+| `locale`         | string   | The locale code to query documents or `all` for multi-locale export.                                              |
+| `drafts`         | boolean  | When `true`, includes draft versions for collections with drafts enabled.                                         |
+| `fields`         | string[] | Which collection fields to include in the export. Defaults to all fields.                                         |
+| `collectionSlug` | string   | The collection slug to export from.                                                                               |
+| `where`          | object   | The WhereObject used to query documents to export. This is set by making selections or filters from the list view |
+| `filename`       | string   | The name for the exported file (without extension).                                                               |
+
+## Importing Data
+
+The plugin allows importing data from CSV or JSON files. There are several ways to import:
+
+1. **Admin UI** - Use the Import drawer from the list view of a collection
+2. **File storage** - Create an import document in the `imports` collection with an uploaded file
+3. **Local API** - Create an import document: `payload.create({ collection: 'imports', data: { collectionSlug: 'pages', importMode: 'create' }, file: { ... } })`
+4. **Jobs Queue** - `payload.jobs.queue({ task: 'createCollectionImport', input: parameters })`
+
+### Import Parameters
+
+| Property         | Type   | Description                                                                              |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `collectionSlug` | string | The collection to import into.                                                           |
+| `importMode`     | string | `create`, `update`, or `upsert` (default: `create`).                                     |
+| `matchField`     | string | The field to use for matching existing documents during `update` or `upsert` operations. |
+| `locale`         | string | The locale to use for localized fields.                                                  |
+
+The `matchField` option allows you to match documents by a field other than `id`. For example, if importing users, you could match by `email` instead of `id`:
+
+```ts
+payload.create({
+  collection: 'imports',
+  data: {
+    collectionSlug: 'users',
+    importMode: 'upsert',
+    matchField: 'email',
+  },
+  file: csvFile,
+})
+```
+
+### Import Modes
+
+| Mode   | Description                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------- |
+| create | Only creates new documents. Documents with existing IDs will fail.                                      |
+| update | Only updates existing documents. Requires `id` column in CSV. Documents without matching IDs will fail. |
+| upsert | Creates new documents or updates existing ones based on `id`. Most flexible option.                     |
+
+### Import Results
+
+After an import completes, the import document is updated with a summary:
+
+| Property               | Type   | Description                                       |
+| ---------------------- | ------ | ------------------------------------------------- |
+| `status`               | string | `pending`, `processing`, `completed`, or `failed` |
+| `summary.total`        | number | Total number of rows processed                    |
+| `summary.imported`     | number | Number of successfully imported documents         |
+| `summary.updated`      | number | Number of updated documents (update/upsert modes) |
+| `summary.issues`       | number | Number of rows that failed                        |
+| `summary.issueDetails` | array  | Details about each failure                        |
+
+## CSV Format
+
+### Column Naming Convention
+
+CSV columns use underscore (`_`) notation to represent nested fields:
+
+| Field Path       | CSV Column Name                  |
+| ---------------- | -------------------------------- |
+| `title`          | `title`                          |
+| `group.value`    | `group_value`                    |
+| `array[0].field` | `array_0_field`                  |
+| `blocks[0]`      | `blocks_0_<blockSlug>_blockType` |
+| `localized` (en) | `localized_en`                   |
+
+### Relationship Columns
+
+For relationship fields, the column format varies based on the relationship type:
+
+| Relationship Type     | Column(s)                                  |
+| --------------------- | ------------------------------------------ |
+| hasOne (monomorphic)  | `fieldName`                                |
+| hasOne (polymorphic)  | `fieldName_relationTo`, `fieldName_id`     |
+| hasMany (monomorphic) | `fieldName_0`, `fieldName_1`, etc.         |
+| hasMany (polymorphic) | `fieldName_0_relationTo`, `fieldName_0_id` |
+
+### Value Handling
+
+During CSV import, certain values are automatically converted:
+
+| CSV Value        | Converted To      | Notes                                    |
+| ---------------- | ----------------- | ---------------------------------------- |
+| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                         |
+| `false`, `FALSE` | `false` (boolean) | Case-insensitive                         |
+| `null`, `NULL`   | `null`            | Use `fromCSV` hook to preserve as string |
+| Empty string     | `''` or omitted   | Depends on field type                    |
+| Numeric strings  | `number`          | Auto-detected for integers and floats    |
+
+To preserve literal strings like "null" or "true", use a `fromCSV` function:
+
+```ts
+{
+  name: 'specialField',
+  type: 'text',
+  custom: {
+    'plugin-import-export': {
+      fromCSV: ({ value }) => {
+        // Return raw value without automatic conversion
+        return value
+      },
+    },
+  },
+}
+```
+
+## Localized Fields
+
+### Single Locale Export
+
+When exporting with a specific locale selected, localized fields appear without a locale suffix:
+
+```
+title,description
+"English Title","English Description"
+```
+
+### Multi-Locale Export
+
+When exporting with locale set to `all`, each localized field gets a column per configured locale:
+
+```
+title_en,title_es,title_de,description_en,description_es,description_de
+"English","Español","Deutsch","Desc EN","Desc ES","Desc DE"
+```
+
+### Importing Localized Fields
+
+For single-locale import, data goes into the locale specified in the import settings:
+
+```
+title,description
+"New Title","New Description"
+```
+
+For multi-locale import, use locale suffixes in column names to import multiple locales at once:
+
+```
+title_en,title_es
+"English Title","Título en Español"
+```
+
+## JSON Format
+
+When using JSON format for import/export:
+
+- **Export**: Documents are exported as a JSON array, preserving their nested structure
+- **Import**: Expects a JSON array of document objects
+
+JSON format preserves the exact structure of your data, including:
+
+- Nested objects and arrays
+- Rich text (Lexical) structures with numeric properties
+- Relationship references
+- All field types in their native format
+
+Example JSON export:
+
+```json
+[
+  {
+    "id": "abc123",
+    "title": "My Page",
+    "group": {
+      "value": "nested value",
+      "array": [{ "field1": "item 1" }, { "field2": "item 2" }]
+    },
+    "blocks": [
+      {
+        "blockType": "hero",
+        "title": "Hero Title"
+      }
+    ]
+  }
+]
+```

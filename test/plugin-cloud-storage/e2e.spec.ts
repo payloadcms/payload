@@ -13,7 +13,7 @@ import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Admin Panel', () => {
+test.describe('Cloud Storage Plugin', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
 

@@ -7,7 +7,7 @@
   "scripts": {
     "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true NODE_OPTIONS=--no-deprecation next dev",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation pnpm seed && next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:schema": "payload-graphql generate:schema",
     "generate:types": "payload generate:types",
@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/graphql": "latest",
     "@payloadcms/next": "latest",
     "@payloadcms/richtext-lexical": "latest",
     "@payloadcms/ui": "latest",
@@ -24,17 +25,16 @@
     "dotenv": "^8.2.0",
     "graphql": "^16.9.0",
     "install": "^0.13.0",
-    "next": "^15.0.0",
+    "next": "^15.4.10",
     "payload": "latest",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
     "@types/ejs": "^3.1.5",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
     "tsx": "^4.16.2",
@@ -42,15 +42,5 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

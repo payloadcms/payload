@@ -12,40 +12,51 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
-    "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "test": "pnpm run test:int && pnpm run test:e2e",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/next": "latest",
-    "@payloadcms/payload-cloud": "latest",
     "@payloadcms/richtext-lexical": "latest",
+    "@payloadcms/ui": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.0.0",
+    "next": "15.4.10",
     "payload": "latest",
-    "react": "19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "19.0.0-rc-65a56d0e-20241020",
-    "sharp": "0.32.6"
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
+    "sharp": "0.34.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@playwright/test": "1.56.1",
+    "@testing-library/react": "16.3.0",
     "@types/node": "^22.5.4",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.0",
-    "typescript": "5.7.2"
+    "@types/react": "19.2.1",
+    "@types/react-dom": "19.2.1",
+    "@vitejs/plugin-react": "4.5.2",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.4.7",
+    "jsdom": "26.1.0",
+    "playwright": "1.56.1",
+    "playwright-core": "1.56.1",
+    "prettier": "^3.4.2",
+    "typescript": "5.7.3",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "3.2.3"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10"
   },
   "pnpm": {
-    "overrides": {
-      "@types/react": "npm:types-react@19.0.0-rc.1",
-      "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-    }
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver"
+    ]
   }
 }

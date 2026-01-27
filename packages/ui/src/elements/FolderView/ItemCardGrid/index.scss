@@ -1,0 +1,16 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .item-card-grid {
+    --gap: var(--base);
+    gap: var(--gap);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    margin-bottom: var(--base);
+
+    &__title {
+      color: var(--theme-elevation-400);
+      margin-bottom: calc(var(--base) / 2);
+    }
+  }
+}

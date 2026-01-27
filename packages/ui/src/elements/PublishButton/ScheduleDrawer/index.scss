@@ -1,0 +1,52 @@
+@layer payload-default {
+  .schedule-publish {
+    &__drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: calc(var(--base) * 2.5) var(--gutter-h);
+      height: 48px;
+      border-bottom: 1px solid var(--theme-border-color);
+
+      h2 {
+        margin: 0;
+      }
+    }
+
+    &__scheduler {
+      padding-top: calc(var(--base) * 2);
+      padding-bottom: calc(var(--base) * 2);
+      border-bottom: 1px solid var(--theme-border-color);
+    }
+
+    &__type {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+
+      li {
+        margin-right: calc(var(--base) * 2);
+      }
+    }
+
+    &__actions {
+      button {
+        margin-right: var(--base);
+      }
+    }
+
+    &__upcoming {
+      padding-top: calc(var(--base) * 2);
+      padding-bottom: calc(var(--base) * 2);
+
+      h4 {
+        margin-bottom: var(--base);
+      }
+    }
+
+    &__delete {
+      margin: 0;
+    }
+  }
+}

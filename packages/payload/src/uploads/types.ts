@@ -1,6 +1,7 @@
-import type { ResizeOptions, Sharp } from 'sharp'
+import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
-import type { TypeWithID } from '../collections/config/types.js'
+import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -9,8 +10,19 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url?: null | string // TODO V4: make non-optional
   width: null | number
 }
+
+// TODO: deprecate in Payload v4.
+/**
+ * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ */
+export type FileSizeImproved = {
+  url: null | string
+} & FileSize
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -59,6 +71,33 @@ export type GenerateImageName = (args: {
 
 export type ImageSize = {
   /**
+   * Admin UI options that control how this image size appears in list views.
+   *
+   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
+   * should default to `true` so image size subfields are hidden from list columns
+   * and filters by default, reducing noise in the admin UI.
+   */
+  admin?: {
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable groupBy option in the collection list view.
+     * @default false
+     */
+    disableGroupBy?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable column in the collection list view.
+     * @default false
+     */
+    disableListColumn?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a filter option in the collection list view.
+     * @default false
+     */
+    disableListFilter?: boolean
+  }
+  /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
@@ -83,6 +122,28 @@ export type ImageSize = {
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
+
+export type FileAllowList = Array<{
+  extensions: string[]
+  mimeType: string
+}>
+
+type Admin = {
+  components?: {
+    /**
+     * The Controls component to extend the upload controls in the admin panel.
+     */
+    controls?: PayloadComponent[]
+  }
+}
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
@@ -90,16 +151,39 @@ export type UploadConfig = {
    */
   adapter?: string
   /**
+   * The admin configuration for the upload field.
+   */
+  admin?: Admin
+  /**
    * Represents an admin thumbnail, which can be either a React component or a string.
    * - If a string, it should be one of the image size names.
    * - A function that generates a fully qualified URL for the thumbnail, receives the doc as the only argument.
    **/
   adminThumbnail?: GetAdminThumbnail | string
   /**
+   * Allow restricted file types known to be problematic.
+   * - If set to `true`, it will allow all file types.
+   * - If set to `false`, it will not allow file types and extensions known to be problematic.
+   * - This setting is overriden by the `mimeTypes` option.
+   * @default false
+   */
+  allowRestrictedFileTypes?: boolean
+  /**
    * Enables bulk upload of files from the list view.
    * @default true
    */
   bulkUpload?: boolean
+  /**
+   * Appends a cache tag to the image URL when fetching the thumbnail in the admin panel. It may be desirable to disable this when hosting via CDNs with strict parameters.
+   *
+   * @default true
+   */
+  cacheTags?: boolean
+  /**
+   * Sharp constructor options to be passed to the uploaded file.
+   * @link https://sharp.pixelplumbing.com/api-constructor/#sharp
+   */
+  constructorOptions?: SharpOptions
   /**
    * Enables cropping of images.
    * @default true
@@ -117,14 +201,19 @@ export type UploadConfig = {
    */
   displayPreview?: boolean
   /**
-   * Ability to filter/modify Request Headers when fetching a file.
+   *
+   * Accepts existing headers and returns the headers after filtering or modifying.
+   * If using this option, you should handle the removal of any sensitive cookies
+   * (like payload-prefixed cookies) to prevent leaking session information to external
+   * services. By default, Payload automatically filters out payload-prefixed cookies
+   * when this option is NOT defined.
    *
    * Useful for adding custom headers to fetch from external providers.
    * @default undefined
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
-   * Field slugs to use for a compount index instead of the default filename index.
+   * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
   /**
@@ -148,15 +237,25 @@ export type UploadConfig = {
    * - If a handler returns null, the next handler will be run.
    * - If no handlers return a response the file will be returned by default.
    *
+   * @link https://sharp.pixelplumbing.com/api-output/#toformat
    * @default undefined
    */
   handlers?: ((
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      params: { collection: string; filename: string }
+      headers?: Headers
+      params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
+   */
+  hideFileInputOnCreate?: boolean
+  /**
+   * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
+   */
+  hideRemoveFile?: boolean
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
@@ -168,13 +267,30 @@ export type UploadConfig = {
    * Ability to modify the response headers fetching a file.
    * @default undefined
    */
-  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
+  modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers | void
+  /**
+   * Controls the behavior of pasting/uploading files from URLs.
+   * If set to `false`, fetching from remote URLs is disabled.
+   * If an `allowList` is provided, server-side fetching will be enabled for specified URLs.
+   *
+   * @default true (client-side fetching enabled)
+   */
+  pasteURL?:
+    | {
+        allowList: AllowList
+      }
+    | false
   /**
    * Sharp resize options for the original image.
    * @link https://sharp.pixelplumbing.com/api-resize#resize
    * @default undefined
    */
   resizeOptions?: ResizeOptions
+  /**
+   *  Skip safe fetch when using server-side fetching for external files from these URLs.
+   *  @default false
+   */
+  skipSafeFetch?: AllowList | boolean
   /**
    * The directory to serve static files from. Defaults to collection slug.
    * @default undefined
@@ -192,6 +308,11 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+export type checkFileRestrictionsParams = {
+  collection: CollectionConfig
+  file: File
+  req: PayloadRequest
 }
 
 export type SanitizedUploadConfig = {
@@ -236,7 +357,7 @@ type Crop = {
   y: number
 }
 
-type FocalPoint = {
+export type FocalPoint = {
   x: number
   y: number
 }

@@ -1,36 +1,36 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload'
+
 import React from 'react'
 
+import { File } from '../../graphics/File/index.js'
+import { generateImageSrcWithCacheTag } from '../../utilities/generateCacheTagSrc.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'
-
-import type { SanitizedCollectionConfig } from 'payload'
-
-import { File } from '../../graphics/File/index.js'
-import { useIntersect } from '../../hooks/useIntersect.js'
-import { ShimmerEffect } from '../ShimmerEffect/index.js'
-
-const getImageSrc = (url: string, tag?: string) => {
-  if (!url) return ''
-  if (!tag) return url
-
-  const hasQueryParams = url.includes('?')
-  return hasQueryParams ? `${url}&${tag}` : `${url}?${tag}`
-}
-
 export type ThumbnailProps = {
   className?: string
   collectionSlug?: string
   doc?: Record<string, unknown>
   fileSrc?: string
+  height?: number
   imageCacheTag?: string
-  size?: 'expand' | 'large' | 'medium' | 'small'
+  size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
+  width?: number
 }
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
+  const {
+    className = '',
+    doc: { filename } = {},
+    fileSrc,
+    height,
+    imageCacheTag,
+    size,
+    width,
+  } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
@@ -40,6 +40,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -57,7 +58,12 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       {fileExists && (
         <img
           alt={filename as string}
-          src={getImageSrc(fileSrc, imageCacheTag)}
+          height={height}
+          src={generateImageSrcWithCacheTag({
+            cacheTag: imageCacheTag,
+            src: fileSrc,
+          })}
+          width={width}
         />
       )}
       {fileExists === false && <File />}
@@ -71,7 +77,7 @@ type ThumbnailComponentProps = {
   readonly filename: string
   readonly fileSrc: string
   readonly imageCacheTag?: string
-  readonly size?: 'expand' | 'large' | 'medium' | 'small'
+  readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
   const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
@@ -84,6 +90,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -99,9 +106,9 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
       {fileExists && (
-        <img 
-          alt={alt || filename} 
-          src={getImageSrc(fileSrc, imageCacheTag)}
+        <img
+          alt={alt || filename}
+          src={generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: fileSrc })}
         />
       )}
       {fileExists === false && <File />}

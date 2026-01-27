@@ -1,5 +1,8 @@
 'use client'
-const boolean = [
+
+import type { ClientField } from 'payload'
+
+const equalsOperators = [
   {
     label: 'equals',
     value: 'equals',
@@ -10,8 +13,7 @@ const boolean = [
   },
 ]
 
-const base = [
-  ...boolean,
+export const arrayOperators = [
   {
     label: 'isIn',
     value: 'in',
@@ -20,11 +22,14 @@ const base = [
     label: 'isNotIn',
     value: 'not_in',
   },
-  {
-    label: 'exists',
-    value: 'exists',
-  },
 ]
+
+const exists = {
+  label: 'exists',
+  value: 'exists',
+}
+
+const base = [...equalsOperators, ...arrayOperators, exists]
 
 const numeric = [
   ...base,
@@ -47,11 +52,7 @@ const numeric = [
 ]
 
 const geo = [
-  ...boolean,
-  {
-    label: 'exists',
-    value: 'exists',
-  },
+  ...equalsOperators,
   {
     label: 'near',
     value: 'near',
@@ -73,23 +74,33 @@ const like = {
   value: 'like',
 }
 
+const notLike = {
+  label: 'isNotLike',
+  value: 'not_like',
+}
+
 const contains = {
   label: 'contains',
   value: 'contains',
 }
 
-const fieldTypeConditions = {
+export const fieldTypeConditions: {
+  [key: string]: {
+    component: string
+    operators: { label: string; value: string }[]
+  }
+} = {
   checkbox: {
     component: 'Text',
-    operators: boolean,
+    operators: [...equalsOperators, exists],
   },
   code: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   date: {
     component: 'Date',
-    operators: [...base, ...numeric],
+    operators: [...numeric, exists],
   },
   email: {
     component: 'Text',
@@ -97,15 +108,15 @@ const fieldTypeConditions = {
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains, within, intersects],
+    operators: [...base, like, contains, notLike, within, intersects],
   },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
+    operators: [...numeric, exists],
   },
   point: {
     component: 'Point',
-    operators: [...geo, within, intersects],
+    operators: [...geo, exists, within, intersects],
   },
   radio: {
     component: 'Select',
@@ -117,7 +128,7 @@ const fieldTypeConditions = {
   },
   richText: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   select: {
     component: 'Select',
@@ -125,16 +136,51 @@ const fieldTypeConditions = {
   },
   text: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   textarea: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, notLike, contains],
   },
   upload: {
-    component: 'Text',
+    component: 'Relationship',
     operators: [...base],
   },
 }
 
-export default fieldTypeConditions
+export const getValidFieldOperators = ({
+  field,
+  operator,
+}: {
+  field: ClientField
+  operator?: string
+}): {
+  validOperator: string
+  validOperators: {
+    label: string
+    value: string
+  }[]
+} => {
+  let validOperators: {
+    label: string
+    value: string
+  }[] = []
+
+  if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+    if ('hasMany' in field && field.hasMany) {
+      validOperators = [...equalsOperators, exists]
+    } else {
+      validOperators = [...base]
+    }
+  } else {
+    validOperators = [...fieldTypeConditions[field.type].operators]
+  }
+
+  return {
+    validOperator:
+      operator && validOperators.find(({ value }) => value === operator)
+        ? operator
+        : validOperators[0].value,
+    validOperators,
+  }
+}

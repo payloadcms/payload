@@ -4,6 +4,6 @@ import type { PointFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = (props) => {
-  return <FieldLabel label={props?.label} path={props?.path} />
+export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = ({ field, path }) => {
+  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
 }

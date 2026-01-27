@@ -33,7 +33,7 @@ describe('Upload with restrictions', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -55,7 +55,7 @@ describe('Upload with restrictions', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -90,7 +90,7 @@ describe('Upload with restrictions', () => {
       .locator('.list-drawer__header')
       .locator('button', { hasText: 'Create New' })
     await expect(createNewHeader).toBeVisible()
-    await page.locator('.list-drawer__header-close').click()
+    await page.locator('.list-drawer__header .close-modal-button').click()
     await expect(drawer).toBeHidden()
     const fieldWithAllowCreateFalse = page.locator('#field-uploadWithAllowCreateFalse')
     await expect(fieldWithAllowCreateFalse).toBeVisible()

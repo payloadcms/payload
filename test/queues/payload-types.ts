@@ -6,13 +6,70 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     simple: Simple;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -23,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -32,6 +90,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
@@ -43,22 +102,46 @@ export interface Config {
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
+      CreateSimpleRetriesUndefined: TaskCreateSimpleRetriesUndefined;
+      CreateSimpleRetries0: TaskCreateSimpleRetries0;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
+      ThrowError: TaskThrowError;
+      ReturnError: TaskReturnError;
+      ReturnCustomError: TaskReturnCustomError;
+      DoNothingTask: TaskDoNothingTask;
+      SelfCancel: TaskSelfCancel;
       inline: {
         input: unknown;
         output: unknown;
       };
     };
     workflows: {
+      selfCancel: WorkflowSelfCancel;
       updatePost: MyUpdatePostWorkflowType;
       updatePostJSONWorkflow: WorkflowUpdatePostJSONWorkflow;
       retriesTest: WorkflowRetriesTest;
       retriesRollbackTest: WorkflowRetriesRollbackTest;
       retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      workflowNoRetriesSet: WorkflowWorkflowNoRetriesSet;
+      workflowRetries0: WorkflowWorkflowRetries0;
+      workflowAndTasksRetriesUndefined: WorkflowWorkflowAndTasksRetriesUndefined;
+      workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
+      workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
+      failsImmediately: WorkflowFailsImmediately;
+      fastParallelTask: WorkflowFastParallelTask;
+      inlineTaskTestDelayed: WorkflowInlineTaskTestDelayed;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
+      subTask: WorkflowSubTask;
+      subTaskFails: WorkflowSubTaskFails;
+      longRunning: WorkflowLongRunning;
+      parallelTask: WorkflowParallelTask;
+      exclusiveConcurrency: WorkflowExclusiveConcurrency;
+      noConcurrency: WorkflowNoConcurrency;
+      queueSpecificConcurrency: WorkflowQueueSpecificConcurrency;
+      supersedesConcurrency: WorkflowSupersedesConcurrency;
     };
   };
 }
@@ -91,7 +174,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -119,6 +202,23 @@ export interface Simple {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -132,6 +232,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -140,6 +247,9 @@ export interface User {
  */
 export interface PayloadJob {
   id: string;
+  /**
+   * Input data provided to the job
+   */
   input?:
     | {
         [k: string]: unknown;
@@ -160,7 +270,13 @@ export interface PayloadJob {
     | null;
   completedAt?: string | null;
   totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
   hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
   error?:
     | {
         [k: string]: unknown;
@@ -170,6 +286,9 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  /**
+   * Task execution log
+   */
   log?:
     | {
         executedAt: string;
@@ -179,8 +298,15 @@ export interface PayloadJob {
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
+          | 'CreateSimpleRetriesUndefined'
+          | 'CreateSimpleRetries0'
           | 'CreateSimpleWithDuplicateMessage'
-          | 'ExternalTask';
+          | 'ExternalTask'
+          | 'ThrowError'
+          | 'ReturnError'
+          | 'ReturnCustomError'
+          | 'DoNothingTask'
+          | 'SelfCancel';
         taskID: string;
         input?:
           | {
@@ -215,14 +341,31 @@ export interface PayloadJob {
     | null;
   workflowSlug?:
     | (
+        | 'selfCancel'
         | 'updatePost'
         | 'updatePostJSONWorkflow'
         | 'retriesTest'
         | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
+        | 'workflowNoRetriesSet'
+        | 'workflowRetries0'
+        | 'workflowAndTasksRetriesUndefined'
+        | 'workflowRetries2TasksRetriesUndefined'
+        | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
+        | 'failsImmediately'
+        | 'fastParallelTask'
+        | 'inlineTaskTestDelayed'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
+        | 'subTask'
+        | 'subTaskFails'
+        | 'longRunning'
+        | 'parallelTask'
+        | 'exclusiveConcurrency'
+        | 'noConcurrency'
+        | 'queueSpecificConcurrency'
+        | 'supersedesConcurrency'
       )
     | null;
   taskSlug?:
@@ -231,13 +374,24 @@ export interface PayloadJob {
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
+        | 'CreateSimpleRetriesUndefined'
+        | 'CreateSimpleRetries0'
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
+        | 'ThrowError'
+        | 'ReturnError'
+        | 'ReturnCustomError'
+        | 'DoNothingTask'
+        | 'SelfCancel'
       )
     | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -259,10 +413,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -329,6 +479,14 @@ export interface SimpleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -341,6 +499,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -371,6 +536,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -445,6 +611,32 @@ export interface TaskCreateSimple {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetriesUndefined".
+ */
+export interface TaskCreateSimpleRetriesUndefined {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetries0".
+ */
+export interface TaskCreateSimpleRetries0 {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateSimpleWithDuplicateMessage".
  */
 export interface TaskCreateSimpleWithDuplicateMessage {
@@ -466,6 +658,61 @@ export interface TaskExternalTask {
   };
   output: {
     simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskThrowError".
+ */
+export interface TaskThrowError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnError".
+ */
+export interface TaskReturnError {
+  input?: unknown;
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskReturnCustomError".
+ */
+export interface TaskReturnCustomError {
+  input: {
+    errorMessage: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskDoNothingTask".
+ */
+export interface TaskDoNothingTask {
+  input: {
+    message: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSelfCancel".
+ */
+export interface TaskSelfCancel {
+  input: {
+    shouldCancel?: boolean | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSelfCancel".
+ */
+export interface WorkflowSelfCancel {
+  input: {
+    shouldCancel?: boolean | null;
   };
 }
 /**
@@ -517,9 +764,79 @@ export interface WorkflowRetriesWorkflowLevelTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowNoRetriesSet".
+ */
+export interface WorkflowWorkflowNoRetriesSet {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries0".
+ */
+export interface WorkflowWorkflowRetries0 {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowAndTasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowAndTasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowRetries2TasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetries0".
+ */
+export interface WorkflowWorkflowRetries2TasksRetries0 {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkflowInlineTaskTest".
  */
 export interface WorkflowInlineTaskTest {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFailsImmediately".
+ */
+export interface WorkflowFailsImmediately {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowFastParallelTask".
+ */
+export interface WorkflowFastParallelTask {
+  input: {
+    amount: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowInlineTaskTestDelayed".
+ */
+export interface WorkflowInlineTaskTestDelayed {
   input: {
     message: string;
   };
@@ -544,6 +861,80 @@ export interface WorkflowRetriesBackoffTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTask".
+ */
+export interface WorkflowSubTask {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTaskFails".
+ */
+export interface WorkflowSubTaskFails {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowLongRunning".
+ */
+export interface WorkflowLongRunning {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowParallelTask".
+ */
+export interface WorkflowParallelTask {
+  input: {
+    amount: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowExclusiveConcurrency".
+ */
+export interface WorkflowExclusiveConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowNoConcurrency".
+ */
+export interface WorkflowNoConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowQueueSpecificConcurrency".
+ */
+export interface WorkflowQueueSpecificConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSupersedesConcurrency".
+ */
+export interface WorkflowSupersedesConcurrency {
+  input: {
+    resourceId: string;
+    delayMs?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -552,6 +943,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

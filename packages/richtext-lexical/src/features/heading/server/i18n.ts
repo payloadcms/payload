@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Encabezado {{headingLevel}}',
   },
+  et: {
+    label: 'Pealkiri {{headingLevel}}',
+  },
   fa: {
     label: '[SKIPPED]',
   },
@@ -39,6 +42,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   hu: {
     label: 'Címsor {{headingLevel}}',
+  },
+  is: {
+    label: 'Fyrirsögn {{headingLevel}}',
   },
   it: {
     label: 'Intestazione {{headingLevel}}',
@@ -68,7 +74,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Titlu {{headingLevel}}',
   },
   rs: {
-    label: 'Naslov {{headingLevel}}',
+    label: 'Наслов {{headingLevel}}',
   },
   'rs-latin': {
     label: 'Naslov {{headingLevel}}',
@@ -79,8 +85,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Nadpis {{headingLevel}}',
   },
+  sl: {
+    label: 'Naslov {{headingLevel}}',
+  },
   sv: {
     label: 'Rubrik {{headingLevel}}',
+  },
+  ta: {
+    label: 'தலைப்பு {{headingLevel}}',
   },
   th: {
     label: 'หัวข้อ {{headingLevel}}',

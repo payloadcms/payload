@@ -1,309 +1,92 @@
 'use client'
-import type { ClientCollectionConfig, FormState } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
-import type { FormProps } from '../../forms/Form/index.js'
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
-import { useForm } from '../../forms/Form/context.js'
-import { Form } from '../../forms/Form/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
-import { FormSubmit } from '../../forms/Submit/index.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
-import { OperationContext } from '../../providers/Operation/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { useSearchParams } from '../../providers/SearchParams/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
-import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
-import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
+import { ListSelectionButton } from '../ListSelection/index.js'
+import { EditManyDrawerContent } from './DrawerContent.js'
 import './index.scss'
-import { FieldSelect } from '../FieldSelect/index.js'
 
-const baseClass = 'edit-many'
+export const baseClass = 'edit-many'
 
 export type EditManyProps = {
   readonly collection: ClientCollectionConfig
 }
 
-const Submit: React.FC<{
-  readonly action: string
-  readonly disabled: boolean
-}> = ({ action, disabled }) => {
-  const { submit } = useForm()
-  const { t } = useTranslation()
-
-  const save = useCallback(() => {
-    void submit({
-      action,
-      method: 'PATCH',
-      skipValidation: true,
-    })
-  }, [action, submit])
-
-  return (
-    <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
-      {t('general:save')}
-    </FormSubmit>
-  )
-}
-
-const PublishButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
-  const { submit } = useForm()
-  const { t } = useTranslation()
-
-  const save = useCallback(() => {
-    void submit({
-      action,
-      method: 'PATCH',
-      overrides: {
-        _status: 'published',
-      },
-      skipValidation: true,
-    })
-  }, [action, submit])
-
-  return (
-    <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
-      {t('version:publishChanges')}
-    </FormSubmit>
-  )
-}
-
-const SaveDraftButton: React.FC<{ action: string; disabled: boolean }> = ({ action, disabled }) => {
-  const { submit } = useForm()
-  const { t } = useTranslation()
-
-  const save = useCallback(() => {
-    void submit({
-      action,
-      method: 'PATCH',
-      overrides: {
-        _status: 'draft',
-      },
-      skipValidation: true,
-    })
-  }, [action, submit])
-
-  return (
-    <FormSubmit
-      buttonStyle="secondary"
-      className={`${baseClass}__draft`}
-      disabled={disabled}
-      onClick={save}
-    >
-      {t('version:saveDraft')}
-    </FormSubmit>
-  )
-}
-
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const { collection: { slug, fields, labels: { plural } } = {}, collection } = props
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
-  const { permissions, user } = useAuth()
-
-  const { closeModal } = useModal()
-
-  const {
-    config: {
-      routes: { api: apiRoute },
-      serverURL,
-    },
-  } = useConfig()
-
-  const { getFormState } = useServerFunctions()
-
-  const { count, getQueryParams, selectAll } = useSelection()
-  const { i18n, t } = useTranslation()
-  const [selected, setSelected] = useState([])
-  const { searchParams, stringifyParams } = useSearchParams()
-  const router = useRouter()
-  const [initialState, setInitialState] = useState<FormState>()
-  const hasInitializedState = React.useRef(false)
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
-  const { clearRouteCache } = useRouteCache()
-
-  const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update
-
-  const drawerSlug = `edit-${slug}`
-
-  React.useEffect(() => {
-    const controller = new AbortController()
-
-    if (!hasInitializedState.current) {
-      const getInitialState = async () => {
-        const { state: result } = await getFormState({
-          collectionSlug: slug,
-          data: {},
-          docPermissions: collectionPermissions,
-          docPreferences: null,
-          operation: 'update',
-          schemaPath: slug,
-          signal: controller.signal,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-
-    return () => {
-      abortAndIgnore(controller)
-    }
-  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
-
-  const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        collectionSlug: slug,
-        docPermissions: collectionPermissions,
-        docPreferences: null,
-        formState: prevFormState,
-        operation: 'update',
-        schemaPath: slug,
-        signal: controller.signal,
-      })
-
-      return state
-    },
-    [slug, getFormState, collectionPermissions],
+  return (
+    <EditMany_v4
+      {...props}
+      count={count}
+      ids={selectedIDs}
+      onSuccess={() => toggleAll()}
+      selectAll={selectAll === SelectAllStatus.AllAvailable}
+    />
   )
+}
 
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-    }
-  }, [])
+export const EditMany_v4: React.FC<
+  {
+    count: number
+    ids: (number | string)[]
+    /**
+     * When multiple EditMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
+    onSuccess?: () => void
+    selectAll: boolean
+    where?: Where
+  } & Omit<EditManyProps, 'ids'>
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll, where }) => {
+  const { permissions } = useAuth()
+  const { openModal } = useModal()
 
-  const queryString = useMemo(() => {
-    const queryWithSearch = mergeListSearchAndWhere({
-      collectionConfig: collection,
-      search: searchParams?.search as string,
-    })
+  const { t } = useTranslation()
 
-    return getQueryParams(queryWithSearch)
-  }, [collection, searchParams, getQueryParams])
+  const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
 
-  const onSuccess = () => {
-    router.replace(
-      stringifyParams({
-        params: { page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined },
-      }),
-    )
-    clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
-    closeModal(drawerSlug)
-  }
+  const collectionPermissions = permissions?.collections?.[collection.slug]
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
+
+  if (count === 0 || !collectionPermissions?.update) {
     return null
   }
 
   return (
-    <div className={baseClass}>
-      <DrawerToggler
+    <div className={[baseClass, `${baseClass}__toggle`].filter(Boolean).join(' ')}>
+      <ListSelectionButton
         aria-label={t('general:edit')}
-        className={`${baseClass}__toggle`}
         onClick={() => {
-          setSelected([])
+          openModal(drawerSlug)
+          setSelectedFields([])
         }}
-        slug={drawerSlug}
       >
         {t('general:edit')}
-      </DrawerToggler>
+      </ListSelectionButton>
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
-          <DocumentInfoProvider
-            collectionSlug={slug}
-            currentEditor={user}
-            hasPublishedDoc={false}
-            id={null}
-            initialData={{}}
-            initialState={initialState}
-            isLocked={false}
-            lastUpdateTime={0}
-            mostRecentVersionIsAutosaved={false}
-            unpublishedVersionCount={0}
-            versionCount={0}
-          >
-            <OperationContext.Provider value="update">
-              <div className={`${baseClass}__main`}>
-                <div className={`${baseClass}__header`}>
-                  <h2 className={`${baseClass}__header__title`}>
-                    {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
-                  </h2>
-                  <button
-                    aria-label={t('general:close')}
-                    className={`${baseClass}__header__close`}
-                    id={`close-drawer__${drawerSlug}`}
-                    onClick={() => closeModal(drawerSlug)}
-                    type="button"
-                  >
-                    <XIcon />
-                  </button>
-                </div>
-                <Form
-                  className={`${baseClass}__form`}
-                  initialState={initialState}
-                  onChange={[onChange]}
-                  onSuccess={onSuccess}
-                >
-                  <FieldSelect fields={fields} setSelected={setSelected} />
-                  {selected.length === 0 ? null : (
-                    <RenderFields
-                      fields={selected}
-                      parentIndexPath=""
-                      parentPath=""
-                      parentSchemaPath={slug}
-                      permissions={collectionPermissions?.fields}
-                      readOnly={false}
-                    />
-                  )}
-                  <div className={`${baseClass}__sidebar-wrap`}>
-                    <div className={`${baseClass}__sidebar`}>
-                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                        <div className={`${baseClass}__document-actions`}>
-                          {collection?.versions?.drafts ? (
-                            <React.Fragment>
-                              <SaveDraftButton
-                                action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                                disabled={selected.length === 0}
-                              />
-                              <PublishButton
-                                action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                                disabled={selected.length === 0}
-                              />
-                            </React.Fragment>
-                          ) : (
-                            <Submit
-                              action={`${serverURL}${apiRoute}/${slug}${queryString}`}
-                              disabled={selected.length === 0}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Form>
-              </div>
-            </OperationContext.Provider>
-          </DocumentInfoProvider>
+          <EditManyDrawerContent
+            collection={collection}
+            count={count}
+            drawerSlug={drawerSlug}
+            ids={ids}
+            onSuccess={onSuccess}
+            selectAll={selectAll}
+            selectedFields={selectedFields}
+            setSelectedFields={setSelectedFields}
+            where={where}
+          />
         </Drawer>
       </EditDepthProvider>
     </div>

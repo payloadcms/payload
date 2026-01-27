@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.2.1",
+  "version": "3.73.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -16,7 +16,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -32,6 +35,16 @@
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
+    },
+    "./icons/*": {
+      "import": "./src/icons/*/index.tsx",
+      "types": "./src/icons/*/index.tsx",
+      "default": "./src/icons/*/index.tsx"
+    },
+    "./elements/*": {
+      "import": "./src/elements/*/index.tsx",
+      "types": "./src/elements/*/index.tsx",
+      "default": "./src/elements/*/index.tsx"
     },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
@@ -52,6 +65,26 @@
       "import": "./src/utilities/buildTableState.ts",
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
+    },
+    "./utilities/getFolderResultsComponentAndData": {
+      "import": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "types": "./src/utilities/getFolderResultsComponentAndData.tsx",
+      "default": "./src/utilities/getFolderResultsComponentAndData.tsx"
+    },
+    "./utilities/getClientSchemaMap": {
+      "import": "./src/utilities/getClientSchemaMap.ts",
+      "types": "./src/utilities/getClientSchemaMap.ts",
+      "default": "./src/utilities/getClientSchemaMap.ts"
+    },
+    "./utilities/getSchemaMap": {
+      "import": "./src/utilities/getSchemaMap.ts",
+      "types": "./src/utilities/getSchemaMap.ts",
+      "default": "./src/utilities/getSchemaMap.ts"
+    },
+    "./utilities/schedulePublishHandler": {
+      "import": "./src/utilities/schedulePublishHandler.ts",
+      "types": "./src/utilities/schedulePublishHandler.ts",
+      "default": "./src/utilities/schedulePublishHandler.ts"
     },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
@@ -88,66 +121,67 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:esbuild": "node bundle.js && rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client",
-    "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:types",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild esbuild --no-split",
+    "build:debug": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles && pnpm build:types",
+    "build:esbuild": "node bundle.js",
+    "build:esbuild:postprocess": "rm -rf dist/exports/client && mv dist/exports/client_optimized dist/exports/client && rm -rf dist/exports/shared && mv dist/exports/shared_optimized dist/exports/shared",
+    "build:reactcompiler": "rm -rf dist esbuild && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:esbuild && pnpm build:esbuild:postprocess && pnpm build:types",
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@dnd-kit/core": "6.0.8",
-    "@dnd-kit/sortable": "7.0.2",
-    "@faceless-ui/modal": "3.0.0-beta.2",
-    "@faceless-ui/scroll-info": "2.0.0-beta.0",
-    "@faceless-ui/window-info": "3.0.0-beta.0",
-    "@monaco-editor/react": "4.6.0",
+    "@date-fns/tz": "1.2.0",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
+    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/scroll-info": "2.0.0",
+    "@faceless-ui/window-info": "3.0.1",
+    "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
-    "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
     "date-fns": "4.1.0",
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
     "qs-esm": "7.0.2",
-    "react-datepicker": "6.9.0",
+    "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
-    "react-select": "5.8.0",
-    "scheduler": "0.0.0-experimental-3edc000d-20240926",
-    "sonner": "^1.5.0",
+    "react-select": "5.9.0",
+    "scheduler": "0.25.0",
+    "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.24.5",
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/preset-react": "^7.24.1",
-    "@babel/preset-typescript": "^7.24.1",
-    "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-datepicker": "6.2.0",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "0.0.0-experimental-24ec0eb-20240918",
-    "esbuild": "0.23.1",
+    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-a7bf2bd-20241110",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0",
+    "next": "^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0",
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
@@ -242,9 +276,5 @@
     },
     "main": "./dist/exports/client/index.js",
     "types": "./dist/exports/client/index.d.ts"
-  },
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

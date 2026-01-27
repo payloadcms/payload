@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/live-preview-vue",
-  "version": "3.2.1",
+  "version": "3.73.0",
   "description": "The official Vue SDK for Payload Live Preview",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -32,13 +33,13 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/live-preview": "workspace:*"

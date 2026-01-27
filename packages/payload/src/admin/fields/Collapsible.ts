@@ -12,11 +12,13 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
 
-type CollapsibleFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+type CollapsibleFieldBaseClientProps = FieldPaths
 
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 
@@ -61,3 +63,10 @@ export type CollapsibleFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type CollapsibleFieldErrorClientComponent =
   FieldErrorClientComponent<CollapsibleFieldClientWithoutType>
+
+export type CollapsibleFieldDiffServerComponent = FieldDiffServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClient
+>
+
+export type CollapsibleFieldDiffClientComponent = FieldDiffClientComponent<CollapsibleFieldClient>

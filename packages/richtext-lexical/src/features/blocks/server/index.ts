@@ -1,23 +1,33 @@
-import type { Block, BlocksField, Config, FieldSchemaMap, FlattenedBlocksField } from 'payload'
+import type {
+  Block,
+  BlocksField,
+  BlockSlug,
+  Config,
+  FieldSchemaMap,
+  FlattenedBlocksField,
+  UIFieldClientProps,
+  UIFieldServerProps,
+} from 'payload'
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
+import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { getBlockMarkdownTransformers } from './markdownTransformer.js'
+import { getBlockMarkdownTransformers } from './markdown/markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
-  blocks?: Block[]
-  inlineBlocks?: Block[]
+  blocks?: (Block | BlockSlug)[] | Block[]
+  inlineBlocks?: (Block | BlockSlug)[] | Block[]
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props: _props }) => {
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const sanitized = await sanitizeFields({
@@ -26,12 +36,14 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         {
           name: 'lexical_blocks',
           type: 'blocks',
-          blocks: props.blocks ?? [],
+          blockReferences: _props.blocks ?? [],
+          blocks: [],
         },
         {
           name: 'lexical_inline_blocks',
           type: 'blocks',
-          blocks: props.inlineBlocks ?? [],
+          blockReferences: _props.inlineBlocks ?? [],
+          blocks: [],
         },
       ],
       parentIsLocalized,
@@ -39,8 +51,39 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       validRelationships,
     })
 
-    props.blocks = (sanitized[0] as BlocksField).blocks
-    props.inlineBlocks = (sanitized[1] as BlocksField).blocks
+    const blockConfigs: Block[] = []
+    for (const _block of (sanitized[0] as BlocksField).blockReferences ??
+      (sanitized[0] as BlocksField).blocks) {
+      const block =
+        typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
+      if (!block) {
+        throw new Error(
+          `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
+        )
+      }
+      // Apply baseFilter to relationship fields in the block
+      blockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
+    }
+
+    const inlineBlockConfigs: Block[] = []
+    for (const _block of (sanitized[1] as BlocksField).blockReferences ??
+      (sanitized[1] as BlocksField).blocks) {
+      const block =
+        typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
+      if (!block) {
+        throw new Error(
+          `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
+        )
+      }
+      // Apply baseFilter to relationship fields in the block
+      inlineBlockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
+    }
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
@@ -50,53 +93,64 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           config,
           currentSchema,
           field,
+          i18n,
           interfaceNameDefinitions,
         }) => {
-          if (!props?.blocks?.length && !props?.inlineBlocks?.length) {
+          if (!blockConfigs?.length && !inlineBlockConfigs?.length) {
             return currentSchema
           }
 
           const fields: FlattenedBlocksField[] = []
 
-          if (props?.blocks?.length) {
+          if (blockConfigs?.length) {
             fields.push({
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: props.blocks.map((block) => ({
-                ...block,
-                flattenedFields: flattenAllFields({ fields: block.fields }),
-              })),
+              blocks: blockConfigs.map((block) => {
+                return {
+                  ...block,
+                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                }
+              }),
             })
           }
-          if (props?.inlineBlocks?.length) {
+          if (inlineBlockConfigs?.length) {
             fields.push({
               name: field?.name + '_lexical_inline_blocks',
               type: 'blocks',
-              blocks: props.inlineBlocks.map((block) => ({
-                ...block,
-                flattenedFields: flattenAllFields({ fields: block.fields }),
-              })),
+              blocks: inlineBlockConfigs.map((block) => {
+                return {
+                  ...block,
+                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                }
+              }),
             })
           }
 
           if (fields.length) {
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema(collectionIDFieldTypes, fields, interfaceNameDefinitions, config)
+            fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              fields,
+              interfaceNameDefinitions,
+              config,
+              i18n,
+            )
           }
 
           return currentSchema
         },
       },
-      generateSchemaMap: ({ props }) => {
+      generateSchemaMap: ({ config }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
          */
         const schemaMap: FieldSchemaMap = new Map()
 
-        if (props?.blocks?.length) {
-          for (const block of props.blocks) {
+        if (blockConfigs?.length) {
+          for (const block of blockConfigs) {
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
@@ -122,9 +176,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           }
         }
 
-        if (props?.inlineBlocks?.length) {
+        if (inlineBlockConfigs?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
-          for (const block of props.inlineBlocks) {
+          for (const block of inlineBlockConfigs) {
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
@@ -156,8 +210,8 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       },
       i18n,
       markdownTransformers: getBlockMarkdownTransformers({
-        blocks: props.blocks,
-        inlineBlocks: props.inlineBlocks,
+        blocks: blockConfigs,
+        inlineBlocks: inlineBlockConfigs,
       }),
 
       nodes: [
@@ -165,12 +219,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (props?.blocks?.length) {
+              if (blockConfigs?.length) {
                 return [
                   {
                     name: 'lexical_blocks',
                     type: 'blocks',
-                    blocks: props.blocks,
+                    blocks: blockConfigs,
                   },
                 ]
               }
@@ -179,26 +233,26 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
             const blockType = node.fields.blockType
 
-            const block = props.blocks?.find((block) => block.slug === blockType)
+            const block = blockConfigs?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
           },
-          graphQLPopulationPromises: [blockPopulationPromiseHOC(props.blocks)],
+          graphQLPopulationPromises: [blockPopulationPromiseHOC(blockConfigs)],
           node: ServerBlockNode,
-          validations: [blockValidationHOC(props.blocks)],
+          validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (props?.inlineBlocks?.length) {
+              if (inlineBlockConfigs?.length) {
                 return [
                   {
                     name: 'lexical_inline_blocks',
                     type: 'blocks',
-                    blocks: props.inlineBlocks,
+                    blocks: inlineBlockConfigs,
                   },
                 ]
               }
@@ -207,19 +261,55 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
             const blockType = node.fields.blockType
 
-            const block = props.inlineBlocks?.find((block) => block.slug === blockType)
+            const block = inlineBlockConfigs?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
           },
-          graphQLPopulationPromises: [blockPopulationPromiseHOC(props.inlineBlocks)],
+          graphQLPopulationPromises: [blockPopulationPromiseHOC(inlineBlockConfigs)],
           node: ServerInlineBlockNode,
-          validations: [blockValidationHOC(props.inlineBlocks)],
+          validations: [blockValidationHOC(inlineBlockConfigs)],
         }),
       ],
-      sanitizedServerFeatureProps: props,
+      sanitizedServerFeatureProps: _props,
     }
   },
   key: 'blocks',
 })
+
+/**
+ * Props for the client components provided to `admin.components.Block` of lexical blocks.
+ */
+export type LexicalBlockClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Block` of lexical blocks.
+ */
+export type LexicalBlockServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Label` of lexical blocks.
+ */
+export type LexicalBlockLabelClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Label` of lexical blocks.
+ */
+export type LexicalBlockLabelServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Block` of lexical inline blocks.
+ */
+export type LexicalInlineBlockClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Block` of lexical inline blocks.
+ */
+export type LexicalInlineBlockServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Label` of lexical inline blocks.
+ */
+export type LexicalInlineBlockLabelClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Label` of lexical inline blocks.
+ */
+export type LexicalInlineBlockLabelServerProps = UIFieldServerProps

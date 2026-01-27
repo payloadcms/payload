@@ -6,20 +6,17 @@ This example demonstrates how to use Custom Components in the [Payload](https://
 
 To spin up this example locally, follow the steps below:
 
-1. Clone this repo
-1. Navigate into the project directory and install dependencies using your preferred package manager:
+1. Run the following command to create a project from the example:
 
-- `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+- `npx create-payload-app --example custom-components`
 
-> \*NOTE: The --ignore-workspace flag is needed if you are running this example within the Payload monorepo to avoid workspace conflicts.
-
-1. Start the server:
+2. Start the server:
    - Depending on your package manager, run `pnpm dev`, `yarn dev` or `npm run dev`
    - When prompted, type `y` then `enter` to seed the database with sample data
-1. Access the application:
+3. Access the application:
    - Open your browser and navigate to `http://localhost:3000` to access the homepage.
    - Open `http://localhost:3000/admin` to access the admin panel.
-1. Login:
+4. Login:
 
 - Use the following credentials to log into the admin panel:
   > `Email: demo@payloadcms.com` > `Password: demo`

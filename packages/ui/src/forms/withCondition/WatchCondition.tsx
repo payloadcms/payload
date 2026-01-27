@@ -1,12 +1,11 @@
 'use client'
 
-import React, { Fragment } from 'react'
+import type React from 'react'
 
 import { useFormFields } from '../Form/context.js'
 
 export const WatchCondition: React.FC<{
   children: React.ReactNode
-  indexPath: string
   path: string
 }> = (props) => {
   const { children, path } = props
@@ -19,5 +18,5 @@ export const WatchCondition: React.FC<{
     return null
   }
 
-  return <Fragment>{children}</Fragment>
+  return children
 }

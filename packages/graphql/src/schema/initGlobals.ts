@@ -5,6 +5,7 @@ const { singular } = pluralize
 import type { Field, GraphQLInfo, SanitizedConfig, SanitizedGlobalConfig } from 'payload'
 
 import { buildVersionGlobalFields, toWords } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 
 import { docAccessResolver } from '../resolvers/globals/docAccess.js'
 import { findOne } from '../resolvers/globals/findOne.js'
@@ -26,7 +27,7 @@ type InitGlobalsGraphQLArgs = {
 export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): void {
   Object.keys(graphqlResult.globals.config).forEach((slug) => {
     const global: SanitizedGlobalConfig = graphqlResult.globals.config[slug]
-    const { fields, graphQL, versions } = global
+    const { fields, graphQL } = global
 
     if (graphQL === false) {
       return
@@ -34,7 +35,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
 
     const formattedName = graphQL?.name ? graphQL.name : singular(toWords(global.slug, true))
 
-    const forceNullableObjectType = Boolean(versions?.drafts)
+    const forceNullableObjectType = hasDraftsEnabled(global)
 
     if (!graphqlResult.globals.graphQL) {
       graphqlResult.globals.graphQL = {}
@@ -45,6 +46,7 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
       config,
       fields,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: formattedName,
     })
     graphqlResult.globals.graphQL[slug] = {
@@ -61,44 +63,52 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         : null,
     }
 
-    graphqlResult.Query.fields[formattedName] = {
-      type: graphqlResult.globals.graphQL[slug].type,
-      args: {
-        draft: { type: GraphQLBoolean },
-        ...(config.localization
-          ? {
-              fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
-              locale: { type: graphqlResult.types.localeInputType },
-            }
-          : {}),
-      },
-      resolve: findOne(global),
+    const queriesEnabled = typeof global.graphQL !== 'object' || !global.graphQL.disableQueries
+    const mutationsEnabled = typeof global.graphQL !== 'object' || !global.graphQL.disableMutations
+
+    if (queriesEnabled) {
+      graphqlResult.Query.fields[formattedName] = {
+        type: graphqlResult.globals.graphQL[slug].type,
+        args: {
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+          select: { type: GraphQLBoolean },
+        },
+        resolve: findOne(global),
+      }
+
+      graphqlResult.Query.fields[`docAccess${formattedName}`] = {
+        type: buildPolicyType({
+          type: 'global',
+          entity: global,
+          scope: 'docAccess',
+          typeSuffix: 'DocAccess',
+        }),
+        resolve: docAccessResolver(global),
+      }
     }
 
-    graphqlResult.Mutation.fields[`update${formattedName}`] = {
-      type: graphqlResult.globals.graphQL[slug].type,
-      args: {
-        ...(updateMutationInputType
-          ? { data: { type: graphqlResult.globals.graphQL[slug].mutationInputType } }
-          : {}),
-        draft: { type: GraphQLBoolean },
-        ...(config.localization
-          ? {
-              locale: { type: graphqlResult.types.localeInputType },
-            }
-          : {}),
-      },
-      resolve: update(global),
-    }
-
-    graphqlResult.Query.fields[`docAccess${formattedName}`] = {
-      type: buildPolicyType({
-        type: 'global',
-        entity: global,
-        scope: 'docAccess',
-        typeSuffix: 'DocAccess',
-      }),
-      resolve: docAccessResolver(global),
+    if (mutationsEnabled) {
+      graphqlResult.Mutation.fields[`update${formattedName}`] = {
+        type: graphqlResult.globals.graphQL[slug].type,
+        args: {
+          ...(updateMutationInputType
+            ? { data: { type: graphqlResult.globals.graphQL[slug].mutationInputType } }
+            : {}),
+          draft: { type: GraphQLBoolean },
+          ...(config.localization
+            ? {
+                locale: { type: graphqlResult.types.localeInputType },
+              }
+            : {}),
+        },
+        resolve: update(global),
+      }
     }
 
     if (global.versions) {
@@ -131,52 +141,60 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         parentName: `${formattedName}Version`,
       })
 
-      graphqlResult.Query.fields[`version${formatName(formattedName)}`] = {
-        type: graphqlResult.globals.graphQL[slug].versionType,
-        args: {
-          id: { type: idType },
-          draft: { type: GraphQLBoolean },
-          ...(config.localization
-            ? {
-                fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
-                locale: { type: graphqlResult.types.localeInputType },
-              }
-            : {}),
-        },
-        resolve: findVersionByID(global),
-      }
-      graphqlResult.Query.fields[`versions${formattedName}`] = {
-        type: buildPaginatedListType(
-          `versions${formatName(formattedName)}`,
-          graphqlResult.globals.graphQL[slug].versionType,
-        ),
-        args: {
-          where: {
-            type: buildWhereInputType({
-              name: `versions${formattedName}`,
-              fields: versionGlobalFields,
-              parentName: `versions${formattedName}`,
-            }),
+      if (queriesEnabled) {
+        graphqlResult.Query.fields[`version${formatName(formattedName)}`] = {
+          type: graphqlResult.globals.graphQL[slug].versionType,
+          args: {
+            id: { type: idType },
+            draft: { type: GraphQLBoolean },
+            ...(config.localization
+              ? {
+                  fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+                  locale: { type: graphqlResult.types.localeInputType },
+                }
+              : {}),
+            select: { type: GraphQLBoolean },
           },
-          ...(config.localization
-            ? {
-                fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
-                locale: { type: graphqlResult.types.localeInputType },
-              }
-            : {}),
-          limit: { type: GraphQLInt },
-          page: { type: GraphQLInt },
-          sort: { type: GraphQLString },
-        },
-        resolve: findVersions(global),
+          resolve: findVersionByID(global),
+        }
+        graphqlResult.Query.fields[`versions${formattedName}`] = {
+          type: buildPaginatedListType(
+            `versions${formatName(formattedName)}`,
+            graphqlResult.globals.graphQL[slug].versionType,
+          ),
+          args: {
+            where: {
+              type: buildWhereInputType({
+                name: `versions${formattedName}`,
+                fields: versionGlobalFields,
+                parentName: `versions${formattedName}`,
+              }),
+            },
+            ...(config.localization
+              ? {
+                  fallbackLocale: { type: graphqlResult.types.fallbackLocaleInputType },
+                  locale: { type: graphqlResult.types.localeInputType },
+                }
+              : {}),
+            limit: { type: GraphQLInt },
+            page: { type: GraphQLInt },
+            pagination: { type: GraphQLBoolean },
+            select: { type: GraphQLBoolean },
+            sort: { type: GraphQLString },
+          },
+          resolve: findVersions(global),
+        }
       }
-      graphqlResult.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
-        type: graphqlResult.globals.graphQL[slug].type,
-        args: {
-          id: { type: idType },
-          draft: { type: GraphQLBoolean },
-        },
-        resolve: restoreVersion(global),
+
+      if (mutationsEnabled) {
+        graphqlResult.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
+          type: graphqlResult.globals.graphQL[slug].type,
+          args: {
+            id: { type: idType },
+            draft: { type: GraphQLBoolean },
+          },
+          resolve: restoreVersion(global),
+        }
       }
     }
   })

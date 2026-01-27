@@ -1,21 +1,20 @@
-import { jest } from '@jest/globals'
 import fs from 'fs'
 import fse from 'fs-extra'
 import globby from 'globby'
 import * as os from 'node:os'
 import path from 'path'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
+import type { CliArgs, DbType, ProjectExample, ProjectTemplate } from '../types.js'
 
-import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
-
-import { createProject } from './create-project.js'
-import { dbReplacements } from './replacements.js'
+import { createProject, updatePackageJSONDependencies } from './create-project.js'
 import { getValidTemplates } from './templates.js'
 
 describe('createProject', () => {
   let projectDir: string
+
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vitest.fn()
   })
 
   beforeEach(() => {
@@ -44,10 +43,11 @@ describe('createProject', () => {
         name: 'plugin',
         type: 'plugin',
         description: 'Template for creating a Payload plugin',
-        url: 'https://github.com/payloadcms/payload-plugin-template',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
       }
+
       await createProject({
-        cliArgs: args,
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
         packageManager,
         projectDir,
         projectName,
@@ -60,6 +60,56 @@ describe('createProject', () => {
       // Check package name and description
       expect(packageJson.name).toStrictEqual(projectName)
     })
+
+    it('updates project name in plugin template importMap file', async () => {
+      const projectName = 'my-custom-plugin'
+      const template: ProjectTemplate = {
+        name: 'plugin',
+        type: 'plugin',
+        description: 'Template for creating a Payload plugin',
+        url: 'https://github.com/payloadcms/payload/templates/plugin',
+      }
+
+      await createProject({
+        cliArgs: { ...args, '--local-template': 'plugin' } as CliArgs,
+        packageManager,
+        projectDir,
+        projectName,
+        template,
+      })
+
+      const importMapPath = path.resolve(projectDir, './dev/app/(payload)/admin/importMap.js')
+      const importMapFile = fse.readFileSync(importMapPath, 'utf-8')
+
+      expect(importMapFile).not.toContain('plugin-package-name-placeholder')
+      expect(importMapFile).toContain('my-custom-plugin')
+    })
+
+    it('creates example', async () => {
+      const projectName = 'custom-server-example'
+      const example: ProjectExample = {
+        name: 'custom-server',
+        url: 'https://github.com/payloadcms/payload/examples/custom-server#main',
+      }
+
+      await createProject({
+        cliArgs: {
+          ...args,
+          '--local-template': undefined,
+          '--local-example': 'custom-server',
+        } as CliArgs,
+        packageManager,
+        projectDir,
+        projectName,
+        example,
+      })
+
+      const packageJsonPath = path.resolve(projectDir, 'package.json')
+      const packageJson = fse.readJsonSync(packageJsonPath)
+
+      // Check package name and description
+      expect(packageJson.name).toStrictEqual(projectName)
+    }, 90_000)
 
     describe('creates project from template', () => {
       const templates = getValidTemplates()
@@ -96,8 +146,6 @@ describe('createProject', () => {
           template: template as ProjectTemplate,
         })
 
-        const dbReplacement = dbReplacements[db as DbType]
-
         const packageJsonPath = path.resolve(projectDir, 'package.json')
         const packageJson = fse.readJsonSync(packageJsonPath)
 
@@ -118,13 +166,51 @@ describe('createProject', () => {
 
         const content = fse.readFileSync(payloadConfigPath, 'utf-8')
 
-        // Check payload.config.ts
+        // Check payload.config.ts doesn't have placeholder comments
         expect(content).not.toContain('// database-adapter-import')
-        expect(content).toContain(dbReplacement.importReplacement)
-
         expect(content).not.toContain('// database-adapter-config-start')
         expect(content).not.toContain('// database-adapter-config-end')
-        expect(content).toContain(dbReplacement.configReplacement().join('\n'))
+
+        // Verify correct adapter import and usage based on db type
+        if (db === 'mongodb') {
+          expect(content).toContain("import { mongooseAdapter } from '@payloadcms/db-mongodb'")
+          expect(content).toContain('mongooseAdapter')
+        } else if (db === 'postgres') {
+          expect(content).toContain("import { postgresAdapter } from '@payloadcms/db-postgres'")
+          expect(content).toContain('postgresAdapter')
+        }
+      })
+    })
+
+    describe('updates package.json', () => {
+      it('updates package name and bumps workspace versions', async () => {
+        const latestVersion = '3.0.0'
+        const initialJSON = {
+          name: 'test-project',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/db-mongodb': 'workspace:*',
+            payload: 'workspace:*',
+            '@payloadcms/ui': 'workspace:*',
+          },
+        }
+
+        const correctlyModifiedJSON = {
+          name: 'test-project',
+          version: '1.0.0',
+          dependencies: {
+            '@payloadcms/db-mongodb': `${latestVersion}`,
+            payload: `${latestVersion}`,
+            '@payloadcms/ui': `${latestVersion}`,
+          },
+        }
+
+        updatePackageJSONDependencies({
+          latestVersion,
+          packageJson: initialJSON,
+        })
+
+        expect(initialJSON).toEqual(correctlyModifiedJSON)
       })
     })
   })

@@ -1,4 +1,6 @@
 'use client'
+import type { CSSProperties } from 'react'
+
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
@@ -53,7 +55,13 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={`field-${path.replace(/\./g, '__')}`}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -62,22 +70,23 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
           Fallback={<FieldError path={path} showError={showError} />}
         />
         {BeforeInput}
-        <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
-          <div className="textarea-inner">
-            <div className="textarea-clone" data-value={value || placeholder || ''} />
-            <textarea
-              className="textarea-element"
-              data-rtl={rtl}
-              disabled={readOnly}
-              id={`field-${path.replace(/\./g, '__')}`}
-              name={path}
-              onChange={onChange}
-              placeholder={getTranslation(placeholder, i18n)}
-              rows={rows}
-              value={value || ''}
-            />
-          </div>
-        </label>
+        <div className="textarea-outer">
+          <textarea
+            data-rtl={rtl}
+            disabled={readOnly}
+            id={`field-${path.replace(/\./g, '__')}`}
+            name={path}
+            onChange={onChange}
+            placeholder={getTranslation(placeholder, i18n)}
+            rows={rows}
+            style={
+              {
+                '--rows': rows,
+              } as CSSProperties
+            }
+            value={value || ''}
+          />
+        </div>
         {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}

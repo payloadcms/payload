@@ -1,41 +1,34 @@
-import type { PaginateOptions } from 'mongoose'
-import type { FindGlobalVersions, PayloadRequest } from 'payload'
+import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { FindGlobalVersions } from 'payload'
 
-import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
+import { APIError, buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { getGlobal } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
   {
-    global,
-    limit,
+    global: globalSlug,
+    limit = 0,
     locale,
     page,
     pagination,
-    req = {} as PayloadRequest,
+    req,
     select,
-    skip,
     sort: sortArg,
-    where,
+    where = {},
   },
 ) {
-  const Model = this.versions[global]
-  const versionFields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.globals.config.find(({ slug }) => slug === global),
-    true,
-  )
-  const options = {
-    ...(await withSession(this, req)),
-    limit,
-    skip,
-  }
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
+
+  const versionFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   let hasNearConstraint = false
 
@@ -47,6 +40,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: versionFields,
       locale,
@@ -55,12 +49,21 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
-  const query = await Model.buildQuery({
-    globalSlug: global,
+  const query = await buildQuery({
+    adapter: this,
+    fields: versionFields,
     locale,
-    payload: this.payload,
     where,
   })
+
+  const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -92,8 +95,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
-          ...options,
           hint: { _id: 1 },
+          session,
         }),
       )
     }
@@ -102,7 +105,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
@@ -111,13 +115,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionGlobalFields(this.payload.config, globalConfig),
+    operation: 'read',
+  })
+
+  return result
 }

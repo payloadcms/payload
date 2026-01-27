@@ -3,6 +3,7 @@ import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig }
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { generateImageSrcWithCacheTag } from '../../utilities/generateCacheTagSrc.js'
 import { FileMeta } from '../FileDetails/FileMeta/index.js'
 import './index.scss'
 
@@ -33,6 +34,7 @@ const sortSizes = (sizes: FilesSizesWithUrl, imageSizes: SanitizedUploadConfig['
 
 type PreviewSizeCardProps = {
   active: boolean
+  alt: string
   meta: FileInfo
   name: string
   onClick?: () => void
@@ -41,6 +43,7 @@ type PreviewSizeCardProps = {
 const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   name,
   active,
+  alt,
   meta,
   onClick,
   previewSrc,
@@ -63,7 +66,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
       tabIndex={0}
     >
       <div className={`${baseClass}__image`}>
-        <img alt={meta.filename} src={previewSrc} />
+        <img alt={alt} src={previewSrc} />
       </div>
       <div className={`${baseClass}__sizeMeta`}>
         <div className={`${baseClass}__sizeName`}>{name}</div>
@@ -85,34 +88,20 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   const { imageSizes } = uploadConfig
   const { sizes } = doc
 
+  const alt = (doc as { alt?: string })?.alt || doc.filename || ''
+
   const [orderedSizes, setOrderedSizes] = useState<FilesSizesWithUrl>(() =>
     sortSizes(sizes, imageSizes),
   )
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
-  const getImageSrc = (url: string, tag?: string) => {
-    if (!url) return ''
-    if (!tag) return url
-  
-    const hasQueryParams = url.includes('?')
-    return hasQueryParams ? `${url}&${tag}` : `${url}?${tag}`
-  }
-
-  const generateImageUrl = (doc) => {
-    if (!doc.filename) {
-      return null
-    }
-    if (doc.url) {
-      return getImageSrc(doc.url, imageCacheTag)
-    }
-  }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
-    ? generateImageUrl(doc.sizes[selectedSize])
-    : generateImageUrl(doc)
+    ? generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.sizes[selectedSize].url })
+    : generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.url })
 
   const originalImage = useMemo(
     (): FileInfo => ({
@@ -134,26 +123,31 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
           <div className={`${baseClass}__sizeName`}>{selectedSize || originalFilename}</div>
           <FileMeta {...(selectedSize ? orderedSizes[selectedSize] : originalImage)} />
         </div>
-        <img alt={doc.filename} className={`${baseClass}__preview`} src={mainPreviewSrc} />
+        <img alt={alt} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
       <div className={`${baseClass}__listWrap`}>
         <div className={`${baseClass}__list`}>
           <PreviewSizeCard
             active={!selectedSize}
+            alt={alt}
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
-            previewSrc={generateImageUrl(doc)}
+            previewSrc={generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.url })}
           />
 
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = generateImageUrl(val)
+            const previewSrc = generateImageSrcWithCacheTag({
+              cacheTag: imageCacheTag,
+              src: val.url,
+            })
 
             if (previewSrc) {
               return (
                 <PreviewSizeCard
                   active={selected}
+                  alt={alt}
                   key={key}
                   meta={val}
                   name={key}

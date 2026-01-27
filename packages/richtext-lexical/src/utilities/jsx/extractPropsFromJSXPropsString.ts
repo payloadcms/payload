@@ -1,3 +1,5 @@
+import { JSOX } from 'jsox'
+
 /**
  * Turns a JSX props string into an object.
  *
@@ -52,6 +54,8 @@ function handleValue(propsString: string, startIndex: number): { newIndex: numbe
 
   if (char === '"') {
     return handleQuotedString(propsString, startIndex)
+  } else if (char === "'") {
+    return handleQuotedString(propsString, startIndex, true)
   } else if (char === '{') {
     return handleObject(propsString, startIndex)
   } else if (char === '[') {
@@ -78,16 +82,20 @@ function handleArray(propsString: string, startIndex: number): { newIndex: numbe
     i++
   }
 
-  return { newIndex: i, value: JSON.parse(`[${value}]`) }
+  return { newIndex: i, value: JSOX.parse(`[${value}]`) }
 }
 
 function handleQuotedString(
   propsString: string,
   startIndex: number,
+  isSingleQuoted = false,
 ): { newIndex: number; value: string } {
   let value = ''
   let i = startIndex + 1
-  while (i < propsString.length && (propsString[i] !== '"' || propsString[i - 1] === '\\')) {
+  while (
+    i < propsString.length &&
+    (propsString[i] !== (isSingleQuoted ? "'" : '"') || propsString[i - 1] === '\\')
+  ) {
     value += propsString[i]
     i++
   }
@@ -116,10 +124,10 @@ function handleObject(propsString: string, startIndex: number): { newIndex: numb
 
 function parseObject(objString: string): Record<string, any> {
   if (objString[0] !== '{') {
-    return JSON.parse(objString)
+    return JSOX.parse(objString)
   }
 
-  const result = JSON.parse(objString.replace(/(\w+):/g, '"$1":'))
+  const result = JSOX.parse(objString.replace(/(\w+):/g, '"$1":'))
 
   return result
 }

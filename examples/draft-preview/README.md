@@ -1,20 +1,19 @@
 # Payload Draft Preview Example
 
-The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published.
+The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement [Draft Preview](https://payloadcms.com/docs/admin/preview#draft-preview) in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). With Draft Preview, you can navigate to your front-end application and enter "draft mode", where your queries are modified to fetch draft content instead of published content. This is useful for seeing how your content will look before being published.
 
 ## Quick Start
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
-2. `cd` into this directory and run `pnpm i --ignore-workspace`\*, `yarn`, or `npm install`
+1. Run the following command to create a project from the example:
 
-   > \*If you are running using pnpm within the Payload Monorepo, the `--ignore-workspace` flag is needed so that pnpm generates a lockfile in this example's directory despite the fact that one exists in root.
+- `npx create-payload-app --example draft-preview`
 
-3. `cp .env.example .env` to copy the example environment variables
-4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
-5. `open http://localhost:3000/admin` to access the admin panel
-6. Login with email `demo@payloadcms.com` and password `demo`
+2. `cp .env.example .env` to copy the example environment variables
+3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+4. `open http://localhost:3000/admin` to access the admin panel
+5. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
@@ -69,7 +68,7 @@ If your front-end is statically generated then you may also want to regenerate t
 
 ### Admin Bar
 
-You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar). For other frameworks, simply hit the `/me` route with `credentials: 'include'` and render your own admin bar if the user is logged in.
+You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload/tree/main/packages/admin-bar). For other frameworks, simply hit the `/me` route with `credentials: 'include'` and render your own admin bar if the user is logged in.
 
 ### CORS
 

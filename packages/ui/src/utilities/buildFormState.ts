@@ -1,7 +1,14 @@
-import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
+import type {
+  BuildFormStateArgs,
+  ClientConfig,
+  ClientUser,
+  ErrorResult,
+  FormState,
+  ServerFunction,
+} from 'payload'
 
-import { formatErrors } from 'payload'
-import { reduceFieldsToValues } from 'payload/shared'
+import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
+import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -9,17 +16,29 @@ import { getClientConfig } from './getClientConfig.js'
 import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
+import { handleLivePreview } from './handleLivePreview.js'
+import { handlePreview } from './handlePreview.js'
+
+export type LockedState = {
+  isLocked: boolean
+  lastEditedAt: string
+  user: ClientUser | number | string
+}
 
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  livePreviewURL?: string
+  lockedState?: LockedState
+  previewURL?: string
   state: FormState
 }
 
 type BuildFormStateErrorResult = {
+  livePreviewURL?: never
   lockedState?: never
+  previewURL?: never
   state?: never
 } & (
   | {
@@ -30,45 +49,16 @@ type BuildFormStateErrorResult = {
 
 export type BuildFormStateResult = BuildFormStateErrorResult | BuildFormStateSuccessResult
 
-export const buildFormStateHandler = async (
-  args: BuildFormStateArgs,
-): Promise<BuildFormStateResult> => {
+export const buildFormStateHandler: ServerFunction<
+  BuildFormStateArgs,
+  Promise<BuildFormStateResult>
+> = async (args) => {
   const { req } = args
 
-  const incomingUserSlug = req.user?.collection
-  const adminUserSlug = req.payload.config.admin.user
-
   try {
-    // If we have a user slug, test it against the functions
-    if (incomingUserSlug) {
-      const adminAccessFunction = req.payload.collections[incomingUserSlug].config.access?.admin
-
-      // Run the admin access function from the config if it exists
-      if (adminAccessFunction) {
-        const canAccessAdmin = await adminAccessFunction({ req })
-
-        if (!canAccessAdmin) {
-          throw new Error('Unauthorized')
-        }
-        // Match the user collection to the global admin config
-      } else if (adminUserSlug !== incomingUserSlug) {
-        throw new Error('Unauthorized')
-      }
-    } else {
-      const hasUsers = await req.payload.find({
-        collection: adminUserSlug,
-        depth: 0,
-        limit: 1,
-        pagination: false,
-      })
-
-      // If there are users, we should not allow access because of /create-first-user
-      if (hasUsers.docs.length) {
-        throw new Error('Unauthorized')
-      }
-    }
-
+    await canAccessAdmin({ req })
     const res = await buildFormState(args)
+
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -80,7 +70,7 @@ export const buildFormStateHandler = async (
     }
 
     if (err.message === 'Unauthorized') {
-      return null
+      throw new UnauthorizedError()
     }
 
     return formatErrors(err)
@@ -96,9 +86,14 @@ export const buildFormState = async (
     data: incomingData,
     docPermissions,
     docPreferences,
+    documentFormState,
     formState,
     globalSlug,
+    initialBlockData,
+    initialBlockFormState,
+    mockRSCs,
     operation,
+    readOnly,
     renderAllFields,
     req,
     req: {
@@ -106,12 +101,17 @@ export const buildFormState = async (
       payload,
       payload: { config },
     },
+    returnLivePreviewURL,
     returnLockStatus,
+    returnPreviewURL,
     schemaPath = collectionSlug || globalSlug,
+    select,
+    skipClientConfigAuth,
+    skipValidation,
     updateLastEdited,
   } = args
 
-  let data = incomingData
+  const selectMode = select ? getSelectMode(select) : undefined
 
   if (!collectionSlug && !globalSlug) {
     throw new Error('Either collectionSlug or globalSlug must be provided')
@@ -126,7 +126,12 @@ export const buildFormState = async (
 
   const clientSchemaMap = getClientSchemaMap({
     collectionSlug,
-    config: getClientConfig({ config, i18n, importMap: req.payload.importMap }),
+    config: getClientConfig({
+      config,
+      i18n,
+      importMap: req.payload.importMap,
+      user: skipClientConfigAuth ? true : req.user,
+    }),
     globalSlug,
     i18n,
     payload,
@@ -152,10 +157,20 @@ export const buildFormState = async (
     )
   }
 
-  // If there is a form state,
-  // then we can deduce data from that form state
-  if (formState) {
-    data = reduceFieldsToValues(formState, true)
+  // If there is form state but no data, deduce data from that form state, e.g. on initial load
+  // Otherwise, use the incoming data as the source of truth, e.g. on subsequent saves
+  const data = incomingData || reduceFieldsToValues(formState, true)
+
+  let documentData = undefined
+
+  if (documentFormState) {
+    documentData = reduceFieldsToValues(documentFormState, true)
+  }
+
+  let blockData = initialBlockData
+
+  if (initialBlockFormState) {
+    blockData = reduceFieldsToValues(initialBlockFormState, true)
   }
 
   /**
@@ -173,21 +188,34 @@ export const buildFormState = async (
       ? fieldOrEntityConfig.fields
       : [fieldOrEntityConfig]
 
+  // Ensure data.id is present during form state requests, where the data
+  // is passed from the client as an argument, without the ID
+  if (!data.id && id) {
+    data.id = id
+  }
+
   const formStateResult = await fieldSchemasToFormState({
     id,
     clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
+    documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    initialBlockData: blockData,
+    mockRSCs,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
     previousFormState: formState,
+    readOnly,
     renderAllFields,
     renderFieldFn: renderField,
     req,
     schemaPath,
+    select,
+    selectMode,
+    skipValidation,
   })
 
   // Maintain form state of auth / upload fields
@@ -209,8 +237,42 @@ export const buildFormState = async (
     })
   }
 
-  return {
+  const res: BuildFormStateSuccessResult = {
     lockedState: lockedStateResult,
     state: formStateResult,
   }
+
+  if (returnLivePreviewURL) {
+    const { livePreviewURL } = await handleLivePreview({
+      collectionSlug,
+      config,
+      data,
+      globalSlug,
+      req,
+    })
+
+    // Important: only set this when not undefined,
+    // Otherwise it will travel through the network as `$undefined`
+    if (livePreviewURL) {
+      res.livePreviewURL = livePreviewURL
+    }
+  }
+
+  if (returnPreviewURL) {
+    const { previewURL } = await handlePreview({
+      collectionSlug,
+      config,
+      data,
+      globalSlug,
+      req,
+    })
+
+    // Important: only set this when not undefined,
+    // Otherwise it will travel through the network as `$undefined`
+    if (previewURL) {
+      res.previewURL = previewURL
+    }
+  }
+
+  return res
 }

@@ -6,9 +6,67 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
+  };
+  blocks: {
+    mediaBlock: MediaBlock;
   };
   collections: {
     users: User;
@@ -19,6 +77,11 @@ export interface Config {
     tenants: Tenant;
     categories: Category;
     media: Media;
+    'collection-level-config': CollectionLevelConfig;
+    'static-url': StaticUrl;
+    'custom-live-preview': CustomLivePreview;
+    'conditional-url': ConditionalUrl;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -33,6 +96,11 @@ export interface Config {
     tenants: TenantsSelect<false> | TenantsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
+    'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
+    'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -40,6 +108,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -48,13 +117,13 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -77,6 +146,37 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mediaBlock".
+ */
+export interface MediaBlock {
+  invertBackground?: boolean | null;
+  position?: ('default' | 'fullscreen') | null;
+  media: string | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -90,6 +190,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -135,6 +242,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -169,6 +279,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -202,12 +315,18 @@ export interface Page {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -215,6 +334,8 @@ export interface Page {
           }
       )[]
     | null;
+  localizedTitle?: string | null;
+  relationToLocalized?: (string | null) | Post;
   richTextSlate?:
     | {
         [k: string]: unknown;
@@ -224,7 +345,22 @@ export interface Page {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richTextLexicalLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -255,7 +391,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -305,25 +441,6 @@ export interface Tenant {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -365,6 +482,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -399,6 +519,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -432,12 +555,18 @@ export interface Post {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -446,6 +575,7 @@ export interface Post {
       )[]
     | null;
   relatedPosts?: (string | Post)[] | null;
+  localizedTitle?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -453,6 +583,7 @@ export interface Post {
   };
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -507,6 +638,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -541,6 +675,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -574,12 +711,18 @@ export interface Ssr {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -638,6 +781,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -672,6 +818,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -705,12 +854,18 @@ export interface SsrAutosave {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -726,6 +881,199 @@ export interface SsrAutosave {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Live Preview is enabled on this collection's own config, not the root config.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config".
+ */
+export interface CollectionLevelConfig {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url".
+ */
+export interface StaticUrl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview".
+ */
+export interface CustomLivePreview {
+  id: string;
+  slug: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  hero: {
+    type: 'none' | 'highImpact' | 'lowImpact';
+    richText?:
+      | {
+          [k: string]: unknown;
+        }[]
+      | null;
+    media?: (string | null) | Media;
+  };
+  layout?:
+    | (
+        | {
+            invertBackground?: boolean | null;
+            richText?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            links?:
+              | {
+                  link: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            invertBackground?: boolean | null;
+            columns?:
+              | {
+                  size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
+                  richText?:
+                    | {
+                        [k: string]: unknown;
+                      }[]
+                    | null;
+                  enableLink?: boolean | null;
+                  link?: {
+                    type?: ('reference' | 'custom') | null;
+                    newTab?: boolean | null;
+                    reference?:
+                      | ({
+                          relationTo: 'posts';
+                          value: string | Post;
+                        } | null)
+                      | ({
+                          relationTo: 'pages';
+                          value: string | Page;
+                        } | null);
+                    url?: string | null;
+                    label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
+                    appearance?: ('default' | 'primary' | 'secondary') | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            invertBackground?: boolean | null;
+            position?: ('default' | 'fullscreen') | null;
+            media: string | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | {
+            introContent?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            populateBy?: ('collection' | 'selection') | null;
+            relationTo?: 'posts' | null;
+            categories?: (string | Category)[] | null;
+            limit?: number | null;
+            selectedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocs?:
+              | {
+                  relationTo: 'posts';
+                  value: string | Post;
+                }[]
+              | null;
+            /**
+             * This field is auto-populated after-read
+             */
+            populatedDocsTotal?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'archive';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    image?: (string | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-url".
+ */
+export interface ConditionalUrl {
+  id: string;
+  title?: string | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -765,6 +1113,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'collection-level-config';
+        value: string | CollectionLevelConfig;
+      } | null)
+    | ({
+        relationTo: 'static-url';
+        value: string | StaticUrl;
+      } | null)
+    | ({
+        relationTo: 'custom-live-preview';
+        value: string | CustomLivePreview;
+      } | null)
+    | ({
+        relationTo: 'conditional-url';
+        value: string | ConditionalUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -822,6 +1186,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -913,8 +1284,11 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  localizedTitle?: T;
+  relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
+  richTextLexicalLocalized?: T;
   relationshipAsUpload?: T;
   relationshipMonoHasOne?: T;
   relationshipMonoHasMany?: T;
@@ -1037,6 +1411,7 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   relatedPosts?: T;
+  localizedTitle?: T;
   meta?:
     | T
     | {
@@ -1046,6 +1421,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1287,6 +1663,142 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-level-config_select".
+ */
+export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "static-url_select".
+ */
+export interface StaticUrlSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-live-preview_select".
+ */
+export interface CustomLivePreviewSelect<T extends boolean = true> {
+  slug?: T;
+  tenant?: T;
+  title?: T;
+  hero?:
+    | T
+    | {
+        type?: T;
+        richText?: T;
+        media?: T;
+      };
+  layout?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              invertBackground?: T;
+              richText?: T;
+              links?:
+                | T
+                | {
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              invertBackground?: T;
+              columns?:
+                | T
+                | {
+                    size?: T;
+                    richText?: T;
+                    enableLink?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                          appearance?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        mediaBlock?:
+          | T
+          | {
+              invertBackground?: T;
+              position?: T;
+              media?: T;
+              id?: T;
+              blockName?: T;
+            };
+        archive?:
+          | T
+          | {
+              introContent?: T;
+              populateBy?: T;
+              relationTo?: T;
+              categories?: T;
+              limit?: T;
+              selectedDocs?: T;
+              populatedDocs?: T;
+              populatedDocsTotal?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-url_select".
+ */
+export interface ConditionalUrlSelect<T extends boolean = true> {
+  title?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1339,6 +1851,9 @@ export interface Header {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;
@@ -1369,6 +1884,9 @@ export interface Footer {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;
@@ -1435,6 +1953,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

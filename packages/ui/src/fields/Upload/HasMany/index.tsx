@@ -11,12 +11,15 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
-import type { ReloadDoc } from '../types.js'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 
 import './index.scss'
 
+import type { ReloadDoc } from '../types.js'
+
 type Props = {
   readonly className?: string
+  readonly displayPreview?: boolean
   readonly fileDocs: {
     relationTo: string
     value: JsonObject
@@ -27,10 +30,22 @@ type Props = {
   readonly readonly?: boolean
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
+  readonly showCollectionSlug?: boolean
 }
+
 export function UploadComponentHasMany(props: Props) {
-  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, reloadDoc, serverURL } =
-    props
+  const {
+    className,
+    displayPreview,
+    fileDocs,
+    isSortable,
+    onRemove,
+    onReorder,
+    readonly,
+    reloadDoc,
+    serverURL,
+    showCollectionSlug = false,
+  } = props
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -66,13 +81,32 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
-          const url: string = value.thumbnailURL || value.url
           let src: string
+          let thumbnailSrc: string
 
-          try {
-            src = new URL(url, serverURL).toString()
-          } catch {
-            src = `${serverURL}${url}`
+          if (value.url) {
+            try {
+              src = new URL(value.url, serverURL).toString()
+            } catch {
+              src = `${serverURL}${value.url}`
+            }
+          }
+
+          if (value.thumbnailURL) {
+            try {
+              thumbnailSrc = new URL(value.thumbnailURL, serverURL).toString()
+            } catch {
+              thumbnailSrc = `${serverURL}${value.thumbnailURL}`
+            }
+          }
+
+          if (isImage(value.mimeType)) {
+            thumbnailSrc = getBestFitFromSizes({
+              sizes: value.sizes,
+              thumbnailURL: thumbnailSrc,
+              url: src,
+              width: value.width,
+            })
           }
 
           return (
@@ -109,12 +143,16 @@ export function UploadComponentHasMany(props: Props) {
                       alt={(value?.alt || value?.filename) as string}
                       byteSize={value.filesize as number}
                       collectionSlug={relationTo}
+                      displayPreview={displayPreview}
                       filename={value.filename as string}
                       id={id}
                       mimeType={value?.mimeType as string}
                       onRemove={() => removeItem(index)}
                       reloadDoc={reloadDoc}
+                      showCollectionSlug={showCollectionSlug}
                       src={src}
+                      thumbnailSrc={thumbnailSrc}
+                      updatedAt={value.updatedAt}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

@@ -9,6 +9,7 @@ export type Resolver = (
   args: {
     data: Record<string, unknown>
     locale?: string
+    trash?: boolean
     where?: Where
   },
   context: {
@@ -30,6 +31,7 @@ export function countResolver(collection: Collection): Resolver {
     const options = {
       collection,
       req: isolateObjectProperty(req, 'transactionID'),
+      trash: args.trash,
       where: args.where,
     }
 

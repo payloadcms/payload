@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/payload-cloud",
-  "version": "3.2.1",
+  "version": "3.73.0",
   "description": "The official Payload Cloud plugin",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -32,12 +33,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "jest"
   },
   "dependencies": {
@@ -47,14 +48,11 @@
     "@aws-sdk/lib-storage": "^3.614.0",
     "@payloadcms/email-nodemailer": "workspace:*",
     "amazon-cognito-identity-js": "^6.1.2",
-    "nodemailer": "6.9.10",
-    "resend": "^0.17.2"
+    "nodemailer": "7.0.12"
   },
   "devDependencies": {
-    "@types/jest": "29.5.12",
-    "@types/nodemailer": "6.4.14",
-    "payload": "workspace:*",
-    "ts-jest": "^29.1.0"
+    "@types/nodemailer": "7.0.2",
+    "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"

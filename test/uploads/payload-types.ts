@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     relation: Relation;
     audio: Audio;
@@ -22,10 +78,21 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDatum;
     'crop-only': CropOnly;
     'focal-only': FocalOnly;
+    'image-sizes-only': ImageSizesOnly;
     'focal-no-sizes': FocalNoSize;
     media: Media;
+    'allow-list-media': AllowListMedia;
+    'skip-safe-fetch-media': SkipSafeFetchMedia;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilter;
+    'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMedia;
+    'restrict-file-types': RestrictFileType;
+    'no-restrict-file-types': NoRestrictFileType;
+    'no-restrict-file-mime-types': NoRestrictFileMimeType;
+    'pdf-only': PdfOnly;
+    'restricted-mime-types': RestrictedMimeType;
     'animated-type-media': AnimatedTypeMedia;
     enlarge: Enlarge;
+    'without-enlarge': WithoutEnlarge;
     reduce: Reduce;
     'media-trim': MediaTrim;
     'custom-file-name-media': CustomFileNameMedia;
@@ -33,15 +100,33 @@ export interface Config {
     'externally-served-media': ExternallyServedMedia;
     'uploads-1': Uploads1;
     'uploads-2': Uploads2;
+    'any-images': AnyImage;
     'admin-thumbnail-function': AdminThumbnailFunction;
+    'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
+    'admin-upload-control': AdminUploadControl;
+    'no-files-required': NoFilesRequired;
+    'relation-to-no-files-required': RelationToNoFilesRequired;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
     'custom-upload-field': CustomUploadField;
     'media-with-relation-preview': MediaWithRelationPreview;
+    'media-without-cache-tags': MediaWithoutCacheTag;
     'media-without-relation-preview': MediaWithoutRelationPreview;
     'relation-preview': RelationPreview;
+    'hide-file-input-on-create': HideFileInputOnCreate;
+    'best-fit': BestFit;
+    'list-view-preview': ListViewPreview;
+    'three-dimensional': ThreeDimensional;
+    'constructor-options': ConstructorOption;
+    'bulk-uploads': BulkUpload;
+    'simple-relationship': SimpleRelationship;
+    'file-mime-type': FileMimeType;
+    'svg-only': SvgOnly;
+    'media-without-delete-access': MediaWithoutDeleteAccess;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminProp;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -60,10 +145,21 @@ export interface Config {
     'with-only-jpeg-meta-data': WithOnlyJpegMetaDataSelect<false> | WithOnlyJpegMetaDataSelect<true>;
     'crop-only': CropOnlySelect<false> | CropOnlySelect<true>;
     'focal-only': FocalOnlySelect<false> | FocalOnlySelect<true>;
+    'image-sizes-only': ImageSizesOnlySelect<false> | ImageSizesOnlySelect<true>;
     'focal-no-sizes': FocalNoSizesSelect<false> | FocalNoSizesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'allow-list-media': AllowListMediaSelect<false> | AllowListMediaSelect<true>;
+    'skip-safe-fetch-media': SkipSafeFetchMediaSelect<false> | SkipSafeFetchMediaSelect<true>;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilterSelect<false> | SkipSafeFetchHeaderFilterSelect<true>;
+    'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaSelect<false> | SkipAllowListSafeFetchMediaSelect<true>;
+    'restrict-file-types': RestrictFileTypesSelect<false> | RestrictFileTypesSelect<true>;
+    'no-restrict-file-types': NoRestrictFileTypesSelect<false> | NoRestrictFileTypesSelect<true>;
+    'no-restrict-file-mime-types': NoRestrictFileMimeTypesSelect<false> | NoRestrictFileMimeTypesSelect<true>;
+    'pdf-only': PdfOnlySelect<false> | PdfOnlySelect<true>;
+    'restricted-mime-types': RestrictedMimeTypesSelect<false> | RestrictedMimeTypesSelect<true>;
     'animated-type-media': AnimatedTypeMediaSelect<false> | AnimatedTypeMediaSelect<true>;
     enlarge: EnlargeSelect<false> | EnlargeSelect<true>;
+    'without-enlarge': WithoutEnlargeSelect<false> | WithoutEnlargeSelect<true>;
     reduce: ReduceSelect<false> | ReduceSelect<true>;
     'media-trim': MediaTrimSelect<false> | MediaTrimSelect<true>;
     'custom-file-name-media': CustomFileNameMediaSelect<false> | CustomFileNameMediaSelect<true>;
@@ -71,32 +167,51 @@ export interface Config {
     'externally-served-media': ExternallyServedMediaSelect<false> | ExternallyServedMediaSelect<true>;
     'uploads-1': Uploads1Select<false> | Uploads1Select<true>;
     'uploads-2': Uploads2Select<false> | Uploads2Select<true>;
+    'any-images': AnyImagesSelect<false> | AnyImagesSelect<true>;
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
+    'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
+    'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
+    'no-files-required': NoFilesRequiredSelect<false> | NoFilesRequiredSelect<true>;
+    'relation-to-no-files-required': RelationToNoFilesRequiredSelect<false> | RelationToNoFilesRequiredSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'custom-upload-field': CustomUploadFieldSelect<false> | CustomUploadFieldSelect<true>;
     'media-with-relation-preview': MediaWithRelationPreviewSelect<false> | MediaWithRelationPreviewSelect<true>;
+    'media-without-cache-tags': MediaWithoutCacheTagsSelect<false> | MediaWithoutCacheTagsSelect<true>;
     'media-without-relation-preview': MediaWithoutRelationPreviewSelect<false> | MediaWithoutRelationPreviewSelect<true>;
     'relation-preview': RelationPreviewSelect<false> | RelationPreviewSelect<true>;
+    'hide-file-input-on-create': HideFileInputOnCreateSelect<false> | HideFileInputOnCreateSelect<true>;
+    'best-fit': BestFitSelect<false> | BestFitSelect<true>;
+    'list-view-preview': ListViewPreviewSelect<false> | ListViewPreviewSelect<true>;
+    'three-dimensional': ThreeDimensionalSelect<false> | ThreeDimensionalSelect<true>;
+    'constructor-options': ConstructorOptionsSelect<false> | ConstructorOptionsSelect<true>;
+    'bulk-uploads': BulkUploadsSelect<false> | BulkUploadsSelect<true>;
+    'simple-relationship': SimpleRelationshipSelect<false> | SimpleRelationshipSelect<true>;
+    'file-mime-type': FileMimeTypeSelect<false> | FileMimeTypeSelect<true>;
+    'svg-only': SvgOnlySelect<false> | SvgOnlySelect<true>;
+    'media-without-delete-access': MediaWithoutDeleteAccessSelect<false> | MediaWithoutDeleteAccessSelect<true>;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminPropsSelect<false> | MediaWithImageSizeAdminPropsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -122,18 +237,31 @@ export interface UserAuthOperations {
  * via the `definition` "relation".
  */
 export interface Relation {
-  id: string;
-  image?: (string | null) | Media;
-  versionedImage?: (string | null) | Version;
+  id: number;
+  image?: (number | null) | Media;
+  versionedImage?: (number | null) | Version;
+  hideFileInputOnCreate?: (number | null) | HideFileInputOnCreate;
+  blocks?:
+    | {
+        media: number | Media;
+        relatedMedia?: (number | Media)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedMediaBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
+  alt?: string | null;
+  localized?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -266,6 +394,14 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -273,7 +409,7 @@ export interface Media {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -290,11 +426,30 @@ export interface Version {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hide-file-input-on-create".
+ */
+export interface HideFileInputOnCreate {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "audio".
  */
 export interface Audio {
-  id: string;
-  audio?: (string | null) | Media;
+  id: number;
+  audio?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -303,7 +458,7 @@ export interface Audio {
  * via the `definition` "gif-resize".
  */
 export interface GifResize {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -339,7 +494,10 @@ export interface GifResize {
  * via the `definition` "filename-compound-index".
  */
 export interface FilenameCompoundIndex {
-  id: string;
+  id: number;
+  /**
+   * Alt text to be used for compound index
+   */
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -376,7 +534,7 @@ export interface FilenameCompoundIndex {
  * via the `definition` "no-image-sizes".
  */
 export interface NoImageSize {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -394,7 +552,7 @@ export interface NoImageSize {
  * via the `definition` "object-fit".
  */
 export interface ObjectFit {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -446,7 +604,7 @@ export interface ObjectFit {
  * via the `definition` "with-meta-data".
  */
 export interface WithMetaDatum {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -474,7 +632,7 @@ export interface WithMetaDatum {
  * via the `definition` "without-meta-data".
  */
 export interface WithoutMetaDatum {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -502,7 +660,7 @@ export interface WithoutMetaDatum {
  * via the `definition` "with-only-jpeg-meta-data".
  */
 export interface WithOnlyJpegMetaDatum {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -530,7 +688,7 @@ export interface WithOnlyJpegMetaDatum {
  * via the `definition` "crop-only".
  */
 export interface CropOnly {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -574,7 +732,7 @@ export interface CropOnly {
  * via the `definition` "focal-only".
  */
 export interface FocalOnly {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -615,10 +773,208 @@ export interface FocalOnly {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only".
+ */
+export interface ImageSizesOnly {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sizeTwo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "focal-no-sizes".
  */
 export interface FocalNoSize {
-  id: string;
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media".
+ */
+export interface AllowListMedia {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-media".
+ */
+export interface SkipSafeFetchMedia {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter".
+ */
+export interface SkipSafeFetchHeaderFilter {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-allow-list-safe-fetch-media".
+ */
+export interface SkipAllowListSafeFetchMedia {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrict-file-types".
+ */
+export interface RestrictFileType {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-types".
+ */
+export interface NoRestrictFileType {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-mime-types".
+ */
+export interface NoRestrictFileMimeType {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pdf-only".
+ */
+export interface PdfOnly {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-mime-types".
+ */
+export interface RestrictedMimeType {
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -636,7 +992,7 @@ export interface FocalNoSize {
  * via the `definition` "animated-type-media".
  */
 export interface AnimatedTypeMedia {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -688,7 +1044,7 @@ export interface AnimatedTypeMedia {
  * via the `definition` "enlarge".
  */
 export interface Enlarge {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -741,14 +1097,40 @@ export interface Enlarge {
       filesize?: number | null;
       filename?: string | null;
     };
+    undefinedHeightWithoutEnlargement?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge".
+ */
+export interface WithoutEnlarge {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "reduce".
  */
 export interface Reduce {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -800,7 +1182,7 @@ export interface Reduce {
  * via the `definition` "media-trim".
  */
 export interface MediaTrim {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -844,7 +1226,7 @@ export interface MediaTrim {
  * via the `definition` "custom-file-name-media".
  */
 export interface CustomFileNameMedia {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -872,7 +1254,7 @@ export interface CustomFileNameMedia {
  * via the `definition` "unstored-media".
  */
 export interface UnstoredMedia {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -890,7 +1272,7 @@ export interface UnstoredMedia {
  * via the `definition` "externally-served-media".
  */
 export interface ExternallyServedMedia {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -908,14 +1290,16 @@ export interface ExternallyServedMedia {
  * via the `definition` "uploads-1".
  */
 export interface Uploads1 {
-  id: string;
-  hasManyUpload?: (string | Uploads2)[] | null;
-  singleUpload?: (string | null) | Uploads2;
+  id: number;
+  hasManyUpload?: (number | Uploads2)[] | null;
+  singleUpload?: (number | null) | Uploads2;
+  hasManyThumbnailUpload?: (number | AdminThumbnailSize)[] | null;
+  singleThumbnailUpload?: (number | null) | AdminThumbnailSize;
   richText?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -943,26 +1327,9 @@ export interface Uploads1 {
  * via the `definition` "uploads-2".
  */
 export interface Uploads2 {
-  id: string;
+  id: number;
+  prefix: string;
   title?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "admin-thumbnail-function".
- */
-export interface AdminThumbnailFunction {
-  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -980,7 +1347,7 @@ export interface AdminThumbnailFunction {
  * via the `definition` "admin-thumbnail-size".
  */
 export interface AdminThumbnailSize {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1013,10 +1380,112 @@ export interface AdminThumbnailSize {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images".
+ */
+export interface AnyImage {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-function".
+ */
+export interface AdminThumbnailFunction {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-with-search-queries".
+ */
+export interface AdminThumbnailWithSearchQuery {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control".
+ */
+export interface AdminUploadControl {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-files-required".
+ */
+export interface NoFilesRequired {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-to-no-files-required".
+ */
+export interface RelationToNoFilesRequired {
+  id: number;
+  title?: string | null;
+  uploadField?: (number | null) | NoFilesRequired;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1034,7 +1503,7 @@ export interface OptionalFile {
  * via the `definition` "required-file".
  */
 export interface RequiredFile {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1052,7 +1521,7 @@ export interface RequiredFile {
  * via the `definition` "custom-upload-field".
  */
 export interface CustomUploadField {
-  id: string;
+  id: number;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1071,7 +1540,26 @@ export interface CustomUploadField {
  * via the `definition` "media-with-relation-preview".
  */
 export interface MediaWithRelationPreview {
-  id: string;
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-cache-tags".
+ */
+export interface MediaWithoutCacheTag {
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1090,7 +1578,7 @@ export interface MediaWithRelationPreview {
  * via the `definition` "media-without-relation-preview".
  */
 export interface MediaWithoutRelationPreview {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1109,22 +1597,238 @@ export interface MediaWithoutRelationPreview {
  * via the `definition` "relation-preview".
  */
 export interface RelationPreview {
-  id: string;
-  imageWithPreview1?: (string | null) | MediaWithRelationPreview;
-  imageWithPreview2?: (string | null) | MediaWithRelationPreview;
-  imageWithoutPreview1?: (string | null) | MediaWithRelationPreview;
-  imageWithoutPreview2?: (string | null) | MediaWithoutRelationPreview;
-  imageWithPreview3?: (string | null) | MediaWithoutRelationPreview;
-  imageWithoutPreview3?: (string | null) | MediaWithoutRelationPreview;
+  id: number;
+  imageWithPreview1?: (number | null) | MediaWithRelationPreview;
+  imageWithPreview2?: (number | null) | MediaWithRelationPreview;
+  imageWithoutPreview1?: (number | null) | MediaWithRelationPreview;
+  imageWithoutPreview2?: (number | null) | MediaWithoutRelationPreview;
+  imageWithPreview3?: (number | null) | MediaWithoutRelationPreview;
+  imageWithoutPreview3?: (number | null) | MediaWithoutRelationPreview;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "best-fit".
+ */
+export interface BestFit {
+  id: number;
+  withAdminThumbnail?: (number | null) | AdminThumbnailFunction;
+  withinRange?: (number | null) | Enlarge;
+  nextSmallestOutOfRange?: (number | null) | FocalOnly;
+  original?: (number | null) | FocalOnly;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview".
+ */
+export interface ListViewPreview {
+  id: number;
+  title?: string | null;
+  imageUpload?: (number | null) | MediaWithRelationPreview;
+  imageRelationship?: (number | null) | MediaWithRelationPreview;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional".
+ */
+export interface ThreeDimensional {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options".
+ */
+export interface ConstructorOption {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads".
+ */
+export interface BulkUpload {
+  id: number;
+  title: string;
+  relationship?: {
+    relationTo: 'simple-relationship';
+    value: number | SimpleRelationship;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-relationship".
+ */
+export interface SimpleRelationship {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-mime-type".
+ */
+export interface FileMimeType {
+  id: number;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only".
+ */
+export interface SvgOnly {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access".
+ */
+export interface MediaWithoutDeleteAccess {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props".
+ */
+export interface MediaWithImageSizeAdminProp {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    one?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    two?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    three?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    four?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1134,6 +1838,13 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
 }
 /**
@@ -1141,140 +1852,252 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'relation';
-        value: string | Relation;
+        value: number | Relation;
       } | null)
     | ({
         relationTo: 'audio';
-        value: string | Audio;
+        value: number | Audio;
       } | null)
     | ({
         relationTo: 'gif-resize';
-        value: string | GifResize;
+        value: number | GifResize;
       } | null)
     | ({
         relationTo: 'filename-compound-index';
-        value: string | FilenameCompoundIndex;
+        value: number | FilenameCompoundIndex;
       } | null)
     | ({
         relationTo: 'no-image-sizes';
-        value: string | NoImageSize;
+        value: number | NoImageSize;
       } | null)
     | ({
         relationTo: 'object-fit';
-        value: string | ObjectFit;
+        value: number | ObjectFit;
       } | null)
     | ({
         relationTo: 'with-meta-data';
-        value: string | WithMetaDatum;
+        value: number | WithMetaDatum;
       } | null)
     | ({
         relationTo: 'without-meta-data';
-        value: string | WithoutMetaDatum;
+        value: number | WithoutMetaDatum;
       } | null)
     | ({
         relationTo: 'with-only-jpeg-meta-data';
-        value: string | WithOnlyJpegMetaDatum;
+        value: number | WithOnlyJpegMetaDatum;
       } | null)
     | ({
         relationTo: 'crop-only';
-        value: string | CropOnly;
+        value: number | CropOnly;
       } | null)
     | ({
         relationTo: 'focal-only';
-        value: string | FocalOnly;
+        value: number | FocalOnly;
+      } | null)
+    | ({
+        relationTo: 'image-sizes-only';
+        value: number | ImageSizesOnly;
       } | null)
     | ({
         relationTo: 'focal-no-sizes';
-        value: string | FocalNoSize;
+        value: number | FocalNoSize;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'allow-list-media';
+        value: number | AllowListMedia;
+      } | null)
+    | ({
+        relationTo: 'skip-safe-fetch-media';
+        value: number | SkipSafeFetchMedia;
+      } | null)
+    | ({
+        relationTo: 'skip-safe-fetch-header-filter';
+        value: number | SkipSafeFetchHeaderFilter;
+      } | null)
+    | ({
+        relationTo: 'skip-allow-list-safe-fetch-media';
+        value: number | SkipAllowListSafeFetchMedia;
+      } | null)
+    | ({
+        relationTo: 'restrict-file-types';
+        value: number | RestrictFileType;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-types';
+        value: number | NoRestrictFileType;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-mime-types';
+        value: number | NoRestrictFileMimeType;
+      } | null)
+    | ({
+        relationTo: 'pdf-only';
+        value: number | PdfOnly;
+      } | null)
+    | ({
+        relationTo: 'restricted-mime-types';
+        value: number | RestrictedMimeType;
       } | null)
     | ({
         relationTo: 'animated-type-media';
-        value: string | AnimatedTypeMedia;
+        value: number | AnimatedTypeMedia;
       } | null)
     | ({
         relationTo: 'enlarge';
-        value: string | Enlarge;
+        value: number | Enlarge;
+      } | null)
+    | ({
+        relationTo: 'without-enlarge';
+        value: number | WithoutEnlarge;
       } | null)
     | ({
         relationTo: 'reduce';
-        value: string | Reduce;
+        value: number | Reduce;
       } | null)
     | ({
         relationTo: 'media-trim';
-        value: string | MediaTrim;
+        value: number | MediaTrim;
       } | null)
     | ({
         relationTo: 'custom-file-name-media';
-        value: string | CustomFileNameMedia;
+        value: number | CustomFileNameMedia;
       } | null)
     | ({
         relationTo: 'unstored-media';
-        value: string | UnstoredMedia;
+        value: number | UnstoredMedia;
       } | null)
     | ({
         relationTo: 'externally-served-media';
-        value: string | ExternallyServedMedia;
+        value: number | ExternallyServedMedia;
       } | null)
     | ({
         relationTo: 'uploads-1';
-        value: string | Uploads1;
+        value: number | Uploads1;
       } | null)
     | ({
         relationTo: 'uploads-2';
-        value: string | Uploads2;
+        value: number | Uploads2;
+      } | null)
+    | ({
+        relationTo: 'any-images';
+        value: number | AnyImage;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-function';
-        value: string | AdminThumbnailFunction;
+        value: number | AdminThumbnailFunction;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-with-search-queries';
+        value: number | AdminThumbnailWithSearchQuery;
       } | null)
     | ({
         relationTo: 'admin-thumbnail-size';
-        value: string | AdminThumbnailSize;
+        value: number | AdminThumbnailSize;
+      } | null)
+    | ({
+        relationTo: 'admin-upload-control';
+        value: number | AdminUploadControl;
+      } | null)
+    | ({
+        relationTo: 'no-files-required';
+        value: number | NoFilesRequired;
+      } | null)
+    | ({
+        relationTo: 'relation-to-no-files-required';
+        value: number | RelationToNoFilesRequired;
       } | null)
     | ({
         relationTo: 'optional-file';
-        value: string | OptionalFile;
+        value: number | OptionalFile;
       } | null)
     | ({
         relationTo: 'required-file';
-        value: string | RequiredFile;
+        value: number | RequiredFile;
       } | null)
     | ({
         relationTo: 'versions';
-        value: string | Version;
+        value: number | Version;
       } | null)
     | ({
         relationTo: 'custom-upload-field';
-        value: string | CustomUploadField;
+        value: number | CustomUploadField;
       } | null)
     | ({
         relationTo: 'media-with-relation-preview';
-        value: string | MediaWithRelationPreview;
+        value: number | MediaWithRelationPreview;
+      } | null)
+    | ({
+        relationTo: 'media-without-cache-tags';
+        value: number | MediaWithoutCacheTag;
       } | null)
     | ({
         relationTo: 'media-without-relation-preview';
-        value: string | MediaWithoutRelationPreview;
+        value: number | MediaWithoutRelationPreview;
       } | null)
     | ({
         relationTo: 'relation-preview';
-        value: string | RelationPreview;
+        value: number | RelationPreview;
+      } | null)
+    | ({
+        relationTo: 'hide-file-input-on-create';
+        value: number | HideFileInputOnCreate;
+      } | null)
+    | ({
+        relationTo: 'best-fit';
+        value: number | BestFit;
+      } | null)
+    | ({
+        relationTo: 'list-view-preview';
+        value: number | ListViewPreview;
+      } | null)
+    | ({
+        relationTo: 'three-dimensional';
+        value: number | ThreeDimensional;
+      } | null)
+    | ({
+        relationTo: 'constructor-options';
+        value: number | ConstructorOption;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads';
+        value: number | BulkUpload;
+      } | null)
+    | ({
+        relationTo: 'simple-relationship';
+        value: number | SimpleRelationship;
+      } | null)
+    | ({
+        relationTo: 'file-mime-type';
+        value: number | FileMimeType;
+      } | null)
+    | ({
+        relationTo: 'svg-only';
+        value: number | SvgOnly;
+      } | null)
+    | ({
+        relationTo: 'media-without-delete-access';
+        value: number | MediaWithoutDeleteAccess;
+      } | null)
+    | ({
+        relationTo: 'media-with-image-size-admin-props';
+        value: number | MediaWithImageSizeAdminProp;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1284,10 +2107,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -1307,7 +2130,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1320,8 +2143,22 @@ export interface PayloadMigration {
 export interface RelationSelect<T extends boolean = true> {
   image?: T;
   versionedImage?: T;
+  hideFileInputOnCreate?: T;
+  blocks?:
+    | T
+    | {
+        localizedMediaBlock?:
+          | T
+          | {
+              media?: T;
+              relatedMedia?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1690,6 +2527,47 @@ export interface FocalOnlySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only_select".
+ */
+export interface ImageSizesOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        sizeOne?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        sizeTwo?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "focal-no-sizes_select".
  */
 export interface FocalNoSizesSelect<T extends boolean = true> {
@@ -1710,6 +2588,8 @@ export interface FocalNoSizesSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  localized?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1874,7 +2754,170 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        undefinedHeight?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media_select".
+ */
+export interface AllowListMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-media_select".
+ */
+export interface SkipSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter_select".
+ */
+export interface SkipSafeFetchHeaderFilterSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-allow-list-safe-fetch-media_select".
+ */
+export interface SkipAllowListSafeFetchMediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrict-file-types_select".
+ */
+export interface RestrictFileTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-types_select".
+ */
+export interface NoRestrictFileTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-mime-types_select".
+ */
+export interface NoRestrictFileMimeTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pdf-only_select".
+ */
+export interface PdfOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-mime-types_select".
+ */
+export interface RestrictedMimeTypesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2006,7 +3049,34 @@ export interface EnlargeSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        undefinedHeightWithoutEnlargement?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge_select".
+ */
+export interface WithoutEnlargeSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2192,6 +3262,8 @@ export interface ExternallyServedMediaSelect<T extends boolean = true> {
 export interface Uploads1Select<T extends boolean = true> {
   hasManyUpload?: T;
   singleUpload?: T;
+  hasManyThumbnailUpload?: T;
+  singleThumbnailUpload?: T;
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2210,7 +3282,25 @@ export interface Uploads1Select<T extends boolean = true> {
  * via the `definition` "uploads-2_select".
  */
 export interface Uploads2Select<T extends boolean = true> {
+  prefix?: T;
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images_select".
+ */
+export interface AnyImagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2228,6 +3318,23 @@ export interface Uploads2Select<T extends boolean = true> {
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-with-search-queries_select".
+ */
+export interface AdminThumbnailWithSearchQueriesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2280,6 +3387,51 @@ export interface AdminThumbnailSizeSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control_select".
+ */
+export interface AdminUploadControlSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-files-required_select".
+ */
+export interface NoFilesRequiredSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-to-no-files-required_select".
+ */
+export interface RelationToNoFilesRequiredSelect<T extends boolean = true> {
+  title?: T;
+  uploadField?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2372,6 +3524,24 @@ export interface MediaWithRelationPreviewSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-cache-tags_select".
+ */
+export interface MediaWithoutCacheTagsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-without-relation-preview_select".
  */
 export interface MediaWithoutRelationPreviewSelect<T extends boolean = true> {
@@ -2404,6 +3574,228 @@ export interface RelationPreviewSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hide-file-input-on-create_select".
+ */
+export interface HideFileInputOnCreateSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "best-fit_select".
+ */
+export interface BestFitSelect<T extends boolean = true> {
+  withAdminThumbnail?: T;
+  withinRange?: T;
+  nextSmallestOutOfRange?: T;
+  original?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview_select".
+ */
+export interface ListViewPreviewSelect<T extends boolean = true> {
+  title?: T;
+  imageUpload?: T;
+  imageRelationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional_select".
+ */
+export interface ThreeDimensionalSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options_select".
+ */
+export interface ConstructorOptionsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads_select".
+ */
+export interface BulkUploadsSelect<T extends boolean = true> {
+  title?: T;
+  relationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-relationship_select".
+ */
+export interface SimpleRelationshipSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-mime-type_select".
+ */
+export interface FileMimeTypeSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only_select".
+ */
+export interface SvgOnlySelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access_select".
+ */
+export interface MediaWithoutDeleteAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props_select".
+ */
+export interface MediaWithImageSizeAdminPropsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        one?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        two?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        three?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        four?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -2416,6 +3808,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2459,6 +3858,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

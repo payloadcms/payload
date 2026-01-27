@@ -2,11 +2,20 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { v4 as uuid } from 'uuid'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import { seed } from './seed.js'
+import {
+  apiKeysSlug,
+  BASE_PATH,
+  namedSaveToJWTValue,
+  partialDisableLocalStrategiesSlug,
+  publicUsersSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
+
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
   admin: {
@@ -14,6 +23,18 @@ export default buildConfigWithDefaults({
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
+    },
+    autoRefresh: true,
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+      views: {
+        'create-first-user': {
+          Component: './CreateFirstUser.js#CreateFirstUser',
+          path: '/create-first-user',
+          exact: true,
+        },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -38,6 +59,9 @@ export default buildConfigWithDefaults({
         tokenExpiration: 7200, // 2 hours
         useAPIKey: true,
         verify: false,
+        forgotPassword: {
+          expiration: 300000, // 5 minutes
+        },
       },
       fields: [
         {
@@ -60,11 +84,26 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
         {
+          name: 'loginMetadata',
+          type: 'array',
+          label: 'Login Metadata',
+          fields: [
+            {
+              name: 'info',
+              type: 'text',
+            },
+          ],
+        },
+        {
           name: 'namedSaveToJWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
           label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'richText',
+          type: 'richText',
         },
         {
           name: 'group',
@@ -172,6 +211,46 @@ export default buildConfigWithDefaults({
           },
           label: 'Auth Debug',
         },
+        {
+          // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
+          // E.g. if the user is authenticated, it will appear in the both the client config
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+          access: {
+            // Setting this forces the field to show up in the permissions object
+            read: () => true,
+          },
+        },
+      ],
+    },
+    {
+      slug: partialDisableLocalStrategiesSlug,
+      auth: {
+        disableLocalStrategy: {
+          // optionalPassword: true,
+          enableFields: true,
+        },
+      },
+      fields: [
+        // with `enableFields: true`, the following DB columns will be created:
+        // email
+        // reset_password_token
+        // reset_password_expiration
+        // salt
+        // hash
+        // login_attempts
+        // lock_until
+      ],
+    },
+    {
+      slug: 'disable-local-strategy-password',
+      auth: { disableLocalStrategy: true },
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          required: true,
+        },
       ],
     },
     {
@@ -181,7 +260,7 @@ export default buildConfigWithDefaults({
           if (!user) {
             return false
           }
-          if (user?.collection === 'api-keys') {
+          if (user?.collection === apiKeysSlug) {
             return {
               id: {
                 equals: user.id,
@@ -202,7 +281,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'public-users',
+      slug: publicUsersSlug,
       auth: {
         verify: true,
       },
@@ -222,34 +301,35 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'api-keys-with-field-read-access',
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Field Read Access',
+        singular: 'API Key With Field Read Access',
+      },
+    },
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        custom: 'Hello, world!',
-        email: devUser.email,
-        password: devUser.password,
-        roles: ['admin'],
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: 'api-keys',
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-  },
+  onInit: seed,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-vercel-blob",
-  "version": "3.2.1",
+  "version": "3.73.0",
   "description": "Payload storage adapter for Vercel Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,12 +17,18 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -33,12 +39,12 @@
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/plugin-cloud-storage": "workspace:*",
@@ -59,6 +65,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",

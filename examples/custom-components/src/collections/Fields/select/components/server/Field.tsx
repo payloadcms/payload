@@ -3,7 +3,18 @@ import type React from 'react'
 
 import { SelectField } from '@payloadcms/ui'
 
-export const CustomSelectFieldServer: SelectFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <SelectField field={props?.clientField} path={path} />
+export const CustomSelectFieldServer: SelectFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <SelectField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
 }

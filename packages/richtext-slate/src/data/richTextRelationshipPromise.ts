@@ -156,6 +156,7 @@ export const richTextRelationshipPromise = ({
   draft,
   field,
   overrideAccess,
+  parentIsLocalized,
   populateArg,
   populationPromises,
   req,

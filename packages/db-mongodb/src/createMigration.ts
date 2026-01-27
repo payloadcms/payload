@@ -10,11 +10,11 @@ const migrationTemplate = ({ downSQL, imports, upSQL }: MigrationTemplateArgs): 
   MigrateUpArgs,
 } from '@payloadcms/db-mongodb'
 ${imports ?? ''}
-export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ payload, req, session }: MigrateUpArgs): Promise<void> {
 ${upSQL ?? `  // Migration code`}
 }
 
-export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ payload, req, session }: MigrateDownArgs): Promise<void> {
 ${downSQL ?? `  // Migration code`}
 }
 `
@@ -42,8 +42,9 @@ export const createMigration: CreateMigration = async function createMigration({
   const migrationFileContent = migrationTemplate(predefinedMigration)
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
-  const formattedDate = yyymmdd.replace(/\D/g, '')
-  const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
+
+  const formattedDate = yyymmdd!.replace(/\D/g, '')
+  const formattedTime = hhmmss!.split('.')[0]!.replace(/\D/g, '')
 
   const timestamp = `${formattedDate}_${formattedTime}`
 

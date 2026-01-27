@@ -1,7 +1,6 @@
 import type {
-  PayloadRequest,
+  JsonObject,
   SanitizedCollectionConfig,
-  TypeWithID,
   TypeWithVersion,
   UpdateVersionArgs,
 } from 'payload'
@@ -11,22 +10,23 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
-export async function updateVersion<T extends TypeWithID>(
+export async function updateVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     id,
     collection,
     locale,
-    req = {} as PayloadRequest,
+    req,
+    returning,
     select,
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
-) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+): Promise<TypeWithVersion<T>> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(
@@ -43,12 +43,16 @@ export async function updateVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
+    collectionSlug: collection,
     data: versionData,
     db,
     fields,
+    ignoreResult: returning === false,
     joinQuery: false,
     operation: 'update',
     req,
@@ -56,6 +60,10 @@ export async function updateVersion<T extends TypeWithID>(
     tableName,
     where,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

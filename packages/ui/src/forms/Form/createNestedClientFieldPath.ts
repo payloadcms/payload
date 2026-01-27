@@ -5,7 +5,7 @@ import { fieldAffectsData } from 'payload/shared'
 
 export const createNestedClientFieldPath = (parentPath: string, field: ClientField): string => {
   if (parentPath) {
-    if (fieldAffectsData(field)) {
+    if (fieldAffectsData(field) && field.name) {
       return `${parentPath}.${field.name}`
     }
     return parentPath

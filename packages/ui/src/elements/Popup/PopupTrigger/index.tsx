@@ -12,8 +12,8 @@ export type PopupTriggerProps = {
   className?: string
   disabled?: boolean
   noBackground?: boolean
-  setActive: (active: boolean) => void
-  size?: 'large' | 'medium' | 'small'
+  setActive: (active: boolean, viaKeyboard?: boolean) => void
+  size?: 'large' | 'medium' | 'small' | 'xsmall'
 }
 
 export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
@@ -25,12 +25,20 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
     `${baseClass}--${buttonType}`,
     !noBackground && `${baseClass}--background`,
     size && `${baseClass}--size-${size}`,
+    disabled && `${baseClass}--disabled`,
   ]
     .filter(Boolean)
     .join(' ')
 
   const handleClick = () => {
-    setActive(!active)
+    setActive(!active, false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      setActive(!active, true)
+    }
   }
 
   if (buttonType === 'none') {
@@ -42,11 +50,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
       <div
         className={classes}
         onClick={handleClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleClick()
-          }
-        }}
+        onKeyDown={handleKeyDown}
         role="button"
         tabIndex={0}
       >
@@ -60,11 +64,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
       className={classes}
       disabled={disabled}
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          handleClick()
-        }
-      }}
+      onKeyDown={handleKeyDown}
       tabIndex={0}
       type="button"
     >

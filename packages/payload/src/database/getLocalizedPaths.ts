@@ -1,6 +1,12 @@
-import type { Field, FlattenedField } from '../fields/config/types.js'
-import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
+
+import {
+  type Field,
+  fieldShouldBeLocalized,
+  type FlattenedBlock,
+  type FlattenedField,
+} from '../fields/config/types.js'
+import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -9,6 +15,7 @@ export function getLocalizedPaths({
   incomingPath,
   locale,
   overrideAccess = false,
+  parentIsLocalized,
   payload,
 }: {
   collectionSlug?: string
@@ -17,6 +24,10 @@ export function getLocalizedPaths({
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
+  /**
+   * @todo make required in v4.0. Usually, you'd wanna pass this through
+   */
+  parentIsLocalized?: boolean
   payload: Payload
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
@@ -26,10 +37,12 @@ export function getLocalizedPaths({
     {
       collectionSlug,
       complete: false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       field: undefined,
       fields,
       globalSlug,
       invalid: false,
+      parentIsLocalized: parentIsLocalized!,
       path: '',
     },
   ]
@@ -44,15 +57,44 @@ export function getLocalizedPaths({
       let currentPath = path ? `${path}.${segment}` : segment
 
       let fieldsToSearch: FlattenedField[]
+      let _parentIsLocalized = parentIsLocalized
 
-      if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
-        fieldsToSearch = lastIncompletePath.field.flattenedFields
+      let matchedField!: FlattenedField
+
+      if (lastIncompletePath?.field?.type === 'blocks') {
+        if (segment === 'blockType') {
+          matchedField = {
+            name: 'blockType',
+            type: 'text',
+          }
+        } else {
+          for (const _block of lastIncompletePath.field.blockReferences ??
+            lastIncompletePath.field.blocks) {
+            let block: FlattenedBlock
+            if (typeof _block === 'string') {
+              block = payload.blocks[_block]!
+            } else {
+              block = _block
+            }
+
+            matchedField = block.flattenedFields.find((field) => field.name === segment)!
+            if (matchedField) {
+              break
+            }
+          }
+        }
       } else {
-        fieldsToSearch = lastIncompletePath.fields
+        if (lastIncompletePath?.field && 'flattenedFields' in lastIncompletePath.field) {
+          fieldsToSearch = lastIncompletePath.field.flattenedFields
+        } else {
+          fieldsToSearch = lastIncompletePath.fields!
+        }
+        _parentIsLocalized = parentIsLocalized || lastIncompletePath.field?.localized
+
+        matchedField = fieldsToSearch.find((field) => field.name === segment)!
       }
 
-      const matchedField = fieldsToSearch.find((field) => field.name === segment)
-      lastIncompletePath.field = matchedField
+      lastIncompletePath.field = matchedField!
 
       if (currentPath === 'globalType' && globalSlug) {
         lastIncompletePath.path = currentPath
@@ -60,6 +102,18 @@ export function getLocalizedPaths({
         lastIncompletePath.field = {
           name: 'globalType',
           type: 'text',
+        }
+
+        return paths
+      }
+
+      if (currentPath === 'relationTo') {
+        lastIncompletePath.path = currentPath
+        lastIncompletePath.complete = true
+        lastIncompletePath.field = {
+          name: 'relationTo',
+          type: 'select',
+          options: Object.keys(payload.collections),
         }
 
         return paths
@@ -81,58 +135,57 @@ export function getLocalizedPaths({
           lastIncompletePath.invalid = true
         }
 
-        const nextSegment = pathSegments[i + 1]
+        const nextSegment = pathSegments[i + 1]!
+        const currentFieldIsLocalized = fieldShouldBeLocalized({
+          field: matchedField,
+          parentIsLocalized: _parentIsLocalized!,
+        })
+
         const nextSegmentIsLocale =
-          localizationConfig && localizationConfig.localeCodes.includes(nextSegment)
+          localizationConfig &&
+          localizationConfig.localeCodes.includes(nextSegment) &&
+          currentFieldIsLocalized
 
         if (nextSegmentIsLocale) {
           // Skip the next iteration, because it's a locale
           i += 1
           currentPath = `${currentPath}.${nextSegment}`
-        } else if (localizationConfig && 'localized' in matchedField && matchedField.localized) {
+        } else if (localizationConfig && currentFieldIsLocalized) {
           currentPath = `${currentPath}.${locale}`
         }
 
         switch (matchedField.type) {
-          case 'blocks':
-          case 'json':
-          case 'richText': {
-            const upcomingSegments = pathSegments.slice(i + 1).join('.')
-            lastIncompletePath.complete = true
-            lastIncompletePath.path = upcomingSegments
-              ? `${currentPath}.${upcomingSegments}`
-              : currentPath
-            return paths
-          }
-
+          case 'join':
           case 'relationship':
           case 'upload': {
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
-            if (typeof matchedField.relationTo !== 'string') {
-              const lastSegmentIsValid =
-                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
-                pathSegments.length === 1 ||
-                (pathSegments.length === 2 && pathSegments[0] === 'version')
-
+            if (matchedField.type !== 'join' && typeof matchedField.relationTo !== 'string') {
               lastIncompletePath.path = pathSegments.join('.')
-
-              if (lastSegmentIsValid) {
-                lastIncompletePath.complete = true
-              } else {
+              if (![matchedField.name, 'relationTo', 'value'].includes(pathSegments.at(-1)!)) {
                 lastIncompletePath.invalid = true
-                return paths
+              } else {
+                lastIncompletePath.complete = true
               }
             } else {
               lastIncompletePath.complete = true
-              lastIncompletePath.path = currentPath
+              lastIncompletePath.path = currentPath!
 
               const nestedPathToQuery = pathSegments
                 .slice(nextSegmentIsLocale ? i + 2 : i + 1)
                 .join('.')
 
               if (nestedPathToQuery) {
-                const relatedCollection = payload.collections[matchedField.relationTo].config
+                let relatedCollection: SanitizedCollectionConfig
+                if (matchedField.type === 'join') {
+                  if (Array.isArray(matchedField.collection)) {
+                    throw new APIError('Not supported')
+                  }
+
+                  relatedCollection = payload.collections[matchedField.collection]!.config
+                } else {
+                  relatedCollection = payload.collections[matchedField.relationTo as string]!.config
+                }
 
                 const remainingPaths = getLocalizedPaths({
                   collectionSlug: relatedCollection.slug,
@@ -140,6 +193,7 @@ export function getLocalizedPaths({
                   globalSlug,
                   incomingPath: nestedPathToQuery,
                   locale,
+                  parentIsLocalized: false,
                   payload,
                 })
 
@@ -151,17 +205,31 @@ export function getLocalizedPaths({
 
             break
           }
+          case 'json':
+          case 'richText': {
+            const upcomingSegments = pathSegments.slice(i + 1).join('.')
+            pathSegments.forEach((path) => {
+              if (!/^\w+(?:\.\w+)*$/.test(path)) {
+                lastIncompletePath.invalid = true
+              }
+            })
+            lastIncompletePath.complete = true
+            lastIncompletePath.path = upcomingSegments
+              ? `${currentPath}.${upcomingSegments}`
+              : currentPath!
+            return paths
+          }
 
           default: {
             if (i + 1 === pathSegments.length) {
               lastIncompletePath.complete = true
             }
-            lastIncompletePath.path = currentPath
+            lastIncompletePath.path = currentPath!
           }
         }
       } else {
         lastIncompletePath.invalid = true
-        lastIncompletePath.path = currentPath
+        lastIncompletePath.path = currentPath!
         return paths
       }
     }

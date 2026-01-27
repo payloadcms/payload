@@ -1,4 +1,4 @@
-import type { EditViewComponent, PayloadServerReactComponent } from 'payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -6,9 +6,7 @@ import React, { Fragment } from 'react'
 
 import { customNestedTabViewTitle } from '../../../shared.js'
 
-export const CustomNestedTabView: PayloadServerReactComponent<EditViewComponent> = ({
-  initPageResult,
-}) => {
+export function CustomNestedTabView({ initPageResult }: DocumentViewServerProps) {
   if (!initPageResult) {
     notFound()
   }

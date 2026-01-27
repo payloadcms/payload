@@ -29,6 +29,7 @@ import { recursivelyBuildNestedPaths } from './recursivelyBuildNestedPaths.js'
 import { withOperators } from './withOperators.js'
 
 type Args = {
+  collectionSlug?: string
   nestedFieldName?: string
   parentName: string
 }

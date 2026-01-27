@@ -16,7 +16,7 @@ import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
-import { revalidatePost } from './hooks/revalidatePost'
+import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
 
 import {
   MetaDescriptionField,
@@ -25,8 +25,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { slugField } from '@/fields/slug'
-import { getServerSideURL } from '@/utilities/getURL'
+import { slugField } from 'payload'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -51,23 +50,19 @@ export const Posts: CollectionConfig<'posts'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
+      url: ({ data, req }) =>
+        generatePreviewPath({
+          slug: data?.slug,
           collection: 'posts',
-        })
-
-        return `${getServerSideURL()}${path}`
-      },
+          req,
+        }),
     },
-    preview: (data) => {
-      const path = generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+    preview: (data, { req }) =>
+      generatePreviewPath({
+        slug: data?.slug as string,
         collection: 'posts',
-      })
-
-      return `${getServerSideURL()}${path}`
-    },
+        req,
+      }),
     useAsTitle: 'title',
   },
   fields: [
@@ -81,6 +76,11 @@ export const Posts: CollectionConfig<'posts'> = {
       tabs: [
         {
           fields: [
+            {
+              name: 'heroImage',
+              type: 'upload',
+              relationTo: 'media',
+            },
             {
               name: 'content',
               type: 'richText',
@@ -214,17 +214,19 @@ export const Posts: CollectionConfig<'posts'> = {
         },
       ],
     },
-    ...slugField(),
+    slugField(),
   ],
   hooks: {
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
+    afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
       autosave: {
         interval: 100, // We set this interval for optimal live preview
       },
+      schedulePublish: true,
     },
     maxPerDoc: 50,
   },

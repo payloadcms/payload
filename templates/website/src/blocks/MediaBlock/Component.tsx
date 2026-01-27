@@ -1,6 +1,6 @@
 import type { StaticImageData } from 'next/image'
 
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import React from 'react'
 import RichText from '@/components/RichText'
 
@@ -42,11 +42,13 @@ export const MediaBlock: React.FC<Props> = (props) => {
         className,
       )}
     >
-      <Media
-        imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
-        resource={media}
-        src={staticImage}
-      />
+      {(media || staticImage) && (
+        <Media
+          imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
+          resource={media}
+          src={staticImage}
+        />
+      )}
       {caption && (
         <div
           className={cn(
@@ -57,7 +59,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
             captionClassName,
           )}
         >
-          <RichText content={caption} enableGutter={false} />
+          <RichText data={caption} enableGutter={false} />
         </div>
       )}
     </div>

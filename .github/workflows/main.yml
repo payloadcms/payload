@@ -1,14 +1,11 @@
-name: build
+name: ci
 
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+    types: [opened, reopened, synchronize]
+
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -16,274 +13,371 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 22.6.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
+      needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             needs_build:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
+            needs_tests:
+              - '.github/workflows/main.yml'
+              - 'packages/**'
+              - 'test/**'
+              - 'pnpm-lock.yaml'
+              - 'package.json'
             templates:
               - 'templates/**'
-      - name: Log all filter results
+      - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
+          echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
   lint:
-    if: >
-      github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'no-lint') && !contains(github.event.pull_request.title, 'skip-lint')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - name: Node setup
+        uses: ./.github/actions/setup
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+      - name: Lint TypeScript/JavaScript
+        run: pnpm lint -- --quiet
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        timeout-minutes: 720
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
-      - name: Lint staged
-        run: |
-          git diff --name-only --diff-filter=d origin/${GITHUB_BASE_REF}...${GITHUB_SHA}
-          npx lint-staged --diff="origin/${GITHUB_BASE_REF}...${GITHUB_SHA}"
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
-    runs-on: ubuntu-latest
+    if: needs.changes.outputs.needs_build == 'true'
+    runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
+      - uses: actions/checkout@v5
 
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - name: Node setup
+        uses: ./.github/actions/setup
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        timeout-minutes: 720
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-store-
-            pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - run: pnpm install
       - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
   tests-unit:
-    runs-on: ubuntu-latest
-    needs: build
-
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v5
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Unit Tests
         run: pnpm test:unit
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  tests-types:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+
+      - name: Types Tests
+        run: pnpm test:types --target '>=5.7'
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
   tests-int:
-    runs-on: ubuntu-latest
-    needs: build
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         database:
           - mongodb
+          - mongodb-atlas
+          - documentdb
+          - cosmosdb
+          - firestore
           - postgres
           - postgres-custom-schema
           - postgres-uuid
           - supabase
           - sqlite
+          - sqlite-uuid
+
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
     services:
-      postgres:
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
-        env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+      redis:
+        image: redis:latest
         ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          - 6379:6379
+
+        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 25
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v5
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Restore build
+        uses: actions/cache@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - run: pnpm install
+          path: ./*
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Configure Redis
+        run: |
+          echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
         with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
+          database: ${{ matrix.database }}
 
       - name: Integration Tests
         run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
 
   tests-e2e:
-    runs-on: ubuntu-latest
-    needs: build
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
     name: e2e-${{ matrix.suite }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
+        suite:
+          - _community
+          - a11y
+          - access-control
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
+          - admin-bar
+          - admin-root
+          - auth
+          - auth-basic
+          - bulk-edit
+          - dashboard
+          - joins
+          - field-error-states
+          - field-paths
+          - fields-relationship
+          - fields__collections__Array
+          - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
+          - fields__collections__Checkbox
+          - fields__collections__Collapsible
+          - fields__collections__ConditionalLogic
+          - fields__collections__CustomID
+          - fields__collections__Date
+          - fields__collections__Email
+          - fields__collections__Indexed
+          - fields__collections__JSON
+          - fields__collections__Number
+          - fields__collections__Point
+          - fields__collections__Radio
+          - fields__collections__Relationship
+          - fields__collections__Row
+          - fields__collections__Select
+          - fields__collections__Tabs
+          - fields__collections__Tabs2
+          - fields__collections__Text
+          - fields__collections__UI
+          - fields__collections__Upload
+          - fields__collections__UploadPoly
+          - fields__collections__UploadMultiPoly
+          - group-by
+          - folders
+          - hooks
+          - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
+          - lexical__collections__LexicalHeadingFeature
+          - lexical__collections__LexicalJSXConverter
+          - lexical__collections__LexicalLinkFeature
+          - lexical__collections__OnDemandForm
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
+          - query-presets
+          - form-state
+          - live-preview
+          - localization
+          - locked-documents
+          - i18n
+          - plugin-cloud-storage
+          - plugin-form-builder
+          - plugin-import-export
+          - plugin-multi-tenant
+          - plugin-nested-docs
+          - plugin-redirects
+          - plugin-seo
+          - queues
+          - sort
+          - server-url
+          - trash
+          - versions
+          - uploads
+    env:
+      SUITE_NAME: ${{ matrix.suite }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+
+      - name: Start LocalStack
+        run: pnpm docker:start
+        if: matrix.suite == 'plugin-cloud-storage'
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: mongodb
+
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium --no-shell
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.suite }}
+          path: test/test-results/
+          if-no-files-found: ignore
+          retention-days: 1
+
+      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
+      # - uses: daun/playwright-report-summary@v3
+      #   with:
+      #     report-file: results_${{ matrix.suite }}.json
+      #     report-tag: ${{ matrix.suite }}
+      #     job-summary: true
+
+  # This is unused, keeping it here for reference and possibly enabling in the future
+  tests-e2e-turbo:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: >-
+      needs.changes.outputs.needs_tests == 'true' &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
+        github.event.label.name == 'run-e2e-turbo'
+      )
+    name: e2e-turbo-${{ matrix.suite }}
     strategy:
       fail-fast: false
       matrix:
@@ -291,65 +385,90 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin__e2e__1
-          - admin__e2e__2
-          - admin__e2e__3
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
+          - admin-bar
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
+          - dashboard
+          - joins
           - field-error-states
           - fields-relationship
-          - fields
-          - fields__collections__Blocks
           - fields__collections__Array
-          - fields__collections__Relationship
-          - fields__collections__RichText
-          - fields__collections__Lexical__e2e__main
-          - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
+          - fields__collections__Checkbox
+          - fields__collections__Collapsible
+          - fields__collections__ConditionalLogic
+          - fields__collections__CustomID
           - fields__collections__Date
+          - fields__collections__Email
+          - fields__collections__Indexed
+          - fields__collections__JSON
           - fields__collections__Number
           - fields__collections__Point
+          - fields__collections__Radio
+          - fields__collections__Relationship
+          - fields__collections__Row
+          - fields__collections__Select
           - fields__collections__Tabs
+          - fields__collections__Tabs2
           - fields__collections__Text
+          - fields__collections__UI
           - fields__collections__Upload
+          - group-by
+          - folders
+          - hooks
+          - lexical__collections___LexicalFullyFeatured
+          - lexical__collections___LexicalFullyFeatured__db
+          - lexical__collections__LexicalHeadingFeature
+          - lexical__collections__LexicalJSXConverter
+          - lexical__collections__LexicalLinkFeature
+          - lexical__collections__OnDemandForm
+          - lexical__collections__Lexical__e2e__main
+          - lexical__collections__Lexical__e2e__blocks
+          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
+          - lexical__collections__RichText
+          - query-presets
+          - form-state
           - live-preview
           - localization
           - locked-documents
           - i18n
           - plugin-cloud-storage
           - plugin-form-builder
+          - plugin-import-export
+          - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
+          - queues
+          - sort
+          - trash
           - versions
           - uploads
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v5
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: matrix.suite == 'plugin-cloud-storage'
 
       - name: Store Playwright's Version
         run: |
@@ -382,7 +501,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-turbo${{ matrix.suite }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -394,60 +513,58 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  # Build listed templates with packed local packages
-  build-templates:
-    runs-on: ubuntu-latest
-    needs: build
+  # Build listed templates with packed local packages and then runs their int and e2e tests
+  build-and-test-templates:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_build == 'true'
+    name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - template: blank
             database: mongodb
+
           - template: website
             database: mongodb
-          - template: with-payload-cloud
-            database: mongodb
+
           - template: with-vercel-mongodb
             database: mongodb
+
           # Postgres
           - template: with-postgres
             database: postgres
+
           - template: with-vercel-postgres
             database: postgres
+
+          - template: plugin
 
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
           #   database: postgres
 
-    name: ${{ matrix.template }}-${{ matrix.database }}
-
     env:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
+      MONGODB_VERSION: 6.0
 
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v5
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -469,42 +586,83 @@ jobs:
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
+      # Avoid dockerhub rate-limiting
+      - name: Cache Docker images
+        # Use AndreKurait/docker-cache@0.6.0 instead of ScribeMD/docker-cache@0.5.0 to fix the following issue: https://github.com/ScribeMD/docker-cache/issues/837 ("Warning: Failed to restore: Cache service responded with 400")
+        uses: AndreKurait/docker-cache@0.6.0
+        with:
+          key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
+
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
+        uses: supercharge/mongodb-github-action@1.12.0
         with:
           mongodb-version: 6.0
+        if: matrix.database == 'mongodb'
 
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Runs Template Int Tests
+        run: pnpm --filter ${{ matrix.template }} run test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          MONGODB_URL: mongodb://localhost:27017/payloadtests
+
+      - name: Runs Template E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          MONGODB_URL: mongodb://localhost:27017/payloadtests
+          NEXT_TELEMETRY_DISABLED: 1
 
   tests-type-generation:
-    runs-on: ubuntu-latest
-    needs: build
-
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      # https://github.com/actions/virtual-environments/issues/1187
-      - name: tune linux network
-        run: sudo ethtool -K eth0 tx off rx off
+      - uses: actions/checkout@v5
 
-      - name: Setup Node@${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - name: Node setup
+        uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
 
       - name: Restore build
         uses: actions/cache@v4
-        timeout-minutes: 10
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -515,13 +673,18 @@ jobs:
   all-green:
     name: All Green
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
-      - lint
-      - build
-      - tests-unit
-      - tests-int
-      - tests-e2e
+      [
+        lint,
+        build,
+        build-and-test-templates,
+        tests-unit,
+        tests-int,
+        tests-e2e,
+        tests-types,
+        tests-type-generation,
+      ]
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
@@ -529,7 +692,7 @@ jobs:
 
   publish-canary:
     name: Publish Canary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
@@ -539,3 +702,36 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isV3: ${{ github.ref == 'refs/heads/main' }}
+  analyze:
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    timeout-minutes: 5
+    permissions:
+      contents: read # for checkout repository
+      actions: read # for fetching base branch bundle stats
+      pull-requests: write # for comments
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false # Full build is restored below
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+
+      - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
+      - name: Analyze esbuild bundle size
+        # Temporarily disable this for community PRs until this can be implemented in a separate workflow
+        if: github.event.pull_request.head.repo.fork == false
+        uses: exoego/esbuild-bundle-analyzer@v1
+        with:
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

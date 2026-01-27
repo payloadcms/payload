@@ -2,6 +2,7 @@
 
 @layer payload-default {
   .collapsible {
+    position: relative;
     --toggle-pad-h: #{base(0.75)};
     --toggle-pad-v: #{base(0.6)};
 
@@ -20,7 +21,7 @@
       border-top-left-radius: $style-radius-m;
       width: 100%;
 
-      &:hover {
+      &:not(.toggle-disabled):hover {
         background: var(--theme-elevation-100);
       }
 
@@ -47,7 +48,6 @@
       @extend %btn-reset;
       @extend %body;
       text-align: left;
-      cursor: pointer;
       border-top-right-radius: $style-radius-m;
       border-top-left-radius: $style-radius-m;
       width: 100%;
@@ -56,6 +56,10 @@
       position: absolute;
       top: 0;
       left: 0;
+
+      &:not(.toggle-disabled) {
+        cursor: pointer;
+      }
 
       span {
         user-select: none;

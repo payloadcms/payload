@@ -1,38 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../translations" }],
   "compilerOptions": {
-    "composite": true, // Required for packages/db-mongodb to build
-    "noEmit": false /* Do not emit outputs. */,
-    "emitDeclarationOnly": true,
-    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
-    "outDir": "./dist" /* Redirect output structure to the directory. */,
-    "paths": {
-      "payload/auth": ["./src/auth/types.ts"],
-      "payload/config": ["./src/config/types.ts"],
-      "payload/generated-types": ["./src/generated-types.ts"],
-      "payload/types": ["./src/types/index.ts"]
-    },
-    "types": ["jest", "node", "@types/jest"],
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2022"
-    ],
-  },
-  "exclude": [
-    "dist",
-    "build",
-    "tests",
-    "test",
-    "node_modules",
-    "eslint.config.js",
-    "src/**/*.spec.js",
-    "src/**/*.spec.jsx",
-    "src/**/*.spec.ts",
-    "src/**/*.spec.tsx",
-    "temp"
-  ],
-  /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
-  "references": [{ "path": "../translations" }]
+    // Do not include DOM and DOM.Iterable as payload is a server-only package.
+    // This ensures node types do not conflict with node types (e.g. fetch.dispatcher)
+    "lib": ["ES2022"],
+  }
 }

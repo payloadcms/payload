@@ -4,6 +4,9 @@ import React from 'react'
 
 import './index.scss'
 
+/**
+ * @internal
+ */
 export const NavWrapper: React.FC<{
   baseClass?: string
   children: React.ReactNode
@@ -22,6 +25,7 @@ export const NavWrapper: React.FC<{
       ]
         .filter(Boolean)
         .join(' ')}
+      inert={!navOpen ? true : undefined}
     >
       <div className={`${baseClass}__scroll`} ref={navRef}>
         {children}

@@ -1,34 +1,44 @@
-import type { PgColumnBuilder } from 'drizzle-orm/pg-core'
-import type { FlattenedField } from 'payload'
+import type { SetColumnID } from '../../types.js'
 
-import { numeric, serial, uuid, varchar } from 'drizzle-orm/pg-core'
-
-import type { BasePostgresAdapter, IDType } from '../types.js'
-
-type Args = {
-  adapter: BasePostgresAdapter
-  columns: Record<string, PgColumnBuilder>
-  fields: FlattenedField[]
-}
-export const setColumnID = ({ adapter, columns, fields }: Args): IDType => {
+export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
   const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
-      columns.id = numeric('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'numeric',
+        primaryKey: true,
+      }
+
       return 'numeric'
     }
 
     if (idField.type === 'text') {
-      columns.id = varchar('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'varchar',
+        primaryKey: true,
+      }
       return 'varchar'
     }
   }
 
   if (adapter.idType === 'uuid') {
-    columns.id = uuid('id').defaultRandom().primaryKey()
+    columns.id = {
+      name: 'id',
+      type: 'uuid',
+      defaultRandom: true,
+      primaryKey: true,
+    }
+
     return 'uuid'
   }
 
-  columns.id = serial('id').primaryKey()
+  columns.id = {
+    name: 'id',
+    type: 'serial',
+    primaryKey: true,
+  }
+
   return 'integer'
 }

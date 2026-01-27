@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-form-builder",
-  "version": "3.2.1",
+  "version": "3.73.0",
   "description": "Form builder plugin for Payload CMS",
   "keywords": [
     "payload",
@@ -27,6 +27,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -52,12 +53,12 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
@@ -67,16 +68,16 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "^1.0.4",
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {
@@ -100,9 +101,5 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
-  "homepage:": "https://payloadcms.com",
-  "overrides": {
-    "@types/react": "npm:types-react@19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
-  }
+  "homepage:": "https://payloadcms.com"
 }

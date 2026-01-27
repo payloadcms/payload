@@ -1,15 +1,10 @@
-import { Types } from 'mongoose'
-import {
-  buildVersionCollectionFields,
-  type CreateVersion,
-  type Document,
-  type PayloadRequest,
-} from 'payload'
+import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
@@ -19,34 +14,49 @@ export const createVersion: CreateVersion = async function createVersion(
     createdAt,
     parent,
     publishedLocale,
-    req = {} as PayloadRequest,
+    req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
-  const VersionModel = this.versions[collectionSlug]
-  const options = await withSession(this, req)
-
-  const data = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      autosave,
-      createdAt,
-      latest: true,
-      parent,
-      publishedLocale,
-      snapshot,
-      updatedAt,
-      version: versionData,
-    },
-    fields: buildVersionCollectionFields(
-      this.payload.config,
-      this.payload.collections[collectionSlug].config,
-    ),
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
   })
 
-  const [doc] = await VersionModel.create([data], options, req)
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
+
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
+  })
+
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
+
+  let [doc] = await Model.create([data], options, req)
 
   const parentQuery = {
     $or: [
@@ -57,15 +67,8 @@ export const createVersion: CreateVersion = async function createVersion(
       },
     ],
   }
-  if (data.parent instanceof Types.ObjectId) {
-    parentQuery.$or.push({
-      parent: {
-        $eq: data.parent.toString(),
-      },
-    })
-  }
 
-  await VersionModel.updateMany(
+  await Model.updateMany(
     {
       $and: [
         {
@@ -79,19 +82,29 @@ export const createVersion: CreateVersion = async function createVersion(
             $eq: true,
           },
         },
+        {
+          updatedAt: {
+            $lt: new Date(doc.updatedAt),
+          },
+        },
       ],
     },
     { $unset: { latest: 1 } },
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    return null
   }
-  return result
+
+  doc = doc.toObject()
+
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
+
+  return doc
 }

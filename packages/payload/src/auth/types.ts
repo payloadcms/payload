@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -40,10 +40,10 @@ export type SanitizedBlocksPermissions =
 
 export type FieldPermissions = {
   blocks?: BlocksPermissions
-  create: Permission
+  create?: Permission
   fields?: FieldsPermissions
-  read: Permission
-  update: Permission
+  read?: Permission
+  update?: Permission
 }
 
 export type SanitizedFieldPermissions =
@@ -63,12 +63,14 @@ export type SanitizedFieldsPermissions =
   | true
 
 export type CollectionPermission = {
-  create: Permission
-  delete: Permission
+  create?: Permission
+  delete?: Permission
   fields: FieldsPermissions
-  read: Permission
+  read?: Permission
   readVersions?: Permission
-  update: Permission
+  // Auth-enabled Collections only
+  unlock?: Permission
+  update?: Permission
 }
 
 export type SanitizedCollectionPermission = {
@@ -77,14 +79,16 @@ export type SanitizedCollectionPermission = {
   fields: SanitizedFieldsPermissions
   read?: true
   readVersions?: true
+  // Auth-enabled Collections only
+  unlock?: true
   update?: true
 }
 
 export type GlobalPermission = {
   fields: FieldsPermissions
-  read: Permission
+  read?: Permission
   readVersions?: Permission
-  update: Permission
+  update?: Permission
 }
 
 export type SanitizedGlobalPermission = {
@@ -118,10 +122,14 @@ type BaseUser = {
   collection: string
   email?: string
   id: number | string
+  sessions?: Array<UserSession>
   username?: string
 }
 
-export type User = {
+/**
+ * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ */
+export type UntypedUser = {
   [key: string]: any
 } & BaseUser
 
@@ -133,6 +141,7 @@ export type ClientUser = {
   [key: string]: any
 } & BaseUser
 
+export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -158,14 +167,27 @@ type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
+  /**
+   * Specifies whether or not response headers can be set from this strategy.
+   */
+  canSetHeaders?: boolean
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /**
+   * The AuthStrategy name property from the payload config.
+   */
+  strategyName?: string
 }
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: null | User
+  user:
+    | ({
+        _strategy?: string
+        collection?: string
+      } & TypedUser)
+    | null
 }
 
 export type AuthStrategyFunction = (
@@ -206,12 +228,26 @@ export interface IncomingAuthType {
   /**
    * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
    */
-  disableLocalStrategy?: true
+  disableLocalStrategy?:
+    | {
+        /**
+         * Include auth fields on the collection even though the local strategy is disabled.
+         * Useful when you do not want the database or types to vary depending on the auth configuration.
+         */
+        enableFields?: true
+        optionalPassword?: true
+      }
+    | true
   /**
    * Customize the way that the forgotPassword operation functions.
    * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
+    /**
+     * The number of milliseconds that the forgot password token should be valid for.
+     * @default 3600000 // 1 hour
+     */
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
@@ -250,6 +286,13 @@ export interface IncomingAuthType {
    * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
+
+  /**
+   * Use sessions for authentication. Enabled by default.
+   * @default true
+   */
+  useSessions?: boolean
+
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
    * @link https://payloadcms.com/docs/authentication/email#email-verification
@@ -270,6 +313,7 @@ export type VerifyConfig = {
 export interface Auth
   extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }

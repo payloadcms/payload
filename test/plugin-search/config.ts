@@ -5,6 +5,8 @@ const dirname = path.dirname(filename)
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { randomUUID } from 'node:crypto'
 
+import type { Config } from './payload-types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Pages } from './collections/Pages.js'
@@ -13,7 +15,33 @@ import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Pages, Posts],
+  collections: [
+    Users,
+    Pages,
+    Posts,
+    {
+      slug: 'custom-ids-1',
+      fields: [{ type: 'text', name: 'id' }],
+    },
+    {
+      slug: 'custom-ids-2',
+      fields: [{ type: 'text', name: 'id' }],
+    },
+    {
+      slug: 'filtered-locales',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          localized: true,
+        },
+        {
+          type: 'checkbox',
+          name: 'syncEnglishOnly',
+        },
+      ],
+    },
+  ],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -36,7 +64,7 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    searchPlugin({
+    searchPlugin<Config>({
       beforeSync: ({ originalDoc, searchDoc }) => {
         return {
           ...searchDoc,
@@ -44,7 +72,13 @@ export default buildConfigWithDefaults({
           slug: originalDoc.slug,
         }
       },
-      collections: ['pages', 'posts'],
+      collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
+      skipSync: ({ locale, doc, collectionSlug }) => {
+        if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
+          return locale !== 'en'
+        }
+        return false
+      },
       defaultPriorities: {
         pages: 10,
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),
@@ -52,7 +86,7 @@ export default buildConfigWithDefaults({
       searchOverrides: {
         access: {
           // Used for int test
-          delete: ({ req: { user } }) => user.email === devUser.email,
+          delete: ({ req: { user } }) => user?.email === devUser.email,
         },
         fields: ({ defaultFields }) => [
           ...defaultFields,

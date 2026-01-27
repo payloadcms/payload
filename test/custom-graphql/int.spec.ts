@@ -2,6 +2,7 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -19,12 +20,12 @@ describe('Custom GraphQL', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
-  if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE || '')) {
+  if (
+    !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE || '')
+  ) {
     describe('Isolated Transaction ID', () => {
       it('should isolate transaction IDs between queries in the same request', async () => {
         const query = `query {
@@ -60,7 +61,7 @@ describe('Custom GraphQL', () => {
       })
     })
   } else {
-    it('should not run isolated transaction ID tests for sqlite', () => {
+    it('should not run isolated transaction ID tests for sqlite/firestore/cosmosdb', () => {
       expect(true).toBe(true)
     })
   }

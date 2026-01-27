@@ -1,18 +1,23 @@
 import type { CountOptions } from 'mongodb'
-import type { CountVersions, PayloadRequest } from 'payload'
+import type { CountVersions } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
 
 export const countVersions: CountVersions = async function countVersions(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection: collectionSlug, locale, req, where = {} },
 ) {
-  const Model = this.versions[collection]
-  const options: CountOptions = await withSession(this, req)
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   let hasNearConstraint = false
 
@@ -21,14 +26,19 @@ export const countVersions: CountVersions = async function countVersions(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     locale,
-    payload: this.payload,
     where,
   })
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
+
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   if (!useEstimatedCount && Object.keys(query).length === 0 && this.disableIndexHints !== true) {
     // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding

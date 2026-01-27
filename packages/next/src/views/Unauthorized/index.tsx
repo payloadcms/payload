@@ -1,23 +1,17 @@
-import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
-import { Button } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
+import { Button, Gutter } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
-
-export { generateUnauthorizedMetadata } from './meta.js'
-
 const baseClass = 'unauthorized'
 
-export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> = ({
-  initPageResult,
-}) => {
+export function UnauthorizedView({ initPageResult }: AdminViewServerProps) {
   const {
+    permissions,
     req: {
       i18n,
       payload: {
@@ -28,6 +22,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
           routes: { admin: adminRoute },
         },
       },
+      user,
     },
   } = initPageResult
 
@@ -35,13 +30,13 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
     <div className={baseClass}>
       <FormHeader
         description={i18n.t('error:notAllowedToAccessPage')}
-        heading={i18n.t('error:unauthorized')}
+        heading={i18n.t(
+          user && !permissions.canAccessAdmin ? 'error:unauthorizedAdmin' : 'error:unauthorized',
+        )}
       />
-
       <Button
         className={`${baseClass}__button`}
         el="link"
-        Link={Link}
         size="large"
         to={formatAdminURL({
           adminRoute,
@@ -51,5 +46,13 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
         {i18n.t('authentication:logOut')}
       </Button>
     </div>
+  )
+}
+
+export const UnauthorizedViewWithGutter = (props: AdminViewServerProps) => {
+  return (
+    <Gutter className={[baseClass, `${baseClass}--with-gutter`].join(' ')}>
+      <UnauthorizedView {...props} />
+    </Gutter>
   )
 }

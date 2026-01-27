@@ -20,8 +20,9 @@ Ensure you have an npm script called "payload" in your `package.json` file.
 ```
 
 <Banner>
-  Note that you need to run Payload migrations through the package manager that you are using,
-  because Payload should not be globally installed on your system.
+  Note that you need to run Payload migrations through the package manager that
+  you are using, because Payload should not be globally installed on your
+  system.
 </Banner>
 
 ## Migration file contents
@@ -51,11 +52,53 @@ export async function down({ payload, req }: MigrateDownArgs): Promise<void> {
 
 ## Using Transactions
 
-When migrations are run, each migration is performed in a new [transactions](/docs/database/transactions) for you. All
-you need to do is pass the `req` object to any [local API](/docs/local-api/overview) or direct database calls, such as
+When migrations are run, each migration is performed in a new [transaction](/docs/database/transactions) for you. All
+you need to do is pass the `req` object to any [Local API](/docs/local-api/overview) or direct database calls, such as
 `payload.db.updateMany()`, to make database changes inside the transaction. Assuming no errors were thrown, the transaction is committed
 after your `up` or `down` function runs. If the migration errors at any point or fails to commit, it is caught and the
 transaction gets aborted. This way no change is made to the database if the migration fails.
+
+### Using database directly with the transaction
+
+Additionally, you can bypass Payload's layer entirely and perform operations directly on your underlying database within the active transaction:
+
+### MongoDB:
+
+```ts
+import { type MigrateUpArgs } from '@payloadcms/db-mongodb'
+
+export async function up({
+  session,
+  payload,
+  req,
+}: MigrateUpArgs): Promise<void> {
+  const posts = await payload.db.collections.posts.collection
+    .find({ session })
+    .toArray()
+}
+```
+
+### Postgres:
+
+```ts
+import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  const { rows: posts } = await db.execute(sql`SELECT * from posts`)
+}
+```
+
+### SQLite:
+
+In SQLite, transactions are disabled by default. [More](./transactions).
+
+```ts
+import { type MigrateUpArgs, sql } from '@payloadcms/db-sqlite'
+
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  const { rows: posts } = await db.run(sql`SELECT * from posts`)
+}
+```
 
 ## Migrations Directory
 
@@ -85,6 +128,11 @@ default, migrations will be named using a timestamp.
 ```text
 npm run payload migrate:create optional-name-here
 ```
+
+Flags:
+
+- `--skip-empty`: with Postgres, it skips the "no schema changes detected. Would you like to create a blank migration file?" prompt which can be useful for generating migration in CI.
+- `--force-accept-warning`: accepts any command prompts, creates a blank migration even if there weren't any changes to the schema.
 
 ### Status
 
@@ -135,13 +183,13 @@ Depending on which Database Adapter you use, your migration workflow might diffe
 
 In relational databases, migrations will be **required** for non-development database environments. But with MongoDB, you might only need to run migrations once in a while (or never even need them).
 
-#### MongoDB
+#### MongoDB#mongodb-migrations
 
 In MongoDB, you'll only ever really need to run migrations for times where you change your database shape, and you have lots of existing data that you'd like to transform from Shape A to Shape B.
 
 In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you build / deploy, or you can run them locally, against your production database, by using your production database connection string on your local computer and running the `pnpm payload migrate` command.
 
-#### Postgres
+#### Postgres#postgres-migrations
 
 In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see errors upon trying to read / write your data).
 
@@ -157,16 +205,17 @@ You can disable this setting and solely use migrations to manage your local deve
 
 For this reason, we suggest that you leave `push` as its default setting and treat your local dev database as a sandbox.
 
-For more information about push mode and prototyping in development, [click here](./postgres#prototyping-in-dev-mode).
+For more information about push mode and prototyping in development, [click here](./postgres#prototyping-in-development-mode).
 
 The typical workflow in Payload is to build out your Payload configs, install plugins, and make progress in development mode - allowing Drizzle to push your changes to your local database for you. Once you're finished, you can create a migration.
 
 But importantly, you do not need to run migrations against your development database, because Drizzle will have already pushed your changes to your database for you.
 
 <Banner type="warning">
-  Warning: do not mix "push" and migrations with your local development database. If you use "push"
-  locally, and then try to migrate, Payload will throw a warning, telling you that these two methods
-  are not meant to be used interchangeably.
+  Warning: do not mix "push" and migrations with your local development
+  database. If you use "push" locally, and then try to migrate, Payload will
+  throw a warning, telling you that these two methods are not meant to be used
+  interchangeably.
 </Banner>
 
 **2 - create a migration**
@@ -181,7 +230,10 @@ But once you're ready, you can run `pnpm payload migrate:create`, which will per
 We won't immediately run this migration for you, however.
 
 <Banner type="success">
-  Tip: migrations created by Payload are relatively programmatic in nature, so there should not be any surprises, but before you check in the created migration it's a good idea to always double-check the contents of the migration files.
+  Tip: migrations created by Payload are relatively programmatic in nature, so
+  there should not be any surprises, but before you check in the created
+  migration it's a good idea to always double-check the contents of the
+  migration files.
 </Banner>
 
 **3 - set up your build process to run migrations**
@@ -234,13 +286,27 @@ export default buildConfig({
   // your config here
   db: postgresAdapter({
     //  your adapter config here
-    prodMigrations: migrations
-  })
+    prodMigrations: migrations,
+  }),
 })
 ```
 
 Passing your migrations as shown above will tell Payload, in production only, to execute any migrations that need to be run prior to completing the initialization of Payload. This is ideal for long-running services where Payload will only be initialized at startup.
 
 <Banner type="warning">
-  Warning - if Payload is instructed to run migrations in production, this may slow down serverless cold starts on platforms such as Vercel. Generally, this option should only be used for long-running servers / containers.
+  **Warning:** if Payload is instructed to run migrations in production, this
+  may slow down serverless cold starts on platforms such as Vercel. Generally,
+  this option should only be used for long-running servers / containers.
 </Banner>
+
+## Environment-Specific Configurations and Migrations
+
+Your configuration may include environment-specific settings (e.g., enabling a plugin only in production). If you generate migrations without considering the environment, it can lead to discrepancies and issues. When running migrations locally, Payload uses the development environment, which might miss production-specific configurations. Similarly, running migrations in production could miss development-specific entities.
+
+This is an easy oversight, so be mindful of any environment-specific logic in your config when handling migrations.
+
+**Ways to address this:**
+
+- Manually update your migration file after it is generated to include any environment-specific configurations.
+- Temporarily enable any required production environment variables in your local setup when generating the migration to capture the necessary updates.
+- Use separate migration files for each environment to ensure the correct migration is executed in the corresponding environment.

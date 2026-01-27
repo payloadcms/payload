@@ -5,7 +5,8 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(
   this: DrizzleAdapter,
@@ -19,8 +20,6 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
-
   const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const { joins, where } = buildQuery({
@@ -30,6 +29,8 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     tableName,
     where: whereArg,
   })
+
+  const db = await getTransaction(this, req)
 
   const countResult = await this.countDistinct({
     db,

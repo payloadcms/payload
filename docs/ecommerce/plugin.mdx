@@ -1,0 +1,995 @@
+---
+title: Ecommerce Plugin
+label: Plugin
+order: 20
+desc: Add ecommerce functionality to your Payload CMS application with this plugin.
+keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+---
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: [],
+    },
+  ],
+  plugins: [
+    ecommercePlugin({
+      // You must add your access control functions here
+      access: {
+        adminOnlyFieldAccess,
+        adminOrPublishedStatus,
+        isAdmin,
+        isAuthenticated,
+        isCustomer,
+        isDocumentOwner,
+      },
+      customers: { slug: 'users' },
+    }),
+  ],
+})
+
+export default config
+```
+
+## Options
+
+| Option         | Type               | Description                                                                                                              |
+| -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `access`       | `object`           | Configuration to override the default access control, use this when checking for roles or multi tenancy. [More](#access) |
+| `addresses`    | `object`           | Configuration for addresses collection and supported fields. [More](#addresses)                                          |
+| `carts`        | `object`           | Configuration for carts collection. [More](#carts)                                                                       |
+| `currencies`   | `object`           | Supported currencies by the store. [More](#currencies)                                                                   |
+| `customers`    | `object`           | Used to provide the customers slug. [More](#customers)                                                                   |
+| `inventory`    | `boolean` `object` | Enable inventory tracking within Payload. Defaults to `true`. [More](#inventory)                                         |
+| `payments`     | `object`           | Configuring payments and supported payment methods. [More](#payments)                                                    |
+| `products`     | `object`           | Configuration for products, variants collections and more. [More](#products)                                             |
+| `orders`       | `object`           | Configuration for orders collection. [More](#orders)                                                                     |
+| `transactions` | `boolean` `object` | Configuration for transactions collection. [More](#transactions)                                                         |
+
+Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
+
+```ts
+ecommercePlugin({
+  access: {
+    adminOnlyFieldAccess,
+    adminOrPublishedStatus,
+    isAdmin,
+    isAuthenticated,
+    isCustomer,
+    isDocumentOwner,
+  },
+  customers: {
+    slug: 'users',
+  },
+  payments: {
+    paymentMethods: [
+      stripeAdapter({
+        secretKey: process.env.STRIPE_SECRET_KEY!,
+        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+        webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+      }),
+    ],
+  },
+  products: {
+    variants: {
+      variantsCollection: VariantsCollection,
+    },
+    productsCollection: ProductsCollection,
+  },
+})
+```
+
+## Access
+
+The plugin requires access control functions in order to restrict permissions to certain collections or fields. You must provide these functions in the `access` option.
+
+| Option                    | Type          | Description                                                                                           |
+| ------------------------- | ------------- | ----------------------------------------------------------------------------------------------------- |
+| `adminOnlyFieldAccess`    | `FieldAccess` | Limited to only admin users, specifically for Field level access control.                             |
+| `adminOrPublishedStatus`  | `Access`      | The document is published or user is admin.                                                           |
+| `isAdmin`                 | `Access`      | Checks if the user is an admin.                                                                       |
+| `isAuthenticated`         | `Access`      | Checks if the user is authenticated (any role).                                                       |
+| `isCustomer`              | `FieldAccess` | (Optional) Checks if the user is a customer (authenticated but not admin). Used for address creation. |
+| `isDocumentOwner`         | `Access`      | Checks if the user owns the document being accessed.                                                  |
+| `publicAccess`            | `Access`      | (Optional) Entirely public access. Defaults to returning true.                                        |
+| `customerOnlyFieldAccess` | `FieldAccess` | **Deprecated** - Use `isCustomer` instead. Will be removed in v4.                                     |
+
+The plugin provides default implementations for `publicAccess` only:
+
+```ts
+access: {
+  publicAccess: () => true,
+}
+```
+
+### adminOnlyFieldAccess
+
+Field level access control to check if the user has `admin` permissions.
+
+Example:
+
+```ts
+adminOnlyFieldAccess: ({ req: { user } }) =>
+  Boolean(user?.roles?.includes('admin'))
+```
+
+### adminOrPublishedStatus
+
+Access control to check if the user has `admin` permissions or if the document is published.
+
+Example:
+
+```ts
+adminOrPublishedStatus: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+  return {
+    _status: {
+      equals: 'published',
+    },
+  }
+}
+```
+
+### isCustomer
+
+Checks if the user is a customer (authenticated but not an admin). This is used internally to auto-assign the customer ID when creating addresses - customers can only create addresses for themselves, while admins can create addresses for any customer.
+
+Example:
+
+```ts
+isCustomer: ({ req: { user } }) =>
+  Boolean(user && !user?.roles?.includes('admin'))
+```
+
+### isAdmin
+
+Access control to check if the user has `admin` permissions.
+
+Example:
+
+```ts
+isAdmin: ({ req: { user } }) => Boolean(user?.roles?.includes('admin'))
+```
+
+### isAuthenticated
+
+Access control to check if the user is authenticated (any role).
+
+Example:
+
+```ts
+isAuthenticated: ({ req: { user } }) => Boolean(user)
+```
+
+### isDocumentOwner
+
+Access control to check if the user owns the document being accessed via the `customer` field. Returns a Where query to filter documents by the customer field.
+
+Example:
+
+```ts
+isDocumentOwner: ({ req: { user } }) => {
+  if (user && Boolean(user?.roles?.includes('admin'))) {
+    return true
+  }
+
+  if (user?.id) {
+    return {
+      customer: {
+        equals: user.id,
+      },
+    }
+  }
+
+  return false
+}
+```
+
+### publicAccess
+
+Access control to allow public access. By default the following is provided:
+
+```ts
+publicAccess: () => true
+```
+
+## Addresses
+
+The `addresses` option is used to configure the addresses collection and supported fields. Defaults to `true` which will create an `addresses` collection with default fields. It also takes an object:
+
+| Option                        | Type                 | Description                                                                                                                                                  |
+| ----------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `addressFields`               | `FieldsOverride`     | A function that is given the `defaultFields` as an argument and returns an array of fields. Use this to customise the supported fields for stored addresses. |
+| `addressesCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `addresses` with a function where you can access the `defaultCollection` as an argument.                           |
+| `supportedCountries`          | `CountryType[]`      | An array of supported countries in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). Defaults to all countries.                 |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+addresses: {
+  addressesCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'googleMapLocation',
+        label: 'Google Map Location',
+        type: 'text',
+      },
+    ],
+  })
+}
+```
+
+### supportedCountries
+
+The `supportedCountries` option is an array of country codes in [ISO 3166-1 alpha-2 format](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2). This is used to limit the countries that can be selected when creating or updating an address. If not provided, all countries will be supported. Currently used for storing addresses only.
+
+You can import the default list of countries from the plugin:
+
+```ts
+import { defaultCountries } from '@payloadcms/plugin-ecommerce/client/react'
+```
+
+## Carts
+
+The `carts` option is used to configure the carts collection. Defaults to `true` which will create a `carts` collection with default fields and enable guest carts. It also takes an object:
+
+| Option                    | Type                 | Description                                                                                                                    |
+| ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `allowGuestCarts`         | `boolean`            | Allow unauthenticated users to create carts. Defaults to `true`.                                                               |
+| `cartsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `carts` with a function where you can access the `defaultCollection` as an argument. |
+| `cartItemMatcher`         | `CartItemMatcher`    | Custom function to determine item uniqueness when adding to cart. [More](#cart-item-matcher)                                   |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+carts: {
+  cartsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
+}
+```
+
+### Guest Carts
+
+By default, guest carts are enabled (`allowGuestCarts: true`), allowing unauthenticated users to create and manage carts. This is useful for anonymous checkout flows where users can shop without logging in.
+
+To disable guest carts and require authentication:
+
+```ts
+carts: {
+  allowGuestCarts: false,
+}
+```
+
+Carts are created when a customer adds their first item to the cart. The cart is then updated as they add or remove items. The cart is linked to a _Customer_ via the `customer` field. If the user is authenticated, this will be set to their user ID. If the user is not authenticated, this will be `null`.
+
+When guest carts are enabled and the user is not authenticated, the cart ID is stored in local storage and used to fetch the cart on subsequent requests. Access control by default works so that if the user is not authenticated then they can only access carts that have no customer linked to them.
+
+### Cart API Endpoints
+
+The plugin automatically adds custom endpoints to the carts collection for managing cart items. These endpoints use a reducer-like pattern with MongoDB-style operators for flexible updates.
+
+#### Add Item
+
+Adds an item to the cart. If an item matching the same criteria already exists (determined by the `cartItemMatcher`), its quantity is incremented instead of creating a duplicate entry.
+
+```
+POST /api/carts/:cartID/add-item
+```
+
+| Body Parameter | Type                                    | Description                                          |
+| -------------- | --------------------------------------- | ---------------------------------------------------- |
+| `item`         | `{ product: string, variant?: string }` | The item to add (product ID and optional variant ID) |
+| `quantity`     | `number`                                | Quantity to add. Defaults to `1`.                    |
+| `secret`       | `string`                                | Secret for guest cart access (if applicable).        |
+
+#### Update Item
+
+Updates an item in the cart. Supports both setting a specific quantity and incrementing/decrementing using MongoDB-style operators.
+
+```
+POST /api/carts/:cartID/update-item
+```
+
+| Body Parameter | Type                         | Description                                                                           |
+| -------------- | ---------------------------- | ------------------------------------------------------------------------------------- |
+| `itemID`       | `string`                     | The cart item row ID to update.                                                       |
+| `quantity`     | `number \| { $inc: number }` | Set to a number or use `{ $inc: n }` to increment (positive) or decrement (negative). |
+| `removeOnZero` | `boolean`                    | Remove item if quantity reaches 0. Defaults to `true`.                                |
+| `secret`       | `string`                     | Secret for guest cart access (if applicable).                                         |
+
+Examples:
+
+```ts
+// Set quantity to 5
+fetch('/api/carts/123/update-item', {
+  method: 'POST',
+  body: JSON.stringify({ itemID: 'item-456', quantity: 5 }),
+})
+
+// Increment by 1
+fetch('/api/carts/123/update-item', {
+  method: 'POST',
+  body: JSON.stringify({ itemID: 'item-456', quantity: { $inc: 1 } }),
+})
+
+// Decrement by 1
+fetch('/api/carts/123/update-item', {
+  method: 'POST',
+  body: JSON.stringify({ itemID: 'item-456', quantity: { $inc: -1 } }),
+})
+```
+
+#### Remove Item
+
+Removes an item from the cart by its row ID.
+
+```
+POST /api/carts/:cartID/remove-item
+```
+
+| Body Parameter | Type     | Description                                   |
+| -------------- | -------- | --------------------------------------------- |
+| `itemID`       | `string` | The cart item row ID to remove.               |
+| `secret`       | `string` | Secret for guest cart access (if applicable). |
+
+#### Clear Cart
+
+Removes all items from the cart.
+
+```
+POST /api/carts/:cartID/clear
+```
+
+| Body Parameter | Type     | Description                                   |
+| -------------- | -------- | --------------------------------------------- |
+| `secret`       | `string` | Secret for guest cart access (if applicable). |
+
+### Cart Item Matcher
+
+The `cartItemMatcher` option allows you to customize how the plugin determines if two cart items should be considered the same. When items match, their quantities are combined instead of creating separate entries. When items don't match, they appear as separate line items in the cart.
+
+By default, items are matched by `product` and `variant` IDs only. This means if a customer adds the same product twice, the quantity is incremented rather than creating a duplicate entry.
+
+However, many ecommerce scenarios require distinguishing the same product based on additional criteria:
+
+- **Fulfillment options**: Same product for shipping vs. in-store pickup
+- **Gift wrapping**: Same item with or without gift wrapping
+- **Personalization**: Same product with different engraving text
+- **Subscription intervals**: Same product with weekly vs. monthly delivery
+
+The `cartItemMatcher` function receives both the existing cart item and the new item being added, and returns `true` if they should be combined or `false` if they should remain separate.
+
+#### Example: Fulfillment Options
+
+This example shows how to allow the same product to appear as separate cart items when different fulfillment options (shipping vs. pickup) are selected.
+
+First, add a `fulfillment` field to cart items using `cartsCollectionOverride`:
+
+```ts
+import type { CollectionConfig } from 'payload'
+import type { CartItemMatcher } from '@payloadcms/plugin-ecommerce'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+
+/**
+ * Custom cart item matcher that includes fulfillment option.
+ * This ensures the same product with different fulfillment options
+ * are listed as separate items in the cart.
+ */
+const fulfillmentCartItemMatcher: CartItemMatcher = ({
+  existingItem,
+  newItem,
+}) => {
+  const existingProductID =
+    typeof existingItem.product === 'object'
+      ? existingItem.product.id
+      : existingItem.product
+
+  const existingVariantID =
+    existingItem.variant && typeof existingItem.variant === 'object'
+      ? existingItem.variant.id
+      : existingItem.variant
+
+  const productMatches = existingProductID === newItem.product
+
+  // Variant matching: both must have same variant or both must have no variant
+  const variantMatches = newItem.variant
+    ? existingVariantID === newItem.variant
+    : !existingVariantID
+
+  // Fulfillment matching: items with different fulfillment options are separate
+  const existingFulfillment = existingItem.fulfillment as string | undefined
+  const newFulfillment = newItem.fulfillment as string | undefined
+  const fulfillmentMatches = existingFulfillment === newFulfillment
+
+  return productMatches && variantMatches && fulfillmentMatches
+}
+
+export default buildConfig({
+  // ... other config
+  plugins: [
+    ecommercePlugin({
+      carts: {
+        cartItemMatcher: fulfillmentCartItemMatcher,
+        cartsCollectionOverride: ({ defaultCollection }): CollectionConfig => ({
+          ...defaultCollection,
+          fields: defaultCollection.fields.map((f) => {
+            if ('name' in f && f.name === 'items' && f.type === 'array') {
+              return {
+                ...f,
+                fields: [
+                  ...f.fields,
+                  {
+                    name: 'fulfillment',
+                    type: 'select',
+                    defaultValue: 'shipping',
+                    options: [
+                      { label: 'Shipping', value: 'shipping' },
+                      { label: 'Pickup', value: 'pickup' },
+                    ],
+                  },
+                ],
+              }
+            }
+            return f
+          }),
+        }),
+      },
+      // ... other options
+    }),
+  ],
+})
+```
+
+Then, when adding items to the cart from the frontend, include the `fulfillment` field:
+
+```ts
+const { addItem } = useCart()
+
+// These will be separate line items in the cart
+await addItem({ product: 'product-123', fulfillment: 'shipping' })
+await addItem({ product: 'product-123', fulfillment: 'pickup' })
+```
+
+#### Default Matcher
+
+You can import and extend the default matcher for simpler customizations:
+
+```ts
+import {
+  defaultCartItemMatcher,
+  type CartItemMatcher,
+  type CartItemMatcherArgs,
+} from '@payloadcms/plugin-ecommerce'
+
+const customMatcher: CartItemMatcher = (args) => {
+  // First check the default criteria (product + variant)
+  const defaultMatch = defaultCartItemMatcher(args)
+
+  // Then add your custom criteria
+  return defaultMatch && args.existingItem.giftWrap === args.newItem.giftWrap
+}
+```
+
+### Cart Operations (Server-side)
+
+The plugin exports isolated cart operation functions that can be used directly in your own endpoints, hooks, or local API operations:
+
+```ts
+import {
+  addItem,
+  removeItem,
+  updateItem,
+  clearCart,
+} from '@payloadcms/plugin-ecommerce'
+
+// Add item to cart
+const result = await addItem({
+  payload,
+  cartsSlug: 'carts',
+  cartID: '123',
+  item: { product: 'prod-1', variant: 'var-1' },
+  quantity: 2,
+})
+
+// Update item quantity with $inc operator
+const result = await updateItem({
+  payload,
+  cartsSlug: 'carts',
+  cartID: '123',
+  itemID: 'item-row-id',
+  quantity: { $inc: 1 }, // or just a number to set directly
+})
+
+// Remove item
+const result = await removeItem({
+  payload,
+  cartsSlug: 'carts',
+  cartID: '123',
+  itemID: 'item-row-id',
+})
+
+// Clear cart
+const result = await clearCart({
+  payload,
+  cartsSlug: 'carts',
+  cartID: '123',
+})
+```
+
+## Customers
+
+The `customers` option is required and is used to provide the customers collection slug. This collection is used to link orders, carts, and addresses to a customer.
+
+| Option | Type     | Description                           |
+| ------ | -------- | ------------------------------------- |
+| `slug` | `string` | The slug of the customers collection. |
+
+While it's recommended to use just one collection for customers and your editors, you can use any collection you want for your customers. Just make sure that your access control is checking for the correct collections as well.
+
+## Currencies
+
+The `currencies` option is used to configure the supported currencies by the store. Defaults to `true` which will support `USD`. It also takes an object:
+
+| Option                | Type         | Description                                                                                                                     |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedCurrencies` | `Currency[]` | An array of supported currencies by the store. Defaults to `USD`. See [Currencies](#currencies-list) for available currencies.  |
+| `defaultCurrency`     | `string`     | The default currency code to use for the store. Defaults to the first currency. Must be one of the `supportedCurrencies` codes. |
+
+The `Currency` type is as follows:
+
+```ts
+type Currency = {
+  code: string // The currency code in ISO 4217 format, e.g. 'USD'
+  decimals: number // The number of decimal places for the currency, e.g. 2 for USD
+  label: string // A human-readable label for the currency, e.g. 'US Dollar'
+  symbol: string // The currency symbol, e.g. '$'
+}
+```
+
+For example, to support JYP in addition to USD:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { USD } from '@payloadcms/plugin-ecommerce'
+
+ecommercePlugin({
+  currencies: {
+    supportedCurrencies: [
+      USD,
+      {
+        code: 'JPY',
+        decimals: 0,
+        label: 'Japanese Yen',
+        symbol: '¥',
+      },
+    ],
+    defaultCurrency: 'USD',
+  },
+})
+```
+
+Note that adding a new currency could generate a new schema migration as it adds new prices fields in your products.
+
+We currently support the following currencies out of the box:
+
+- `USD`
+- `EUR`
+- `GBP`
+
+You can import these from the plugin:
+
+```ts
+import { EUR } from '@payloadcms/plugin-ecommerce'
+```
+
+<Banner type="info">
+  Note that adding new currencies here does not automatically enable them in
+  your payment gateway. Make sure to enable the currencies in your payment
+  gateway dashboard as well.
+</Banner>
+
+## Inventory
+
+The `inventory` option is used to enable or disable inventory tracking within Payload. It defaults to `true`. It also takes an object:
+
+| Option      | Type     | Description                                                               |
+| ----------- | -------- | ------------------------------------------------------------------------- |
+| `fieldName` | `string` | Override the field name used to track inventory. Defaults to `inventory`. |
+
+For now it's quite rudimentary tracking with no integrations to 3rd party services. It will simply add an `inventory` field to the `variants` collection and decrement the inventory when an order is placed.
+
+## Payments
+
+The `payments` option is used to configure payments and supported payment methods.
+
+| Option           | Type    | Description                                                                                       |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `paymentMethods` | `array` | An array of payment method adapters. Currently, only Stripe is supported. [More](#stripe-adapter) |
+
+### Payment adapters
+
+The plugin supports payment adapters to integrate with different payment gateways. Currently, only the [Stripe adapter](#stripe-adapter) is available. Adapters will provide a client side version as well with slightly different arguments.
+
+Every adapter supports the following arguments in addition to their own:
+
+| Argument         | Type                               | Description                                                             |
+| ---------------- | ---------------------------------- | ----------------------------------------------------------------------- |
+| `label`          | `string`                           | Human readabale label for this payment adapter.                         |
+| `groupOverrides` | `GroupField` with `FieldsOverride` | Use this to override the available fields for the payment adapter type. |
+
+Client side base arguments are the following:
+
+| Argument | Type     | Description                                     |
+| -------- | -------- | ----------------------------------------------- |
+| `label`  | `string` | Human readabale label for this payment adapter. |
+
+See the [Stripe adapter](#stripe-adapter) for an example of client side arguments and the [React section](#react) for usage.
+
+#### `groupOverrides`
+
+The `groupOverrides` option allows you to customize the fields that are available for a specific payment adapter. It takes a `GroupField` object with a `fields` function that receives the default fields and returns an array of fields.
+These fields are stored in transactions and can be used to collect additional information for the payment method. Stripe, for example, will track the `paymentIntentID`.
+
+Example for overriding the default fields:
+
+```ts
+payments: {
+  paymentMethods: [
+    stripeAdapter({
+      secretKey: process.env.STRIPE_SECRET_KEY,
+      publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+      groupOverrides: {
+        fields: ({ defaultFields }) => {
+          return [
+            ...defaultFields,
+            {
+              name: 'customField',
+              label: 'Custom Field',
+              type: 'text',
+            },
+          ]
+        }
+      }
+    }),
+  ],
+},
+```
+
+### Stripe Adapter
+
+The Stripe adapter is used to integrate with the Stripe payment gateway. It requires a secret key, publishable key, and optionally webhook secret.
+
+<Banner type="info">
+  Note that Payload will not install the Stripe SDK package for you
+  automatically, so you will need to install it yourself:
+
+```
+pnpm add stripe
+```
+
+</Banner>
+
+| Argument         | Type               | Description                                                                                                                                                                          |
+| ---------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `secretKey`      | `string`           | Required for communicating with the Stripe API in the backend.                                                                                                                       |
+| `publishableKey` | `string`           | Required for communicating with the Stripe API in the client side.                                                                                                                   |
+| `webhookSecret`  | `string`           | The webhook secret used to verify incoming webhook requests from Stripe.                                                                                                             |
+| `webhooks`       | `WebhookHandler[]` | An array of webhook handlers to register within Payload's REST API for Stripe to callback.                                                                                           |
+| `apiVersion`     | `string`           | The Stripe API version to use. See [docs](https://stripe.com/docs/api/versioning). This will be deprecated soon by Stripe's SDK, configure the API version in your Stripe Dashboard. |
+| `appInfo`        | `object`           | The application info to pass to Stripe. See [docs](https://stripe.com/docs/api/app_info).                                                                                            |
+
+```ts
+import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
+
+stripeAdapter({
+  secretKey: process.env.STRIPE_SECRET_KEY!,
+  publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  webhookSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET!,
+})
+```
+
+#### Stripe `webhooks`
+
+The `webhooks` option allows you to register custom webhook handlers for [Stripe events](https://docs.stripe.com/api/events). This is useful if you want to handle specific events that are not covered by the default handlers provided by the plugin.
+
+```ts
+stripeAdapter({
+  webhooks: {
+    'payment_intent.succeeded': ({ event, req }) => {
+      // Access to Payload's req object and event data
+    },
+  },
+}),
+```
+
+#### Stripe client side
+
+On the client side, you can use the `publishableKey` to initialize Stripe and handle payments. The client side version of the adapter only requires the `label` and `publishableKey` arguments. Never expose the `secretKey` or `webhookSecret` keys on the client side.
+
+```ts
+import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/stripe'
+
+<EcommerceProvider
+  paymentMethods={[
+    stripeAdapterClient({
+      publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    }),
+  ]}
+>
+  {children}
+</EcommerceProvider>
+```
+
+## Products
+
+The `products` option is used to configure the products and variants collections. Defaults to `true` which will create `products` and `variants` collections with default fields. It also takes an object:
+
+| Option                       | Type                 | Description                                                                                                                                                 |
+| ---------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `productsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `products` with a function where you can access the `defaultCollection` as an argument.                           |
+| `variants`                   | `boolean` `object`   | Configuration for the variants collection. Defaults to true. [More](#variants)                                                                              |
+| `validation`                 | `ProductsValidation` | Customise the validation used for checking products or variants before a transaction is created or a payment can be confirmed. [More](#products-validation) |
+
+You can add your own fields or modify the structure of the existing on in the collections. Example for overriding the default fields:
+
+```ts
+products: {
+  productsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
+}
+```
+
+### Variants
+
+The `variants` option is used to configure the variants collection. It takes an object:
+
+| Option                             | Type                 | Description                                                                                                                             |
+| ---------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `variantsCollectionOverride`       | `CollectionOverride` | Allows you to override the collection for `variants` with a function where you can access the `defaultCollection` as an argument.       |
+| `variantTypesCollectionOverride`   | `CollectionOverride` | Allows you to override the collection for `variantTypes` with a function where you can access the `defaultCollection` as an argument.   |
+| `variantOptionsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `variantOptions` with a function where you can access the `defaultCollection` as an argument. |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+variants: {
+  variantsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'customField',
+        label: 'Custom Field',
+        type: 'text',
+      },
+    ],
+  })
+}
+```
+
+The key differences between these collections:
+
+- `variantTypes` are the types of variants that a product can have, e.g. Size, Color.
+- `variantOptions` are the options for each variant type, e.g. Small, Medium, Large for Size.
+- `variants` are the actual variants of a product, e.g. a T-Shirt in Size Small and Color Red.
+
+### Products validation
+
+We use an addition validation step when creating transactions or confirming payments to ensure that the products and variants being purchased are valid. This is to prevent issues such as purchasing a product that is out of stock or has been deleted.
+
+You can customise this validation by providing your own validation function via the `validation` option which receives the following arguments:
+
+| Option             | Type               | Description                                                                                              |
+| ------------------ | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `currenciesConfig` | `CurrenciesConfig` | The full currencies configuration provided in the plugin options.                                        |
+| `product`          | `TypedCollection`  | The product being purchased.                                                                             |
+| `variant`          | `TypedCollection`  | The variant being purchased, if a variant was selected for the product otherwise it will be `undefined`. |
+| `quantity`         | `number`           | The quantity being purchased.                                                                            |
+| `currency`         | `string`           | The currency code being used for the purchase.                                                           |
+
+The function should throw an error if the product or variant is not valid. If the function does not throw an error, the product or variant is considered valid.
+
+The default validation function checks for the following:
+
+- A currency is provided.
+- The product or variant has a price in the selected currency.
+- The product or variant has enough inventory for the requested quantity.
+
+```ts
+export const defaultProductsValidation: ProductsValidation = ({
+  currenciesConfig,
+  currency,
+  product,
+  quantity = 1,
+  variant,
+}) => {
+  if (!currency) {
+    throw new Error('Currency must be provided for product validation.')
+  }
+
+  const priceField = `priceIn${currency.toUpperCase()}`
+
+  if (variant) {
+    if (!variant[priceField]) {
+      throw new Error(
+        `Variant with ID ${variant.id} does not have a price in ${currency}.`,
+      )
+    }
+
+    if (
+      variant.inventory === 0 ||
+      (variant.inventory && variant.inventory < quantity)
+    ) {
+      throw new Error(
+        `Variant with ID ${variant.id} is out of stock or does not have enough inventory.`,
+      )
+    }
+  } else if (product) {
+    // Validate the product's details only if the variant is not provided as it can have its own inventory and price
+    if (!product[priceField]) {
+      throw new Error(`Product does not have a price in.`, {
+        cause: { code: MissingPrice, codes: [product.id, currency] },
+      })
+    }
+
+    if (
+      product.inventory === 0 ||
+      (product.inventory && product.inventory < quantity)
+    ) {
+      throw new Error(
+        `Product is out of stock or does not have enough inventory.`,
+        {
+          cause: { code: OutOfStock, codes: [product.id] },
+        },
+      )
+    }
+  }
+}
+```
+
+## Orders
+
+The `orders` option is used to configure the orders collection. Defaults to `true` which will create an `orders` collection with default fields. It also takes an object:
+
+| Option                     | Type                 | Description                                                                                                                     |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `ordersCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `orders` with a function where you can access the `defaultCollection` as an argument. |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+orders: {
+  ordersCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
+}
+```
+
+## Transactions
+
+The `transactions` option is used to configure the transactions collection. Defaults to `true` which will create a `transactions` collection with default fields. It also takes an object:
+
+| Option                           | Type                 | Description                                                                                                                           |
+| -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `transactionsCollectionOverride` | `CollectionOverride` | Allows you to override the collection for `transactions` with a function where you can access the `defaultCollection` as an argument. |
+
+You can add your own fields or modify the structure of the existing on in the collection. Example for overriding the default fields:
+
+```ts
+transactions: {
+  transactionsCollectionOverride: ({ defaultCollection }) => ({
+    ...defaultCollection,
+    fields: [
+      ...defaultCollection.fields,
+      {
+        name: 'notes',
+        label: 'Notes',
+        type: 'textarea',
+      },
+    ],
+  })
+}
+```
+
+## Translations
+
+The plugin includes translations for admin UI labels and messages under the `plugin-ecommerce` namespace. To add the plugin's translations to your Payload config, use the `i18n.translations` key.
+
+### Adding translations
+
+Import the plugin translations and add them to your Payload config:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { en } from '@payloadcms/translations/languages/en'
+import { enTranslations as ecommerceEn } from '@payloadcms/plugin-ecommerce/translations/languages/en'
+
+export default buildConfig({
+  // ...
+  i18n: {
+    supportedLanguages: { en },
+    translations: {
+      en: ecommerceEn,
+    },
+  },
+  plugins: [
+    ecommercePlugin({
+      /* ... */
+    }),
+  ],
+})
+```
+
+### Overriding translations
+
+You can override specific translation strings by providing your own values under the `plugin-ecommerce` namespace:
+
+```ts
+import { buildConfig } from 'payload'
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { en } from '@payloadcms/translations/languages/en'
+import { enTranslations as ecommerceEn } from '@payloadcms/plugin-ecommerce/translations/languages/en'
+
+export default buildConfig({
+  // ...
+  i18n: {
+    supportedLanguages: { en },
+    translations: {
+      en: {
+        ...ecommerceEn,
+        'plugin-ecommerce': {
+          ...ecommerceEn['plugin-ecommerce'],
+          cart: 'Shopping Cart',
+          orders: 'My Orders',
+        },
+      },
+    },
+  },
+  plugins: [
+    ecommercePlugin({
+      /* ... */
+    }),
+  ],
+})
+```

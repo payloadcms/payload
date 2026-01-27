@@ -1,12 +1,12 @@
 ---
 title: Nested Docs Plugin
 label: Nested Docs
-order: 40
+order: 60
 desc: Nested documents in a parent, child, and sibling relationship.
 keywords: plugins, nested, documents, parent, child, sibling, relationship
 ---
 
-[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-nested-docs)](https://www.npmjs.com/package/@payloadcms/plugin-nested-docs)
+![https://www.npmjs.com/package/@payloadcms/plugin-nested-docs](https://img.shields.io/npm/v/@payloadcms/plugin-nested-docs)
 
 This plugin allows you to easily nest the documents of your application inside of one another. It does so by adding a
 new `parent` field onto each of your documents that, when selected, attaches itself to the parent's tree. When you edit
@@ -26,9 +26,10 @@ but different parents.
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs). If you need
-  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20nested-docs&template=bug_report.md&title=plugin-nested-docs%3A)
   with as much detail as possible.
 </Banner>
@@ -44,8 +45,7 @@ but different parents.
 
 ## Installation
 
-Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com),
-or [PNPM](https://pnpm.io):
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
 
 ```bash
   pnpm add @payloadcms/plugin-nested-docs
@@ -80,7 +80,8 @@ const config = buildConfig({
     nestedDocsPlugin({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+      generateURL: (docs) =>
+        docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
   ],
 })
@@ -114,13 +115,13 @@ An array of collections slugs to enable nested docs.
 #### `generateLabel`
 
 Each `breadcrumb` has a required `label` field. By default, its value will be set to the collection's `admin.useAsTitle`
-or fallback the the `ID` of the document.
+or fallback to the `ID` of the document.
 
 You can also pass a function to dynamically set the `label` of your breadcrumb.
 
 ```ts
 // payload.config.ts
-nestedDocs({
+nestedDocsPlugin({
   //...
   generateLabel: (_, doc) => doc.title, // NOTE: 'title' is a hypothetical field
 })
@@ -128,10 +129,11 @@ nestedDocs({
 
 The function takes two arguments and returns a string:
 
-| Argument | Type     | Description                                  |
-| -------- | -------- | -------------------------------------------- |
-| `docs`   | `Array`  | An array of the breadcrumbs up to that point |
-| `doc`    | `Object` | The current document being edited            |
+| Argument     | Type     | Description                                   |
+| ------------ | -------- | --------------------------------------------- |
+| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object` | The current document being edited             |
+| `collection` | `Object` | The collection config of the current document |
 
 #### `generateURL`
 
@@ -141,16 +143,17 @@ that point, like `/about-us/company/our-team`.
 
 ```ts
 // payload.config.ts
-nestedDocs({
+nestedDocsPlugin({
   //...
   generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
 })
 ```
 
-| Argument | Type     | Description                                  |
-| -------- | -------- | -------------------------------------------- |
-| `docs`   | `Array`  | An array of the breadcrumbs up to that point |
-| `doc`    | `Object` | The current document being edited            |
+| Argument     | Type     | Description                                   |
+| ------------ | -------- | --------------------------------------------- |
+| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object` | The current document being edited             |
+| `collection` | `Object` | The collection config of the current document |
 
 #### `parentFieldSlug`
 
@@ -164,11 +167,12 @@ When defined, the `breadcrumbs` field will not be provided for you, and instead,
 own `breadcrumbs` field to each collection manually. Set this property to the `name` of your custom field.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  <br />
-  If you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make
-  sure that both fields are placed at the top-level of your document. They cannot exist within any
-  nested data structures like a `group`, `array`, or `blocks`.
+  **Note:**
+
+If you opt out of automatically being provided a `parent` or `breadcrumbs` field, you need to make
+sure that both fields are placed at the top-level of your document. They cannot exist within any
+nested data structures like a `group`, `array`, or `blocks`.
+
 </Banner>
 
 ## Overrides
@@ -178,8 +182,8 @@ and `createBreadcrumbField` methods. They will merge your customizations overtop
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { createParentField } from '@payloadcms/plugin-nested-docs/fields'
-import { createBreadcrumbsField } from '@payloadcms/plugin-nested-docs/fields'
+import { createParentField } from '@payloadcms/plugin-nested-docs'
+import { createBreadcrumbsField } from '@payloadcms/plugin-nested-docs'
 
 const examplePageConfig: CollectionConfig = {
   slug: 'pages',
@@ -197,7 +201,7 @@ const examplePageConfig: CollectionConfig = {
         },
         // Note: if you override the `filterOptions` of the `parent` field,
         // be sure to continue to prevent the document from referencing itself as the parent like this:
-        // filterOptions: ({ id }) => ({ id: {not_equals: id }})`
+        // filterOptions: ({ id }) => ({ id: {not_equals: id }})
       },
     ),
     createBreadcrumbsField(
@@ -216,10 +220,11 @@ const examplePageConfig: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  If overriding the `name` of either `breadcrumbs` or `parent` fields, you must specify the
-  `breadcrumbsFieldSlug` or `parentFieldSlug` respectively.
+  **Note:**
+
+If overriding the `name` of either `breadcrumbs` or `parent` fields, you must specify the
+`breadcrumbsFieldSlug` or `parentFieldSlug` respectively.
+
 </Banner>
 
 ## Localization
@@ -233,7 +238,11 @@ the [Localization](https://payloadcms.com/docs/configuration/localization) docs.
 All types can be directly imported:
 
 ```ts
-import { PluginConfig, GenerateURL, GenerateLabel } from '@payloadcms/plugin-nested-docs/types'
+import {
+  PluginConfig,
+  GenerateURL,
+  GenerateLabel,
+} from '@payloadcms/plugin-nested-docs/types'
 ```
 
 ## Examples

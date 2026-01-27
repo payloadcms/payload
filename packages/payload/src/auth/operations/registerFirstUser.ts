@@ -8,6 +8,7 @@ import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -42,6 +43,10 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     req: { payload },
   } = args
 
+  if (config.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
+
   try {
     const shouldCommit = await initTransaction(req)
 
@@ -53,9 +58,16 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(config.trash),
+      trash: false,
+      where: {}, // no initial filter; just exclude trashed docs
+    })
+
     const doc = await payload.db.findOne({
       collection: config.slug,
       req,
+      where,
     })
 
     if (doc) {
@@ -94,6 +106,9 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       collection: slug,
       req,
     })
+
+    result.collection = slug
+    result._strategy = 'local-jwt'
 
     if (shouldCommit) {
       await commitTransaction(req)

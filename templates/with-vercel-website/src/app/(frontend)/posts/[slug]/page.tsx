@@ -13,6 +13,7 @@ import type { Post } from '@/payload-types'
 import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
+import { LivePreviewListener } from '@/components/LivePreviewListener'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -20,8 +21,8 @@ export async function generateStaticParams() {
     collection: 'posts',
     draft: false,
     limit: 1000,
-    pagination: false,
     overrideAccess: false,
+    pagination: false,
     select: {
       slug: true,
     },
@@ -41,9 +42,12 @@ type Args = {
 }
 
 export default async function Post({ params: paramsPromise }: Args) {
+  const { isEnabled: draft } = await draftMode()
   const { slug = '' } = await paramsPromise
-  const url = '/posts/' + slug
-  const post = await queryPostBySlug({ slug })
+  // Decode to support slugs with special characters
+  const decodedSlug = decodeURIComponent(slug)
+  const url = '/posts/' + decodedSlug
+  const post = await queryPostBySlug({ slug: decodedSlug })
 
   if (!post) return <PayloadRedirects url={url} />
 
@@ -54,11 +58,13 @@ export default async function Post({ params: paramsPromise }: Args) {
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />
 
+      {draft && <LivePreviewListener />}
+
       <PostHero post={post} />
 
       <div className="flex flex-col items-center gap-4 pt-8">
         <div className="container">
-          <RichText className="max-w-[48rem] mx-auto" content={post.content} enableGutter={false} />
+          <RichText className="max-w-[48rem] mx-auto" data={post.content} enableGutter={false} />
           {post.relatedPosts && post.relatedPosts.length > 0 && (
             <RelatedPosts
               className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
@@ -73,7 +79,9 @@ export default async function Post({ params: paramsPromise }: Args) {
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug = '' } = await paramsPromise
-  const post = await queryPostBySlug({ slug })
+  // Decode to support slugs with special characters
+  const decodedSlug = decodeURIComponent(slug)
+  const post = await queryPostBySlug({ slug: decodedSlug })
 
   return generateMeta({ doc: post })
 }

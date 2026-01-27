@@ -1,8 +1,9 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { MarkOptional } from 'ts-essentials'
 
-import type { SanitizedFieldPermissions, User } from '../../auth/types.js'
+import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
@@ -18,9 +19,17 @@ import type {
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientComponentProps = {
-  customComponents: FormField['customComponents']
+  customComponents?: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
+  /**
+   * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
+   *
+   * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
+   *
+   * If a number is provided, will immediately render fields _up to that index_.
+   */
   forceRender?: boolean
+  permissions?: SanitizedFieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   /**
@@ -66,6 +75,9 @@ export type FieldPaths = {
   path: string
 }
 
+/**
+ * TODO: This should be renamed to `FieldComponentServerProps` or similar
+ */
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
   clientFieldSchemaMap: ClientFieldSchemaMap
@@ -89,7 +101,8 @@ export type ServerComponentProps = {
   preferences: DocumentPreferences
   req: PayloadRequest
   siblingData: Data
-  user: User
+  user: TypedUser
+  value?: unknown
 }
 
 export type ClientFieldBase<

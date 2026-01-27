@@ -3,21 +3,18 @@ import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Button, SetStepNav } from '@payloadcms/ui'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
+
 const baseClass = 'custom-default-view'
 
-export const CustomDefaultView: React.FC<AdminViewProps> = ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export function CustomDefaultView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     permissions,
     req: {

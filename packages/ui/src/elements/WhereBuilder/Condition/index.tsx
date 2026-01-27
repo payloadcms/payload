@@ -1,52 +1,39 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
-import type { FieldCondition } from '../types.js'
+import type {
+  AddCondition,
+  ReducedField,
+  RemoveCondition,
+  UpdateCondition,
+  Value,
+} from '../types.js'
 
 export type Props = {
-  readonly addCondition: ({
-    andIndex,
-    fieldName,
-    orIndex,
-    relation,
-  }: {
-    andIndex: number
-    fieldName: string
-    orIndex: number
-    relation: 'and' | 'or'
-  }) => void
+  readonly addCondition: AddCondition
   readonly andIndex: number
-  readonly fieldName: string
-  readonly fields: FieldCondition[]
-  readonly initialValue: string
+  readonly fieldPath: string
+  readonly filterOptions: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
-  readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
+  readonly reducedFields: ReducedField[]
+  readonly removeCondition: RemoveCondition
   readonly RenderedFilter: React.ReactNode
-  readonly updateCondition: ({
-    andIndex,
-    fieldName,
-    operator,
-    orIndex,
-    value,
-  }: {
-    andIndex: number
-    fieldName: string
-    operator: string
-    orIndex: number
-    value: string
-  }) => void
+  readonly updateCondition: UpdateCondition
+  readonly value: Value
 }
 
-import type { Operator } from 'payload'
+import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
+import { getOperatorValueTypes } from './validOperators.js'
 import './index.scss'
 
 const baseClass = 'condition'
@@ -55,63 +42,100 @@ export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
     andIndex,
-    fieldName,
-    fields,
-    initialValue,
+    fieldPath,
+    filterOptions,
     operator,
     orIndex,
+    reducedFields,
     removeCondition,
     RenderedFilter,
     updateCondition,
+    value,
   } = props
-  const [internalField, setInternalField] = useState<FieldCondition>(() =>
-    fields.find((field) => fieldName === field.value),
-  )
 
   const { t } = useTranslation()
-  const [internalOperatorOption, setInternalOperatorOption] = useState<Operator>(operator)
-  const [internalQueryValue, setInternalQueryValue] = useState<string>(initialValue)
 
-  const debouncedValue = useDebounce(internalQueryValue, 300)
+  const reducedField = reducedFields.find((field) => field.value === fieldPath)
 
-  useEffect(() => {
-    // This is to trigger changes when the debounced value changes
-    if (
-      (internalField?.value || typeof internalField?.value === 'number') &&
-      internalOperatorOption &&
-      ![null, undefined].includes(debouncedValue)
-    ) {
-      updateCondition({
-        andIndex,
-        fieldName: internalField.value,
-        operator: internalOperatorOption,
-        orIndex,
-        value: debouncedValue,
-      })
-    }
-  }, [
-    debouncedValue,
-    andIndex,
-    internalField?.value,
-    internalOperatorOption,
-    orIndex,
-    updateCondition,
-    operator,
-  ])
+  const [internalValue, setInternalValue] = useState<Value>(value)
 
-  const booleanSelect =
-    ['exists'].includes(internalOperatorOption) || internalField?.field?.type === 'checkbox'
+  const debouncedValue = useDebounce(internalValue, 300)
 
-  let valueOptions
+  const booleanSelect = ['exists'].includes(operator) || reducedField?.field?.type === 'checkbox'
+
+  let valueOptions: PayloadOption[] = []
 
   if (booleanSelect) {
     valueOptions = [
       { label: t('general:true'), value: 'true' },
       { label: t('general:false'), value: 'false' },
     ]
-  } else if (internalField?.field && 'options' in internalField.field) {
-    valueOptions = internalField.field.options
+  } else if (reducedField?.field && 'options' in reducedField.field) {
+    valueOptions = reducedField.field.options
   }
+
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
+    if (operator) {
+      await updateCondition({
+        type: 'value',
+        andIndex,
+        field: reducedField,
+        operator,
+        orIndex,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
+      })
+    }
+  })
+
+  useEffect(() => {
+    void updateValue(debouncedValue)
+  }, [debouncedValue])
+
+  const disabled =
+    (!reducedField?.value && typeof reducedField?.value !== 'number') ||
+    reducedField?.field?.admin?.disableListFilter
+
+  const handleFieldChange = useCallback(
+    async (field: Option<string>) => {
+      setInternalValue(undefined)
+      await updateCondition({
+        type: 'field',
+        andIndex,
+        field: reducedFields.find((option) => option.value === field.value),
+        operator,
+        orIndex,
+        value: undefined,
+      })
+    },
+    [andIndex, operator, orIndex, reducedFields, updateCondition],
+  )
+
+  const handleOperatorChange = useCallback(
+    async (operator: Option<Operator>) => {
+      const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
+      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
+      const isValidValue =
+        validOperatorValue === 'any' ||
+        typeof value === validOperatorValue ||
+        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+
+      if (!isValidValue) {
+        // if the current value is not valid for the new operator
+        // reset the value before passing it to updateCondition
+        setInternalValue(undefined)
+      }
+
+      await updateCondition({
+        type: 'operator',
+        andIndex,
+        field: reducedField,
+        operator: operator.value,
+        orIndex,
+        value: isValidValue ? value : undefined,
+      })
+    },
+    [andIndex, reducedField, orIndex, updateCondition, value],
+  )
 
   return (
     <div className={baseClass}>
@@ -119,41 +143,44 @@ export const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
+              disabled={disabled}
+              filterOption={(option, inputValue) =>
+                ((option?.data?.plainTextLabel as string) || option.label)
+                  .toLowerCase()
+                  .includes(inputValue.toLowerCase())
+              }
               isClearable={false}
-              onChange={(field: Option) => {
-                setInternalField(fields.find((f) => f.value === field.value))
-                setInternalOperatorOption(undefined)
-                setInternalQueryValue(undefined)
-              }}
-              options={fields}
-              value={fields.find((field) => internalField?.value === field.value) || fields[0]}
+              onChange={handleFieldChange}
+              options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
+              value={
+                reducedField || {
+                  value: reducedField?.value,
+                }
+              }
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!internalField?.value && typeof internalField?.value !== 'number'}
+              disabled={disabled}
               isClearable={false}
-              onChange={(operator: Option<Operator>) => {
-                setInternalOperatorOption(operator.value)
-              }}
-              options={internalField?.operators}
-              value={
-                internalField?.operators.find(
-                  (operator) => internalOperatorOption === operator.value,
-                ) || null
-              }
+              onChange={handleOperatorChange}
+              options={reducedField?.operators}
+              value={reducedField?.operators.find((o) => operator === o.value) || null}
             />
           </div>
           <div className={`${baseClass}__value`}>
             {RenderedFilter || (
               <DefaultFilter
                 booleanSelect={booleanSelect}
-                disabled={!internalOperatorOption}
-                internalField={internalField}
-                onChange={setInternalQueryValue}
-                operator={internalOperatorOption}
+                disabled={
+                  !operator || !reducedField || reducedField?.field?.admin?.disableListFilter
+                }
+                filterOptions={filterOptions}
+                internalField={reducedField}
+                onChange={setInternalValue}
+                operator={operator}
                 options={valueOptions}
-                value={internalQueryValue ?? ''}
+                value={internalValue ?? ''}
               />
             )}
           </div>
@@ -180,7 +207,7 @@ export const Condition: React.FC<Props> = (props) => {
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                fieldName: fields[0].value,
+                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                 orIndex,
                 relation: 'and',
               })

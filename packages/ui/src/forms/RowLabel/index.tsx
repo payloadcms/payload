@@ -17,14 +17,18 @@ export const RowLabel: React.FC<RowLabelProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={CustomComponent}
         Fallback={
-          <span
-            className={[baseClass, className].filter(Boolean).join(' ')}
-            style={{
-              pointerEvents: 'none',
-            }}
-          >
-            {label}
-          </span>
+          typeof label === 'string' ? (
+            <span
+              className={[baseClass, className].filter(Boolean).join(' ')}
+              style={{
+                pointerEvents: 'none',
+              }}
+            >
+              {label}
+            </span>
+          ) : (
+            label
+          )
         }
       />
     </RowLabelProvider>

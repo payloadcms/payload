@@ -1,5 +1,5 @@
 'use client'
-import React, { forwardRef } from 'react'
+import React from 'react'
 
 import './index.scss'
 
@@ -9,18 +9,20 @@ export type GutterProps = {
   left?: boolean
   negativeLeft?: boolean
   negativeRight?: boolean
+  ref?: React.RefObject<HTMLDivElement>
   right?: boolean
 }
 
 const baseClass = 'gutter'
 
-export const Gutter = forwardRef<HTMLDivElement, GutterProps>((props, ref) => {
+export const Gutter: React.FC<GutterProps> = (props) => {
   const {
     children,
     className,
     left = true,
     negativeLeft = false,
     negativeRight = false,
+    ref,
     right = true,
   } = props
 
@@ -30,6 +32,7 @@ export const Gutter = forwardRef<HTMLDivElement, GutterProps>((props, ref) => {
   return (
     <div
       className={[
+        baseClass,
         shouldPadLeft && `${baseClass}--left`,
         shouldPadRight && `${baseClass}--right`,
         negativeLeft && `${baseClass}--negative-left`,
@@ -43,6 +46,4 @@ export const Gutter = forwardRef<HTMLDivElement, GutterProps>((props, ref) => {
       {children}
     </div>
   )
-})
-
-Gutter.displayName = 'Gutter'
+}

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strict": true,
     "baseUrl": ".",
     "esModuleInterop": true,
     "target": "ES2022",
@@ -10,9 +11,6 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "incremental": true,
     "jsx": "preserve",
@@ -43,9 +41,11 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "redirects.js",
-    "next.config.js"
+    "next-env.d.ts",
+    "next.config.js",
+    "next-sitemap.config.cjs"
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }

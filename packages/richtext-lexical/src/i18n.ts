@@ -49,6 +49,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listas',
     toolbarItemsActive: '{{count}} activo',
   },
+  et: {
+    placeholder: "Alusta kirjutamist või vajuta '/' käskude jaoks...",
+    slashMenuBasicGroupLabel: 'Põhiline',
+    slashMenuListGroupLabel: 'Loendid',
+    toolbarItemsActive: '{{count}} aktiivne',
+  },
   fa: {
     placeholder: "شروع به تایپ کنید، یا برای دستورات '/' را فشار دهید ...",
     slashMenuBasicGroupLabel: 'پایه',
@@ -78,6 +84,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: 'Alapvető',
     slashMenuListGroupLabel: 'Listák',
     toolbarItemsActive: '{{count}} aktív',
+  },
+  is: {
+    placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
+    slashMenuBasicGroupLabel: 'Grunnur',
+    slashMenuListGroupLabel: 'Listar',
+    toolbarItemsActive: '{{count}} virk',
   },
   it: {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
@@ -134,10 +146,10 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} activ',
   },
   rs: {
-    placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
-    slashMenuBasicGroupLabel: 'Osnovno',
-    slashMenuListGroupLabel: 'Liste',
-    toolbarItemsActive: '{{count}} aktivno',
+    placeholder: "Почните да куцате, или притисните '/' за команде...",
+    slashMenuBasicGroupLabel: 'Основно',
+    slashMenuListGroupLabel: 'Листе',
+    toolbarItemsActive: '{{count}} активно',
   },
   'rs-latin': {
     placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
@@ -157,11 +169,23 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Zoznamy',
     toolbarItemsActive: '{{count}} aktívne',
   },
+  sl: {
+    placeholder: 'Začnite tipkati ali pritisnite "/" za ukaze...',
+    slashMenuBasicGroupLabel: 'Osnovno',
+    slashMenuListGroupLabel: 'Seznami',
+    toolbarItemsActive: '{{count}} aktivno',
+  },
   sv: {
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",
     slashMenuBasicGroupLabel: 'Grundläggande',
     slashMenuListGroupLabel: 'Listor',
     toolbarItemsActive: '{{count}} aktiv',
+  },
+  ta: {
+    placeholder: "எழுதத் தொடங்கவும், அல்லது கட்டளைகளுக்கு '/' அழுத்தவும்...",
+    slashMenuBasicGroupLabel: 'அடிப்படை',
+    slashMenuListGroupLabel: 'பட்டியல்கள்',
+    toolbarItemsActive: '{{count}} செயலில் உள்ளது',
   },
   th: {
     placeholder: "เริ่มพิมพ์หรือกด '/' สำหรับคำสั่ง...",

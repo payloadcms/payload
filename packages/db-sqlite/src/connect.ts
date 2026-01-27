@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { pushDevSchema } from '@payloadcms/drizzle'
@@ -15,14 +15,27 @@ export const connect: Connect = async function connect(
 ) {
   const { hotReload } = options
 
-  this.schema = {
-    ...this.tables,
-    ...this.relations,
-  }
-
   try {
     if (!this.client) {
       this.client = createClient(this.clientConfig)
+
+      if (this.busyTimeout > 0) {
+        await this.client.execute(`PRAGMA busy_timeout = ${this.busyTimeout};`)
+      }
+
+      if (this.wal) {
+        const result = await this.client.execute('PRAGMA journal_mode;')
+
+        if (result.rows[0]?.journal_mode !== 'wal') {
+          this.payload.logger.info(
+            `[db-sqlite] Enabling WAL mode with journal size limit ${this.wal.journalSizeLimit}.`,
+          )
+          await this.client.execute(`PRAGMA journal_mode = WAL;`)
+          await this.client.execute(`PRAGMA journal_size_limit = ${this.wal.journalSizeLimit};`)
+        }
+
+        await this.client.execute(`PRAGMA synchronous = ${this.wal.synchronous};`)
+      }
     }
 
     const logger = this.logger || false
@@ -36,11 +49,12 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${err.message}` })
+    const message = err instanceof Error ? err.message : String(err)
+    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${message}` })
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
-    process.exit(1)
+    throw new Error(`Error: cannot connect to SQLite: ${message}`)
   }
 
   // Only push schema if not in production
@@ -57,6 +71,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as Migration[] })
   }
 }

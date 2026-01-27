@@ -8,10 +8,10 @@ import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { hero } from '@/heros/config'
-import { slugField } from '@/fields/slug'
+import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
-import { revalidatePage } from './hooks/revalidatePage'
+import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 
 import {
   MetaDescriptionField,
@@ -20,7 +20,6 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { getServerSideURL } from '@/utilities/getURL'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -40,23 +39,19 @@ export const Pages: CollectionConfig<'pages'> = {
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
-      url: ({ data }) => {
-        const path = generatePreviewPath({
-          slug: typeof data?.slug === 'string' ? data.slug : '',
+      url: ({ data, req }) =>
+        generatePreviewPath({
+          slug: data?.slug,
           collection: 'pages',
-        })
-
-        return `${getServerSideURL()}${path}`
-      },
+          req,
+        }),
     },
-    preview: (data) => {
-      const path = generatePreviewPath({
-        slug: typeof data?.slug === 'string' ? data.slug : '',
+    preview: (data, { req }) =>
+      generatePreviewPath({
+        slug: data?.slug as string,
         collection: 'pages',
-      })
-
-      return `${getServerSideURL()}${path}`
-    },
+        req,
+      }),
     useAsTitle: 'title',
   },
   fields: [
@@ -79,6 +74,9 @@ export const Pages: CollectionConfig<'pages'> = {
               type: 'blocks',
               blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
               required: true,
+              admin: {
+                initCollapsed: true,
+              },
             },
           ],
           label: 'Content',
@@ -119,17 +117,19 @@ export const Pages: CollectionConfig<'pages'> = {
         position: 'sidebar',
       },
     },
-    ...slugField(),
+    slugField(),
   ],
   hooks: {
     afterChange: [revalidatePage],
     beforeChange: [populatePublishedAt],
+    afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
       autosave: {
         interval: 100, // We set this interval for optimal live preview
       },
+      schedulePublish: true,
     },
     maxPerDoc: 50,
   },

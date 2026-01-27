@@ -1,108 +1,14 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "declaration": true,
-    "declarationMap": true,
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowJs": true,
-    "checkJs": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "preserve",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2022"
-    ],
+    "composite": false,
     "noEmit": true,
-    "outDir": "./dist",
-    "resolveJsonModule": true,
-    "rootDir": ".",
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "strict": false,
-    "types": [
-      "jest",
-      "node",
-      "@types/jest"
-    ],
-    "incremental": true,
-    "isolatedModules": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@payload-config": [
-        "./test/_community/config.ts"
-      ],
-      "@payloadcms/live-preview": [
-        "./packages/live-preview/src"
-      ],
-      "@payloadcms/live-preview-react": [
-        "./packages/live-preview-react/src/index.ts"
-      ],
-      "@payloadcms/live-preview-vue": [
-        "./packages/live-preview-vue/src/index.ts"
-      ],
-      "@payloadcms/ui": [
-        "./packages/ui/src/exports/client/index.ts"
-      ],
-      "@payloadcms/ui/shared": [
-        "./packages/ui/src/exports/shared/index.ts"
-      ],
-      "@payloadcms/ui/scss": [
-        "./packages/ui/src/scss.scss"
-      ],
-      "@payloadcms/ui/scss/app.scss": [
-        "./packages/ui/src/scss/app.scss"
-      ],
-      "@payloadcms/next/*": [
-        "./packages/next/src/exports/*.ts"
-      ],
-      "@payloadcms/richtext-lexical/client": [
-        "./packages/richtext-lexical/src/exports/client/index.ts"
-      ],
-      "@payloadcms/richtext-lexical/rsc": [
-        "./packages/richtext-lexical/src/exports/server/rsc.ts"
-      ],
-      "@payloadcms/richtext-slate/rsc": [
-        "./packages/richtext-slate/src/exports/server/rsc.ts"
-      ],
-      "@payloadcms/richtext-slate/client": [
-        "./packages/richtext-slate/src/exports/client/index.ts"
-      ],
-      "@payloadcms/plugin-seo/client": [
-        "./packages/plugin-seo/src/exports/client.ts"
-      ],
-      "@payloadcms/plugin-sentry/client": [
-        "./packages/plugin-sentry/src/exports/client.ts"
-      ],
-      "@payloadcms/plugin-stripe/client": [
-        "./packages/plugin-stripe/src/exports/client.ts"
-      ],
-      "@payloadcms/plugin-search/client": [
-        "./packages/plugin-search/src/exports/client.ts"
-      ],
-      "@payloadcms/plugin-form-builder/client": [
-        "./packages/plugin-form-builder/src/exports/client.ts"
-      ],
-      "@payloadcms/next": [
-        "./packages/next/src/exports/*"
-      ]
-    }
+    "baseUrl": ".",
   },
-  "exclude": [
-    "dist",
-    "build",
-    "temp",
-    "node_modules"
-  ],
-  "composite": true,
   "references": [
+    {
+      "path": "./packages/admin-bar"
+    },
     {
       "path": "./packages/create-payload-app"
     },
@@ -128,6 +34,9 @@
       "path": "./packages/live-preview-vue"
     },
     {
+      "path": "./packages/kv-redis"
+    },
+    {
       "path": "./packages/next"
     },
     {
@@ -135,6 +44,9 @@
     },
     {
       "path": "./packages/plugin-cloud-storage"
+    },
+    {
+      "path": "./packages/storage-s3"
     },
     {
       "path": "./packages/payload-cloud"
@@ -155,7 +67,13 @@
       "path": "./packages/plugin-seo"
     },
     {
+      "path": "./packages/plugin-import-export"
+    },
+    {
       "path": "./packages/plugin-stripe"
+    },
+    {
+      "path": "./packages/plugin-multi-tenant"
     },
     {
       "path": "./packages/richtext-slate"
@@ -168,14 +86,14 @@
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/sdk"
     }
   ],
   "include": [
-    "app",
+    "${configDir}/src",
     ".next/types/**/*.ts",
-    "scripts/**/*.ts",
-    "instrumentation.ts",
-    "sentry.server.config.ts",
-    "sentry.client.config.ts"
+    "./scripts/**/*.ts"
   ]
 }

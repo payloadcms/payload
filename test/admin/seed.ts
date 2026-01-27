@@ -2,19 +2,20 @@ import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { seedDB } from '../helpers/seed.js'
 import {
   collectionSlugs,
-  customIdCollectionId,
+  customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
+  with300DocumentsSlug,
 } from './slugs.js'
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await executePromises(
     [
       () =>
@@ -51,6 +52,8 @@ export const seed = async (_payload) => {
           data: {
             description: 'Description',
             title: `Post ${i + 1}`,
+            disableListColumnText: 'Disable List Column Text',
+            disableListFilterText: 'Disable List Filter Text',
           },
           depth: 0,
           overrideAccess: true,
@@ -70,6 +73,15 @@ export const seed = async (_payload) => {
           overrideAccess: true,
         })
       }),
+      () =>
+        _payload.create({
+          collection: customDocumentControlsSlug,
+          data: {
+            title: 'Custom Document Controls',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
       () =>
         _payload.create({
           collection: customViews1CollectionSlug,
@@ -115,20 +127,9 @@ export const seed = async (_payload) => {
         }),
       () =>
         _payload.create({
-          collection: 'customIdTab',
+          collection: localizedCollectionSlug,
           data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
-      () =>
-        _payload.create({
-          collection: 'customIdRow',
-          data: {
-            id: customIdCollectionId,
-            title: 'Hello world title',
+            title: 'Localized Doc',
           },
           depth: 0,
           overrideAccess: true,
@@ -136,13 +137,24 @@ export const seed = async (_payload) => {
     ],
     false,
   )
-}
 
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'adminTests',
+  // delete all with300Documents
+  await _payload.delete({
+    collection: with300DocumentsSlug,
+    where: {},
   })
+
+  // Create 300 documents of with300Documents
+  const manyDocumentsPromises: Promise<unknown>[] = Array.from({ length: 300 }, (_, i) => {
+    const index = (i + 1).toString().padStart(3, '0')
+    return _payload.create({
+      collection: with300DocumentsSlug,
+      data: {
+        id: index,
+        text: `document ${index}`,
+      },
+    })
+  })
+
+  await Promise.all([...manyDocumentsPromises])
 }

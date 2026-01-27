@@ -3,7 +3,13 @@ import type React from 'react'
 
 import { ArrayField } from '@payloadcms/ui'
 
-export const CustomArrayFieldServer: ArrayFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <ArrayField field={props.clientField} path={path} permissions={props?.permissions} />
+export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <ArrayField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+  )
 }

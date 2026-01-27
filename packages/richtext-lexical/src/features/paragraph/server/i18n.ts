@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Párrafo',
     label2: 'Texto normal',
   },
+  et: {
+    label: 'Paragrahv',
+    label2: 'Tavaline tekst',
+  },
   fa: {
     label: 'پاراگراف',
     label2: 'متن عادی',
@@ -52,6 +56,10 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Bekezdés',
     label2: 'Normál szöveg',
+  },
+  is: {
+    label: 'Málsgrein',
+    label2: 'Venjulegur texti',
   },
   it: {
     label: 'Paragrafo',
@@ -90,12 +98,12 @@ export const i18n: Partial<GenericLanguages> = {
     label2: 'Text normal',
   },
   rs: {
-    label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label: 'Параграф',
+    label2: 'Oбичан текст',
   },
   'rs-latin': {
     label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label2: 'Običan tekst',
   },
   ru: {
     label: 'Параграф',
@@ -105,9 +113,17 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Odsek',
     label2: 'Normálny text',
   },
+  sl: {
+    label: 'Odstavek',
+    label2: 'Navaden besedilo',
+  },
   sv: {
     label: 'Stycke',
     label2: 'Normal Text',
+  },
+  ta: {
+    label: 'பத்தி',
+    label2: 'சாதாரண உரை',
   },
   th: {
     label: 'ย่อหน้า',

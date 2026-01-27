@@ -1,15 +1,33 @@
-import type { Payload, User } from 'payload'
+import type {
+  BasePayload,
+  EmailFieldValidation,
+  FieldAffectingData,
+  Payload,
+  SanitizedConfig,
+  User,
+} from 'payload'
 
+import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { ApiKey } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { apiKeysSlug, namedSaveToJWTValue, saveToJWTKey, slug } from './shared.js'
+import {
+  apiKeysSlug,
+  namedSaveToJWTValue,
+  partialDisableLocalStrategiesSlug,
+  publicUsersSlug,
+  saveToJWTKey,
+  slug,
+} from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -25,9 +43,7 @@ describe('Auth', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('GraphQL - admin user', () => {
@@ -96,7 +112,79 @@ describe('Auth', () => {
       const data = await response.json()
 
       expect(response.status).toBe(200)
+      expect(data.user).toBeDefined()
+      expect(data.user.collection).toBe(slug)
+      expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
+    })
+
+    it('should not lose data if login throws', async () => {
+      const testEmail = 'transaction-rollback-test@example.com'
+      const testPassword = 'test123'
+      const originalArrayData = [{ info: 'original-value-1' }, { info: 'original-value-2' }]
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          roles: ['user'],
+          email: testEmail,
+          password: testPassword,
+          loginMetadata: originalArrayData,
+        },
+      })
+
+      const userBefore: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+      const sessionCountBefore = userBefore.sessions?.length || 0
+
+      const originalHooks = payload.config.collections.find((c) => c.slug === slug)?.hooks
+        ?.beforeLogin
+      const throwingHook = () => {
+        throw new Error('Simulated failure after session added')
+      }
+
+      const collection = payload.config.collections.find((c) => c.slug === slug)
+      if (collection) {
+        collection.hooks = collection.hooks || {}
+        collection.hooks.beforeLogin = [throwingHook]
+      }
+
+      const res = await restClient.POST(`/${slug}/login`, {
+        body: JSON.stringify({
+          email: testEmail,
+          password: testPassword,
+        }),
+      })
+      const data: any = await res.json()
+      expect(data.errors).toHaveLength(1)
+
+      // Restore original hooks
+      if (collection) {
+        if (originalHooks) {
+          collection.hooks.beforeLogin = originalHooks
+        } else if (collection.hooks) {
+          collection.hooks.beforeLogin = []
+        }
+      }
+
+      const userAfter: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+
+      expect(userAfter.loginMetadata).toHaveLength(2)
+      expect(userAfter.loginMetadata).toMatchObject(originalArrayData)
+
+      const sessionCountAfter = userAfter.sessions?.length || 0
+      expect(sessionCountAfter).toBe(sessionCountBefore)
+
+      // Clean up
+      await payload.delete({
+        collection: slug,
+        id: testUser.id,
+      })
     })
 
     describe('logged in', () => {
@@ -243,6 +331,42 @@ describe('Auth', () => {
         expect(data.user.custom).toBe('Goodbye, world!')
       })
 
+      it('keeps apiKey encrypted in DB after refresh operation', async () => {
+        const apiKey = '987e6543-e21b-12d3-a456-426614174999'
+        const user = await payload.create({
+          collection: slug,
+          data: { email: 'user@example.com', password: 'Password123', apiKey, enableAPIKey: true },
+        })
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+        await restClient.POST('/users/refresh-token', {
+          headers: { Authorization: `JWT ${token}` },
+        })
+        const raw = await payload.db.findOne<any>({
+          collection: 'users',
+          req: { locale: 'en' } as any,
+          where: { id: { equals: user.id } },
+        })
+        expect(raw?.apiKey).not.toContain('-') // still ciphertext
+      })
+
+      it('returns a user with decrypted apiKey after refresh', async () => {
+        const { token } = await payload.login({
+          collection: 'users',
+          data: { email: 'user@example.com', password: 'Password123' },
+        })
+
+        const res = await restClient
+          .POST('/users/refresh-token', {
+            headers: { Authorization: `JWT ${token}` },
+          })
+          .then((r) => r.json())
+
+        expect(res.user.apiKey).toMatch(/[0-9a-f-]{36}/) // UUID string
+      })
+
       it('should allow a user to be created', async () => {
         const response = await restClient.POST(`/${slug}`, {
           body: JSON.stringify({
@@ -270,7 +394,7 @@ describe('Auth', () => {
 
       it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com'
-        const response = await restClient.POST(`/public-users`, {
+        const response = await restClient.POST(`/${publicUsersSlug}`, {
           body: JSON.stringify({
             email: emailToVerify,
             password,
@@ -284,7 +408,7 @@ describe('Auth', () => {
         expect(response.status).toBe(201)
 
         const userResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -300,13 +424,13 @@ describe('Auth', () => {
         expect(_verificationToken).toBeDefined()
 
         const verificationResponse = await restClient.POST(
-          `/public-users/verify/${_verificationToken}`,
+          `/${publicUsersSlug}/verify/${_verificationToken}`,
         )
 
         expect(verificationResponse.status).toBe(200)
 
         const afterVerifyResult = await payload.find({
-          collection: 'public-users',
+          collection: publicUsersSlug,
           limit: 1,
           showHiddenFields: true,
           where: {
@@ -479,13 +603,21 @@ describe('Auth', () => {
       describe('Account Locking', () => {
         const userEmail = 'lock@me.com'
 
-        const tryLogin = async () => {
-          await restClient.POST(`/${slug}/login`, {
-            body: JSON.stringify({
-              email: userEmail,
-              password: 'bad',
-            }),
+        const tryLogin = async (success?: boolean) => {
+          const res = await restClient.POST(`/${slug}/login`, {
+            body: JSON.stringify(
+              success
+                ? {
+                    email: userEmail,
+                    password,
+                  }
+                : {
+                    email: userEmail,
+                    password: 'bad',
+                  },
+            ),
           })
+          return await res.json()
         }
 
         beforeAll(async () => {
@@ -511,10 +643,32 @@ describe('Auth', () => {
           })
         })
 
+        beforeEach(async () => {
+          await payload.db.updateOne({
+            collection: slug,
+            data: {
+              lockUntil: null,
+              loginAttempts: 0,
+            },
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+        })
+
+        const lockedMessage = 'This user is locked due to having too many failed login attempts.'
+        const incorrectMessage = 'The email or password provided is incorrect.'
+
         it('should lock the user after too many attempts', async () => {
-          await tryLogin()
-          await tryLogin()
-          await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
+          const user1 = await tryLogin()
+          const user2 = await tryLogin()
+          const user3 = await tryLogin() // Let it call multiple times, therefore the unlock condition has no bug.
+
+          expect(user1.errors[0].message).toBe(incorrectMessage)
+          expect(user2.errors[0].message).toBe(incorrectMessage)
+          expect(user3.errors[0].message).toBe(lockedMessage)
 
           const userResult = await payload.find({
             collection: slug,
@@ -527,10 +681,98 @@ describe('Auth', () => {
             },
           })
 
-          const { lockUntil, loginAttempts } = userResult.docs[0]
+          const { lockUntil, loginAttempts } = userResult.docs[0]!
 
           expect(loginAttempts).toBe(2)
           expect(lockUntil).toBeDefined()
+
+          const successfulLogin = await tryLogin(true)
+          expect(successfulLogin.errors?.[0].message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        })
+
+        it('should lock the user after too many parallel attempts', async () => {
+          const tryLoginAttempts = 100
+          const users = await Promise.allSettled(
+            Array.from({ length: tryLoginAttempts }, () => tryLogin()),
+          )
+
+          expect(users).toHaveLength(tryLoginAttempts)
+
+          // Expect min. 8 locked message max. 2 incorrect messages.
+          const lockedMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' && result.value?.errors?.[0]?.message === lockedMessage,
+          )
+          const incorrectMessages = users.filter(
+            (result) =>
+              result.status === 'fulfilled' &&
+              result.value?.errors?.[0]?.message === incorrectMessage,
+          )
+
+          const userResult = await payload.find({
+            collection: slug,
+            limit: 1,
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          })
+
+          const { lockUntil, loginAttempts } = userResult.docs[0]!
+
+          // loginAttempts does not have to be exactly the same amount of login attempts. If this ran sequentially, login attempts would stop
+          // incrementing after maxLoginAttempts is reached. Since this is run in parallel, it can increment more than maxLoginAttempts, but it is not
+          // expected to and can be less depending on the timing.
+          expect(loginAttempts).toBeGreaterThan(3)
+          expect(lockUntil).toBeDefined()
+
+          expect(incorrectMessages.length).toBeLessThanOrEqual(2)
+          expect(lockedMessages.length).toBeGreaterThanOrEqual(tryLoginAttempts - 2)
+
+          const successfulLogin = await tryLogin(true)
+
+          expect(successfulLogin.errors?.[0].message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        })
+
+        it('ensure that login session expires if max login attempts is reached within narrow time-frame', async () => {
+          const tryLoginAttempts = 5
+
+          // If there are 100 parallel login attempts, 99 incorrect and 1 correct one, we do not want the correct one to be able to consistently be able
+          // to login successfully.
+          const user = await tryLogin(true)
+          const firstMeResponse = await restClient.GET(`/${slug}/me`, {
+            headers: {
+              Authorization: `JWT ${user.token}`,
+            },
+          })
+
+          expect(firstMeResponse.status).toBe(200)
+
+          const firstMeData = await firstMeResponse.json()
+
+          expect(firstMeData.token).toBeDefined()
+          expect(firstMeData.user.email).toBeDefined()
+
+          await Promise.allSettled(Array.from({ length: tryLoginAttempts }, () => tryLogin()))
+
+          const secondMeResponse = await restClient.GET(`/${slug}/me`, {
+            headers: {
+              Authorization: `JWT ${user.token}`,
+            },
+          })
+
+          expect(secondMeResponse.status).toBe(200)
+
+          const secondMeData = await secondMeResponse.json()
+
+          expect(secondMeData.user).toBeNull()
+          expect(secondMeData.token).not.toBeDefined()
         })
 
         it('should unlock account once lockUntil period is over', async () => {
@@ -709,37 +951,147 @@ describe('Auth', () => {
     })
   })
 
+  describe('disableLocalStrategy', () => {
+    it('should allow create of a user with disableLocalStrategy', async () => {
+      const email = 'test@example.com'
+      const user = await payload.create({
+        collection: partialDisableLocalStrategiesSlug,
+        data: {
+          email,
+          // password is not required
+        },
+      })
+      expect(user.email).toStrictEqual(email)
+    })
+
+    it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
+      const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
+
+        .filter((field) => 'name' in field && field.name)
+        .map((field) => (field as FieldAffectingData).name)
+
+      expect(authFields).toMatchObject([
+        'updatedAt',
+        'createdAt',
+        'email',
+        'resetPasswordToken',
+        'resetPasswordExpiration',
+        'salt',
+        'hash',
+        'loginAttempts',
+        'lockUntil',
+        'sessions',
+      ])
+    })
+
+    it('should prevent login of user with disableLocalStrategy.', async () => {
+      await payload.create({
+        collection: partialDisableLocalStrategiesSlug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await expect(
+        payload.login({
+          collection: partialDisableLocalStrategiesSlug,
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
+    })
+
+    it('rest - should prevent login', async () => {
+      const response = await restClient.POST(`/${partialDisableLocalStrategiesSlug}/login`, {
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should allow to use password field', async () => {
+      const doc = await payload.create({
+        collection: 'disable-local-strategy-password',
+        data: { password: '123' },
+      })
+      expect(doc.password).toBe('123')
+      const updated = await payload.update({
+        collection: 'disable-local-strategy-password',
+        data: { password: '1234' },
+        id: doc.id,
+      })
+      expect(updated.password).toBe('1234')
+    })
+  })
+
   describe('API Key', () => {
     it('should authenticate via the correct API key user', async () => {
       const usersQuery = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
       })
 
       const [user1, user2] = usersQuery.docs
 
       const success = await restClient
-        .GET(`/api-keys/${user2.id}`, {
+        .GET(`/${apiKeysSlug}/${user2.id}`, {
           headers: {
-            Authorization: `api-keys API-Key ${user2.apiKey}`,
+            Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
           },
         })
         .then((res) => res.json())
 
       expect(success.apiKey).toStrictEqual(user2.apiKey)
 
-      const fail = await restClient.GET(`/api-keys/${user1.id}`, {
+      const fail = await restClient.GET(`/${apiKeysSlug}/${user1.id}`, {
         headers: {
-          Authorization: `api-keys API-Key ${user2.apiKey}`,
+          Authorization: `${apiKeysSlug} API-Key ${user2.apiKey}`,
         },
       })
 
       expect(fail.status).toStrictEqual(404)
     })
 
+    it('should allow authentication with an API key saved with sha1', async () => {
+      const usersQuery = await payload.find({
+        collection: apiKeysSlug,
+      })
+
+      const [user] = usersQuery.docs as [ApiKey]
+
+      const sha1Index = crypto
+        .createHmac('sha256', payload.secret)
+        .update(user.apiKey as string)
+        .digest('hex')
+
+      await payload.db.updateOne({
+        collection: apiKeysSlug,
+        data: {
+          apiKeyIndex: sha1Index,
+        },
+        id: user.id,
+      })
+
+      const response = await restClient
+        .GET(`/${apiKeysSlug}/${user?.id}`, {
+          headers: {
+            Authorization: `${apiKeysSlug} API-Key ${user?.apiKey}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.id).toStrictEqual(user.id)
+    })
+
     it('should not remove an API key from a user when updating other fields', async () => {
       const apiKey = uuid()
       const user = await payload.create({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           apiKey,
           enableAPIKey: true,
@@ -748,14 +1100,14 @@ describe('Auth', () => {
 
       const updatedUser = await payload.update({
         id: user.id,
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         data: {
           enableAPIKey: true,
         },
       })
 
       const userResult = await payload.find({
-        collection: 'api-keys',
+        collection: apiKeysSlug,
         where: {
           id: {
             equals: user.id,
@@ -787,7 +1139,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
@@ -818,7 +1170,7 @@ describe('Auth', () => {
 
       // use the api key in a fetch to assert that it is disabled
       const response = await restClient
-        .GET(`/api-keys/me`, {
+        .GET(`/${apiKeysSlug}/me`, {
           headers: {
             Authorization: `${apiKeysSlug} API-Key ${apiKey}`,
           },
@@ -861,6 +1213,592 @@ describe('Auth', () => {
       })
 
       expect(reset.user.email).toStrictEqual('dev@payloadcms.com')
+    })
+
+    it('should not allow reset password if forgotPassword expiration token is expired', async () => {
+      // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
+      const originalDateNow = Date.now
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
+        // Move the current time back by 6 minutes (360,000 ms)
+        return originalDateNow() - 6 * 60 * 1000
+      })
+
+      let forgot
+      try {
+        // Call forgotPassword while the mocked Date.now() is active
+        forgot = await payload.forgotPassword({
+          collection: 'users',
+          data: {
+            email: 'dev@payloadcms.com',
+          },
+        })
+      } finally {
+        // Restore the original Date.now() after the forgotPassword call
+        mockDateNow.mockRestore()
+      }
+
+      // Attempt to reset password, which should fail because the token is expired
+      await expect(
+        payload.resetPassword({
+          collection: 'users',
+          data: {
+            password: 'test',
+            token: forgot,
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+
+    describe('Login Attempts', () => {
+      async function attemptLogin(email: string, password: string) {
+        return payload.login({
+          collection: slug,
+          data: {
+            email,
+            password,
+          },
+          overrideAccess: false,
+        })
+      }
+
+      it('should reset the login attempts after a successful login', async () => {
+        // fail 1
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // successful login 1
+        const successfulLogin = await attemptLogin(devUser.email, devUser.password)
+        expect(successfulLogin).toBeDefined()
+
+        // fail 2
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // successful login 2 without exceeding attempts
+        const successfulLogin2 = await attemptLogin(devUser.email, devUser.password)
+        expect(successfulLogin2).toBeDefined()
+
+        const user = await payload.findByID({
+          collection: slug,
+          id: successfulLogin2.user.id,
+          overrideAccess: true,
+          showHiddenFields: true,
+        })
+
+        expect(user.loginAttempts).toBe(0)
+        expect(user.lockUntil).toBeNull()
+      })
+
+      it('should lock the user after too many failed login attempts', async () => {
+        const now = new Date()
+        // fail 1
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // fail 2
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect((error as Error).message).toBe('The email or password provided is incorrect.')
+        }
+
+        // fail 3
+        try {
+          const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
+          expect(failedLogin).toBeUndefined()
+        } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect((error as Error).message).toBe(
+            'This user is locked due to having too many failed login attempts.',
+          )
+        }
+
+        const userQuery = await payload.find({
+          collection: slug,
+          overrideAccess: true,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        expect(userQuery.docs[0]).toBeDefined()
+
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(2)
+        expect(user!.lockUntil).toBeDefined()
+        expect(typeof user!.lockUntil).toBe('string')
+        expect(new Date(user!.lockUntil!).getTime()).toBeGreaterThan(now.getTime())
+      })
+
+      it('should allow force unlocking of a user', async () => {
+        await payload.unlock({
+          collection: slug,
+          data: {
+            email: devUser.email,
+          } as any,
+          overrideAccess: true,
+        })
+
+        const userQuery = await payload.find({
+          collection: slug,
+          overrideAccess: true,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: devUser.email,
+            },
+          },
+        })
+
+        expect(userQuery.docs[0]).toBeDefined()
+
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(0)
+        expect(user!.lockUntil).toBeNull()
+      })
+    })
+  })
+
+  describe('Email - format validation', () => {
+    const mockT = vitest.fn((key) => key) // Mocks translation function
+
+    const mockContext: Parameters<EmailFieldValidation>[1] = {
+      // @ts-expect-error: Mocking context for email validation
+      req: {
+        payload: {
+          collections: {} as Record<string, never>,
+          config: {} as SanitizedConfig,
+        } as unknown as BasePayload,
+        t: mockT,
+      },
+      required: true,
+      siblingData: {},
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
+    }
+    it('should allow standard formatted emails', () => {
+      expect(emailValidation('user@example.com', mockContext)).toBe(true)
+      expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
+      expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
+      expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+      expect(emailValidation("user'payload@example.org", mockContext)).toBe(true)
+    })
+
+    it('should not allow emails with double quotes', () => {
+      expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with spaces', () => {
+      expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with consecutive dots', () => {
+      expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with invalid domains', () => {
+      expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow domains starting or ending with a hyphen', () => {
+      expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that start with dot', () => {
+      expect(emailValidation('.user@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+    it('should not allow emails that have a comma', () => {
+      expect(emailValidation('user,name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+  })
+
+  describe('Sessions', () => {
+    it('should set a session on a user', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      expect(authenticated.token).toBeTruthy()
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: authenticated.user.id,
+          },
+        },
+      })
+
+      expect(Array.isArray(user.docs[0]?.sessions)).toBeTruthy()
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      expect(decoded.sid).toBeDefined()
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      expect(matchedSession).toBeDefined()
+      expect(matchedSession?.createdAt).toBeDefined()
+      expect(matchedSession?.expiresAt).toBeDefined()
+    })
+
+    it('should log out a user and delete only the session being logged out', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const authenticated2 = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+      expect(decoded.sid).toBeDefined()
+
+      const remainingSessions = user.docs[0]?.sessions ?? []
+
+      const loggedOutSession = remainingSessions.find(({ id }) => id === decoded.sid)
+      expect(loggedOutSession).toBeUndefined()
+
+      const decoded2 = jwtDecode<{ sid: string }>(String(authenticated2.token))
+      expect(decoded2.sid).toBeDefined()
+
+      const existingSession = remainingSessions.find(({ id }) => id === decoded2.sid)
+      expect(existingSession?.id).toStrictEqual(decoded2.sid)
+    })
+
+    it('should refresh an existing session', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const decoded = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const matchedSession = user.docs[0]?.sessions?.find(({ id }) => id === decoded.sid)
+
+      const refreshed = await restClient
+        .POST(`/${slug}/refresh-token`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      const refreshedUser = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const decodedRefreshed = jwtDecode<{ sid: string }>(String(refreshed.refreshedToken))
+
+      const matchedRefreshedSession = refreshedUser.docs[0]?.sessions?.find(
+        ({ id }) => id === decodedRefreshed.sid,
+      )
+
+      expect(decodedRefreshed.sid).toStrictEqual(decoded.sid)
+
+      expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
+        new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
+      )
+    })
+
+    it('should not authenticate a user who has a JWT but its session has been terminated', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      await restClient.POST(`/${slug}/logout?allSessions=true`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      const user = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      const remainingSessions = user.docs[0]?.sessions
+      expect(remainingSessions).toHaveLength(0)
+
+      const meQuery = await restClient
+        .GET(`/${slug}/me`, {
+          headers: {
+            Authorization: `JWT ${authenticated.token}`,
+          },
+        })
+        .then((res) => res.json())
+
+      expect(meQuery.user).toBeNull()
+    })
+
+    it('should clean up expired sessions when logging in', async () => {
+      const userWithExpiredSession = await payload.create({
+        collection: slug,
+        data: {
+          email: `${devUser.email}.au`,
+          password: devUser.password,
+          roles: ['admin'],
+          sessions: [
+            {
+              id: uuid(),
+              createdAt: new Date().toDateString(),
+              expiresAt: new Date(new Date().getTime() - 5000).toDateString(), // Set an expired session
+            },
+          ],
+        },
+      })
+
+      expect(userWithExpiredSession.sessions).toHaveLength(1)
+
+      await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+
+      const user2 = await payload.db.find<User>({
+        collection: slug,
+        where: {
+          email: {
+            equals: devUser.email,
+          },
+        },
+      })
+
+      expect(user2.docs[0]?.sessions).toHaveLength(1)
+    })
+
+    it('should not update updatedAt when creating a session', async () => {
+      // Create a user
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.updatedAt.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const originalUpdatedAt = testUser.updatedAt
+
+      // Wait a moment to ensure timestamps would differ if updated
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Login to create a session
+      await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogin?.updatedAt).toEqual(originalUpdatedAt)
+      expect(Array.isArray(userAfterLogin?.sessions)).toBeTruthy()
+      expect(userAfterLogin?.sessions?.length).toBeGreaterThan(0)
+    })
+
+    it('should not update updatedAt when logging out', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.logout.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Logout
+      await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogout = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogout?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
+
+    it('should not update updatedAt when refreshing a session', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.refresh.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Refresh token
+      await restClient.POST(`/${slug}/refresh-token`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterRefresh = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterRefresh?.updatedAt).toEqual(updatedAtAfterLogin)
     })
   })
 })

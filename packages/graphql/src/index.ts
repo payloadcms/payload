@@ -98,14 +98,12 @@ export function configToSchema(config: SanitizedConfig): {
   const query = new GraphQL.GraphQLObjectType(graphqlResult.Query)
   const mutation = new GraphQL.GraphQLObjectType(graphqlResult.Mutation)
 
-  const schemaToCreate = {
+  const schema = new GraphQL.GraphQLSchema({
     mutation,
     query,
-  }
+  })
 
-  const schema = new GraphQL.GraphQLSchema(schemaToCreate)
-
-  const validationRules = (args) => [
+  const validationRules = (args): GraphQL.ValidationRule[] => [
     createComplexityRule({
       estimators: [
         fieldExtensionsEstimator(),
@@ -115,6 +113,10 @@ export function configToSchema(config: SanitizedConfig): {
       variables: args.variableValues,
       // onComplete: (complexity) => { console.log('Query Complexity:', complexity); },
     }),
+    ...(config.graphQL.disableIntrospectionInProduction ? [NoProductionIntrospection] : []),
+    ...(typeof config?.graphQL?.validationRules === 'function'
+      ? config.graphQL.validationRules(args)
+      : []),
   ]
 
   return {
@@ -122,3 +124,18 @@ export function configToSchema(config: SanitizedConfig): {
     validationRules,
   }
 }
+
+const NoProductionIntrospection: GraphQL.ValidationRule = (context) => ({
+  Field(node) {
+    if (process.env.NODE_ENV === 'production') {
+      if (node.name.value === '__schema' || node.name.value === '__type') {
+        context.reportError(
+          new GraphQL.GraphQLError(
+            'GraphQL introspection is not allowed, but the query contained __schema or __type',
+            { nodes: [node] },
+          ),
+        )
+      }
+    }
+  },
+})

@@ -26,37 +26,35 @@ export const MyTabsField: Field = {
   type: 'tabs',
   tabs: [
     // ...
-  ]
+  ],
   // highlight-end
 }
 ```
 
 ## Config Options
 
-| Option        | Description                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **`tabs`** \* | Array of tabs to render within this Tabs field.                                                                          |
-| **`admin`**   | Admin-specific configuration. [More details](../admin/fields#admin-options). |
-| **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                |
+| Option        | Description                                                             |
+| ------------- | ----------------------------------------------------------------------- |
+| **`tabs`** \* | Array of tabs to render within this Tabs field.                         |
+| **`admin`**   | Admin-specific configuration. [More details](./overview#admin-options). |
+| **`custom`**  | Extension point for adding custom data (e.g. for plugins)               |
 
 ### Tab-specific Config
 
 Each tab must have either a `name` or `label` and the required `fields` array. You can also optionally pass a `description` to render within each individual tab.
 
-| Option              | Description                                                                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`name`**          | Groups field data into an object when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                      |
-| **`label`**         | The label to render on the tab itself. Required when name is undefined, defaults to name converted to words.                                                                                                 |
-| **`fields`** \*     | The fields to render within this tab.                                                                                                                                                                        |
-| **`description`**   | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                  |
-| **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). (`name` must be present) |
-| **`virtual`**       | Provide `true` to disable field in the database (`name` must be present). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                    |
+| Option              | Description                                                                                                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`**          | Groups field data into an object when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                        |
+| **`label`**         | The label to render on the tab itself. Required when name is undefined, defaults to name converted to words.                                                                                                                                                                                            |
+| **`fields`** \*     | The fields to render within this tab.                                                                                                                                                                                                                                                                   |
+| **`description`**   | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                                                                                                             |
+| **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). (`name` must be present)                                                                                            |
+| **`virtual`**       | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'
