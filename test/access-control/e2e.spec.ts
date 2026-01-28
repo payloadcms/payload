@@ -410,7 +410,6 @@ describe('Access Control', () => {
 
       await page.goto(restrictedUrl.list)
 
-       
       expect(errors).not.toHaveLength(0)
     })
 
@@ -704,6 +703,9 @@ describe('Access Control', () => {
       const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
       const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
 
+      // Wait for hydration
+      await wait(1000)
+
       // Ensure admin user cannot unlock other users
       await adminUserRow.locator('.cell-id a').click()
       await page.waitForURL(`**/collections/users/**`)
@@ -714,6 +716,9 @@ describe('Access Control', () => {
       await expect(page.locator('.payload-toast-container')).toContainText('Successfully unlocked')
 
       await page.goto(usersUrl.list)
+
+      // Wait for hydration
+      await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
       await nonAdminUserRow.locator('.cell-id a').click()

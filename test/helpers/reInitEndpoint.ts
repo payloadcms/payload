@@ -23,6 +23,11 @@ const handler: PayloadHandler = async (req) => {
     ignoreQueryPrefix: true,
   })
 
+  let uploadsDir = query.uploadsDir as string | string[]
+  if (typeof uploadsDir === 'object') {
+    uploadsDir = Object.values(uploadsDir)
+  }
+
   try {
     await seedDB({
       _payload: payload,
@@ -30,7 +35,7 @@ const handler: PayloadHandler = async (req) => {
       seedFunction: payload.config.onInit,
       snapshotKey: String(query.snapshotKey),
       // uploadsDir can be string or stringlist
-      uploadsDir: query.uploadsDir as string | string[],
+      uploadsDir,
       // query value will be a string of 'true' or 'false'
       deleteOnly: query.deleteOnly === 'true',
     })

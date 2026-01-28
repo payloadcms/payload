@@ -85,7 +85,7 @@ export async function ensureCompilationIsDone({
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
-  const maxAttempts = 50
+  const maxAttempts = 15
   let attempt = 1
 
   while (attempt <= maxAttempts) {
@@ -96,10 +96,11 @@ export async function ensureCompilationIsDone({
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
       )
 
-      await page.goto(adminURL)
+      // Commit is faster than waiting for the default waitUntil: load
+      await page.goto(adminURL, { waitUntil: 'commit' })
 
       if (readyURL) {
-        await page.waitForURL(readyURL)
+        await page.waitForURL(readyURL, { waitUntil: 'commit' })
       } else {
         await expect
           .poll(
@@ -125,15 +126,15 @@ export async function ensureCompilationIsDone({
       }
       return
     } catch (error) {
-      console.error(`Compilation not done yet`)
-
       if (attempt === maxAttempts) {
-        console.error('Max retry attempts reached. Giving up.')
+        console.error(
+          'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
+        )
         throw error
       }
 
-      console.log('Retrying in 3 seconds...')
-      await wait(3000)
+      console.log('Compilation not done yet. Retrying in 2 seconds...')
+      await wait(2000)
       attempt++
     }
   }
