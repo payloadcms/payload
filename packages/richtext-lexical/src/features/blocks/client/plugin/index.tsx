@@ -63,7 +63,7 @@ export const BlocksPlugin: PluginComponent = () => {
               // Insert blocks node BEFORE potentially removing focusNode, as $insertNodeToNearestRoot errors if the focusNode doesn't exist
               $insertNodeToNearestRoot(blockNode)
 
-              // Delete the node it it's an empty paragraph
+              // Delete the node if it's an empty paragraph
               if ($isParagraphNode(focusNode) && !focusNode.__first) {
                 focusNode.remove()
               }
