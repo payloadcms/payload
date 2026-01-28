@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@types/find-node-modules": "^2.1.2",
-    "@types/react": "19.2.8",
+    "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },

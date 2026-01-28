@@ -345,7 +345,7 @@ export const findOperation = async <
                 findMany: true,
                 query: fullWhere,
                 req,
-              })) || doc
+              })) || docRef
           }
 
           return docRef

@@ -27,7 +27,14 @@ process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-tu
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const { _: args, bail, part } = minimist(process.argv.slice(2))
+const {
+  _: args,
+  bail,
+  'fully-parallel': fullyParallel,
+  part,
+  shard,
+  workers,
+} = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
 // Run all
@@ -100,7 +107,15 @@ if (!suiteName) {
 
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
-  executePlaywright(allSuitesInFolder, baseTestFolder, false, suiteConfigPath)
+  executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -117,6 +132,9 @@ function executePlaywright(
   baseTestFolder: string,
   bail = false,
   suiteConfigPath?: string,
+  shardArg?: string,
+  fullyParallelArg?: boolean,
+  workersArg?: number,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -141,14 +159,19 @@ function executePlaywright(
   process.env.START_MEMORY_DB = 'true'
 
   const child = spawn('pnpm', spawnDevArgs, {
-    stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
     env: {
       ...process.env,
     },
+    stdio: 'inherit',
   })
 
-  const cmd = slash(`${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}`)
+  const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
+  const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const cmd = slash(
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}`,
+  )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
