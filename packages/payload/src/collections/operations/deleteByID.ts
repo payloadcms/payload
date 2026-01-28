@@ -231,6 +231,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess: overrideAccess!,
             req,
           })) || result
       }

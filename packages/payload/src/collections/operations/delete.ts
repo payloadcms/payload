@@ -254,6 +254,7 @@ export const deleteOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: result || doc,
+                overrideAccess: overrideAccess!,
                 req,
               })) || result
           }
