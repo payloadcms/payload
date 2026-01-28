@@ -91,7 +91,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     collection: { config: collectionConfig },
     data,
     depth,
-    overrideAccess,
+    overrideAccess = false,
     req,
     req: {
       fallbackLocale,
@@ -358,7 +358,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       fallbackLocale: fallbackLocale!,
       global: null,
       locale: locale!,
-      overrideAccess: overrideAccess!,
+      overrideAccess,
       req,
       showHiddenFields: showHiddenFields!,
     })
@@ -374,6 +374,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
             collection: args.collection?.config,
             context: req.context,
             doc: user,
+            overrideAccess,
             req,
           })) || user
       }
