@@ -172,6 +172,11 @@ export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   overrideAccess: boolean
 }
 
+export type BeforeDuplicateNodeHookArgs<T extends SerializedLexicalNode> = {
+  /** The original node being duplicated from */
+  originalNode: T
+}
+
 export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   /**
    * Only available in `beforeChange` hooks.
@@ -215,6 +220,10 @@ export type BeforeChangeNodeHook<T extends SerializedLexicalNode> = (
 
 export type BeforeValidateNodeHook<T extends SerializedLexicalNode> = (
   args: BaseNodeHookArgs<T> & BeforeValidateNodeHookArgs<T>,
+) => Promise<T> | T
+
+export type BeforeDuplicateNodeHook<T extends SerializedLexicalNode> = (
+  args: BaseNodeHookArgs<T> & BeforeDuplicateNodeHookArgs<T>,
 ) => Promise<T> | T
 
 // Define the node with hooks that use the node's exportJSON return type
@@ -409,6 +418,7 @@ export type SanitizedServerFeatures = {
     afterChange?: Map<string, Array<AfterChangeNodeHook<SerializedLexicalNode>>>
     afterRead?: Map<string, Array<AfterReadNodeHook<SerializedLexicalNode>>>
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
+    beforeDuplicate?: Map<string, Array<BeforeDuplicateNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
   /**  The node types mapped to their validations */

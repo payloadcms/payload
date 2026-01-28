@@ -155,9 +155,17 @@ const RichTextComponent: React.FC<
           value,
         )
       ) {
-        prevInitialValueRef.current = initialValue
-        prevValueRef.current = value
-        setRerenderProviderKey(new Date())
+        // Prevent re-render if this Lexical editor currently has focus to preserve cursor position
+        const activeElement = document.activeElement
+        const isActivelyEditing = activeElement &&
+          activeElement.getAttribute('contenteditable') === 'true' &&
+          activeElement.closest('.rich-text-lexical')?.closest('[data-path]')?.getAttribute('data-path') === path
+
+        if (!isActivelyEditing) {
+          prevInitialValueRef.current = initialValue
+          prevValueRef.current = value
+          setRerenderProviderKey(new Date())
+        }
       }
     },
   )
@@ -173,7 +181,7 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
+    <div className={classes} data-path={path} key={pathWithEditDepth} style={styles}>
       <RenderCustomComponent
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
