@@ -69,6 +69,74 @@ Here's a quick overview:
 - A Job is an instance of a single task or workflow which will be executed
 - A Queue is a way to segment your jobs into different "groups" - for example, some to run nightly, and others to run every 10 minutes
 
+### How Jobs Flow Through the System
+
+Here's a visual representation of how the pieces fit together:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. DEFINE WORK                                             │
+├─────────────────────────────────────────────────────────────┤
+│  Task/Workflow Definition                                   │
+│  - slug: 'sendEmail'                                        │
+│  - handler: async () => { /* your logic */ }                │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  2. QUEUE JOBS (Choose one or both)                         │
+├─────────────────────────────────────────────────────────────┤
+│  Option A: Manual Queuing                                   │
+│    → payload.jobs.queue({ task: 'sendEmail' })              │
+│    → Used for user-triggered actions                        │
+│                                                             │
+│  Option B: Automatic Queuing (Scheduled)                    │
+│    → schedule: [{ cron: '0 8 * * *', queue: 'emails' }]     │
+│    → Used for recurring tasks                               │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  3. STORAGE                                                 │
+├─────────────────────────────────────────────────────────────┤
+│  payload-jobs collection (database)                         │
+│  - Stores queued jobs waiting to run                        │
+│  - Tracks job status, retries, errors                       │
+│  - Jobs remain here until processed                         │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  4. RUN JOBS (Choose one)                                   │
+├─────────────────────────────────────────────────────────────┤
+│  Option A: autoRun (Dedicated Server)                       │
+│    → autoRun: [{ cron: '* * * * *', queue: 'emails' }]      │
+│    → Automatic execution on schedule                        │
+│                                                             │
+│  Option B: API Endpoint (Serverless)                        │
+│    → GET /api/payload-jobs/run?queue=emails                 │
+│    → Triggered by external cron (Vercel Cron, etc.)         │
+│                                                             │
+│  Option C: Manual                                           │
+│    → payload.jobs.run({ queue: 'emails' })                  │
+│    → Programmatic control                                   │
+└─────────────────────────────────────────────────────────────┘
+                           ↓
+┌─────────────────────────────────────────────────────────────┐
+│  5. EXECUTION                                               │
+├─────────────────────────────────────────────────────────────┤
+│  Task/Workflow handler runs                                 │
+│  - Success → Job marked complete (optionally deleted)       │
+│  - Failure → Retry (if configured) or mark as failed        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Key Insights:**
+
+- **Steps 2 (queuing) and 4 (running) are separate and independent**
+- You can queue without running, and run without auto-queuing
+- The `queue` name connects queuing and running (they must match)
+- Jobs persist in the database between queuing and execution
+
+**Common Mistake:** Configuring only step 2 (queuing via `schedule`) or only step 4 (`autoRun`) won't work. You need both for scheduled jobs to execute automatically.
+
 ### Visualizing Jobs in the Admin UI
 
 By default, the internal `payload-jobs` collection is hidden from the Payload Admin Panel. To make this collection visible for debugging or inspection purposes, you can override its configuration using `jobsCollectionOverrides`.

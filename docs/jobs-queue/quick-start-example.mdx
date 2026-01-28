@@ -110,6 +110,190 @@ export default buildConfig({
 })
 ```
 
-The [`autoRun`](/docs/jobs-queue/workflows#autorun) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/workflows#manual-run) with `payload.jobs.run()` or run jobs in [separate worker processes](/docs/jobs-queue/workflows#inline-vs-workers) for better scalability.
+The [`autoRun`](/docs/jobs-queue/queues#cron-jobs) configuration automatically processes queued jobs on a schedule using cron syntax. In this example, Payload checks for pending jobs every 5 minutes and executes them. Alternatively, you can [manually trigger job processing](/docs/jobs-queue/queues#local-api) with `payload.jobs.run()` or use the [API endpoint](/docs/jobs-queue/queues#endpoint) for serverless platforms.
 
 That's it! Now when users sign up, a job is queued and will be processed within 5 minutes without blocking the API response.
+
+## Example 2: Recurring Scheduled Job
+
+The previous example showed **manual job queuing** (jobs triggered by user actions). Now let's look at a job that runs **automatically on a schedule** without any user action.
+
+We'll create a task that generates a daily analytics report every morning at 8 AM.
+
+### Why Use Scheduled Jobs?
+
+- **Automated recurring tasks**: No need to manually trigger them
+- **Predictable timing**: Reports, cleanups, syncs run at exact times
+- **No manual intervention**: Set it once and forget it
+
+### Step 1: Define a Task with Schedule
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ... other config
+  jobs: {
+    tasks: [
+      {
+        slug: 'generateDailyReport',
+
+        // This automatically queues a job every day at 8 AM
+        schedule: [
+          {
+            cron: '0 8 * * *', // 8:00 AM daily
+            queue: 'reports', // Put it in the 'reports' queue
+          },
+        ],
+
+        inputSchema: [],
+
+        outputSchema: [
+          {
+            name: 'reportId',
+            type: 'text',
+          },
+        ],
+
+        handler: async ({ req }) => {
+          // Generate the report
+          const yesterday = new Date()
+          yesterday.setDate(yesterday.getDate() - 1)
+
+          const analytics = await req.payload.find({
+            collection: 'analytics',
+            where: {
+              createdAt: {
+                greater_than_equal: yesterday.toISOString(),
+              },
+            },
+          })
+
+          // Save the report
+          const report = await req.payload.create({
+            collection: 'reports',
+            data: {
+              date: new Date().toISOString(),
+              totalEvents: analytics.totalDocs,
+              summary: `Generated report for ${yesterday.toDateString()}`,
+            },
+          })
+
+          return {
+            output: {
+              reportId: report.id,
+            },
+          }
+        },
+      },
+    ],
+  },
+})
+```
+
+The `schedule` property tells Payload to automatically queue this job every day at 8 AM.
+
+### Step 2: Configure the Job Runner
+
+The `schedule` property only **queues** jobs—it doesn't run them. You also need to configure how queued jobs are executed:
+
+```ts
+export default buildConfig({
+  // ... other config
+  jobs: {
+    tasks: [
+      /* task from step 1 */
+    ],
+
+    // This processes jobs from the 'reports' queue
+    autoRun: [
+      {
+        cron: '* * * * *', // Check every minute
+        queue: 'reports', // Process 'reports' queue
+        limit: 10,
+      },
+    ],
+  },
+})
+```
+
+### How It Works
+
+Here's the complete flow:
+
+1. **At 8:00 AM:** The `schedule` configuration automatically queues a new job in the 'reports' queue
+2. **Within 1 minute:** The `autoRun` cron checks the 'reports' queue and finds the job
+3. **Execution:** The job runs and generates the report
+4. **The next day:** The process repeats automatically at 8:00 AM
+
+<Banner type="error">
+  **Critical:** Both `schedule.queue` and `autoRun.queue` must use the same
+  queue name ('reports' in this example). If they don't match, jobs will be
+  queued but never executed.
+</Banner>
+
+### Complete Configuration
+
+Here's the full config with both the task and runner:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ... other config
+  jobs: {
+    tasks: [
+      {
+        slug: 'generateDailyReport',
+        schedule: [
+          {
+            cron: '0 8 * * *',
+            queue: 'reports',
+          },
+        ],
+        handler: async ({ req }) => {
+          // Report generation logic
+          const report = await generateReport()
+          return { output: { reportId: report.id } }
+        },
+      },
+    ],
+    autoRun: [
+      {
+        cron: '* * * * *',
+        queue: 'reports',
+        limit: 10,
+      },
+    ],
+  },
+})
+```
+
+<Banner type="warning">
+  **For Serverless Platforms:** If deploying to Vercel or similar platforms,
+  `autoRun` won't work. Use the [Vercel Cron
+  approach](/docs/jobs-queue/queues#vercel-cron-example) instead.
+</Banner>
+
+### When to Use Each Approach
+
+| Approach                  | When to Use                                      | Example                                              |
+| ------------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| **Manual Queuing**        | Jobs triggered by user actions or data changes   | Welcome emails, payment processing, notifications    |
+| **Scheduled Jobs**        | Jobs that run automatically at regular intervals | Daily reports, weekly cleanups, nightly syncs        |
+| **Scheduled with Future** | One-time job in the future                       | Publish post at 3pm tomorrow, trial expiry reminders |
+
+**For scheduled jobs with `waitUntil`:**
+
+```ts
+// Queue a one-time job for the future
+await payload.jobs.queue({
+  task: 'publishPost',
+  input: { postId: '123' },
+  waitUntil: new Date('2024-12-25T15:00:00Z'), // Runs once at this time
+})
+```
+
+This is different from the `schedule` property, which repeats automatically.
+
+See [Job Schedules](/docs/jobs-queue/schedules) for more details on scheduling options and advanced patterns.
