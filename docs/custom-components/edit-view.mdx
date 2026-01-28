@@ -108,6 +108,7 @@ The following options are available:
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `LivePreviewToggler`     | A toggle button that enables or disables live preview for the current document. [More details](#livepreviewtoggler).         |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Collection. [More details](#description).                                                               |
 | `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
@@ -137,12 +138,13 @@ export const MyGlobal: GlobalConfig = {
 The following options are available:
 
 | Path                     | Description                                                                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | --- |
 | `beforeDocumentControls` | Inject custom components before the Save / Publish buttons. [More details](#beforedocumentcontrols).                         |
 | `editMenuItems`          | Inject custom components within the 3-dot menu dropdown located in the document control bar. [More details](#editmenuitems). |
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `LivePreviewToggler`     | A toggle button that enables or disables live preview for the current document. [More details](#livepreviewtoggler).         |     |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Global. [More details](#description).                                                                   |
 | `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
@@ -447,6 +449,64 @@ import type { PublishButtonClientProps } from 'payload'
 export function MyPublishButton(props: PublishButtonClientProps) {
   return <PublishButton label="Publish" />
 }
+```
+
+### LivePreviewToggler
+
+The `LivePreviewToggler` property allows you to render a custom Live Preview Toggler in the Edit View.
+
+To add a `LivePreviewToggler` component, use the `components.edit.LivePreviewToggler` property in your [Collection Config](../configuration/collections) or `components.elements.LivePreviewToggler` in your [Global Config](../configuration/globals):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        LivePreviewToggler: '/path/to/MyLivePreviewToggler',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `PreviewButton` component:
+
+#### Client Component
+
+```tsx
+'use client'
+
+import { useLivePreviewContext } from '@payloadcms/ui'
+
+const CustomLivePreviewButton = () => {
+  const {
+    isLivePreviewing,
+    setIsLivePreviewing,
+    url: livePreviewURL,
+  } = useLivePreviewContext()
+
+  if (!livePreviewURL) {
+    return null
+  }
+
+  return (
+    <button
+      onClick={() => {
+        setIsLivePreviewing(!isLivePreviewing)
+      }}
+      type="button"
+    >
+      {isLivePreviewing ? 'Exit Live Preview' : 'Enter Live Preview'}
+    </button>
+  )
+}
+
+export default CustomLivePreviewButton
 ```
 
 ### PreviewButton

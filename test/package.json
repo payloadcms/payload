@@ -5,7 +5,7 @@
   "description": "Payload test suite",
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation tsx ./dev.ts",
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
     "test:int": "pnpm -C \"../\" run test:int",

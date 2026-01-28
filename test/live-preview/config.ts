@@ -8,6 +8,7 @@ import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { ConditionalURL } from './collections/ConditionalURL.js'
 import { CustomLivePreview } from './collections/CustomLivePreview.js'
+import { CustomToggler } from './collections/CustomToggler.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -21,6 +22,7 @@ import { Header } from './globals/Header.js'
 import { seed } from './seed/index.js'
 import {
   customLivePreviewSlug,
+  customTogglerSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -50,6 +52,7 @@ export default buildConfigWithDefaults({
         ssrPagesSlug,
         ssrAutosavePagesSlug,
         customLivePreviewSlug,
+        customTogglerSlug,
       ],
       globals: ['header', 'footer'],
     },
@@ -68,6 +71,7 @@ export default buildConfigWithDefaults({
     CollectionLevelConfig,
     StaticURLCollection,
     CustomLivePreview,
+    CustomToggler,
     ConditionalURL,
   ],
   globals: [Header, Footer],

@@ -38,6 +38,7 @@ export function iterateCollections({
 
     addToImportMap(collection.admin?.components?.edit?.beforeDocumentControls)
     addToImportMap(collection.admin?.components?.edit?.editMenuItems)
+    addToImportMap(collection.admin?.components?.edit?.LivePreviewToggler)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
     addToImportMap(collection.admin?.components?.edit?.SaveButton)
