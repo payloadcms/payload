@@ -199,6 +199,7 @@ export default buildConfigWithDefaults({
           },
         ],
         mimeTypes: ['image/*'],
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -547,6 +548,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         allowRestrictedFileTypes: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -554,6 +556,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         allowRestrictedFileTypes: true,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -561,6 +564,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         mimeTypes: ['text/html'],
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -775,6 +779,7 @@ export default buildConfigWithDefaults({
       slug: unstoredMediaSlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './media'),
         disableLocalStorage: true,
       },
     },
@@ -838,6 +843,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: true,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -850,6 +856,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         cacheTags: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -862,6 +869,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -984,6 +992,7 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         focalPoint: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -1017,6 +1026,7 @@ export default buildConfigWithDefaults({
       slug: mediaWithImageSizeAdminPropsSlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './media'),
         imageSizes: [
           {
             name: 'one',

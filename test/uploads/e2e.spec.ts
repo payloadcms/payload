@@ -173,6 +173,31 @@ describe('Uploads', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'uploadsTest',
+      uploadsDir: [
+        path.resolve(dirname, './uploads'),
+        path.resolve(dirname, './media'),
+        path.resolve(dirname, './media-gif'),
+        path.resolve(dirname, './no-image-sizes'),
+        path.resolve(dirname, './object-fit'),
+        path.resolve(dirname, './custom-file-name-media'),
+        path.resolve(dirname, './focal-only'),
+        path.resolve(dirname, './crop-only'),
+        path.resolve(dirname, './optional'),
+        path.resolve(dirname, './required'),
+        path.resolve(dirname, './focal-no-sizes'),
+        path.resolve(dirname, './svg-only'),
+        path.resolve(dirname, './media-trim'),
+        path.resolve(dirname, './versions'),
+        path.resolve(dirname, './with-meta-data'),
+        path.resolve(dirname, './with-only-jpeg-meta-data'),
+        path.resolve(dirname, './without-meta-data'),
+        path.resolve(dirname, './collections/Upload1/uploads'),
+        path.resolve(dirname, './collections/Upload2/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailFunction/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailSize/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailWithSearchQueries/test/uploads'),
+        path.resolve(dirname, './collections/AdminUploadControl/test/uploads'),
+      ],
     })
 
     if (client) {
