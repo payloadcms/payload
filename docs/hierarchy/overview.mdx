@@ -45,82 +45,21 @@ export const Pages: CollectionConfig = {
 This automatically:
 
 - Creates a `parent` relationship field (if it doesn't exist)
-- Adds internal `_h_parentTree`, `_h_depth`, `_h_slugPath`, and `_h_titlePath` fields
-- Sets up hooks to maintain tree integrity
-- Generates breadcrumb paths based on `admin.useAsTitle`
+- Adds virtual `_h_slugPath` and `_h_titlePath` fields (computed on-demand)
+- Sets up hooks to validate circular references and clean up tree on deletion
+- Computes breadcrumb paths based on `admin.useAsTitle` when requested
 
 ## Auto-Generated Fields
 
-When hierarchy is enabled, four internal fields are automatically added to your collection:
-
-### `_h_parentTree`
-
-**Type:** Array of IDs
-**Purpose:** Stores the complete ancestor chain
-**Indexed:** Yes
-
-```ts
-{
-  id: 'doc-c',
-  title: 'Current Document',
-  parent: 'doc-b',
-  _h_parentTree: ['doc-a', 'doc-b'],  // Grandparent, Parent
-}
-```
-
-**Use for queries:**
-
-```ts
-// Find all descendants of doc-b
-await payload.find({
-  collection: 'pages',
-  where: {
-    _h_parentTree: { in: ['doc-b'] },
-  },
-})
-```
-
-### `_h_depth`
-
-**Type:** Number
-**Purpose:** Stores the depth/level in the tree (0-indexed from root)
-**Indexed:** Yes
-
-```ts
-{
-  _h_depth: 0,  // Root level
-  _h_depth: 1,  // First level
-  _h_depth: 2,  // Second level
-}
-```
-
-**Use for queries:**
-
-```ts
-// Get all root documents
-await payload.find({
-  collection: 'pages',
-  where: {
-    _h_depth: { equals: 0 },
-  },
-})
-
-// Get documents up to 2 levels deep
-await payload.find({
-  collection: 'pages',
-  where: {
-    _h_depth: { less_than_equal: 2 },
-  },
-})
-```
+When hierarchy is enabled, virtual path fields are automatically added to your collection. These fields are computed on-demand when requested and are not stored in the database.
 
 ### `_h_slugPath`
 
-**Type:** String or Localized Object
+**Type:** String or Localized Object (virtual field)
 **Purpose:** Slugified breadcrumb path for URLs and search
-**Indexed:** Yes
+**Stored:** No - computed on-demand from ancestor tree
 **Read-only:** Yes
-**Added when:** `generatePaths: true` (default)
+**Requires:** Opt-in (see [Requesting Path Computation](#requesting-path-computation))
 
 ```ts
 {
@@ -139,6 +78,7 @@ await payload.find({
 const page = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
+  context: { computeHierarchyPaths: true }, // Request path computation
 })
 
 // Use in your frontend routing
@@ -147,11 +87,11 @@ const url = `/${page._h_slugPath}` // "/store/products/widgets"
 
 ### `_h_titlePath`
 
-**Type:** String or Localized Object
+**Type:** String or Localized Object (virtual field)
 **Purpose:** Human-readable breadcrumb path for display
-**Indexed:** Yes
+**Stored:** No - computed on-demand from ancestor tree
 **Read-only:** Yes
-**Added when:** `generatePaths: true` (default)
+**Requires:** Opt-in (see [Requesting Path Computation](#requesting-path-computation))
 
 ```ts
 {
@@ -167,9 +107,88 @@ const url = `/${page._h_slugPath}` // "/store/products/widgets"
 **Use for breadcrumbs:**
 
 ```tsx
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+})
+
 const breadcrumbs = page._h_titlePath.split('/')
 // ['Store', 'Products', 'Widgets']
 ```
+
+## Requesting Path Computation
+
+Path fields (`_h_slugPath` and `_h_titlePath`) are virtual fields that must be explicitly requested. This opt-in design prevents unnecessary database queries when paths aren't needed (e.g., when loading documents through relationships).
+
+### Method 1: Context Flag
+
+Pass `computeHierarchyPaths: true` in the context:
+
+```ts
+// Single document
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+})
+
+// Query multiple documents
+const pages = await payload.find({
+  collection: 'pages',
+  where: { parent: { equals: null } },
+  context: { computeHierarchyPaths: true },
+})
+```
+
+### Method 2: Query Parameter
+
+For REST API requests, add the `computeHierarchyPaths` query parameter:
+
+```bash
+# Get single document with paths
+GET /api/pages/abc123?computeHierarchyPaths=true
+
+# Query collection with paths
+GET /api/pages?computeHierarchyPaths=true&where[parent][equals]=null
+```
+
+### Method 3: Field Selection
+
+Paths are automatically computed when you explicitly select them:
+
+```ts
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  select: {
+    title: true,
+    _h_slugPath: true,
+    _h_titlePath: true,
+  },
+})
+
+// REST API
+// GET /api/pages/abc123?select[title]=true&select[_h_slugPath]=true
+```
+
+### Performance Considerations
+
+**Query Cost:** Computing paths requires one additional query per document to fetch all ancestors. For example, loading 50 folder documents will make 51 queries (1 for the folders, 1 for ancestors).
+
+**Request-Scoped Caching:** Ancestors are cached within each request, so if multiple documents share the same parent, the parent is only fetched once:
+
+```ts
+// Load 50 folders with same parent
+const folders = await payload.find({
+  collection: 'folders',
+  where: { parent: { equals: 'parent-id' } },
+  context: { computeHierarchyPaths: true },
+})
+// Result: Only 2 queries total (1 for folders, 1 for the shared parent)
+```
+
+**Recommendation:** Only request paths when you need them for URLs or breadcrumbs. Skip path computation when loading related documents if paths aren't used.
 
 ## Configuration
 
@@ -262,49 +281,14 @@ Define the parent field yourself for custom validation or UI:
 }
 ```
 
-### Without Path Generation
-
-If you only need tree structure for queries (without breadcrumb paths):
-
-```ts
-{
-  slug: 'categories',
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    }
-  ],
-  hierarchy: {
-    parentFieldName: 'parent',
-    generatePaths: false,  // Skip path generation
-  }
-}
-```
-
-**What you get:**
-
-- ✅ `parent` field (auto-created)
-- ✅ `_h_parentTree` field (for descendant queries)
-- ✅ `_h_depth` field (for level tracking)
-- ❌ `_h_slugPath` and `_h_titlePath` fields (skipped)
-
-**Benefits:**
-
-- Faster operations (no path computation)
-- No dependency on `useAsTitle` field
-- Simpler data model when URLs/breadcrumbs aren't needed
-
 ## Config Options
 
-| Option               | Type       | Required | Description                                                                                   |
-| -------------------- | ---------- | -------- | --------------------------------------------------------------------------------------------- |
-| `parentFieldName`    | `string`   | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist.              |
-| `generatePaths`      | `boolean`  | No       | Whether to generate path fields (`_h_slugPath` and `_h_titlePath`). Default: `true`           |
-| `slugify`            | `function` | No       | Custom function to slugify text for path generation. Only used when `generatePaths: true`     |
-| `slugPathFieldName`  | `string`   | No       | Name for slugified path field. Default: `'_h_slugPath'`. Only used when `generatePaths: true` |
-| `titlePathFieldName` | `string`   | No       | Name for title path field. Default: `'_h_titlePath'`. Only used when `generatePaths: true`    |
+| Option               | Type       | Required | Description                                                                      |
+| -------------------- | ---------- | -------- | -------------------------------------------------------------------------------- |
+| `parentFieldName`    | `string`   | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist. |
+| `slugify`            | `function` | No       | Custom function to slugify text for path generation. Default uses basic slugify. |
+| `slugPathFieldName`  | `string`   | No       | Name for the virtual slugified path field. Default: `'_h_slugPath'`              |
+| `titlePathFieldName` | `string`   | No       | Name for the virtual title path field. Default: `'_h_titlePath'`                 |
 
 ## Use Cases
 
@@ -422,14 +406,13 @@ If the title field (from `admin.useAsTitle`) is localized, path fields are autom
 
 ## How It Works
 
-### Automatic Tree Maintenance
+### Parent Relationship Management
 
-When a document's parent or title changes, hierarchy automatically:
+Hierarchy maintains parent-child relationships through a simple `parent` field:
 
-1. Recalculates tree data for the document
-2. Updates all descendants recursively
-3. Regenerates all path fields for consistency
-4. Processes descendants in batches of 100 (handles unlimited depth)
+1. Validates there are no circular references when parent changes
+2. Cleans up orphaned children when a parent is deleted (sets their parent to null)
+3. No cascade updates needed - paths are always computed fresh
 
 **Example:**
 
@@ -441,33 +424,58 @@ await payload.update({
   data: { parent: 'page-b' }, // Changed from page-a
 })
 
-// Automatically updates:
-// - page-c's _h_parentTree: ['page-a'] → ['page-b']
-// - All descendants of page-c get new tree paths
+// Only updates:
+// - page-c's parent field: 'page-a' → 'page-b'
+// - No descendant updates needed
+// - Paths computed fresh on next read
 ```
 
-### Performance Optimizations
+### Path Computation
 
-**Title-Only Change Optimization:**
-When only the title changes (parent unchanged), hierarchy derives the parent's path without fetching from the database—50% faster.
+Path fields are computed on-demand when requested:
 
-**Batch Processing:**
-Descendants are processed in batches of 100, handling unlimited tree depths without memory issues.
+1. **Walk Parent Chain:** Recursively follows `parent` relationships to root
+2. **Build Paths:** Concatenates titles/slugs from ancestors in correct order
+3. **Cache Results:** Ancestors cached in `req.context` for the request duration
+4. **Localization:** Paths computed per locale if title field is localized
 
-**Direct Database Updates:**
-Descendant updates use `db.updateOne()` directly for performance. Trade-off: Descendants don't trigger `afterChange` hooks during cascade updates.
+**Title Change Behavior:**
+
+When you change a document's title, paths are automatically updated on the next read—no cascade updates needed:
+
+```ts
+// Change a parent's title from "Products" to "Items"
+await payload.update({
+  collection: 'pages',
+  id: 'parent-id',
+  data: { title: 'Items' },
+})
+
+// Next time a child is read with path computation:
+const child = await payload.findByID({
+  collection: 'pages',
+  id: 'child-id',
+  context: { computeHierarchyPaths: true },
+})
+
+// child._h_titlePath reflects the new parent title:
+// Old: "Products/Widget"
+// New: "Items/Widget"
+```
+
+No descendants are updated in the database—paths always reflect current ancestor titles.
 
 ## Important Behaviors
 
-### Automatic Descendant Updates
+### No Cascade Updates
 
-When you move or rename a document, all its descendants are automatically updated to maintain tree integrity. These updates:
+When you move or rename a document, descendants are not updated:
 
-- ✅ **Trigger all hooks** - `afterChange` hooks fire for each descendant
-- ✅ **Create versions** - If versioning is enabled, each descendant gets a new version
-- ✅ **Respect access control** - Updates use `overrideAccess: true` since parent access was already checked
+- ✅ **Only parent field updated** - The document's `parent` field is changed
+- ✅ **No descendant updates** - Children and descendants are not touched
+- ✅ **Paths always accurate** - Paths computed fresh on read always reflect current hierarchy
 
-**Performance Note:** Moving a document with many descendants (100+) will take longer due to processing each descendant individually. This tradeoff ensures Payload's hooks and versioning work as expected.
+**Performance Benefit:** Moving or renaming documents is fast regardless of how many descendants exist.
 
 **Example:**
 
@@ -479,8 +487,9 @@ await payload.update({
   data: { parent: 'new-parent' },
 })
 // Result:
-// - Folder: ✅ Updated, hooks fire, version created
-// - 50 descendants: ✅ All updated, hooks fire, versions created
+// - Folder: ✅ parent field updated
+// - 50 descendants: No updates (still point to folder-id)
+// - Paths: Computed fresh on next read, automatically reflect new structure
 ```
 
 ### Circular Reference Protection
@@ -494,44 +503,44 @@ These operations will throw an error before any changes are made.
 
 ### Draft Version Handling
 
-When versioning with drafts is enabled, hierarchy updates both published and draft versions to keep them in sync:
+When versioning with drafts is enabled, paths are computed based on the current read context:
 
-- ✅ **Published version updated** - Main document paths reflect new hierarchy
-- ✅ **Draft version updated** - Draft changes preserved with correct paths
-- ✅ **Independent paths** - Draft can have different path based on draft title
+- ✅ **Draft context** - Paths computed using draft parent and draft title
+- ✅ **Published context** - Paths computed using published parent and published title
+- ✅ **Always accurate** - Paths always reflect the correct version's data
 
 **Example:**
 
 ```ts
-// Published version has one path
-{
-  _status: 'published',
-  title: 'Clothing',
-  _h_slugPath: 'products/clothing',
-}
+// Reading published version
+const published = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+  // draft: false (default)
+})
+// published._h_slugPath: 'products/clothing' (uses published parent title)
 
-// Draft version has its own path based on draft title
-{
-  _status: 'draft',
-  title: 'Apparel',  // Draft change
-  _h_slugPath: 'products/apparel',  // Uses draft title
-}
-
-// When parent moves to 'categories':
-// Published: 'categories/products/clothing' ✅
-// Draft: 'categories/products/apparel' ✅
+// Reading draft version
+const draft = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  draft: true,
+  context: { computeHierarchyPaths: true },
+})
+// draft._h_slugPath: 'products/apparel' (uses draft title if changed)
 ```
 
 **How it works:**
 
-1. **Draft-only title changes** update the draft version record in the versions table
-2. **Parent moves** update both published and draft descendants separately
-3. **Each version maintains its own paths** based on its own title
+1. When computing paths, hierarchy fetches ancestors using the same `draft` context
+2. If reading a draft, ancestor titles come from draft versions (if they exist)
+3. If reading published, ancestor titles come from published versions
+4. This ensures paths always reflect the correct version's hierarchy state
 
-**Performance Impact:**
+**No Cascade Updates Needed:**
 
-- Published document with draft = 2× updates (one per version)
-- With localization (3 locales) = 6× updates (2 versions × 3 locales)
+Unlike stored paths, computed paths don't require updating draft versions when a parent changes. Paths are always accurate because they're computed from the current version's tree structure.
 
 ## Limitations
 
@@ -541,43 +550,46 @@ Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Upd
 
 ### Parent Changes with `publishSpecificLocale`
 
-**Use with caution:** When using `publishSpecificLocale`, avoid changing the `parent` field in drafts. This is because:
+**Use with caution:** When using `publishSpecificLocale`, be aware that the `parent` field is **not localized**—tree structure must be consistent across locales.
 
-- The `parent` field is **not localized** (tree structure must be consistent across locales)
-- Publishing a specific locale publishes the draft's parent value for **all locales**
-- This causes paths to be recalculated for all locales based on the new parent
-- Only the published locale's paths will be correct; other locales will have incorrect paths
+When you publish a draft with a changed parent using `publishSpecificLocale`:
 
-**Problematic scenario:**
+- The parent change applies to **all locales** (parent field is not localized)
+- Paths are computed per locale on next read
+- Each locale's paths will reflect the new parent combined with that locale's titles
+
+**Example:**
 
 ```ts
-// 1. Create published document
-await payload.create({
-  collection: 'pages',
-  data: { title: 'Page', parent: 'parent-1' },
-})
+// Published document with localized titles
+{
+  parent: 'parent-1',
+  title: { en: 'Page', fr: 'Page' },
+  _h_slugPath: { en: 'products/page', fr: 'produits/page' }
+}
 
-// 2. Create draft with different parent
+// Draft changes parent
 await payload.update({
-  collection: 'pages',
+  collection: 'pages',∫
   id: 'doc-id',
-  data: { parent: 'parent-2' }, // Draft has different parent
+  data: { parent: 'parent-2' },
   draft: true,
 })
 
-// 3. Publish only French
+// Publish only French
 await payload.update({
   collection: 'pages',
   id: 'doc-id',
-  publishSpecificLocale: 'fr', // ❌ Problem: parent changes to 'parent-2' for ALL locales
+  publishSpecificLocale: 'fr',
 })
-// Result: French paths correct, but English/German paths now incorrect
+// Result: parent changed to 'parent-2' for ALL locales
+// Paths computed on next read will reflect new parent for all locales
 ```
 
-**Recommendation:** When moving documents in the hierarchy (changing parent), always use `publishAllLocales` (default behavior):
+**Recommendation:** When moving documents in the hierarchy (changing parent), prefer `publishAllLocales` (default) to make the intent clear:
 
 ```ts
-// ✅ Safe: publishes all locales at once
+// ✅ Clear: publishes parent change for all locales
 await payload.update({
   collection: 'pages',
   id: 'doc-id',
@@ -586,7 +598,7 @@ await payload.update({
 })
 ```
 
-**Note:** Title changes work fine with `publishSpecificLocale` since path fields (`_h_slugPath`, `_h_titlePath`) are localized.
+**Note:** Title changes work as expected with `publishSpecificLocale` since paths are computed per locale.
 
 ## Best Practices
 
@@ -611,32 +623,34 @@ Ensure your `admin.useAsTitle` field is stable and always has a value:
 
 **Avoid:** Fields that can be empty, computed fields, or fields nested in named groups/tabs.
 
-### Plan for Migrations
-
-If adding hierarchy to an existing collection, regenerate all paths:
-
-```ts
-const docs = await payload.find({
-  collection: 'pages',
-  limit: 1000,
-})
-
-for (const doc of docs.docs) {
-  await payload.update({
-    collection: 'pages',
-    id: doc.id,
-    data: { parent: doc.parent }, // Trigger hierarchy recalculation
-  })
-}
-```
-
 ### Consider Performance at Scale
 
 For collections with many documents:
 
-- Limit tree depth in your UI (e.g., max 5 levels)
-- Use `generatePaths: false` if you only need parent tree structure
-- Consider background jobs for large tree reorganizations
+- **Only request paths when needed** - Use `computeHierarchyPaths: true` only for UI/breadcrumb display
+- **Skip paths for relationships** - When loading related documents, omit path computation to avoid extra queries
+- **Limit tree depth** - Deep trees (10+ levels) will have slower path computation
+- **Leverage caching** - Multiple documents sharing ancestors benefit from request-scoped caching
+
+**Example optimization:**
+
+```ts
+// ❌ Unnecessary path computation for a tag relationship
+const post = await payload.findByID({
+  collection: 'posts',
+  id: 'post-id',
+  depth: 2, // Populates category relationship
+  context: { computeHierarchyPaths: true }, // Computes paths for category too
+})
+
+// ✅ Only compute paths when you'll use them
+const post = await payload.findByID({
+  collection: 'posts',
+  id: 'post-id',
+  depth: 2,
+  // No path computation - category.parent populated but no _h_slugPath
+})
+```
 
 ## TypeScript
 
@@ -645,16 +659,22 @@ The hierarchy fields are automatically included in your generated types:
 ```ts
 import type { Page } from './payload-types'
 
-const page: Page = {
+// Fetched document type includes all hierarchy fields
+const page = await payload.findByID({
+  collection: 'pages',
   id: 'page-id',
-  title: 'My Page',
-  parent: 'parent-id',
-  _h_parentTree: ['grandparent-id', 'parent-id'],
-  _h_depth: 2,
-  _h_slugPath: 'grandparent/parent/my-page',
-  _h_titlePath: 'Grandparent/Parent/My Page',
-}
+  context: { computeHierarchyPaths: true },
+})
+
+// TypeScript knows about these fields:
+const id: string = page.id
+const title: string = page.title
+const parent: string | null = page.parent
+const slugPath: string = page._h_slugPath // Virtual field, computed when requested
+const titlePath: string = page._h_titlePath // Virtual field, computed when requested
 ```
+
+**Note:** Virtual path fields (`_h_slugPath`, `_h_titlePath`) are included in generated types but will be `undefined` at runtime unless you request path computation.
 
 If types aren't generated, regenerate them:
 
