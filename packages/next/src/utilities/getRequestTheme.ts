@@ -11,7 +11,19 @@ type GetRequestLanguageArgs = {
 
 const acceptedThemes: Theme[] = ['dark', 'light']
 
-export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguageArgs): Theme => {
+/**
+ * Determines the theme for a request based on admin settings, cookies, and headers.
+ * Priority:
+ * 1. Admin-configured theme (if not 'all')
+ * 2. Theme from cookies (user preference)
+ * 3. Theme from 'Sec-CH-Prefers-Color-Scheme' header (limited browser support)
+ * 4. Undefined (to allow client-side determination)
+ */
+export const getRequestTheme = ({
+  config,
+  cookies,
+  headers,
+}: GetRequestLanguageArgs): Theme | undefined => {
   if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
     return config.admin.theme
   }
@@ -32,5 +44,5 @@ export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguage
     return themeFromHeader
   }
 
-  return defaultTheme
+  return undefined
 }
