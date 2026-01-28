@@ -244,6 +244,14 @@ export const deleteOperation = async <
         })
 
         // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          result = { ...result, collection: collectionConfig.slug }
+        }
+
+        // /////////////////////////////////////
         // afterRead - Collection
         // /////////////////////////////////////
 

@@ -314,6 +314,14 @@ export const createOperation = async <
     let result: Document = sanitizeInternalFields(doc)
 
     // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
+    // /////////////////////////////////////
     // Create version
     // /////////////////////////////////////
 

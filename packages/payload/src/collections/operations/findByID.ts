@@ -193,6 +193,14 @@ export const findByIDOperation = async <
       (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
 
     // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
+    // /////////////////////////////////////
     // Include Lock Status if required
     // /////////////////////////////////////
 
