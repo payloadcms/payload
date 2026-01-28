@@ -3,9 +3,12 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -18,13 +21,12 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Field Error States', () => {
   let serverURL: string
-  let page: Page
   let validateDraftsOff: AdminUrlUtil
   let validateDraftsOn: AdminUrlUtil
   let validateDraftsOnAutosave: AdminUrlUtil
@@ -35,7 +37,7 @@ describe('Field Error States', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     validateDraftsOff = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOff!)
     validateDraftsOn = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOn!)
     validateDraftsOnAutosave = new AdminUrlUtil(
@@ -50,14 +52,22 @@ describe('Field Error States', () => {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
-    const context = await browser.newContext()
-    page = await context.newPage()
+
+    await ensureCompilationIsDone({ browser, serverURL })
+  })
+
+  beforeEach(async ({ page }) => {
     initPageConsoleErrorCatch(page)
+
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'fielderrorstates',
+    })
 
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('Remove row should remove error states from parent fields', async () => {
+  test('Remove row should remove error states from parent fields', async ({ page }) => {
     await page.goto(
       formatAdminURL({ adminRoute, path: '/collections/error-fields/create', serverURL }),
     )
@@ -94,17 +104,19 @@ describe('Field Error States', () => {
   })
 
   describe('draft validations', () => {
-    test('should not validate drafts by default', async () => {
+    test('should not validate drafts by default', async ({ page }) => {
       await page.goto(validateDraftsOff.create)
       await saveDocAndAssert(page, '#action-save-draft')
     })
 
-    test('should validate drafts when enabled', async () => {
+    test('should validate drafts when enabled', async ({ page }) => {
       await page.goto(validateDraftsOn.create)
       await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
-    test('should show validation errors when validate and autosave are enabled', async () => {
+    test('should show validation errors when validate and autosave are enabled', async ({
+      page,
+    }) => {
       await page.goto(validateDraftsOnAutosave.create)
       await page.locator('#field-title').fill('valid')
       await saveDocAndAssert(page)
@@ -112,7 +124,9 @@ describe('Field Error States', () => {
       await saveDocAndAssert(page, '#action-save', 'error')
     })
 
-    test('should keep save draft button enabled after validation failure on update', async () => {
+    test('should keep save draft button enabled after validation failure on update', async ({
+      page,
+    }) => {
       await page.goto(validateDraftsOn.create)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
@@ -132,7 +146,9 @@ describe('Field Error States', () => {
       await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
-    test('should keep save draft button enabled after successful save when form is modified again', async () => {
+    test('should keep save draft button enabled after successful save when form is modified again', async ({
+      page,
+    }) => {
       await page.goto(validateDraftsOn.create)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
@@ -146,7 +162,7 @@ describe('Field Error States', () => {
   })
 
   describe('previous values', () => {
-    test('should pass previous value into validate function', async () => {
+    test('should pass previous value into validate function', async ({ page }) => {
       // save original
       await page.goto(prevValue.create)
       await waitForFormReady(page)
@@ -183,7 +199,7 @@ describe('Field Error States', () => {
   })
 
   describe('error field types', () => {
-    async function prefillBaseRequiredFields() {
+    async function prefillBaseRequiredFields(page: Page) {
       const homeTabLocator = page.locator('.tabs-field__tab-button', {
         hasText: 'Home',
       })
@@ -202,9 +218,9 @@ describe('Field Error States', () => {
       await page.locator('#field-tabText').fill('Hero Tab Text')
       await page.locator('#field-text').fill('Hero Tab Collapsible Text')
     }
-    test('group errors', async () => {
+    test('group errors', async ({ page }) => {
       await page.goto(errorFieldsURL.create)
-      await prefillBaseRequiredFields()
+      await prefillBaseRequiredFields(page)
 
       // clear group and save
       await page.locator('#field-group__text').fill('')
