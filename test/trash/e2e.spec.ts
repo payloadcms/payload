@@ -8,7 +8,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  closeAllToasts,
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  throttleTest,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -43,7 +48,7 @@ describe('Trash', () => {
     await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  beforeEach(async ({ page }) => {
+  beforeEach(async ({ page, context }) => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'trash',
@@ -83,6 +88,7 @@ describe('Trash', () => {
       })
     ).docs[0]!.id
     initPageConsoleErrorCatch(page)
+    //await throttleTest({ page, context, delay: 'Slow 4G' })
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -770,6 +776,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
 
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
@@ -818,6 +825,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -871,6 +879,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -924,6 +933,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -971,6 +981,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
