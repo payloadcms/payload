@@ -141,27 +141,39 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
-  tests-int:
+  # Generate the integration test matrix from TypeScript config
+  int-matrix:
+    name: Setup Int Matrix
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
-    name: int-${{ matrix.database }}
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/int.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  tests-int:
+    runs-on: ubuntu-24.04
+    needs: int-matrix
+    name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - mongodb-atlas
-          - documentdb
-          - cosmosdb
-          - firestore
-          - postgres
-          - postgres-custom-schema
-          - postgres-uuid
-          - supabase
-          - sqlite
-          - sqlite-uuid
+      matrix: ${{ fromJson(needs.int-matrix.outputs.matrix) }}
 
     env:
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
@@ -206,7 +218,7 @@ jobs:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int
+        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
