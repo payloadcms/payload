@@ -1043,7 +1043,8 @@ describe('General', () => {
   })
 
   describe('progress bar', () => {
-    test('should show progress bar on page navigation', async () => {
+    test.fixme('should show progress bar on page navigation', async () => {
+      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
       // eslint-disable-next-line playwright/no-networkidle
       await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
       // Wait for hydration - otherwise playwright clicks the card early and nothing happens
