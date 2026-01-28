@@ -1,4 +1,5 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { NumberFilterProps as Props } from './types.js'
@@ -12,13 +13,13 @@ const baseClass = 'condition-value-number'
 export const NumberFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { hasMany },
+    field: { admin, hasMany },
     onChange,
     operator,
     value,
   } = props
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const isMulti = ['in', 'not_in'].includes(operator) || hasMany
 
@@ -63,6 +64,8 @@ export const NumberFilter: React.FC<Props> = (props) => {
     }
   }, [value])
 
+  const placeholder = getTranslation(admin?.placeholder, i18n) || t('general:enterAValue')
+
   return isMulti ? (
     <ReactSelect
       disabled={disabled}
@@ -73,7 +76,7 @@ export const NumberFilter: React.FC<Props> = (props) => {
       numberOnly
       onChange={onSelect}
       options={[]}
-      placeholder={t('general:enterAValue')}
+      placeholder={placeholder}
       value={valueToRender || []}
     />
   ) : (
@@ -81,7 +84,7 @@ export const NumberFilter: React.FC<Props> = (props) => {
       className={baseClass}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={t('general:enterAValue')}
+      placeholder={placeholder}
       type="number"
       value={value as number}
     />

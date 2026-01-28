@@ -8,6 +8,7 @@ export const Posts: CollectionConfig = {
     useAsTitle: 'title',
   },
   folders: true,
+  trash: true,
   fields: [
     {
       name: 'title',

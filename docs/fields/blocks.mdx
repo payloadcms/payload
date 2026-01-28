@@ -2,24 +2,23 @@
 title: Blocks Field
 label: Blocks
 order: 30
-desc: The Blocks Field is a great layout build and can be used to construct any flexible content model. Learn how to use Block Fields, see examples and options.
+desc: The Blocks Field is a great layout builder and can be used to construct any flexible content model. Learn how to use Block Fields, see examples and options.
 keywords: blocks, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Blocks Field is **incredibly powerful**, storing an array of objects based on the fields that you define, where each item in the array is a "block" with its own unique schema.
+The Blocks Field is one of the most flexible tools in Payload. It stores an array of objects, where each object is a “block” with its own schema. Unlike a simple array (where every item looks the same), blocks let you mix and match different content types in any order.
 
-Blocks are a great way to create a flexible content model that can be used to build a wide variety of content types, including:
+This makes Blocks perfect for building dynamic, editor-friendly experiences, such as:
 
-- A layout builder tool that grants editors to design highly customizable page or post layouts. Blocks could include configs such as `Quote`, `CallToAction`, `Slider`, `Content`, `Gallery`, or others.
-- A form builder tool where available block configs might be `Text`, `Select`, or `Checkbox`.
-- Virtual event agenda "timeslots" where a timeslot could either be a `Break`, a `Presentation`, or a `BreakoutSession`.
-
-<LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
-  srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
-  alt="Admin Panel screenshot of add Blocks drawer view"
-  caption="Admin Panel screenshot of add Blocks drawer view"
-/>
+- A page builder with blocks like `Quote`, `CallToAction`, `Slider`, or `Gallery`.
+- A form builder with block types like `Text`, `Select`, or `Checkbox`.
+- An event agenda where each timeslot could be a `Break`, `Presentation`, or `BreakoutSession`.
+  <LightDarkImage
+    srcLight="https://payloadcms.com/images/docs/fields/blocks.png"
+    srcDark="https://payloadcms.com/images/docs/fields/blocks-dark.png"
+    alt="Admin Panel screenshot of add Blocks drawer view"
+    caption="Admin Panel screenshot of add Blocks drawer view"
+  />
 
 To add a Blocks Field, set the `type` to `blocks` in your [Field Config](./overview):
 
@@ -37,7 +36,11 @@ export const MyBlocksField: Field = {
 }
 ```
 
-## Config Options
+This page is divided into two parts: first, the settings of the Blocks Field, and then the settings of the blocks inside it.
+
+## Block Field
+
+### Block Config Options
 
 | Option                 | Description                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -62,7 +65,7 @@ export const MyBlocksField: Field = {
 
 _\* An asterisk denotes that a property is required._
 
-## Admin Options
+### Block Admin Options
 
 To customize the appearance and behavior of the Blocks Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
@@ -80,12 +83,10 @@ export const MyBlocksField: Field = {
 
 The Blocks Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option                 | Description                                                                |
-| ---------------------- | -------------------------------------------------------------------------- |
-| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
-| **`initCollapsed`**    | Set the initial collapsed state                                            |
-| **`isSortable`**       | Disable order sorting by setting this value to `false`                     |
-| **`disableBlockName`** | Hide the blockName field by setting this value to `true`                   |
+| Option              | Description                                            |
+| ------------------- | ------------------------------------------------------ |
+| **`initCollapsed`** | Set the initial collapsed state                        |
+| **`isSortable`**    | Disable order sorting by setting this value to `false` |
 
 #### Customizing the way your block is rendered in Lexical
 
@@ -132,7 +133,9 @@ import {
 } from '@payloadcms/richtext-lexical/client'
 ```
 
-## Block Configs
+## Blocks Items
+
+### Config Options
 
 Blocks are defined as separate configs of their own.
 
@@ -145,29 +148,175 @@ Blocks are defined as separate configs of their own.
   trivializes their reusability.
 </Banner>
 
-| Option                     | Description                                                                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
-| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
-| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined.                                                                             |
-| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
-| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
-| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
-| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
+| Option                     | Description                                                                                                                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                                                                                        |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                                                                                     |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.                                                                 |
+| **`imageURL`**             | Provide a custom image thumbnail URL to help editors identify this block in the Admin UI. The image will be displayed in a 3:2 aspect ratio container and cropped using `object-fit: cover` if needed. [More details](#block-image-guidelines). |
+| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                                                                                |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                             |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                                                                                    |
+| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                                                                                           |
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                       |
 
-### Auto-generated data per block
+_\* An asterisk denotes that a property is required._
 
-In addition to the field data that you define on each block, Payload will store two additional properties on each block:
+### Block Image Guidelines
 
-**`blockType`**
+When providing a custom thumbnail via `imageURL`, it's important to understand how images are displayed in the Admin UI to ensure they look correct.
 
-The `blockType` is saved as the slug of the block that has been selected.
+**Aspect Ratio and Cropping**:
 
-**`blockName`**
+- The image container uses a **3:2 aspect ratio** (e.g., 480x320 pixels)
+- Images are scaled using `object-fit: cover`, which means:
+  - Images that don't match 3:2 will be **cropped** to fill the container
+  - The image maintains its aspect ratio while being scaled
+  - Cropping is centered, removing edges as needed
 
-The Admin Panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability. This can be visually hidden via `admin.disableBlockName`.
+**Display Contexts**:
+
+1. **Block Selection Drawer**: Images appear as thumbnails in a responsive grid when editors add blocks
+2. **Lexical Editor**: Images are scaled down to 20x20px icons in menus and toolbars
+
+**Recommendations**:
+
+- Use images with a **3:2 aspect ratio** to avoid unwanted cropping (e.g., 480x320, 600x400, 900x600)
+- Keep important visual content **centered** in your image, as edges may be cropped
+- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
+- Always include `imageAltText` for accessibility
+
+**Example**:
+
+```ts
+const QuoteBlock: Block = {
+  slug: 'quote',
+  imageURL: 'https://example.com/thumbnails/quote-block-480x320.jpg',
+  imageAltText: 'Quote block with text and attribution',
+  fields: [
+    {
+      name: 'quoteText',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
+
+If no `imageURL` is provided, a default placeholder graphic is displayed automatically.
+
+### Admin Options
+
+Blocks are not fields, so they don’t inherit the base properties shared by all fields (not to be confused with the Blocks Field, documented above, which does). Here are their available admin options:
+
+| Option                 | Description                                                                |
+| ---------------------- | -------------------------------------------------------------------------- |
+| **`components.Block`** | Custom component for replacing the Block, including the header.            |
+| **`components.Label`** | Custom component for replacing the Block Label.                            |
+| **`disableBlockName`** | Hide the blockName field by setting this value to `true`.                  |
+| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                  |
+
+### blockType, blockName, and block.label
+
+Each block stores two pieces of data alongside your fields. The `blockType` identifies which schema to use and it is exactly the block’s `slug`. The `blockName` is an optional label you can give to a block to make editing and scanning easier.
+
+The **label** is shared by all blocks of the same type and is defined in the block config via `label` with a fallback to `slug`. On the other hand, the **blockName** is specific to each block individually. You can hide the editable name with `admin.disableBlockName`.
+
+If you provide `admin.components.Label`, that component replaces both the name and the label in the Admin UI.
+
+| Property      | Scope      | Source                                     | Visible in UI | Notes                                                                                              |
+| ------------- | ---------- | ------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------- |
+| `blockType`   | Each block | The block’s `slug`                         | Not a header  | Used to resolve which block schema to render                                                       |
+| `blockName`   | Each block | Editor input in the Admin                  | Yes           | Optional label; hide with `admin.disableBlockName` or replace with custom `admin.components.Label` |
+| `block.label` | Block type | `label` in block config or `slug` fallback | Yes           | Shared by all blocks of that type. Can be replaced with custom `admin.components.Label`            |
+
+### Custom Components
+
+#### Field
+
+##### Server Component
+
+```tsx
+import type React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldServerComponent } from 'payload'
+
+export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <BlocksField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+##### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldClientComponent } from 'payload'
+
+export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+  return <BlocksField {...props} />
+}
+```
+
+#### Label
+
+##### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelServerComponent } from 'payload'
+
+export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+##### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelClientComponent } from 'payload'
+
+export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
+  label,
+  path,
+  required,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
 
 ## Example
 
@@ -209,109 +358,6 @@ export const ExampleCollection: CollectionConfig = {
       ],
     },
   ],
-}
-```
-
-## Custom Components
-
-### Field
-
-#### Server Component
-
-```tsx
-import type React from 'react'
-import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldServerComponent } from 'payload'
-
-export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
-  clientField,
-  path,
-  schemaPath,
-  permissions,
-}) => {
-  return (
-    <BlocksField
-      field={clientField}
-      path={path}
-      schemaPath={schemaPath}
-      permissions={permissions}
-    />
-  )
-}
-```
-
-#### Client Component
-
-```tsx
-'use client'
-import React from 'react'
-import { BlocksField } from '@payloadcms/ui'
-import type { BlocksFieldClientComponent } from 'payload'
-
-export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
-  return <BlocksField {...props} />
-}
-```
-
-### Label
-
-#### Server Component
-
-```tsx
-import React from 'react'
-import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelServerComponent } from 'payload'
-
-export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
-```
-
-#### Client Component
-
-```tsx
-'use client'
-import React from 'react'
-import { FieldLabel } from '@payloadcms/ui'
-import type { BlocksFieldLabelClientComponent } from 'payload'
-
-export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
-  label,
-  path,
-  required,
-}) => {
-  return (
-    <FieldLabel
-      label={field?.label || field?.name}
-      path={path}
-      required={field?.required}
-    />
-  )
-}
-```
-
-### Row Label
-
-```tsx
-'use client'
-
-import { useRowLabel } from '@payloadcms/ui'
-
-export const BlockRowLabel = () => {
-  const { data, rowNumber } = useRowLabel<{ title?: string }>()
-
-  const customLabel = `${data.type} ${String(rowNumber).padStart(2, '0')} `
-
-  return <div>Custom Label: {customLabel}</div>
 }
 ```
 
@@ -388,3 +434,34 @@ As you build your own Block configs, you might want to store them in separate fi
 ```ts
 import type { Block } from 'payload'
 ```
+
+## Conditional Blocks
+
+Blocks can be conditionally enabled using the `filterOptions` property on the blocks field. It allows you to provide a function that returns which block slugs should be available based on the given context.
+
+### Behavior
+
+- `filterOptions` is re-evaluated as part of the form state request, whenever the document data changes.
+- If a block is present in the field but no longer allowed by `filterOptions`, a validation error will occur when saving.
+
+### Example
+
+```ts
+{
+  name: 'blocksWithDynamicFilterOptions',
+  type: 'blocks',
+  filterOptions: ({ siblingData }) => {
+    return siblingData?.enabledBlocks?.length
+      ? [siblingData.enabledBlocks] // allow only the matching block
+      : true // allow all blocks if no value is set
+  },
+  blocks: [
+    { slug: 'block1', fields: [{ type: 'text', name: 'block1Text' }] },
+    { slug: 'block2', fields: [{ type: 'text', name: 'block2Text' }] },
+    { slug: 'block3', fields: [{ type: 'text', name: 'block3Text' }] },
+    // ...
+  ],
+}
+```
+
+In this example, the list of available blocks is determined by the enabledBlocks sibling field. If no value is set, all blocks remain available.

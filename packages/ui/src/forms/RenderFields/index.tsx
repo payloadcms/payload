@@ -1,5 +1,7 @@
 'use client'
 
+import type { SanitizedFieldPermissions } from 'payload'
+
 import { fieldIsHiddenOrDisabled, getFieldPaths, getFieldPermissions } from 'payload/shared'
 import React from 'react'
 
@@ -7,8 +9,8 @@ import type { RenderFieldsProps } from './types.js'
 
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
-import { FieldPathContext } from './context.js'
 import './index.scss'
+import { FieldPathContext } from './context.js'
 import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
@@ -99,7 +101,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
                 parentPath={parentPath}
                 parentSchemaPath={parentSchemaPath}
                 path={path}
-                permissions={fieldPermissions}
+                permissions={fieldPermissions as SanitizedFieldPermissions}
                 readOnly={isReadOnly}
                 schemaPath={schemaPath}
               />

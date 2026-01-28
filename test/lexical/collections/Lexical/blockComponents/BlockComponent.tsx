@@ -1,4 +1,7 @@
 'use client'
+
+import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
+
 import {
   BlockCollapsible,
   BlockEditButton,
@@ -7,7 +10,7 @@ import {
 import { useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
-export const BlockComponent: React.FC = () => {
+export const BlockComponent: React.FC<LexicalBlockClientProps> = () => {
   const key = useFormFields(([fields]) => fields.key)
 
   return (

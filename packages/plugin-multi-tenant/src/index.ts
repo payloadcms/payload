@@ -2,6 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
 import chalk from 'chalk'
+import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -16,6 +17,7 @@ import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { combineFilters } from './utilities/combineFilters.js'
+import { miniChalk } from './utilities/miniChalk.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -98,6 +100,7 @@ export const multiTenantPlugin =
     }
 
     addCollectionAccess({
+      accessResultCallback: pluginConfig.usersAccessResultOverride,
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
@@ -116,12 +119,13 @@ export const multiTenantPlugin =
       adminUsersCollection.admin.baseFilter = combineFilters({
         baseFilter,
         customFilter: (args) =>
-          filterDocumentsByTenants({
+          filterDocumentsByTenants<ConfigType>({
             filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           }),
       })
     }
@@ -166,7 +170,7 @@ export const multiTenantPlugin =
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
@@ -176,6 +180,7 @@ export const multiTenantPlugin =
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
 
         if (pluginConfig.collections[foldersSlug]?.customTenantField !== true) {
@@ -186,6 +191,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -207,12 +213,13 @@ export const multiTenantPlugin =
           collection.admin.baseFilter = combineFilters({
             baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
             customFilter: (args) =>
-              filterDocumentsByTenants({
+              filterDocumentsByTenants<ConfigType>({
                 filterFieldName: tenantFieldName,
                 req: args.req,
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -222,6 +229,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled folders collection
            */
           addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[foldersSlug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
@@ -279,6 +287,7 @@ export const multiTenantPlugin =
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -312,12 +321,14 @@ export const multiTenantPlugin =
                 path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
+            disableBulkEdit: true,
+            disableListColumn: true,
           },
         })
 
         collection.endpoints = [
           ...(collection.endpoints || []),
-          getTenantOptionsEndpoint<ConfigType>({
+          getTenantOptionsEndpoint({
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
@@ -333,10 +344,20 @@ export const multiTenantPlugin =
           collection.disableDuplicate = true
         }
 
+        if (!pluginConfig.debug && !isGlobal) {
+          collection.admin ??= {}
+          collection.admin.components ??= {}
+          collection.admin.components.edit ??= {}
+          collection.admin.components.edit.editMenuItems ??= []
+          collection.admin.components.edit.editMenuItems.push({
+            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
+          })
+        }
+
         /**
          * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
           blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
@@ -346,6 +367,7 @@ export const multiTenantPlugin =
           tenantsArrayFieldName,
           tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
 
         if (pluginConfig.collections[collection.slug]?.customTenantField !== true) {
@@ -356,6 +378,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -383,6 +406,7 @@ export const multiTenantPlugin =
                 tenantsArrayFieldName,
                 tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -392,6 +416,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled collection
            */
           addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[collection.slug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
@@ -416,7 +441,7 @@ export const multiTenantPlugin =
       )
       // eslint-disable-next-line no-console
       console.error(
-        chalk.yellow.bold('WARNING (plugin-multi-tenant)'),
+        miniChalk.yellowBold('WARNING (plugin-multi-tenant)'),
         'missing collections',
         missingSlugs,
         'try placing the multi-tenant plugin after other plugins.',

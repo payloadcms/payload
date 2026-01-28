@@ -3,6 +3,7 @@ import { existsSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
 import { type BlocksField, getPayload, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -34,9 +35,10 @@ describe('Config', () => {
     })
 
     it('allows a custom field in the root endpoints', () => {
-      const [endpoint] = payload.config.endpoints
+      const endpoints = payload.config.endpoints
+      const customEndpoint = endpoints?.find((endpoint) => endpoint.path === '/config')
 
-      expect(endpoint.custom).toEqual({
+      expect(customEndpoint?.custom).toEqual({
         description: 'Get the sanitized payload config',
       })
     })
@@ -125,6 +127,11 @@ describe('Config', () => {
       expect((blocksField as BlocksField).blocks[0].custom).toEqual({
         description: 'The blockOne of this page',
       })
+    })
+
+    it('properly merges collection.labels with defaults', () => {
+      const [collection] = payload.config.collections
+      expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Page' })
     })
   })
 

@@ -7,6 +7,7 @@ import type {
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomStatus,
 } from '../../admin/types.js'
 import type {
   Access,
@@ -23,7 +24,14 @@ import type {
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
-import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type {
+  GlobalAdminCustom,
+  GlobalCustom,
+  GlobalSlug,
+  RequestContext,
+  TypedGlobal,
+  TypedGlobalSelect,
+} from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -77,6 +85,22 @@ export type AfterReadHook = (args: {
   req: PayloadRequest
 }) => any
 
+export type HookOperationType = 'countVersions' | 'read' | 'restoreVersion' | 'update'
+
+export type BeforeOperationHook = (args: {
+  args?: any
+  context: RequestContext
+  /**
+   * The Global which this hook is being run on
+   * */
+  global: SanitizedGlobalConfig
+  /**
+   * Hook operation being performed
+   */
+  operation: HookOperationType
+  req: PayloadRequest
+}) => any
+
 export type GlobalAdminOptions = {
   /**
    * Custom admin components
@@ -108,6 +132,10 @@ export type GlobalAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
     }
     views?: {
       /**
@@ -118,7 +146,7 @@ export type GlobalAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: GlobalAdminCustom
   /**
    * Custom description for collection
    */
@@ -157,13 +185,12 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   _sanitized?: boolean
   access?: {
     read?: Access
-    readDrafts?: Access
     readVersions?: Access
     update?: Access
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: GlobalCustom
   /**
    * Customize the SQL table name
    */
@@ -187,6 +214,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     afterChange?: AfterChangeHook[]
     afterRead?: AfterReadHook[]
     beforeChange?: BeforeChangeHook[]
+    beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
@@ -216,16 +244,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
   endpoints: Endpoint[] | false
-
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
   slug: GlobalSlug
-  versions: SanitizedGlobalVersions
+  versions?: SanitizedGlobalVersions
 }
 
 export type Globals = {

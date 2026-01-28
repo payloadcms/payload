@@ -8,7 +8,6 @@
       display: flex;
       flex-direction: column;
       gap: calc(var(--base) * 0.5);
-      align-items: flex-start;
       border-bottom: 1px solid var(--theme-elevation-100);
       padding-bottom: var(--base);
     }
@@ -61,6 +60,10 @@
           vector-effect: non-scaling-stroke;
         }
       }
+    }
+
+    &__after-header {
+      padding-top: calc(var(--base) / 4);
     }
 
     &__divider {

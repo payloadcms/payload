@@ -130,7 +130,6 @@ export const Button: React.FC<Props> = (props) => {
   }
 
   let buttonElement
-  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -159,7 +158,7 @@ export const Button: React.FC<Props> = (props) => {
       }
 
       buttonElement = (
-        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
+        <Link {...buttonProps} href={to || url} prefetch={false}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

@@ -4,7 +4,13 @@ import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { NumberToDelete, RelationshipToDelete, RowToInsert, TextToDelete } from './types.js'
+import type {
+  NumberToDelete,
+  RelationshipToAppend,
+  RelationshipToDelete,
+  RowToInsert,
+  TextToDelete,
+} from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { resolveBlockTableName } from '../../utilities/validateExistingBlockIsIdentical.js'
@@ -63,6 +69,7 @@ type Args = {
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToAppend: RelationshipToAppend[]
   relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
   selects: {
@@ -99,6 +106,7 @@ export const traverseFields = ({
   parentTableName,
   path,
   relationships,
+  relationshipsToAppend,
   relationshipsToDelete,
   row,
   selects,
@@ -106,6 +114,8 @@ export const traverseFields = ({
   textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
+  let fieldsMatched = false
+
   if (row._uuid) {
     data._uuid = row._uuid
   }
@@ -119,6 +129,11 @@ export const traverseFields = ({
       return
     }
 
+    // Mark that we found a matching field
+    if (data[field.name] !== undefined) {
+      fieldsMatched = true
+    }
+
     columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
     fieldName = `${fieldPrefix || ''}${field.name}`
     fieldData = data[field.name]
@@ -129,21 +144,19 @@ export const traverseFields = ({
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
       if (isLocalized) {
-        let value: {
-          [locale: string]: unknown[]
-        } = data[field.name] as any
-
-        let push = false
-        if (typeof value === 'object' && '$push' in value) {
-          value = value.$push as any
-          push = true
-        }
+        const value = data[field.name]
 
         if (typeof value === 'object' && value !== null) {
-          Object.entries(value).forEach(([localeKey, _localeData]) => {
-            let localeData = _localeData
-            if (push && !Array.isArray(localeData)) {
-              localeData = [localeData]
+          Object.entries(value).forEach(([localeKey, localeValue]) => {
+            let localeData = localeValue
+            let push = false
+
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              localeData = localeValue.$push
+              push = true
+              if (!Array.isArray(localeData)) {
+                localeData = [localeData]
+              }
             }
 
             if (Array.isArray(localeData)) {
@@ -320,6 +333,7 @@ export const traverseFields = ({
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
+              relationshipsToAppend,
               relationshipsToDelete,
               row,
               selects,
@@ -353,6 +367,7 @@ export const traverseFields = ({
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
+            relationshipsToAppend,
             relationshipsToDelete,
             row,
             selects,
@@ -368,6 +383,164 @@ export const traverseFields = ({
 
     if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
+
+      // Handle $push operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        'hasMany' in field &&
+        field.hasMany &&
+        ('$push' in fieldData ||
+          (field.localized &&
+            Object.values(fieldData).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$push' in (localeValue as Record<string, unknown>),
+            )))
+      ) {
+        let itemsToAppend: unknown[]
+
+        if (field.localized) {
+          let hasLocaleOperations = false
+          Object.entries(fieldData).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$push' in localeValue) {
+              hasLocaleOperations = true
+              const push = localeValue.$push
+              const localeItems = Array.isArray(push) ? push : [push]
+
+              localeItems.forEach((item) => {
+                const relationshipToAppend: RelationshipToAppend = {
+                  locale: localeKey,
+                  path: relationshipPath,
+                  value: item,
+                }
+
+                // Handle polymorphic relationships
+                if (
+                  Array.isArray(field.relationTo) &&
+                  item &&
+                  typeof item === 'object' &&
+                  'relationTo' in item
+                ) {
+                  relationshipToAppend.relationTo = item.relationTo
+                  relationshipToAppend.value = item.value
+                } else if (typeof field.relationTo === 'string') {
+                  // Simple relationship
+                  relationshipToAppend.relationTo = field.relationTo
+                  relationshipToAppend.value = item
+                }
+
+                relationshipsToAppend.push(relationshipToAppend)
+              })
+            }
+          })
+
+          if (hasLocaleOperations) {
+            return
+          }
+        } else {
+          // Handle non-localized fields: { field: { $push: data } }
+          itemsToAppend = Array.isArray((fieldData as any).$push)
+            ? (fieldData as any).$push
+            : [(fieldData as any).$push]
+
+          itemsToAppend.forEach((item) => {
+            const relationshipToAppend: RelationshipToAppend = {
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+              value: item,
+            }
+
+            // Handle polymorphic relationships
+            if (
+              Array.isArray(field.relationTo) &&
+              item &&
+              typeof item === 'object' &&
+              'relationTo' in item &&
+              'value' in item
+            ) {
+              relationshipToAppend.relationTo = item.relationTo as string
+              relationshipToAppend.value = item.value as number | string
+            } else if (typeof field.relationTo === 'string') {
+              // Simple relationship
+              relationshipToAppend.relationTo = field.relationTo
+              relationshipToAppend.value = item
+            }
+
+            relationshipsToAppend.push(relationshipToAppend)
+          })
+        }
+        return
+      }
+
+      // Handle $remove operation for relationship fields
+      if (
+        fieldData &&
+        typeof fieldData === 'object' &&
+        'hasMany' in field &&
+        field.hasMany &&
+        ('$remove' in fieldData ||
+          (field.localized &&
+            Object.values(fieldData).some(
+              (localeValue) =>
+                localeValue &&
+                typeof localeValue === 'object' &&
+                '$remove' in (localeValue as Record<string, unknown>),
+            )))
+      ) {
+        // Check for new locale-first syntax: { field: { locale: { $remove: data } } }
+        if (field.localized) {
+          let hasLocaleOperations = false
+          Object.entries(fieldData).forEach(([localeKey, localeValue]) => {
+            if (localeValue && typeof localeValue === 'object' && '$remove' in localeValue) {
+              hasLocaleOperations = true
+              const remove = localeValue.$remove
+              const localeItems = Array.isArray(remove) ? remove : [remove]
+
+              localeItems.forEach((item) => {
+                const relationshipToDelete: RelationshipToDelete = {
+                  itemToRemove: item,
+                  locale: localeKey,
+                  path: relationshipPath,
+                }
+
+                // Store relationTo for simple relationships
+                if (typeof field.relationTo === 'string') {
+                  relationshipToDelete.relationTo = field.relationTo
+                }
+
+                relationshipsToDelete.push(relationshipToDelete)
+              })
+            }
+          })
+
+          if (hasLocaleOperations) {
+            return
+          }
+        } else {
+          // Handle non-localized fields: { field: { $remove: data } }
+          const itemsToRemove = Array.isArray((fieldData as any).$remove)
+            ? (fieldData as any).$remove
+            : [(fieldData as any).$remove]
+
+          itemsToRemove.forEach((item) => {
+            const relationshipToDelete: RelationshipToDelete = {
+              itemToRemove: item,
+              locale: isLocalized ? withinArrayOrBlockLocale : undefined,
+              path: relationshipPath,
+            }
+
+            // Store relationTo for simple relationships
+            if (typeof field.relationTo === 'string') {
+              relationshipToDelete.relationTo = field.relationTo
+            }
+
+            relationshipsToDelete.push(relationshipToDelete)
+          })
+        }
+        return
+      }
 
       if (
         isLocalized &&
@@ -586,8 +759,12 @@ export const traverseFields = ({
       let formattedValue = value
 
       if (field.type === 'date') {
-        if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
-          // let the db handle this. If formattedValue is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
+        if (fieldName === 'updatedAt' && formattedValue === null) {
+          // If updatedAt is explicitly set to null, skip it entirely - don't add to row
+          // This prevents the timestamp from being updated for session-only operations
+          return // Skip this iteration
+        } else if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
+          // If updatedAt is undefined, set it to current time (normal behavior)
           formattedValue = new Date().toISOString()
         } else {
           if (typeof value === 'number' && !Number.isNaN(value)) {
@@ -633,4 +810,60 @@ export const traverseFields = ({
       }
     })
   })
+
+  // Handle dot-notation paths when no fields matched
+  if (!fieldsMatched) {
+    Object.keys(data).forEach((key) => {
+      if (key.includes('.')) {
+        // Split on first dot only
+        const firstDotIndex = key.indexOf('.')
+        const fieldName = key.substring(0, firstDotIndex)
+        const remainingPath = key.substring(firstDotIndex + 1)
+
+        // Create nested structure for this field
+        if (!data[fieldName]) {
+          data[fieldName] = {}
+        }
+
+        const nestedData = data[fieldName] as Record<string, unknown>
+
+        // Move the value to the nested structure
+        nestedData[remainingPath] = data[key]
+        delete data[key]
+
+        // Recursively process the newly created nested structure
+        // The field traversal will naturally handle it if the field exists in the schema
+        traverseFields({
+          adapter,
+          arrays,
+          arraysToPush,
+          baseTableName,
+          blocks,
+          blocksToDelete,
+          columnPrefix,
+          data,
+          enableAtomicWrites,
+          existingLocales,
+          fieldPrefix,
+          fields,
+          forcedLocale,
+          insideArrayOrBlock,
+          locales,
+          numbers,
+          numbersToDelete,
+          parentIsLocalized,
+          parentTableName,
+          path,
+          relationships,
+          relationshipsToAppend,
+          relationshipsToDelete,
+          row,
+          selects,
+          texts,
+          textsToDelete,
+          withinArrayOrBlockLocale,
+        })
+      }
+    })
+  }
 }

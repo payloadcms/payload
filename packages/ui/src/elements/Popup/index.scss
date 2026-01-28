@@ -2,13 +2,6 @@
 
 @layer payload-default {
   .popup {
-    --popup-button-highlight: var(--theme-elevation-200);
-    --popup-bg: var(--theme-input-bg);
-    --popup-text: var(--theme-text);
-    --popup-caret-size: 10px;
-    --popup-x-padding: calc(var(--base) * 0.33);
-    --popup-padding: calc(var(--base) * 0.5);
-    --button-size-offset: -8px;
     position: relative;
 
     &__trigger-wrap {
@@ -18,246 +11,73 @@
       cursor: pointer;
     }
 
-    &__content {
-      position: absolute;
-      background: var(--popup-bg);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      z-index: var(--z-popup);
-      max-width: calc(100vw - #{$baseline});
-      color: var(--popup-text);
-      border-radius: 4px;
-      padding-left: var(--popup-padding);
-      padding-right: var(--popup-padding);
-      min-width: var(--popup-width, auto);
+    &__on-hover-watch {
+      display: contents;
     }
+  }
 
-    &__hide-scrollbar {
-      overflow: hidden;
+  .popup__hidden-content {
+    display: none;
+  }
+
+  .popup__content {
+    --popup-caret-size: 8px;
+    --popup-button-highlight: var(--theme-elevation-150);
+
+    position: absolute;
+    z-index: var(--z-popup);
+    background: var(--theme-input-bg);
+    color: var(--theme-text);
+    border-radius: 4px;
+    padding: calc(var(--base) * 0.5);
+    min-width: 150px;
+    max-width: calc(100vw - var(--base));
+    @include shadow-lg;
+
+    &.popup--size-xsmall {
+      min-width: 80px;
     }
-
-    &__scroll-container {
-      overflow-y: auto;
-      white-space: nowrap;
-      width: calc(100% + var(--scrollbar-width));
-      padding-top: var(--popup-padding);
-      padding-bottom: var(--popup-padding);
+    &.popup--size-small {
+      min-width: 100px;
     }
-
-    &__scroll-content {
-      width: calc(100% - var(--scrollbar-width));
+    &.popup--size-large {
+      min-width: 200px;
     }
+    &.popup--size-fit-content {
+      min-width: fit-content;
+    }
+  }
 
-    &--show-scrollbar {
-      .popup__scroll-container,
-      .popup__scroll-content {
-        width: 100%;
+  .popup__scroll-container {
+    overflow-y: auto;
+    max-height: calc(var(--base) * 10);
+
+    &:not(.popup__scroll-container--show-scrollbar) {
+      scrollbar-width: none; // Firefox
+      -ms-overflow-style: none; // IE/Edge
+
+      &::-webkit-scrollbar {
+        display: none; // Chrome/Safari/Opera
       }
     }
+  }
 
-    &:focus,
-    &:active {
-      outline: none;
+  .popup__caret {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: var(--popup-caret-size) solid transparent;
+    left: var(--caret-left, 16px);
+    transform: translateX(-50%);
+
+    .popup--v-bottom & {
+      top: calc(var(--popup-caret-size) * -2);
+      border-bottom-color: var(--theme-input-bg);
     }
 
-    ////////////////////////////////
-    // SIZE
-    ////////////////////////////////
-
-    &--size-xsmall {
-      --popup-width: 80px;
-      .popup__content {
-        @include shadow-sm;
-      }
-    }
-
-    &--size-small {
-      --popup-width: 100px;
-      .popup__content {
-        @include shadow-m;
-      }
-    }
-
-    &--size-medium {
-      --popup-width: 150px;
-      .popup__content {
-        @include shadow-lg;
-      }
-    }
-
-    &--size-large {
-      --popup-width: 200px;
-      .popup__content {
-        @include shadow-lg;
-      }
-    }
-
-    ////////////////////////////////
-    /// BUTTON SIZE
-    ////////////////////////////////
-
-    &--button-size-xsmall {
-      --button-size-offset: -12px;
-    }
-
-    &--button-size-small {
-      --button-size-offset: -8px;
-    }
-
-    &--button-size-medium {
-      --button-size-offset: -4px;
-    }
-
-    &--button-size-large {
-      --button-size-offset: 0px;
-    }
-
-    ////////////////////////////////
-    // HORIZONTAL ALIGNMENT
-    ////////////////////////////////
-    [dir='rtl'] &--h-align-left {
-      .popup__caret {
-        right: var(--popup-padding);
-        left: unset;
-      }
-    }
-    &--h-align-left {
-      .popup__caret {
-        left: var(--popup-padding);
-      }
-    }
-    &--h-align-center {
-      .popup__content {
-        left: 50%;
-        transform: translateX(-50%);
-      }
-
-      .popup__caret {
-        left: 50%;
-        transform: translateX(-50%);
-      }
-    }
-
-    [dir='rtl'] &--h-align-right {
-      .popup__content {
-        right: unset;
-        left: 0;
-      }
-
-      .popup__caret {
-        right: unset;
-        left: var(--popup-padding);
-      }
-    }
-
-    &--h-align-right {
-      .popup__content {
-        right: var(--button-size-offset);
-      }
-
-      .popup__caret {
-        right: var(--popup-padding);
-      }
-    }
-
-    ////////////////////////////////
-    // VERTICAL ALIGNMENT
-    ////////////////////////////////
-
-    &__caret {
-      position: absolute;
-      border: var(--popup-caret-size) solid transparent;
-    }
-
-    &--v-align-top {
-      .popup__content {
-        @include shadow-lg;
-        bottom: calc(100% + var(--popup-caret-size));
-      }
-
-      .popup__caret {
-        top: calc(100% - 1px);
-        border-top-color: var(--popup-bg);
-      }
-    }
-
-    &--v-align-bottom {
-      .popup__content {
-        @include shadow-lg-top;
-        top: calc(100% + var(--popup-caret-size));
-      }
-
-      .popup__caret {
-        bottom: calc(100% - 1px);
-        border-bottom-color: var(--popup-bg);
-      }
-    }
-
-    ////////////////////////////////
-    // ACTIVE
-    ////////////////////////////////
-
-    &--active {
-      .popup__content {
-        opacity: 1;
-        visibility: visible;
-        pointer-events: all;
-      }
-    }
-
-    @include mid-break {
-      --popup-padding: calc(var(--base) * 0.25);
-
-      &--h-align-center {
-        .popup__content {
-          left: 50%;
-          transform: translateX(-0%);
-        }
-
-        .popup__caret {
-          left: 50%;
-          transform: translateX(-0%);
-        }
-      }
-
-      &--h-align-right {
-        .popup__content {
-          right: 0;
-        }
-
-        .popup__caret {
-          right: var(--popup-padding);
-        }
-      }
-
-      &--force-h-align-left {
-        .popup__content {
-          left: 0;
-          right: unset;
-          transform: unset;
-        }
-
-        .popup__caret {
-          left: var(--popup-padding);
-          right: unset;
-          transform: unset;
-        }
-      }
-
-      &--force-h-align-right {
-        .popup__content {
-          right: 0;
-          left: unset;
-          transform: unset;
-        }
-
-        .popup__caret {
-          right: var(--popup-padding);
-          left: unset;
-          transform: unset;
-        }
-      }
+    .popup--v-top & {
+      bottom: calc(var(--popup-caret-size) * -2);
+      border-top-color: var(--theme-input-bg);
     }
   }
 }

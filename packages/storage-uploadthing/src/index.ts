@@ -23,6 +23,17 @@ export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthi
 
 export type UploadthingStorageOptions = {
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * Do uploads directly on the client, to bypass limits on Vercel.
    */
   clientUploads?:
@@ -135,6 +146,7 @@ export const uploadthingStorage: UploadthingPlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -145,6 +157,9 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
       name: '_key',
       type: 'text',
       admin: {
+        disableBulkEdit: true,
+        disableListColumn: true,
+        disableListFilter: true,
         hidden: true,
       },
     },

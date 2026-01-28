@@ -3,4 +3,4 @@ import { baseConfig } from './baseConfig.js'
 
 export default buildConfigWithDefaults(baseConfig)
 
-export { collectionSlugs } from './baseConfig.js'
+export { collections } from './baseConfig.js'

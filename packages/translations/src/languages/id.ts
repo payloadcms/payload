@@ -1,8 +1,6 @@
-import { title } from 'process'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-import type { Language } from '../types.js'
-
-export const idTranslations = {
+export const idTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Akun',
     accountOfCurrentUser: 'Akun pengguna saat ini',
@@ -29,11 +27,9 @@ export const idTranslations = {
     forgotPassword: 'Lupa Kata Sandi',
     forgotPasswordEmailInstructions:
       'Silakan masukkan email Anda di bawah ini. Anda akan menerima pesan email dengan instruksi tentang cara mengatur ulang kata sandi Anda.',
+    forgotPasswordQuestion: 'Lupa kata sandi?',
     forgotPasswordUsernameInstructions:
       'Silakan masukkan nama pengguna Anda di bawah ini. Instruksi tentang cara mengatur ulang kata sandi Anda akan dikirim ke alamat email yang terkait dengan nama pengguna Anda.',
-    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
-
-    forgotPasswordQuestion: 'Lupa kata sandi?',
     generate: 'Buat',
     generateNewAPIKey: 'Buat kunci API baru',
     generatingNewAPIKeyWillInvalidate:
@@ -71,6 +67,7 @@ export const idTranslations = {
     tokenRefreshSuccessful: 'Penyegaran token berhasil.',
     unableToVerify: 'Tidak Dapat Memverifikasi',
     username: 'Nama Pengguna',
+    usernameNotValid: 'Nama pengguna yang diberikan tidak valid',
     verified: 'Terverifikasi',
     verifiedSuccessfully: 'Berhasil Diverifikasi',
     verify: 'Verifikasi',
@@ -82,6 +79,11 @@ export const idTranslations = {
       'Anda menerima ini karena Anda (atau orang lain) telah meminta pengaturan ulang kata sandi untuk akun Anda. Silakan klik tautan berikut, atau tempel ini ke browser Anda untuk menyelesaikan proses:',
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
+  },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Hapus widget {{id}}',
+    searchWidgets: 'Cari widget...',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
@@ -120,6 +122,7 @@ export const idTranslations = {
     problemUploadingFile: 'Terjadi masalah saat mengunggah file.',
     restoringTitle:
       'Terjadi kesalahan saat memulihkan {{title}}. Harap periksa koneksi Anda dan coba lagi.',
+    revertingDocument: 'Ada masalah saat mengembalikan dokumen ini.',
     tokenInvalidOrExpired: 'Token tidak valid atau telah kedaluwarsa.',
     tokenNotProvided: 'Token tidak disediakan.',
     unableToCopy: 'Tidak dapat menyalin.',
@@ -177,6 +180,7 @@ export const idTranslations = {
     removeUpload: 'Hapus Unggahan',
     saveChanges: 'Simpan perubahan',
     searchForBlock: 'Cari blok',
+    searchForLanguage: 'Cari bahasa',
     selectExistingLabel: 'Pilih {{label}} yang ada',
     selectFieldsToEdit: 'Pilih isian untuk diedit',
     showAll: 'Tampilkan Semua',
@@ -341,6 +345,7 @@ export const idTranslations = {
     loading: 'Memuat',
     locale: 'Lokal',
     locales: 'Lokal',
+    lock: 'Kunci',
     menu: 'Menu',
     moreOptions: 'Opsi lainnya',
     move: 'Pindah',
@@ -419,7 +424,7 @@ export const idTranslations = {
     successfullyCreated: '{{label}} berhasil dibuat.',
     successfullyDuplicated: '{{label}} berhasil diduplikasi.',
     successfullyReindexed:
-      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}',
+      'Berhasil mengindeks ulang {{count}} dari {{total}} dokumen dari {{collections}}, dan melewatkan {{skips}} draf.',
     takeOver: 'Ambil alih',
     thisLanguage: 'Bahasa Indonesia',
     time: 'Waktu',
@@ -431,6 +436,7 @@ export const idTranslations = {
     trashedCountSuccessfully: '{{count}} {{label}} dipindahkan ke tempat sampah.',
     true: 'Benar',
     unauthorized: 'Tidak Sah',
+    unlock: 'Buka Kunci',
     unsavedChanges:
       'Anda memiliki perubahan yang belum disimpan. Simpan atau buang sebelum melanjutkan.',
     unsavedChangesDuplicate:
@@ -461,7 +467,9 @@ export const idTranslations = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke lokal',
     localeToPublish: 'Lokal untuk dipublikasikan',
+    selectedLocales: 'Lokasi yang Dipilih',
     selectLocaleToCopy: 'Pilih lokal untuk disalin',
+    selectLocaleToDuplicate: 'Pilih bahasa lokal untuk duplikat',
   },
   operators: {
     contains: 'mengandung',
@@ -517,12 +525,16 @@ export const idTranslations = {
     enterNumber: 'Harap masukkan nomor yang valid.',
     fieldHasNo: 'Isian ini tidak memiliki {{label}}',
     greaterThanMax: '{{value}} lebih besar dari {{label}} maksimum yang diizinkan yaitu {{max}}.',
+    invalidBlock: 'Blok "{{block}}" tidak diperbolehkan.',
+    invalidBlocks: 'Bidang ini berisi blok yang tidak lagi diizinkan: {{blocks}}.',
     invalidInput: 'Isian ini memiliki masukan yang tidak valid.',
     invalidSelection: 'Isian ini memiliki pilihan yang tidak valid.',
     invalidSelections: 'Isian ini memiliki pilihan tidak valid berikut:',
+    latitudeOutOfBounds: 'Lintang harus berada antara -90 dan 90.',
     lessThanMin: '{{value}} lebih kecil dari {{label}} minimum yang diizinkan yaitu {{min}}.',
     limitReached: 'Batas tercapai, hanya {{max}} item yang dapat ditambahkan.',
     longerThanMin: 'Nilai ini harus lebih panjang dari panjang minimum {{minLength}} karakter.',
+    longitudeOutOfBounds: 'Garis bujur harus berada di antara -180 dan 180.',
     notValidDate: '"{{value}}" bukan tanggal yang valid.',
     required: 'Isian ini wajib diisi.',
     requiresAtLeast: 'Isian ini membutuhkan setidaknya {{count}} {{label}}.',
@@ -544,6 +556,8 @@ export const idTranslations = {
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',
     aboutToUnpublish: 'Anda akan membatalkan publikasi dokumen ini. Apakah Anda yakin?',
+    aboutToUnpublishIn:
+      'Anda akan menonaktifkan publikasi dokumen ini dalam {{locale}}. Apakah Anda yakin?',
     aboutToUnpublishSelection:
       'Anda akan membatalkan publikasi semua {{label}} dalam pilihan. Apakah Anda yakin?',
     autosave: 'Simpan Otomatis',
@@ -565,11 +579,13 @@ export const idTranslations = {
     currentlyViewing: 'Sedang melihat',
     currentPublishedVersion: 'Versi Terbitan Saat Ini',
     draft: 'Draf',
+    draftHasPublishedVersion: 'Draf (memiliki versi yang dipublikasikan)',
     draftSavedSuccessfully: 'Draf berhasil disimpan.',
     lastSavedAgo: 'Terakhir disimpan {{distance}} yang lalu',
     modifiedOnly: 'Hanya yang diubah',
     moreVersions: 'Versi lainnya...',
     noFurtherVersionsFound: 'Tidak ada versi lebih lanjut yang ditemukan',
+    noLabelGroup: 'Grup Tanpa Nama',
     noRowsFound: 'Tidak ada {{label}} yang ditemukan',
     noRowsSelected: 'Tidak ada {{label}} yang dipilih',
     preview: 'Pratinjau',
@@ -589,6 +605,8 @@ export const idTranslations = {
     restoring: 'Memulihkan...',
     reverting: 'Mengembalikan...',
     revertToPublished: 'Kembali ke yang dipublikasikan',
+    revertUnsuccessful:
+      'Pengembalian gagal. Tidak ada versi yang sebelumnya dipublikasikan ditemukan.',
     saveDraft: 'Simpan Draf',
     scheduledSuccessfully: 'Berhasil dijadwalkan.',
     schedulePublish: 'Jadwalkan Publikasi',
@@ -599,6 +617,9 @@ export const idTranslations = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublished: 'Belum dipublikasikan',
+    unpublishedSuccessfully: 'Berhasil tidak diterbitkan.',
+    unpublishIn: 'Batalkan Publikasi dalam {{locale}}',
     unpublishing: 'Membatalkan publikasi...',
     version: 'Versi',
     versionAgo: '{{distance}} yang lalu',

@@ -104,23 +104,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     return true
   })()
 
-  const clientBlocks = useMemo(() => {
-    if (!blockReferences) {
-      return blocks
-    }
-
-    const resolvedBlocks: ClientBlock[] = []
-    for (const blockReference of blockReferences) {
-      const block =
-        typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
-      if (block) {
-        resolvedBlocks.push(block)
-      }
-    }
-
-    return resolvedBlocks
-  }, [blockReferences, blocks, config.blocksMap])
-
   const memoizedValidate = useCallback(
     (value, options) => {
       // alternative locales can be null
@@ -135,6 +118,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
+    blocksFilterOptions,
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
     errorPaths,
@@ -148,6 +132,38 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
+
+  const { clientBlocks, clientBlocksAfterFilter } = useMemo(() => {
+    let resolvedBlocks: ClientBlock[] = []
+
+    if (!blockReferences) {
+      resolvedBlocks = blocks
+    } else {
+      for (const blockReference of blockReferences) {
+        const block =
+          typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
+        if (block) {
+          resolvedBlocks.push(block)
+        }
+      }
+    }
+
+    if (Array.isArray(blocksFilterOptions)) {
+      const clientBlocksAfterFilter = resolvedBlocks.filter((block) => {
+        const blockSlug = typeof block === 'string' ? block : block.slug
+        return blocksFilterOptions.includes(blockSlug)
+      })
+
+      return {
+        clientBlocks: resolvedBlocks,
+        clientBlocksAfterFilter,
+      }
+    }
+    return {
+      clientBlocks: resolvedBlocks,
+      clientBlocksAfterFilter: resolvedBlocks,
+    }
+  }, [blockReferences, blocks, blocksFilterOptions, config.blocksMap])
 
   const addRow = useCallback(
     (rowIndex: number, blockType: string) => {
@@ -401,11 +417,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
+
             const blockConfig: ClientBlock =
-              config.blocksMap[blockType] ??
-              ((blockReferences ?? blocks).find(
-                (block) => typeof block !== 'string' && block.slug === blockType,
-              ) as ClientBlock)
+              config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`
@@ -425,7 +439,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      blocks={blockReferences ?? blocks}
+                      // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
+                      blocks={clientBlocks}
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
@@ -497,7 +512,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blockReferences ?? blocks}
+            // Only allow choosing filtered blocks
+            blocks={clientBlocksAfterFilter}
             drawerSlug={drawerSlug}
             labels={labels}
           />

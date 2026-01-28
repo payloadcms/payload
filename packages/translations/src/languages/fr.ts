@@ -81,6 +81,11 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  dashboard: {
+    addWidget: 'Ajouter un Widget',
+    deleteWidget: 'Supprimer le widget {{id}}',
+    searchWidgets: 'Rechercher des widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
     autosaving: 'Un problème est survenu lors de l’enregistrement automatique de ce document.',
@@ -119,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     restoringTitle:
       'Il y a eu une erreur lors de la restauration de {{title}}. Veuillez vérifier votre connexion et réessayer.',
+    revertingDocument: 'Il y a eu un problème lors de la restauration de ce document.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',
@@ -179,6 +185,7 @@ export const frTranslations: DefaultTranslationsObject = {
     removeUpload: 'Supprimer le téléversement',
     saveChanges: 'Sauvegarder les modifications',
     searchForBlock: 'Rechercher un bloc',
+    searchForLanguage: 'Recherchez une langue',
     selectExistingLabel: 'Sélectionnez {{label}} existant',
     selectFieldsToEdit: 'Sélectionnez les champs à modifier',
     showAll: 'Afficher tout',
@@ -347,6 +354,7 @@ export const frTranslations: DefaultTranslationsObject = {
     loading: 'Chargement en cours',
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
+    lock: 'Verrou',
     menu: 'Menu',
     moreOptions: "Plus d'options",
     move: 'Déplacez-vous',
@@ -425,7 +433,7 @@ export const frTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} créé(e) avec succès.',
     successfullyDuplicated: '{{label}} dupliqué(e) avec succès.',
     successfullyReindexed:
-      '{{count}} des {{total}} documents des collections {{collections}} ont été réindexés avec succès.',
+      '{{count}} des {{total}} documents de {{collections}} ont été réindexés avec succès, et {{skips}} brouillons ont été ignorés.',
     takeOver: 'Prendre en charge',
     thisLanguage: 'Français',
     time: 'Temps',
@@ -437,6 +445,7 @@ export const frTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} déplacé à la corbeille.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
+    unlock: 'Déverrouiller',
     unsavedChanges:
       'Vous avez des modifications non enregistrées. Enregistrez ou supprimez avant de continuer.',
     unsavedChangesDuplicate:
@@ -467,7 +476,9 @@ export const frTranslations: DefaultTranslationsObject = {
     copyTo: 'Copier à',
     copyToLocale: 'Copier vers le lieu',
     localeToPublish: 'Locale à publier',
+    selectedLocales: 'Langues sélectionnées',
     selectLocaleToCopy: 'Sélectionnez la locale à copier',
+    selectLocaleToDuplicate: 'Sélectionnez les paramètres régionaux à dupliquer',
   },
   operators: {
     contains: 'contient',
@@ -523,13 +534,17 @@ export const frTranslations: DefaultTranslationsObject = {
     enterNumber: 'S’il vous plait, veuillez entrer un nombre valide.',
     fieldHasNo: 'Ce champ n’a pas de {{label}}',
     greaterThanMax: '{{value}} est supérieur au max autorisé {{label}} de {{max}}.',
+    invalidBlock: 'Le bloc "{{block}}" n\'est pas autorisé.',
+    invalidBlocks: 'Ce champ contient des blocs qui ne sont plus autorisés : {{blocks}}.',
     invalidInput: 'Ce champ a une entrée invalide.',
     invalidSelection: 'Ce champ a une sélection invalide.',
     invalidSelections: 'Ce champ contient les sélections invalides suivantes :',
+    latitudeOutOfBounds: 'La latitude doit être comprise entre -90 et 90.',
     lessThanMin: '{{value}} est inférieur au min autorisé {{label}} de {{min}}.',
     limitReached: 'Limite atteinte, seulement {{max}} éléments peuvent être ajoutés.',
     longerThanMin:
       'Cette valeur doit être supérieure à la longueur minimale de {{minLength}} caractères.',
+    longitudeOutOfBounds: 'La longitude doit être comprise entre -180 et 180.',
     notValidDate: '"{{value}}" n’est pas une date valide.',
     required: 'Ce champ est requis.',
     requiresAtLeast: 'Ce champ doit avoir au moins {{count}} {{label}}.',
@@ -555,6 +570,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de rétablir les modifications apportées à ce document à la version publiée. Êtes-vous sûr ?',
     aboutToUnpublish:
       'Vous êtes sur le point d’annuler la publication de ce document. Êtes-vous sûr ?',
+    aboutToUnpublishIn:
+      'Vous êtes sur le point de dépublier ce document en {{locale}}. Êtes-vous sûr ?',
     aboutToUnpublishSelection:
       'Vous êtes sur le point de dépublier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     autosave: 'Enregistrement automatique',
@@ -576,11 +593,13 @@ export const frTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actuellement en train de regarder',
     currentPublishedVersion: 'Version Publiée Actuelle',
     draft: 'Brouillon',
+    draftHasPublishedVersion: 'Brouillon (a une version publiée)',
     draftSavedSuccessfully: 'Brouillon enregistré avec succès.',
     lastSavedAgo: 'Dernière sauvegarde il y a {{distance}}',
     modifiedOnly: 'Modifié uniquement',
     moreVersions: 'Plus de versions...',
     noFurtherVersionsFound: 'Aucune autre version trouvée',
+    noLabelGroup: 'Groupe sans nom',
     noRowsFound: 'Aucun(e) {{label}} trouvé(e)',
     noRowsSelected: 'Aucune {{étiquette}} sélectionnée',
     preview: 'Aperçu',
@@ -600,6 +619,8 @@ export const frTranslations: DefaultTranslationsObject = {
     restoring: 'Restauration en cours...',
     reverting: 'Republication en cours...',
     revertToPublished: 'Republier',
+    revertUnsuccessful:
+      "Annulation infructueuse. Aucune version précédemment publiée n'a été trouvée.",
     saveDraft: 'Enregistrer le brouillon',
     scheduledSuccessfully: 'Programmé avec succès.',
     schedulePublish: 'Programmer la publication',
@@ -610,6 +631,9 @@ export const frTranslations: DefaultTranslationsObject = {
     specificVersion: 'Version spécifique',
     status: 'Statut',
     unpublish: 'Annuler la publication',
+    unpublished: 'Non publié',
+    unpublishedSuccessfully: 'Non publié avec succès.',
+    unpublishIn: 'Dépublier en {{locale}}',
     unpublishing: 'Annulation en cours...',
     version: 'Version',
     versionAgo: 'il y a {{distance}}',

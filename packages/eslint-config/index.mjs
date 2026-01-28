@@ -5,12 +5,12 @@ import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
-import jestExtends from './configs/jest/index.mjs'
 import globals from 'globals'
 import importX from 'eslint-plugin-import-x'
 import typescriptParser from '@typescript-eslint/parser'
 import { deepMerge } from './deepMerge.js'
 import reactCompiler from 'eslint-plugin-react-compiler'
+import vitest from '@vitest/eslint-plugin'
 
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
@@ -151,6 +151,7 @@ export const rootEslintConfig = [
             '../db-postgres/relationships-v2-v3.mjs',
             '../db-postgres/scripts/renamePredefinedMigrations.ts',
             '../db-sqlite/bundle.js',
+            '../db-d1-sqlite/bundle.js',
             '../db-vercel-postgres/relationships-v2-v3.mjs',
             '../db-vercel-postgres/scripts/renamePredefinedMigrations.ts',
             '../plugin-cloud-storage/azure.d.ts',
@@ -179,6 +180,9 @@ export const rootEslintConfig = [
         ...globals.node,
       },
       parser: typescriptParser,
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
     },
     plugins: {
       'import-x': importX,
@@ -228,18 +232,15 @@ export const rootEslintConfig = [
     files: ['**/*.tsx'],
   },
   {
-    name: 'Unit Tests',
-    ...deepMerge(jestExtends, {
-      plugins: {
-        payload: payloadPlugin,
-      },
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        '@typescript-eslint/unbound-method': 'off',
-      },
-    }),
+    name: 'Unit and Integration Tests',
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+    },
     files: ['**/*.spec.ts'],
+    ignores: ['**/*.e2e.spec.ts'],
   },
   {
     name: 'Payload Config',
@@ -254,6 +255,7 @@ export const rootEslintConfig = [
   {
     name: 'React Compiler',
     ...reactCompiler.configs.recommended,
+    files: ['**/*.tsx'],
   },
 ]
 

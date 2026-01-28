@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 import { ensureCompilationIsDone } from '../../../helpers.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { LexicalHelpers } from './utils.js'
+import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -16,7 +16,10 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
-test.describe.configure({ mode: 'parallel' })
+// PLEASE do not reset the database or perform any operations that modify it in this file.
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+// test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
@@ -31,11 +34,6 @@ describe('Lexical Link Feature', () => {
     await page.close()
   })
   beforeEach(async ({ page }) => {
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
-    })
     const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)

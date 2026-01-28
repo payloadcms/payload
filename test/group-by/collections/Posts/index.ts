@@ -11,6 +11,7 @@ export const PostsCollection: CollectionConfig = {
     groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
+  enableQueryPresets: true,
   trash: true,
   fields: [
     {
@@ -21,6 +22,24 @@ export const PostsCollection: CollectionConfig = {
       name: 'category',
       type: 'relationship',
       relationTo: categoriesSlug,
+    },
+    {
+      name: 'virtualTitleFromCategory',
+      type: 'text',
+      virtual: 'category.title',
+      admin: {
+        disableGroupBy: true,
+      },
+    },
+    {
+      name: 'page',
+      type: 'relationship',
+      relationTo: 'pages',
+    },
+    {
+      name: 'virtualTitleFromPage',
+      type: 'text',
+      virtual: 'page.title',
     },
     {
       name: 'checkbox',

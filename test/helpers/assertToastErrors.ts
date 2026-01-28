@@ -2,18 +2,18 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+import { closeAllToasts } from '../helpers.js'
+
 export async function assertToastErrors({
   page,
   errors,
-  dismissAfterAssertion,
 }: {
-  dismissAfterAssertion?: boolean
   errors: string[]
   page: Page
 }): Promise<void> {
   const isSingleError = errors.length === 1
   const message = isSingleError
-    ? 'The following field is invalid:'
+    ? 'The following field is invalid: '
     : `The following fields are invalid (${errors.length}):`
 
   // Check the intro message text
@@ -32,12 +32,5 @@ export async function assertToastErrors({
     }
   }
 
-  if (dismissAfterAssertion) {
-    const closeButtons = page.locator('.payload-toast-container button.payload-toast-close-button')
-    const count = await closeButtons.count()
-
-    for (let i = 0; i < count; i++) {
-      await closeButtons.nth(i).click()
-    }
-  }
+  await closeAllToasts(page)
 }

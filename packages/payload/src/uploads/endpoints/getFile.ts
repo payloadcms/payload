@@ -11,6 +11,7 @@ import { APIError } from '../../errors/APIError.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
 import { streamFile } from '../../uploads/fetchAPI-stream-file/index.js'
 import { getFileTypeFallback } from '../../uploads/getFileTypeFallback.js'
+import { parseRangeHeader } from '../../uploads/parseRangeHeader.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 
@@ -49,6 +50,9 @@ export const getFileHandler: PayloadHandler = async (req) => {
           filename,
         },
       })
+      if (customResponse && customResponse instanceof Response) {
+        break
+      }
     }
 
     if (customResponse instanceof Response) {
@@ -91,7 +95,6 @@ export const getFileHandler: PayloadHandler = async (req) => {
     throw err
   }
 
-  const data = streamFile(filePath)
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
   let mimeType = fileTypeResult.mime
 
@@ -99,9 +102,50 @@ export const getFileHandler: PayloadHandler = async (req) => {
     mimeType = 'image/svg+xml'
   }
 
+  // Parse Range header for byte range requests
+  const rangeHeader = req.headers.get('range')
+  const rangeResult = parseRangeHeader({
+    fileSize: stats.size,
+    rangeHeader,
+  })
+
+  if (rangeResult.type === 'invalid') {
+    let headers = new Headers()
+    headers.set('Content-Range', `bytes */${stats.size}`)
+    headers = collection.config.upload?.modifyResponseHeaders
+      ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
+      : headers
+
+    return new Response(null, {
+      headers: headersWithCors({
+        headers,
+        req,
+      }),
+      status: httpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+    })
+  }
+
   let headers = new Headers()
   headers.set('Content-Type', mimeType)
-  headers.set('Content-Length', stats.size + '')
+  headers.set('Accept-Ranges', 'bytes')
+
+  let data: ReadableStream
+  let status: number
+  const isPartial = rangeResult.type === 'partial'
+  const range = rangeResult.range
+
+  if (isPartial && range) {
+    const contentLength = range.end - range.start + 1
+    headers.set('Content-Length', String(contentLength))
+    headers.set('Content-Range', `bytes ${range.start}-${range.end}/${stats.size}`)
+    data = streamFile({ filePath, options: { end: range.end, start: range.start } })
+    status = httpStatus.PARTIAL_CONTENT
+  } else {
+    headers.set('Content-Length', String(stats.size))
+    data = streamFile({ filePath })
+    status = httpStatus.OK
+  }
+
   headers = collection.config.upload?.modifyResponseHeaders
     ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
     : headers
@@ -111,6 +155,6 @@ export const getFileHandler: PayloadHandler = async (req) => {
       headers,
       req,
     }),
-    status: httpStatus.OK,
+    status,
   })
 }

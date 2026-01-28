@@ -14,7 +14,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   slug: queryPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
-    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns'],
+    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns', 'groupBy'],
     hidden: true,
     useAsTitle: 'title',
   },
@@ -95,6 +95,17 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       },
     },
     {
+      name: 'groupBy',
+      type: 'text',
+      admin: {
+        components: {
+          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
+          Field: '@payloadcms/ui#QueryPresetsGroupByField',
+        },
+      },
+      label: 'Group By',
+    },
+    {
       name: 'relatedCollection',
       type: 'select',
       admin: {
@@ -118,7 +129,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'checkbox',
       admin: {
         description:
-          "This is a tempoary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.",
+          "This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.",
         disabled: true,
         hidden: true,
       },

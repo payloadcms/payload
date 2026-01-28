@@ -5,7 +5,20 @@ import path from 'path'
 import type { DbType, StorageAdapterType } from '../types.js'
 
 import { warning } from '../utils/log.js'
-import { dbReplacements, storageReplacements } from './replacements.js'
+import { updatePackageJson } from './ast/package-json.js'
+import { configurePayloadConfig as configurePayloadConfigAST } from './ast/payload-config.js'
+
+/** Get default env var name for db type */
+function getEnvVarName(dbType: DbType, customEnvName?: string): string {
+  if (customEnvName) {
+    return customEnvName
+  }
+  // Default env var names per adapter type
+  if (dbType === 'vercel-postgres') {
+    return 'POSTGRES_URL'
+  }
+  return 'DATABASE_URL'
+}
 
 /** Update payload config with necessary imports and adapters */
 export async function configurePayloadConfig(args: {
@@ -29,45 +42,19 @@ export async function configurePayloadConfig(args: {
 
   if (packageJsonPath && fse.existsSync(packageJsonPath)) {
     try {
-      const packageObj = await fse.readJson(packageJsonPath)
-
-      const dbPackage = dbReplacements[args.dbType]
-
-      // Delete all other db adapters
-      Object.values(dbReplacements).forEach((p) => {
-        if (p.packageName !== dbPackage.packageName) {
-          delete packageObj.dependencies[p.packageName]
-        }
+      updatePackageJson(packageJsonPath, {
+        databaseAdapter: args.dbType,
+        packageName: args.packageJsonName,
+        removeSharp: args.sharp === false,
+        storageAdapter: args.storageAdapter,
       })
-
-      // Set version of db adapter to match payload version
-      packageObj.dependencies[dbPackage.packageName] = packageObj.dependencies['payload']
-
-      if (args.storageAdapter) {
-        const storagePackage = storageReplacements[args.storageAdapter]
-
-        if (storagePackage?.packageName) {
-          // Set version of storage adapter to match payload version
-          packageObj.dependencies[storagePackage.packageName] = packageObj.dependencies['payload']
-        }
-      }
-
-      // Sharp provided by default, only remove if explicitly set to false
-      if (args.sharp === false) {
-        delete packageObj.dependencies['sharp']
-      }
-
-      if (args.packageJsonName) {
-        packageObj.name = args.packageJsonName
-      }
-
-      await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
     } catch (err: unknown) {
       warning(`Unable to configure Payload in package.json`)
       warning(err instanceof Error ? err.message : '')
     }
   }
 
+  // Update payload.config.ts
   try {
     let payloadConfigPath: string | undefined
     if (!('payloadConfigPath' in args.projectDirOrConfigPath)) {
@@ -86,88 +73,25 @@ export async function configurePayloadConfig(args: {
       return
     }
 
-    const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
-    let configLines = configContent.split('\n')
+    const envVarName = getEnvVarName(args.dbType, args.envNames?.dbUri)
 
-    // DB Replacement
-    const dbReplacement = dbReplacements[args.dbType]
-
-    configLines = replaceInConfigLines({
-      endMatch: `// database-adapter-config-end`,
-      lines: configLines,
-      replacement: dbReplacement.configReplacement(args.envNames?.dbUri),
-      startMatch: `// database-adapter-config-start`,
+    const result = await configurePayloadConfigAST(payloadConfigPath, {
+      db: {
+        type: args.dbType,
+        envVarName,
+      },
+      formatWithPrettier: true,
+      removeSharp: args.sharp === false,
+      storage: args.storageAdapter,
+      validateStructure: false,
     })
 
-    configLines = replaceInConfigLines({
-      lines: configLines,
-      replacement: [dbReplacement.importReplacement],
-      startMatch: '// database-adapter-import',
-    })
-
-    // Storage Adapter Replacement
-    if (args.storageAdapter) {
-      const replacement = storageReplacements[args.storageAdapter]
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: replacement.configReplacement,
-        startMatch: '// storage-adapter-placeholder',
-      })
-
-      if (replacement?.importReplacement !== undefined) {
-        configLines = replaceInConfigLines({
-          lines: configLines,
-          replacement: [replacement.importReplacement],
-          startMatch: '// storage-adapter-import-placeholder',
-        })
-      }
+    if (!result.success && result.error) {
+      warning(`Unable to update payload.config.ts: ${result.error.userMessage}`)
     }
-
-    // Sharp Replacement (provided by default, only remove if explicitly set to false)
-    if (args.sharp === false) {
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: [],
-        startMatch: 'sharp,',
-      })
-      configLines = replaceInConfigLines({
-        lines: configLines,
-        replacement: [],
-        startMatch: "import sharp from 'sharp'",
-      })
-    }
-
-    fse.writeFileSync(payloadConfigPath, configLines.join('\n'))
   } catch (err: unknown) {
     warning(
       `Unable to update payload.config.ts with plugins: ${err instanceof Error ? err.message : ''}`,
     )
   }
-}
-
-function replaceInConfigLines({
-  endMatch,
-  lines,
-  replacement,
-  startMatch,
-}: {
-  /** Optional endMatch to replace multiple lines */
-  endMatch?: string
-  lines: string[]
-  replacement: string[]
-  startMatch: string
-}) {
-  if (!replacement) {
-    return lines
-  }
-
-  const startIndex = lines.findIndex((l) => l.includes(startMatch))
-  const endIndex = endMatch ? lines.findIndex((l) => l.includes(endMatch)) : startIndex
-
-  if (startIndex === -1 || endIndex === -1) {
-    return lines
-  }
-
-  lines.splice(startIndex, endIndex - startIndex + 1, ...replacement)
-  return lines
 }

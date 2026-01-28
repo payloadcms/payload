@@ -1,6 +1,9 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
+  AccessArgs,
+  AccessResult,
   ArrayField,
+  CollectionConfig,
   CollectionSlug,
   Field,
   RelationshipField,
@@ -30,6 +33,15 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   collections: {
     [key in CollectionSlug]?: {
+      /**
+       * Override the access result from the collection access control functions
+       *
+       * The function receives:
+       *  - accessResult: the original result from the access control function
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - ...restOfAccessArgs: the original arguments passed to the access control function
+       */
+      accessResultOverride?: CollectionAccessResultOverride
       /**
        * Opt out of adding the tenant field and place
        * it manually using the `tenantField` export from the plugin
@@ -92,21 +104,27 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     translations: {
       [key in AcceptedLanguages]?: {
         /**
-         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
-         */
-        'confirm-modal-tenant-switch--body'?: string
-        /**
-         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         * Shown inside 3 dot menu on edit document view
          *
-         * @default 'Confirm {{tenantLabel}} change'
+         * @default 'Assign Tenant'
          */
-        'confirm-modal-tenant-switch--heading'?: string
+        'assign-tenant-button-label'?: string
         /**
+         * Shown as the title of the assign tenant modal
+         *
+         * @default 'Assign "{{title}}"'
+         */
+        'assign-tenant-modal-title'?: string
+        /**
+         * Shown as the label for the assigned tenant field in the assign tenant modal
+         *
          * @default 'Assigned Tenant'
          */
         'field-assignedTenant-label'?: string
         /**
-         * @default 'Tenant'
+         * Shown as the label for the global tenant selector in the admin UI
+         *
+         * @default 'Filter by Tenant'
          */
         'nav-tenantSelector-label'?: string
       }
@@ -191,6 +209,15 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
   /**
+   * Override the access result on the users collection access control functions
+   *
+   * The function receives:
+   *  - accessResult: the original result from the access control function
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - ...restOfAccessArgs: the original arguments passed to the access control function
+   */
+  usersAccessResultOverride?: CollectionAccessResultOverride
+  /**
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
@@ -198,6 +225,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out including the baseListFilter to filter tenants by selected tenant
    */
   useTenantsListFilter?: boolean
+
   /**
    * Opt out including the baseListFilter to filter users by selected tenant
    */
@@ -208,7 +236,6 @@ export type RootTenantFieldConfigOverrides = Partial<
   Omit<
     SingleRelationshipField,
     | '_sanitized'
-    | 'hasMany'
     | 'hidden'
     | 'index'
     | 'localized'
@@ -240,3 +267,24 @@ export type UserWithTenantsField = {
       }[]
     | null
 } & TypedUser
+
+type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
+  Required<CollectionConfig>['access'],
+  'admin'
+>
+  ? keyof Omit<Required<CollectionConfig>['access'], 'admin'> extends T[number]
+    ? T
+    : never
+  : never
+
+export type AllAccessKeys = AllAccessKeysT<
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
+>
+
+export type CollectionAccessResultOverride = ({
+  accessKey,
+  accessResult,
+}: {
+  accessKey: AllAccessKeys[number]
+  accessResult: AccessResult
+} & AccessArgs) => AccessResult | Promise<AccessResult>

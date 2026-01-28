@@ -40,12 +40,14 @@ export type AdminViewClientProps = {
 
 export type AdminViewServerPropsOnly = {
   readonly clientConfig: ClientConfig
+  readonly collectionConfig?: SanitizedCollectionConfig
   readonly disableActions?: boolean
   /**
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
   readonly folderID?: number | string
+  readonly globalConfig?: SanitizedGlobalConfig
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
@@ -54,6 +56,7 @@ export type AdminViewServerPropsOnly = {
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly redirectAfterRestore?: boolean
+  readonly viewActions?: CustomComponent[]
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
@@ -88,6 +91,7 @@ export type InitPageResult = {
 export type ViewTypes =
   | 'account'
   | 'collection-folders'
+  | 'createFirstUser'
   | 'dashboard'
   | 'document'
   | 'folders'

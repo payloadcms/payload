@@ -275,18 +275,40 @@ RelationshipFeature({
 ```ts
 type UploadFeatureProps = {
   collections?: {
-    [collection: CollectionSlug]: {
+    [collection: UploadCollectionSlug]: {
       fields: Field[]
     }
   }
   /**
-   * Sets a maximum population depth for this upload
-   * (not the fields for this upload), regardless of
-   * the remaining depth when the respective field is
-   * reached.
+   * Sets a maximum population depth for this upload (not the fields for this upload), regardless of the remaining depth when the respective field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
   maxDepth?: number
-}
+} & ExclusiveUploadFeatureProps
+
+type ExclusiveUploadFeatureProps =
+  | {
+      /**
+       * The collections that should be disabled. Overrides the `enableRichTextRelationship` property in the collection config.
+       * When this property is set, `enabledCollections` will not be available.
+       **/
+      disabledCollections?: UploadCollectionSlug[]
+
+      // Ensures that enabledCollections is not available when disabledCollections is set
+      enabledCollections?: never
+    }
+  | {
+      // Ensures that disabledCollections is not available when enabledCollections is set
+      disabledCollections?: never
+
+      /**
+       * The collections that should be enabled. Overrides the `enableRichTextRelationship` property in the collection config
+       * When this property is set, `disabledCollections` will not be available.
+       **/
+      enabledCollections?: UploadCollectionSlug[]
+    }
 ```
 
 - Usage example:
@@ -310,6 +332,7 @@ UploadFeature({
     },
   },
   maxDepth: 1, // Population depth for uploads
+  disabledCollections: ['specialUploads'], // Collections to exclude
 })
 ```
 
@@ -376,47 +399,10 @@ FixedToolbarFeature({
 
 ### BlocksFeature
 
-- Description: Allows use of Payload's Blocks Field directly in the editor with toolbar buttons and slash menu entries for each block type.
+- Description: Allows use of Payload's [Blocks Field](/docs/fields/blocks) directly in the editor with toolbar buttons and slash menu entries for each block type. Supports both block-level and inline blocks.
 - Included by default: No
-- Types:
 
-```ts
-type BlocksFeatureProps = {
-  blocks?: (Block | BlockSlug)[] | Block[]
-  inlineBlocks?: (Block | BlockSlug)[] | Block[]
-}
-```
-
-- Usage example:
-
-```ts
-BlocksFeature({
-  blocks: [
-    {
-      slug: 'callout',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
-  ],
-  inlineBlocks: [
-    {
-      slug: 'mention',
-      fields: [
-        {
-          name: 'name',
-          type: 'text',
-          required: true,
-        },
-      ],
-    },
-  ],
-})
-```
+For complete documentation including custom block components, the pre-built CodeBlock, and rendering blocks on the frontend, see the dedicated [Blocks documentation](/docs/rich-text/blocks).
 
 ### TreeViewFeature
 

@@ -12,7 +12,7 @@ import { Warning } from './icons/Warning.js'
 export const ToastContainer: React.FC<{
   config: ClientConfig
 }> = ({ config }) => {
-  const { admin: { toast: { duration, expand, limit } = {} } = {} } = config
+  const { admin: { toast: { duration, expand, limit, position } = {} } = {} } = config
 
   return (
     <Toaster
@@ -30,6 +30,7 @@ export const ToastContainer: React.FC<{
         warning: <Warning />,
       }}
       offset="calc(var(--gutter-h) / 2)"
+      position={position ?? 'bottom-right'}
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',

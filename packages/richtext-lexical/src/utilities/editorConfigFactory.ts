@@ -9,10 +9,10 @@ import type {
   LexicalRichTextAdapterProvider,
 } from '../types.js'
 
-import { getDefaultSanitizedEditorConfig } from '../getDefaultSanitizedEditorConfig.js'
 import { defaultEditorConfig, defaultEditorFeatures } from '../lexical/config/server/default.js'
 import { loadFeatures } from '../lexical/config/server/loader.js'
 import { sanitizeServerFeatures } from '../lexical/config/server/sanitize.js'
+import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 
 export const editorConfigFactory = {
   default: async (args: {

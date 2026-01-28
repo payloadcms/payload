@@ -2,8 +2,11 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
+import { login } from 'helpers/e2e/auth/login.js'
+import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -15,21 +18,21 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, slug } from './shared.js'
+import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 let payload: PayloadTestSDK<Config>
 
-const { beforeAll, afterAll, describe } = test
+const { beforeAll, beforeEach, afterAll, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
@@ -41,26 +44,33 @@ describe('Auth', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = `${serverURL}/api`
+    apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
   })
+
   describe('create first user', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       await reInitializeDB({
         serverURL,
         snapshotKey: 'create-first-user',
         deleteOnly: true,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await payload.delete({
         collection: slug,
@@ -87,9 +97,14 @@ describe('Auth', () => {
       } = getRoutes({})
 
       // wait for create first user route
-      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
 
       await expect(page.locator('.create-first-user')).toBeVisible()
+
+      // Check that custom view override is visible
+      await expect(page.locator('#custom-view-override')).toHaveText(
+        'Custom CreateFirstUser View Override',
+      )
 
       await waitForVisibleAuthFields()
 
@@ -124,6 +139,33 @@ describe('Auth', () => {
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .not.toContain('create-first-user')
     })
+
+    test('richText field should should not be readOnly in create first user view', async () => {
+      const {
+        admin: {
+          routes: { createFirstUser: createFirstUserRoute },
+        },
+        routes: { admin: adminRoute },
+      } = getRoutes({})
+
+      // wait for create first user route
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
+
+      await expect(page.locator('.create-first-user')).toBeVisible()
+
+      await waitForVisibleAuthFields()
+
+      const richTextRoot = page
+        .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      // ensure editor is present
+      await expect(richTextRoot).toBeVisible()
+
+      // core read-only checks
+      await expect(richTextRoot).toHaveAttribute('contenteditable', 'true')
+      await expect(richTextRoot).not.toHaveAttribute('aria-readonly', 'true')
+    })
   })
 
   describe('non create first user', () => {
@@ -133,8 +175,6 @@ describe('Auth', () => {
         snapshotKey: 'auth',
         deleteOnly: false,
       })
-
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
 
       await login({ page, serverURL })
     })
@@ -153,11 +193,64 @@ describe('Auth', () => {
         await saveDocAndAssert(page, '#action-save')
       })
 
+      // TODO: This test is unreliable. During development, the bundle sent to the client will include debug information.
+      // For example, arguments passed from one RSC to another RSC may be sent to the client by Next.js for debug reasons.
+      // In production however, this would never happen.
+      // In this case, simply using console.log on the permissions object
+      // may cause `shouldNotShowInClientConfigUnlessAuthenticated` to be included in the bundle,
+      // even though we're never actually sending it to the client.
+      // We'll need to run this test in production to ensure it passes.
+      test.skip('should protect field schemas behind authentication', async () => {
+        await logout(page, serverURL)
+
+        // Inspect the page source (before authentication)
+        const loginPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '/login', serverURL }),
+        )
+        const loginPageSource = await loginPageRes?.text()
+        expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+
+        // Inspect the client config (before authentication)
+        await expect(page.locator('#unauthenticated-client-config')).toBeAttached()
+
+        await expect(
+          page.locator('#unauthenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(0)
+
+        await login({ page, serverURL })
+
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+
+        // Inspect the client config (after authentication)
+        await expect(page.locator('#authenticated-client-config')).toBeAttached()
+
+        await expect(
+          page.locator('#authenticated-client-config', {
+            hasText: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          }),
+        ).toHaveCount(1)
+
+        // Inspect the page source (after authentication)
+        const dashboardPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '', serverURL }),
+        )
+        const dashboardPageSource = await dashboardPageRes?.text()
+        expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
+      })
+
       test('should allow change password', async () => {
         await page.goto(url.account)
         const emailBeforeSave = await page.locator('#field-email').inputValue()
+        await expect(page.locator('#force-unlock')).toBeVisible()
+
         await page.locator('#change-password').click()
         await page.locator('#field-password').fill('password')
+
+        await expect(page.locator('#change-password')).toBeHidden()
+
+        await expect(page.locator('#cancel-change-password')).toBeVisible()
         // should fail to save without confirm password
         await page.locator('#action-save').click()
         await expect(
@@ -184,11 +277,12 @@ describe('Auth', () => {
       })
 
       test('should prevent new user creation without confirm password', async () => {
+        await page.goto(url.list)
         await page.goto(url.create)
         await page.locator('#field-email').fill('dev2@payloadcms.com')
         await page.locator('#field-password').fill('password')
         // should fail to save without confirm password
-        await page.locator('#action-save').click()
+        await page.locator('#action-save').click({ delay: 100 })
         await expect(
           page.locator('.field-type.confirm-password .tooltip--show', {
             hasText: exactText('This field is required.'),
@@ -222,6 +316,7 @@ describe('Auth', () => {
         await page.goto(url.list)
 
         await page.locator('.table .row-1 .cell-custom a').click()
+        await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
         await expect(textInput).toBeVisible()
@@ -243,8 +338,11 @@ describe('Auth', () => {
         await expect.poll(() => lockedDocs.docs.length).toBe(1)
 
         await openNav(page)
-
-        await page.locator('.nav .nav__controls a[href="/admin/logout"]').click()
+        await page
+          .locator(
+            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout', adminRoute: '/admin' })}"]`,
+          )
+          .click()
 
         // Locate the modal container
         const modalContainer = page.locator('.payload__modal-container')
@@ -359,6 +457,108 @@ describe('Auth', () => {
 
         await saveDocAndAssert(page)
       })
+
+      test('ensure `?redirect=` param is injected into the URL and handled properly after login', async () => {
+        const users = await payload.find({
+          collection: slug,
+          limit: 1,
+        })
+
+        const userDocumentRoute = formatAdminURL({
+          adminRoute,
+          path: `/collections/users/${users?.docs?.[0]?.id}`,
+          serverURL,
+        })
+
+        await logout(page, serverURL)
+
+        // This will send the user back to the login page with a `?redirect=` param
+        await page.goto(userDocumentRoute)
+
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(userDocumentRoute)
+
+        // Previously, this would crash the page with a "Cannot read properties of undefined (reading 'match')" error
+        await expect(page.locator('#field-roles')).toBeVisible()
+
+        // Now do this again, only with a page that is not in the user's collection
+        const notInUserCollection = await payload.create({
+          collection: 'relationsCollection',
+          data: {},
+        })
+
+        await logout(page, serverURL)
+
+        const notInUserCollectionURL = formatAdminURL({
+          adminRoute,
+          path: `/collections/relationsCollection/${notInUserCollection.id}`,
+          serverURL,
+        })
+        await page.goto(notInUserCollectionURL)
+
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toContain('/admin/login?redirect=')
+
+        // Important: do not use the login helper here, as this may clear the redirect param
+        await expect(page.locator('#field-email')).toBeVisible()
+        await expect(page.locator('#field-password')).toBeVisible()
+
+        await page.locator('.form-submit > button').click()
+
+        // Expect to be redirected to the correct page
+        await expect
+          .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+          .toBe(notInUserCollectionURL)
+
+        // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
+        await expect(page.locator('#field-rel')).toBeVisible()
+      })
+    })
+  })
+
+  describe('autoRefresh', () => {
+    beforeAll(async () => {
+      await reInitializeDB({
+        serverURL,
+        snapshotKey: 'auth',
+        deleteOnly: false,
+      })
+
+      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+
+      url = new AdminUrlUtil(serverURL, slug)
+
+      // Install clock before login so token expiration and clock are in sync
+      await page.clock.install({ time: Date.now() })
+
+      await login({ page, serverURL })
+    })
+
+    test('should automatically refresh token without showing modal', async () => {
+      await expect(page.locator('.nav')).toBeVisible()
+
+      // Fast forward time to just past the reminder timeout
+      await page.clock.fastForward(7141000) // 1 hour 59 minutes + 1 second
+
+      // Resume clock so timers can execute
+      await page.clock.resume()
+
+      await expect(page.locator('.confirmation-modal')).toBeHidden()
+
+      await expect(page.locator('.nav')).toBeVisible()
     })
   })
 })

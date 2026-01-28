@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm build:typecheck && pnpm build:popular-issues:ncc && pnpm build:new-issues:ncc",
+    "build:new-issues:ncc": "ncc build src/new-issues.ts -m -o dist/new-issues",
+    "build:popular-issues:ncc": "ncc build src/popular-issues.ts -m -o dist/popular-issues",
+    "build:typecheck": "tsc",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@actions/core": "^1.3.0",
+    "@actions/github": "^5.0.0",
+    "@slack/web-api": "^7.10.0"
+  },
+  "devDependencies": {
+    "@octokit/openapi-types": "^26.0.0",
+    "@octokit/webhooks-types": "^7.5.1",
+    "@types/node": "^20.16.5",
+    "@vercel/ncc": "0.38.1",
+    "typescript": "^4.9.5"
+  }
+}

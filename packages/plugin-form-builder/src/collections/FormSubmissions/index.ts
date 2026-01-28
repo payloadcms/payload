@@ -18,9 +18,6 @@ export const generateSubmissionCollection = (
     {
       name: 'form',
       type: 'relationship',
-      admin: {
-        readOnly: true,
-      },
       relationTo: formSlug,
       required: true,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -50,9 +47,6 @@ export const generateSubmissionCollection = (
     {
       name: 'submissionData',
       type: 'array',
-      admin: {
-        readOnly: true,
-      },
       fields: [
         {
           name: 'field',
@@ -61,7 +55,7 @@ export const generateSubmissionCollection = (
         },
         {
           name: 'value',
-          type: 'text',
+          type: 'textarea',
           required: true,
           validate: (value: unknown) => {
             // TODO:
@@ -106,9 +100,12 @@ export const generateSubmissionCollection = (
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
+      afterChange: [
+        (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
+      ],
       beforeChange: [
         (data) => createCharge(data, formConfig),
-        (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },

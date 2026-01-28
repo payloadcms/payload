@@ -11,13 +11,15 @@ export const create: Create = async function create(
   this: DrizzleAdapter,
   { collection: collectionSlug, data, req, returning, select },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow({
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: collection.flattenedFields,

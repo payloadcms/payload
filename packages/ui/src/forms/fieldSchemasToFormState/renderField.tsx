@@ -32,6 +32,7 @@ export const renderField: RenderFieldMethod = ({
   fieldConfig,
   fieldSchemaMap,
   fieldState,
+  forceCreateClientField,
   formState,
   indexPath,
   lastRenderedPath,
@@ -48,20 +49,27 @@ export const renderField: RenderFieldMethod = ({
   schemaPath,
   siblingData,
 }) => {
-  const requiresRender = renderAllFields || !lastRenderedPath || lastRenderedPath !== path
+  // Fields with beforeInput/afterInput need custom components created, so they require render
+  const hasBeforeOrAfterInput =
+    fieldConfig.admin?.components &&
+    ('beforeInput' in fieldConfig.admin.components || 'afterInput' in fieldConfig.admin.components)
+
+  const requiresRender =
+    renderAllFields || !lastRenderedPath || lastRenderedPath !== path || hasBeforeOrAfterInput
 
   if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
     return
   }
 
-  const clientField = clientFieldSchemaMap
-    ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
-    : createClientField({
-        defaultIDType: req.payload.config.db.defaultIDType,
-        field: fieldConfig,
-        i18n: req.i18n,
-        importMap: req.payload.importMap,
-      })
+  const clientField =
+    clientFieldSchemaMap && !forceCreateClientField
+      ? (clientFieldSchemaMap.get(schemaPath) as ClientField)
+      : createClientField({
+          defaultIDType: req.payload.config.db.defaultIDType,
+          field: fieldConfig,
+          i18n: req.i18n,
+          importMap: req.payload.importMap,
+        })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
     field: clientField,
@@ -255,7 +263,13 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
             importMap: req.payload.importMap,
-            serverProps,
+            serverProps: {
+              ...serverProps,
+              // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
+              // Otherwise, the editorConfig would be included twice - once on the top-level, and once as part of the `FieldComponent` server props.
+              sanitizedEditorConfig:
+                'editorConfig' in fieldConfig.editor ? fieldConfig.editor.editorConfig : undefined,
+            },
           })}
         </WatchCondition>
       ) : (
@@ -319,7 +333,7 @@ export const renderField: RenderFieldMethod = ({
               clientProps,
               Component: fieldConfig.admin.components.afterInput,
               importMap: req.payload.importMap,
-              key: 'field.admin.components.afterInput',
+              key: `field.admin.components.afterInput.${path}`,
               serverProps,
             })
           : 'Mock'
@@ -331,7 +345,7 @@ export const renderField: RenderFieldMethod = ({
               clientProps,
               Component: fieldConfig.admin.components.beforeInput,
               importMap: req.payload.importMap,
-              key: 'field.admin.components.beforeInput',
+              key: `field.admin.components.beforeInput.${path}`,
               serverProps,
             })
           : 'Mock'

@@ -264,7 +264,11 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
             TitleActions={[
               allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                   key="create-new-button"

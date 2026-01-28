@@ -89,6 +89,7 @@ export const addOrderableFieldsAndHook = (
       admin: {
         disableBulkEdit: true,
         disabled: true,
+        disableGroupBy: true,
         disableListColumn: true,
         disableListFilter: true,
         hidden: true,

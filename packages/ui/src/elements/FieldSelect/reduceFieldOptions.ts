@@ -120,7 +120,7 @@ export const reduceFieldOptions = ({
       label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
       value: {
         field,
-        fieldPermissions,
+        fieldPermissions: fieldPermissions as SanitizedFieldPermissions,
         path: createNestedClientFieldPath(path, field),
       },
     }

@@ -1,27 +1,24 @@
 'use client'
 
-import type { RelationshipFieldClientProps, StaticLabel } from 'payload'
+import type { RelationshipFieldClientProps } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import {
-  ConfirmationModal,
+  Pill,
   RelationshipField,
-  Translation,
+  useDocumentInfo,
   useField,
   useForm,
   useFormModified,
   useModal,
-  useTranslation,
 } from '@payloadcms/ui'
 import React from 'react'
 
-import type {
-  PluginMultiTenantTranslationKeys,
-  PluginMultiTenantTranslations,
-} from '../../translations/index.js'
-
-import './index.scss'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
+import {
+  AssignTenantFieldModal,
+  assignTenantModalSlug,
+} from '../AssignTenantFieldModal/index.client.js'
+import './index.scss'
 
 const baseClass = 'tenantField'
 
@@ -30,17 +27,75 @@ type Props = {
   unique?: boolean
 } & RelationshipFieldClientProps
 
-export const TenantField = (args: Props) => {
+export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { entityType, options, selectedTenantID, setEntityType, setTenant } = useTenantSelection()
-  const { value } = useField<number | string>()
+  const { setValue, showError, value } = useField<(number | string)[] | (number | string)>()
+  const modified = useFormModified()
+  const { isValid: isFormValid, setModified } = useForm()
+  const { id: docID, collectionSlug } = useDocumentInfo()
+  const { isModalOpen, openModal } = useModal()
+  const isEditManyModalOpen = collectionSlug ? isModalOpen(`edit-${collectionSlug}`) : false
+  const isConfirmingRef = React.useRef<boolean>(false)
+  const prevModified = React.useRef(modified)
+  const prevValue = React.useRef<typeof value>(value)
+  const showField =
+    (options.length > 1 && !fieldArgs.field.admin?.hidden && !fieldArgs.field.hidden) || debug
+
+  const onConfirm = React.useCallback(() => {
+    isConfirmingRef.current = true
+  }, [])
+
+  const afterModalOpen = React.useCallback(() => {
+    prevModified.current = modified
+    prevValue.current = value
+  }, [modified, value])
+
+  const afterModalClose = React.useCallback(() => {
+    let didChange = true
+    if (isConfirmingRef.current) {
+      // did the values actually change?
+      if (fieldArgs.field.hasMany) {
+        const prev = (prevValue.current || []) as (number | string)[]
+        const newValue = (value || []) as (number | string)[]
+        if (prev.length !== newValue.length) {
+          didChange = true
+        } else {
+          const allMatch = newValue.every((val) => prev.includes(val))
+          if (allMatch) {
+            didChange = false
+          }
+        }
+      } else if (value === prevValue.current) {
+        didChange = false
+      }
+
+      if (didChange) {
+        prevModified.current = true
+        prevValue.current = value
+      }
+    }
+
+    setValue(prevValue.current, true)
+    setModified(prevModified.current)
+
+    isConfirmingRef.current = false
+  }, [setValue, setModified, value, fieldArgs.field.hasMany])
 
   React.useEffect(() => {
     if (!entityType) {
-      setEntityType(args.unique ? 'global' : 'document')
+      setEntityType(unique ? 'global' : 'document')
     } else {
       // unique documents are controlled from the global TenantSelector
-      if (!args.unique && value) {
-        if (!selectedTenantID || value !== selectedTenantID) {
+      if (!unique && value) {
+        if (Array.isArray(value)) {
+          if (value.length) {
+            if (!selectedTenantID) {
+              setTenant({ id: value[0], refresh: false })
+            } else if (!value.includes(selectedTenantID)) {
+              setTenant({ id: value[0], refresh: false })
+            }
+          }
+        } else if (selectedTenantID !== value) {
           setTenant({ id: value, refresh: false })
         }
       }
@@ -51,137 +106,64 @@ export const TenantField = (args: Props) => {
         setEntityType(undefined)
       }
     }
-  }, [args.unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
+  }, [unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
-  if (options.length > 1 && !args.field.admin?.hidden && !args.field.hidden) {
-    return (
-      <>
-        <div className={baseClass}>
-          <div className={`${baseClass}__wrapper`}>
-            <RelationshipField
-              {...args}
-              field={{
-                ...args.field,
-                required: true,
-              }}
-              readOnly={args.readOnly || args.field.admin?.readOnly || args.unique}
-            />
-          </div>
-        </div>
-        {args.unique ? (
-          <SyncFormModified />
-        ) : (
-          <ConfirmTenantChange fieldLabel={args.field.label} fieldPath={args.path} />
-        )}
-      </>
-    )
+  React.useEffect(() => {
+    if (unique) {
+      return
+    }
+    if ((!isFormValid && showError && showField) || (!value && !selectedTenantID)) {
+      openModal(assignTenantModalSlug)
+    }
+  }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
+
+  if (showField) {
+    if (debug || isEditManyModalOpen) {
+      return <TenantRelationshipField debug={debug} fieldArgs={fieldArgs} unique={unique} />
+    }
+
+    if (!unique) {
+      /** Editing a non-global tenant document */
+      return (
+        <AssignTenantFieldModal
+          afterModalClose={afterModalClose}
+          afterModalOpen={afterModalOpen}
+          onConfirm={onConfirm}
+        >
+          <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
+        </AssignTenantFieldModal>
+      )
+    }
+
+    return <SyncFormModified />
   }
 
   return null
 }
 
-const confirmSwitchTenantSlug = 'confirm-switch-tenant'
-
-const ConfirmTenantChange = ({
-  fieldLabel,
-  fieldPath,
-}: {
-  fieldLabel?: StaticLabel
-  fieldPath: string
-}) => {
-  const { options, selectedTenantID, setTenant } = useTenantSelection()
-  const { setValue: setTenantFormValue, value: tenantFormValue } = useField<null | number | string>(
-    { path: fieldPath },
-  )
-  const { setModified } = useForm()
-  const modified = useFormModified()
-  const { i18n, t } = useTranslation<
-    PluginMultiTenantTranslations,
-    PluginMultiTenantTranslationKeys
-  >()
-  const { isModalOpen, openModal } = useModal()
-
-  const prevTenantValueRef = React.useRef<null | number | string>(tenantFormValue || null)
-  const [tenantToConfirm, setTenantToConfirm] = React.useState<null | number | string>(
-    tenantFormValue || null,
-  )
-
-  const fromTenantOption = React.useMemo(() => {
-    if (tenantFormValue) {
-      return options.find((option) => option.value === tenantFormValue)
-    }
-    return undefined
-  }, [options, tenantFormValue])
-
-  const toTenantOption = React.useMemo(() => {
-    if (tenantToConfirm) {
-      return options.find((option) => option.value === tenantToConfirm)
-    }
-    return undefined
-  }, [options, tenantToConfirm])
-
-  const modalIsOpen = isModalOpen(confirmSwitchTenantSlug)
-  const testRef = React.useRef<boolean>(false)
-
-  React.useEffect(() => {
-    // the form value changed
-    if (
-      !modalIsOpen &&
-      tenantFormValue &&
-      prevTenantValueRef.current &&
-      tenantFormValue !== prevTenantValueRef.current
-    ) {
-      // revert the form value change temporarily
-      setTenantFormValue(prevTenantValueRef.current, true)
-      // save the tenant to confirm in modal
-      setTenantToConfirm(tenantFormValue)
-      // open confirmation modal
-      openModal(confirmSwitchTenantSlug)
-    }
-  }, [
-    tenantFormValue,
-    setTenantFormValue,
-    openModal,
-    setTenant,
-    selectedTenantID,
-    modalIsOpen,
-    modified,
-  ])
-
+const TenantRelationshipField: React.FC<{
+  debug?: boolean
+  fieldArgs: RelationshipFieldClientProps
+  unique?: boolean
+}> = ({ debug, fieldArgs, unique }) => {
   return (
-    <ConfirmationModal
-      body={
-        <Translation
-          elements={{
-            0: ({ children }) => {
-              return <b>{children}</b>
-            },
+    <div className={baseClass}>
+      <div className={`${baseClass}__wrapper`}>
+        {debug && (
+          <Pill className={`${baseClass}__debug-pill`} pillStyle="success" size="small">
+            Multi-Tenant Debug Enabled
+          </Pill>
+        )}
+        <RelationshipField
+          {...fieldArgs}
+          field={{
+            ...fieldArgs.field,
+            required: true,
           }}
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          i18nKey="plugin-multi-tenant:confirm-modal-tenant-switch--body"
-          t={t}
-          variables={{
-            fromTenant: fromTenantOption?.label,
-            toTenant: toTenantOption?.label,
-          }}
+          readOnly={fieldArgs.readOnly || fieldArgs.field.admin?.readOnly || unique}
         />
-      }
-      heading={t('plugin-multi-tenant:confirm-modal-tenant-switch--heading', {
-        tenantLabel: fieldLabel
-          ? getTranslation(fieldLabel, i18n)
-          : t('plugin-multi-tenant:nav-tenantSelector-label'),
-      })}
-      modalSlug={confirmSwitchTenantSlug}
-      onCancel={() => {
-        setModified(testRef.current)
-      }}
-      onConfirm={() => {
-        // set the form value to the tenant to confirm
-        prevTenantValueRef.current = tenantToConfirm
-        setTenantFormValue(tenantToConfirm)
-      }}
-    />
+      </div>
+    </div>
   )
 }
 

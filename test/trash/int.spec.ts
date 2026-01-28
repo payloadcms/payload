@@ -2,6 +2,7 @@ import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Post, RestrictedCollection } from './payload-types.js'
@@ -645,6 +646,127 @@ describe('trash', () => {
 
         expect(allDocs.totalDocs).toEqual(1)
         expect(allDocs.docs[0]?.id).toEqual(postsDocTwo.id)
+      })
+    })
+
+    describe('trashing documents with validation issues', () => {
+      it('should allow trashing documents with empty required fields (draft scenario)', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(draftDoc.title).toBe('')
+        expect(draftDoc._status).toBe('draft')
+
+        // Should be able to trash the document even with empty required field
+        const trashedDoc = await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        expect(trashedDoc.deletedAt).toBeDefined()
+        expect(trashedDoc.title).toBe('') // Title should still be empty
+        expect(trashedDoc._status).toBe('draft')
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
+      })
+
+      it('should allow restoring trashed drafts with empty required fields as draft', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Trash it
+        await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Should be able to restore as draft without validation errors
+        const restoredDoc = await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: null,
+            _status: 'draft',
+          },
+          trash: true,
+        })
+
+        expect(restoredDoc.deletedAt).toBeNull()
+        expect(restoredDoc.title).toBe('')
+        expect(restoredDoc._status).toBe('draft')
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
+      })
+
+      it('should NOT allow restoring trashed drafts with empty required fields as published', async () => {
+        // Create a draft document with empty required field
+        const draftDoc = await payload.create({
+          collection: postsSlug,
+          data: {
+            title: '', // Empty required field
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Trash it
+        await payload.update({
+          collection: postsSlug,
+          id: draftDoc.id,
+          data: {
+            deletedAt: new Date().toISOString(),
+          },
+        })
+
+        // Should NOT be able to restore as published - should fail validation
+        await expect(
+          payload.update({
+            collection: postsSlug,
+            id: draftDoc.id,
+            data: {
+              deletedAt: null,
+              _status: 'published',
+            },
+            trash: true,
+          }),
+        ).rejects.toThrow(/invalid/i)
+
+        // Clean up
+        await payload.delete({
+          collection: postsSlug,
+          id: draftDoc.id,
+          trash: true,
+        })
       })
     })
 

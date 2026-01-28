@@ -100,6 +100,7 @@ export const usePreventLeave = ({
           )
         }
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('Unexpected exception thrown in LeaveWithoutSaving:isAnchorOfCurrentUrl', err)
       }
       return false
@@ -139,12 +140,15 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('Unexpected exception thrown in LeaveWithoutSaving:usePreventLeave', err)
       }
     }
 
-    // Add the global click event listener
-    document.addEventListener('click', handleClick, true)
+    if (prevent) {
+      // Add the global click event listener
+      document.addEventListener('click', handleClick, true)
+    }
 
     // Clean up the global click event listener when the component is unmounted
     return () => {

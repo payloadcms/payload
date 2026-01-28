@@ -1,9 +1,9 @@
 name: audit-dependencies
 
 on:
-  # Sundays at 2am EST
+  # Monday at 2am EST
   schedule:
-    - cron: '0 7 * * 0'
+    - cron: '0 7 * * 1'
   workflow_dispatch:
     inputs:
       audit-level:
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup
         uses: ./.github/actions/setup
 
@@ -34,7 +34,7 @@ jobs:
 
       - name: Slack notification on failure
         if: failure()
-        uses: slackapi/slack-github-action@v2.1.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook

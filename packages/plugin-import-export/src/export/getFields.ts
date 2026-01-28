@@ -1,12 +1,18 @@
 import type { TFunction } from '@payloadcms/translations'
 import type { Config, Field, SelectField } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
-
+import { getFilename } from '../utilities/getFilename.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
-import { getFilename } from './getFilename.js'
 
-export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfig): Field[] => {
+type GetFieldsOptions = {
+  /**
+   * Force a specific format, hiding the format dropdown
+   */
+  format?: 'csv' | 'json'
+}
+
+export const getFields = (config: Config, options?: GetFieldsOptions): Field[] => {
+  const format = options?.format
   let localeField: SelectField | undefined
   if (config.localization) {
     localeField = {
@@ -49,14 +55,11 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
               name: 'format',
               type: 'select',
               admin: {
-                // Hide if a forced format is set via plugin config
-                condition: () => !pluginConfig?.format,
+                // Hide if a forced format is set via config
+                condition: () => !format,
                 width: '33.3333%',
               },
-              defaultValue: (() => {
-                // Default to plugin-defined format, otherwise 'csv'
-                return pluginConfig?.format ?? 'csv'
-              })(),
+              defaultValue: format ?? 'csv',
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-format-label'),
               options: [
@@ -224,7 +227,6 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
             components: {
               Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
-            hidden: true,
           },
           required: true,
         },
@@ -252,7 +254,7 @@ export const getFields = (config: Config, pluginConfig?: ImportExportPluginConfi
       type: 'ui',
       admin: {
         components: {
-          Field: '@payloadcms/plugin-import-export/rsc#Preview',
+          Field: '@payloadcms/plugin-import-export/rsc#ExportPreview',
         },
       },
     },

@@ -29,6 +29,8 @@ export function loadClientFeatures({
   schemaPath: string
   unSanitizedEditorConfig: ClientEditorConfig
 }): ResolvedClientFeatureMap {
+  const featureProviderMap: ClientFeatureProviderMap = new Map()
+
   for (const featureProvider of unSanitizedEditorConfig.features) {
     if (
       !featureProvider?.clientFeatureProps?.featureKey ||
@@ -39,17 +41,13 @@ export function loadClientFeatures({
         'A Feature you have installed does not return the client props as clientFeatureProps. Please make sure to always return those props, even if they are null, as other important props like order and featureKey are later on injected.',
       )
     }
+    featureProviderMap.set(featureProvider.clientFeatureProps.featureKey, featureProvider)
   }
 
   // sort unSanitizedEditorConfig.features by order
   unSanitizedEditorConfig.features = unSanitizedEditorConfig.features.sort(
     (a, b) => a.clientFeatureProps.order - b.clientFeatureProps.order,
   )
-
-  const featureProviderMap: ClientFeatureProviderMap = new Map()
-  for (const feature of unSanitizedEditorConfig.features) {
-    featureProviderMap.set(feature.clientFeatureProps.featureKey, feature)
-  }
 
   const resolvedFeatures: ResolvedClientFeatureMap = new Map()
 

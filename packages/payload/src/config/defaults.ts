@@ -3,6 +3,7 @@ import type { Config } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
+import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
@@ -57,11 +58,14 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   i18n: {},
   jobs: {
     access: {
+      cancel: defaultAccess,
+      queue: defaultAccess,
       run: defaultAccess,
     },
     deleteJobOnComplete: true,
     depth: 0,
   } as JobsConfig,
+
   localization: false,
   maxDepth: 10,
   routes: {
@@ -136,6 +140,8 @@ export const addDefaultsToConfig = (config: Config): Config => {
     depth: 0,
     ...(config.jobs || {}),
     access: {
+      cancel: defaultAccess,
+      queue: defaultAccess,
       run: defaultAccess,
       ...(config.jobs?.access || {}),
     },
@@ -144,7 +150,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
     admin: '/admin',
-    api: (process.env.NEXT_BASE_PATH ?? '') + '/api',
+    api: '/api',
     graphQL: '/graphql',
     graphQLPlayground: '/graphql-playground',
     ...(config.routes || {}),
@@ -161,6 +167,12 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.auth = {
     jwtOrder: ['JWT', 'Bearer', 'cookie'],
     ...(config.auth || {}),
+  }
+
+  config.kv = config.kv ?? databaseKVAdapter()
+
+  if (config.kv?.kvCollection) {
+    config.collections.push(config.kv.kvCollection)
   }
 
   if (

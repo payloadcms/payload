@@ -28,6 +28,7 @@
         background: none;
         border: none;
         padding: 0;
+        padding-left: calc(var(--base) * 0.25);
         min-height: auto !important;
         position: relative;
         box-shadow: unset;

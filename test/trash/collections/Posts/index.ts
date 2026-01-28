@@ -12,6 +12,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      required: true,
     },
   ],
   versions: {

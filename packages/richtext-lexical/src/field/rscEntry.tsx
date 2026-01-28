@@ -13,8 +13,8 @@ import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type {
+  LexicalEditorProps,
   LexicalFieldAdminClientProps,
-  LexicalFieldAdminProps,
   LexicalRichTextFieldProps,
 } from '../types.js'
 
@@ -25,15 +25,17 @@ import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
   {
-    admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
+    Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
+
+  const disabled = args?.readOnly || field?.admin?.readOnly
 
   if (!(args?.clientField as RichTextFieldClient)?.name) {
     throw new Error('Initialized lexical RSC field without a field name')
@@ -56,6 +58,7 @@ export const RscEntryLexicalField: React.FC<
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        disabled,
         documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
@@ -94,7 +97,6 @@ export const RscEntryLexicalField: React.FC<
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
-    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
@@ -108,6 +110,9 @@ export const RscEntryLexicalField: React.FC<
   }
   if (Object.keys(admin).length) {
     props.admin = admin
+  }
+  if (Object.keys(featureClientImportMap).length) {
+    props.featureClientImportMap = featureClientImportMap
   }
 
   for (const key in props) {

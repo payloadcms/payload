@@ -11,10 +11,11 @@ import type {
   Where,
 } from 'payload'
 
-import { APIError, formatErrors } from 'payload'
-import { isNumber } from 'payload/shared'
+import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
 import { upsertPreferences } from './upsertPreferences.js'
 
@@ -73,7 +74,7 @@ const buildTableState = async (
 ): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
-    columns,
+    columns: columnsFromArgs,
     data: dataFromArgs,
     enableRowSelections,
     orderableFieldName,
@@ -90,45 +91,18 @@ const buildTableState = async (
     tableAppearance,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
+
+  const permissions = await getAccessResults({ req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
@@ -148,7 +122,7 @@ const buildTableState = async (
       : `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromArgs,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
@@ -229,9 +203,19 @@ const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columns,
+    columns: getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: columnsFromArgs,
+      i18n: req.i18n,
+      permissions,
+    }),
     data,
     enableRowSelections,
+    fieldPermissions: Array.isArray(collectionSlug)
+      ? true
+      : permissions.collections[collectionSlug].fields,
     i18n: req.i18n,
     orderableFieldName,
     payload,

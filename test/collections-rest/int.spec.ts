@@ -1,15 +1,19 @@
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { getFormDataSize } from '../helpers/getFormDataSize.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
   customIdSlug,
@@ -117,6 +121,47 @@ describe('collections-rest', () => {
       expect(response.status).toEqual(200)
       expect(doc.title).toEqual(updatedTitle)
       expect(doc.description).toEqual(description) // Check was not modified
+    })
+
+    it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
+      const doc = await payload.create({
+        collection: largeDocumentsCollectionSlug,
+        data: {},
+      })
+
+      const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
+
+      // Now use the REST API and attempt to PATCH the document with a payload over 1mb
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify({
+          title: 'Hello, world!',
+          // fill with long, random string of text to exceed 1mb
+          array: arrayData,
+        }),
+      }
+
+      const formData: FormData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
+
+      // Ensure the form data we are about to send is greater than the default limit (1mb)
+      // But less than the increased limit that we've set in the root config (2mb)
+      const docSize = getFormDataSize(formData)
+      expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
+      expect(docSize).toBeLessThan(2 * 1024 * 1024)
+
+      // This request should not fail with error: "Unterminated string in JSON at position..."
+      // This is because we set `bodyParser.limits.fieldSize` to 2mb in the root config
+      const res = await restClient
+        .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
+          body: formData,
+        })
+        .then((res) => res.json())
+
+      expect(res).not.toHaveProperty('errors')
+      expect(res.doc.id).toEqual(doc.id)
+      expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
     describe('Bulk operations', () => {

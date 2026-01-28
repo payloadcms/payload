@@ -1,6 +1,6 @@
 import type { CollectionPopulationRequestHandler } from './types.js'
 
-import { handleMessage } from './handleMessage.js'
+import { handleMessage, resetCache } from './handleMessage.js'
 
 export const subscribe = <T extends Record<string, any>>(args: {
   apiRoute?: string
@@ -11,6 +11,10 @@ export const subscribe = <T extends Record<string, any>>(args: {
   serverURL: string
 }): ((event: MessageEvent) => Promise<void> | void) => {
   const { apiRoute, callback, depth, initialData, requestHandler, serverURL } = args
+
+  // Ensure previous subscription state does not leak across navigations
+  // by clearing the internal cached data before subscribing.
+  resetCache()
 
   const onMessage = async (event: MessageEvent) => {
     const mergedData = await handleMessage<T>({

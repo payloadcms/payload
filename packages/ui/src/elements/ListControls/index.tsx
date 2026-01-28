@@ -7,11 +7,10 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
-import { Popup } from '../../elements/Popup/index.js'
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
-import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
@@ -19,7 +18,7 @@ import { ColumnSelector } from '../ColumnSelector/index.js'
 import { GroupByBuilder } from '../GroupByBuilder/index.js'
 import { Pill } from '../Pill/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
-import { SearchFilter } from '../SearchFilter/index.js'
+import { SearchBar } from '../SearchBar/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
@@ -132,67 +131,64 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           queryPresetPermissions={queryPresetPermissions}
         />
       )}
-      <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__search`}>
-          <SearchIcon />
-          <SearchFilter
-            handleChange={handleSearchChange}
-            key={collectionSlug}
-            label={searchLabelTranslated.current}
-            searchQueryParam={query?.search}
-          />
-        </div>
-        <div className={`${baseClass}__buttons`}>
-          {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-          {enableColumns && (
+      <SearchBar
+        Actions={[
+          !smallBreak && (
+            <React.Fragment key="before-actions">{beforeActions && beforeActions}</React.Fragment>
+          ),
+          enableColumns && (
             <Pill
               aria-controls={`${baseClass}-columns`}
               aria-expanded={visibleDrawer === 'columns'}
               className={`${baseClass}__toggle-columns`}
               icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
               id="toggle-list-columns"
+              key="toggle-list-columns"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
               pillStyle="light"
               size="small"
             >
               {t('general:columns')}
             </Pill>
-          )}
-          {enableFilters && (
+          ),
+          enableFilters && (
             <Pill
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
               className={`${baseClass}__toggle-where`}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               id="toggle-list-filters"
+              key="toggle-list-filters"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"
               size="small"
             >
               {t('general:filters')}
             </Pill>
-          )}
-          {enableSort && (
+          ),
+          enableSort && (
             <Pill
               aria-controls={`${baseClass}-sort`}
               aria-expanded={visibleDrawer === 'sort'}
               className={`${baseClass}__toggle-sort`}
               icon={<ChevronIcon />}
               id="toggle-list-sort"
+              key="toggle-list-sort"
               onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
               pillStyle="light"
               size="small"
             >
               {t('general:sort')}
             </Pill>
-          )}
-          {collectionConfig.admin.groupBy && (
+          ),
+          collectionConfig.admin.groupBy && (
             <Pill
               aria-controls={`${baseClass}-group-by`}
               aria-expanded={visibleDrawer === 'group-by'}
               className={`${baseClass}__toggle-group-by`}
               icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
               id="toggle-group-by"
+              key="toggle-group-by"
               onClick={() =>
                 setVisibleDrawer(visibleDrawer !== 'group-by' ? 'group-by' : undefined)
               }
@@ -203,23 +199,30 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 label: '',
               })}
             </Pill>
-          )}
-          {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
+          ),
+          listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
             <Popup
               button={<Dots ariaLabel={t('general:moreOptions')} />}
               className={`${baseClass}__popup`}
               horizontalAlign="right"
               id="list-menu"
+              key="list-menu"
               size="small"
               verticalAlign="bottom"
             >
-              {listMenuItems.map((item, i) => (
-                <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-              ))}
+              <PopupList.ButtonGroup>
+                {listMenuItems.map((item, i) => (
+                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                ))}
+              </PopupList.ButtonGroup>
             </Popup>
-          )}
-        </div>
-      </div>
+          ),
+        ].filter(Boolean)}
+        key={collectionSlug}
+        label={searchLabelTranslated.current}
+        onSearchChange={handleSearchChange}
+        searchQueryParam={query?.search}
+      />
       {enableColumns && (
         <AnimateHeight
           className={`${baseClass}__columns`}

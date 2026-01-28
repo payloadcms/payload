@@ -2,11 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const idTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'Anda akan mengubah kepemilikan dari <0>{{fromTenant}}</0> ke <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Konfirmasi perubahan {{tenantLabel}}',
+    'assign-tenant-button-label': 'Tetapkan Tenant',
+    'assign-tenant-modal-title': 'Tetapkan "{{title}}"',
     'field-assignedTenant-label': 'Penyewa yang Ditugaskan',
-    'nav-tenantSelector-label': 'Penyewa',
+    'nav-tenantSelector-label': 'Filter berdasarkan Tenant',
   },
 }
 

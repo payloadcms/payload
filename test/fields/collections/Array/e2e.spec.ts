@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test'
 import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
 import { addArrayRow, duplicateArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -102,16 +103,16 @@ describe('Array', () => {
       })
       .catch(() => false) // If it doesn't appear, this resolves to `false`
 
-    expect(defaultRowLabelWasAttached).toBeFalsy()
+    await expect.poll(() => defaultRowLabelWasAttached).toBeFalsy()
 
     await expect(page.locator('#field-rowLabelAsComponent #custom-array-row-label')).toBeVisible()
 
     await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
-    await wait(100)
 
     const customRowLabel = page.locator(
       '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("custom row label")',
     )
+    await expect(customRowLabel).toBeVisible()
 
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
@@ -191,76 +192,136 @@ describe('Array', () => {
   })
 
   describe('row manipulation', () => {
-    test('should add, remove and duplicate rows', async () => {
-      const assertText0 = 'array row 1'
-      const assertGroupText0 = 'text in group in row 1'
-      const assertText1 = 'array row 2'
-      const assertText3 = 'array row 3'
-      const assertGroupText3 = 'text in group in row 3'
+    test('should add rows', async () => {
+      const row1Text = 'Array row 1'
+      const row2Text = 'Array row 2'
+      const row3Text = 'Array row 3'
+
+      const row1GroupText = 'text in group in row 1'
+
       await loadCreatePage()
-      await page.mouse.wheel(0, 1750)
-      await page.locator('#field-potentiallyEmptyArray').scrollIntoViewIfNeeded()
-      await wait(300)
+      await scrollEntirePage(page)
 
-      // Add 3 rows
       await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
       await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
       await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
 
-      // Fill out row 1
-      await page.locator('#field-potentiallyEmptyArray__0__text').fill(assertText0)
+      await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
+      await page.locator('#field-potentiallyEmptyArray__1__text').fill(row2Text)
+      await page.locator('#field-potentiallyEmptyArray__2__text').fill(row3Text)
 
-      await page
-        .locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
-        .fill(assertGroupText0)
+      await page.locator('#field-potentiallyEmptyArray__0__group__text').fill(row1GroupText)
 
-      // Fill out row 2
-      await page.locator('#field-potentiallyEmptyArray__1__text').fill(assertText1)
-
-      // Fill out row 3
-      await page.locator('#field-potentiallyEmptyArray__2__text').fill(assertText3)
-
-      await page
-        .locator('#field-potentiallyEmptyArray__2__groupInRow__textInGroupInRow')
-        .fill(assertGroupText3)
-
-      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
-      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
-
-      // Save document
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
-      // Scroll to array row (fields are not rendered in DOM until on screen)
-      await page.locator('#field-potentiallyEmptyArray__0__groupInRow').scrollIntoViewIfNeeded()
+      await expect(page.locator('#field-potentiallyEmptyArray__0__text')).toHaveValue(row1Text)
+      await expect(page.locator('#field-potentiallyEmptyArray__1__text')).toHaveValue(row2Text)
+      await expect(page.locator('#field-potentiallyEmptyArray__2__text')).toHaveValue(row3Text)
 
-      // Expect the remaining row to be the third row
-      const input = page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow')
-      await expect(input).toHaveValue(assertGroupText3)
+      const input = page.locator('#field-potentiallyEmptyArray__0__group__text')
+
+      await expect(input).toHaveValue(row1GroupText)
+    })
+
+    test('should duplicate rows', async () => {
+      const row1Text = 'Array row 1'
+      const row2Text = 'Array row 2'
+      const row3Text = 'Array row 3'
+
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+
+      await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
+      await page.locator('#field-potentiallyEmptyArray__1__text').fill(row2Text)
+      await page.locator('#field-potentiallyEmptyArray__2__text').fill(row3Text)
+
+      await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
+
+      // Mark the first row with some unique values to assert against later
+      await page
+        .locator('#field-potentiallyEmptyArray__0__group__text')
+        .fill(`${row1Text} duplicate`)
 
       await duplicateArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
 
-      // Update duplicated row group field text
-      await page
-        .locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow')
-        .fill(`${assertGroupText3} duplicate`)
-
-      // Save document
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
-      // Expect the second row to be a duplicate of the remaining row
-      await expect(
-        page.locator('#field-potentiallyEmptyArray__1__groupInRow__textInGroupInRow'),
-      ).toHaveValue(`${assertGroupText3} duplicate`)
+      await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
+      await page.locator('#field-potentiallyEmptyArray__1__text').fill(row1Text)
+      await page.locator('#field-potentiallyEmptyArray__2__text').fill(row2Text)
+      await page.locator('#field-potentiallyEmptyArray__3__text').fill(row3Text)
 
+      await expect(page.locator('#field-potentiallyEmptyArray__1__group__text')).toHaveValue(
+        `${row1Text} duplicate`,
+      )
+    })
+
+    test('should duplicate rows with nested arrays', async () => {
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray__0__array' })
+
+      await page.locator('#field-potentiallyEmptyArray__0__array__0__text').fill('Row 1')
+
+      // There should be 2 fields in the nested array row: the text field and the row id
+      const fieldsInRow = page
+        .locator('#field-potentiallyEmptyArray__0__array')
+        .locator('.render-fields')
+        .first()
+
+      await expect(fieldsInRow.locator('> *')).toHaveCount(2)
+
+      await duplicateArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+
+      // There should still only be 2 fields in the duplicated row
+      const fieldsInDuplicatedRow = page
+        .locator('#field-potentiallyEmptyArray__1__array')
+        .locator('.render-fields')
+        .first()
+
+      await expect(fieldsInDuplicatedRow.locator('> *')).toHaveCount(2)
+    })
+
+    test('should remove rows', async () => {
+      const row1Text = 'Array row 1'
+      const row2Text = 'Array row 2'
+      const row3Text = 'Array row 3'
+
+      const assertGroupText3 = 'text in group in row 3'
+
+      await loadCreatePage()
+      await scrollEntirePage(page)
+
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+      await addArrayRow(page, { fieldName: 'potentiallyEmptyArray' })
+
+      await page.locator('#field-potentiallyEmptyArray__0__text').fill(row1Text)
+      await page.locator('#field-potentiallyEmptyArray__1__text').fill(row2Text)
+      await page.locator('#field-potentiallyEmptyArray__2__text').fill(row3Text)
+
+      // Mark the third row with some unique values to assert against later
+      await page.locator('#field-potentiallyEmptyArray__2__group__text').fill(assertGroupText3)
+
+      // Remove all rows one by one, except the last one
+      await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 1 })
       await removeArrayRow(page, { fieldName: 'potentiallyEmptyArray', rowIndex: 0 })
 
-      // Save document
       await saveDocAndAssert(page)
+      await scrollEntirePage(page)
 
-      // Expect the remaining row to be the copy of the duplicate row
-      await expect(
-        page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
-      ).toHaveValue(`${assertGroupText3} duplicate`)
+      // Expect the remaining row to be the third row, now first
+      await expect(page.locator('#field-potentiallyEmptyArray__0__group__text')).toHaveValue(
+        assertGroupText3,
+      )
     })
   })
 
@@ -424,7 +485,7 @@ describe('Array', () => {
       )
       await arrayFieldPopupBtn.click()
       const disabledCopyBtn = page.locator(
-        '#field-collapsedArray .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Copy Field")',
       )
       await expect(disabledCopyBtn).toBeVisible()
     })
@@ -441,7 +502,7 @@ describe('Array', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '#field-readOnly .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })
@@ -636,5 +697,15 @@ describe('Array', () => {
       await expect(subArrayContainer).toHaveCount(1)
       await expect(subArrayContainer2).toHaveCount(1)
     })
+  })
+  test('should return empty array from getDataByPath for array fields without rows', async () => {
+    await page.goto(url.create)
+
+    // Wait for the test component to render
+    await page.waitForSelector('#getDataByPath-test')
+
+    // Check that getDataByPath returned an empty array, not 0
+    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+    await expect(page.locator('#empty-array-length')).toHaveText('0')
   })
 })

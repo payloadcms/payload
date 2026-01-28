@@ -5,9 +5,9 @@ import type { TextStateFeatureProps } from './feature.server.js'
 
 import { TextStateIcon } from '../../lexical/ui/icons/TextState/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
-import { registerTextStates, setTextState, StatePlugin } from './textState.js'
+import { registerTextStates, setTextState, type StateMap, StatePlugin } from './textState.js'
 
-const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
+const toolbarGroups = (props: TextStateFeatureProps, stateMap: StateMap): ToolbarGroup[] => {
   const items: ToolbarDropdownGroup['items'] = []
 
   for (const stateKey in props.state) {
@@ -19,7 +19,7 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
         key: stateValue,
         label: meta.label,
         onSelect: ({ editor }) => {
-          setTextState(editor, stateKey, stateValue)
+          setTextState(editor, stateMap, stateKey, stateValue)
         },
       })
     }
@@ -29,10 +29,10 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
     {
       ChildComponent: () => <TextStateIcon />,
       key: `clear-style`,
-      label: 'Default style',
+      label: ({ i18n }) => i18n.t('lexical:textState:defaultStyle'),
       onSelect: ({ editor }) => {
         for (const stateKey in props.state) {
-          setTextState(editor, stateKey, undefined)
+          setTextState(editor, stateMap, stateKey, undefined)
         }
       },
       order: 1,
@@ -51,19 +51,19 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
 }
 
 export const TextStateFeatureClient = createClientFeature<TextStateFeatureProps>(({ props }) => {
-  registerTextStates(props.state)
+  const stateMap = registerTextStates(props.state)
   return {
     plugins: [
       {
-        Component: StatePlugin,
+        Component: () => StatePlugin({ stateMap }),
         position: 'normal',
       },
     ],
     toolbarFixed: {
-      groups: toolbarGroups(props),
+      groups: toolbarGroups(props, stateMap),
     },
     toolbarInline: {
-      groups: toolbarGroups(props),
+      groups: toolbarGroups(props, stateMap),
     },
   }
 })

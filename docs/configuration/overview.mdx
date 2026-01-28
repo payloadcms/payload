@@ -40,7 +40,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET,
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
   collections: [
     {
@@ -131,11 +131,12 @@ export default buildConfig({
 
 The following options are available:
 
-| Option             | Description                                                                                                                                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`autoGenerate`** | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview). |
-| **`declare`**      | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.              |
-| **`outputFile`**   | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                   |
+| Option                 | Description                                                                                                                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                         |
+| **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                      |
+| **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                           |
+| **`strictDraftTypes`** | Enable strict type safety for draft mode queries. When enabled, `find` operations with `draft: true` will type required fields as optional, since validation is skipped for drafts. Defaults to `false`. **This will become the default behavior in v4.0.** |
 
 ## Config Location
 
@@ -318,3 +319,13 @@ Now you can run the command using:
 ```sh
 pnpm payload seed
 ```
+
+## Running bin scripts on a schedule
+
+Every bin script supports being run on a schedule using cron syntax. Simply pass the `--cron` flag followed by the cron expression when running the script. Example:
+
+```sh
+pnpm payload run ./myScript.ts --cron "0 * * * *"
+```
+
+This will use the `run` bin script to execute the specified script on the defined schedule.

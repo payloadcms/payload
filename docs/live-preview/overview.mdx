@@ -39,7 +39,7 @@ const config = buildConfig({
 
 ## Options
 
-Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../configuration/collections#admin-options) and [Global Admin Configs](../configuration/globals#admin-options). Once configured, a new "Live Preview" tab will appear at the top of enabled Documents. Navigating to this tab opens the preview window and loads your front-end application.
+Setting up Live Preview is easy. This can be done either globally through the [Root Admin Config](../admin/overview), or on individual [Collection Admin Configs](../configuration/collections#admin-options) and [Global Admin Configs](../configuration/globals#admin-options). Once configured, a new "Live Preview" button will appear at the top of enabled Documents. Toggling this button opens the preview window and loads your front-end application.
 
 The following options are available:
 
@@ -74,6 +74,8 @@ const config = buildConfig({
 #### Dynamic URLs
 
 You can also pass a function in order to dynamically format URLs. This is useful for multi-tenant applications, localization, or any other scenario where the URL needs to be generated based on the Document being edited.
+
+This is also useful for conditionally rendering Live Preview, similar to access control. See [Conditional Rendering](./conditional-rendering) for more details.
 
 To set dynamic URLs, set the `admin.livePreview.url` property in your [Payload Config](../configuration/overview) to a function:
 
@@ -114,7 +116,17 @@ You can return either an absolute URL or relative URL from this function. If you
 If your application requires a fully qualified URL, or you are attempting to preview with a frontend on a different domain, you can use the `req` property to build this URL:
 
 ```ts
-url: ({ data, req }) => `${req.protocol}//${req.host}/${data.slug}` // highlight-line
+url: ({ data, req }) => `${req.protocol}//${req.host}/${data.slug}`
+```
+
+#### Conditional Rendering
+
+You can conditionally render Live Preview by returning `undefined` or `null` from the `url` function. This is similar to access control, where you may want to restrict who can use Live Preview based on certain criteria, such as the current user or document data.
+
+For example, you could check the user's role and only enable Live Preview if they have the appropriate permissions:
+
+```ts
+url: ({ req }) => (req.user?.role === 'admin' ? '/hello-world' : null)
 ```
 
 ### Breakpoints

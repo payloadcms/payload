@@ -173,6 +173,25 @@ The following options are available:
 | **`password`**    | The password of the user to login as. This is only needed if `prefillOnly` is set to true                       |
 | **`prefillOnly`** | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
 
+## Auto-Refresh
+
+Turning this property on will allow users to stay logged in indefinitely while their browser is open and on the admin panel, by automatically refreshing their authentication token before it expires.
+
+To enable auto-refresh for user tokens, set `autoRefresh: true` in the [Payload Config](../admin/overview#admin-options) to:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  admin: {
+    autoRefresh: true,
+  },
+  // highlight-end
+})
+```
+
 ## Operations
 
 All auth-related operations are available via Payload's REST, Local, and GraphQL APIs. These operations are automatically added to your Collection when you enable Authentication. [More details](./operations).

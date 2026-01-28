@@ -17,9 +17,6 @@ export default withBundleAnalyzer(
       devIndicators: {
         position: 'bottom-right',
       },
-      eslint: {
-        ignoreDuringBuilds: true,
-      },
       typescript: {
         ignoreBuildErrors: true,
       },
@@ -45,7 +42,12 @@ export default withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
+        qualities: [5, 50, 75, 100]
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

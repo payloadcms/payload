@@ -22,7 +22,14 @@ export const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentNam
         ...recursivelyBuildNestedPaths({
           field: {
             ...tab,
-            type: 'name' in tab ? 'group' : 'row',
+            ...('name' in tab
+              ? {
+                  name: `${nestedFieldName ? `${nestedFieldName}__` : ''}${tab.name}`,
+                  type: 'group',
+                }
+              : {
+                  type: 'row',
+                }),
           },
           nestedFieldName2: nestedFieldName,
           parentName,

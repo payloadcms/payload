@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -41,10 +41,6 @@ test.describe('Form Builder Plugin', () => {
   test.describe('Forms collection', () => {
     test('has contact form', async () => {
       await page.goto(formsUrl.list)
-
-      await expect(() => expect(page.url()).toContain('forms')).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
 
       const titleCell = page.locator('.row-2 .cell-title a')
       await expect(titleCell).toHaveText('Contact Form')
@@ -87,10 +83,6 @@ test.describe('Form Builder Plugin', () => {
   test.describe('Form submissions collection', () => {
     test('has form submissions', async () => {
       await page.goto(submissionsUrl.list)
-
-      await expect(() => expect(page.url()).toContain('form-submissions')).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
 
       const firstSubmissionCell = page.locator('.table .cell-id a').last()
       const href = await firstSubmissionCell.getAttribute('href')
@@ -135,12 +127,28 @@ test.describe('Form Builder Plugin', () => {
 
       await page.goto(submissionsUrl.edit(createdSubmission.id))
 
-      await expect(() => expect(page.url()).toContain(createdSubmission.id)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
-
       await expect(page.locator('#field-submissionData__0__value')).toHaveValue('New tester')
       await expect(page.locator('#field-submissionData__1__value')).toHaveValue('new@example.com')
+    })
+
+    test('can create form submission from the admin panel', async () => {
+      await page.goto(submissionsUrl.create)
+      await page.locator('#field-form').click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      await options.locator('text=Contact Form').click()
+
+      await expect(page.locator('#field-form').locator('.rs__value-container')).toContainText(
+        'Contact Form',
+      )
+
+      await page.locator('#field-submissionData button.array-field__add-row').click()
+      await page.locator('#field-submissionData__0__field').fill('name')
+      await page.locator('#field-submissionData__0__value').fill('Test Submission')
+      await saveDocAndAssert(page)
+
+      // Check that the fields are still editable, as this user is an admin
+      await expect(page.locator('#field-submissionData__0__field')).toBeEditable()
+      await expect(page.locator('#field-submissionData__0__value')).toBeEditable()
     })
 
     test('can create form submission - with date field', async () => {
@@ -175,10 +183,6 @@ test.describe('Form Builder Plugin', () => {
       })
 
       await page.goto(submissionsUrl.edit(createdSubmission.id))
-
-      await expect(() => expect(page.url()).toContain(createdSubmission.id)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
 
       await expect(page.locator('#field-submissionData__0__value')).toHaveValue('New tester')
       await expect(page.locator('#field-submissionData__1__value')).toHaveValue('new@example.com')

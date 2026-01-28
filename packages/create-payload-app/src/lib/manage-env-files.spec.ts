@@ -1,8 +1,8 @@
-import { jest } from '@jest/globals'
 import fs from 'fs'
 import fse from 'fs-extra'
 import * as os from 'node:os'
 import path from 'path'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { CliArgs } from '../types.js'
 
@@ -15,7 +15,7 @@ describe('createProject', () => {
 
   beforeAll(() => {
     // eslint-disable-next-line no-console
-    console.log = jest.fn()
+    console.log = vitest.fn()
   })
 
   beforeEach(() => {
@@ -60,7 +60,7 @@ describe('createProject', () => {
     const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
 
     expect(updatedEnvContent).toBe(
-      `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URI=your-connection-string-here`,
+      `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URL=your-connection-string-here`,
     )
   })
 
@@ -69,7 +69,7 @@ describe('createProject', () => {
     fse.ensureFileSync(envExampleFilePath)
     fse.writeFileSync(
       envExampleFilePath,
-      `DATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value\n`,
+      `DATABASE_URL=example-connection-string\nCUSTOM_VAR=custom-value\n`,
     )
 
     await manageEnvFiles({
@@ -87,7 +87,7 @@ describe('createProject', () => {
     const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
 
     expect(updatedEnvContent).toBe(
-      `DATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n# Added by Payload`,
+      `DATABASE_URL=example-connection-string\nCUSTOM_VAR=custom-value\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n# Added by Payload`,
     )
   })
 
@@ -96,14 +96,14 @@ describe('createProject', () => {
     fse.ensureFileSync(envFilePath)
     fse.writeFileSync(
       envFilePath,
-      `CUSTOM_VAR=custom-value\nDATABASE_URI=example-connection-string\n`,
+      `CUSTOM_VAR=custom-value\nDATABASE_URL=example-connection-string\n`,
     )
 
     // create an .env.example file to ensure that its contents DO NOT override existing .env vars
     fse.ensureFileSync(envExampleFilePath)
     fse.writeFileSync(
       envExampleFilePath,
-      `CUSTOM_VAR=custom-value-2\nDATABASE_URI=example-connection-string-2\n`,
+      `CUSTOM_VAR=custom-value-2\nDATABASE_URL=example-connection-string-2\n`,
     )
 
     await manageEnvFiles({
@@ -121,7 +121,7 @@ describe('createProject', () => {
     const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
 
     expect(updatedEnvContent).toBe(
-      `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URI=example-connection-string\nCUSTOM_VAR=custom-value`,
+      `# Added by Payload\nPAYLOAD_SECRET=YOUR_SECRET_HERE\nDATABASE_URL=example-connection-string\nCUSTOM_VAR=custom-value`,
     )
   })
 
@@ -130,8 +130,8 @@ describe('createProject', () => {
       cliArgs: {
         '--debug': true,
       } as CliArgs,
-      databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URI
-      databaseUri: 'mongodb://localhost:27017/test', // this mimics the CLI selection and will be used as the DATABASE_URI
+      databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URL
+      databaseUri: 'mongodb://localhost:27017/test', // this mimics the CLI selection and will be used as the DATABASE_URL
       payloadSecret: 'test-secret', // this mimics the CLI selection and will be used as the PAYLOAD_SECRET
       projectDir,
       template: undefined,
@@ -140,7 +140,7 @@ describe('createProject', () => {
     const updatedEnvContent = fse.readFileSync(envFilePath, 'utf-8')
 
     expect(updatedEnvContent).toBe(
-      `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URI=mongodb://localhost:27017/test`,
+      `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URL=mongodb://localhost:27017/test`,
     )
 
     // delete the generated .env file and do it again, but this time, omit the databaseUri to ensure the default is generated
@@ -150,7 +150,7 @@ describe('createProject', () => {
       cliArgs: {
         '--debug': true,
       } as CliArgs,
-      databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URI
+      databaseType: 'mongodb', // this mimics the CLI selection and will be used as the DATABASE_URL
       databaseUri: '', // omit this to ensure the default is generated based on the selected database type
       payloadSecret: 'test-secret',
       projectDir,
@@ -159,7 +159,7 @@ describe('createProject', () => {
 
     const updatedEnvContentWithDefault = fse.readFileSync(envFilePath, 'utf-8')
     expect(updatedEnvContentWithDefault).toBe(
-      `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URI=mongodb://127.0.0.1/your-database-name`,
+      `# Added by Payload\nPAYLOAD_SECRET=test-secret\nDATABASE_URL=mongodb://127.0.0.1/your-database-name`,
     )
   })
 })

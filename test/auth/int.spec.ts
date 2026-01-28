@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-conditional-in-test */
 import type {
   BasePayload,
   EmailFieldValidation,
@@ -14,6 +13,7 @@ import path from 'path'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
@@ -116,6 +116,75 @@ describe('Auth', () => {
       expect(data.user.collection).toBe(slug)
       expect(data.user._strategy).toBeDefined()
       expect(data.token).toBeDefined()
+    })
+
+    it('should not lose data if login throws', async () => {
+      const testEmail = 'transaction-rollback-test@example.com'
+      const testPassword = 'test123'
+      const originalArrayData = [{ info: 'original-value-1' }, { info: 'original-value-2' }]
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          roles: ['user'],
+          email: testEmail,
+          password: testPassword,
+          loginMetadata: originalArrayData,
+        },
+      })
+
+      const userBefore: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+      const sessionCountBefore = userBefore.sessions?.length || 0
+
+      const originalHooks = payload.config.collections.find((c) => c.slug === slug)?.hooks
+        ?.beforeLogin
+      const throwingHook = () => {
+        throw new Error('Simulated failure after session added')
+      }
+
+      const collection = payload.config.collections.find((c) => c.slug === slug)
+      if (collection) {
+        collection.hooks = collection.hooks || {}
+        collection.hooks.beforeLogin = [throwingHook]
+      }
+
+      const res = await restClient.POST(`/${slug}/login`, {
+        body: JSON.stringify({
+          email: testEmail,
+          password: testPassword,
+        }),
+      })
+      const data: any = await res.json()
+      expect(data.errors).toHaveLength(1)
+
+      // Restore original hooks
+      if (collection) {
+        if (originalHooks) {
+          collection.hooks.beforeLogin = originalHooks
+        } else if (collection.hooks) {
+          collection.hooks.beforeLogin = []
+        }
+      }
+
+      const userAfter: any = await payload.findByID({
+        collection: slug,
+        id: testUser.id,
+      })
+
+      expect(userAfter.loginMetadata).toHaveLength(2)
+      expect(userAfter.loginMetadata).toMatchObject(originalArrayData)
+
+      const sessionCountAfter = userAfter.sessions?.length || 0
+      expect(sessionCountAfter).toBe(sessionCountBefore)
+
+      // Clean up
+      await payload.delete({
+        collection: slug,
+        id: testUser.id,
+      })
     })
 
     describe('logged in', () => {
@@ -924,15 +993,15 @@ describe('Auth', () => {
         },
       })
 
-      await expect(async () => {
-        await payload.login({
+      await expect(
+        payload.login({
           collection: partialDisableLocalStrategiesSlug,
           data: {
             email: devUser.email,
             password: devUser.password,
           },
-        })
-      }).rejects.toThrow('You are not allowed to perform this action.')
+        }),
+      ).rejects.toThrow('You are not allowed to perform this action.')
     })
 
     it('rest - should prevent login', async () => {
@@ -1149,7 +1218,7 @@ describe('Auth', () => {
     it('should not allow reset password if forgotPassword expiration token is expired', async () => {
       // Mock Date.now() to simulate the forgotPassword call happening 6 minutes ago (current expiration is set to 5 minutes)
       const originalDateNow = Date.now
-      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 6 minutes (360,000 ms)
         return originalDateNow() - 6 * 60 * 1000
       })
@@ -1199,6 +1268,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1211,6 +1281,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1236,6 +1307,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1244,6 +1316,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe('The email or password provided is incorrect.')
         }
 
@@ -1252,6 +1325,7 @@ describe('Auth', () => {
           const failedLogin = await attemptLogin(devUser.email, 'wrong-password')
           expect(failedLogin).toBeUndefined()
         } catch (error) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect((error as Error).message).toBe(
             'This user is locked due to having too many failed login attempts.',
           )
@@ -1270,15 +1344,11 @@ describe('Auth', () => {
 
         expect(userQuery.docs[0]).toBeDefined()
 
-        if (userQuery.docs[0]) {
-          const user = userQuery.docs[0]
-          expect(user.loginAttempts).toBe(2)
-          expect(user.lockUntil).toBeDefined()
-          expect(typeof user.lockUntil).toBe('string')
-          if (typeof user.lockUntil === 'string') {
-            expect(new Date(user.lockUntil).getTime()).toBeGreaterThan(now.getTime())
-          }
-        }
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(2)
+        expect(user!.lockUntil).toBeDefined()
+        expect(typeof user!.lockUntil).toBe('string')
+        expect(new Date(user!.lockUntil!).getTime()).toBeGreaterThan(now.getTime())
       })
 
       it('should allow force unlocking of a user', async () => {
@@ -1303,17 +1373,15 @@ describe('Auth', () => {
 
         expect(userQuery.docs[0]).toBeDefined()
 
-        if (userQuery.docs[0]) {
-          const user = userQuery.docs[0]
-          expect(user.loginAttempts).toBe(0)
-          expect(user.lockUntil).toBeNull()
-        }
+        const user = userQuery.docs[0]
+        expect(user!.loginAttempts).toBe(0)
+        expect(user!.lockUntil).toBeNull()
       })
     })
   })
 
   describe('Email - format validation', () => {
-    const mockT = jest.fn((key) => key) // Mocks translation function
+    const mockT = vitest.fn((key) => key) // Mocks translation function
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
       // @ts-expect-error: Mocking context for email validation
@@ -1582,6 +1650,155 @@ describe('Auth', () => {
       })
 
       expect(user2.docs[0]?.sessions).toHaveLength(1)
+    })
+
+    it('should not update updatedAt when creating a session', async () => {
+      // Create a user
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.updatedAt.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const originalUpdatedAt = testUser.updatedAt
+
+      // Wait a moment to ensure timestamps would differ if updated
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Login to create a session
+      await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogin?.updatedAt).toEqual(originalUpdatedAt)
+      expect(Array.isArray(userAfterLogin?.sessions)).toBeTruthy()
+      expect(userAfterLogin?.sessions?.length).toBeGreaterThan(0)
+    })
+
+    it('should not update updatedAt when logging out', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.logout.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Logout
+      await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterLogout = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterLogout?.updatedAt).toEqual(updatedAtAfterLogin)
+    })
+
+    it('should not update updatedAt when refreshing a session', async () => {
+      // Create and login
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: `test.refresh.${Date.now()}@example.com`,
+          password: 'test123',
+          roles: ['admin'],
+        },
+      })
+
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: testUser.email,
+          password: 'test123',
+        },
+      })
+
+      const userAfterLogin = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      const updatedAtAfterLogin = userAfterLogin?.updatedAt
+
+      // Wait a moment
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      // Refresh token
+      await restClient.POST(`/${slug}/refresh-token`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+
+      // Fetch the user to check updatedAt
+      const userAfterRefresh = await payload.db.findOne<User>({
+        collection: slug,
+        where: {
+          id: {
+            equals: testUser.id,
+          },
+        },
+      })
+
+      // updatedAt should not have changed
+      expect(userAfterRefresh?.updatedAt).toEqual(updatedAtAfterLogin)
     })
   })
 })

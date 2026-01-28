@@ -41,6 +41,7 @@ type DateFNSKeys =
   | 'sk'
   | 'sl-SI'
   | 'sv'
+  | 'ta'
   | 'th'
   | 'tr'
   | 'uk'

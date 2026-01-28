@@ -9,9 +9,7 @@ export const LinkHTMLConverter: (args: {
       nodes: node.children,
     }).join('')
 
-    return `<a${providedStyleTag} href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
-        ${children}
-      </a>`
+    return `<a${providedStyleTag} href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
   link: ({ node, nodesToHTML, providedStyleTag }) => {
     const children = nodesToHTML({
@@ -30,8 +28,6 @@ export const LinkHTMLConverter: (args: {
       }
     }
 
-    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
-        ${children}
-      </a>`
+    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
 })

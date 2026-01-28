@@ -3,8 +3,10 @@
 import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
@@ -15,6 +17,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
@@ -22,7 +25,6 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
     id,
     collectionSlug,
-    docConfig,
     globalSlug,
     hasPublishedDoc,
     hasPublishPermission,
@@ -45,10 +47,9 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
     localization,
     routes: { api },
-    serverURL,
   } = config
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const label = labelProp || t('version:publishChanges')
 
   const entityConfig = React.useMemo(() => {
@@ -63,21 +64,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
 
   const hasNewerVersions = unpublishedVersionCount > 0
 
-  const schedulePublish =
-    typeof entityConfig?.versions?.drafts === 'object' &&
-    entityConfig?.versions?.drafts.schedulePublish
-
   const canPublish =
     hasPublishPermission &&
     (modified || hasNewerVersions || !hasPublishedDoc) &&
     uploadStatus !== 'uploading'
 
-  const scheduledPublishEnabled = Boolean(schedulePublish)
+  const scheduledPublishEnabled = hasScheduledPublishEnabled(entityConfig)
 
   // If autosave is enabled the modified will always be true so only conditionally check on modified state
-  const hasAutosave = Boolean(
-    typeof entityConfig?.versions?.drafts === 'object' && entityConfig?.versions?.drafts.autosave,
-  )
+  const hasAutosave = hasAutosaveEnabled(entityConfig)
 
   const canSchedulePublish = Boolean(
     scheduledPublishEnabled &&
@@ -85,6 +80,15 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       (globalSlug || (collectionSlug && id)) &&
       (hasAutosave || !modified),
   )
+
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
+
+  useEffect(() => {
+    const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
+    setHasLocalizedFields(hasLocalizedField)
+  }, [entityConfig?.fields])
+
+  const isSpecificLocalePublishEnabled = localization && hasLocalizedFields && hasPublishPermission
 
   const operation = useOperation()
 
@@ -95,19 +99,34 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       return
     }
 
-    const search = `?locale=${localeCode}&depth=0&fallback-locale=null&draft=true`
+    const params = qs.stringify(
+      {
+        depth: 0,
+        draft: true,
+        'fallback-locale': 'null',
+        locale: localeCode,
+      },
+      { addQueryPrefix: true },
+    )
+
     let action
     let method = 'POST'
 
     if (collectionSlug) {
-      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${id ? `/${id}` : ''}${params}`,
+      })
       if (id) {
         method = 'PATCH'
       }
     }
 
     if (globalSlug) {
-      action = `${serverURL}${api}/globals/${globalSlug}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${globalSlug}${params}`,
+      })
     }
 
     await submit({
@@ -118,32 +137,56 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       },
       skipValidation: true,
     })
-  }, [submit, collectionSlug, globalSlug, serverURL, api, localeCode, id, disabled])
+  }, [disabled, localeCode, collectionSlug, globalSlug, submit, api, id])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault()
     e.stopPropagation()
 
-    if (saveDraft && docConfig.versions?.drafts && docConfig.versions?.drafts?.autosave) {
+    if (saveDraft && hasAutosave) {
       void saveDraft()
     }
   })
 
-  const publish = useCallback(() => {
+  const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
       return
     }
 
-    void submit({
+    const params = qs.stringify(
+      {
+        depth: 0,
+        locale: localeCode,
+        publishAllLocales: true,
+      },
+      { addQueryPrefix: true },
+    )
+
+    const action = formatAdminURL({
+      apiRoute: api,
+      path: `${
+        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}${id ? `/${id}` : ''}`
+      }${params}` as `/${string}`,
+    })
+
+    const result = await submit({
+      action,
       overrides: {
         _status: 'published',
       },
     })
 
-    setUnpublishedVersionCount(0)
-    setMostRecentVersionIsAutosaved(false)
-    setHasPublishedDoc(true)
+    if (result) {
+      setUnpublishedVersionCount(0)
+      setMostRecentVersionIsAutosaved(false)
+      setHasPublishedDoc(true)
+    }
   }, [
+    localeCode,
+    api,
+    collectionSlug,
+    globalSlug,
+    id,
     setHasPublishedDoc,
     submit,
     setUnpublishedVersionCount,
@@ -152,33 +195,46 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   ])
 
   const publishSpecificLocale = useCallback(
-    (locale) => {
+    async (locale) => {
       if (uploadStatus === 'uploading') {
         return
       }
 
-      const params = qs.stringify({
-        publishSpecificLocale: locale,
+      const params = qs.stringify(
+        {
+          depth: 0,
+          locale,
+          publishSpecificLocale: locale,
+        },
+        { addQueryPrefix: true },
+      )
+
+      const pathSegment = globalSlug
+        ? `/globals/${globalSlug}`
+        : `/${collectionSlug}${id ? `/${id}` : ''}`
+      const action = formatAdminURL({
+        apiRoute: api,
+        path: `${pathSegment}${params}` as `/${string}`,
       })
 
-      const action = `${serverURL}${api}${
-        globalSlug ? `/globals/${globalSlug}` : `/${collectionSlug}/${id ? `${'/' + id}` : ''}`
-      }${params ? '?' + params : ''}`
-
-      void submit({
+      const result = await submit({
         action,
         overrides: {
           _status: 'published',
         },
       })
 
-      setHasPublishedDoc(true)
+      if (result) {
+        setHasPublishedDoc(true)
+      }
     },
-    [api, collectionSlug, globalSlug, id, serverURL, setHasPublishedDoc, submit, uploadStatus],
+    [api, collectionSlug, globalSlug, id, setHasPublishedDoc, submit, uploadStatus],
   )
 
-  const publishAll =
-    !localization || (localization && localization.defaultLocalePublishOption !== 'active')
+  // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
+  const isDefaultPublishAll =
+    !isSpecificLocalePublishEnabled ||
+    (localization && localization?.defaultLocalePublishOption !== 'active')
 
   const activeLocale =
     localization &&
@@ -186,19 +242,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       typeof locale === 'string' ? locale === localeCode : locale.code === localeCode,
     )
 
-  const activeLocaleLabel =
-    activeLocale &&
-    (typeof activeLocale.label === 'string'
-      ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined))
-
-  const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
-  const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
-
-  const secondaryPublish = publishAll ? () => publishSpecificLocale(activeLocale.code) : publish
-  const secondaryLabel = publishAll
-    ? t('version:publishIn', { locale: activeLocaleLabel })
-    : t('version:publishAllLocales')
+  const activeLocaleLabel = activeLocale && getTranslation(activeLocale.label, i18n)
 
   if (!hasPublishPermission) {
     return null
@@ -210,10 +254,10 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         buttonId="action-save"
         disabled={!canPublish}
         enableSubMenu={canSchedulePublish}
-        onClick={defaultPublish}
+        onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={
-          localization || canSchedulePublish
+          isSpecificLocalePublishEnabled || canSchedulePublish
             ? ({ close }) => {
                 return (
                   <React.Fragment>
@@ -227,10 +271,19 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
-                    {localization && canPublish && (
+                    {isSpecificLocalePublishEnabled && (
                       <PopupList.ButtonGroup>
-                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
-                          {secondaryLabel}
+                        <PopupList.Button
+                          id="publish-locale"
+                          onClick={
+                            isDefaultPublishAll
+                              ? () => publishSpecificLocale(activeLocale.code)
+                              : publish
+                          }
+                        >
+                          {isDefaultPublishAll
+                            ? t('version:publishIn', { locale: activeLocaleLabel })
+                            : t('version:publishAllLocales')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
@@ -241,12 +294,17 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
         }
         type="button"
       >
-        {localization ? defaultLabel : label}
+        {!isDefaultPublishAll ? t('version:publishIn', { locale: activeLocaleLabel }) : label}
       </FormSubmit>
       {canSchedulePublish && isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
-          schedulePublishConfig={typeof schedulePublish === 'object' && schedulePublish}
+          schedulePublishConfig={
+            scheduledPublishEnabled &&
+            typeof entityConfig.versions.drafts.schedulePublish === 'object'
+              ? entityConfig.versions.drafts.schedulePublish
+              : undefined
+          }
           slug={drawerSlug}
         />
       )}

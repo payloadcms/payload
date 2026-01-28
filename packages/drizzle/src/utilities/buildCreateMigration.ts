@@ -1,5 +1,5 @@
 import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
-import type { CreateMigration } from 'payload'
+import type { CreateMigration, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -39,12 +39,17 @@ export const buildCreateMigration = ({
     let imports: string = ''
     let downSQL: string
     let upSQL: string
-    ;({ downSQL, imports, upSQL } = await getPredefinedMigration({
+
+    const predefinedMigration = await getPredefinedMigration({
       dirname,
       file,
       migrationName,
       payload,
-    }))
+    })
+
+    imports = predefinedMigration.imports
+    downSQL = predefinedMigration.downSQL
+    upSQL = predefinedMigration.upSQL
 
     const timestamp = `${formattedDate}_${formattedTime}`
 
@@ -52,6 +57,22 @@ export const buildCreateMigration = ({
     const fileName = `${timestamp}${name ? `_${name.replace(/\W/g, '_')}` : ''}`
 
     const filePath = `${dir}/${fileName}`
+
+    if (typeof predefinedMigration.dynamic === 'function') {
+      const dynamicResult = await predefinedMigration.dynamic({ filePath, payload })
+
+      if (dynamicResult.upSQL) {
+        upSQL = dynamicResult.upSQL
+      }
+
+      if (dynamicResult.downSQL) {
+        downSQL = dynamicResult.downSQL
+      }
+
+      if (dynamicResult.imports) {
+        imports = dynamicResult.imports
+      }
+    }
 
     let drizzleJsonBefore = this.defaultDrizzleSnapshot as DrizzleSnapshotJSON
 
@@ -116,19 +137,20 @@ export const buildCreateMigration = ({
       fs.writeFileSync(`${filePath}.json`, JSON.stringify(drizzleJsonAfter, null, 2))
     }
 
+    const data = getMigrationTemplate({
+      downSQL: downSQL || `  // Migration code`,
+      imports,
+      packageName: payload.db.packageName,
+      upSQL: upSQL || `  // Migration code`,
+    })
+
+    const fullPath = `${filePath}.ts`
+
     // write migration
-    fs.writeFileSync(
-      `${filePath}.ts`,
-      getMigrationTemplate({
-        downSQL: downSQL || `  // Migration code`,
-        imports,
-        packageName: payload.db.packageName,
-        upSQL: upSQL || `  // Migration code`,
-      }),
-    )
+    fs.writeFileSync(fullPath, data)
 
     writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
-    payload.logger.info({ msg: `Migration created at ${filePath}.ts` })
+    payload.logger.info({ msg: `Migration created at ${fullPath}` })
   }
 }

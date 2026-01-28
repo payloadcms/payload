@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { autosaveCollectionSlug } from '../slugs.js'
+import { autosaveCollectionSlug, postCollectionSlug } from '../slugs.js'
 
 const AutosavePosts: CollectionConfig = {
   slug: autosaveCollectionSlug,
@@ -52,6 +52,16 @@ const AutosavePosts: CollectionConfig = {
       required: true,
       unique: true,
       localized: true,
+    },
+    {
+      name: 'relationship',
+      type: 'relationship',
+      relationTo: postCollectionSlug,
+      admin: {
+        components: {
+          Label: './elements/CustomFieldLabel/index.tsx#CustomFieldLabel',
+        },
+      },
     },
     {
       name: 'computedTitle',

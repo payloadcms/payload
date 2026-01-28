@@ -22,7 +22,7 @@
     "emitDeclarationOnly": true,
     "sourceMap": true,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -31,7 +31,8 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/_community/config.ts"],
+      "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
+      "@payload-config": ["./test/plugin-import-export/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
@@ -47,6 +48,9 @@
       ],
       "@payloadcms/richtext-lexical/rsc": ["./packages/richtext-lexical/src/exports/server/rsc.ts"],
       "@payloadcms/richtext-slate/rsc": ["./packages/richtext-slate/src/exports/server/rsc.ts"],
+      "@payloadcms/plugin-ecommerce/ui": ["./packages/plugin-ecommerce/src/exports/ui.ts"],
+      "@payloadcms/plugin-ecommerce/react": ["./packages/plugin-ecommerce/src/exports/react.ts"],
+      "@payloadcms/plugin-ecommerce/types": ["./packages/plugin-ecommerce/src/exports/types.ts"],
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"
       ],
@@ -60,6 +64,7 @@
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
+      "@payloadcms/plugin-mcp": ["./packages/plugin-mcp/src/index.ts"],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"

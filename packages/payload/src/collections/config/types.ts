@@ -2,7 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload } from '../../admin/types.js'
+import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -35,6 +35,8 @@ import type {
 } from '../../fields/config/types.js'
 import type { CollectionFoldersConfiguration } from '../../folders/types.js'
 import type {
+  CollectionAdminCustom,
+  CollectionCustom,
   CollectionSlug,
   JsonObject,
   RequestContext,
@@ -56,7 +58,11 @@ import type {
   IncomingCollectionVersions,
   SanitizedCollectionVersions,
 } from '../../versions/types.js'
-import type { AfterOperationArg, AfterOperationMap } from '../operations/utils.js'
+import type {
+  AfterOperationArg,
+  BeforeOperationArg,
+  OperationMap,
+} from '../operations/utilities/types.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
@@ -67,11 +73,38 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
+
+/**
+ * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
+ * When creating a draft, required fields don't need to be provided as validation is skipped
+ * The id field is optional since it's auto-generated
+ */
+export type DraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
+
+export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
+  DataFromCollectionSlug<TSlug>
+>
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required
+ * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
+ */
+export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Pick<TData, 'id'>
+
+export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  QueryDraftDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
@@ -90,17 +123,13 @@ export type HookOperationType =
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
-export type BeforeOperationHook = (args: {
-  args?: any
-  /** The collection which this hook is being run on */
-  collection: SanitizedCollectionConfig
-  context: RequestContext
-  /**
-   * Hook operation being performed
-   */
-  operation: HookOperationType
-  req: PayloadRequest
-}) => any
+export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = string> = (
+  arg: BeforeOperationArg<TOperationGeneric>,
+) =>
+  | Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]
+  | Promise<Parameters<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>[0]>
+  | Promise<void>
+  | void
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
@@ -191,13 +220,9 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 export type AfterOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: AfterOperationArg<TOperationGeneric>,
 ) =>
-  | Awaited<
-      ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
-    >
+  | Awaited<ReturnType<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>>
   | Promise<
-      Awaited<
-        ReturnType<AfterOperationMap<TOperationGeneric>[keyof AfterOperationMap<TOperationGeneric>]>
-      >
+      Awaited<ReturnType<OperationMap<TOperationGeneric>[keyof OperationMap<TOperationGeneric>]>>
     >
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
@@ -346,6 +371,10 @@ export type CollectionAdminOptions = {
        */
       SaveDraftButton?: CustomComponent
       /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
+      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
@@ -369,7 +398,7 @@ export type CollectionAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: CollectionAdminCustom
   /**
    * Default columns to show in list view
    */
@@ -383,8 +412,38 @@ export type CollectionAdminOptions = {
    * @default false
    */
   disableCopyToLocale?: boolean
+  /**
+   * Performance opt-in. If true, will use the [Select API](https://payloadcms.com/docs/queries/select) when
+   * loading the list view to query only the active columns, as opposed to the entire documents.
+   * If your cells require specific fields that may be unselected, such as within hooks, etc.,
+   * use `forceSelect` in conjunction with this property.
+   *
+   * @experimental This is an experimental feature and may change in the future. Use at your own risk.
+   */
+  enableListViewSelectAPI?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Function to format the URL for document links in the list view.
+   * Return null to disable linking for that document.
+   * Return a string to customize the link destination.
+   * If not provided, uses the default admin edit URL.
+   */
+  formatDocURL?: (args: {
+    collectionSlug: string
+    /**
+     * The default URL that would normally be used for this document link.
+     * You can return this as-is, modify it, or completely replace it.
+     */
+    defaultURL: string
+    doc: Record<string, unknown>
+    req: PayloadRequest
+    /**
+     * The current view context where the link is being generated.
+     * Most relevant values for document linking are 'list' and 'trash'.
+     */
+    viewType?: ViewTypes
+  }) => null | string
   /**
    * Specify a navigational group for collections in the admin sidebar.
    * - Provide a string to place the entity in a custom group.
@@ -393,10 +452,10 @@ export type CollectionAdminOptions = {
    */
   group?: false | Record<string, string> | string
   /**
-   * @experimental This option is currently in beta and may change in future releases and/or contain bugs.
-   * Use at your own risk.
    * @description Enable grouping by a field in the list view.
    * Uses `payload.findDistinct` under the hood to populate the group-by options.
+   *
+   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
    */
   groupBy?: boolean
   /**
@@ -412,7 +471,9 @@ export type CollectionAdminOptions = {
    */
   listSearchableFields?: string[]
   /**
-   * Live preview options
+   * Live Preview options.
+   *
+   * @see https://payloadcms.com/docs/live-preview/overview
    */
   livePreview?: LivePreviewConfig
   meta?: MetaConfig
@@ -459,8 +520,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Configuration for bulk operations
+   */
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: CollectionCustom
   /**
    * Used to override the default naming of the database table or collection with your using a function or string
    * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
@@ -529,7 +593,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     beforeChange?: BeforeChangeHook[]
     beforeDelete?: BeforeDeleteHook[]
     beforeLogin?: BeforeLoginHook[]
-    beforeOperation?: BeforeOperationHook[]
+    beforeOperation?: BeforeOperationHook<TSlug>[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
     /**
@@ -576,7 +640,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   * Under the hood, a field with {@link https://payloadcms.com/docs/configuration/collections#fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
    *
@@ -681,7 +745,7 @@ export interface SanitizedCollectionConfig
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
-  versions: SanitizedCollectionVersions
+  versions?: SanitizedCollectionVersions
 }
 
 export type Collection = {
@@ -703,6 +767,7 @@ export type BulkOperationResult<TSlug extends CollectionSlug, TSelect extends Se
   docs: TransformCollectionWithSelect<TSlug, TSelect>[]
   errors: {
     id: DataFromCollectionSlug<TSlug>['id']
+    isPublic: boolean
     message: string
   }[]
 }
@@ -711,9 +776,14 @@ export type AuthCollection = {
   config: SanitizedCollectionConfig
 }
 
+export type LocalizedMeta = {
+  [locale: string]: {
+    status: 'draft' | 'published'
+    updatedAt: string
+  }
+}
+
 export type TypeWithID = {
-  deletedAt?: null | string
-  docId?: any
   id: number | string
 }
 

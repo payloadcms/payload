@@ -1,27 +1,29 @@
-/* eslint-disable jest/no-conditional-in-test */
-import type {
-  SerializedBlockNode,
-  SerializedLinkNode,
-  SerializedRelationshipNode,
-  SerializedUploadNode,
-} from '@payloadcms/richtext-lexical'
 import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
+import {
+  buildEditorState,
+  type DefaultNodeTypes,
+  type SerializedBlockNode,
+  type SerializedLinkNode,
+  type SerializedRelationshipNode,
+  type SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { NextRESTClient } from '../helpers/NextRESTClient.js'
+import { it } from '../helpers/vitest.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
@@ -655,7 +657,7 @@ describe('Lexical', () => {
         locale: 'en',
         data: {
           title: 'Localized Lexical hooks',
-          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }),
+          lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',
@@ -739,12 +741,99 @@ describe('Lexical', () => {
       expect(child.doc.relationTo).toEqual('array-fields')
 
       if (payload.db.defaultIDType === 'number') {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('number')
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('string')
       }
 
       expect(child.doc.value.items).toHaveLength(6)
+    })
+
+    it('should disallow unsafe query paths', async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children from': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children."unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.(unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.unsafe="': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: 'select(' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: '"unsafe' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `'unsafe` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe\\` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe=` },
+          },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 })

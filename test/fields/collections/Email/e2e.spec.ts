@@ -1,10 +1,9 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -125,5 +124,35 @@ describe('Email', () => {
     })
     const nextSiblingText = await page.evaluate((el) => el.textContent, nextSibling)
     expect(nextSiblingText).toEqual('#after-input')
+  })
+
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-email').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Email inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-email').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.document-fields__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

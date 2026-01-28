@@ -1,8 +1,8 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
-import type { Validate } from 'payload'
 
 import {
+  BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
@@ -12,6 +12,8 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
+import { dequal } from 'dequal/lite'
+import { type Validate } from 'payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -140,10 +142,18 @@ const RichTextComponent: React.FC<
   const handleInitialValueChange = useEffectEvent(
     (initialValue: SerializedEditorState | undefined) => {
       // Object deep equality check here, as re-mounting the editor if
-      // the new value is the same as the old one is not necessary
+      // the new value is the same as the old one is not necessary.
+      // In postgres, the order of keys in JSON objects is not guaranteed to be preserved,
+      // so we need to do a deep equality check here that does not care about key order => we use dequal.
+      // If we used JSON.stringify, the editor would re-mount every time you save the document, as the order of keys changes => change detected => re-mount.
       if (
         prevValueRef.current !== value &&
-        JSON.stringify(prevValueRef.current) !== JSON.stringify(value)
+        !dequal(
+          prevValueRef.current != null
+            ? JSON.parse(JSON.stringify(prevValueRef.current))
+            : prevValueRef.current,
+          value,
+        )
       ) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
@@ -172,19 +182,22 @@ const RichTextComponent: React.FC<
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          <LexicalProvider
-            composerKey={pathWithEditDepth}
-            editorConfig={editorConfig}
-            fieldProps={props}
-            isSmallWidthViewport={isSmallWidthViewport}
-            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-            onChange={handleChange}
-            readOnly={disabled}
-            value={value}
-          />
+          {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
+          is rendered in the correct depth (not displayed *behind* the current drawer)*/}
+          <BulkUploadProvider drawerSlugPrefix={path}>
+            <LexicalProvider
+              composerKey={pathWithEditDepth}
+              editorConfig={editorConfig}
+              fieldProps={props}
+              isSmallWidthViewport={isSmallWidthViewport}
+              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+              onChange={handleChange}
+              readOnly={disabled}
+              value={value}
+            />
+          </BulkUploadProvider>
           {AfterInput}
         </ErrorBoundary>
-        {Description}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

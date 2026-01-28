@@ -61,31 +61,31 @@ export const DiffCollapser: React.FC<Props> = ({
         'DiffCollapser: field must be an array or blocks field when isIterable is true',
       )
     }
-    const comparisonRows = valueFrom ?? []
-    const versionRows = valueTo ?? []
+    const valueFromRows = valueFrom ?? []
+    const valueToRows = valueTo ?? []
 
-    if (!Array.isArray(comparisonRows) || !Array.isArray(versionRows)) {
+    if (!Array.isArray(valueFromRows) || !Array.isArray(valueToRows)) {
       throw new Error(
-        'DiffCollapser: comparison and version must be arrays when isIterable is true',
+        'DiffCollapser: valueFrom and valueTro must be arrays when isIterable is true',
       )
     }
 
     changeCount = countChangedFieldsInRows({
-      comparisonRows,
       config,
       field,
       locales,
       parentIsLocalized,
-      versionRows,
+      valueFromRows,
+      valueToRows,
     })
   } else {
     changeCount = countChangedFields({
-      comparison: valueFrom,
       config,
       fields,
       locales,
       parentIsLocalized,
-      version: valueTo,
+      valueFrom,
+      valueTo,
     })
   }
 

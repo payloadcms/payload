@@ -84,7 +84,7 @@ The following options are available:
 | `slug` \*       | Unique, URL-friendly string that will act as an identifier for this Global.                                                                                                                    |
 | `typescript`    | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                            |
 | `versions`      | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#global-config).                                                                |
-| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                          |
+| `forceSelect`   | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).      |
 
 _\* An asterisk denotes that a property is required._
 
@@ -179,12 +179,15 @@ export const MyGlobal: SanitizedGlobalConfig = {
 
 The following options are available:
 
-| Option            | Description                                                                                                                                                                                                |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
-| `SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
-| `PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
-| `PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
+| Option                   | Description                                                                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `beforeDocumentControls` | Inject custom components before the Save button. [More details](../custom-components/edit-view#beforedocumentcontrols).                                                                                    |
+| `Description`            | A component to render below the Global label in the Edit View. [More details](../custom-components/edit-view#description).                                                                                 |
+| `SaveButton`             | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
+| `SaveDraftButton`        | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
+| `PublishButton`          | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
+| `PreviewButton`          | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
+| `Status`                 | Replace the default Status component with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#status).                                         |
 
 <Banner type="success">
   **Note:** For details on how to build Custom Components, see [Building Custom

@@ -3,7 +3,6 @@ import type { LexicalCommand } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { $insertNodeToNearestRoot } from '@lexical/utils'
-import { useConfig } from '@payloadcms/ui'
 import {
   $getPreviousSelection,
   $getSelection,
@@ -20,6 +19,7 @@ import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
 import { RelationshipDrawer } from '../drawer/index.js'
 import { $createRelationshipNode, RelationshipNode } from '../nodes/RelationshipNode.js'
+import { useEnabledRelationships } from '../utils/useEnabledRelationships.js'
 
 export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = createCommand(
   'INSERT_RELATIONSHIP_COMMAND',
@@ -27,19 +27,11 @@ export const INSERT_RELATIONSHIP_COMMAND: LexicalCommand<RelationshipData> = cre
 
 export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
-  const {
-    config: { collections },
-  } = useConfig()
 
-  let enabledRelations: null | string[] = null
-
-  if (clientProps?.enabledCollections) {
-    enabledRelations = clientProps?.enabledCollections
-  } else if (clientProps?.disabledCollections) {
-    enabledRelations = collections
-      .filter(({ slug }) => !clientProps?.disabledCollections?.includes(slug))
-      .map(({ slug }) => slug)
-  }
+  const { enabledCollectionSlugs } = useEnabledRelationships({
+    collectionSlugsBlacklist: clientProps?.disabledCollections,
+    collectionSlugsWhitelist: clientProps?.enabledCollections,
+  })
 
   useEffect(() => {
     if (!editor.hasNodes([RelationshipNode])) {
@@ -71,5 +63,5 @@ export const RelationshipPlugin: PluginComponent<RelationshipFeatureProps> = ({ 
     )
   }, [editor])
 
-  return <RelationshipDrawer enabledCollectionSlugs={enabledRelations} />
+  return <RelationshipDrawer enabledCollectionSlugs={enabledCollectionSlugs} />
 }

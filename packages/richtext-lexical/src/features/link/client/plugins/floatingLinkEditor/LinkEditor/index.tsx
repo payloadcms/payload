@@ -3,6 +3,7 @@ import type { ElementNode, LexicalNode } from 'lexical'
 import type { Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -26,6 +27,7 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
@@ -61,6 +63,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     fieldProps: { schemaPath },
     uuid,
   } = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -171,15 +174,22 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setLinkLabel(loadingLabel)
 
         requests
-          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
+          .get(
+            formatAdminURL({
+              apiRoute: config.routes.api,
+              path: `/${collection}/${id}`,
+              serverURL: config.serverURL,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale: locale?.code,
+              },
             },
-            params: {
-              depth: 0,
-              locale: locale?.code,
-            },
-          })
+          )
           .then(async (res) => {
             if (!res.ok) {
               throw new Error(`HTTP error! Status: ${res.status}`)
@@ -353,7 +363,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             </>
           ) : null}
 
-          {editor.isEditable() && (
+          {isEditable && (
             <React.Fragment>
               <button
                 aria-label="Edit link"

@@ -72,6 +72,9 @@ export interface Config {
     'food-items': FoodItem;
     'food-menu': FoodMenu;
     'autosave-global': AutosaveGlobal;
+    relationships: Relationship;
+    notTenanted: NotTenanted;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -87,6 +90,9 @@ export interface Config {
     'food-items': FoodItemsSelect<false> | FoodItemsSelect<true>;
     'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -94,9 +100,10 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -137,6 +144,7 @@ export interface Tenant {
     totalDocs?: number;
   };
   isPublic?: boolean | null;
+  selectedLocales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -179,11 +187,12 @@ export interface FoodItem {
   id: string;
   tenant?: (string | null) | Tenant;
   name: string;
+  localizedName?: string | null;
   content?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -194,6 +203,41 @@ export interface FoodItem {
     };
     [k: string]: unknown;
   } | null;
+  polymorphicRelationship?:
+    | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'food-items';
+        value: string | FoodItem;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  relationship?: (string | null) | Relationship;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted".
+ */
+export interface NotTenanted {
+  id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,6 +278,23 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -258,6 +319,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-global';
         value: string | AutosaveGlobal;
+      } | null)
+    | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -310,6 +379,7 @@ export interface TenantsSelect<T extends boolean = true> {
   domain?: T;
   users?: T;
   isPublic?: T;
+  selectedLocales?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -349,7 +419,9 @@ export interface UsersSelect<T extends boolean = true> {
 export interface FoodItemsSelect<T extends boolean = true> {
   tenant?: T;
   name?: T;
+  localizedName?: T;
   content?: T;
+  polymorphicRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -382,6 +454,34 @@ export interface AutosaveGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships_select".
+ */
+export interface RelationshipsSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  relationship?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted_select".
+ */
+export interface NotTenantedSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -425,6 +525,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

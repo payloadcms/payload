@@ -52,6 +52,8 @@ export const Image: React.FC<MediaProps> = (props) => {
     src = `${PAYLOAD_SERVER_URL}/api/media/file/${filename}`
   }
 
+  if (!src) return null
+
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = Object.entries(breakpoints)
     .map(([, value]) => `(max-width: ${value}px) ${value}px`)

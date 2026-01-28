@@ -2,7 +2,7 @@ import type { Payload, QueryPreset } from 'payload'
 
 import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { pagesSlug, usersSlug } from './slugs.js'
+import { pagesSlug, postsSlug, usersSlug } from './slugs.js'
 
 type SeededQueryPreset = {
   relatedCollection: 'pages'
@@ -136,6 +136,27 @@ export const seed = async (_payload: Payload) => {
     false,
   )
 
+  // Create posts first, then pages with relationships
+  const [post1, post2] = await executePromises(
+    [
+      () =>
+        _payload.create({
+          collection: postsSlug,
+          data: {
+            text: 'Test Post 1',
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: postsSlug,
+          data: {
+            text: 'Test Post 2',
+          },
+        }),
+    ],
+    false,
+  )
+
   await executePromises(
     [
       () =>
@@ -143,6 +164,7 @@ export const seed = async (_payload: Payload) => {
           collection: pagesSlug,
           data: {
             text: 'example page',
+            postsRelationship: [post1.id, post2.id],
           },
         }),
       () =>
@@ -178,6 +200,36 @@ export const seed = async (_payload: Payload) => {
             access: {
               read: {
                 constraint: 'noone',
+              },
+            },
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: 'default-columns',
+          data: {
+            field1: 'field1',
+            field2: 'field2',
+            defaultColumnField: 'defaultColumnField',
+          },
+        }),
+      // Create basic query preset for default columns
+      () =>
+        _payload.create({
+          collection: 'payload-query-presets',
+          user: adminUser,
+          overrideAccess: false,
+          data: {
+            relatedCollection: 'default-columns',
+            title: 'Default Columns',
+            where: {
+              field1: {
+                exists: true,
+              },
+            },
+            access: {
+              read: {
+                constraint: 'everyone',
               },
             },
           },

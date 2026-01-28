@@ -93,12 +93,12 @@ The locale codes do not need to be in any specific format. It's up to you to def
 
 #### Locale Object
 
-| Option               | Description                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                     |
-| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use. |
-| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                      |
-| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
+| Option               | Description                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                                |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use.            |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                                 |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present. This can be a single locale or array of locales. |
 
 _\* An asterisk denotes that a property is required._
 
@@ -167,6 +167,69 @@ All field types with a `name` property support the `localized` property—even t
   strategy.
 </Banner>
 
+## Status Localization
+
+Payload allows you to localize the `status` field for **draft enabled** collections and globals. This lets you manage publication status independently for each locale, ensures the admin UI always shows the status for the selected locale, and unpublish content in a single locale.
+
+<Banner type="warning">
+  **Important:** This feature is **experimental** and currently in beta, you may
+  encounter some limitations or bugs. Please test thoroughly before using in
+  production.
+</Banner>
+
+**Two-Step Setup Required:** To enable localized status, you need to set **two** configuration options:
+
+1. Enable the experimental flag in your main config
+2. Enable it for specific collections or globals
+
+### Step 1: Enable Experimental Flag
+
+First, enable the experimental flag in your main Payload config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // highlight-start
+  experimental: {
+    localizeStatus: true, // Required to enable the feature globally
+  },
+  // highlight-end
+  // ... rest of your config
+})
+```
+
+### Step 2: Enable for Collections/Globals
+
+Then, enable it for specific collections or globals:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  versions: {
+    drafts: {
+      // highlight-start
+      localizeStatus: true, // Enable for this specific collection
+      // highlight-end
+    },
+  },
+}
+```
+
+When enabled, the `status` field will be stored as an object keyed by locales:
+
+```ts
+status: {
+  en: 'published',
+  es: 'draft',
+  de: 'published',
+}
+```
+
+`localizeStatus` is disabled by default, in which case the `status` field returns a single string (`'draft'` or `'published'`) representing the latest document status across all locales.
+
 ## Retrieving Localized Docs
 
 When retrieving documents, you can specify which locale you'd like to receive as well as which fallback locale should be
@@ -199,7 +262,7 @@ The `locale` arg will only accept valid locales, but locales will be formatted a
 values (dashes or special characters will be converted to underscores, spaces will be removed, etc.). If you are curious
 to see how locales are auto-formatted, you can use the [GraphQL playground](/docs/graphql/overview#graphql-playground).
 
-The `fallbackLocale` arg will accept valid locales as well as `none` to disable falling back.
+The `fallbackLocale` arg will accept valid locales, an array of locales, as well as `none` to disable falling back.
 
 **Example:**
 
@@ -224,7 +287,7 @@ query {
 
 You can specify `locale` as well as `fallbackLocale` within the Local API as well as properties on the `options`
 argument. The `locale` property will accept any valid locale, and the `fallbackLocale` property will accept any valid
-locale as well as `'null'`, `'false'`, `false`, and `'none'`.
+locale, array of locales, as well as `'null'`, `'false'`, `false`, and `'none'`.
 
 **Example:**
 

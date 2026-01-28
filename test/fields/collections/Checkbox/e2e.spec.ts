@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { addListFilter } from 'helpers/e2e/filters/index.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
@@ -61,12 +62,41 @@ describe('Checkboxes', () => {
     await page.goto(url.list)
 
     await addListFilter({
-      page,
       fieldLabel: 'Checkbox',
       operatorLabel: 'equals',
+      page,
       value: 'True',
     })
 
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
+  })
+
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-checkbox').waitFor()
+
+      const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
+        page,
+        testInfo,
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Checkbox inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-checkbox').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        selector: '.document-fields__main',
+        testInfo,
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

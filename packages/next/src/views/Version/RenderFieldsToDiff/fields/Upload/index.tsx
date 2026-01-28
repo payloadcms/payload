@@ -15,6 +15,11 @@ import React from 'react'
 
 const baseClass = 'upload-diff'
 
+type NonPolyUploadDoc = (FileData & TypeWithID) | number | string
+type PolyUploadDoc = { relationTo: string; value: (FileData & TypeWithID) | number | string }
+
+type UploadDoc = NonPolyUploadDoc | PolyUploadDoc
+
 export const Upload: UploadFieldDiffServerComponent = (args) => {
   const {
     comparisonValue: valueFrom,
@@ -25,17 +30,20 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
     req,
     versionValue: valueTo,
   } = args
+  const hasMany = 'hasMany' in field && field.hasMany && Array.isArray(valueTo)
+  const polymorphic = Array.isArray(field.relationTo)
 
-  if ('hasMany' in field && field.hasMany && Array.isArray(valueTo)) {
+  if (hasMany) {
     return (
       <HasManyUploadDiff
         field={field}
         i18n={i18n}
         locale={locale}
         nestingLevel={nestingLevel}
+        polymorphic={polymorphic}
         req={req}
-        valueFrom={valueFrom as any}
-        valueTo={valueTo as any}
+        valueFrom={valueFrom as UploadDoc[]}
+        valueTo={valueTo as UploadDoc[]}
       />
     )
   }
@@ -46,9 +54,10 @@ export const Upload: UploadFieldDiffServerComponent = (args) => {
       i18n={i18n}
       locale={locale}
       nestingLevel={nestingLevel}
+      polymorphic={polymorphic}
       req={req}
-      valueFrom={valueFrom as any}
-      valueTo={valueTo as any}
+      valueFrom={valueFrom as UploadDoc}
+      valueTo={valueTo as UploadDoc}
     />
   )
 }
@@ -58,11 +67,12 @@ export const HasManyUploadDiff: React.FC<{
   i18n: I18nClient
   locale: string
   nestingLevel?: number
+  polymorphic: boolean
   req: PayloadRequest
-  valueFrom: Array<FileData & TypeWithID>
-  valueTo: Array<FileData & TypeWithID>
+  valueFrom: Array<UploadDoc>
+  valueTo: Array<UploadDoc>
 }> = async (args) => {
-  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
+  const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
   const ReactDOMServer = (await import('react-dom/server')).default
 
   let From: React.ReactNode = ''
@@ -70,11 +80,22 @@ export const HasManyUploadDiff: React.FC<{
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
+  const getUploadDocKey = (uploadDoc: UploadDoc): number | string => {
+    if (typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
+      // Polymorphic case
+      const value = uploadDoc.value
+      return typeof value === 'object' ? value.id : value
+    }
+    // Non-polymorphic case
+    return typeof uploadDoc === 'object' ? uploadDoc.id : uploadDoc
+  }
+
   const FromComponents = valueFrom
     ? valueFrom.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
-          key={uploadDoc.id}
+          key={getUploadDocKey(uploadDoc)}
+          polymorphic={polymorphic}
           relationTo={field.relationTo}
           req={req}
           showCollectionSlug={showCollectionSlug}
@@ -86,7 +107,8 @@ export const HasManyUploadDiff: React.FC<{
     ? valueTo.map((uploadDoc) => (
         <UploadDocumentDiff
           i18n={i18n}
-          key={uploadDoc.id}
+          key={getUploadDocKey(uploadDoc)}
+          polymorphic={polymorphic}
           relationTo={field.relationTo}
           req={req}
           showCollectionSlug={showCollectionSlug}
@@ -137,11 +159,12 @@ export const SingleUploadDiff: React.FC<{
   i18n: I18nClient
   locale: string
   nestingLevel?: number
+  polymorphic: boolean
   req: PayloadRequest
-  valueFrom: FileData & TypeWithID
-  valueTo: FileData & TypeWithID
+  valueFrom: UploadDoc
+  valueTo: UploadDoc
 }> = async (args) => {
-  const { field, i18n, locale, nestingLevel, req, valueFrom, valueTo } = args
+  const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
 
   const ReactDOMServer = (await import('react-dom/server')).default
 
@@ -153,6 +176,7 @@ export const SingleUploadDiff: React.FC<{
   const FromComponent = valueFrom ? (
     <UploadDocumentDiff
       i18n={i18n}
+      polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
       showCollectionSlug={showCollectionSlug}
@@ -162,6 +186,7 @@ export const SingleUploadDiff: React.FC<{
   const ToComponent = valueTo ? (
     <UploadDocumentDiff
       i18n={i18n}
+      polymorphic={polymorphic}
       relationTo={field.relationTo}
       req={req}
       showCollectionSlug={showCollectionSlug}
@@ -201,35 +226,72 @@ export const SingleUploadDiff: React.FC<{
 
 const UploadDocumentDiff = (args: {
   i18n: I18nClient
-  relationTo: string
+  polymorphic: boolean
+  relationTo: string | string[]
   req: PayloadRequest
   showCollectionSlug?: boolean
-  uploadDoc: FileData & TypeWithID
+  uploadDoc: UploadDoc
 }) => {
-  const { i18n, relationTo, req, showCollectionSlug, uploadDoc } = args
+  const { i18n, polymorphic, relationTo, req, showCollectionSlug, uploadDoc } = args
 
-  const thumbnailSRC: string =
-    ('thumbnailURL' in uploadDoc && (uploadDoc?.thumbnailURL as string)) || uploadDoc?.url || ''
+  let thumbnailSRC: string = ''
+
+  const value = polymorphic
+    ? (uploadDoc as { relationTo: string; value: FileData & TypeWithID }).value
+    : (uploadDoc as FileData & TypeWithID)
+
+  if (value && typeof value === 'object' && 'thumbnailURL' in value) {
+    thumbnailSRC =
+      (typeof value.thumbnailURL === 'string' && value.thumbnailURL) ||
+      (typeof value.url === 'string' && value.url) ||
+      ''
+  }
+
+  let filename: string
+  if (value && typeof value === 'object') {
+    filename = value.filename
+  } else {
+    filename = `${i18n.t('general:untitled')} - ID: ${uploadDoc as number | string}`
+  }
 
   let pillLabel: null | string = null
 
   if (showCollectionSlug) {
-    const uploadConfig = req.payload.collections[relationTo].config
+    let collectionSlug: string
+    if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
+      collectionSlug = uploadDoc.relationTo
+    } else {
+      collectionSlug = typeof relationTo === 'string' ? relationTo : relationTo[0]
+    }
+    const uploadConfig = req.payload.collections[collectionSlug].config
     pillLabel = uploadConfig.labels?.singular
       ? getTranslation(uploadConfig.labels.singular, i18n)
       : uploadConfig.slug
   }
 
+  let id: number | string | undefined
+  if (polymorphic && typeof uploadDoc === 'object' && 'relationTo' in uploadDoc) {
+    const polyValue = uploadDoc.value
+    id = typeof polyValue === 'object' ? polyValue.id : polyValue
+  } else if (typeof uploadDoc === 'object' && 'id' in uploadDoc) {
+    id = uploadDoc.id
+  } else if (typeof uploadDoc === 'string' || typeof uploadDoc === 'number') {
+    id = uploadDoc
+  }
+
+  const alt =
+    (value && typeof value === 'object' && (value as { alt?: string }).alt) || filename || ''
+
   return (
     <div
       className={`${baseClass}`}
       data-enable-match="true"
-      data-id={uploadDoc?.id}
+      data-id={id}
       data-relation-to={relationTo}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__thumbnail`}>
-          {thumbnailSRC?.length ? <img alt={uploadDoc?.filename} src={thumbnailSRC} /> : <File />}
+          {thumbnailSRC?.length ? <img alt={alt} src={thumbnailSRC} /> : <File />}
         </div>
         {pillLabel && (
           <div className={`${baseClass}__pill`} data-enable-match="false">
@@ -237,7 +299,7 @@ const UploadDocumentDiff = (args: {
           </div>
         )}
         <div className={`${baseClass}__info`} data-enable-match="false">
-          <strong>{uploadDoc?.filename}</strong>
+          <strong>{filename}</strong>
         </div>
       </div>
     </div>

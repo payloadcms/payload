@@ -11,7 +11,7 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { DestinationStream, Level, pino } from 'pino'
+import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -43,8 +43,10 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  DefaultDocumentIDType,
   FlattenedBlock,
   JobsConfig,
+  KVAdapterResult,
   Payload,
   RequestContext,
   SelectField,
@@ -138,6 +140,8 @@ type Prettify<T> = {
 
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreviewURLType = null | string | undefined
+
 export type LivePreviewConfig = {
   /**
    Device breakpoints to use for the `iframe` of the Live Preview window.
@@ -151,10 +155,16 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * @see https://payloadcms.com/docs/live-preview/frontend
+   *
+   * To conditionally render Live Preview, use a function that returns `undefined` or `null`.
+   *
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {
@@ -168,8 +178,8 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => Promise<string> | string)
-    | string
+      }) => LivePreviewURLType | Promise<LivePreviewURLType>)
+    | LivePreviewURLType
 }
 
 export type RootLivePreviewConfig = {
@@ -275,6 +285,7 @@ export type InitOptions = {
   disableOnInit?: boolean
 
   importMap?: ImportMap
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -304,7 +315,7 @@ export type AccessArgs<TData = any> = {
    */
   data?: TData
   /** ID of the resource being accessed */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
@@ -335,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
@@ -430,7 +441,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -461,7 +472,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -688,7 +699,16 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+export type ErrorResult = {
+  data?: any
+  errors: {
+    data?: Record<string, unknown>
+    field?: string
+    message?: string
+    name?: string
+  }[]
+  stack?: string
+}
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
@@ -725,6 +745,53 @@ export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
 
+export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
+
+export type Widget = {
+  ComponentPath: string
+  /**
+   * Human-friendly label for the widget.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the label will be auto-generated from the slug.
+   */
+  label?: LabelFunction | StaticLabel
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
+  // TODO: Add fields
+  // fields?: Field[]
+  // Maybe:
+  // ImageURL?: string // similar to Block
+}
+
+/**
+ * Client-side widget type with resolved label (no functions).
+ */
+export type ClientWidget = {
+  label?: StaticLabel
+  maxWidth?: WidgetWidth
+  minWidth?: WidgetWidth
+  slug: string
+}
+
+export type WidgetInstance = {
+  // TODO: should be inferred from Widget Fields
+  // data: Record<string, any>
+  widgetSlug: string
+  width?: WidgetWidth
+}
+
+export type DashboardConfig = {
+  defaultLayout?:
+    | ((args: { req: PayloadRequest }) => Array<WidgetInstance> | Promise<Array<WidgetInstance>>)
+    | Array<WidgetInstance>
+  widgets: Array<Widget>
+}
+
+export type SanitizedDashboardConfig = {
+  widgets: Array<Omit<Widget, 'ComponentPath'>>
+}
+
 /**
  * This is the central configuration
  *
@@ -752,6 +819,12 @@ export type Config = {
           username?: string
         }
       | false
+    /**
+     * Automatically refresh user tokens for users logged into the dashboard
+     *
+     * @default false
+     */
+    autoRefresh?: boolean
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
     avatar?:
       | 'default'
@@ -819,6 +892,11 @@ export type Config = {
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -837,6 +915,11 @@ export type Config = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Customize the dashboard widgets
+     * @experimental This prop is subject to change in future releases.
+     */
+    dashboard?: DashboardConfig
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
@@ -873,6 +956,11 @@ export type Config = {
        */
       importMapFile?: string
     }
+    /**
+     * Live Preview options.
+     *
+     * @see https://payloadcms.com/docs/live-preview/overview
+     */
     livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
@@ -940,9 +1028,10 @@ export type Config = {
      */
     timezones?: TimezonesConfig
     /**
-     * @experimental
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
+     *
+     * @experimental This property is experimental and may change in future releases. Use at your own risk.
      */
     toast?: {
       /**
@@ -961,10 +1050,22 @@ export type Config = {
        * @default 5
        */
       limit?: number
+      /**
+       * The position of the toast on the screen.
+       * @default 'bottom-right'
+       */
+      position?:
+        | 'bottom-center'
+        | 'bottom-left'
+        | 'bottom-right'
+        | 'top-center'
+        | 'top-left'
+        | 'top-right'
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+
   /**
    * Configure authentication-related Payload-wide settings.
    */
@@ -978,6 +1079,15 @@ export type Config = {
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]
+  /**
+   * Pass additional options to the parser used to process `multipart/form-data` requests.
+   * For example, a PATCH request containing HTML form data.
+   * For example, you may want to increase the `limits` imposed by the parser.
+   * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
+   *
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
+   */
+  bodyParser?: Partial<BusboyConfig>
   /**
    * Manage the datamodel of your application
    *
@@ -1009,10 +1119,8 @@ export type Config = {
   cors?: '*' | CORSConfig | string[]
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
-
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1042,8 +1150,25 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Experimental features may be unstable or change in future versions.
+   */
+  experimental?: {
+    /**
+     * Enable per-locale status for documents.
+     *
+     * Requires:
+     * - `localization` enabled
+     * - `versions.drafts` enabled
+     * - `versions.drafts.localizeStatus` set at collection or global level
+     *
+     * @experimental
+     */
+    localizeStatus?: boolean
+  }
+  /**
    * Options for folder view within the admin panel
-   * @experimental this feature may change in minor versions until it is fully stable
+   *
+   * @experimental This feature may change in minor versions until it is fully stable
    */
   folders?: false | RootFoldersConfiguration
   /**
@@ -1113,6 +1238,15 @@ export type Config = {
    */
   jobs?: JobsConfig
   /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
+  /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
@@ -1142,7 +1276,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
@@ -1188,18 +1322,69 @@ export type Config = {
    * @see https://payloadcms.com/docs/query-presets/overview
    */
   queryPresets?: {
+    /**
+     * Define collection-level access control that applies to all presets globally.
+     * This is separate from document-level access (constraints) which users can configure per-preset.
+     */
     access: {
       create?: Access<QueryPreset>
       delete?: Access<QueryPreset>
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
+    /**
+     * Define custom document-level access control options for presets.
+     *
+     * Payload provides sensible defaults (Only Me, Everyone, Specific Users), but you can
+     * add custom constraints for more complex patterns like RBAC.
+     *
+     * @example
+     * ```ts
+     * constraints: {
+     *   read: [
+     *     {
+     *       label: 'Specific Roles',
+     *       value: 'specificRoles',
+     *       fields: [
+     *         {
+     *           name: 'roles',
+     *           type: 'select',
+     *           hasMany: true,
+     *           options: [
+     *             { label: 'Admin', value: 'admin' },
+     *             { label: 'User', value: 'user' },
+     *           ],
+     *         },
+     *       ],
+     *       access: ({ req: { user } }) => ({
+     *         'access.read.roles': { in: [user?.roles] },
+     *       }),
+     *     },
+     *   ],
+     * }
+     * ```
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#custom-access-control
+     */
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    /**
+     * Used to dynamically filter which constraints are available based on the current user, document data,
+     * or other criteria.
+     *
+     * Some examples of this might include:
+     *
+     * - Ensuring that only "admins" are allowed to make a preset available to "everyone"
+     * - Preventing the "onlyMe" option from being selected based on a hypothetical "disablePrivatePresets" checkbox
+     *
+     * When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#constraint-access-control
+     */
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
@@ -1289,6 +1474,14 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
+
+    /**
+     * Enable strict type safety for draft mode queries.
+     * When enabled, find operations with draft: true will type required fields as optional.
+     * @default false
+     * @todo Remove in v4. Strict draft types will become the default behavior.
+     */
+    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

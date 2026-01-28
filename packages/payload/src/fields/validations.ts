@@ -529,11 +529,100 @@ export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t 
 
 export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
 
-export const blocks: BlocksFieldValidation = (
+/**
+ * This function validates the blocks in a blocks field against the provided filterOptions.
+ * It will return a list of all block slugs found in the value, the allowed block slugs (if any),
+ * and a list of invalid block slugs that are used despite being disallowed.
+ *
+ * @internal - this may break or be removed at any time
+ */
+export async function validateBlocksFilterOptions({
+  id,
+  data,
+  filterOptions,
+  req,
+  siblingData,
   value,
-  { maxRows, minRows, req: { t }, required },
+}: { value: Parameters<BlocksFieldValidation>[0] } & Pick<
+  Parameters<BlocksFieldValidation>[1],
+  'data' | 'filterOptions' | 'id' | 'req' | 'siblingData'
+>): Promise<{
+  /**
+   * All block slugs found in the value of the blocks field
+   */
+  allBlockSlugs: string[]
+  /**
+   * All block slugs that are allowed. If undefined, all blocks are allowed.
+   */
+  allowedBlockSlugs: string[] | undefined
+  /**
+   * A list of block slugs that are used despite being disallowed. If undefined, field passed validation.
+   */
+  invalidBlockSlugs: string[] | undefined
+}> {
+  const allBlockSlugs = Array.isArray(value)
+    ? (value as Array<{ blockType?: string }>)
+        .map((b) => b.blockType)
+        .filter((s): s is string => Boolean(s))
+    : []
+
+  // if undefined => all blocks allowed
+  let allowedBlockSlugs: string[] | undefined = undefined
+
+  if (typeof filterOptions === 'function') {
+    const result = await filterOptions({
+      id: id!, // original code asserted presence
+      data,
+      req,
+      siblingData,
+      user: req.user,
+    })
+    if (result !== true && Array.isArray(result)) {
+      allowedBlockSlugs = result
+    }
+  } else if (Array.isArray(filterOptions)) {
+    allowedBlockSlugs = filterOptions
+  }
+
+  const invalidBlockSlugs: string[] = []
+  if (allowedBlockSlugs) {
+    for (const blockSlug of allBlockSlugs) {
+      if (!allowedBlockSlugs.includes(blockSlug)) {
+        invalidBlockSlugs.push(blockSlug)
+      }
+    }
+  }
+
+  return {
+    allBlockSlugs,
+    allowedBlockSlugs,
+    invalidBlockSlugs,
+  }
+}
+export const blocks: BlocksFieldValidation = async (
+  value,
+  { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
-  return validateArrayLength(value, { maxRows, minRows, required, t })
+  const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+  if (typeof lengthValidationResult === 'string') {
+    return lengthValidationResult
+  }
+
+  if (filterOptions) {
+    const { invalidBlockSlugs } = await validateBlocksFilterOptions({
+      id,
+      data,
+      filterOptions,
+      req,
+      siblingData,
+      value,
+    })
+    if (invalidBlockSlugs?.length) {
+      return t('validation:invalidBlocks', { blocks: invalidBlockSlugs.join(', ') })
+    }
+  }
+
+  return true
 }
 
 const validateFilterOptions: Validate<
@@ -894,6 +983,31 @@ export const select: SelectFieldValidation = (
     return t('validation:invalidSelection')
   }
 
+  // Check for duplicate values when hasMany is true
+  if (hasMany && Array.isArray(value) && value.length > 1) {
+    const counts = new Map<unknown, number>()
+
+    for (const item of value) {
+      counts.set(item, (counts.get(item) || 0) + 1)
+    }
+
+    const duplicates: unknown[] = []
+    for (const [item, count] of counts.entries()) {
+      if (count > 1) {
+        // Add the item 'count' times to show all occurrences
+        for (let i = 0; i < count; i++) {
+          duplicates.push(item)
+        }
+      }
+    }
+
+    if (duplicates.length > 0) {
+      return duplicates.reduce((err, duplicate, i) => {
+        return `${err} ${JSON.stringify(duplicate)}${i < duplicates.length - 1 ? ',' : ''}`
+      }, t('validation:invalidSelections')) as string
+    }
+  }
+
   if (
     typeof value === 'string' &&
     !filteredOptions.some(
@@ -958,6 +1072,16 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
 
   if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
+  }
+
+  // Validate longitude bounds (-180 to 180)
+  if (value[0] && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+    return t('validation:longitudeOutOfBounds')
+  }
+
+  // Validate latitude bounds (-90 to 90)
+  if (value[1] && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+    return t('validation:latitudeOutOfBounds')
   }
 
   return true

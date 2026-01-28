@@ -1,4 +1,3 @@
-import type { I18n } from '@payloadcms/translations'
 import type {
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -14,26 +13,33 @@ import './index.scss'
 
 const baseClass = `doc-header`
 
+/**
+ * @internal
+ */
 export const DocumentHeader: React.FC<{
+  AfterHeader?: React.ReactNode
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   permissions: SanitizedPermissions
   req: PayloadRequest
 }> = (props) => {
-  const { collectionConfig, globalConfig, hideTabs, permissions, req } = props
+  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
     <Gutter className={baseClass}>
-      <RenderTitle className={`${baseClass}__title`} />
-      {!hideTabs && (
-        <DocumentTabs
-          collectionConfig={collectionConfig}
-          globalConfig={globalConfig}
-          permissions={permissions}
-          req={req}
-        />
-      )}
+      <div className={`${baseClass}__header`}>
+        <RenderTitle className={`${baseClass}__title`} />
+        {!hideTabs && (
+          <DocumentTabs
+            collectionConfig={collectionConfig}
+            globalConfig={globalConfig}
+            permissions={permissions}
+            req={req}
+          />
+        )}
+      </div>
+      {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}
     </Gutter>
   )
 }

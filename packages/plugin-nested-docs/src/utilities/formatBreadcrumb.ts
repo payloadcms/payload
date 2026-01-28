@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { PayloadRequest, SanitizedCollectionConfig } from 'payload'
 
 import type { Breadcrumb, GenerateLabel, GenerateURL } from '../types.js'
 
@@ -12,6 +12,7 @@ type Args = {
   docs: Record<string, unknown>[]
   generateLabel?: GenerateLabel
   generateURL?: GenerateURL
+  req: PayloadRequest
 }
 
 export const formatBreadcrumb = ({
@@ -20,6 +21,7 @@ export const formatBreadcrumb = ({
   docs,
   generateLabel,
   generateURL,
+  req,
 }: Args): Breadcrumb => {
   let url: string | undefined = undefined
   let label: string
@@ -27,11 +29,11 @@ export const formatBreadcrumb = ({
   const lastDoc = docs[docs.length - 1]!
 
   if (typeof generateURL === 'function') {
-    url = generateURL(docs, lastDoc)
+    url = generateURL(docs, lastDoc, collection, req)
   }
 
   if (typeof generateLabel === 'function') {
-    label = generateLabel(docs, lastDoc)
+    label = generateLabel(docs, lastDoc, collection, req)
   } else {
     const title = collection.admin?.useAsTitle ? lastDoc[collection.admin.useAsTitle] : ''
 

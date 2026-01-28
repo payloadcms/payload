@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -21,9 +22,6 @@ import {
   ListBulkUploadButton,
   ListCreateNewDocInFolderButton,
 } from '../../elements/ListHeader/TitleActions/index.js'
-import { ByFolderPill } from '../../elements/ListHeaderTabs/ByFolderPill.js'
-import { DefaultListPill } from '../../elements/ListHeaderTabs/DefaultListPill.js'
-import { TrashPill } from '../../elements/ListHeaderTabs/TrashPill.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
@@ -245,6 +243,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     collectionSlug,
     config.folders,
     config.routes.admin,
+    config.serverURL,
     drawerDepth,
     i18n,
     labels?.plural,
@@ -274,35 +273,23 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                   key="list-selection"
                 />
               ),
-              config.folders && collectionConfig.folders && (
-                <Fragment key="list-header-folder-view-buttons">
-                  <DefaultListPill
-                    collectionConfig={collectionConfig}
-                    key="list-header-default-button"
-                    viewType="folders"
-                  />
-                  <ByFolderPill
-                    collectionConfig={collectionConfig}
-                    folderCollectionSlug={folderCollectionSlug}
-                    key="list-header-by-folder-button"
-                    viewType="folders"
-                  />
-                </Fragment>
-              ),
-              collectionConfig.trash && (
-                <TrashPill
-                  collectionConfig={collectionConfig}
-                  key="list-header-trash-button"
-                  viewType="folders"
-                />
-              ),
+              <DefaultListViewTabs
+                collectionConfig={collectionConfig}
+                config={config}
+                key="default-list-actions"
+                viewType="folders"
+              />,
             ].filter(Boolean)}
             AfterListHeaderContent={Description}
             title={getTranslation(labels?.plural, i18n)}
             TitleActions={[
               allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={
                     Array.isArray(folderType) ? folderType : [collectionSlug]

@@ -3,7 +3,6 @@ import type { Field, Option, SelectField } from '../fields/config/types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { buildFolderField } from './buildFolderField.js'
-import { foldersSlug } from './constants.js'
 import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
@@ -87,9 +86,6 @@ export const createFolderCollection = ({
               admin: {
                 components: {
                   Field: {
-                    clientProps: {
-                      options: collectionOptions,
-                    },
                     path: '@payloadcms/ui#FolderTypeField',
                   },
                 },
@@ -115,7 +111,7 @@ export const createFolderCollection = ({
       ],
       beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
       beforeValidate: [
-        ...(collectionSpecific ? [ensureSafeCollectionsChange({ foldersSlug })] : []),
+        ...(collectionSpecific ? [ensureSafeCollectionsChange({ foldersSlug: slug })] : []),
       ],
     },
     labels: {

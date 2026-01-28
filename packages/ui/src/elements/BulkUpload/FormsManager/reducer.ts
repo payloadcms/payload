@@ -2,6 +2,8 @@ import type { FormState, UploadEdits } from 'payload'
 
 import { v4 as uuidv4 } from 'uuid'
 
+import type { InitialForms } from './index.js'
+
 export type State = {
   activeIndex: number
   forms: {
@@ -28,8 +30,7 @@ type Action =
       uploadEdits?: UploadEdits
     }
   | {
-      files: FileList
-      initialState: FormState | null
+      forms: InitialForms
       type: 'ADD_FORMS'
     }
   | {
@@ -49,16 +50,16 @@ export function formsManagementReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD_FORMS': {
       const newForms: State['forms'] = []
-      for (let i = 0; i < action.files.length; i++) {
+      for (let i = 0; i < action.forms.length; i++) {
         newForms[i] = {
           errorCount: 0,
-          formID: crypto.randomUUID ? crypto.randomUUID() : uuidv4(),
+          formID: action.forms[i].formID ?? (crypto.randomUUID ? crypto.randomUUID() : uuidv4()),
           formState: {
-            ...(action.initialState || {}),
+            ...(action.forms[i].initialState || {}),
             file: {
-              initialValue: action.files[i],
+              initialValue: action.forms[i].file,
               valid: true,
-              value: action.files[i],
+              value: action.forms[i].file,
             },
           },
           uploadEdits: {},
@@ -110,7 +111,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     case 'UPDATE_FORM': {
@@ -133,7 +134,7 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms: updatedForms,
-        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+        totalErrorCount: updatedForms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }
     default: {

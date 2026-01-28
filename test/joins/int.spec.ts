@@ -3,6 +3,7 @@ import type { Payload, TypeWithID } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
@@ -215,6 +216,18 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
   })
 
+  it('should count hasMany relationship joins', async () => {
+    const res = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        hasManyPosts: { limit: 1, count: true },
+      },
+    })
+
+    expect(res.hasManyPosts?.totalDocs).toBe(15)
+  })
+
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
@@ -396,6 +409,66 @@ describe('Joins Field', () => {
                 folderType: {
                   in: ['folderPoly1'],
                 },
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+  })
+
+  it('should query where with exists for hasMany select fields', async () => {
+    await payload.delete({ collection: 'payload-folders', where: {} })
+    const folderDoc = await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'scopedFolder',
+        folderType: ['folderPoly1', 'folderPoly2'],
+      },
+    })
+
+    await payload.create({
+      collection: 'payload-folders',
+      data: {
+        name: 'childFolder',
+        folderType: ['folderPoly1'],
+        folder: folderDoc.id,
+      },
+    })
+
+    const findFolder = await payload.find({
+      collection: 'payload-folders',
+      where: {
+        id: {
+          equals: folderDoc.id,
+        },
+      },
+      joins: {
+        documentsAndFolders: {
+          limit: 100_000,
+          sort: 'name',
+          where: {
+            and: [
+              {
+                relationTo: {
+                  equals: 'payload-folders',
+                },
+              },
+              {
+                or: [
+                  {
+                    folderType: {
+                      in: ['folderPoly1'],
+                    },
+                  },
+                  {
+                    folderType: {
+                      exists: false,
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -1762,6 +1835,61 @@ describe('Joins Field', () => {
       where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
     })
 
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'group.relatedPosts.title': { equals: 'my-category-title' },
+          },
+          {
+            'group.relatedPosts.title': { exists: true },
+          },
+          {
+            'group.relatedPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with hasMany relationship multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { categories: [category.id], title: 'my-title', isFiltered: true },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'hasManyPosts.title': { equals: 'my-title' },
+          },
+          {
+            'hasManyPosts.title': { exists: true },
+          },
+          {
+            'hasManyPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
   })

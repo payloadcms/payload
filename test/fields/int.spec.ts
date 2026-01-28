@@ -1,9 +1,11 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
+import type { Payload, ValidationError } from 'payload'
 
 import path from 'path'
-import { type Payload, reload } from 'payload'
+import { reload } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
@@ -11,6 +13,7 @@ import type { BlockField, GroupField } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
+import { it } from '../helpers/vitest.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
@@ -32,13 +35,14 @@ import {
   blockFieldsSlug,
   checkboxFieldsSlug,
   collapsibleFieldsSlug,
+  customIDNestedSlug,
+  dateFieldsSlug,
   groupFieldsSlug,
   numberFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
-
 let restClient: NextRESTClient
 let user: any
 let payload: Payload
@@ -154,6 +158,43 @@ describe('Fields', () => {
         where: {
           hasMany: {
             in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query multiple hasMany fields', async () => {
+      await payload.delete({ collection: 'text-fields', where: {} })
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['1', '2', '3'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['6'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: { equals: '3' },
+          hasManySecond: {
+            equals: '4',
           },
         },
       })
@@ -590,6 +631,7 @@ describe('Fields', () => {
 
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
+    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10)
     let doc
     beforeEach(async () => {
       doc = await payload.create({
@@ -612,7 +654,7 @@ describe('Fields', () => {
       expect(docs.map(({ id }) => id)).toContain(doc.id)
     })
 
-    it('should query createdAt', async () => {
+    it('should query createdAt (greater_than_equal with results)', async () => {
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
@@ -624,6 +666,76 @@ describe('Fields', () => {
       })
 
       expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (greater_than_equal with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (less_than with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (less_than with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesAgo,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (in with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [new Date(doc.createdAt)],
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+    })
+
+    it('should query createdAt (in without results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [tenMinutesAgo],
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
     })
 
     // Function to generate random date between start and end dates
@@ -666,12 +778,13 @@ describe('Fields', () => {
 
       expect(res.docs.every(filter)).toBe(true)
       expect(dataSample.filter(filter)).toHaveLength(res.totalDocs)
-      // eslint-disable-next-line jest/no-conditional-in-test
       if (res.totalDocs > 10) {
         // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
         // not only ID, but also created_at, updated_at, items_date
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(res.docs).toHaveLength(10)
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(res.docs.length).toBeLessThanOrEqual(res.totalDocs)
       }
     })
@@ -886,6 +999,7 @@ describe('Fields', () => {
 
         expect(result).toBeFalsy()
       } catch (error) {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect((error as Error).message).toBe(
           'The following field is invalid: Select with filtered options',
         )
@@ -900,6 +1014,25 @@ describe('Fields', () => {
       })
 
       expect(result).toBeTruthy()
+    })
+
+    it('should throw field error when duplicate values in hasMany select field', async () => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: 'select-fields',
+          data: {
+            selectHasMany: ['one', 'two', 'one', 'two', 'one'],
+          },
+        })
+      } catch (e) {
+        error = e as ValidationError
+      }
+
+      expect(error.data.errors[0].message).toBe(
+        'This field has the following invalid selections: "one", "one", "one", "two", "two"',
+      )
     })
   })
 
@@ -2095,6 +2228,102 @@ describe('Fields', () => {
       expect(idFields).toHaveLength(1)
       expect(idFields[0].admin?.disableListFilter).toBe(true)
     })
+
+    it('should query exists true', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withCollapsed.id)
+    })
+
+    it('should query exists false', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withoutCollapsed.id)
+    })
   })
 
   describe('group', () => {
@@ -3060,7 +3289,10 @@ describe('Fields', () => {
           await payload.create({
             collection: 'json-fields',
             data: {
-              json: { value: i },
+              json: {
+                value: i,
+                isEven: i % 2 === 0,
+              },
             },
           })
         }
@@ -3266,8 +3498,31 @@ describe('Fields', () => {
         expect(docIDs).toContain(2)
       })
 
+      it('should query nested numbers with multiple clauses - equals_and_in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.isEven': { equals: true },
+              },
+              {
+                // Tests odd -> even order and even -> odd order for better coverage.
+                'json.value': { in: [1, 4, 2, 3] },
+              },
+            ],
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).not.toContain(1)
+        expect(docIDs).toContain(2)
+        expect(docIDs).not.toContain(3)
+        expect(docIDs).toContain(4)
+      })
+
       it('should query deeply', async () => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -3325,6 +3580,91 @@ describe('Fields', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0].id).toBe(json_1.id)
       })
+
+      it('should disallow unsafe query paths', async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.select from': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json."unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.(unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.unsafe="': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+      })
+
+      it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: 'select(' },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: '"unsafe' },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `'unsafe` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe\\` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe=` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+      })
     })
   })
 
@@ -3340,6 +3680,277 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+
+    describe('querying', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ collection: 'relationship-fields', id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should query non-polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text1.id, text2.id]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text1.id] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text-fields:text1, array-fields:array1]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text-fields:text1] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [{ relationTo: 'text-fields', value: text1.id }],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query non-polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const text3 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 3' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text3.id],
+            relationship: { relationTo: 'text-fields', value: text3.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text1.id, text2.id] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text3.id] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text3.id],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+
+      it('should query polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: text2.id }],
+            relationship: { relationTo: 'text-fields', value: text2.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text-fields:text1, array-fields:array1] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text-fields:text2] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [{ relationTo: 'text-fields', value: text2.id }],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
     })
   })
 
@@ -3399,6 +4010,609 @@ describe('Fields', () => {
       })
 
       expect(result.docs).toHaveLength(1)
+    })
+  })
+
+  describe('Custom ID Nested', () => {
+    const createdIDs: number[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: customIDNestedSlug,
+          id,
+        })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should create document with numeric custom ID nested in tabs', async () => {
+      const customID = 12345
+      createdIDs.push(customID)
+
+      const doc = await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Test Document',
+          description: 'Testing nested custom ID field',
+        },
+      })
+
+      expect(doc.id).toBe(customID)
+      expect(doc.title).toBe('Test Document')
+    })
+
+    it('should retrieve document by numeric custom ID', async () => {
+      const customID = 67890
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Another Test',
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: customIDNestedSlug,
+        id: customID,
+      })
+
+      expect(retrieved.id).toBe(customID)
+      expect(retrieved.title).toBe('Another Test')
+    })
+
+    it('should update document with numeric custom ID', async () => {
+      const customID = 99999
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Original Title',
+        },
+      })
+
+      const updated = await payload.update({
+        collection: customIDNestedSlug,
+        id: customID,
+        data: {
+          title: 'Updated Title',
+        },
+      })
+
+      expect(updated.id).toBe(customID)
+      expect(updated.title).toBe('Updated Title')
+    })
+  })
+
+  describe('date fields with timezones', () => {
+    it('should create document with UTC offset timezone', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+      expect(doc.dateWithOffsetTimezone_tz).toEqual('+05:30')
+    })
+
+    it('should update timezone from IANA to offset', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      const updated = await payload.update({
+        id: doc.id,
+        collection: dateFieldsSlug,
+        data: {
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+      })
+
+      expect(updated.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should query documents by timezone field', async () => {
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      const indiaTimezoneResults = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          dateWithOffsetTimezone_tz: {
+            equals: '+05:30',
+          },
+        },
+      })
+
+      expect(indiaTimezoneResults.docs.length).toBeGreaterThanOrEqual(1)
+      expect(
+        indiaTimezoneResults.docs.every((doc) => doc.dateWithOffsetTimezone_tz === '+05:30'),
+      ).toBe(true)
+    })
+
+    it('should store mixed IANA and offset timezones correctly', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      // Create another doc with offset timezone
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should handle different offset formats consistently', async () => {
+      // Test HH:mm format
+      const doc1 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
+
+      // Test negative offset
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
+
+      // Test zero offset
+      const doc3 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
+          dateWithOffsetTimezone_tz: '+00:00',
+        },
+        draft: true,
+      })
+
+      expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
+    })
+
+    describe('GraphQL timezone operations', () => {
+      // Note: GraphQL enums serialize to their NAME (e.g., '_TZOFFSET_PLUS_05_30'), not their VALUE (e.g., '+05:30')
+      // This is standard GraphQL behavior. UTC offsets are transformed to GraphQL-safe names:
+      // +05:30 → _TZOFFSET_PLUS_05_30, -08:00 → _TZOFFSET_MINUS_08_00, America/New_York → America_New_York
+
+      it('should read UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+        // GraphQL returns enum NAME, not VALUE
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_PLUS_05_30')
+      })
+
+      it('should read negative UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_MINUS_08_00')
+      })
+
+      it('should read mixed IANA and offset timezones via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithMixedTimezones
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        // GraphQL returns enum NAME (America_New_York), not VALUE (America/New_York)
+        expect(result.data.DateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should create document with UTC offset timezone via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T04:30:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              id
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should create document with negative UTC offset via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T16:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update timezone from one offset to another via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update mixed timezone field from IANA to offset via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should update mixed timezone field from offset to IANA via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+            dateWithMixedTimezones_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: America_New_York
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should query documents by offset timezone field via GraphQL', async () => {
+        // Create documents with different timezones
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateFields(where: { dateWithOffsetTimezone_tz: { equals: _TZOFFSET_PLUS_05_30 } }) {
+              docs {
+                dateWithOffsetTimezone_tz
+              }
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateFields.docs.length).toBeGreaterThanOrEqual(1)
+        expect(
+          result.data.DateFields.docs.every(
+            (doc: { dateWithOffsetTimezone_tz: string }) =>
+              doc.dateWithOffsetTimezone_tz === '_TZOFFSET_PLUS_05_30',
+          ),
+        ).toBe(true)
+      })
+
+      it('should handle UTC+00:00 offset via GraphQL', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T10:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_00_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_00_00',
+        )
+      })
+    })
+
+    it('should apply timezone override function to customize the field', async () => {
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // We can verify this by checking the collection config has the modified field
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
+      expect(timezoneField).toBeDefined()
+      expect(timezoneField?.type).toEqual('select')
+      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect(timezoneField?.admin?.description).toEqual(
+        'This timezone field was customized via override',
+      )
+
+      // Also verify it still works for creating/storing data
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
+          dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
+    })
+
+    it('should generate timezone field label from parent date field label', () => {
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      // Field with no explicit label - should use toWords(name) for timezone label
+      const defaultTzField = fields.find((f) => f.name === 'defaultWithTimezone_tz')
+      expect(defaultTzField?.label).toEqual('Default With Timezone Tz')
+
+      // Field with disableListColumn override - label should still be generated
+      const disabledColumnsTzField = fields.find(
+        (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
+      )
+      expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
     })
   })
 })

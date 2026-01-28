@@ -25,6 +25,7 @@ const incrementName = (name: string) => {
 type Args = {
   collectionSlug: string
   desiredFilename: string
+  prefix?: string
   req: PayloadRequest
   staticPath: string
 }
@@ -32,6 +33,7 @@ type Args = {
 export async function getSafeFileName({
   collectionSlug,
   desiredFilename,
+  prefix,
   req,
   staticPath,
 }: Args): Promise<string> {
@@ -42,6 +44,7 @@ export async function getSafeFileName({
       collectionSlug,
       filename: modifiedFilename,
       path: staticPath,
+      prefix,
       req,
     })) ||
     (await fileExists(`${staticPath}/${modifiedFilename}`))

@@ -1,35 +1,21 @@
 import type {
+  Browser,
   BrowserContext,
   CDPSession,
   ChromiumBrowserContext,
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
-import { wait } from 'payload/shared'
-import shelljs from 'shelljs'
+import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
-import { devUser } from './credentials.js'
-import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
-type AdminRoutes = NonNullable<Config['admin']>['routes']
-
-type LoginArgs = {
-  customAdminRoutes?: AdminRoutes
-  customRoutes?: Config['routes']
-  data?: {
-    email: string
-    password: string
-  }
-  page: Page
-  serverURL: string
-}
+export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -69,21 +55,35 @@ const networkConditions = {
 export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
-  page,
+  page: pageFromArgs,
   serverURL,
   noAutoLogin,
+  browser,
   readyURL,
 }: {
+  /**
+   * Provide a browser if you need this utility to create and close a temporary page for you.
+   */
+  browser?: Browser
   customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
-  page: Page
+  page?: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
+  if (!pageFromArgs && !browser) {
+    throw new Error('Either page or browser must be provided')
+  }
+  if (pageFromArgs && browser) {
+    throw new Error('Either page or browser must be provided, not both')
+  }
+
+  const page = pageFromArgs ?? (await browser!.newPage())
+
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
-  const adminURL = `${serverURL}${adminRoute}`
+  const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
   const maxAttempts = 50
   let attempt = 1
@@ -120,6 +120,9 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      if (browser) {
+        await page.close()
+      }
       return
     } catch (error) {
       console.error(`Compilation not done yet`)
@@ -136,6 +139,9 @@ export async function ensureCompilationIsDone({
   }
 
   if (noAutoLogin) {
+    if (browser) {
+      await page.close()
+    }
     return
   }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
@@ -143,6 +149,10 @@ export async function ensureCompilationIsDone({
   })
 
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
+
+  if (browser) {
+    await page.close()
+  }
 }
 
 /**
@@ -177,110 +187,6 @@ export async function throttleTest({
   return client
 }
 
-/**
- * Logs a user in by navigating via click-ops instead of using page.goto()
- */
-export async function loginClientSide(args: LoginArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
-  const {
-    routes: { admin: incomingAdminRoute } = {},
-    admin: { routes: { login: incomingLoginRoute, createFirstUser } = {} },
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
-  const loginRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLoginRoute,
-  })
-  const createFirstUserRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: createFirstUser,
-  })
-
-  if ((await page.locator('#nav-toggler').count()) > 0) {
-    // a user is already logged in - log them out
-    await openNav(page)
-    await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
-    await page.locator('.nav__controls [aria-label="Log out"]').click()
-
-    if (await page.locator('dialog#leave-without-saving').isVisible()) {
-      await page.locator('dialog#leave-without-saving #confirm-action').click()
-    }
-
-    await page.waitForURL(loginRoute)
-  }
-
-  await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
-  await wait(500)
-  await page.click('[type=submit]')
-
-  await expect(page.locator('.step-nav__home')).toBeVisible()
-  if ((await page.locator('a.step-nav__home').count()) > 0) {
-    await page.locator('a.step-nav__home').click()
-  }
-
-  await page.waitForURL(adminRoute)
-
-  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
-export async function login(args: LoginArgs): Promise<void> {
-  const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
-
-  const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute, logout: incomingLogoutRoute } = {},
-    },
-    routes: { admin: incomingAdminRoute } = {},
-  } = getRoutes({ customAdminRoutes, customRoutes })
-
-  const logoutRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLogoutRoute,
-  })
-
-  await page.goto(logoutRoute)
-  await wait(500)
-
-  const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
-  const loginRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: incomingLoginRoute,
-  })
-  const createFirstUserRoute = formatAdminURL({
-    serverURL,
-    adminRoute: incomingAdminRoute,
-    path: createFirstUser,
-  })
-
-  await page.goto(loginRoute)
-  await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
-  await wait(500)
-  await page.click('[type=submit]')
-  await page.waitForURL(adminRoute)
-
-  await expect(() => expect(page.url()).not.toContain(loginRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-
-  await expect(() => expect(page.url()).not.toContain(createFirstUserRoute)).toPass({
-    timeout: POLL_TOPASS_TIMEOUT,
-  })
-}
-
 export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   const ua = page.evaluate(() => navigator.userAgent)
   const isMac = (await ua).includes('Mac OS X')
@@ -296,6 +202,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
     await page.keyboard.up('Control')
   }
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  await closeAllToasts(page)
 }
 
 export async function saveDocAndAssert(
@@ -307,8 +214,19 @@ export async function saveDocAndAssert(
     | '#publish-locale'
     | string = '#action-save',
   expectation: 'error' | 'success' = 'success',
+  options?: {
+    /**
+     * If true, the all toasts will not be dismissed after the save operation.
+     */
+    disableDismissAllToasts?: boolean
+  },
 ): Promise<void> {
   await wait(500) // TODO: Fix this
+  if (selector === '#publish-locale') {
+    // open dropdown
+    const chevronButton = page.locator('.form-submit .popup__trigger-wrap > .popup-button')
+    await chevronButton.click()
+  }
   await page.click(selector, { delay: 100 })
 
   if (expectation === 'success') {
@@ -316,6 +234,26 @@ export async function saveDocAndAssert(
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+  }
+
+  // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
+  // 1. saveDocAndAssert
+  // 2. some operation
+  // 3. second saveDocAndAssert
+  // 4. the first toast is still visible => the second saveDocAndAssert will pass even though the save is not finished yet (or even not successful!)
+  if (!options?.disableDismissAllToasts) {
+    await closeAllToasts(page)
+  }
+}
+
+export async function closeAllToasts(page: Locator | Page): Promise<void> {
+  const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
+  let count = await page.locator(toastCloseSelector).count()
+
+  while (count > 0) {
+    await page.locator(toastCloseSelector).first().click()
+    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
+    count--
   }
 }
 
@@ -335,17 +273,9 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
   await wait(500) // wait for drawer form state to initialize
 }
 
-export async function closeNav(page: Page): Promise<void> {
-  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
-    return
-  }
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
-}
-
 export async function openLocaleSelector(page: Page): Promise<void> {
   const button = page.locator('.localizer button.popup-button')
-  const popup = page.locator('.localizer .popup.popup--active')
+  const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
     await button.click()
@@ -354,7 +284,7 @@ export async function openLocaleSelector(page: Page): Promise<void> {
 }
 
 export async function closeLocaleSelector(page: Page): Promise<void> {
-  const popup = page.locator('.localizer .popup.popup--active')
+  const popup = page.locator('.popup__content')
 
   if (await popup.isVisible()) {
     await page.click('body', { position: { x: 0, y: 0 } })
@@ -366,27 +296,41 @@ export async function changeLocale(page: Page, newLocale: string) {
   await openLocaleSelector(page)
 
   const currentlySelectedLocale = await page
-    .locator(
-      `.localizer .popup.popup--active .popup-button-list__button--selected .localizer__locale-code`,
-    )
+    .locator(`.popup__content .popup-button-list__button--selected .localizer__locale-code`)
     .textContent()
 
   if (currentlySelectedLocale !== `(${newLocale})`) {
     const localeToSelect = page
-      .locator('.localizer .popup.popup--active .popup-button-list__button')
+      .locator('.popup__content .popup-button-list__button')
       .locator('.localizer__locale-code', {
-        hasText: `(${newLocale})`,
+        hasText: `${newLocale}`,
       })
 
-    await expect(localeToSelect).toBeEnabled()
+    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
     await localeToSelect.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)
 
     await expect(page).toHaveURL(regexPattern)
+
+    // Wait for form to finish re-initializing after locale change.
+    // When locale changes, the form fetches new data asynchronously.
+    // The Form exposes a data-form-ready attribute that indicates initialization is complete.
+    await waitForFormReady(page)
   }
 
   await closeLocaleSelector(page)
+}
+
+export async function waitForFormReady(page: Page) {
+  await expect
+    .poll(async () => (await page.locator('[data-form-ready="false"]').count()) === 0, {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+    .toBe(true)
 }
 
 export function exactText(text: string) {
@@ -469,6 +413,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
+      !msg.text().includes('Error loading language') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
       !msg.text().includes('Error getting document data') &&
@@ -487,7 +432,9 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
-      throw new Error(`Browser console error: ${msg.text()}`)
+      const { url, lineNumber, columnNumber } = msg.location() || {}
+      const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
+      throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
     }
 
     // Log ignored CORS-related errors for visibility
@@ -504,9 +451,12 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
   // Capture uncaught errors that do not appear in the console
   page.on('pageerror', (error) => {
     if (shouldCollectErrors) {
-      consoleErrors.push(`Page error: ${error.message}`)
+      const stack = error?.stack
+      const message = error?.message ?? String(error)
+      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
     } else {
-      throw new Error(`Page error: ${error.message}`)
+      // Rethrow the original error to preserve stack, name, and other metadata
+      throw error
     }
   })
 
@@ -515,24 +465,6 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
     collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
     stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
   }
-}
-
-export function describeIfInCIOrHasLocalstack(): jest.Describe {
-  if (process.env.CI) {
-    return describe
-  }
-
-  // Check that localstack is running
-  const { code } = shelljs.exec(`docker ps | grep localstack`)
-
-  if (code !== 0) {
-    console.warn('Localstack is not running. Skipping test suite.')
-    return describe.skip
-  }
-
-  console.log('Localstack is running. Running test suite.')
-
-  return describe
 }
 
 export function getRoutes({
@@ -545,7 +477,7 @@ export function getRoutes({
   admin: {
     routes: AdminRoutes
   }
-  routes: Config['routes']
+  routes: NonNullable<SanitizedConfig['routes']>
 } {
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes
@@ -570,4 +502,19 @@ export function getRoutes({
     },
     routes,
   }
+}
+
+type RunJobsQueueArgs = {
+  queue?: string
+  serverURL: string
+}
+
+export async function runJobsQueue(args: RunJobsQueueArgs) {
+  const { serverURL } = args
+  const queue = args?.queue ?? 'default'
+
+  return await fetch(`${serverURL}/api/payload-jobs/run?queue=${queue}`, {
+    method: 'get',
+    credentials: 'include',
+  })
 }

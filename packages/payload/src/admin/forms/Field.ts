@@ -21,6 +21,13 @@ export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 export type ClientComponentProps = {
   customComponents?: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
+  /**
+   * Controls the rendering behavior of the fields, i.e. defers rendering until they intersect with the viewport using the Intersection Observer API.
+   *
+   * If true, the fields will be rendered immediately, rather than waiting for them to intersect with the viewport.
+   *
+   * If a number is provided, will immediately render fields _up to that index_.
+   */
   forceRender?: boolean
   permissions?: SanitizedFieldPermissions
   readOnly?: boolean

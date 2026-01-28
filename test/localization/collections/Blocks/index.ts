@@ -4,8 +4,20 @@ export const blocksCollectionSlug = 'blocks-fields'
 
 export const BlocksCollection: CollectionConfig = {
   slug: blocksCollectionSlug,
-  versions: { drafts: true },
+  admin: {
+    useAsTitle: 'title',
+  },
+  versions: {
+    drafts: {
+      autosave: true,
+    },
+  },
   fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+    },
     {
       type: 'tabs',
       tabs: [
@@ -37,6 +49,10 @@ export const BlocksCollection: CollectionConfig = {
         {
           slug: 'blockInsideBlock',
           fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
             {
               name: 'content',
               type: 'blocks',

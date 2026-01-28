@@ -1,3 +1,4 @@
+import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -22,11 +23,10 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
   args: Arguments,
@@ -79,11 +79,15 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // Find
     // /////////////////////////////////////
 
+    const usePagination = pagination && limit !== 0
+    const sanitizedLimit = limit ?? (usePagination ? 10 : 0)
+    const sanitizedPage = page || 1
+
     const paginatedDocs = await payload.db.findGlobalVersions<T>({
       global: globalConfig.slug,
-      limit: limit ?? 10,
+      limit: sanitizedLimit,
       locale: locale!,
-      page: page || 1,
+      page: sanitizedPage,
       pagination,
       req,
       select,

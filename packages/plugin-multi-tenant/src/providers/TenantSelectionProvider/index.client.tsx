@@ -4,6 +4,7 @@ import type { OptionObject } from 'payload'
 
 import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
 import { generateCookie } from '../../utilities/generateCookie.js'
@@ -65,9 +66,12 @@ const Context = createContext<ContextType>({
   updateTenants: () => null,
 })
 
-const setCookie = (value?: string) => {
+const DEFAULT_COOKIE_NAME = 'payload-tenant'
+
+const setTenantCookie = (args: { cookieName?: string; value: string }) => {
+  const { cookieName = DEFAULT_COOKIE_NAME, value } = args
   document.cookie = generateCookie<string>({
-    name: 'payload-tenant',
+    name: cookieName,
     maxAge: 60 * 60 * 24 * 365, // 1 year in seconds
     path: '/',
     returnCookieAsObject: false,
@@ -75,14 +79,25 @@ const setCookie = (value?: string) => {
   })
 }
 
-const deleteCookie = () => {
+const deleteTenantCookie = (args: { cookieName?: string } = {}) => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
   document.cookie = generateCookie<string>({
-    name: 'payload-tenant',
+    name: cookieName,
     maxAge: -1,
     path: '/',
     returnCookieAsObject: false,
     value: '',
   })
+}
+
+const getTenantCookie = (args: { cookieName?: string } = {}): string | undefined => {
+  const { cookieName = DEFAULT_COOKIE_NAME } = args
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${cookieName}=`)
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift()
+  }
+  return undefined
 }
 
 export const TenantSelectionProviderClient = ({
@@ -119,9 +134,9 @@ export const TenantSelectionProviderClient = ({
     ({ id, refresh }: { id: number | string | undefined; refresh?: boolean }) => {
       setSelectedTenantID(id)
       if (id !== undefined) {
-        setCookie(String(id))
+        setTenantCookie({ value: String(id) })
       } else {
-        deleteCookie()
+        deleteTenantCookie()
       }
       if (refresh) {
         router.refresh()
@@ -157,7 +172,10 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}/populate-tenant-options`,
+        formatAdminURL({
+          apiRoute: config.routes.api,
+          path: `/${tenantsCollectionSlug}/populate-tenant-options`,
+        }),
         {
           credentials: 'include',
           method: 'GET',
@@ -171,13 +189,13 @@ export const TenantSelectionProviderClient = ({
 
         if (result.tenantOptions.length === 1) {
           setSelectedTenantID(result.tenantOptions[0].value)
-          setCookie(String(result.tenantOptions[0].value))
+          setTenantCookie({ value: String(result.tenantOptions[0].value) })
         }
       }
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, userID])
+  }, [config.routes.api, tenantsCollectionSlug, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -199,21 +217,22 @@ export const TenantSelectionProviderClient = ({
   )
 
   React.useEffect(() => {
-    if (userChanged) {
+    if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
       if (userID) {
         // user logging in
         void syncTenants()
       } else {
         // user logging out
         setSelectedTenantID(undefined)
-        deleteCookie()
+        deleteTenantCookie()
         if (tenantOptions.length > 0) {
           setTenantOptions([])
         }
+        router.refresh()
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions])
+  }, [userID, userChanged, syncTenants, tenantOptions, initialValue, router])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.

@@ -79,6 +79,11 @@ export const itTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
+  dashboard: {
+    addWidget: 'Aggiungi Widget',
+    deleteWidget: 'Elimina widget {{id}}',
+    searchWidgets: 'Cerca widget...',
+  },
   error: {
     accountAlreadyActivated: 'Questo account è già stato attivato.',
     autosaving:
@@ -118,6 +123,7 @@ export const itTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Si è verificato un problema durante il caricamento del file.',
     restoringTitle:
       'Si è verificato un errore durante il ripristino di {{title}}. Si prega di controllare la connessione e riprovare.',
+    revertingDocument: "C'è stato un problema durante il ripristino di questo documento.",
     tokenInvalidOrExpired: 'Il token non è valido o è scaduto.',
     tokenNotProvided: 'Token non fornito.',
     unableToCopy: 'Impossibile copiare.',
@@ -177,6 +183,7 @@ export const itTranslations: DefaultTranslationsObject = {
     removeUpload: 'Rimuovi Upload',
     saveChanges: 'Salva modifiche',
     searchForBlock: 'Cerca un blocco',
+    searchForLanguage: 'Cerca una lingua',
     selectExistingLabel: 'Seleziona {{label}} esistente',
     selectFieldsToEdit: 'Seleziona i campi da modificare',
     showAll: 'Mostra tutto',
@@ -340,6 +347,7 @@ export const itTranslations: DefaultTranslationsObject = {
     loading: 'Caricamento',
     locale: 'Locale',
     locales: 'Localizzazioni',
+    lock: 'Serratura',
     menu: 'Menù',
     moreOptions: 'Più opzioni',
     move: 'Muoviti',
@@ -419,7 +427,7 @@ export const itTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creato con successo.',
     successfullyDuplicated: '{{label}} duplicato con successo.',
     successfullyReindexed:
-      'Reindicizzati con successo {{count}} di {{total}} documenti da {{collections}} collezioni.',
+      'Sono stati reindicizzati con successo {{count}} dei {{total}} documenti da {{collections}}, e {{skips}} bozze sono state saltate.',
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     time: 'Tempo',
@@ -431,6 +439,7 @@ export const itTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} spostati nel cestino.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
+    unlock: 'Sblocca',
     unsavedChanges: 'Hai delle modifiche non salvate. Salva o scarta prima di continuare.',
     unsavedChangesDuplicate: 'Sono presenti modifiche non salvate. Vuoi continuare a duplicare?',
     untitled: 'Senza titolo',
@@ -459,7 +468,9 @@ export const itTranslations: DefaultTranslationsObject = {
     copyTo: 'Copia per',
     copyToLocale: 'Copia in locale',
     localeToPublish: 'Località da pubblicare',
+    selectedLocales: 'Località Selezionate',
     selectLocaleToCopy: 'Seleziona la località da copiare',
+    selectLocaleToDuplicate: 'Seleziona le località da duplicare',
   },
   operators: {
     contains: 'contiene',
@@ -515,13 +526,17 @@ export const itTranslations: DefaultTranslationsObject = {
     enterNumber: 'Si prega di inserire un numero valido.',
     fieldHasNo: 'Questo campo non ha {{label}}',
     greaterThanMax: '{{value}} è superiore al massimo consentito {{label}} di {{max}}.',
+    invalidBlock: 'Il blocco "{{block}}" non è consentito.',
+    invalidBlocks: 'Questo campo contiene blocchi che non sono più consentiti: {{blocks}}.',
     invalidInput: 'Questo campo ha un input non valido.',
     invalidSelection: 'Questo campo ha una selezione non valida.',
     invalidSelections: "'In questo campo sono presenti le seguenti selezioni non valide:'",
+    latitudeOutOfBounds: 'La latitudine deve essere compresa tra -90 e 90.',
     lessThanMin: '{{value}} è inferiore al minimo consentito {{label}} di {{min}}.',
     limitReached: 'Raggiunto il limite, possono essere aggiunti solo {{max}} elementi.',
     longerThanMin:
       'Questo valore deve essere più lungo della lunghezza minima di {{minLength}} caratteri.',
+    longitudeOutOfBounds: 'La longitudine deve essere compresa tra -180 e 180.',
     notValidDate: '"{{value}}" non è una data valida.',
     required: 'Questo campo è obbligatorio.',
     requiresAtLeast: 'Questo campo richiede almeno {{count}} {{label}}.',
@@ -545,6 +560,8 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Stai per ripristinare le modifiche di questo documento al suo stato pubblicato. Sei sicuro?',
     aboutToUnpublish: 'Stai per annullare la pubblicazione di questo documento. Sei sicuro?',
+    aboutToUnpublishIn:
+      'Stai per annullare la pubblicazione di questo documento in {{locale}}. Sei sicuro?',
     aboutToUnpublishSelection:
       'Stai per annullare la pubblicazione di tutte le {{label}} nella selezione. Sei sicuro?',
     autosave: 'Salvataggio automatico',
@@ -566,11 +583,13 @@ export const itTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Visualizzazione attuale',
     currentPublishedVersion: 'Versione Pubblicata Attuale',
     draft: 'Bozza',
+    draftHasPublishedVersion: 'Bozza (ha una versione pubblicata)',
     draftSavedSuccessfully: 'Bozza salvata con successo.',
     lastSavedAgo: 'Ultimo salvataggio {{distance}} fa',
     modifiedOnly: 'Modificato solo',
     moreVersions: 'Altre versioni...',
     noFurtherVersionsFound: 'Non sono state trovate ulteriori versioni',
+    noLabelGroup: 'Gruppo Senza Nome',
     noRowsFound: 'Nessun {{label}} trovato',
     noRowsSelected: 'Nessuna {{etichetta}} selezionata',
     preview: 'Anteprima',
@@ -590,6 +609,8 @@ export const itTranslations: DefaultTranslationsObject = {
     restoring: 'Ripristino...',
     reverting: 'Ritorno...',
     revertToPublished: 'Ritorna alla versione pubblicata',
+    revertUnsuccessful:
+      'Annullamento non riuscito. Nessuna versione precedentemente pubblicata trovata.',
     saveDraft: 'Salva Bozza',
     scheduledSuccessfully: 'Programmato con successo.',
     schedulePublish: 'Pubblicazione Programmata',
@@ -600,6 +621,9 @@ export const itTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versione Specifica',
     status: 'Stato',
     unpublish: 'Annulla pubblicazione',
+    unpublished: 'Non pubblicato',
+    unpublishedSuccessfully: 'Pubblicazione annullata con successo.',
+    unpublishIn: 'Annulla pubblicazione in {{locale}}',
     unpublishing: 'Annullamento pubblicazione...',
     version: 'Versione',
     versionAgo: '{{distance}} fa',

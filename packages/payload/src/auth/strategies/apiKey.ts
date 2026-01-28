@@ -7,7 +7,7 @@ import type { AuthStrategyFunction } from '../index.js'
 
 export const APIKeyAuthentication =
   (collectionConfig: SanitizedCollectionConfig): AuthStrategyFunction =>
-  async ({ headers, payload }) => {
+  async ({ headers, isGraphQL = false, payload }) => {
     const authHeader = headers.get('Authorization')
 
     if (authHeader?.startsWith(`${collectionConfig.slug} API-Key `)) {
@@ -53,7 +53,7 @@ export const APIKeyAuthentication =
 
         const userQuery = await payload.find({
           collection: collectionConfig.slug,
-          depth: collectionConfig.auth.depth,
+          depth: isGraphQL ? 0 : collectionConfig.auth.depth,
           limit: 1,
           overrideAccess: true,
           pagination: false,

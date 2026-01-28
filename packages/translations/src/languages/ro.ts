@@ -81,6 +81,11 @@ export const roTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Dacă nu ați solicitat acest lucru, vă rugăm să ignorați acest email și parola dvs. va rămâne neschimbată.',
   },
+  dashboard: {
+    addWidget: 'Adaugați widget',
+    deleteWidget: 'Ștergeți widget-ul {{id}}',
+    searchWidgets: 'Caută widgeturi...',
+  },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',
     autosaving: 'A existat o problemă în timpul salvării automate a acestui document.',
@@ -118,6 +123,7 @@ export const roTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'A existat o problemă în timpul încărcării fișierului.',
     restoringTitle:
       'A survenit o eroare în timpul restaurării {{title}}. Verificați conexiunea și încercați din nou.',
+    revertingDocument: 'A apărut o problemă în timp ce se revenea la acest document.',
     tokenInvalidOrExpired: 'Tokenul este invalid sau a expirat.',
     tokenNotProvided: 'Tokenul nu a fost furnizat.',
     unableToCopy: 'Imposibil de copiat.',
@@ -177,6 +183,7 @@ export const roTranslations: DefaultTranslationsObject = {
     removeUpload: 'Eliminați încărcarea',
     saveChanges: 'Salvați modificările',
     searchForBlock: 'Căutați un bloc',
+    searchForLanguage: 'Căutați o limbă',
     selectExistingLabel: 'Selectați existent {{label}}',
     selectFieldsToEdit: 'Selectați câmpurile de editat',
     showAll: 'Afișați toate',
@@ -342,6 +349,7 @@ export const roTranslations: DefaultTranslationsObject = {
     loading: 'Încărcare',
     locale: 'Localitate',
     locales: 'Localuri',
+    lock: 'Încuietoare',
     menu: 'Meniu',
     moreOptions: 'Mai multe opțiuni',
     move: 'Mutați',
@@ -420,7 +428,7 @@ export const roTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} creat(ă) cu succes.',
     successfullyDuplicated: '{{label}} duplicat(ă) cu succes.',
     successfullyReindexed:
-      'Reindexare realizată cu succes pentru {{count}} din {{total}} documente din colecțiile {{collections}}.',
+      'Au fost reindexate cu succes {{count}} din {{total}} documente din {{collections}}, iar {{skips}} proiecte au fost omise.',
     takeOver: 'Preia controlul',
     thisLanguage: 'Română',
     time: 'Timp',
@@ -432,6 +440,7 @@ export const roTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} mutate la coșul de gunoi.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
+    unlock: 'Deblocare',
     unsavedChanges: 'Aveți modificări nesalvate. Salvați sau renunțați înainte de a continua.',
     unsavedChangesDuplicate: 'Aveți modificări nesalvate. Doriți să continuați să duplicați?',
     untitled: 'Fără titlu',
@@ -460,7 +469,9 @@ export const roTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiați în',
     copyToLocale: 'Copiați în localizare',
     localeToPublish: 'Localizare pentru publicare',
+    selectedLocales: 'Locații selectate',
     selectLocaleToCopy: 'Selectați localizarea pentru copiere',
+    selectLocaleToDuplicate: 'Selectați localizările pentru duplicare',
   },
   operators: {
     contains: 'conține',
@@ -517,14 +528,18 @@ export const roTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'Acest câmp nu are un {{label}}',
     greaterThanMax:
       '{{value}} este mai mare decât valoarea maximă permisă pentru {{label}} de {{max}}.',
+    invalidBlock: 'Blocul "{{block}}" nu este permis.',
+    invalidBlocks: 'Acest câmp conține blocuri care nu mai sunt permise: {{blocks}}.',
     invalidInput: 'Acest câmp are o intrare invalidă.',
     invalidSelection: 'Acest câmp are o selecție invalidă.',
     invalidSelections: 'Acest câmp are următoarele selecții invalide:',
+    latitudeOutOfBounds: 'Latitudinea trebuie să fie între -90 și 90.',
     lessThanMin:
       '{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.',
     limitReached: 'Limita atinsă, doar {{max}} elemente pot fi adăugate.',
     longerThanMin:
       'Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.',
+    longitudeOutOfBounds: 'Longitudinea trebuie să fie între -180 și 180.',
     notValidDate: '"{{value}}" nu este o dată valabilă.',
     required: 'Acest câmp este obligatoriu.',
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',
@@ -549,6 +564,8 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Sunteți pe cale să readuceți modificările aduse acestui document la starea sa publicată. Sunteți sigur?',
     aboutToUnpublish: 'Sunteți pe cale să nepublicați acest document. Sunteți sigur?',
+    aboutToUnpublishIn:
+      'Sunteți pe cale să anulați publicarea acestui document în {{locale}}. Sunteți sigur?',
     aboutToUnpublishSelection:
       'Sunteți pe punctul de a nepublica toate {{label}} din selecție. Sunteți sigur?',
     autosave: 'Autosalvare',
@@ -570,11 +587,13 @@ export const roTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Vizualizare curentă',
     currentPublishedVersion: 'Versiunea Publicată Curentă',
     draft: 'Proiect',
+    draftHasPublishedVersion: 'Proiect (are versiune publicată)',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
     modifiedOnly: 'Modificat doar',
     moreVersions: 'Mai multe versiuni...',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
+    noLabelGroup: 'Grup Fără Nume',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     noRowsSelected: 'Niciun {{etichetă}} selectat',
     preview: 'Previzualizare',
@@ -594,6 +613,7 @@ export const roTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurare...',
     reverting: 'Revenire...',
     revertToPublished: 'Reveniți la publicat',
+    revertUnsuccessful: 'Revenire eșuată. Nu s-a găsit nicio versiune publicată anterior.',
     saveDraft: 'Salvați proiectul',
     scheduledSuccessfully: 'Programat cu succes.',
     schedulePublish: 'Programare Publicare',
@@ -604,6 +624,9 @@ export const roTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versiunea specifică',
     status: 'Status',
     unpublish: 'Dezpublicare',
+    unpublished: 'Needitat',
+    unpublishedSuccessfully: 'Nepublicat cu succes.',
+    unpublishIn: 'Anulați publicarea în {{locale}}',
     unpublishing: 'Dezpublicare...',
     version: 'Versiune',
     versionAgo: '{{distance}} în urmă',

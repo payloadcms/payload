@@ -14,7 +14,7 @@ jobs:
     name: lint-pr-title
     runs-on: ubuntu-24.04
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - uses: amannn/action-semantic-pull-request@v6
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -35,25 +35,32 @@ jobs:
             test
           scopes: |
             cpa
+            claude
             db-\*
+            db-d1-sqlite
             db-mongodb
             db-postgres
             db-vercel-postgres
             db-sqlite
+            db-d1-sqlite
             drizzle
             email-\*
             email-nodemailer
             email-resend
             eslint
             graphql
+            kv
+            kv-redis
             live-preview
             live-preview-react
             next
             payload-cloud
             plugin-cloud
             plugin-cloud-storage
+            plugin-ecommerce
             plugin-form-builder
             plugin-import-export
+            plugin-mcp
             plugin-multi-tenant
             plugin-nested-docs
             plugin-redirects
@@ -64,9 +71,11 @@ jobs:
             richtext-\*
             richtext-lexical
             richtext-slate
+            sdk
             storage-\*
             storage-azure
             storage-gcs
+            storage-r2
             storage-uploadthing
             storage-vercel-blob
             storage-s3

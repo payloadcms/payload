@@ -3,7 +3,7 @@
  */
 export async function executePromises<T extends Array<() => Promise<any>>>(
   promiseFns: T,
-  parallel: boolean,
+  parallel?: boolean,
 ): Promise<{ [K in keyof T]: Awaited<ReturnType<T[K]>> }> {
   if (parallel) {
     // Parallel execution with Promise.all and maintain proper typing

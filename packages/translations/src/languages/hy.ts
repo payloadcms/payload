@@ -79,6 +79,11 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  dashboard: {
+    addWidget: 'Ավելացնել վիճակագրություն',
+    deleteWidget: 'Ջնջել վիդջեթը {{id}}',
+    searchWidgets: 'Որոնել վիջեթներ...',
+  },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',
     autosaving: 'Այս փաստաթղթի ավտոմատ պահպանման ժամանակ խնդիր է առաջացել։',
@@ -116,6 +121,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ֆայլը վերբեռնելու ժամանակ խնդիր է առաջացել։',
     restoringTitle:
       'Սխալ է տեղի ունեցել {{title}}-ի վերականգնելիս: Խնդրում ենք ստուգել ձեր կապը և կրկին փորձել:',
+    revertingDocument: 'Այս փաստաթղթի վերականգնման ընթացքում խնդիր է առաջացել:',
     tokenInvalidOrExpired: 'Թոքենն անվավեր է կամ ժամկետանց։',
     tokenNotProvided: 'Թոքենը տրամադրված չէ։',
     unableToCopy: 'Չհաջողվեց պատճենել։',
@@ -173,6 +179,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     removeUpload: 'Հեռացնել վերբեռնվածը',
     saveChanges: 'Պահպանել փոփոխությունները',
     searchForBlock: 'Որոնել բլոկ',
+    searchForLanguage: 'Որոնեք լեզու',
     selectExistingLabel: 'Ընտրել գոյություն ունեցող {{label}}',
     selectFieldsToEdit: 'Ընտրեք դաշտեր խմբագրման համար',
     showAll: 'Ցուցադրել բոլորը',
@@ -338,6 +345,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     loading: 'Բեռնում',
     locale: 'Լոկալ',
     locales: 'Լոկալներ',
+    lock: 'Կողպել',
     menu: 'Մենյու',
     moreOptions: 'Լրացուցիչ ընտրանքներ',
     move: 'Տեղափոխվել',
@@ -417,7 +425,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} հաջողությամբ ստեղծվել է։',
     successfullyDuplicated: '{{label}} հաջողությամբ կրկնօրինակվել է։',
     successfullyReindexed:
-      'Հաջողությամբ վերաինդեքսավորվել են {{count}}-ը {{total}} փաստաթղթերից {{collections}}-ում',
+      '{{collections}}-ից {{total}} փաստաթղթից {{count}}-ը հաջողությամբ վերաինդեքսավորվեց, և {{skips}} նախագիծ թռիչք դարձան։',
     takeOver: 'Վերցնել վերահսկողությունը',
     thisLanguage: 'Հայերեն',
     time: 'Ժամ',
@@ -429,6 +437,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} տեղափոխվել է աղբարկղում։',
     true: 'Ճիշտ',
     unauthorized: 'Չթույլատրված',
+    unlock: 'Բացարձակել',
     unsavedChanges:
       'Դուք ունեք չպահպանված փոփոխություններ։ Պահպանեք կամ հեռացեք նախքան շարունակելը։',
     unsavedChangesDuplicate:
@@ -459,7 +468,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     copyTo: 'Պատճենել դեպի',
     copyToLocale: 'Պատճենել լոկալին',
     localeToPublish: 'Հրապարակման լոկալ',
+    selectedLocales: 'Ընտրված տեղադրություններ',
     selectLocaleToCopy: 'Ընտրեք լոկալ՝ պատճենելու համար',
+    selectLocaleToDuplicate: 'Ընտրեք տեղայնացվածությունները կրկնօրինակելու համար',
   },
   operators: {
     contains: 'պարունակում է',
@@ -515,14 +526,18 @@ export const hyTranslations: DefaultTranslationsObject = {
     enterNumber: 'Խնդրում ենք մուտքագրել վավեր հեռախոսահամար։',
     fieldHasNo: 'Այս դաշտում {{label}} չկա',
     greaterThanMax: '{{value}}-ը մեծ է {{max}} {{label}}-ի թույլատրելի առավելագույնից։',
+    invalidBlock: '"{{block}}" բլոկը չի թույլատրվում:',
+    invalidBlocks: 'Այս դաշտում առկա են բլոկներ, որոնք այլևս թույլատրված չեն: {{blocks}}.',
     invalidInput: 'Ներմուծված արժեքն անվավեր է',
     invalidSelection: 'Այս դաշտն ունի անվավեր ընտրություն։',
     invalidSelections: 'Այս դաշտն ունի հետևյալ անվավեր ընտրությունները։',
+    latitudeOutOfBounds: 'Լաթիտուդը պետք է լինի -90-ից 90 միջակայքում:',
     lessThanMin: '{{value}}-ը փոքր է {{min}} {{label}}-ի թույլատրելի նվազագույն արժեքից։',
     limitReached:
       'Դու հասել եք առավելագույն սահմանին, կարող են ավելացվել միայն {{max}} քանակի տարրեր։',
     longerThanMin:
       'Այս արժեքը պետք է ավելի երկար լինի, քան {{minLength}} նիշերի նվազագույն երկարությունը։',
+    longitudeOutOfBounds: 'Լոնգիտուդը պետք է լինի -180-ի և 180-ի միջակայքում:',
     notValidDate: '"{{value}}"-ը վավեր ամսաթիվ չէ։',
     required: 'Այս դաշտը պարտադիր է։',
     requiresAtLeast: 'Այս դաշտը պահանջում է առնվազն {{count}} {{label}}։',
@@ -548,6 +563,8 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստվում եք հետ բերել այս փաստաթղթի փոփոխությունները դեպի իր հրապարակված վիճակին։ Համոզվա՞ծ եք։',
     aboutToUnpublish:
       'Դուք պատրաստվում եք այս փաստաթուղթը բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
+    aboutToUnpublishIn:
+      'Դուք պատրաստվում եք այս փաստաթուղթը {{locale}} լեզվով չհրատապել։ Համոզված եք։',
     aboutToUnpublishSelection:
       'Դուք պատրաստվում եք ընտրության մեջ գտնվող բոլոր {{label}}-ները բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
     autosave: 'Ինքնապահպանում',
@@ -569,11 +586,13 @@ export const hyTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ներկայումս դիտում է',
     currentPublishedVersion: 'Ընթացիկ հրապարակված տարբերակ',
     draft: 'Սևագիր',
+    draftHasPublishedVersion: 'Սրաց (ունի հրատարակված տարբերակ)',
     draftSavedSuccessfully: 'Սևագիրը հաջողությամբ պահպանվել է։',
     lastSavedAgo: 'Վերջին անգամ պահպանվել է {{distance}} առաջ',
     modifiedOnly: 'Միայն փոփոխված',
     moreVersions: 'Ավելի շատ տարբերակներ...',
     noFurtherVersionsFound: 'Այլ տարբերակներ չեն գտնվել',
+    noLabelGroup: 'Անանուն խումբ',
     noRowsFound: ' Ոչ մի {{label}} չի գտնվել',
     noRowsSelected: 'Ոչ մի {{label}} ընտրված չէ',
     preview: 'Նախադիտում',
@@ -593,6 +612,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     restoring: 'Վերականգնվում է...',
     reverting: 'Հետ է բերվում...',
     revertToPublished: 'Հետ բերել հրապարակված վիճակին',
+    revertUnsuccessful: 'Վերացումը չհաջողվել: Նախկինում հրապարակված տարբերակներ չեն հայտնաբերվել:',
     saveDraft: 'Պահպանել սևագիրը',
     scheduledSuccessfully: 'Հաջողությամբ պլանավորված։',
     schedulePublish: 'Պլանավորել հրապարակումը',
@@ -603,6 +623,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     specificVersion: 'Մասնավոր Տարբերակ',
     status: 'Կարգավիճակ',
     unpublish: 'Բերել չհրապարակված վիճակի։',
+    unpublished: 'Չհրատարակված',
+    unpublishedSuccessfully: 'Չհրատարակվել է հաջողությամբ:',
+    unpublishIn: 'Արգելարարել {{locale}} լեզվով',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',
     version: 'Տարբերակ',
     versionAgo: '{{distance}} առաջ',

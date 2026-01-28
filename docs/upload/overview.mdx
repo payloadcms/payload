@@ -95,7 +95,7 @@ _An asterisk denotes that an option is required._
 | **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                                                                                                                                                     |
 | **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                                                                                                                                                |
 | **`cacheTags`**                | Set to `false` to disable the cache tag set in the UI for the admin thumbnail component. Useful for when CDNs don't allow certain cache queries.                                                                                                                                                                                                                 |
-| **`constructorOptions`**       | An object passed to the the Sharp image library that accepts any Constructor options and applies them to the upload file. [More](https://sharp.pixelplumbing.com/api-constructor/)                                                                                                                                                                               |
+| **`constructorOptions`**       | An object passed to the Sharp image library that accepts any Constructor options and applies them to the upload file. [More](https://sharp.pixelplumbing.com/api-constructor/)                                                                                                                                                                                   |
 | **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                                                                                                                                                          |
 | **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                                                                                                                                                      |
 | **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                                                                                                                                                    |
@@ -108,11 +108,11 @@ _An asterisk denotes that an option is required._
 | **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                                                                                                                                               |
 | **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                                                                                                                                         |
 | **`pasteURL`**                 | Controls whether files can be uploaded from remote URLs by pasting them into the Upload field. **Enabled by default.** Accepts `false` to disable or an object with an `allowList` of valid remote URLs. [More](#uploading-files-from-remote-urls)                                                                                                               |
-| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                                                                                                                                  |
+| **`resizeOptions`**            | An object passed to the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                                                                                                                                      |
 | **`skipSafeFetch`**            | Set to an `allowList` to skip the safe fetch check when fetching external files. Set to `true` to skip the safe fetch for all documents in this collection. Defaults to `false`.                                                                                                                                                                                 |
 | **`allowRestrictedFileTypes`** | Set to `true` to allow restricted file types. If your Collection has defined [mimeTypes](#mimetypes), restricted file verification will be skipped. Defaults to `false`. [More](#restricted-file-types)                                                                                                                                                          |
 | **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                                                                                                                                           |
-| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                                                                                                                               |
+| **`trimOptions`**              | An object passed to the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                                                                                                                                   |
 | **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                                                                                                                                |
 | **`hideFileInputOnCreate`**    | Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.                                                                                                                                                                                                                                |
 | **`hideRemoveFile`**           | Set to `true` to prevent the admin UI having a way to remove an existing file while editing.                                                                                                                                                                                                                                                                     |
@@ -192,9 +192,34 @@ Behind the scenes, Payload relies on [`sharp`](https://sharp.pixelplumbing.com/a
 
 Note that for image resizing to work, `sharp` must be specified in your [Payload Config](../configuration/overview). This is configured by default if you created your Payload project with `create-payload-app`. See `sharp` in [Config Options](../configuration/overview#config-options).
 
+#### Admin List View Options
+
+Each image size also supports `admin` options to control whether it appears in the [Admin Panel](../admin/overview) list view.
+
+```ts
+{
+  name: 'thumbnail',
+  width: 400,
+  height: 300,
+  admin: {
+    disableGroupBy: true, // hide from list view groupBy options
+    disableListColumn: true, // hide from list view columns
+    disableListFilter: true, // hide from list view filters
+  },
+}
+```
+
+| Option                  | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`disableGroupBy`**    | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
+| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
+| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
+
+This is useful for hiding large or rarely used image sizes from the list view UI while still keeping them available in the API.
+
 #### Accessing the resized images in hooks
 
-All auto-resized images are exposed to be re-used in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
+All auto-resized images are exposed to be reused in hooks and similar via an object that is bound to `req.payloadUploadSizes`.
 
 The object will have keys for each size generated, and each key will be set equal to a buffer containing the file data.
 
@@ -304,6 +329,218 @@ export const Media: CollectionConfig = {
   },
 }
 ```
+
+## Customizing the Upload UI
+
+You can completely customize the upload interface in the Admin Panel by swapping in your own React components. This allows you to modify how files are uploaded, add custom fields, integrate custom actions, or enhance the upload experience.
+
+### Upload Component Configuration
+
+To customize the upload UI for an upload-enabled collection, use the `admin.components.edit.Upload` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: true,
+  admin: {
+    components: {
+      edit: {
+        Upload: '/components/CustomUpload#CustomUploadServer',
+      },
+    },
+  },
+  fields: [
+    {
+      name: 'alt',
+      type: 'text',
+    },
+  ],
+}
+```
+
+### Building Custom Upload Components
+
+Custom upload components must integrate with Payload's form system to work correctly. The recommended approach is to use Payload's built-in `<Upload>` component from `@payloadcms/ui` and wrap it with additional functionality.
+
+<Banner type="warning">
+  You should not use a simple `<input type="file" />` element
+  alone. It will not connect to Payload's upload API or form state, resulting
+  in errors like "400 Bad Request - no file uploaded." Always use Payload's
+  `<Upload>` component or properly integrate with form hooks.
+</Banner>
+
+#### Basic Example
+
+Here's a minimal example showing how to create a custom upload component:
+
+**Server Component** (`/components/CustomUpload.tsx`):
+
+```tsx
+import React from 'react'
+import type {
+  PayloadServerReactComponent,
+  SanitizedCollectionConfig,
+} from 'payload'
+import { CustomUploadClient } from './CustomUpload.client'
+
+export const CustomUploadServer: PayloadServerReactComponent<
+  SanitizedCollectionConfig['admin']['components']['edit']['Upload']
+> = (props) => {
+  return (
+    <div>
+      <h2>Custom Upload Interface</h2>
+      <CustomUploadClient {...props} />
+    </div>
+  )
+}
+```
+
+**Client Component** (`/components/CustomUpload.client.tsx`):
+
+```tsx
+'use client'
+import React from 'react'
+import { Upload, useDocumentInfo } from '@payloadcms/ui'
+
+export const CustomUploadClient = () => {
+  const { collectionSlug, docConfig, initialState } = useDocumentInfo()
+
+  return (
+    <Upload
+      collectionSlug={collectionSlug}
+      initialState={initialState}
+      uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
+    />
+  )
+}
+```
+
+#### Advanced Example with Custom Actions
+
+You can add custom actions, drawers, and fields to enhance the upload experience:
+
+```tsx
+'use client'
+import React from 'react'
+import {
+  Drawer,
+  DrawerToggler,
+  TextField,
+  Upload,
+  useDocumentInfo,
+} from '@payloadcms/ui'
+
+const customDrawerSlug = 'custom-upload-drawer'
+
+const CustomDrawer = () => {
+  return (
+    <Drawer slug={customDrawerSlug}>
+      <h2>Custom Upload Options</h2>
+      <TextField
+        field={{
+          name: 'customField',
+          label: 'Custom Field',
+          type: 'text',
+        }}
+        path="customField"
+      />
+    </Drawer>
+  )
+}
+
+const CustomDrawerToggler = () => {
+  return (
+    <DrawerToggler slug={customDrawerSlug}>
+      <button type="button">Open Custom Options</button>
+    </DrawerToggler>
+  )
+}
+
+export const CustomUploadClient = () => {
+  const { collectionSlug, docConfig, initialState } = useDocumentInfo()
+
+  return (
+    <div>
+      <CustomDrawer />
+      <Upload
+        collectionSlug={collectionSlug}
+        customActions={[<CustomDrawerToggler key="custom-drawer" />]}
+        initialState={initialState}
+        uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
+      />
+    </div>
+  )
+}
+```
+
+### Available Hooks and Components
+
+When building custom upload components, you have access to several useful hooks and components from `@payloadcms/ui`:
+
+| Hook / Component    | Description                                                           |
+| ------------------- | --------------------------------------------------------------------- |
+| `useDocumentInfo()` | Get collection slug, document config, and initial state               |
+| `useField()`        | Access and manipulate form field state                                |
+| `useBulkUpload()`   | Access bulk upload context                                            |
+| `<Upload>`          | Main upload component with file selection, drag-and-drop, and preview |
+| `<Drawer>`          | Modal drawer for additional UI                                        |
+| `<DrawerToggler>`   | Button to open/close drawers                                          |
+| `<TextField>`, etc. | Form field components                                                 |
+
+### Custom Upload Fields vs. Custom Upload Collections
+
+It's important to understand the difference between these two customization approaches:
+
+| Approach                            | Configuration                               | Use Case                                                                                                                |
+| ----------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Upload Collection Customization** | `admin.components.edit.Upload`              | Customize the UI when editing documents in an upload-enabled collection (e.g., the Media collection edit view)          |
+| **Upload Field Customization**      | `admin.components.Field` on an upload field | Customize the field that references uploads in other collections (e.g., a "Featured Image" field on a Posts collection) |
+
+**Example of Upload Field Customization:**
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'featuredImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        components: {
+          Field: '/components/CustomUploadField',
+        },
+      },
+    },
+  ],
+}
+```
+
+For more details on customizing fields, see [Field Components](../fields/overview#custom-components).
+
+### Component Export Syntax
+
+Custom components are referenced using file paths. Both default exports and named exports are supported:
+
+```ts
+// Named export with hash syntax
+Upload: '/components/CustomUpload#CustomUploadServer'
+
+// Default export (no hash needed)
+Upload: '/components/CustomUpload'
+
+// Alternative: using exportName property
+Upload: {
+  path: '/components/CustomUpload',
+  exportName: 'CustomUploadServer',
+}
+```
+
+For more details on component paths, see [Custom Components](../custom-components/overview#component-paths).
 
 ## Restricted File Types
 

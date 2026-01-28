@@ -2,6 +2,7 @@ import httpStatus from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDistinctDocs } from '../../database/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { PayloadRequest, PopulateType, Sort, Where } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
 
@@ -15,7 +16,8 @@ import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/rela
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -43,18 +45,11 @@ export const findDistinctOperation = async (
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req!.context,
-            operation: 'readDistinct',
-            req: args.req!,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'readDistinct',
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -117,7 +112,9 @@ export const findDistinctOperation = async (
     })
 
     const fieldResult = getFieldByPath({
+      config: payload.config,
       fields: collectionConfig.flattenedFields,
+      includeRelationships: true,
       path: args.field,
     })
 
@@ -139,6 +136,58 @@ export const findDistinctOperation = async (
       }
     }
 
+    if ('virtual' in fieldResult.field && fieldResult.field.virtual) {
+      if (typeof fieldResult.field.virtual !== 'string') {
+        throw new APIError(
+          `Cannot findDistinct by a virtual field that isn't linked to a relationship field.`,
+        )
+      }
+
+      let relationPath: string = ''
+      let currentFields: FlattenedField[] = collectionConfig.flattenedFields
+      const fieldPathSegments = fieldResult.field.virtual.split('.')
+      for (const segment of fieldResult.field.virtual.split('.')) {
+        relationPath = `${relationPath}${segment}`
+        fieldPathSegments.shift()
+        const field = currentFields.find((e) => e.name === segment)!
+        if (
+          (field.type === 'relationship' || field.type === 'upload') &&
+          typeof field.relationTo === 'string'
+        ) {
+          break
+        }
+        if ('flattenedFields' in field) {
+          currentFields = field.flattenedFields
+        }
+      }
+
+      const path = `${relationPath}.${fieldPathSegments.join('.')}`
+
+      const result = await payload.findDistinct({
+        collection: collectionConfig.slug,
+        depth: args.depth,
+        disableErrors,
+        field: path,
+        limit: args.limit,
+        locale,
+        overrideAccess,
+        page: args.page,
+        populate,
+        req,
+        showHiddenFields,
+        sort: args.sort,
+        trash,
+        where,
+      })
+
+      for (const val of result.values) {
+        val[args.field] = val[path]
+        delete val[path]
+      }
+
+      return result
+    }
+
     let result = await payload.db.findDistinct({
       collection: collectionConfig.slug,
       field: args.field,
@@ -155,6 +204,10 @@ export const findDistinctOperation = async (
       args.depth
     ) {
       const populationPromises: Promise<void>[] = []
+      const sanitizedField = { ...fieldResult.field }
+      if (fieldResult.field.hasMany) {
+        sanitizedField.hasMany = false
+      }
       for (const doc of result.values) {
         populationPromises.push(
           relationshipPopulationPromise({
@@ -162,7 +215,7 @@ export const findDistinctOperation = async (
             depth: args.depth,
             draft: false,
             fallbackLocale: req.fallbackLocale || null,
-            field: fieldResult.field,
+            field: sanitizedField,
             locale: req.locale || null,
             overrideAccess: args.overrideAccess ?? true,
             parentIsLocalized: false,

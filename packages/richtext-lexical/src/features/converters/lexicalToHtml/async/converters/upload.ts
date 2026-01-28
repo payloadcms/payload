@@ -27,6 +27,8 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
       return ''
     }
 
+    const alt = (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || ''
+
     const url = uploadDoc.url
 
     // 1) If upload is NOT an image, return a link
@@ -38,7 +40,7 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
     if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
       return `
         <img${providedStyleTag}
-          alt="${uploadDoc.filename}"
+          alt="${alt}"
           height="${uploadDoc.height}"
           src="${url}"
           width="${uploadDoc.width}"
@@ -75,13 +77,13 @@ export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode>
 
     pictureHTML += `
       <img
-        alt="${uploadDoc.filename}"
+        alt="${alt}"
         height="${uploadDoc.height}"
         src="${url}"
         width="${uploadDoc.width}"
       />
     `
 
-    return `<picture${providedStyleTag}>${pictureHTML}</picture$>`
+    return `<picture${providedStyleTag}>${pictureHTML}</picture>`
   },
 }

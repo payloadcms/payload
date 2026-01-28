@@ -69,6 +69,7 @@ export type Args = {
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
+   *
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
@@ -87,13 +88,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle =
   | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
-  | PgWithReplicas<
-      PgDatabase<
-        PgQueryResultHKT,
-        Record<string, unknown>,
-        ExtractTablesWithRelations<Record<string, unknown>>
-      >
-    >
+  | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
 
 export type PostgresAdapter = {
   drizzle: Drizzle

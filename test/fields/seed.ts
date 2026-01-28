@@ -22,8 +22,10 @@ import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
 import { radiosDoc } from './collections/Radio/shared.js'
 import { selectsDoc } from './collections/Select/shared.js'
+import { slugFieldDoc } from './collections/SlugField/shared.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+import { anotherTextareaDoc, textareaDoc } from './collections/Textarea/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
@@ -45,7 +47,9 @@ import {
   radioFieldsSlug,
   relationshipFieldsSlug,
   selectFieldsSlug,
+  slugFieldsSlug,
   tabsFieldsSlug,
+  textareaFieldsSlug,
   textFieldsSlug,
   uiSlug,
   uploadsMulti,
@@ -86,6 +90,27 @@ export const seed = async (_payload: Payload) => {
   const createdAnotherTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: anotherTextDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: textareaDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdAnotherTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: anotherTextareaDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdSlugDoc = await _payload.create({
+    collection: slugFieldsSlug,
+    data: slugFieldDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -131,7 +156,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: uploadsMulti,
     data: {
-      media: [createdPNGDoc.id, createdJPGDoc.id],
+      media: [createdPNGDoc.id],
     },
   })
 

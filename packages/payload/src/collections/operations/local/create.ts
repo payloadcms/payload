@@ -9,6 +9,7 @@ import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   DataFromCollectionSlug,
+  DraftDataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -17,6 +18,7 @@ import { APIError } from '../../../errors/index.js'
 import {
   type CollectionSlug,
   deepCopyObjectSimple,
+  type FindOptions,
   type Payload,
   type RequestContext,
   type TypedLocale,
@@ -25,7 +27,7 @@ import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * the Collection slug to operate against.
    */
@@ -37,10 +39,6 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * to determine if it should run or not.
    */
   context?: RequestContext
-  /**
-   * The data for the document to create.
-   */
-  data: RequiredDataFromCollectionSlug<TSlug>
   /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
@@ -55,10 +53,6 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * you can disable the email that is auto-sent
    */
   disableVerificationEmail?: boolean
-  /**
-   * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * If you want to create a document that is a duplicate of another document
    */
@@ -96,14 +90,14 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   populate?: PopulateType
   /**
+   * Publish to all locales
+   */
+  publishAllLocales?: boolean
+  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -113,7 +107,30 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
+
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
+  | ({
+      /**
+       * The data for the document to create.
+       */
+      data: RequiredDataFromCollectionSlug<TSlug>
+      /**
+       * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: false
+    } & BaseOptions<TSlug, TSelect>)
+  | ({
+      /**
+       * The data for the document to create.
+       * When creating a draft, required fields are optional as validation is skipped by default.
+       */
+      data: DraftDataFromCollectionSlug<TSlug>
+      /**
+       * Create a **draft** document. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft: true
+    } & BaseOptions<TSlug, TSelect>)
 
 export async function createLocal<
   TSlug extends CollectionSlug,
@@ -135,6 +152,7 @@ export async function createLocal<
     overrideAccess = true,
     overwriteExistingFiles = false,
     populate,
+    publishAllLocales,
     select,
     showHiddenFields,
   } = options
@@ -162,6 +180,7 @@ export async function createLocal<
     overrideAccess,
     overwriteExistingFiles,
     populate,
+    publishAllLocales,
     req,
     select,
     showHiddenFields,

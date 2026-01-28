@@ -20,13 +20,13 @@ export async function createFolder({
       hasText: 'Create',
     })
     await folderDropdown.click()
-    const createFolderButton = titleActionsLocator.locator('.popup-button-list__button', {
+    const createFolderButton = page.locator('.popup__content .popup-button-list__button', {
       hasText: 'Folder',
     })
     await createFolderButton.click()
   } else {
     const createFolderButton = page.locator(
-      '.create-new-doc-in-folder__button:has-text("Create New")',
+      '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
     )
     await createFolderButton.click()
   }

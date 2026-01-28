@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -15,16 +15,19 @@ import {
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { customAdminRoutes } from '../../shared.js'
+import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
+  formatDocURLCollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
+  virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -33,15 +36,21 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
+import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from 'helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { openListColumns } from 'helpers/e2e/openListColumns.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -50,9 +59,8 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
-import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -69,7 +77,10 @@ describe('List View', () => {
   let withListViewUrl: AdminUrlUtil
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
+  let formatDocURLUrl: AdminUrlUtil
   let user: any
+  let virtualsUrl: AdminUrlUtil
+  let noTimestampsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -94,6 +105,9 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
+    virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
+    noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -243,9 +257,12 @@ describe('List View', () => {
       await kebabMenu.click()
 
       await expect(
-        page.locator('.popup-button-list').locator('div', {
-          hasText: 'listMenuItems',
-        }),
+        page
+          .locator('.popup-button-list')
+          .locator('div', {
+            hasText: 'listMenuItems',
+          })
+          .first(),
       ).toBeVisible()
     })
 
@@ -305,7 +322,7 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
       await page.waitForURL(url)
@@ -414,6 +431,44 @@ describe('List View', () => {
           hasText: exactText('Tab 1 > Title'),
         }),
       ).toBeVisible()
+    })
+
+    test('should not allow search by virtual: true field in field dropdown', async () => {
+      await page.goto(virtualsUrl.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+
+      const menuList = conditionField.locator('.rs__menu-list')
+
+      // ensure the virtual field is not present
+      await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
+    })
+
+    test('should allow to filter by virtual relationship field', async () => {
+      const post1 = await createPost({ title: 'somePost' })
+      const post2 = await createPost({ title: 'otherPost' })
+
+      await createVirtualDoc({ post: post1.id })
+      await createVirtualDoc({ post: post2.id })
+
+      await page.goto(virtualsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Virtual Title From Post',
+        operatorLabel: 'equals',
+        value: 'somePost',
+      })
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
     test('should allow to filter in array field', async () => {
@@ -676,7 +731,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueInput = whereBuilder.locator('.condition__value >> input')
@@ -690,6 +744,33 @@ describe('List View', () => {
 
       // Check if the input still has the correct value
       await expect(valueInput).toHaveValue('Test')
+    })
+
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
     })
 
     test('should still show second filter if two filters exist and first filter is removed', async () => {
@@ -786,27 +867,6 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should show no results when queryin on a field a user cannot read', async () => {
-      await payload.create({
-        collection: postsCollectionSlug,
-        data: {
-          noReadAccessField: 'test',
-        },
-      })
-
-      await page.goto(postsUrl.list)
-
-      const { whereBuilder } = await addListFilter({
-        page,
-        fieldLabel: 'No Read Access Field',
-        operatorLabel: 'equals',
-        value: 'test',
-      })
-
-      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
-    })
-
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 
@@ -814,7 +874,6 @@ describe('List View', () => {
         page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
-        skipValueInput: true,
       })
 
       const valueField = whereBuilder.locator('.condition__value')
@@ -927,7 +986,7 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should toggle columns and effect table', async () => {
+    test('should toggle columns and affect table', async () => {
       const tableHeaders = 'table > thead > tr > th'
 
       await openListColumns(page, {})
@@ -949,6 +1008,103 @@ describe('List View', () => {
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+    })
+
+    describe('enableListViewSelectAPI', () => {
+      test('`id` should always be selected even when toggled off', async () => {
+        const doc = await payload.create({
+          collection: listViewSelectAPISlug,
+          data: {
+            title: 'This is a test title',
+            description: 'This is a test description',
+          },
+        })
+
+        const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+        await page.goto(selectAPIUrl.list)
+
+        const printedResults = page.locator('#table-state')
+
+        await expect
+          .poll(
+            async () => {
+              const resultText = await printedResults.innerText()
+              const parsedResult = JSON.parse(resultText)
+              return Boolean(parsedResult[0].id && parsedResult[0].description)
+            },
+            {
+              timeout: 3000,
+              intervals: [100, 250, 500, 1000],
+            },
+          )
+          .toBeTruthy()
+
+        await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+        await toggleColumn(page, {
+          columnLabel: 'Description',
+          columnName: 'description',
+          targetState: 'off',
+        })
+
+        // Poll until the "description" field is removed from the response BUT `id` is still present
+        // The `id` field will remain selected despite it being inactive
+        await expect
+          .poll(
+            async () => {
+              const resultText = await printedResults.innerText()
+              const parsedResult = JSON.parse(resultText)
+              return Boolean(parsedResult[0].description === undefined && parsedResult[0].id)
+            },
+            {
+              timeout: 3000,
+              intervals: [100, 250, 500, 1000],
+            },
+          )
+          .toBeTruthy()
+      })
+
+      test('group fields should populate with the select API', async () => {
+        const doc = await payload.create({
+          collection: listViewSelectAPISlug,
+          data: {
+            title: 'This is a test title',
+            description: 'This is a test description',
+            group: {
+              groupNameField: 'Select Nested Field',
+            },
+          },
+        })
+
+        const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+        await page.goto(selectAPIUrl.list)
+
+        await toggleColumn(page, {
+          columnLabel: 'Group > Group Name Field',
+          columnName: 'group.groupNameField',
+          targetState: 'off',
+        })
+
+        await toggleColumn(page, {
+          columnLabel: 'Group > Group Name Field',
+          columnName: 'group.groupNameField',
+          targetState: 'on',
+        })
+
+        await getRowByCellValueAndAssert({
+          cellClass: `.cell-group__groupNameField`,
+          page,
+          textToMatch: 'Select Nested Field',
+        })
+
+        // cleanup after run
+        await payload.delete({
+          id: doc.id,
+          collection: listViewSelectAPISlug,
+        })
+      })
     })
 
     test('should toggle columns and save to preferences', async () => {
@@ -1330,12 +1486,12 @@ describe('List View', () => {
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
-      // delete button should be present
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
+      const deleteBtn = page.locator('.delete-documents__toggle')
+      await expect(deleteBtn).toBeVisible()
 
       await page.locator('.row-2 .cell-_select input').check()
 
-      await page.locator('.delete-documents__toggle').click()
+      await deleteBtn.click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
@@ -1373,8 +1529,7 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('.per-page .popup-button').click()
-      await page.locator('.per-page .popup-button').click()
-      const options = page.locator('.per-page button.per-page__button')
+      const options = page.locator('.popup__content button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
@@ -1415,7 +1570,7 @@ describe('List View', () => {
       await page.locator('.per-page .popup-button').click()
 
       await page
-        .locator('.per-page button.per-page__button', {
+        .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()
@@ -1427,6 +1582,71 @@ describe('List View', () => {
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
+    })
+
+    test('should paginate when timestamps are disabled', async () => {
+      await mapAsync([...Array(6)], async () => {
+        await createNoTimestampPost()
+      })
+
+      await page.goto(noTimestampsUrl.list)
+
+      await page.locator('.per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+      await page.waitForURL(/limit=5/)
+
+      const firstPageIds = await page.locator('.cell-id').allInnerTexts()
+      await goToNextPage(page)
+      const secondPageIds = await page.locator('.cell-id').allInnerTexts()
+
+      expect(firstPageIds).not.toContain(secondPageIds[0])
+    })
+
+    test('should persist per-page limit in list drawer', async () => {
+      await payload.delete({
+        collection: listDrawerSlug,
+        where: {},
+      })
+
+      await mapAsync([...Array(20)], async (_, i) => {
+        await payload.create({
+          disableTransaction: true,
+          collection: listDrawerSlug,
+          data: {
+            title: `List Drawer Item ${i + 1}`,
+            description: `Description ${i + 1}`,
+            number: i + 1,
+          },
+        })
+      })
+
+      await page.goto(withListViewUrl.list)
+
+      // Open the list drawer via the "Select posts" button
+      await page.locator('button:has-text("Select posts")').click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
+
+      // Change per-page to 5
+      await page.locator('.list-drawer .per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
+
+      await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
+      await expect(listDrawer).toBeHidden()
+
+      // Reopen the drawer
+      await page.locator('button:has-text("Select posts")').click()
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
 
@@ -1446,12 +1666,12 @@ describe('List View', () => {
     test('should sort', async () => {
       await page.reload()
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1468,7 +1688,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'asc',
       })
 
@@ -1482,7 +1701,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'desc',
       })
 
@@ -1506,7 +1724,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'asc',
       })
 
@@ -1520,7 +1737,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'desc',
       })
 
@@ -1626,6 +1842,36 @@ describe('List View', () => {
       await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+    })
+
+    test('should not show sort chevrons for virtual: true fields', async () => {
+      const post = await createPost({ title: 'Test Post' })
+      await createVirtualDoc({ post: post.id, textField: 'test text' })
+
+      await page.goto(virtualsUrl.list)
+
+      await openListColumns(page, {})
+      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+
+      // Check that virtualText (virtual: true) does NOT have sort buttons
+      const virtualTextHeading = page.locator('#heading-virtualText')
+      await expect(virtualTextHeading).toBeVisible()
+      await expect(virtualTextHeading.locator('.sort-column__buttons')).toHaveCount(0)
+
+      // Check that textField (regular field) DOES have sort buttons as a control
+      const textFieldHeading = page.locator('#heading-textField')
+      await expect(textFieldHeading).toBeVisible()
+      await expect(textFieldHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__desc')).toBeVisible()
+
+      // Check that virtualTitleFromPost (virtual: 'post.title') DOES have sort buttons
+      const virtualTitleHeading = page.locator('#heading-virtualTitleFromPost')
+      await expect(virtualTitleHeading).toBeVisible()
+      await expect(virtualTitleHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__desc')).toBeVisible()
     })
   })
 
@@ -1751,11 +1997,154 @@ describe('List View', () => {
 
     await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(2)
   })
+
+  describe('formatDocURL', () => {
+    beforeEach(async () => {
+      // Clean up any existing formatDocURL documents
+      await payload.delete({
+        collection: formatDocURLCollectionSlug,
+        where: { id: { exists: true } },
+      })
+    })
+
+    test('should disable linking for documents with title "no-link"', async () => {
+      // Create test documents
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable' },
+      })
+
+      const normalDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'normal', description: 'This should be linkable normally' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      // Find the row with "no-link" title - it should NOT have a link
+      const noLinkRow = page.locator(tableRowLocator).filter({ hasText: 'no-link' })
+      const noLinkTitleCell = noLinkRow.locator('td').nth(1)
+      await expect(noLinkTitleCell.locator('a')).toHaveCount(0)
+
+      // Find the row with "normal" title - it should have a link with admin=true query param
+      // (because we're logged in as dev@payloadcms.com)
+      const normalRow = page.locator(tableRowLocator).filter({ hasText: 'normal' })
+      const normalTitleCell = normalRow.locator('td').nth(1)
+      const normalLink = normalTitleCell.locator('a')
+      await expect(normalLink).toHaveCount(1)
+      await expect(normalLink).toHaveAttribute(
+        'href',
+        `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${normalDoc.id}?admin=true`,
+      )
+    })
+
+    test('should use custom destination for documents with title "custom-link"', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'custom-link', description: 'This should link to custom destination' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Find the row with "custom-link" title - it should link to custom destination
+      const customLinkRow = page.locator(tableRowLocator).filter({ hasText: 'custom-link' })
+      const customLinkTitleCell = customLinkRow.locator('td').nth(1)
+      const customLink = customLinkTitleCell.locator('a')
+      await expect(customLink).toHaveCount(1)
+      await expect(customLink).toHaveAttribute('href', '/custom-destination')
+    })
+
+    test('should add admin query param for dev@payloadcms.com user', async () => {
+      // This test verifies the user-based URL modification
+      const adminDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'admin-test', description: 'This should have admin query param' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Since we're logged in as dev@payloadcms.com, links should have ?admin=true
+      const adminRow = page.locator(tableRowLocator).filter({ hasText: 'admin-test' })
+      const adminTitleCell = adminRow.locator('td').nth(1)
+      const adminLink = adminTitleCell.locator('a')
+      await expect(adminLink).toHaveCount(1)
+      await expect(adminLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${adminDoc.id}\\?admin=true`,
+        ),
+      )
+    })
+
+    test('should use different URL for trash view', async () => {
+      // Create a document and then move it to trash
+      const trashDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'trash-test', description: 'This should show trash URL' },
+      })
+
+      // Move the document to trash by setting deletedAt (not delete)
+      await payload.update({
+        collection: formatDocURLCollectionSlug,
+        id: trashDoc.id,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+      })
+
+      // Go to trash view
+      await page.goto(`${formatDocURLUrl.list}/trash`)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // In trash view, the formatDocURL should add ?from=trash
+      const trashRow = page.locator(tableRowLocator).filter({ hasText: 'trash-test' })
+      const trashTitleCell = trashRow.locator('td').nth(1)
+      const trashLink = trashTitleCell.locator('a')
+      await expect(trashLink).toHaveCount(1)
+      await expect(trashLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/trash/${trashDoc.id}\\?from=trash`,
+        ),
+      )
+    })
+
+    test('should add published query param for published documents', async () => {
+      // Create a published document
+      const publishedDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: {
+          title: 'published-test',
+          description: 'This is a published document',
+          _status: 'published',
+        },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Published documents should have ?published=true added
+      const publishedRow = page.locator(tableRowLocator).filter({ hasText: 'published-test' })
+      const publishedTitleCell = publishedRow.locator('td').nth(1)
+      const publishedLink = publishedTitleCell.locator('a')
+      await expect(publishedLink).toHaveCount(1)
+      await expect(publishedLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${publishedDoc.id}\\?published=true`,
+        ),
+      )
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -1771,6 +2160,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -1778,11 +2168,34 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   }) as unknown as Promise<Geo>
 }
 
+async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
+  return payload.create({
+    collection: noTimestampsSlug,
+    disableTransaction: true,
+    data: {
+      title,
+      ...overrides,
+    },
+  }) as unknown as Promise<Post>
+}
+
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
     },
   })
+}
+
+async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
+  return payload.create({
+    collection: virtualsSlug,
+    disableTransaction: true,
+    data: {
+      post: overrides?.post,
+      ...overrides,
+    },
+  }) as unknown as Promise<Virtual>
 }

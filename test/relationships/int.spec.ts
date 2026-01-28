@@ -3,6 +3,7 @@ import type { Payload, PayloadRequest } from 'payload'
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
@@ -17,6 +18,7 @@ import type {
 } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { mongooseList } from '../helpers/isMongoose.js'
 import {
   chainedRelSlug,
   customIdNumberSlug,
@@ -38,7 +40,7 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
-const mongoIt = ['firestore', 'mongodb'].includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
+const mongoIt = mongooseList.includes(process.env.PAYLOAD_DATABASE || '') ? it : it.skip
 
 describe('Relationships', () => {
   beforeAll(async () => {
@@ -648,7 +650,7 @@ describe('Relationships', () => {
             },
           })
 
-          // eslint-disable-next-line jest/no-standalone-expect
+          // eslint-disable-next-line vitest/no-standalone-expect
           expect(query1.totalDocs).toStrictEqual(1)
         })
 
@@ -789,6 +791,45 @@ describe('Relationships', () => {
 
           expect(localized_res_1.docs).toStrictEqual([movie_2, movie_1])
           expect(localized_res_2.docs).toStrictEqual([movie_1, movie_2])
+        })
+
+        it('should sort by a property of a nested relationship', async () => {
+          await payload.delete({ collection: 'directors', where: {} })
+          await payload.delete({ collection: 'movies', where: {} })
+
+          const director = await payload.create({ collection: 'directors', data: {} })
+
+          const movie = await payload.create({
+            collection: 'movies',
+            data: { director: director.id, name: 'movie 1' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director.id,
+            data: { movie: movie.id },
+          })
+
+          const director_2 = await payload.create({ collection: 'directors', data: {} })
+
+          const movie_2 = await payload.create({
+            collection: 'movies',
+            data: { director: director_2.id, name: 'movie 2' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_2.id,
+            data: { movie: movie_2.id },
+          })
+
+          const res = await payload.find({ collection: 'movies', sort: 'director.movie.name' })
+          expect(res.docs[0].id).toBe(movie.id)
+          expect(res.docs[1].id).toBe(movie_2.id)
+
+          const res_2 = await payload.find({ collection: 'movies', sort: '-director.movie.name' })
+          expect(res_2.docs[0].id).toBe(movie_2.id)
+          expect(res_2.docs[1].id).toBe(movie.id)
         })
 
         it('should sort by multiple properties of a relationship', async () => {
@@ -1521,6 +1562,31 @@ describe('Relationships', () => {
         expect(result.manyPoly[0]).toStrictEqual({ relationTo: 'movies', value: movie })
         expect(result.onePoly).toStrictEqual({ relationTo: 'movies', value: movie })
       })
+
+      it('should allow a localized hasMany relationship inside a block', async () => {
+        const director1 = await payload.create({
+          collection: 'directors',
+          data: { name: 'director-1' },
+        })
+        const director2 = await payload.create({
+          collection: 'directors',
+          data: { name: 'director-2' },
+        })
+        const result = await payload.create({
+          collection: 'blocks',
+          data: {
+            blocks: [
+              {
+                blockType: 'some',
+                directors: [director1.id, director2.id],
+              },
+            ],
+          },
+        })
+
+        expect(result.blocks[0]?.directors[0].id).toBe(director1.id)
+        expect(result.blocks[0]?.directors[1].id).toBe(director2.id)
+      })
     })
   })
 
@@ -1618,7 +1684,7 @@ describe('Relationships', () => {
         })
         .then((res) => res.json())
 
-      // eslint-disable-next-line jest/no-standalone-expect
+      // eslint-disable-next-line vitest/no-standalone-expect
       expect(queryOne.docs).toHaveLength(1)
     })
 

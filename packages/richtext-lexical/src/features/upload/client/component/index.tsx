@@ -2,6 +2,7 @@
 import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -12,8 +13,8 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
-import { isImage } from 'payload/shared'
+import { $getNodeByKey, type ElementFormatType } from 'lexical'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -25,24 +26,25 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import './index.scss'
-
-const baseClass = 'lexical-upload'
 
 const initialParams = {
   depth: 0,
 }
 
 export type ElementProps = {
+  className: string
   data: UploadData
+  format?: ElementFormatType
   nodeKey: string
 }
 
-const Component: React.FC<ElementProps> = (props) => {
+export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
+    className: baseClass,
     data: { fields, relationTo, value },
+    format,
     nodeKey,
   } = props
 
@@ -66,9 +68,9 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const {
     editorConfig,
-    fieldProps: { readOnly, schemaPath },
+    fieldProps: { schemaPath },
   } = useEditorConfigContext()
-
+  const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection] = useState<ClientCollectionConfig>(() =>
@@ -92,7 +94,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 
@@ -105,7 +107,7 @@ const Component: React.FC<ElementProps> = (props) => {
   }, [editor, nodeKey])
 
   const updateUpload = useCallback(
-    (data: Data) => {
+    (_data: Data) => {
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -139,33 +141,43 @@ const Component: React.FC<ElementProps> = (props) => {
     [editor, nodeKey],
   )
 
+  const aspectRatio =
+    thumbnailSRC && data?.width && data?.height
+      ? data.width > data.height
+        ? 'landscape'
+        : 'portrait'
+      : 'landscape'
+
   return (
-    <div className={baseClass} contentEditable={false} ref={uploadRef}>
+    <div
+      className={`${baseClass}__contents ${baseClass}__contents--${aspectRatio}`}
+      data-align={format || undefined}
+      data-filename={data?.filename}
+      ref={uploadRef}
+    >
       <div className={`${baseClass}__card`}>
-        <div className={`${baseClass}__topRow`}>
-          <div className={`${baseClass}__thumbnail`}>
-            <Thumbnail
-              collectionSlug={relationTo}
-              fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
-            />
-          </div>
-          <div className={`${baseClass}__topRowRightPanel`}>
-            <div className={`${baseClass}__collectionLabel`}>
-              {getTranslation(relatedCollection.labels.singular, i18n)}
-            </div>
-            {editor.isEditable() && (
-              <div className={`${baseClass}__actions`}>
+        <div className={`${baseClass}__media`}>
+          <Thumbnail
+            collectionSlug={relationTo}
+            fileSrc={isImage(data?.mimeType) ? thumbnailSRC : null}
+            height={data?.height}
+            size="none"
+            width={data?.width}
+          />
+
+          {isEditable && (
+            <div className={`${baseClass}__overlay ${baseClass}__floater`}>
+              <div className={`${baseClass}__actions`} role="toolbar">
                 {hasExtraFields ? (
                   <Button
                     buttonStyle="icon-label"
                     className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={readOnly}
+                    disabled={!isEditable}
                     el="button"
                     icon="edit"
-                    onClick={() => {
-                      toggleDrawer()
-                    }}
+                    onClick={toggleDrawer}
                     round
+                    size="medium"
                     tooltip={t('fields:editRelationship')}
                   />
                 ) : null}
@@ -173,7 +185,7 @@ const Component: React.FC<ElementProps> = (props) => {
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__swap-drawer-toggler`}
-                  disabled={readOnly}
+                  disabled={!isEditable}
                   el="button"
                   icon="swap"
                   onClick={() => {
@@ -182,30 +194,40 @@ const Component: React.FC<ElementProps> = (props) => {
                     })
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:swapUpload')}
                 />
+
                 <Button
                   buttonStyle="icon-label"
                   className={`${baseClass}__removeButton`}
-                  disabled={readOnly}
+                  disabled={!isEditable}
                   icon="x"
                   onClick={(e) => {
                     e.preventDefault()
                     removeUpload()
                   }}
                   round
+                  size="medium"
                   tooltip={t('fields:removeUpload')}
                 />
               </div>
-            )}
+            </div>
+          )}
+        </div>
+
+        <div className={`${baseClass}__metaOverlay ${baseClass}__floater`}>
+          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+            <strong className={`${baseClass}__filename`}>
+              {data?.filename || t('general:untitled')}
+            </strong>
+          </DocumentDrawerToggler>
+          <div className={`${baseClass}__collectionLabel`}>
+            {getTranslation(relatedCollection.labels.singular, i18n)}
           </div>
         </div>
-        <div className={`${baseClass}__bottomRow`}>
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <strong>{data?.filename}</strong>
-          </DocumentDrawerToggler>
-        </div>
       </div>
+
       {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
@@ -221,13 +243,5 @@ const Component: React.FC<ElementProps> = (props) => {
         />
       ) : null}
     </div>
-  )
-}
-
-export const UploadComponent = (props: ElementProps): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props} uploads>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
   )
 }

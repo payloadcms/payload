@@ -46,7 +46,7 @@ function createErrorsFromMessage(message: string): {
   if (errors.length === 1) {
     return {
       errors,
-      message: `${intro}:`,
+      message: `${intro}: `,
     }
   }
 

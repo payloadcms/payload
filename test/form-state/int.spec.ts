@@ -5,6 +5,7 @@ import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -729,5 +730,44 @@ describe('Form State', () => {
       },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
+  })
+
+  it('should set rows to empty array for empty array fields', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    // Create a document with an empty array
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+        array: [], // Empty array - this should result in rows: [] in form state
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: {
+        create: true,
+        delete: true,
+        fields: true,
+        read: true,
+        readVersions: true,
+        update: true,
+      },
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.array).toBeDefined()
+    expect(state?.array?.rows).toEqual([]) // should be [] not undefined
   })
 })

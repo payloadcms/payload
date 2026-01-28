@@ -88,6 +88,7 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -116,6 +117,7 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -124,6 +126,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
     header: Header;
     global: Global;
@@ -138,7 +141,7 @@ export interface Config {
     'global-3': Global3Select<false> | Global3Select<true>;
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
-  locale: 'en' | 'es';
+  locale: 'en' | 'es' | 'uk';
   user: User & {
     collection: 'users';
   };
@@ -180,6 +183,7 @@ export interface NoTimeStamp {
 export interface Category {
   id: string;
   title?: string | null;
+  simple?: (string | null) | Simple;
   hideout?: {
     camera1?: {
       time1Image?: (string | null) | Post;
@@ -191,16 +195,77 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  text?: string | null;
+  number?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
   title: string;
   category?: (string | null) | Category;
+  categoryID?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  categoryTitle?: string | null;
+  categorySimpleText?: string | null;
+  categories?: (string | Category)[] | null;
+  categoriesCustomID?: (number | CategoriesCustomId)[] | null;
+  categoryPoly?: {
+    relationTo: 'categories';
+    value: string | Category;
+  } | null;
+  categoryPolyMany?:
+    | {
+        relationTo: 'categories';
+        value: string | Category;
+      }[]
+    | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
+  polymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
+  localizedPolymorphicRelations?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string | Category;
+          }
+        | {
+            relationTo: 'simple';
+            value: string | Simple;
+          }
+      )[]
+    | null;
   localized?: string | null;
   text?: string | null;
   number?: number | null;
+  numberDefault?: number | null;
+  numbersHasMany?: number[] | null;
+  publishDate?: string | null;
   blocks?:
     | {
         nested?:
@@ -216,6 +281,23 @@ export interface Post {
         blockType: 'block-third';
       }[]
     | null;
+  testNestedGroup?: {
+    nestedLocalizedPolymorphicRelation?:
+      | (
+          | {
+              relationTo: 'categories';
+              value: string | Category;
+            }
+          | {
+              relationTo: 'simple';
+              value: string | Simple;
+            }
+        )[]
+      | null;
+    nestedLocalizedText?: string | null;
+    nestedText1?: string | null;
+    nestedText2?: string | null;
+  };
   D1?: {
     D2?: {
       D3?: {
@@ -267,17 +349,6 @@ export interface CategoriesCustomId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple".
- */
-export interface Simple {
-  id: string;
-  text?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "error-on-unnamed-fields".
  */
 export interface ErrorOnUnnamedField {
@@ -326,7 +397,7 @@ export interface RelationA {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -352,7 +423,7 @@ export interface RelationB {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -449,6 +520,8 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postsTitles?: string[] | null;
+  postCategoriesTitles?: string[] | null;
   postTitleHidden?: string | null;
   postCategoryTitle?: string | null;
   postCategoryID?:
@@ -472,6 +545,7 @@ export interface VirtualRelation {
     | null;
   postLocalized?: string | null;
   post?: (string | null) | Post;
+  posts?: (string | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -607,6 +681,23 @@ export interface UniqueField {
   slugField?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -782,6 +873,7 @@ export interface NoTimeStampsSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  simple?: T;
   hideout?:
     | T
     | {
@@ -822,10 +914,22 @@ export interface CategoriesCustomIdSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  categoryID?: T;
+  categoryTitle?: T;
+  categorySimpleText?: T;
+  categories?: T;
+  categoriesCustomID?: T;
+  categoryPoly?: T;
+  categoryPolyMany?: T;
   categoryCustomID?: T;
+  polymorphicRelations?: T;
+  localizedPolymorphicRelations?: T;
   localized?: T;
   text?: T;
   number?: T;
+  numberDefault?: T;
+  numbersHasMany?: T;
+  publishDate?: T;
   blocks?:
     | T
     | {
@@ -846,6 +950,14 @@ export interface PostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  testNestedGroup?:
+    | T
+    | {
+        nestedLocalizedPolymorphicRelation?: T;
+        nestedLocalizedText?: T;
+        nestedText1?: T;
+        nestedText2?: T;
       };
   D1?:
     | T
@@ -1044,6 +1156,8 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postsTitles?: T;
+  postCategoriesTitles?: T;
   postTitleHidden?: T;
   postCategoryTitle?: T;
   postCategoryID?: T;
@@ -1051,6 +1165,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   postID?: T;
   postLocalized?: T;
   post?: T;
+  posts?: T;
   customID?: T;
   customIDValue?: T;
   updatedAt?: T;
@@ -1188,6 +1303,14 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
   slugField?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

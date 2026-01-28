@@ -47,7 +47,12 @@ export async function handleTaskError({
   } = error.args
 
   if (taskConfig?.onFail) {
-    await taskConfig.onFail()
+    await taskConfig.onFail({
+      input,
+      job,
+      req,
+      taskStatus,
+    })
   }
 
   const errorJSON = {

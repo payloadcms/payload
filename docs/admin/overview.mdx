@@ -56,7 +56,7 @@ app
 
 As shown above, all Payload routes are nested within the `(payload)` route group. This creates a boundary between the Admin Panel and the rest of your application by scoping all layouts and styles. The `layout.tsx` file within this directory, for example, is where Payload manages the `html` tag of the document to set proper [`lang`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang) and [`dir`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir) attributes, etc.
 
-The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contains all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
+The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contain all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
 <Banner type="warning">
   **Note:** If you don't intend to use the Admin Panel, [REST
@@ -98,6 +98,7 @@ The following options are available:
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `avatar`                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                        |
 | `autoLogin`                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                      |
+| `autoRefresh`              | Used to automatically refresh user tokens for users logged into the dashboard. [More details](../authentication/overview).                      |
 | `components`               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                 |
 | `custom`                   | Any custom properties you wish to pass to the Admin Panel.                                                                                      |
 | `dateFormat`               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used. |
@@ -285,12 +286,14 @@ Users in the Admin Panel have the ability to choose between light mode and dark 
 
 The `admin.timezones` configuration allows you to configure timezone settings for the Admin Panel. You can customise the available list of timezones and in the future configure the default timezone for the Admin Panel and for all users.
 
+Dates in Payload are always stored in UTC in the database. The timezone settings in the Admin Panel affect only how dates are displayed to editors to help ensure consistency for multi-region editorial teams.
+
 The following options are available:
 
-| Option               | Description                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit` |
-| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                         |
+| Option               | Description                                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit`. Also supports a function that is given the defaultTimezones list. |
+| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                                                                                            |
 
 We validate the supported timezones array by checking the value against the list of IANA timezones supported via the Intl API, specifically `Intl.supportedValuesOf('timeZone')`.
 
@@ -299,6 +302,92 @@ We validate the supported timezones array by checking the value against the list
   `timezone: true`. See [Date Fields](../fields/overview#date) for more
   information.
 </Banner>
+
+For example:
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Extending supported timezones
+
+For `supportedTimezones` we also support using a function that is given the defaultTimezones list. This allows you to easily extend the default list of timezones rather than replacing it completely.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones, // list provided by Payload
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Using a UTC timezone
+
+In some situations you may want the displayed date and time to match exactly what's being stored in the database where we always store values in UTC. You can do this by adding UTC as a valid timezone option.
+Using a UTC timezone means that an editor inputing for example '1pm' will always see '1pm' and the stored value will be '13:00:00Z'.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'UTC',
+          value: 'UTC',
+        },
+        // ...other timezones
+      ],
+      defaultTimezone: 'UTC',
+    },
+  },
+})
+```
 
 ## Toast
 
@@ -311,8 +400,9 @@ The `admin.toast` configuration allows you to customize the handling of toast me
 
 The following options are available for the `admin.toast` configuration:
 
-| Option     | Description                                                                                                      | Default |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
-| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
-| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
-| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |
+| Option     | Description                                                                                                      | Default        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | -------------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`         |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false`        |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`            |
+| `position` | The position of the toast on the screen.                                                                         | `bottom-right` |

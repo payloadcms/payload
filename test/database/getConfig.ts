@@ -55,6 +55,11 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'title',
         },
         {
+          name: 'simple',
+          type: 'relationship',
+          relationTo: 'simple',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -103,6 +108,20 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'simple-localized',
+      fields: [
+        {
+          type: 'text',
+          localized: true,
+          name: 'text',
+        },
+        {
+          type: 'number',
+          name: 'number',
+        },
+      ],
+    },
+    {
       slug: 'categories-custom-id',
       versions: { drafts: true },
       fields: [
@@ -127,9 +146,60 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'category',
         },
         {
+          type: 'json',
+          name: 'categoryID',
+          virtual: 'category.id',
+        },
+        {
+          type: 'text',
+          name: 'categoryTitle',
+          virtual: 'category.title',
+        },
+        {
+          type: 'text',
+          name: 'categorySimpleText',
+          virtual: 'category.simple.text',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories',
+          hasMany: true,
+          name: 'categories',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'categories-custom-id',
+          hasMany: true,
+          name: 'categoriesCustomID',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories'],
+          name: 'categoryPoly',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories'],
+          hasMany: true,
+          name: 'categoryPolyMany',
+        },
+        {
           type: 'relationship',
           relationTo: 'categories-custom-id',
           name: 'categoryCustomID',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          name: 'polymorphicRelations',
+        },
+        {
+          type: 'relationship',
+          relationTo: ['categories', 'simple'],
+          hasMany: true,
+          localized: true,
+          name: 'localizedPolymorphicRelations',
         },
         {
           name: 'localized',
@@ -143,6 +213,20 @@ export const getConfig: () => Partial<Config> = () => ({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          name: 'numberDefault',
+          type: 'number',
+          defaultValue: 1,
+        },
+        {
+          name: 'numbersHasMany',
+          type: 'number',
+          hasMany: true,
+        },
+        {
+          name: 'publishDate',
+          type: 'date',
         },
         {
           type: 'blocks',
@@ -168,6 +252,32 @@ export const getConfig: () => Partial<Config> = () => ({
                   ],
                 },
               ],
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'testNestedGroup',
+          fields: [
+            {
+              name: 'nestedLocalizedPolymorphicRelation',
+              type: 'relationship',
+              relationTo: ['categories', 'simple'],
+              hasMany: true,
+              localized: true,
+            },
+            {
+              name: 'nestedLocalizedText',
+              type: 'text',
+              localized: true,
+            },
+            {
+              name: 'nestedText1',
+              type: 'text',
+            },
+            {
+              name: 'nestedText2',
+              type: 'text',
             },
           ],
         },
@@ -602,6 +712,16 @@ export const getConfig: () => Partial<Config> = () => ({
           virtual: 'post.title',
         },
         {
+          name: 'postsTitles',
+          type: 'text',
+          virtual: 'posts.title',
+        },
+        {
+          name: 'postCategoriesTitles',
+          type: 'text',
+          virtual: 'post.categories.title',
+        },
+        {
           name: 'postTitleHidden',
           type: 'text',
           virtual: 'post.title',
@@ -636,6 +756,12 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'post',
           type: 'relationship',
           relationTo: 'posts',
+        },
+        {
+          name: 'posts',
+          type: 'relationship',
+          relationTo: 'posts',
+          hasMany: true,
         },
         {
           name: 'customID',
@@ -988,7 +1114,7 @@ export const getConfig: () => Partial<Config> = () => ({
   ],
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: ['en', 'es', 'uk'],
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
