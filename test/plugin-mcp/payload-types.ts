@@ -219,6 +219,13 @@ export interface Post {
    * The author of the post
    */
   author?: (string | null) | User;
+  /**
+   * Geographic location coordinates
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -565,6 +572,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  location?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -760,6 +768,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
