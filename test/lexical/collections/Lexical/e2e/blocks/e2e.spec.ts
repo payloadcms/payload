@@ -554,8 +554,6 @@ describe('lexicalBlocks', () => {
 
       await expect(floatingToolbar_formatSection).toBeVisible()
 
-      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
-
       const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
       await expect(boldButton).toBeVisible()
