@@ -12,6 +12,9 @@ interface Args {
 export const getAfterChangeHook =
   ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ doc, operation, previousDoc, req }) => {
+    if (req.context?.triggerAfterChange === false) {
+      return doc
+    }
     try {
       const files = getIncomingFiles({ data: doc, req })
 
@@ -71,7 +74,15 @@ export const getAfterChangeHook =
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
-              req,
+              req: {
+                ...req,
+                context: {
+                  ...req.context,
+                  triggerAfterChange: false,
+                },
+                file: undefined,
+                query: {},
+              },
             })
             return { ...doc, ...uploadMetadata }
           } catch (updateError: unknown) {
