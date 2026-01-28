@@ -8,6 +8,7 @@ import type {
   CustomSaveButton,
   CustomSaveDraftButton,
   CustomStatus,
+  CustomUnpublishButton,
 } from '../../admin/types.js'
 import type {
   Access,
@@ -136,6 +137,11 @@ export type GlobalAdminOptions = {
        * Replaces the "Status" section
        */
       Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: CustomUnpublishButton
     }
     views?: {
       /**

@@ -50,6 +50,12 @@ export type {
    * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
    */
   CustomComponent as CustomSaveDraftButton,
+  /**
+   * @deprecated
+   * The `CustomUnpublishButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `UnpublishButtonClientProps` instead.
+   */
+  CustomComponent as CustomUnpublishButton,
 } from '../config/types.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
@@ -80,10 +86,15 @@ export type {
   SaveDraftButtonServerProps,
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
-
 export type { CustomStatus } from './elements/Status.js'
 
 export type { Column } from './elements/Table.js'
+
+export type {
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  UnpublishButtonServerPropsOnly,
+} from './elements/UnpublishButton.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -570,6 +581,7 @@ export type DocumentSlots = {
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Status?: React.ReactNode
+  UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
 }
