@@ -477,6 +477,8 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
@@ -617,6 +619,8 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       await page.locator('.collections__card-list .card__click').first().click()
       // flaky
       // eslint-disable-next-line playwright/no-wait-for-timeout
