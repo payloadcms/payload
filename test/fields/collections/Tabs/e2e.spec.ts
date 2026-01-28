@@ -194,6 +194,9 @@ describe('Tabs', () => {
   test('should save preferences for tab order', async () => {
     await page.goto(url.list)
 
+    // Wait for hydration
+    await wait(1000)
+
     const firstItem = page.locator('.cell-id a').nth(0)
     const href = await firstItem.getAttribute('href')
     await firstItem.click()
