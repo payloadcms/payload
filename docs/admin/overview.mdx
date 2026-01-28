@@ -286,12 +286,14 @@ Users in the Admin Panel have the ability to choose between light mode and dark 
 
 The `admin.timezones` configuration allows you to configure timezone settings for the Admin Panel. You can customise the available list of timezones and in the future configure the default timezone for the Admin Panel and for all users.
 
+Dates in Payload are always stored in UTC in the database. The timezone settings in the Admin Panel affect only how dates are displayed to editors to help ensure consistency for multi-region editorial teams.
+
 The following options are available:
 
-| Option               | Description                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit` |
-| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                         |
+| Option               | Description                                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit`. Also supports a function that is given the defaultTimezones list. |
+| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                                                                                            |
 
 We validate the supported timezones array by checking the value against the list of IANA timezones supported via the Intl API, specifically `Intl.supportedValuesOf('timeZone')`.
 
@@ -312,19 +314,76 @@ const config = buildConfig({
     timezones: {
       supportedTimezones: [
         {
-          label: "Europe/Dublin",
-          value: "Europe/Dublin",
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
         },
         {
-          label: "Europe/Amsterdam",
-          value: "Europe/Amsterdam",
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
         },
         {
-          label: "Europe/Bucharest",
-          value: "Europe/Bucharest",
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
         },
       ],
-      defaultTimezone: "Europe/Amsterdam",
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Extending supported timezones
+
+For `supportedTimezones` we also support using a function that is given the defaultTimezones list. This allows you to easily extend the default list of timezones rather than replacing it completely.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones, // list provided by Payload
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Using a UTC timezone
+
+In some situations you may want the displayed date and time to match exactly what's being stored in the database where we always store values in UTC. You can do this by adding UTC as a valid timezone option.
+Using a UTC timezone means that an editor inputing for example '1pm' will always see '1pm' and the stored value will be '13:00:00Z'.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'UTC',
+          value: 'UTC',
+        },
+        // ...other timezones
+      ],
+      defaultTimezone: 'UTC',
     },
   },
 })

@@ -14,7 +14,9 @@ export const error = (message: string): void => {
 }
 
 export const debug = (message: string): void => {
-  p.log.step(`${chalk.bgGray('[DEBUG]')} ${chalk.gray(message)}`)
+  if (process.env.DEBUG === 'true') {
+    p.log.step(`${chalk.bgGray('[DEBUG]')} ${chalk.gray(message)}`)
+  }
 }
 
 export const log = (message: string): void => {

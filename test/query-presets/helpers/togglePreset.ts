@@ -33,13 +33,13 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
   const queryPresetsControl = page.locator('button#select-preset')
   const clearButton = queryPresetsControl.locator('#clear-preset')
 
-  if (await clearButton.isVisible()) {
-    await clearButton.click()
-  }
+  // Wait for the clear button to be visible and click it
+  await expect(clearButton).toBeVisible()
+  await clearButton.click()
 
-  // columns can either be omitted or an empty string after being cleared
-  const regex = /columns=(?:\[\]|$)/
-
+  // Wait for preset parameter to be cleared from URL
+  // Other params like columns, groupBy may be temporarily empty strings before being removed
+  const regex = /preset=/
   await page.waitForURL((url) => !regex.test(url.search), {
     timeout: TEST_TIMEOUT_LONG,
   })

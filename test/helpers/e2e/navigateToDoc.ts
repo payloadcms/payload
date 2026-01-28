@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test'
-import type { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
 
-import { wait } from 'payload/shared'
+import type { AdminUrlUtil } from '../adminUrlUtil.js'
 
-export const goToFirstCell = async (page: Page, urlUtil: AdminUrlUtil) => {
+import { waitForFormReady } from '../../helpers.js'
+
+export const goToFirstCell = async (page: Page, serverURL: string) => {
   const cellLink = page.locator(`tbody tr:first-child td a`).first()
   const linkURL = await cellLink.getAttribute('href')
-  await page.goto(`${urlUtil.serverURL}${linkURL}`)
-  await wait(50)
+  await page.goto(`${serverURL}${linkURL}`)
 }
 
 export const navigateToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
@@ -15,7 +15,8 @@ export const navigateToDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
   // wait for query params to arrive
   const regex = new RegExp(`^${urlUtil.list}(?:\\?.*)?$`)
   await page.waitForURL(regex)
-  await goToFirstCell(page, urlUtil)
+  await goToFirstCell(page, urlUtil.serverURL)
+  await waitForFormReady(page)
 }
 
 export const navigateToTrashedDoc = async (page: Page, urlUtil: AdminUrlUtil) => {
@@ -23,5 +24,5 @@ export const navigateToTrashedDoc = async (page: Page, urlUtil: AdminUrlUtil) =>
   // wait for query params to arrive
   const regex = new RegExp(`^${urlUtil.trash}(?:\\?.*)?$`)
   await page.waitForURL(regex)
-  await goToFirstCell(page, urlUtil)
+  await goToFirstCell(page, urlUtil.serverURL)
 }

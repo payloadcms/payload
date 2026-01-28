@@ -1,7 +1,7 @@
 ---
 title: Queues
 label: Queues
-order: 50
+order: 60
 desc: A Queue is a specific group of jobs which can be executed in the order that they were added.
 keywords: jobs queue, application framework, typescript, node, react, nextjs
 ---
@@ -82,13 +82,13 @@ await fetch('/api/payload-jobs/run?limit=100&queue=nightly', {
 
 This endpoint is automatically mounted for you and is helpful in conjunction with serverless platforms like Vercel, where you might want to use Vercel Cron to invoke a serverless function that executes your jobs.
 
-**Query Parameters:**
+#### Query Parameters
 
 - `limit`: The maximum number of jobs to run in this invocation (default: 10).
 - `queue`: The name of the queue to run jobs from. If not specified, jobs will be run from the `default` queue.
 - `allQueues`: If set to `true`, all jobs from all queues will be run. This will ignore the `queue` parameter.
 
-**Vercel Cron Example**
+#### Vercel Cron Example
 
 If you're deploying on Vercel, you can add a `vercel.json` file in the root of your project that configures Vercel Cron to invoke the `run` endpoint on a cron schedule.
 
@@ -122,11 +122,14 @@ export default buildConfig({
         // Allow logged in users to execute this endpoint (default)
         if (req.user) return true
 
+        const secret = process.env.CRON_SECRET
+        if (!secret) return false
+
         // If there is no logged in user, then check
         // for the Vercel Cron secret to be present as an
         // Authorization header:
         const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+        return authHeader === `Bearer ${secret}`
       },
     },
     // Other job configurations...
@@ -272,3 +275,221 @@ const createdJob = await payload.jobs.queue({
   processingOrder: '-createdAt', // Process jobs in reverse order of creation = LIFO
 })
 ```
+
+## Common Queue Strategies
+
+Here are typical patterns for organizing your queues:
+
+### Priority-Based Queues
+
+Separate jobs by priority to ensure critical tasks run quickly:
+
+```ts
+export default buildConfig({
+  jobs: {
+    tasks: [
+      /* ... */
+    ],
+    autoRun: [
+      {
+        cron: '* * * * *', // Every minute
+        limit: 100,
+        queue: 'critical',
+      },
+      {
+        cron: '*/5 * * * *', // Every 5 minutes
+        limit: 50,
+        queue: 'default',
+      },
+      {
+        cron: '0 2 * * *', // Daily at 2 AM
+        limit: 1000,
+        queue: 'batch',
+      },
+    ],
+  },
+})
+```
+
+Then queue jobs to appropriate queues:
+
+```ts
+// Critical: Password resets, payment confirmations
+await payload.jobs.queue({
+  task: 'sendPasswordReset',
+  input: { userId: '123' },
+  queue: 'critical',
+})
+
+// Default: Welcome emails, notifications
+await payload.jobs.queue({
+  task: 'sendWelcomeEmail',
+  input: { userId: '123' },
+  queue: 'default',
+})
+
+// Batch: Analytics, reports, cleanups
+await payload.jobs.queue({
+  task: 'generateAnalytics',
+  input: { date: new Date() },
+  queue: 'batch',
+})
+```
+
+### Environment-Based Execution
+
+Only run jobs on specific servers:
+
+```ts
+export default buildConfig({
+  jobs: {
+    tasks: [
+      /* ... */
+    ],
+    shouldAutoRun: async (payload) => {
+      // Only run jobs if this env var is set
+      return process.env.ENABLE_JOB_WORKERS === 'true'
+    },
+    autoRun: [
+      {
+        cron: '*/5 * * * *',
+        limit: 50,
+        queue: 'default',
+      },
+    ],
+  },
+})
+```
+
+**Use cases:**
+
+- Dedicate specific servers to job processing
+- Disable job processing during deployments
+- Scale job workers independently from API servers
+
+### Feature-Based Queues
+
+Group jobs by feature or domain:
+
+```ts
+autoRun: [
+  { cron: '*/2 * * * *', queue: 'emails', limit: 100 },
+  { cron: '*/10 * * * *', queue: 'images', limit: 50 },
+  { cron: '0 * * * *', queue: 'analytics', limit: 1000 },
+]
+```
+
+This makes it easy to:
+
+- Monitor specific features
+- Scale individual features independently
+- Pause/resume specific types of work
+
+## Choosing an Execution Method
+
+Here's a quick guide to help you choose:
+
+| Method                    | Best For                               | Pros                                   | Cons                                               |
+| ------------------------- | -------------------------------------- | -------------------------------------- | -------------------------------------------------- |
+| **Cron jobs** (`autoRun`) | Dedicated servers, long-running apps   | Simple setup, automatic execution      | Not for serverless, requires always-running server |
+| **Endpoint**              | Serverless platforms (Vercel, Netlify) | Works with serverless, easy to trigger | Requires external cron (Vercel Cron, etc.)         |
+| **Local API**             | Custom scheduling, testing             | Full control, good for tests           | Must implement your own scheduling                 |
+| **Bin script**            | Development, manual execution          | Quick testing, manual control          | Manual invocation only                             |
+
+**Recommendations:**
+
+- **Production (Serverless):** Use Endpoint + Vercel Cron
+- **Production (Server):** Use Cron jobs (`autoRun`)
+- **Development:** Use Bin script or Local API
+- **Testing:** Use Local API with `payload.jobs.runByID()`
+
+## Troubleshooting
+
+Jobs aren't running
+
+**Is `shouldAutoRun` returning true?**
+
+```ts
+jobs: {
+  shouldAutoRun: async (payload) => {
+    console.log('shouldAutoRun called') // Add logging
+    return true
+  },
+}
+```
+
+**Is `autoRun` configured correctly?**
+
+```ts
+// invalid cron syntax
+autoRun: [{ cron: 'every 5 minutes' }]
+
+// valid cron syntax
+autoRun: [{ cron: '*/5 * * * *' }]
+```
+
+**Are jobs in the correct queue?**
+
+```ts
+// Queuing to 'critical' queue
+await payload.jobs.queue({ task: 'myTask', queue: 'critical' })
+
+// But autoRun only processes 'default' queue
+autoRun: [{ queue: 'default' }] // won't pick up the job
+```
+
+**Check the jobs collection**
+
+Enable the jobs collection in admin:
+
+```ts
+jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
+  ...defaultJobsCollection,
+  admin: {
+    ...defaultJobsCollection.admin,
+    hidden: false,
+  },
+})
+```
+
+Look for jobs with:
+
+- `processing: true` but stuck → Worker may have crashed
+- `hasError: true` → Check the `log` field for errors
+- `completedAt: null` → Job hasn't run yet
+
+### Jobs running but failing
+
+Check the job logs in the `payload-jobs` collection:
+
+```ts
+const job = await payload.findByID({
+  collection: 'payload-jobs',
+  id: jobId,
+})
+
+console.log(job.log) // View execution log
+console.log(job.processingErrors) // View errors
+```
+
+### Jobs running too slowly
+
+**Increase limit**
+
+```ts
+autoRun: [
+  { cron: '*/5 * * * *', limit: 100 }, // Process more jobs per run
+]
+```
+
+**Run more frequently**
+
+```ts
+autoRun: [
+  { cron: '* * * * *', limit: 50 }, // Run every minute instead of every 5
+]
+```
+
+**Add more workers**
+
+Scale horizontally by running multiple servers with `ENABLE_JOB_WORKERS=true`.

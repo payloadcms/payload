@@ -1,7 +1,7 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'
-import type { Payload, RequestContext } from '../../../index.js'
+import type { FindOptions, Payload, RequestContext } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -76,9 +76,10 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
+   * Specifies which locales to include when duplicating localized fields. Non-localized data is always duplicated.
+   * By default, all locales are duplicated.
    */
-  select?: TSelect
+  selectedLocales?: string[]
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -88,7 +89,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export async function duplicateLocal<
   TSlug extends CollectionSlug,
@@ -107,6 +108,7 @@ export async function duplicateLocal<
     overrideAccess = true,
     populate,
     select,
+    selectedLocales,
     showHiddenFields,
   } = options
 
@@ -138,6 +140,7 @@ export async function duplicateLocal<
     populate,
     req,
     select,
+    selectedLocales,
     showHiddenFields,
   })
 }

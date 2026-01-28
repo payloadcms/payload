@@ -3,6 +3,7 @@ import {
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
 } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
@@ -47,7 +48,7 @@ export const buildRawSchema = ({
     const baseIndexes: Record<string, RawIndex> = {}
 
     if (collection.upload.filenameCompoundIndex) {
-      const indexName = buildIndexName({ name: `${tableName}_filename_compound_idx`, adapter })
+      const indexName = buildIndexName({ name: `${tableName}_filename_compound`, adapter })
 
       baseIndexes.filename_compound_index = {
         name: indexName,
@@ -58,6 +59,7 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      baseIndexes,
       blocksTableNameMap: {},
       compoundIndexes: collection.sanitizedIndexes,
       disableNotNull: !!collection?.versions?.drafts,
@@ -101,7 +103,7 @@ export const buildRawSchema = ({
     buildTable({
       adapter,
       blocksTableNameMap: {},
-      disableNotNull: !!global?.versions?.drafts,
+      disableNotNull: hasDraftsEnabled(global),
       disableUnique: false,
       fields: global.flattenedFields,
       parentIsLocalized: false,

@@ -98,9 +98,8 @@ describe('Radio', () => {
 
     // toast error
     await assertToastErrors({
-      page,
       errors: ['uniqueText'],
-      dismissAfterAssertion: true,
+      page,
     })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
@@ -123,8 +122,8 @@ describe('Radio', () => {
 
     // toast error
     await assertToastErrors({
-      page,
       errors: ['group.unique'],
+      page,
     })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')

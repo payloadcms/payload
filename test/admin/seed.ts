@@ -3,9 +3,12 @@ import type { Payload } from 'payload'
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import {
+  collectionSlugs,
+  customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
@@ -72,6 +75,15 @@ export const seed = async (_payload: Payload) => {
       }),
       () =>
         _payload.create({
+          collection: customDocumentControlsSlug,
+          data: {
+            title: 'Custom Document Controls',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
           collection: customViews1CollectionSlug,
           data: {
             title: 'Custom View',
@@ -110,6 +122,15 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            title: 'Localized Doc',
+          },
           depth: 0,
           overrideAccess: true,
         }),

@@ -17,20 +17,23 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
+import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -45,9 +48,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   /**
    * Sort the documents, can be a string or an array of strings
@@ -56,8 +59,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   trash?: boolean
+  unpublishAllLocales?: boolean
   where: Where
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateOperation = async <
   TSlug extends CollectionSlug,
@@ -78,18 +82,11 @@ export const updateOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'update',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'update',
+    })
 
     const {
       autosave = false,
@@ -102,6 +99,7 @@ export const updateOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -114,6 +112,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
+      unpublishAllLocales,
       where,
     } = args
 
@@ -122,7 +121,7 @@ export const updateOperation = async <
     }
 
     const { data: bulkUpdateData } = args
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
+    const shouldSaveDraft = Boolean(draftArg && hasDraftsEnabled(collectionConfig))
 
     // /////////////////////////////////////
     // Access
@@ -175,7 +174,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -225,12 +224,18 @@ export const updateOperation = async <
       throwOnMissingFile: false,
     })
 
-    const errors: { id: number | string; message: string }[] = []
+    const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
 
       try {
+        // Each document gets its own transaction when singleTransaction is enabled
+        let docShouldCommit = false
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          docShouldCommit = await initTransaction(req)
+        }
+
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
@@ -242,7 +247,6 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         const updatedDoc = await updateDocument({
           id,
-          accessResults: accessResult,
           autosave,
           collectionConfig,
           config,
@@ -257,16 +261,28 @@ export const updateOperation = async <
           overrideLock: overrideLock!,
           payload,
           populate,
+          publishAllLocales,
           publishSpecificLocale,
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,
+          unpublishAllLocales,
         })
+
+        if (docShouldCommit) {
+          await commitTransaction(req)
+        }
 
         return updatedDoc
       } catch (error) {
+        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          await killTransaction(req)
+        }
         errors.push({
           id,
+          isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }
@@ -279,7 +295,17 @@ export const updateOperation = async <
       req,
     })
 
-    const awaitedDocs = await Promise.all(promises)
+    // Process sequentially when using single transaction mode to avoid shared state issues
+    // Process in parallel when using one transaction for better performance
+    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
+    if (req.payload.db.bulkOperationsSingleTransaction) {
+      awaitedDocs = []
+      for (const promise of promises) {
+        awaitedDocs.push(await promise)
+      }
+    } else {
+      awaitedDocs = await Promise.all(promises)
+    }
 
     let result = {
       docs: awaitedDocs.filter(Boolean),

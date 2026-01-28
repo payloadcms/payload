@@ -23,6 +23,7 @@ import {
 } from '../helpers/e2e/live-preview/index.js'
 import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../helpers/e2e/preferences.js'
+import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -784,6 +785,27 @@ describe('Live Preview', () => {
     const customLivePreview = page.locator('.custom-live-preview')
 
     await expect(customLivePreview).toContainText('Custom live preview being rendered')
+  })
+
+  describe('A11y', () => {
+    test.fixme(
+      'Live preview and edit view should have no accessibility violations',
+      async ({}, testInfo) => {
+        await goToCollectionLivePreview(page, pagesURLUtil)
+        const iframe = page.locator('iframe.live-preview-iframe')
+        await expect(iframe).toBeVisible()
+        await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.collection-edit'],
+          exclude: ['.document-fields__main'], // we don't need to test fields here
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      },
+    )
   })
 
   test('renders custom live preview toggler', async () => {

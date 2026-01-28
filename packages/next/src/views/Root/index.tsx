@@ -12,6 +12,7 @@ import type {
 
 import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
 import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
@@ -21,7 +22,6 @@ import React from 'react'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
-import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
 import { initReq } from '../../utilities/initReq.js'
 import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
@@ -119,6 +119,7 @@ export const RootPage = async ({
   }
 
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
     cookies,
     locale,
@@ -137,6 +138,7 @@ export const RootPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
+      // intentionally omit `serverURL` to keep URL relative
       urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
     },
   })
@@ -218,10 +220,13 @@ export const RootPage = async ({
     }
   }
 
-  const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
-
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
+  const createFirstUserRoute = formatAdminURL({
+    adminRoute,
+    path: _createFirstUserRoute,
+  })
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
     redirect(adminRoute)
@@ -245,7 +250,29 @@ export const RootPage = async ({
     importMap,
     user: viewType === 'createFirstUser' ? true : req.user,
   })
+
   await applyLocaleFiltering({ clientConfig, config, req })
+
+  // Ensure locale on req is still valid after filtering locales
+  if (
+    clientConfig.localization &&
+    req.locale &&
+    !clientConfig.localization.localeCodes.includes(req.locale)
+  ) {
+    redirect(
+      `${currentRoute}${qs.stringify(
+        {
+          ...searchParams,
+          locale: clientConfig.localization.localeCodes.includes(
+            clientConfig.localization.defaultLocale,
+          )
+            ? clientConfig.localization.defaultLocale
+            : clientConfig.localization.localeCodes[0],
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+  }
 
   const visibleEntities = getVisibleEntities({ req })
 

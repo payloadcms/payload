@@ -284,6 +284,63 @@ describe('Relationship Field', () => {
     await expect(values).toHaveText([relationOneDoc.id, relationTwoDoc.id])
   })
 
+  test('should paginate polymorphic relationship correctly and not send NaN page parameter', async () => {
+    const relationOneIDs: string[] = []
+    const relationTwoIDs: string[] = []
+
+    // Create 15 relationOne docs to simulate pagination in the dropdown
+    for (let i = 0; i < 15; i++) {
+      const doc = await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: `relation-one-${i}`,
+        },
+      })
+      relationOneIDs.push(doc.id)
+    }
+
+    // Create 15 relationOne docs to simulate pagination in the dropdown
+    for (let i = 0; i < 15; i++) {
+      const doc = await payload.create({
+        collection: relationTwoSlug,
+        data: {
+          name: `relation-two-${i}`,
+        },
+      })
+      relationTwoIDs.push(doc.id)
+    }
+
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationshipHasManyMultiple')
+
+    await field.click({ delay: 100 })
+
+    const menu = page.locator('.rs__menu-list')
+    await expect(menu).toBeVisible()
+    await wait(300)
+
+    const options = page.locator('.rs__option')
+    await expect(options.first()).toBeVisible()
+
+    // Hover over the menu and use mouse wheel to scroll and trigger pagination
+    await menu.hover()
+
+    // Scroll down multiple times using mouse wheel to trigger onMenuScrollToBottom
+    for (let i = 0; i < 5; i++) {
+      await menu.hover()
+      await page.mouse.wheel(0, 500)
+      await wait(300)
+    }
+
+    // Check that we can see the 14th doc from relationTwo (which would be on page 2)
+    // Before the fix, page 2 of relationTwo wouldn't load because page parameter was NaN
+    const fourteenthRelationTwoDoc = relationTwoIDs[13] // Index 13 = 14th doc (page 2, item 4)
+
+    // The 14th relationTwo doc should be visible in the dropdown
+    await expect(options.locator(`text=${fourteenthRelationTwoDoc}`)).toBeVisible()
+  })
+
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
     await wait(300)
@@ -333,7 +390,6 @@ describe('Relationship Field', () => {
     await assertToastErrors({
       page,
       errors: [fieldLabel],
-      dismissAfterAssertion: true,
     })
     await wait(1000)
 
@@ -573,6 +629,70 @@ describe('Relationship Field', () => {
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
+  })
+
+  test('should open document from drawer by clicking on ID Label', async () => {
+    const relatedDoc = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'Drawer ID Label',
+      },
+    })
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: relatedDoc.id,
+      },
+    })
+    await payload.update({
+      collection: slug,
+      id: doc.id,
+      data: {
+        relationToSelf: doc.id,
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+    // open first drawer (self-relation)
+    const selfRelationTrigger = page.locator(
+      '#field-relationToSelf button.relationship--single-value__drawer-toggler',
+    )
+    await expect(selfRelationTrigger).toBeVisible()
+    await selfRelationTrigger.click()
+
+    const drawer1 = page.locator('[id^=doc-drawer_fields-relationship_1_]')
+    await expect(drawer1).toBeVisible()
+
+    // open nested drawer (relation field inside self-relation)
+    const relationshipDrawerTrigger = drawer1.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(relationshipDrawerTrigger).toBeVisible()
+    await relationshipDrawerTrigger.click()
+
+    const drawer2 = page.locator('[id^=doc-drawer_relation-one_2_]')
+    await expect(drawer2).toBeVisible()
+
+    const idLabel = drawer2.locator('.id-label')
+    await expect(idLabel).toBeVisible()
+    await idLabel.locator('a').click()
+
+    const closedModalLocator = page.locator(
+      '.payload__modal-container.payload__modal-container--exitDone',
+    )
+
+    await expect(closedModalLocator).toHaveCount(1)
+
+    await Promise.all([
+      payload.delete({
+        collection: relationOneSlug,
+        id: relatedDoc.id,
+      }),
+      payload.delete({
+        collection: slug,
+        id: doc.id,
+      }),
+    ])
   })
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {

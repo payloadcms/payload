@@ -243,6 +243,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     collectionSlug,
     config.folders,
     config.routes.admin,
+    config.serverURL,
     drawerDepth,
     i18n,
     labels?.plural,

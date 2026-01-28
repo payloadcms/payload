@@ -1,5 +1,6 @@
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
+  CollectionPermission,
   CollectionSlug,
   DataFromCollectionSlug,
   Payload,
@@ -8,14 +9,17 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { Forbidden, ValidationError } from 'payload'
+import { createLocalReq, Forbidden } from 'payload'
+import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { requestHeaders } from './config.js'
+import { requestHeaders } from './getConfig.js'
 import {
+  asyncParentSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
@@ -695,7 +699,7 @@ describe('Access Control', () => {
     it('should not allow reset password if forgotPassword expiration token is expired', async () => {
       // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
       const originalDateNow = Date.now
-      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 1 hour
         return originalDateNow() - 60 * 60 * 1000
       })
@@ -725,6 +729,140 @@ describe('Access Control', () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('async parent permission inheritance', () => {
+    it('should inherit async parent field permissions to nested children', async () => {
+      const doc = await payload.create({
+        collection: asyncParentSlug,
+        data: {
+          title: 'Test Document',
+        },
+      })
+
+      const req = await createLocalReq(
+        {
+          user: {
+            id: 123 as any,
+            collection: 'users',
+            roles: ['admin'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            email: 'test@test.com',
+          },
+        },
+        payload,
+      )
+
+      // Get permissions with admin user (should have access)
+      const permissions = await getEntityPermissions({
+        id: doc.id,
+        blockReferencesPermissions: {} as any,
+        entity: payload.collections[asyncParentSlug].config,
+        entityType: 'collection',
+        operations: ['read', 'update'],
+        fetchData: true,
+        req,
+      })
+
+      expect(permissions).toEqual({
+        fields: {
+          title: { read: { permission: true }, update: { permission: true } },
+          parentField: {
+            read: { permission: true },
+            update: { permission: true },
+            fields: {
+              childField1: { read: { permission: true }, update: { permission: true } },
+              childField2: { read: { permission: true }, update: { permission: true } },
+              nestedGroup: {
+                read: { permission: true },
+                update: { permission: true },
+                fields: {
+                  deepChild1: {
+                    read: { permission: true },
+                    update: { permission: true },
+                  },
+                  deepChild2: {
+                    read: { permission: true },
+                    update: { permission: true },
+                  },
+                },
+              },
+            },
+          },
+          updatedAt: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
+        },
+        read: { permission: true },
+        update: { permission: true },
+      } satisfies CollectionPermission)
+    })
+
+    it('should correctly deny access when async parent denies (non-admin user)', async () => {
+      const doc = await payload.create({
+        collection: asyncParentSlug,
+        data: {
+          title: 'Test Document 2',
+        },
+      })
+
+      // Create non-admin user request
+      const nonAdminReq = await createLocalReq(
+        {
+          user: {
+            id: 456 as any,
+            collection: 'users',
+            roles: ['user'], // Not admin
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            email: 'user@test.com',
+          },
+        },
+        payload,
+      )
+
+      const permissions = await getEntityPermissions({
+        id: doc.id,
+        blockReferencesPermissions: {} as any,
+        entity: payload.collections[asyncParentSlug].config,
+        entityType: 'collection',
+        operations: ['read', 'update'],
+        fetchData: true,
+        req: nonAdminReq,
+      })
+
+      expect(permissions).toEqual({
+        fields: {
+          title: { read: { permission: true }, update: { permission: true } },
+          parentField: {
+            read: { permission: false },
+            update: { permission: false },
+            fields: {
+              childField1: { read: { permission: false }, update: { permission: false } },
+              childField2: { read: { permission: false }, update: { permission: false } },
+              nestedGroup: {
+                read: { permission: false },
+                update: { permission: false },
+                fields: {
+                  deepChild1: {
+                    read: { permission: false },
+                    update: { permission: false },
+                  },
+                  deepChild2: {
+                    read: { permission: false },
+                    update: { permission: false },
+                  },
+                },
+              },
+            },
+          },
+          updatedAt: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
+        },
+        read: { permission: true },
+        update: { permission: true },
+      } satisfies CollectionPermission)
     })
   })
 })

@@ -3,6 +3,8 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
+import { closeAllToasts } from '../../helpers.js'
+
 export async function copyPasteField({
   fieldName,
   rowIndex,
@@ -31,14 +33,15 @@ export async function copyPasteField({
   await popupBtn.click()
 
   const actionBtnSelector = rowAction
-    ? `#${fieldName}-row-${rowIndex} .popup__content .popup-button-list button.array-actions__${action}`
-    : `.popup.clipboard-action__popup .popup__content .popup-button-list button:has-text("${isCopy ? 'Copy' : 'Paste'} Field")`
-  const actionBtn = field.locator(actionBtnSelector).first()
+    ? `.popup__content .popup-button-list button.array-actions__${action}`
+    : `.popup__content .popup-button-list button:has-text("${isCopy ? 'Copy' : 'Paste'} Field")`
+  const actionBtn = page.locator(actionBtnSelector).first()
   await expect(actionBtn).toBeVisible()
   await actionBtn.click()
 
   if (isCopy) {
     const copySuccessToast = page.locator('.payload-toast-item.toast-success')
     await expect(copySuccessToast).toBeVisible()
+    await closeAllToasts(page)
   }
 }

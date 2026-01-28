@@ -5,7 +5,12 @@ import type { SelectType, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere, unflatten } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatAdminURL,
+  mergeListSearchAndWhere,
+  unflatten,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -164,7 +169,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const {
     config: {
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -257,6 +261,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     return qs.stringify(
       {
         locale,
+        select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
@@ -384,17 +389,26 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
+                        action={formatAdminURL({
+                          apiRoute,
+                          path: `/${collection.slug}${queryString}`,
+                        })}
                         disabled={selectedFields.length === 0}
                       />
                     )}

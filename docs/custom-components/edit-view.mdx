@@ -111,6 +111,7 @@ The following options are available:
 | `LivePreviewToggler`     | A toggle button that enables or disables live preview for the current document. [More details](#livepreviewtoggler).         |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Collection. [More details](#description).                                                               |
+| `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
 | `Upload`                 | A file upload component. [More details](#upload).                                                                            |
 
 #### Globals
@@ -146,6 +147,7 @@ The following options are available:
 | `LivePreviewToggler`     | A toggle button that enables or disables live preview for the current document. [More details](#livepreviewtoggler).         |     |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Global. [More details](#description).                                                                   |
+| `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
 
 ### SaveButton
 
@@ -608,11 +610,11 @@ export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
 }
 ```
 
-### Upload
+### Status
 
-The `Upload` property allows you to render a custom file upload component in the Edit View.
+The `Status` property allows you to render a component that represents the collection or global status in the Edit View.
 
-To add an `Upload` component, use the `components.edit.Upload` property in your [Collection Config](../configuration/collections):
+To add an `Status` component, use the `components.edit.Status` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -623,7 +625,31 @@ export const MyCollection: CollectionConfig = {
     components: {
       edit: {
         // highlight-start
-        Upload: '/path/to/MyUploadComponent',
+        Status: '/path/to/MyStatusComponent',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+### Upload
+
+The `Upload` property allows you to render a custom file upload component in the Edit View. This is only available for upload-enabled Collections.
+
+To add an `Upload` component, use the `components.edit.Upload` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: true,
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        Upload: '/path/to/MyUploadComponent#MyUploadServer',
         // highlight-end
       },
     },
@@ -632,15 +658,55 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** The Upload component is only available for Collections.
+  **Important:** Custom upload components must integrate with Payload's form
+  system to work correctly. You cannot use a simple `<input type="file" />` as
+  it won't connect to Payload's upload API. Instead, use Payload's built-in
+  `<Upload>` component from `@payloadcms/ui` or properly integrate with form
+  hooks like `useDocumentInfo()`.
 </Banner>
 
 Here's an example of a custom `Upload` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type {
+  PayloadServerReactComponent,
+  SanitizedCollectionConfig,
+} from 'payload'
+import { CustomUploadClient } from './MyUploadComponent.client'
 
-export function MyUploadComponent() {
-  return <input type="file" />
+export const MyUploadServer: PayloadServerReactComponent<
+  SanitizedCollectionConfig['admin']['components']['edit']['Upload']
+> = (props) => {
+  return (
+    <div>
+      <h2>Custom Upload Interface</h2>
+      <CustomUploadClient {...props} />
+    </div>
+  )
 }
 ```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { Upload, useDocumentInfo } from '@payloadcms/ui'
+
+export const CustomUploadClient = () => {
+  const { collectionSlug, docConfig, initialState } = useDocumentInfo()
+
+  return (
+    <Upload
+      collectionSlug={collectionSlug}
+      initialState={initialState}
+      uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
+    />
+  )
+}
+```
+
+For more details on customizing upload components, including examples with custom actions and drawers, see the [Upload documentation](../upload/overview#customizing-the-upload-ui).
