@@ -864,6 +864,10 @@ describe('General', () => {
     })
 
     test('should allow custom translation of locale labels', async () => {
+      await page.goto(postsUrl.account)
+      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
+      await wait(1000)
+
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1041,6 +1045,8 @@ describe('General', () => {
   describe('progress bar', () => {
     test('should show progress bar on page navigation', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
     })
