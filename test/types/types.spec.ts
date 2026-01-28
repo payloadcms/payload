@@ -1196,63 +1196,100 @@ describe('Types testing', () => {
       })
 
       // Additional operations tests
-      test('find with draft:true on non-draft collection should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on collections without drafts
-        await payload.find({ collection: 'pages', draft: true })
+      test('find with draft:true on non-draft collection should error', () => {
+        expect(payload.find({ collection: 'pages', draft: true })).type.toRaiseError()
       })
 
-      test('find with draft:false on non-draft collection should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on collections without drafts
-        await payload.find({ collection: 'pages', draft: false })
+      test('find with draft:false on non-draft collection should error', () => {
+        expect(payload.find({ collection: 'pages', draft: false })).type.toRaiseError()
       })
 
-      test('find with draft:true on draft-enabled collection should work', async () => {
-        await payload.find({ collection: 'draft-posts', draft: true })
+      test('find with draft:true on draft-enabled collection should work', () => {
+        expect(payload.find({ collection: 'draft-posts', draft: true })).type.not.toRaiseError()
       })
 
-      test('findByID with draft:true on non-draft collection should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on collections without drafts
-        await payload.findByID({ collection: 'pages', id: 1, draft: true })
+      test('find with draft:false on draft-enabled collection should work', () => {
+        expect(payload.find({ collection: 'draft-posts', draft: false })).type.not.toRaiseError()
       })
 
-      test('findByID with draft:true on draft-enabled collection should work', async () => {
-        await payload.findByID({ collection: 'draft-posts', id: 1, draft: true })
+      test('findByID with draft:true on non-draft collection should error', () => {
+        expect(payload.findByID({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
       })
 
-      test('update with draft:true on non-draft collection should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on collections without drafts
-        await payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: true })
+      test('findByID with draft:false on non-draft collection should error', () => {
+        expect(payload.findByID({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
       })
 
-      test('update with draft:true on draft-enabled collection should work', async () => {
-        await payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true })
+      test('findByID with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.findByID({ collection: 'draft-posts', id: 1, draft: true }),
+        ).type.not.toRaiseError()
       })
 
-      test('duplicate with draft:true on non-draft collection should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on collections without drafts
-        await payload.duplicate({ collection: 'pages', id: 1, draft: true })
+      test('update with draft:true on non-draft collection should error', () => {
+        expect(
+          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: true }),
+        ).type.toRaiseError()
       })
 
-      test('duplicate with draft:true on draft-enabled collection should work', async () => {
-        await payload.duplicate({ collection: 'draft-posts', id: 1, draft: true })
+      test('update with draft:false on non-draft collection should error', () => {
+        expect(
+          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: false }),
+        ).type.toRaiseError()
       })
 
-      test('global findOne with draft:true on non-draft global should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on globals without drafts
-        await payload.findGlobal({ slug: 'menu', draft: true })
+      test('update with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+        ).type.not.toRaiseError()
       })
 
-      test('global findOne with draft:true on draft-enabled global should work', async () => {
-        await payload.findGlobal({ slug: 'settings', draft: true })
+      test('duplicate with draft:true on non-draft collection should error', () => {
+        expect(
+          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
+        ).type.toRaiseError()
       })
 
-      test('global update with draft:true on non-draft global should error', async () => {
-        // @ts-expect-error - draft property should be forbidden on globals without drafts
-        await payload.updateGlobal({ slug: 'menu', data: {}, draft: true })
+      test('duplicate with draft:false on non-draft collection should error', () => {
+        expect(
+          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
+        ).type.toRaiseError()
       })
 
-      test('global update with draft:true on draft-enabled global should work', async () => {
-        await payload.updateGlobal({ slug: 'settings', data: {}, draft: true })
+      test('duplicate with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.duplicate({ collection: 'draft-posts', id: 1, draft: true }),
+        ).type.not.toRaiseError()
+      })
+
+      test('global findOne with draft:true on non-draft global should error', () => {
+        expect(payload.findGlobal({ slug: 'menu', draft: true })).type.toRaiseError()
+      })
+
+      test('global findOne with draft:false on non-draft global should error', () => {
+        expect(payload.findGlobal({ slug: 'menu', draft: false })).type.toRaiseError()
+      })
+
+      test('global findOne with draft:true on draft-enabled global should work', () => {
+        expect(payload.findGlobal({ slug: 'settings', draft: true })).type.not.toRaiseError()
+      })
+
+      test('global update with draft:true on non-draft global should error', () => {
+        expect(
+          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
+        ).type.toRaiseError()
+      })
+
+      test('global update with draft:false on non-draft global should error', () => {
+        expect(
+          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
+        ).type.toRaiseError()
+      })
+
+      test('global update with draft:true on draft-enabled global should work', () => {
+        expect(
+          payload.updateGlobal({ slug: 'settings', data: {}, draft: true }),
+        ).type.not.toRaiseError()
       })
     })
 
