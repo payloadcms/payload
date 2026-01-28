@@ -12,6 +12,7 @@ import type { Config, Page as PageType, Post } from './payload-types.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -20,7 +21,7 @@ import { usersSlug } from './collections/Users/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
+const { afterEach, beforeAll, beforeEach, describe } = test
 
 let page: Page
 let postsUrl: AdminUrlUtil
@@ -48,13 +49,20 @@ describe('Trash', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'trashTest',
+    })
 
     pagesDocOne = await createPageDoc({
       title: 'Page',
     })
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
     await payload.delete({
       collection: pagesSlug,
       id: pagesDocOne.id,
@@ -63,7 +71,7 @@ describe('Trash', () => {
 
   describe('Collection view', () => {
     describe('List view', () => {
-      beforeAll(async () => {
+      beforeEach(async () => {
         postsDocOne = await createPostDoc({
           title: 'Post',
           _status: 'published',
@@ -75,10 +83,15 @@ describe('Trash', () => {
         })
       })
 
-      afterAll(async () => {
+      afterEach(async () => {
         await payload.delete({
           collection: postsSlug,
           id: postsDocOne.id,
+          trash: true,
+        })
+        await payload.delete({
+          collection: postsSlug,
+          id: postsDocTwo.id,
           trash: true,
         })
       })
@@ -149,7 +162,7 @@ describe('Trash', () => {
     })
 
     describe('Edit view', () => {
-      beforeAll(async () => {
+      beforeEach(async () => {
         postsDocOne = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -161,7 +174,12 @@ describe('Trash', () => {
         })
       })
 
-      afterAll(async () => {
+      afterEach(async () => {
+        await payload.delete({
+          collection: postsSlug,
+          id: postsDocOne.id,
+          trash: true,
+        })
         await payload.delete({
           collection: postsSlug,
           id: postsDocTwo.id,
