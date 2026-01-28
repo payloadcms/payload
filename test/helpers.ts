@@ -96,10 +96,11 @@ export async function ensureCompilationIsDone({
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
       )
 
-      await page.goto(adminURL)
+      // Commit is faster than waiting for the default waitUntil: load
+      await page.goto(adminURL, { waitUntil: 'commit' })
 
       if (readyURL) {
-        await page.waitForURL(readyURL)
+        await page.waitForURL(readyURL, { waitUntil: 'commit' })
       } else {
         await expect
           .poll(
