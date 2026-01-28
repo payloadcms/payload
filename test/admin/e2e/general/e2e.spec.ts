@@ -1044,11 +1044,31 @@ describe('General', () => {
 
   describe('progress bar', () => {
     test('should show progress bar on page navigation', async () => {
-      await page.goto(postsUrl.admin)
+      // eslint-disable-next-line playwright/no-networkidle
+      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
       // Wait for hydration - otherwise playwright clicks the card early and nothing happens
       await wait(1000)
+
+      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
+      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
+      const client = await page.context().newCDPSession(page)
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: (500 * 1024) / 8, // 500 kbps
+        latency: 400, // 400ms latency
+        offline: false,
+        uploadThroughput: (500 * 1024) / 8,
+      })
+
       await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
+
+      // Reset network conditions
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: -1,
+        latency: 0,
+        offline: false,
+        uploadThroughput: -1,
+      })
     })
   })
 })
