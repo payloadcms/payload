@@ -34,9 +34,7 @@ describe('Lexical Fully Featured', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ serverURL, browser })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -305,9 +303,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
