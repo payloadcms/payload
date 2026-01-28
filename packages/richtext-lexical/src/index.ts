@@ -860,10 +860,10 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-
-                // Use the current node data as siblingDoc, since beforeValidate hooks may need
-                // to access current field values (e.g., for tabs fields that have been edited)
-                const nodeSiblingDoc = subFieldDataFn({ node, req }) ?? {}
+                // In beforeValidate, both siblingData and siblingDoc represent the current data being validated.
+                // This is different from beforeChange/afterChange where siblingDoc represents previous state.
+                // For tabs fields to work correctly, both parameters must have matching structure.
+                const nodeSiblingDoc = nodeSiblingData
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
