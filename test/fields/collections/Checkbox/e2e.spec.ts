@@ -62,9 +62,9 @@ describe('Checkboxes', () => {
     await page.goto(url.list)
 
     await addListFilter({
-      page,
       fieldLabel: 'Checkbox',
       operatorLabel: 'equals',
+      page,
       value: 'True',
     })
 
@@ -77,9 +77,9 @@ describe('Checkboxes', () => {
       await page.locator('#field-checkbox').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -91,8 +91,8 @@ describe('Checkboxes', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

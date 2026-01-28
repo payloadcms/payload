@@ -40,12 +40,12 @@ test.describe('Admin Panel (Root)', () => {
       customRoutes: {
         admin: adminRoute,
       },
+      noAutoLogin: true,
       page,
       serverURL,
-      noAutoLogin: true,
     })
 
-    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
+    await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 
     await ensureCompilationIsDone({
       customRoutes: {
