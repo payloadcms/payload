@@ -291,7 +291,7 @@ export const findOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
-                overrideAccess,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -344,7 +344,7 @@ export const findOperation = async <
                 context: req.context,
                 doc: docRef,
                 findMany: true,
-                overrideAccess,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
