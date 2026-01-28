@@ -82,7 +82,7 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 The following arguments are provided to the `beforeOperation` hook:
 
 | Option           | Description                                                                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
 | **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
@@ -117,8 +117,19 @@ The following arguments are provided to the `beforeValidate` hook:
 | **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
@@ -126,11 +137,20 @@ Immediately before validation, beforeChange hooks will run during create and upd
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
-import type { Post } from '@/payload-types'
 
-const beforeChangeHook: CollectionBeforeChangeHook<Post> = async ({
-  data, // Typed as Partial<Post>
+export const requireTitleOnUpdate: CollectionBeforeChangeHook = async ({
+  data, // Partial<T> — changed fields only
+  originalDoc, // Full doc before changes (defined on update)
+  operation, // 'create' | 'update'
 }) => {
+  // Need the id? Don't expect it in `data`.
+  const id = operation === 'update' ? originalDoc.id : undefined
+
+  // Example: enforce that title cannot be cleared on update
+  if (operation === 'update' && 'title' in (data ?? {}) && !data.title) {
+    throw new Error(`Document ${id} must have a title`)
+  }
+
   return data
 }
 ```
@@ -143,8 +163,19 @@ The following arguments are provided to the `beforeChange` hook:
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 

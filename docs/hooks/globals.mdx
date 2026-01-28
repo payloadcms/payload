@@ -104,8 +104,15 @@ The following arguments are provided to the `beforeValidate` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
@@ -131,8 +138,15 @@ The following arguments are provided to the `beforeChange` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 
