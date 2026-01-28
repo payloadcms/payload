@@ -63,6 +63,12 @@ export type DocumentInfoContext = {
   getDocPreferences: () => Promise<DocumentPreferences>
   incrementVersionCount: () => void
   isInitializing: boolean
+  /**
+   * The tree of parent `DocumentInfo` contexts leading to this one, if any.
+   * E.g. relationship drawers override the main document context with their own,
+   * removing access to the main document's context without this property.
+   */
+  parents?: DocumentInfoContext[]
   preferencesKey?: string
   /**
    * @deprecated This property is deprecated and will be removed in v4.
