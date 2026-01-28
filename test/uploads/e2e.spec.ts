@@ -1988,7 +1988,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image-1.png')
+    await expect(imageRelationshipCell).toHaveText('image.png')
 
     const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
     await expect(pageOneButton).toBeVisible()
