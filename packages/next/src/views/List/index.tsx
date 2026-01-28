@@ -153,6 +153,7 @@ export const renderListView = async (
         collection: 'payload-query-presets',
         depth: 0,
         overrideAccess: false,
+        select: {},
         user,
       })) as QueryPreset
 
@@ -354,7 +355,12 @@ export const renderListView = async (
   })
 
   const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
-  const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
+
+  const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
+    collectionConfig,
+    data: {},
+    req,
+  })
 
   // Check if there's a notFound query parameter (document ID that wasn't found)
   const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -379,6 +385,7 @@ export const renderListView = async (
       collectionSlug,
       hasCreatePermission,
       hasDeletePermission,
+      hasTrashPermission,
       newDocumentURL,
     },
     collectionConfig,
@@ -416,6 +423,7 @@ export const renderListView = async (
               enableRowSelections,
               hasCreatePermission,
               hasDeletePermission,
+              hasTrashPermission,
               listPreferences: collectionPreferences,
               newDocumentURL,
               queryPreset,
