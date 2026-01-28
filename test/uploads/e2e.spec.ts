@@ -498,6 +498,8 @@ describe('Uploads', () => {
 
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
+    // Wait for hydration
+    await wait(1000)
     // from the list edit the first document
     await page.locator('.row-1 a').click()
 

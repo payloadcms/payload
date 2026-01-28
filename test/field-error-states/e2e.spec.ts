@@ -189,6 +189,8 @@ describe('Field Error States', () => {
 
       // go back to doc
       await page.goto(prevValue.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('.row-1 a').click()
       await waitForFormReady(page)
       await page.locator('#field-description').fill('some description')

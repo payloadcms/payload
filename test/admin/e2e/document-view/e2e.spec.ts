@@ -123,6 +123,8 @@ describe('Document View', () => {
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
+      // Wait for hydration
+      await wait(1000)
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
