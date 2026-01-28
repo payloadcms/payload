@@ -1322,6 +1322,8 @@ export type {
   CollectionAdminOptions,
   CollectionConfig,
   DataFromCollectionSlug,
+  DraftDataFromCollection,
+  DraftDataFromCollectionSlug,
   HookOperationType,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
