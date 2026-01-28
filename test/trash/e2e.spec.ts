@@ -3,6 +3,7 @@ import { addListFilter } from 'helpers/e2e/filters/index.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -326,6 +327,8 @@ describe('Trash', () => {
         })
 
         await page.goto(postsUrl.trash)
+        // Wait until hydration is complete
+        await wait(1000)
 
         await page.locator('#empty-trash-button').click()
 

@@ -911,6 +911,7 @@ describe('Versions', () => {
     describe('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
