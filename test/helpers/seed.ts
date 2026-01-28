@@ -134,8 +134,15 @@ export async function seedDB({
         } | null = null
         if (!uploadsDirCache[snapshotKey].find((cache) => cache.originalDir === dir)) {
           // Define new cache folder path to the OS temp directory (well a random folder inside it)
+          // Use a sanitized version of the original path to make the cache dir unique per upload dir
+          const sanitizedPath = dir.replace(/[^a-z0-9]/gi, '_')
           newObj = {
-            cacheDir: path.join(os.tmpdir(), `${snapshotKey}`, `payload-e2e-tests-uploads-cache`),
+            cacheDir: path.join(
+              os.tmpdir(),
+              `${snapshotKey}`,
+              `payload-e2e-tests-uploads-cache`,
+              sanitizedPath,
+            ),
             originalDir: dir,
           }
         }
@@ -152,7 +159,6 @@ export async function seedDB({
 
         try {
           fs.cpSync(newObj.originalDir, newObj.cacheDir, { recursive: true })
-
           uploadsDirCache[snapshotKey].push(newObj)
         } catch (e) {
           console.error('Error in operation (creating snapshot of uploads dir):', e)

@@ -1611,6 +1611,10 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
       ).toBeVisible()
+      // Verify the error message indicates file size limit
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
+      ).toBeVisible()
       await closeAllToasts(page)
       // The file that exceeded the size limit should have exactly 1 error
       // Navigate back to check the second file (2mb.jpg)
@@ -1621,11 +1625,6 @@ describe('Uploads', () => {
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
-
-      // Verify the error message indicates file size limit
-      await expect(
-        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
-      ).toBeVisible()
     })
   })
 
