@@ -378,6 +378,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess: overrideAccess!,
             req,
           })) || result
       }
