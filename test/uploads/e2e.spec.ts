@@ -570,9 +570,8 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'successfully',
       )
-      await page
-        .locator('.payload-toast-container .toast-success .payload-toast-close-button')
-        .click()
+
+      await closeAllToasts(page)
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
@@ -634,7 +633,9 @@ describe('Uploads', () => {
     await wait(1000)
 
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -655,6 +656,8 @@ describe('Uploads', () => {
     await loadFromUrlButton.click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -912,6 +915,7 @@ describe('Uploads', () => {
     await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
@@ -976,6 +980,8 @@ describe('Uploads', () => {
     await page.waitForSelector('button#action-save')
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000) // Wait for the save
 
     await expect(page.locator('.file-field__previewSizes')).toBeVisible()
