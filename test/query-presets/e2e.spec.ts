@@ -5,6 +5,7 @@ import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -621,6 +622,7 @@ describe('Query Presets', () => {
 
     // Create a preset without groupBy
     await page.goto(postsUrl.list)
+    await wait(1000)
 
     await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
