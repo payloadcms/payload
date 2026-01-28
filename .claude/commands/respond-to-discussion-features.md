@@ -1,7 +1,7 @@
 ---
 description: Find GitHub discussions resolved by recent releases and draft response comments to inform the community.
 argument-hint: <time-period> (default: 2months, e.g., "3months", "6weeks", "2025-11-01")
-allowed-tools: Bash(gh release:*, gh api:*), Glob, Grep, Read, Write, TodoWrite
+allowed-tools: Bash(gh release list:*, gh release view:*, gh api graphql:*), Glob, Grep, Read, Write, TodoWrite
 ---
 
 # Respond to Community
