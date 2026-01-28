@@ -75,6 +75,7 @@ export interface Config {
     'posts-no-jobs-queue': PostsNoJobsQueue;
     exports: Export;
     'posts-export': PostsExport;
+    'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
     imports: Import;
     'posts-import': PostsImport;
     'payload-kv': PayloadKv;
@@ -93,6 +94,7 @@ export interface Config {
     'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
+    'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
     'posts-import': PostsImportSelect<false> | PostsImportSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -262,6 +264,15 @@ export interface Page {
   } | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  date?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  dateWithTimezone?: string | null;
+  dateWithTimezone_tz?: SupportedTimezones;
   hasOnePolymorphic?:
     | ({
         relationTo: 'users';
@@ -400,7 +411,7 @@ export interface PostsNoJobsQueue {
 export interface Export {
   id: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -438,7 +449,45 @@ export interface Export {
 export interface PostsExport {
   id: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue-export".
+ */
+export interface PostsNoJobsQueueExport {
+  id: string;
+  name?: string | null;
+  format: 'csv';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -810,6 +859,9 @@ export interface PagesSelect<T extends boolean = true> {
   richTextField?: T;
   relationship?: T;
   excerpt?: T;
+  date?: T;
+  dateWithTimezone?: T;
+  dateWithTimezone_tz?: T;
   hasOnePolymorphic?: T;
   hasManyPolymorphic?: T;
   hasManyMonomorphic?: T;
@@ -896,6 +948,35 @@ export interface ExportsSelect<T extends boolean = true> {
  * via the `definition` "posts-export_select".
  */
 export interface PostsExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue-export_select".
+ */
+export interface PostsNoJobsQueueExportSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
@@ -1058,7 +1139,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
-    format?: ('csv' | 'json') | null;
+    format: 'csv' | 'json';
     limit?: number | null;
     page?: number | null;
     sort?: string | null;
@@ -1098,6 +1179,7 @@ export interface TaskCreateCollectionImport {
       | 'posts-no-jobs-queue'
       | 'exports'
       | 'posts-export'
+      | 'posts-no-jobs-queue-export'
       | 'imports'
       | 'posts-import';
     importMode?: ('create' | 'update' | 'upsert') | null;

@@ -231,6 +231,21 @@ export const Pages: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'date',
+      type: 'date',
+      admin: {
+        description: 'Date field for testing export/import timezone handling',
+      },
+    },
+    {
+      name: 'dateWithTimezone',
+      type: 'date',
+      timezone: true,
+      admin: {
+        description: 'Date field for testing export/import timezone handling',
+      },
+    },
+    {
       name: 'hasOnePolymorphic',
       type: 'relationship',
       relationTo: ['users', 'posts'],

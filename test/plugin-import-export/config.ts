@@ -100,6 +100,10 @@ export default buildConfigWithDefaults({
         {
           slug: 'posts-exports-only',
           import: false,
+          export: {
+            format: 'csv',
+            disableSave: true,
+          },
         },
         {
           slug: 'posts-imports-only',
@@ -115,6 +119,16 @@ export default buildConfigWithDefaults({
           },
           export: {
             disableJobsQueue: true,
+            format: 'csv',
+            disableSave: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-no-jobs-queue-export'
+              if (collection.admin) {
+                collection.admin.group = 'Posts No Jobs Queue'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
           },
         },
       ],

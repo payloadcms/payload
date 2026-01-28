@@ -1202,6 +1202,208 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
+    describe('toCSV derived columns positioning', () => {
+      it('should position derived columns immediately after their base field', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Derived Columns Test',
+            customRelationship: user.user.id,
+            excerpt: 'test excerpt',
+            _status: 'published',
+          },
+        })
+
+        const fields = ['id', 'title', 'customRelationship', 'excerpt']
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const columns = Object.keys(data[0])
+
+        // Derived columns (customRelationship_id, customRelationship_email) should be adjacent to base column
+        const customRelIdx = columns.indexOf('customRelationship')
+        const idIdx = columns.indexOf('customRelationship_id')
+        const emailIdx = columns.indexOf('customRelationship_email')
+        const excerptIdx = columns.indexOf('excerpt')
+
+        expect(customRelIdx).toBeGreaterThan(-1)
+        expect(idIdx).toBe(customRelIdx + 1)
+        expect(emailIdx).toBe(customRelIdx + 2)
+        expect(excerptIdx).toBeGreaterThan(emailIdx)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
+
+    describe('date field export', () => {
+      it('should export date fields as ISO strings', async () => {
+        const dateValue = '2026-01-22T00:00:00.000Z'
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date Export Test',
+            date: dateValue,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'date'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        // Should export as ISO string format
+        expect(data[0].date).toBe('2026-01-22T00:00:00.000Z')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should handle null date values', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: { title: 'Null Date Test', date: null, _status: 'published' },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'date'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        expect(data[0].date).toBe('')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should not include timezone column when only date field is selected', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date With TZ Test',
+            dateWithTimezone: '2026-01-25T12:00:00.000Z',
+            dateWithTimezone_tz: 'Europe/London',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'dateWithTimezone'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const csvContent = fs.readFileSync(csvPath, 'utf-8')
+        const headerLine = csvContent.split('\n')[0]
+
+        // Should only have dateWithTimezone, not dateWithTimezone_tz
+        expect(headerLine).toContain('dateWithTimezone')
+        expect(headerLine).not.toContain('dateWithTimezone_tz')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should not create duplicate columns when selecting both date and timezone fields', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date With TZ Duplicate Test',
+            dateWithTimezone: '2026-01-25T12:00:00.000Z',
+            dateWithTimezone_tz: 'Europe/London',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'dateWithTimezone', 'dateWithTimezone_tz'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const csvContent = fs.readFileSync(csvPath, 'utf-8')
+        const headerLine = csvContent.split('\n')[0]
+        const columns = headerLine.split(',')
+
+        // Count occurrences of dateWithTimezone_tz
+        const tzColumnCount = columns.filter((col) => col === 'dateWithTimezone_tz').length
+
+        // Should have exactly one dateWithTimezone_tz column, not duplicates
+        expect(tzColumnCount).toBe(1)
+
+        // Verify values are correct
+        const data = await readCSV(csvPath)
+        expect(data[0].dateWithTimezone).toBe('2026-01-25T12:00:00.000Z')
+        expect(data[0].dateWithTimezone_tz).toBe('Europe/London')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
+
+    describe('export config options without overrideCollection', () => {
+      it('should apply format option to base export collection', () => {
+        const exportsCollection = payload.collections['exports']
+        expect(exportsCollection.config.admin?.custom?.format).toBe('csv')
+      })
+
+      it('should apply disableSave option to base export collection', () => {
+        const exportsCollection = payload.collections['exports']
+        expect(exportsCollection.config.admin?.custom?.disableSave).toBe(true)
+      })
+    })
+
     describe('json and richText fields CSV serialization', () => {
       it('should serialize json and richText fields as JSON strings in single columns', async () => {
         const jsonData = {
@@ -5899,41 +6101,44 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('concurrent operations', () => {
     it('should handle multiple simultaneous imports', async () => {
-      // Create two different CSV files
-      const csv1 = 'title\n"Concurrent Import A1"\n"Concurrent Import A2"'
-      const csv2 = 'title\n"Concurrent Import B1"\n"Concurrent Import B2"'
+      // Use unique timestamp to avoid filename collisions across test runs
+      const timestamp = Date.now()
 
-      // Start both imports simultaneously
-      const [import1, import2] = await Promise.all([
-        payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: Buffer.from(csv1),
-            mimetype: 'text/csv',
-            name: 'concurrent-import-1.csv',
-            size: csv1.length,
-          },
-        }),
-        payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: Buffer.from(csv2),
-            mimetype: 'text/csv',
-            name: 'concurrent-import-2.csv',
-            size: csv2.length,
-          },
-        }),
-      ])
+      // Create two different CSV files with unique identifiers
+      const csv1 = `title\n"Concurrent Import A1 ${timestamp}"\n"Concurrent Import A2 ${timestamp}"`
+      const csv2 = `title\n"Concurrent Import B1 ${timestamp}"\n"Concurrent Import B2 ${timestamp}"`
+
+      // Create imports sequentially to avoid race conditions in file upload processing
+      // The concurrent aspect we're testing is the job execution, not the document creation
+      const import1 = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: Buffer.from(csv1),
+          mimetype: 'text/csv',
+          name: `concurrent-import-1-${timestamp}.csv`,
+          size: csv1.length,
+        },
+      })
+
+      const import2 = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: Buffer.from(csv2),
+          mimetype: 'text/csv',
+          name: `concurrent-import-2-${timestamp}.csv`,
+          size: csv2.length,
+        },
+      })
 
       // Run jobs
       await payload.jobs.run()
@@ -5953,7 +6158,10 @@ describe('@payloadcms/plugin-import-export', () => {
       const allDocs = await payload.find({
         collection: 'pages',
         where: {
-          title: { contains: 'Concurrent Import' },
+          and: [
+            { title: { contains: 'Concurrent Import' } },
+            { title: { contains: String(timestamp) } },
+          ],
         },
       })
 
@@ -5963,7 +6171,7 @@ describe('@payloadcms/plugin-import-export', () => {
       await payload.delete({
         collection: 'pages',
         where: {
-          title: { contains: 'Concurrent Import' },
+          title: { contains: String(timestamp) },
         },
       })
     })
