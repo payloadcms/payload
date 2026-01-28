@@ -71,7 +71,7 @@ describe('Field Error States', () => {
     await page.goto(
       formatAdminURL({ adminRoute, path: '/collections/error-fields/create', serverURL }),
     )
-
+    await waitForFormReady(page)
     // add parent array
     await addArrayRow(page, { fieldName: 'parentArray' })
 
@@ -106,11 +106,13 @@ describe('Field Error States', () => {
   describe('draft validations', () => {
     test('should not validate drafts by default', async ({ page }) => {
       await page.goto(validateDraftsOff.create)
+      await waitForFormReady(page)
       await saveDocAndAssert(page, '#action-save-draft')
     })
 
     test('should validate drafts when enabled', async ({ page }) => {
       await page.goto(validateDraftsOn.create)
+      await waitForFormReady(page)
       await saveDocAndAssert(page, '#action-save-draft', 'error')
     })
 
@@ -118,6 +120,7 @@ describe('Field Error States', () => {
       page,
     }) => {
       await page.goto(validateDraftsOnAutosave.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('valid')
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('')
@@ -128,6 +131,7 @@ describe('Field Error States', () => {
       page,
     }) => {
       await page.goto(validateDraftsOn.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
       await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
@@ -150,6 +154,7 @@ describe('Field Error States', () => {
       page,
     }) => {
       await page.goto(validateDraftsOn.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('Test Document')
       await page.click('#action-save-draft')
       await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
@@ -220,6 +225,7 @@ describe('Field Error States', () => {
     }
     test('group errors', async ({ page }) => {
       await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
       await prefillBaseRequiredFields(page)
 
       // clear group and save
