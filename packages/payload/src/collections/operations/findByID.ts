@@ -1,5 +1,5 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -24,10 +24,13 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type FindByIDArgs = {
   collection: Collection
@@ -46,10 +49,10 @@ export type FindByIDArgs = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -65,18 +68,11 @@ export const findByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'read',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'read',
+    })
 
     const {
       id,
@@ -84,9 +80,9 @@ export const findByIDOperation = async <
       currentDepth,
       depth,
       disableErrors,
-      draft: draftEnabled = false,
+      draft: replaceWithVersion = false,
       flattenLocales,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       overrideAccess = false,
       populate,
@@ -96,6 +92,9 @@ export const findByIDOperation = async <
       showHiddenFields,
       trash = false,
     } = args
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
@@ -140,18 +139,6 @@ export const findByIDOperation = async <
       req,
     })
 
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      draftsEnabled: draftEnabled,
-      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
-      locale: locale!,
-      req: {
-        transactionID: req.transactionID,
-      } as PayloadRequest,
-      select,
-      where: fullWhere,
-    }
-
     // execute only if there's a custom ID and potentially overwriten access on id
     if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
@@ -161,24 +148,49 @@ export const findByIDOperation = async <
         where,
       })
     }
+
     // /////////////////////////////////////
     // Find by ID
     // /////////////////////////////////////
+
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      draftsEnabled: replaceWithVersion,
+      joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
+      locale: locale!,
+      req: {
+        transactionID: req.transactionID,
+      } as PayloadRequest,
+      select: dbSelect,
+      where: fullWhere,
+    }
 
     if (!findOneArgs.where?.and?.[0]?.id) {
       throw new NotFound(t)
     }
 
-    let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? (await req.payload.db.findOne(findOneArgs))!
+    const docFromDB = await req.payload.db.findOne(findOneArgs)
 
-    if (!result) {
+    if (!docFromDB && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
-
       return null!
     }
+
+    let result: DataFromCollectionSlug<TSlug> =
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -239,7 +251,7 @@ export const findByIDOperation = async <
     // Replace document with draft if available
     // /////////////////////////////////////
 
-    if (collectionConfig.versions?.drafts && draftEnabled) {
+    if (replaceWithVersion && hasDraftsEnabled(collectionConfig)) {
       result = await replaceWithDraftIfAvailable({
         accessResult,
         doc: result,
@@ -278,7 +290,7 @@ export const findByIDOperation = async <
       currentDepth,
       depth: depth!,
       doc: result,
-      draft: draftEnabled,
+      draft: replaceWithVersion,
       fallbackLocale: fallbackLocale!,
       flattenLocales,
       global: null,

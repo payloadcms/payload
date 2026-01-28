@@ -2,6 +2,7 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 
 import {
+  BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
@@ -181,16 +182,20 @@ const RichTextComponent: React.FC<
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          <LexicalProvider
-            composerKey={pathWithEditDepth}
-            editorConfig={editorConfig}
-            fieldProps={props}
-            isSmallWidthViewport={isSmallWidthViewport}
-            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-            onChange={handleChange}
-            readOnly={disabled}
-            value={value}
-          />
+          {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
+          is rendered in the correct depth (not displayed *behind* the current drawer)*/}
+          <BulkUploadProvider drawerSlugPrefix={path}>
+            <LexicalProvider
+              composerKey={pathWithEditDepth}
+              editorConfig={editorConfig}
+              fieldProps={props}
+              isSmallWidthViewport={isSmallWidthViewport}
+              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+              onChange={handleChange}
+              readOnly={disabled}
+              value={value}
+            />
+          </BulkUploadProvider>
           {AfterInput}
         </ErrorBoundary>
         <RenderCustomComponent

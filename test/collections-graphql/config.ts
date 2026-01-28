@@ -390,6 +390,19 @@ export default buildConfigWithDefaults({
       ],
       upload: true,
     },
+    {
+      slug: 'sort',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'number',
+          type: 'number',
+        },
+      ],
+    },
   ],
   graphQL: {
     queries: (GraphQL) => {

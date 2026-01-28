@@ -160,8 +160,8 @@ async function main() {
 
   await execa('pnpm', ['install'], execaOpts)
 
-  // const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
-  const buildResult = await execa('pnpm', ['build:all'], execaOpts)
+  // Build all packages
+  const buildResult = await execa('pnpm', ['build:all:force'], execaOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)

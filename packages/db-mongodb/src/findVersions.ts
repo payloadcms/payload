@@ -16,13 +16,12 @@ export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
     collection: collectionSlug,
-    limit,
+    limit = 0,
     locale,
     page,
     pagination,
     req = {},
     select,
-    skip,
     sort: sortArg,
     where = {},
   },
@@ -32,13 +31,6 @@ export const findVersions: FindVersions = async function findVersions(
     collectionSlug,
     versions: true,
   })
-
-  const session = await getSession(this, req)
-  const options: QueryOptions = {
-    limit,
-    session,
-    skip,
-  }
 
   let hasNearConstraint = false
 
@@ -67,6 +59,15 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -109,7 +110,7 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  if (limit && limit >= 0) {
+  if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
 

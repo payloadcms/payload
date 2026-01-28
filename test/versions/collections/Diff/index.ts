@@ -225,6 +225,12 @@ export const Diff: CollectionConfig = {
       relationTo: [draftCollectionSlug, 'text'],
     },
     {
+      name: 'zeroDepthRelationship',
+      type: 'relationship',
+      relationTo: 'users',
+      maxDepth: 0,
+    },
+    {
       name: 'richtext',
       type: 'richText',
     },

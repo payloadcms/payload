@@ -11,6 +11,27 @@
     font-family: var(--font-body);
     margin-block: base(0.5);
 
+    // Alignment support using :has() selector
+    &:has([data-align='center']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &:has([data-align='right']),
+    &:has([data-align='end']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    &:has([data-align='left']),
+    &:has([data-align='start']) {
+      width: fit-content;
+      margin-left: 0;
+      margin-right: auto;
+    }
+
     &:hover {
       border: 1px solid var(--theme-elevation-150);
     }

@@ -72,7 +72,11 @@ export interface Config {
     media: Media;
     posts: Post;
     products: Product;
+    rolls: Roll;
+    'modified-prompts': ModifiedPrompt;
+    'returned-resources': ReturnedResource;
     'payload-mcp-api-keys': PayloadMcpApiKey;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -83,7 +87,11 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    rolls: RollsSelect<false> | RollsSelect<true>;
+    'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
+    'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -91,9 +99,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
+  locale: 'en' | 'es' | 'fr';
   user:
     | (User & {
         collection: 'users';
@@ -208,6 +221,7 @@ export interface Post {
   author?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -222,6 +236,71 @@ export interface Product {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls".
+ */
+export interface Roll {
+  id: string;
+  /**
+   * The number of sides on the die that was rolled
+   */
+  sides: number;
+  /**
+   * The result of the die roll
+   */
+  result: number;
+  /**
+   * The user who rolled the die
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts".
+ */
+export interface ModifiedPrompt {
+  id: string;
+  /**
+   * The original prompt
+   */
+  original: string;
+  /**
+   * The modified prompt
+   */
+  modified: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources".
+ */
+export interface ReturnedResource {
+  id: string;
+  /**
+   * The URI of the resource
+   */
+  uri: string;
+  /**
+   * The content of the resource
+   */
+  content: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * API keys control which collections, resources, tools, and prompts MCP clients can access
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
@@ -266,6 +345,14 @@ export interface PayloadMcpApiKey {
      * Allow clients to create posts.
      */
     create?: boolean | null;
+    /**
+     * Allow clients to update posts.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete posts.
+     */
+    delete?: boolean | null;
   };
   media?: {
     /**
@@ -277,79 +364,37 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
-  custom?: {
+  siteSettings?: {
+    /**
+     * Allow clients to find site-settings global.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update site-settings global.
+     */
+    update?: boolean | null;
+  };
+  'payload-mcp-tool'?: {
     /**
      * Rolls a virtual dice with a specified number of sides
      */
     diceRoll?: boolean | null;
   };
-  collections?: {
+  'payload-mcp-resource'?: {
     /**
-     * Allow LLMs to find and list Payload collections with optional content and document counts.
+     * Data is a resource that contains special data.
      */
-    find?: boolean | null;
+    data?: boolean | null;
     /**
-     * Allow LLMs to create new Payload collections with specified fields and configuration.
+     * Data is a resource that contains special data.
      */
-    create?: boolean | null;
-    /**
-     * Allow LLMs to update existing Payload collections with new fields, modifications, or configuration changes.
-     */
-    update?: boolean | null;
-    /**
-     * Allow LLMs to delete Payload collections and optionally update the configuration.
-     */
-    delete?: boolean | null;
+    dataByID?: boolean | null;
   };
-  jobs?: {
+  'payload-mcp-prompt'?: {
     /**
-     * Allow LLMs to create new Payload jobs (tasks and workflows) with custom schemas and configuration.
+     * Creates a prompt to process a message
      */
-    create?: boolean | null;
-    /**
-     * Allow LLMs to execute Payload jobs with custom input data and queue options.
-     */
-    run?: boolean | null;
-    /**
-     * Allow LLMs to update existing Payload jobs with new schemas, configuration, or handler code.
-     */
-    update?: boolean | null;
-  };
-  config?: {
-    /**
-     * Allow LLMs to read and display a Payload configuration file.
-     */
-    find?: boolean | null;
-    /**
-     * Allow LLMs to update a Payload configuration file with various modifications.
-     */
-    update?: boolean | null;
-  };
-  auth?: {
-    /**
-     * Allow LLMs to check authentication status for a user by setting custom headers. (e.g. {"Authorization": "Bearer <token>"})
-     */
-    auth?: boolean | null;
-    /**
-     * Allow LLMs to authenticate a user with email and password.
-     */
-    login?: boolean | null;
-    /**
-     * Allow LLMs to verify a user email with a verification token.
-     */
-    verify?: boolean | null;
-    /**
-     * Allow LLMs to reset a user password with a reset token.
-     */
-    resetPassword?: boolean | null;
-    /**
-     * Allow LLMs to send a password reset email to a user.
-     */
-    forgotPassword?: boolean | null;
-    /**
-     * Allow LLMs to unlock a user account that has been locked due to failed login attempts.
-     */
-    unlock?: boolean | null;
+    echo?: boolean | null;
   };
   /**
    * This field added by overrideApiKeyCollection
@@ -360,6 +405,23 @@ export interface PayloadMcpApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -383,6 +445,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: string | Product;
+      } | null)
+    | ({
+        relationTo: 'rolls';
+        value: string | Roll;
+      } | null)
+    | ({
+        relationTo: 'modified-prompts';
+        value: string | ModifiedPrompt;
+      } | null)
+    | ({
+        relationTo: 'returned-resources';
+        value: string | ReturnedResource;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -493,6 +567,7 @@ export interface PostsSelect<T extends boolean = true> {
   author?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -502,6 +577,39 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   price?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls_select".
+ */
+export interface RollsSelect<T extends boolean = true> {
+  sides?: T;
+  result?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts_select".
+ */
+export interface ModifiedPromptsSelect<T extends boolean = true> {
+  original?: T;
+  modified?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources_select".
+ */
+export interface ReturnedResourcesSelect<T extends boolean = true> {
+  uri?: T;
+  content?: T;
+  user?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -526,6 +634,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | {
         find?: T;
         create?: T;
+        update?: T;
+        delete?: T;
       };
   media?:
     | T
@@ -533,41 +643,27 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         update?: T;
       };
-  custom?:
+  siteSettings?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  'payload-mcp-tool'?:
     | T
     | {
         diceRoll?: T;
       };
-  collections?:
+  'payload-mcp-resource'?:
     | T
     | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
+        data?: T;
+        dataByID?: T;
       };
-  jobs?:
+  'payload-mcp-prompt'?:
     | T
     | {
-        create?: T;
-        run?: T;
-        update?: T;
-      };
-  config?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  auth?:
-    | T
-    | {
-        auth?: T;
-        login?: T;
-        verify?: T;
-        resetPassword?: T;
-        forgotPassword?: T;
-        unlock?: T;
+        echo?: T;
       };
   override?: T;
   updatedAt?: T;
@@ -575,6 +671,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -610,6 +714,44 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: string;
+  /**
+   * The name of the site
+   */
+  siteName: string;
+  /**
+   * A brief description of the site
+   */
+  siteDescription?: string | null;
+  /**
+   * Enable or disable maintenance mode
+   */
+  maintenanceMode?: boolean | null;
+  /**
+   * Contact email address for the site
+   */
+  contactEmail?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  siteDescription?: T;
+  maintenanceMode?: T;
+  contactEmail?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -618,6 +760,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

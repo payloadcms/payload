@@ -11,6 +11,7 @@ AGENTS.local.md
 CLAUDE.local.md
 .claude/commands/*.local.md
 .claude/artifacts
+.worktrees/
 
 # Custom actions
 !.github/actions/**/dist
@@ -45,7 +46,9 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
+no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode
@@ -341,6 +344,12 @@ test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
+/media-documents
+/media-with-always-insert-fields
+
 
 
 licenses.csv
+
+# SQLite DB
+payload.db

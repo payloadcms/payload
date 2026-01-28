@@ -10,7 +10,17 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
     if (!firstCollectionSlug?.length) {
       throw new Error('No collection slugs provided to reset the database.')
     }
-    await _payload.db.collections[firstCollectionSlug]?.db.dropDatabase()
+
+    // Delete all documents from each collection instead of dropping the database.
+    // This preserves indexes and is much faster for consecutive test runs.
+    const mongooseCollections = _payload.db.collections[firstCollectionSlug]?.db.collections
+    if (mongooseCollections) {
+      await Promise.all(
+        Object.values(mongooseCollections).map(async (collection: any) => {
+          await collection.deleteMany({})
+        }),
+      )
+    }
   } else if ('drizzle' in _payload.db) {
     const db = _payload.db as unknown as DrizzleAdapter
 

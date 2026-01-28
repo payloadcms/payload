@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
 

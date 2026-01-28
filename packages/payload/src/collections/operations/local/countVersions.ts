@@ -6,7 +6,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countVersionsOperation } from '../countVersions.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type CountVersionsOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -18,10 +18,6 @@ export type Options<TSlug extends CollectionSlug> = {
    * to determine if it should run or not.
    */
   context?: RequestContext
-  /**
-   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
-   */
-  depth?: number
   /**
    * When set to `true`, errors will not be thrown.
    */
@@ -53,7 +49,7 @@ export type Options<TSlug extends CollectionSlug> = {
 
 export async function countVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<TSlug>,
+  options: CountVersionsOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
   const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "3.62.0",
+  "version": "3.73.0",
   "description": "The officially supported Postgres database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -64,22 +64,21 @@
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:debug": "pnpm build",
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build --filter=./",
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
     "@payloadcms/drizzle": "workspace:*",
     "@types/pg": "8.10.2",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.31.5",
-    "drizzle-orm": "0.44.6",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "pg": "8.16.3",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
@@ -89,7 +88,7 @@
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {

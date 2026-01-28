@@ -3,12 +3,12 @@
 import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
 import { useConfig } from '../Config/index.js'
-import { usePreferences } from '../Preferences/index.js'
 
 const LocaleContext = createContext({} as Locale)
 
@@ -42,7 +42,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     config: {
       localization = false,
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -50,7 +49,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const defaultLocale = localization ? localization.defaultLocale : 'en'
 
-  const { getPreference, setPreference } = usePreferences()
   const localeFromParams = useSearchParams().get('locale')
 
   const [locale, setLocale] = React.useState<Locale>(() => {
@@ -85,7 +83,10 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     prevLocale.current = locale
   }, [locale])
 
-  const fetchURL = `${serverURL}${apiRoute}`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: '',
+  })
 
   useEffect(() => {
     /**
@@ -111,7 +112,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     }
 
     void resetLocale()
-  }, [defaultLocale, getPreference, localization, fetchURL, localeFromParams, user?.id])
+  }, [defaultLocale, localization, fetchURL, localeFromParams, user?.id])
 
   return (
     <LocaleContext value={locale}>

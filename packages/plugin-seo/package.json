@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "3.62.0",
+  "version": "3.73.0",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -59,13 +59,13 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -74,14 +74,14 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {

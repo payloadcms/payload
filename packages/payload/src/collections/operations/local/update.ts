@@ -1,6 +1,12 @@
 import type { DeepPartial } from 'ts-essentials'
 
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -96,7 +102,15 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   populate?: PopulateType
   /**
+   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   *
+   * @default undefined
+   */
+  publishAllLocales?: boolean
+  /**
    * Publish the document / documents with a specific locale.
+   *
+   * @default undefined
    */
   publishSpecificLocale?: string
   /**
@@ -104,10 +118,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
+
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -121,10 +132,14 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   trash?: boolean
   /**
+   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   */
+  unpublishAllLocales?: boolean
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
@@ -222,11 +237,13 @@ async function updateLocal<
     overrideLock,
     overwriteExistingFiles = false,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     select,
     showHiddenFields,
     sort,
     trash = false,
+    unpublishAllLocales,
     where,
   } = options
 
@@ -255,12 +272,14 @@ async function updateLocal<
     overwriteExistingFiles,
     payload,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     req,
     select,
     showHiddenFields,
     sort,
     trash,
+    unpublishAllLocales,
     where,
   }
 

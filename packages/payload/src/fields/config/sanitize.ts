@@ -1,5 +1,4 @@
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
-import { v4 as uuid } from 'uuid'
 
 import type {
   CollectionConfig,
@@ -21,11 +20,12 @@ import {
 import { ReservedFieldName } from '../../errors/ReservedFieldName.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
-import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
+import { getFieldPaths } from '../getFieldPaths.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import {
@@ -57,7 +57,16 @@ type Args = {
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
+  /**
+   * A string of '-' separated indexes representing where
+   * to find this field in a given field schema array.
+   */
+  parentIndexPath?: string
   parentIsLocalized: boolean
+  /**
+   * Path for parent fields relative to their position in the schema.
+   */
+  parentSchemaPath?: string
   polymorphicJoins?: SanitizedJoin[]
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -86,7 +95,9 @@ export const sanitizeFields = async ({
   isTopLevelField = true,
   joinPath = '',
   joins,
+  parentIndexPath = '',
   parentIsLocalized,
+  parentSchemaPath = '',
   polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
@@ -112,6 +123,13 @@ export const sanitizeFields = async ({
     }
 
     const fieldAffectsData = _fieldAffectsData(field)
+
+    const { indexPath, schemaPath } = getFieldPaths({
+      field,
+      index: i,
+      parentIndexPath,
+      parentSchemaPath,
+    })
 
     if (isTopLevelField && fieldAffectsData && field.name) {
       if (collectionConfig && collectionConfig.upload) {
@@ -174,6 +192,13 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
+      // Validate that relationTo is not empty
+      if (Array.isArray(field.relationTo) && field.relationTo.length === 0) {
+        throw new Error(
+          `Field "${field.name}" of type "${field.type}" has an empty relationTo array. At least one collection must be specified.`,
+        )
+      }
+
       if (validRelationships) {
         const relationships = Array.isArray(field.relationTo)
           ? field.relationTo
@@ -328,13 +353,16 @@ export const sanitizeFields = async ({
         block._sanitized = true
         block.fields = block.fields.concat(baseBlockFields)
         block.labels = !block.labels ? formatLabels(block.slug) : block.labels
+
         block.fields = await sanitizeFields({
           collectionConfig,
           config,
           existingFieldNames: new Set(),
           fields: block.fields,
           isTopLevelField: false,
+          parentIndexPath: '',
           parentIsLocalized: (parentIsLocalized || field.localized)!,
+          parentSchemaPath: schemaPath + '.' + block.slug,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -351,7 +379,9 @@ export const sanitizeFields = async ({
         isTopLevelField: isTopLevelField && !fieldAffectsData,
         joinPath: fieldAffectsData ? `${joinPath ? joinPath + '.' : ''}${field.name}` : joinPath,
         joins,
+        parentIndexPath: fieldAffectsData ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
+        parentSchemaPath: schemaPath,
         polymorphicJoins,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
@@ -369,14 +399,20 @@ export const sanitizeFields = async ({
           tab.label = toWords(tab.name)
         }
 
+        const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
+          field: tab,
+          index: j,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
+        })
+
         if (
           'admin' in tab &&
           tab.admin?.condition &&
           typeof tab.admin.condition === 'function' &&
           !tab.id
         ) {
-          // Always attach a UUID to tabs with a condition so there's no conflicts even if there are duplicate nested names
-          tab.id = isNamedTab ? `${tab.name}_${uuid()}` : uuid()
+          tab.id = tabSchemaPath
         }
 
         tab.fields = await sanitizeFields({
@@ -387,7 +423,9 @@ export const sanitizeFields = async ({
           isTopLevelField: isTopLevelField && !isNamedTab,
           joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
+          parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
+          parentSchemaPath: tabSchemaPath,
           polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
@@ -408,7 +446,7 @@ export const sanitizeFields = async ({
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
 
-      const defaultTimezone =
+      let defaultTimezone =
         field.timezone && typeof field.timezone === 'object'
           ? field.timezone.defaultTimezone
           : config.admin?.timezones?.defaultTimezone
@@ -427,14 +465,34 @@ export const sanitizeFields = async ({
           ? supportedTimezones({ defaultTimezones })
           : supportedTimezones
 
+      validateTimezones({
+        source: `field "${field.name}" timezone.supportedTimezones`,
+        timezones: options,
+      })
+
+      if (options && options.length === 1 && options[0]?.value) {
+        defaultTimezone = options[0].value
+      }
+
+      // Generate label for timezone field
+      // Use parent field's label + ' Tz' if it's a simple string, otherwise fallback to name
+      const timezoneLabel = typeof field.label === 'string' ? `${field.label} Tz` : toWords(name)
+
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config
-      const timezoneField = baseTimezoneField({
+      const baseField = baseTimezoneField({
         name,
         defaultValue: defaultTimezone,
+        label: timezoneLabel,
         options,
         required,
       })
+
+      // Apply override if provided
+      const timezoneField =
+        typeof field.timezone === 'object' && typeof field.timezone.override === 'function'
+          ? field.timezone.override({ baseField })
+          : baseField
 
       fields.splice(++i, 0, timezoneField)
     }

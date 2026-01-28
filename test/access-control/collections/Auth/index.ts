@@ -18,7 +18,8 @@ export const Auth: CollectionConfig = {
       access: {
         update: ({ req: { user }, data }) => {
           const isUserOrSelf =
-            (user && 'roles' in user && user?.roles?.includes('admin')) || user?.id === data?.id
+            (user && 'roles' in user && user?.roles?.includes('admin')) ||
+            (user?.id === data?.id && user?.collection === 'auth-collection')
           return isUserOrSelf
         },
       },

@@ -1,4 +1,10 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
@@ -61,10 +67,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -82,7 +84,7 @@ export type Options<TSlug extends CollectionSlug> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,
