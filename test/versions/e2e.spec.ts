@@ -189,6 +189,8 @@ describe('Versions', () => {
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       const versionsTab = page.locator('.doc-tab:has-text("Versions")')
@@ -207,6 +209,8 @@ describe('Versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
@@ -226,6 +230,8 @@ describe('Versions', () => {
 
     test('collection — has versions route', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
       await page.goto(`${page.url()}/versions`)
@@ -257,6 +263,8 @@ describe('Versions', () => {
 
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       // Wait for the document to load
@@ -271,6 +279,7 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -723,6 +732,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-id a').click()
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
@@ -911,6 +922,7 @@ describe('Versions', () => {
     describe('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
         await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
@@ -930,6 +942,8 @@ describe('Versions', () => {
 
       test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -949,6 +963,8 @@ describe('Versions', () => {
 
       test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -971,6 +987,8 @@ describe('Versions', () => {
 
       test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
