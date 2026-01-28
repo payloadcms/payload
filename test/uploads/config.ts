@@ -840,7 +840,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: true,
-        staticDir: path.resolve(dirname, './media'),
+        staticDir: path.resolve(dirname, './media-with-relation-preview'),
       },
     },
     {

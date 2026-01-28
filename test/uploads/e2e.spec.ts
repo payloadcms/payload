@@ -189,6 +189,7 @@ describe('Uploads', () => {
         path.resolve(dirname, './media-trim'),
         path.resolve(dirname, './image-sizes-only'),
         path.resolve(dirname, './versions'),
+        path.resolve(dirname, './media-with-relation-preview'),
         path.resolve(dirname, './with-meta-data'),
         path.resolve(dirname, './with-any-image-type'),
         path.resolve(dirname, './with-only-jpeg-meta-data'),
