@@ -355,6 +355,7 @@ export default buildConfigWithDefaults({
       slug: imageSizesOnlySlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './image-sizes-only'),
         crop: false,
         focalPoint: false,
         imageSizes: [
@@ -1015,7 +1016,9 @@ export default buildConfigWithDefaults({
     {
       slug: mediaWithoutDeleteAccessSlug,
       fields: [],
-      upload: true,
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+      },
       access: { delete: () => false },
     },
     {
