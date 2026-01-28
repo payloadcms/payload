@@ -28,10 +28,9 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import { valueHooksSlug } from './collections/Value/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
-import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
+import { afterReadSlug, beforeValidateSlug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -976,6 +975,37 @@ describe('Hooks', () => {
       })
 
       expect(getLastOperation()).toEqual('restoreVersion')
+    })
+  })
+
+  describe('afterRead', () => {
+    it('should return same for find and findByID', async () => {
+      const createdDoc = await payload.create({
+        collection: afterReadSlug,
+        data: {
+          title: 'test',
+        },
+      })
+
+      const docFromFind = await payload.findByID({
+        collection: afterReadSlug,
+        id: createdDoc.id,
+      })
+
+      const { docs } = await payload.find({
+        collection: afterReadSlug,
+        where: {
+          id: {
+            equals: createdDoc.id,
+          },
+        },
+      })
+
+      const docFromFindMany = docs[0]
+
+      expect(docFromFind.title).toEqual('afterRead')
+      expect(docFromFindMany.title).toEqual('afterRead')
+      expect(docFromFind.title).toEqual(docFromFindMany.title)
     })
   })
 })

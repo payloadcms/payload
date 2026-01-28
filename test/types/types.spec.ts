@@ -994,6 +994,17 @@ describe('Types testing', () => {
       expect(result).type.toBe<Pick<Post, 'id' | 'namedGroup' | 'title'>>()
     })
 
+    test('SDK with empty select only returns id', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+      const result = await _sdk.findByID({
+        collection: 'posts',
+        id: 'id',
+        select: {},
+      })
+      expect(result).type.toBe<{ id: string }>()
+    })
+
     test('SDK with select excluding field in findByID returns correct types', async () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       const result = await _sdk.findByID({
