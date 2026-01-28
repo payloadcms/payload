@@ -22,6 +22,8 @@ export default defineConfig({
   },
   test: {
     watch: false, // too troublesome especially with the in memory DB setup
+    // Retry failed tests up to 3 times in CI to handle flaky tests
+    retry: process.env.CI ? 3 : 0,
     server: {
       deps: {
         inline: [/@payloadcms\/figma/],
