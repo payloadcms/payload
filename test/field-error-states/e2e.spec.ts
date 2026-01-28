@@ -12,6 +12,7 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -148,23 +149,30 @@ describe('Field Error States', () => {
     test('should pass previous value into validate function', async () => {
       // save original
       await page.goto(prevValue.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('original value')
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('original value 2')
       await saveDocAndAssert(page)
       await wait(500)
 
-      // create relation to doc
+      // create relation to doc - select by title to avoid picking old test data
       await page.goto(prevValueRelation.create)
+      await waitForFormReady(page)
       await page.locator('#field-previousValueRelation .react-select').click()
-      await page.locator('#field-previousValueRelation .rs__option').first().click()
+      await page
+        .locator('#field-previousValueRelation .rs__option', { hasText: 'original value 2' })
+        .last()
+        .click()
       await saveDocAndAssert(page)
 
       // go back to doc
       await page.goto(prevValue.list)
       await page.locator('.row-1 a').click()
+      await waitForFormReady(page)
       await page.locator('#field-description').fill('some description')
       await saveDocAndAssert(page)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('changed')
       await saveDocAndAssert(page, '#action-save', 'error')
 
