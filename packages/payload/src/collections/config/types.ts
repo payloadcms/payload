@@ -375,6 +375,11 @@ export type CollectionAdminOptions = {
        */
       Status?: CustomStatus
       /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: CustomComponent
+      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */

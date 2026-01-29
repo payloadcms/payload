@@ -108,6 +108,7 @@ The following options are available:
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Collection. [More details](#description).                                                               |
 | `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
@@ -143,6 +144,7 @@ The following options are available:
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Global. [More details](#description).                                                                   |
 | `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
@@ -446,6 +448,56 @@ import type { PublishButtonClientProps } from 'payload'
 
 export function MyPublishButton(props: PublishButtonClientProps) {
   return <PublishButton label="Publish" />
+}
+```
+
+### UnpublishButton
+
+The `UnpublishButton` property allows you to render a custom Unpublish Button in the Edit View.
+
+To add an `UnpublishButton` component, use the `components.edit.UnpublishButton` property in your [Collection Config](../configuration/collections) or `components.elements.UnpublishButton` in your [Global Config](../configuration/globals):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        UnpublishButton: '/path/to/MyUnpublishButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `UnpublishButton` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { UnpublishButton } from '@payloadcms/ui'
+import type { UnpublishButtonServerProps } from 'payload'
+
+export function MyUnpublishButton(props: UnpublishButtonServerProps) {
+  return <UnpublishButton label="Unpublish" />
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { UnpublishButton } from '@payloadcms/ui'
+import type { UnpublishButtonClientProps } from 'payload'
+
+export function MyUnpublishButton(props: UnpublishButtonClientProps) {
+  return <UnpublishButton label="Unpublish" />
 }
 ```
 

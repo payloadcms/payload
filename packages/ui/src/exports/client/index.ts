@@ -132,6 +132,7 @@ export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
+export { UnpublishButton } from '../../elements/UnpublishButton/index.js'
 
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'

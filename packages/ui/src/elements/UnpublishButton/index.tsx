@@ -1,5 +1,7 @@
 'use client'
 
+import type { UnpublishButtonClientProps } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
@@ -17,7 +19,7 @@ import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-export function UnpublishButton() {
+export function UnpublishButton({ label: labelProp }: UnpublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,
@@ -195,7 +197,7 @@ export function UnpublishButton() {
             }
             type="button"
           >
-            {t('version:unpublish')}
+            {labelProp || t('version:unpublish')}
           </FormSubmit>
           <ConfirmationModal
             body={

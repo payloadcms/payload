@@ -13,6 +13,7 @@ import type {
   ServerFunction,
   ServerProps,
   StaticDescription,
+  UnpublishButtonServerPropsOnly,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
 } from 'payload'
@@ -145,6 +146,18 @@ export const renderDocumentSlots: (args: {
           Component: CustomPublishButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies PublishButtonServerPropsOnly,
+        })
+      }
+
+      const CustomUnpublishButton =
+        collectionConfig?.admin?.components?.edit?.UnpublishButton ||
+        globalConfig?.admin?.components?.elements?.UnpublishButton
+
+      if (CustomUnpublishButton) {
+        components.UnpublishButton = RenderServerComponent({
+          Component: CustomUnpublishButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
         })
       }
 
