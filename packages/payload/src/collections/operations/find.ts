@@ -73,6 +73,7 @@ export const findOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -85,7 +86,7 @@ export const findOperation = async <
       includeLockStatus: includeLockStatusFromArgs,
       joins,
       limit,
-      overrideAccess,
+      overrideAccess = false,
       page,
       pagination = true,
       populate,
@@ -163,7 +164,7 @@ export const findOperation = async <
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
-      overrideAccess: overrideAccess!,
+      overrideAccess,
       req,
     })
 
@@ -172,7 +173,7 @@ export const findOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
+        overrideAccess,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -196,7 +197,7 @@ export const findOperation = async <
     } else {
       await validateQueryPaths({
         collectionConfig,
-        overrideAccess: overrideAccess!,
+        overrideAccess,
         req,
         where: where!,
       })
@@ -291,6 +292,7 @@ export const findOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -318,7 +320,7 @@ export const findOperation = async <
           findMany: true,
           global: null,
           locale: locale!,
-          overrideAccess: overrideAccess!,
+          overrideAccess,
           populate,
           req,
           select,

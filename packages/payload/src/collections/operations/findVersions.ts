@@ -46,6 +46,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       args,
       collection: args.collection.config,
       operation: 'findVersions',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -144,6 +145,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef.version,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef.version

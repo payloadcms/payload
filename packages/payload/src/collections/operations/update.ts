@@ -86,6 +86,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -95,7 +96,7 @@ export const updateOperation = async <
       depth,
       draft: draftArg = false,
       limit = 0,
-      overrideAccess,
+      overrideAccess = false,
       overrideLock,
       overwriteExistingFiles = false,
       populate,
@@ -128,13 +129,14 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     let accessResult: AccessResult
+
     if (!overrideAccess) {
       accessResult = await executeAccess({ req }, collectionConfig.access.update)
     }
 
     await validateQueryPaths({
       collectionConfig,
-      overrideAccess: overrideAccess!,
+      overrideAccess,
       req,
       where,
     })
@@ -179,7 +181,7 @@ export const updateOperation = async <
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess: overrideAccess!,
+        overrideAccess,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -257,7 +259,7 @@ export const updateOperation = async <
           fallbackLocale: fallbackLocale!,
           filesToUpload,
           locale: locale!,
-          overrideAccess: overrideAccess!,
+          overrideAccess,
           overrideLock: overrideLock!,
           payload,
           populate,

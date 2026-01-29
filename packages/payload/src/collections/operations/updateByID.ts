@@ -73,6 +73,7 @@ export const updateByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {

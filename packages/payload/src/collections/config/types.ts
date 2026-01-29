@@ -208,6 +208,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
+  overrideAccess: boolean
   req: PayloadRequest
 }) => any
 
@@ -230,6 +231,7 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  overrideAccess: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -249,6 +251,7 @@ export type BeforeDeleteHook = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   id: number | string
+  overrideAccess: boolean
   req: PayloadRequest
 }) => any
 
@@ -273,6 +276,7 @@ export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  overrideAccess: boolean
   req: PayloadRequest
   user: T
 }) => any

@@ -195,6 +195,7 @@ export type BeforeOperationArg<TOperationGeneric extends CollectionSlug> = {
   /** The collection which this hook is being run on */
   collection: SanitizedCollectionConfig
   context: RequestContext
+  overrideAccess: boolean
   req: PayloadRequest
 } & (
   | {

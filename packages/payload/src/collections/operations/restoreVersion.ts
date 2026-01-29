@@ -66,6 +66,7 @@ export const restoreVersionOperation = async <
       args,
       collection: args.collection.config,
       operation: 'restoreVersion',
+      overrideAccess,
     })
 
     if (!id) {
@@ -218,6 +219,7 @@ export const restoreVersionOperation = async <
             data,
             operation: 'update',
             originalDoc,
+            overrideAccess,
             req,
           })) || data
       }
