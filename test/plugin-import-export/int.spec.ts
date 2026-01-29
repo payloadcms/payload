@@ -1392,15 +1392,18 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('export config options without overrideCollection', () => {
-      it('should apply format option to base export collection', () => {
-        const exportsCollection = payload.collections['exports']
-        expect(exportsCollection.config.admin?.custom?.format).toBe('csv')
+    describe('export collection config options', () => {
+      it('should apply per-collection overrideCollection to create custom export collection', () => {
+        // posts-no-jobs-queue has overrideCollection that changes slug to 'posts-no-jobs-queue-export'
+        const customExportCollection = payload.collections['posts-no-jobs-queue-export']
+        expect(customExportCollection).toBeDefined()
+        expect(customExportCollection.config.admin?.group).toBe('Posts No Jobs Queue')
       })
 
-      it('should apply disableSave option to base export collection', () => {
-        const exportsCollection = payload.collections['exports']
-        expect(exportsCollection.config.admin?.custom?.disableSave).toBe(true)
+      it('should apply format and disableSave options to custom export collection', () => {
+        const customExportCollection = payload.collections['posts-no-jobs-queue-export']
+        expect(customExportCollection.config.admin?.custom?.format).toBe('csv')
+        expect(customExportCollection.config.admin?.custom?.disableSave).toBe(true)
       })
     })
 
