@@ -73,6 +73,7 @@ export interface Config {
     'posts-exports-only': PostsExportsOnly;
     'posts-imports-only': PostsImportsOnly;
     'posts-no-jobs-queue': PostsNoJobsQueue;
+    media: Media;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
@@ -92,6 +93,7 @@ export interface Config {
     'posts-exports-only': PostsExportsOnlySelect<false> | PostsExportsOnlySelect<true>;
     'posts-imports-only': PostsImportsOnlySelect<false> | PostsImportsOnlySelect<true>;
     'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
@@ -104,7 +106,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -148,7 +150,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -173,11 +175,11 @@ export interface User {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
+  id: string;
   title: string;
   localized?: string | null;
   custom?: string | null;
-  customRelationship?: (number | null) | User;
+  customRelationship?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -234,7 +236,7 @@ export interface Page {
           }
       )[]
     | null;
-  author?: (number | null) | User;
+  author?: (string | null) | User;
   virtualRelationship?: string | null;
   virtual?: string | null;
   hasManyNumber?: number[] | null;
@@ -262,7 +264,7 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
-  relationship?: (number | null) | User;
+  relationship?: (string | null) | User;
   excerpt?: string | null;
   /**
    * Date field for testing export/import timezone handling
@@ -276,25 +278,25 @@ export interface Page {
   hasOnePolymorphic?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null);
   hasManyPolymorphic?:
     | (
         | {
             relationTo: 'users';
-            value: number | User;
+            value: string | User;
           }
         | {
             relationTo: 'posts';
-            value: number | Post;
+            value: string | Post;
           }
       )[]
     | null;
-  hasManyMonomorphic?: (number | Post)[] | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
   textFieldInCollapsible?: string | null;
   checkbox?: boolean | null;
   select?: ('option1' | 'option2' | 'option3') | null;
@@ -309,6 +311,7 @@ export interface Page {
    */
   point?: [number, number] | null;
   textHasMany?: string[] | null;
+  upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -318,7 +321,7 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -341,10 +344,29 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts-exports-only".
  */
 export interface PostsExportsOnly {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -370,7 +392,7 @@ export interface PostsExportsOnly {
  * via the `definition` "posts-imports-only".
  */
 export interface PostsImportsOnly {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -396,7 +418,7 @@ export interface PostsImportsOnly {
  * via the `definition` "posts-no-jobs-queue".
  */
 export interface PostsNoJobsQueue {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -422,7 +444,7 @@ export interface PostsNoJobsQueue {
  * via the `definition` "exports".
  */
 export interface Export {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -460,7 +482,7 @@ export interface Export {
  * via the `definition` "posts-export".
  */
 export interface PostsExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -498,7 +520,7 @@ export interface PostsExport {
  * via the `definition` "posts-no-jobs-queue-export".
  */
 export interface PostsNoJobsQueueExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv';
   limit?: number | null;
@@ -536,8 +558,8 @@ export interface PostsNoJobsQueueExport {
  * via the `definition` "imports".
  */
 export interface Import {
-  id: number;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
+  id: string;
+  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue' | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -573,8 +595,8 @@ export interface Import {
  * via the `definition` "posts-import".
  */
 export interface PostsImport {
-  id: number;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
+  id: string;
+  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue' | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -610,7 +632,7 @@ export interface PostsImport {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -627,7 +649,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: number;
+  id: string;
   /**
    * Input data provided to the job
    */
@@ -719,36 +741,40 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'posts-exports-only';
-        value: number | PostsExportsOnly;
+        value: string | PostsExportsOnly;
       } | null)
     | ({
         relationTo: 'posts-imports-only';
-        value: number | PostsImportsOnly;
+        value: string | PostsImportsOnly;
       } | null)
     | ({
         relationTo: 'posts-no-jobs-queue';
-        value: number | PostsNoJobsQueue;
+        value: string | PostsNoJobsQueue;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -758,10 +784,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -781,7 +807,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -888,6 +914,7 @@ export interface PagesSelect<T extends boolean = true> {
   code?: T;
   point?: T;
   textHasMany?: T;
+  upload?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -935,6 +962,24 @@ export interface PostsNoJobsQueueSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1199,6 +1244,7 @@ export interface TaskCreateCollectionImport {
       | 'posts-exports-only'
       | 'posts-imports-only'
       | 'posts-no-jobs-queue'
+      | 'media'
       | 'exports'
       | 'posts-export'
       | 'posts-no-jobs-queue-export'

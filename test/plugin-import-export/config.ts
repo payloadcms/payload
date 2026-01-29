@@ -7,6 +7,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
@@ -21,7 +22,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly, PostsNoJobsQueue],
+  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly, PostsNoJobsQueue, Media],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -126,6 +127,9 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+        },
+        {
+          slug: 'media',
         },
       ],
     }),

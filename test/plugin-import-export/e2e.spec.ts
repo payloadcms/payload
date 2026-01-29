@@ -489,4 +489,80 @@ test.describe('Import Export Plugin', () => {
       }
     })
   })
+
+  test.describe('Streaming and Preview', () => {
+    test('should download large export via streaming without truncation', async () => {
+      await page.goto(postsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      const downloadButton = page.locator('.doc-controls__controls button', {
+        hasText: 'Download',
+      })
+      await expect(downloadButton).toBeVisible()
+
+      const [download] = await Promise.all([page.waitForEvent('download'), downloadButton.click()])
+
+      const downloadPath = await download.path()
+      expect(downloadPath).not.toBeNull()
+
+      const stats = fs.statSync(downloadPath)
+      expect(stats.size).toBeGreaterThan(1000)
+
+      const content = fs.readFileSync(downloadPath, 'utf-8')
+      const lines = content.split('\n').filter((line) => line.trim())
+      expect(lines.length).toBeGreaterThan(50)
+
+      const suggestedFilename = download.suggestedFilename()
+      expect(suggestedFilename).toMatch(/\.csv/)
+    })
+
+    test('should show export preview with pagination limited to 10 rows', async () => {
+      await page.goto(postsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const tableBody = page.locator('.export-preview table tbody')
+      await expect(tableBody).toBeVisible()
+
+      const dataRows = page.locator('.export-preview table tbody tr')
+      const rowCount = await dataRows.count()
+
+      expect(rowCount).toBeLessThanOrEqual(10)
+      expect(rowCount).toBeGreaterThan(0)
+
+      const exportCount = page.locator('.export-preview__export-count')
+      await expect(exportCount).toContainText('documents to export')
+    })
+  })
 })

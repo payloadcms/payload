@@ -1,8 +1,20 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
+
 import { devUser, regularUser } from '../../credentials.js'
-import { postsExportsOnlySlug, postsImportsOnlySlug, postsNoJobsQueueSlug } from '../shared.js'
+import {
+  mediaSlug,
+  postsExportsOnlySlug,
+  postsImportsOnlySlug,
+  postsNoJobsQueueSlug,
+} from '../shared.js'
 import { richTextData } from './richTextData.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -286,6 +298,36 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         data: {
           title: `TextMany ${i}`,
           textHasMany: [`tag${i}a`, `tag${i}b`, `tag${i}c`],
+        },
+      })
+    }
+
+    // Seed media documents for upload field testing
+    const imageFilePath = path.resolve(dirname, '../image.png')
+    const imageFile = await getFileByPath(imageFilePath)
+
+    const mediaIds: string[] = []
+    for (let i = 0; i < 3; i++) {
+      const media = await payload.create({
+        collection: mediaSlug,
+        data: {
+          alt: `Test Media ${i}`,
+        },
+        file: {
+          ...imageFile,
+          name: `test-media-${i}.png`,
+        } as File,
+      })
+      mediaIds.push(String(media.id))
+    }
+
+    // Seed pages with upload field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Upload ${i}`,
+          upload: mediaIds[i % mediaIds.length],
         },
       })
     }

@@ -335,5 +335,10 @@ export const Pages: CollectionConfig = {
       type: 'text',
       hasMany: true,
     },
+    {
+      name: 'upload',
+      type: 'upload',
+      relationTo: 'media',
+    },
   ],
 }

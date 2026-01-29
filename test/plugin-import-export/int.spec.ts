@@ -2,6 +2,7 @@ import type { CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
+import { getFileByPath } from 'payload'
 import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -2378,6 +2379,30 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(data).toHaveLength(3)
         expect(data.find((d) => d.title === 'TextMany 0')).toBeDefined()
+      })
+
+      it('should export upload field values as IDs', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'upload'],
+            format: 'csv',
+            where: { title: { contains: 'Upload ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        const uploadDoc = data.find((d) => d.title === 'Upload 0')
+        expect(uploadDoc).toBeDefined()
+        expect(uploadDoc?.upload).toBeDefined()
+        expect(uploadDoc?.upload).not.toBe('')
       })
     })
   })
@@ -4908,6 +4933,176 @@ describe('@payloadcms/plugin-import-export', () => {
         await payload.delete({
           collection: 'pages',
           where: { title: { contains: 'Point Import ' } },
+        })
+      })
+
+      it('should import selectHasMany field from CSV with indexed format', async () => {
+        const csvContent =
+          'title,selectHasMany_0,selectHasMany_1,selectHasMany_2\n' +
+          '"SelectHasMany Import 1","tagA","tagB",""\n' +
+          '"SelectHasMany Import 2","tagC","",""\n' +
+          '"SelectHasMany Import 3","tagA","tagB","tagC"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'select-hasmany-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'SelectHasMany Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(3)
+        expect(
+          importedPages.docs.find((d) => d.title === 'SelectHasMany Import 1')?.selectHasMany,
+        ).toEqual(['tagA', 'tagB'])
+        expect(
+          importedPages.docs.find((d) => d.title === 'SelectHasMany Import 2')?.selectHasMany,
+        ).toEqual(['tagC'])
+        expect(
+          importedPages.docs.find((d) => d.title === 'SelectHasMany Import 3')?.selectHasMany,
+        ).toEqual(['tagA', 'tagB', 'tagC'])
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'SelectHasMany Import ' } },
+        })
+      })
+
+      it('should import textHasMany field from CSV with indexed format', async () => {
+        const csvContent =
+          'title,textHasMany_0,textHasMany_1,textHasMany_2\n' +
+          '"TextHasMany Import 1","value1","value2",""\n' +
+          '"TextHasMany Import 2","single","",""\n' +
+          '"TextHasMany Import 3","a","b","c"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'text-hasmany-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'TextHasMany Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(3)
+        expect(
+          importedPages.docs.find((d) => d.title === 'TextHasMany Import 1')?.textHasMany,
+        ).toEqual(['value1', 'value2'])
+        expect(
+          importedPages.docs.find((d) => d.title === 'TextHasMany Import 2')?.textHasMany,
+        ).toEqual(['single'])
+        expect(
+          importedPages.docs.find((d) => d.title === 'TextHasMany Import 3')?.textHasMany,
+        ).toEqual(['a', 'b', 'c'])
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'TextHasMany Import ' } },
+        })
+      })
+
+      it('should import upload field from CSV with media ID', async () => {
+        const imageFilePath = path.resolve(dirname, './image.png')
+        const imageFile = await getFileByPath(imageFilePath)
+
+        const media = await payload.create({
+          collection: 'media',
+          data: {
+            alt: 'Import Test Media',
+          },
+          file: {
+            ...imageFile,
+            name: 'import-test-media.png',
+          } as File,
+        })
+
+        const csvContent = `title,upload\n"Upload Import 1","${media.id}"\n"Upload Import 2","${media.id}"`
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'upload-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Upload Import ' } },
+          sort: 'title',
+          depth: 0,
+        })
+
+        expect(importedPages.docs).toHaveLength(2)
+        expect(importedPages.docs[0]?.upload).toBe(media.id)
+        expect(importedPages.docs[1]?.upload).toBe(media.id)
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Upload Import ' } },
+        })
+        await payload.delete({
+          collection: 'media',
+          id: media.id,
         })
       })
     })
