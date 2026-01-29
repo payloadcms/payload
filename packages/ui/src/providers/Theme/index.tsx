@@ -69,18 +69,14 @@ export const ThemeProvider: React.FC<{
   const [autoMode, setAutoMode] = useState<boolean>()
 
   useEffect(() => {
-    /**
-     * when a theme is preselected or an initial theme is provided,
-     * we don't want to override it with the cookie or OS preference
-     */
-    if (['dark', 'light'].includes(preselectedTheme) || initialTheme !== undefined) {
+    if (preselectedTheme !== 'all') {
       return
     }
 
     const { theme, themeFromCookies } = getTheme(cookieKey)
     setThemeState(theme)
     setAutoMode(!themeFromCookies)
-  }, [preselectedTheme, cookieKey, initialTheme])
+  }, [preselectedTheme, cookieKey])
 
   const setTheme = useCallback(
     (themeToSet: 'auto' | Theme) => {

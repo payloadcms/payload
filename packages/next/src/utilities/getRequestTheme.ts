@@ -17,13 +17,9 @@ const acceptedThemes: Theme[] = ['dark', 'light']
  * 1. Admin-configured theme (if not 'all')
  * 2. Theme from cookies (user preference)
  * 3. Theme from 'Sec-CH-Prefers-Color-Scheme' header (limited browser support)
- * 4. Undefined (to allow client-side determination)
+ * 4. Default theme
  */
-export const getRequestTheme = ({
-  config,
-  cookies,
-  headers,
-}: GetRequestLanguageArgs): Theme | undefined => {
+export const getRequestTheme = ({ config, cookies, headers }: GetRequestLanguageArgs): Theme => {
   if (config.admin.theme !== 'all' && acceptedThemes.includes(config.admin.theme)) {
     return config.admin.theme
   }
@@ -44,5 +40,5 @@ export const getRequestTheme = ({
     return themeFromHeader
   }
 
-  return undefined
+  return defaultTheme
 }

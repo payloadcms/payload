@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
-import { defaultTheme, ProgressBar, RootProvider } from '@payloadcms/ui'
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
@@ -93,7 +93,7 @@ export const RootLayout = async ({
 
   return (
     <html
-      data-theme={theme ?? defaultTheme}
+      data-theme={theme}
       dir={dir}
       lang={languageCode}
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
