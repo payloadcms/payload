@@ -354,26 +354,7 @@ export const getRouteData = ({
 
           viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
         } else {
-          // Check for custom collection views before assuming it's an edit view
-          const baseRoute = `/${segmentOne}/${segmentTwo}`
-          const customCollectionView = getCustomCollectionViewByRoute({
-            baseRoute,
-            currentRoute,
-            views: collectionConfig.admin.components?.views,
-          })
-
-          if (customCollectionView.viewKey && customCollectionView.view.payloadComponent) {
-            // --> /collections/:collectionSlug/:customViewPath
-            ViewToRender = customCollectionView.view
-
-            templateClassName = `collection-${customCollectionView.viewKey}`
-            templateType = 'default'
-            viewType = customCollectionView.viewKey as ViewTypes
-          } else if (
-            config.folders &&
-            segmentThree === config.folders.slug &&
-            collectionConfig.folders
-          ) {
+          if (config.folders && segmentThree === config.folders.slug && collectionConfig.folders) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/:folderCollectionSlug
             // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
@@ -390,6 +371,22 @@ export const getRouteData = ({
 
             viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
           } else {
+            // Check for custom collection views before assuming it's an edit view
+            const baseRoute = `/${segmentOne}/${segmentTwo}`
+            const customCollectionView = getCustomCollectionViewByRoute({
+              baseRoute,
+              currentRoute,
+              views: collectionConfig.admin.components?.views,
+            })
+
+            if (customCollectionView.viewKey && customCollectionView.view.payloadComponent) {
+              // --> /collections/:collectionSlug/:customViewPath
+              ViewToRender = customCollectionView.view
+
+              templateClassName = `collection-${customCollectionView.viewKey}`
+              templateType = 'default'
+              viewType = customCollectionView.viewKey as ViewTypes
+            } else {
             // Collection Edit Views
             // --> /collections/:collectionSlug/create
             // --> /collections/:collectionSlug/:id
@@ -416,6 +413,7 @@ export const getRouteData = ({
                 viewKeyArg: documentSubViewType,
               }),
             )
+            }
           }
         }
       } else if (globalConfig) {
