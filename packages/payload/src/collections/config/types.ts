@@ -383,19 +383,35 @@ export type CollectionAdminOptions = {
     }
     listMenuItems?: CustomComponent[]
     views?: {
-      /** Add custom collection views */
-      [key: string]: AdminViewConfig
+      /**
+       * Add custom collection views.
+       * Any additional keys define custom collection views that are matched by path and rendered at the collection level.
+       * @link https://payloadcms.com/docs/custom-components/custom-views
+       * @example
+       * ```ts
+       * views: {
+       *   grid: {
+       *     Component: '/path/to/GridView',
+       *     path: '/grid',
+       *     exact: true,
+       *   }
+       * }
+       * ```
+       */
+      [key: string]:
+        | { actions?: CustomComponent[]; Component?: PayloadComponent }
+        | AdminViewConfig
+        | EditConfig
+        | undefined
       /**
        * Replace, modify, or add new "document" views.
        * @link https://payloadcms.com/docs/custom-components/document-views
        */
-      // @ts-expect-error - edit allows more complex nested structure than AdminViewConfig
       edit?: EditConfig
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
        */
-      // @ts-expect-error - list allows actions array which doesn't match AdminViewConfig
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
