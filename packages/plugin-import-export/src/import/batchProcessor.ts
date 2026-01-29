@@ -52,7 +52,18 @@ export interface ImportProcessOptions {
   user?: TypedUser
 }
 
-// Helper function to handle multi-locale data
+/**
+ * Separates multi-locale data from a document for sequential locale updates.
+ *
+ * When a field has locale-keyed values (e.g., { title: { en: 'Hello', es: 'Hola' } }),
+ * this extracts the first locale's data for initial create/update, and stores
+ * remaining locales for subsequent update calls.
+ *
+ * @returns
+ * - flatData: Document with first locale values extracted (for initial operation)
+ * - hasMultiLocale: Whether any multi-locale fields were found
+ * - localeUpdates: Map of locale -> field data for follow-up updates
+ */
 function extractMultiLocaleData(
   data: Record<string, unknown>,
   configuredLocales?: string[],
@@ -65,7 +76,6 @@ function extractMultiLocaleData(
   const localeUpdates: Record<string, Record<string, unknown>> = {}
   let hasMultiLocale = false
 
-  // If no locales configured, skip multi-locale processing
   if (!configuredLocales || configuredLocales.length === 0) {
     return { flatData: { ...data }, hasMultiLocale: false, localeUpdates: {} }
   }
@@ -75,16 +85,13 @@ function extractMultiLocaleData(
   for (const [key, value] of Object.entries(data)) {
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       const valueObj = value as Record<string, unknown>
-      // Check if this object has keys matching configured locales
       const localeKeys = Object.keys(valueObj).filter((k) => localeSet.has(k))
+
       if (localeKeys.length > 0) {
         hasMultiLocale = true
-        // This is a localized field with explicit locale keys
-        // Use the first locale for initial creation, then update others
         const firstLocale = localeKeys[0]
         if (firstLocale) {
           flatData[key] = valueObj[firstLocale]
-          // Store other locales for later update
           for (const locale of localeKeys) {
             if (locale !== firstLocale) {
               if (!localeUpdates[locale]) {
@@ -95,11 +102,9 @@ function extractMultiLocaleData(
           }
         }
       } else {
-        // Not locale data, keep as is
         flatData[key] = value
       }
     } else {
-      // Not an object, keep as is. this includes localized fields without locale suffix; ie default locale
       flatData[key] = value
     }
   }
@@ -118,6 +123,17 @@ type ProcessImportBatchOptions = {
   user?: TypedUser
 }
 
+/**
+ * Processes a batch of documents for import based on the import mode.
+ *
+ * For each document in the batch:
+ * - create: Creates a new document (removes any existing ID)
+ * - update: Finds existing document by matchField and updates it
+ * - upsert: Updates if found, creates if not found
+ *
+ * Handles versioned collections, multi-locale data, and MongoDB ObjectID validation.
+ * Continues processing remaining documents even if individual imports fail.
+ */
 async function processImportBatch({
   batch,
   batchIndex,
@@ -133,16 +149,13 @@ async function processImportBatch({
     successful: [],
   }
 
-  // Check if the collection has versions enabled
   const collectionConfig = req.payload.collections[collectionSlug]?.config
   const collectionHasVersions = Boolean(collectionConfig?.versions)
 
-  // Get configured locales for multi-locale data detection
   const configuredLocales = req.payload.config.localization
     ? req.payload.config.localization.localeCodes
     : undefined
 
-  // Calculate the starting row number for this batch
   const startingRowNumber = batchIndex * options.batchSize
 
   for (let i = 0; i < batch.length; i++) {
@@ -153,24 +166,19 @@ async function processImportBatch({
     const rowNumber = startingRowNumber + i + 1
 
     try {
-      let processedDoc: Record<string, unknown> | undefined
-      let existing: { docs: Array<Record<string, unknown>> } | undefined
+      let savedDocument: Record<string, unknown> | undefined
+      let existingDocResult: { docs: Array<Record<string, unknown>> } | undefined
 
       if (importMode === 'create') {
-        // Remove ID field when creating new document
         const createData = { ...document }
         delete createData.id
 
-        // Only handle _status for versioned collections
         let draftOption: boolean | undefined
         if (collectionHasVersions) {
-          // Check if _status is set - use defaultVersionStatus from config
-          // If no _status field provided, use the configured default
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
           draftOption = !isPublished
 
-          // Debug: log status handling
           if (req.payload.config.debug) {
             req.payload.logger.info({
               _status: createData._status,
@@ -180,10 +188,9 @@ async function processImportBatch({
             })
           }
 
-          delete createData._status // Remove _status from data - it's controlled via draft option
+          delete createData._status
         }
 
-        // Debug: log what we're about to create
         if (req.payload.config.debug && 'title' in createData) {
           req.payload.logger.info({
             msg: 'Creating document',
@@ -201,7 +208,7 @@ async function processImportBatch({
 
         if (hasMultiLocale) {
           // Create with default locale data
-          processedDoc = await req.payload.create({
+          savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: flatData,
             draft: draftOption,
@@ -211,12 +218,12 @@ async function processImportBatch({
           })
 
           // Update for other locales
-          if (processedDoc && Object.keys(localeUpdates).length > 0) {
+          if (savedDocument && Object.keys(localeUpdates).length > 0) {
             for (const [locale, localeData] of Object.entries(localeUpdates)) {
               try {
                 const localeReq = { ...req, locale }
                 await req.payload.update({
-                  id: processedDoc.id as number | string,
+                  id: savedDocument.id as number | string,
                   collection: collectionSlug,
                   data: localeData,
                   draft: collectionHasVersions ? false : undefined,
@@ -228,14 +235,14 @@ async function processImportBatch({
                 // Log but don't fail the entire import if a locale update fails
                 req.payload.logger.error({
                   err: error,
-                  msg: `Failed to update locale ${locale} for document ${String(processedDoc.id)}`,
+                  msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
                 })
               }
             }
           }
         } else {
           // No multi-locale data, create normally
-          processedDoc = await req.payload.create({
+          savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: createData,
             draft: draftOption,
@@ -269,9 +276,8 @@ async function processImportBatch({
         }
         const isValidObjectIdFormat = /^[0-9a-f]{24}$/i.test(matchValueStr)
 
-        // Try to search normally first, catch errors for invalid IDs
         try {
-          existing = await req.payload.find({
+          existingDocResult = await req.payload.find({
             collection: collectionSlug,
             depth: 0,
             limit: 1,
@@ -285,22 +291,18 @@ async function processImportBatch({
             },
           })
         } catch (error) {
-          // If we get an error when searching by ID (e.g., invalid ObjectID format)
-          // and we're in upsert mode, treat as non-existent
+          // MongoDB may throw for invalid ObjectID format - handle gracefully for upsert
           if (isMatchingById && importMode === 'upsert' && !isValidObjectIdFormat) {
-            existing = { docs: [] }
+            existingDocResult = { docs: [] }
           } else if (isMatchingById && importMode === 'update' && !isValidObjectIdFormat) {
-            // For update mode with invalid ID, this should fail
             throw new Error(`Invalid ID format for update: ${matchValueStr}`)
           } else {
-            // Re-throw other errors
             throw error
           }
         }
 
-        if (existing.docs.length > 0) {
-          // Update existing
-          const existingDoc = existing.docs[0]
+        if (existingDocResult.docs.length > 0) {
+          const existingDoc = existingDocResult.docs[0]
           if (!existingDoc) {
             throw new Error(`Document not found`)
           }
@@ -350,7 +352,7 @@ async function processImportBatch({
 
           if (hasMultiLocale) {
             // Update with default locale data
-            processedDoc = await req.payload.update({
+            savedDocument = await req.payload.update({
               id: existingDoc.id as number | string,
               collection: collectionSlug,
               data: flatData,
@@ -362,7 +364,7 @@ async function processImportBatch({
             })
 
             // Update for other locales
-            if (processedDoc && Object.keys(localeUpdates).length > 0) {
+            if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
                   // Clone the request with the specific locale
@@ -401,7 +403,7 @@ async function processImportBatch({
 
               // Update the document - don't specify draft to let Payload handle versions properly
               // This will create a new draft version for collections with versions enabled
-              processedDoc = await req.payload.update({
+              savedDocument = await req.payload.update({
                 id: existingDoc.id as number | string,
                 collection: collectionSlug,
                 data: updateData,
@@ -413,12 +415,12 @@ async function processImportBatch({
               })
 
               // Debug: log what was returned
-              if (req.payload.config.debug && processedDoc) {
+              if (req.payload.config.debug && savedDocument) {
                 req.payload.logger.info({
-                  id: processedDoc.id,
+                  id: savedDocument.id,
                   msg: 'Update completed',
-                  status: processedDoc._status,
-                  title: processedDoc.title,
+                  status: savedDocument._status,
+                  title: savedDocument.title,
                 })
               }
             } catch (updateError) {
@@ -462,7 +464,7 @@ async function processImportBatch({
 
           if (hasMultiLocale) {
             // Create with default locale data
-            processedDoc = await req.payload.create({
+            savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: flatData,
               draft: draftOption,
@@ -472,13 +474,13 @@ async function processImportBatch({
             })
 
             // Update for other locales
-            if (processedDoc && Object.keys(localeUpdates).length > 0) {
+            if (savedDocument && Object.keys(localeUpdates).length > 0) {
               for (const [locale, localeData] of Object.entries(localeUpdates)) {
                 try {
                   // Clone the request with the specific locale
                   const localeReq = { ...req, locale }
                   await req.payload.update({
-                    id: processedDoc.id as number | string,
+                    id: savedDocument.id as number | string,
                     collection: collectionSlug,
                     data: localeData,
                     draft: collectionHasVersions ? false : undefined,
@@ -489,14 +491,14 @@ async function processImportBatch({
                   // Log but don't fail the entire import if a locale update fails
                   req.payload.logger.error({
                     err: error,
-                    msg: `Failed to update locale ${locale} for document ${String(processedDoc.id)}`,
+                    msg: `Failed to update locale ${locale} for document ${String(savedDocument.id)}`,
                   })
                 }
               }
             }
           } else {
             // No multi-locale data, create normally
-            processedDoc = await req.payload.create({
+            savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: createData,
               draft: draftOption,
@@ -524,7 +526,7 @@ async function processImportBatch({
         throw new Error(`Unknown import mode: ${String(importMode)}`)
       }
 
-      if (processedDoc) {
+      if (savedDocument) {
         // Determine operation type for proper counting
         let operation: 'created' | 'updated' | undefined
         if (importMode === 'create') {
@@ -532,8 +534,7 @@ async function processImportBatch({
         } else if (importMode === 'update') {
           operation = 'updated'
         } else if (importMode === 'upsert') {
-          // In upsert mode, check if we found an existing document
-          if (existing && existing.docs.length > 0) {
+          if (existingDocResult && existingDocResult.docs.length > 0) {
             operation = 'updated'
           } else {
             operation = 'created'
@@ -544,7 +545,7 @@ async function processImportBatch({
           document,
           index: rowNumber - 1, // Store as 0-indexed
           operation,
-          result: processedDoc,
+          result: savedDocument,
         })
       }
     } catch (error) {

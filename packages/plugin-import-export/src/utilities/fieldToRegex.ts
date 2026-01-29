@@ -13,19 +13,20 @@
 export const fieldToRegex = (fieldPath: string): RegExp => {
   const fieldSegments = fieldPath.split('.')
 
-  // First segment is anchored at start
+  // Anchor first segment at string start
   let pattern = `^${escapeRegex(fieldSegments[0]!)}`
 
-  // For each subsequent segment, allow optional array indices (one or more)
   for (let i = 1; i < fieldSegments.length; i++) {
     const segment = escapeRegex(fieldSegments[i]!)
-    // Optional array indices: (_digits)* before each segment
+
+    // (?:_\d+)* - Zero or more array indices (e.g., "_0", "_0_1" for nested arrays)
     pattern += `(?:_\\d+)*`
-    // Required underscore + segment
+
+    // _segment - Required underscore followed by the field segment
     pattern += `_${segment}`
   }
 
-  // Allow trailing content (nested fields, indices, etc.)
+  // (?:_.*)?$ - Allow any trailing content (nested fields, additional indices)
   pattern += `(?:_.*)?$`
 
   return new RegExp(pattern)

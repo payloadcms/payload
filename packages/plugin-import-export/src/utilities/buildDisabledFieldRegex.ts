@@ -13,21 +13,25 @@
 export const buildDisabledFieldRegex = (fieldPath: string): RegExp => {
   const fieldSegments = fieldPath.split('.')
 
-  // First segment is anchored at start
+  // Anchor first segment at string start (e.g., "blocks" matches start of "blocks_0_hero")
   let pattern = `^${escapeRegex(fieldSegments[0]!)}`
 
-  // For each subsequent segment, allow optional array index and block type slug
   for (let i = 1; i < fieldSegments.length; i++) {
     const segment = escapeRegex(fieldSegments[i]!)
-    // Optional array index: _digits
+
+    // (?:_\d+)? - Optional array index (e.g., "_0", "_1")
     pattern += `(?:_\\d+)?`
-    // Optional block slug (but not the target segment via negative lookahead): _chars
+
+    // (?:_(?!segment(?:_|$))[^_]+)? - Optional block slug that is NOT the target segment
+    // The negative lookahead (?!segment(?:_|$)) prevents matching the target segment itself
+    // [^_]+ matches the block slug characters (no underscores allowed in slug portion)
     pattern += `(?:_(?!${segment}(?:_|$))[^_]+)?`
-    // Required underscore + segment
+
+    // _segment - Required underscore followed by the field segment
     pattern += `_${segment}`
   }
 
-  // Allow trailing content (nested fields, indices, etc.)
+  // (?:_.*)?$ - Allow any trailing content (nested fields, additional indices)
   pattern += `(?:_.*)?$`
 
   return new RegExp(pattern)

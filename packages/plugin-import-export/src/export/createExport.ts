@@ -127,7 +127,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
-  const hardLimit =
+  const maxExportDocuments =
     typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
 
   // Try to count documents - if access is denied, treat as 0 documents
@@ -164,7 +164,7 @@ export const createExport = async (args: CreateExportArgs) => {
     limit: batchSize,
     locale,
     overrideAccess: false,
-    page: 0, // The page will be incremented manually in the loop
+    page: 0,
     select,
     sort,
     user,
@@ -261,9 +261,10 @@ export const createExport = async (args: CreateExportArgs) => {
 
     const encoder = new TextEncoder()
     let isFirstBatch = true
-    let streamPage = adjustedPage
+    let currentBatchPage = adjustedPage
     let fetched = 0
-    const maxDocs = typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY
+    const maxDocs =
+      typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY
 
     const stream = new Readable({
       async read() {
@@ -280,12 +281,14 @@ export const createExport = async (args: CreateExportArgs) => {
 
         const result = await payload.find({
           ...findArgs,
-          page: streamPage,
+          page: currentBatchPage,
           limit: Math.min(batchSize, remaining),
         })
 
         if (debug) {
-          req.payload.logger.debug(`Streaming batch ${streamPage} with ${result.docs.length} docs`)
+          req.payload.logger.debug(
+            `Streaming batch ${currentBatchPage} with ${result.docs.length} docs`,
+          )
         }
 
         if (result.docs.length === 0) {
@@ -362,7 +365,7 @@ export const createExport = async (args: CreateExportArgs) => {
 
         fetched += result.docs.length
         isFirstBatch = false
-        streamPage += 1 // Increment stream page for the next batch
+        currentBatchPage += 1
 
         if (!result.hasNextPage || fetched >= maxDocs) {
           if (debug) {
@@ -410,7 +413,8 @@ export const createExport = async (args: CreateExportArgs) => {
       collectionSlug,
       findArgs: findArgs as ExportFindArgs,
       format,
-      maxDocs: typeof hardLimit === 'number' ? hardLimit : Number.POSITIVE_INFINITY,
+      maxDocs:
+        typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY,
       req,
       startPage: adjustedPage,
       transformDoc,
