@@ -104,7 +104,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -148,7 +148,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -173,11 +173,11 @@ export interface User {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   localized?: string | null;
   custom?: string | null;
-  customRelationship?: (string | null) | User;
+  customRelationship?: (number | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -234,7 +234,7 @@ export interface Page {
           }
       )[]
     | null;
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   virtualRelationship?: string | null;
   virtual?: string | null;
   hasManyNumber?: number[] | null;
@@ -262,7 +262,7 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
-  relationship?: (string | null) | User;
+  relationship?: (number | null) | User;
   excerpt?: string | null;
   /**
    * Date field for testing export/import timezone handling
@@ -276,26 +276,39 @@ export interface Page {
   hasOnePolymorphic?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null);
   hasManyPolymorphic?:
     | (
         | {
             relationTo: 'users';
-            value: string | User;
+            value: number | User;
           }
         | {
             relationTo: 'posts';
-            value: string | Post;
+            value: number | Post;
           }
       )[]
     | null;
-  hasManyMonomorphic?: (string | Post)[] | null;
+  hasManyMonomorphic?: (number | Post)[] | null;
   textFieldInCollapsible?: string | null;
+  checkbox?: boolean | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  selectHasMany?: ('tagA' | 'tagB' | 'tagC' | 'tagD')[] | null;
+  radio?: ('radio1' | 'radio2' | 'radio3') | null;
+  email?: string | null;
+  textarea?: string | null;
+  code?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  textHasMany?: string[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -305,7 +318,7 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
   content?: {
     root: {
@@ -331,7 +344,7 @@ export interface Post {
  * via the `definition` "posts-exports-only".
  */
 export interface PostsExportsOnly {
-  id: string;
+  id: number;
   title: string;
   content?: {
     root: {
@@ -357,7 +370,7 @@ export interface PostsExportsOnly {
  * via the `definition` "posts-imports-only".
  */
 export interface PostsImportsOnly {
-  id: string;
+  id: number;
   title: string;
   content?: {
     root: {
@@ -383,7 +396,7 @@ export interface PostsImportsOnly {
  * via the `definition` "posts-no-jobs-queue".
  */
 export interface PostsNoJobsQueue {
-  id: string;
+  id: number;
   title: string;
   content?: {
     root: {
@@ -409,7 +422,7 @@ export interface PostsNoJobsQueue {
  * via the `definition` "exports".
  */
 export interface Export {
-  id: string;
+  id: number;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -447,7 +460,7 @@ export interface Export {
  * via the `definition` "posts-export".
  */
 export interface PostsExport {
-  id: string;
+  id: number;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -485,7 +498,7 @@ export interface PostsExport {
  * via the `definition` "posts-no-jobs-queue-export".
  */
 export interface PostsNoJobsQueueExport {
-  id: string;
+  id: number;
   name?: string | null;
   format: 'csv';
   limit?: number | null;
@@ -523,7 +536,7 @@ export interface PostsNoJobsQueueExport {
  * via the `definition` "imports".
  */
 export interface Import {
-  id: string;
+  id: number;
   collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -560,7 +573,7 @@ export interface Import {
  * via the `definition` "posts-import".
  */
 export interface PostsImport {
-  id: string;
+  id: number;
   collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -597,7 +610,7 @@ export interface PostsImport {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -614,7 +627,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
+  id: number;
   /**
    * Input data provided to the job
    */
@@ -706,36 +719,36 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'posts-exports-only';
-        value: string | PostsExportsOnly;
+        value: number | PostsExportsOnly;
       } | null)
     | ({
         relationTo: 'posts-imports-only';
-        value: string | PostsImportsOnly;
+        value: number | PostsImportsOnly;
       } | null)
     | ({
         relationTo: 'posts-no-jobs-queue';
-        value: string | PostsNoJobsQueue;
+        value: number | PostsNoJobsQueue;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -745,10 +758,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -768,7 +781,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -866,6 +879,15 @@ export interface PagesSelect<T extends boolean = true> {
   hasManyPolymorphic?: T;
   hasManyMonomorphic?: T;
   textFieldInCollapsible?: T;
+  checkbox?: T;
+  select?: T;
+  selectHasMany?: T;
+  radio?: T;
+  email?: T;
+  textarea?: T;
+  code?: T;
+  point?: T;
+  textHasMany?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
