@@ -59,7 +59,7 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ;(async () => {
+      ; (async () => {
         let url
         let method
 
@@ -157,46 +157,48 @@ export function UnpublishButton() {
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
-  const canUnpublish = hasPublishPermission && hasPublishedDoc && !isTrashed
-  const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
+  const canUnpublish = React.useMemo(
+    () => hasPublishPermission && hasPublishedDoc && !isTrashed,
+    [hasPublishPermission, hasPublishedDoc, isTrashed],
+  )
+
+  const canUnpublishCurrentLocale = React.useMemo(() => {
+    if (!canUnpublish || !hasLocalizedFields) { return false }
+
+    const drafts = entityConfig?.versions?.drafts
+    const hasDraftsConfig = typeof drafts === 'object' && drafts !== null
+    const localizeStatusConfigured = hasDraftsConfig && drafts.localizeStatus === true
+    const experimentalLocalizeStatus =
+      config.experimental &&
+      'localizeStatus' in config.experimental &&
+      config.experimental.localizeStatus === true
+
+    return localizeStatusConfigured && experimentalLocalizeStatus
+  }, [canUnpublish, hasLocalizedFields, entityConfig?.versions?.drafts, config.experimental])
 
   return (
     <React.Fragment>
       {canUnpublish && (
         <>
-          <FormSubmit
-            buttonId="action-unpublish"
-            disabled={!canUnpublish}
-            enableSubMenu={canUnpublishCurrentLocale}
+          {canUnpublish && <PopupList.Button
+            id="action-unpublish"
             onClick={() => {
               setUnpublishAll(true)
               toggleModal(unPublishModalSlug)
             }}
-            size="medium"
-            SubMenuPopupContent={
-              canUnpublishCurrentLocale
-                ? ({ close }) => {
-                    return (
-                      <PopupList.ButtonGroup>
-                        <PopupList.Button
-                          id="action-unpublish-locale"
-                          onClick={() => {
-                            setUnpublishAll(false)
-                            toggleModal(unPublishModalSlug)
-                            close()
-                          }}
-                        >
-                          {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
-                        </PopupList.Button>
-                      </PopupList.ButtonGroup>
-                    )
-                  }
-                : undefined
-            }
-            type="button"
           >
-            {t('version:unpublish')}
-          </FormSubmit>
+            {t('version:unpublish', { locale: getTranslation(localeLabel, i18n) })}
+          </PopupList.Button>}
+          {canUnpublishCurrentLocale && <PopupList.Button
+            id="action-unpublish-locale"
+            onClick={() => {
+              setUnpublishAll(false)
+              toggleModal(unPublishModalSlug)
+              close()
+            }}
+          >
+            {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
+          </PopupList.Button>}
           <ConfirmationModal
             body={
               !unpublishAll
