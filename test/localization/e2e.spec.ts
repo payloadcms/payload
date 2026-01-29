@@ -763,6 +763,16 @@ describe('Localization', () => {
 
       expect(isActuallyVisible).toBe(true)
     })
+
+    test('should show locale in slate rich text field label', async () => {
+      await page.goto(urlAllFieldsLocalized.create)
+
+      const richTextLabel = page.locator('label[for="field-richTextSlate"]')
+      await expect(richTextLabel).toContainText('en')
+
+      await changeLocale(page, spanishLocale)
+      await expect(richTextLabel).toContainText('es')
+    })
   })
 
   test('should not show publish specific locale button when no localized fields exist', async () => {
