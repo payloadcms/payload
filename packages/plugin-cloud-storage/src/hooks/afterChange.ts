@@ -11,7 +11,12 @@ interface Args {
 
 export const getAfterChangeHook =
   ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
-  async ({ doc, operation, previousDoc, req }) => {
+  async ({ context, doc, operation, previousDoc, req }) => {
+    // Skip if called recursively from the metadata update below
+    if (context?.skipCloudStorageAfterChangeHook) {
+      return doc
+    }
+
     try {
       const files = getIncomingFiles({ data: doc, req })
 
@@ -72,6 +77,8 @@ export const getAfterChangeHook =
               data: uploadMetadata,
               depth: 0,
               req,
+              // Prevent this hook from running again on the nested update
+              context: { ...context, skipCloudStorageAfterChangeHook: true },
             })
             return { ...doc, ...uploadMetadata }
           } catch (updateError: unknown) {
