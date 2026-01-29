@@ -602,7 +602,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -703,6 +703,39 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
+  # Test content-api integration with packed packages
+  tests-content-api:
+    name: Content API Tests
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+
+      - name: Pack packages and setup prod dependencies
+        run: pnpm run prepare-run-test-against-prod:ci
+
+      - name: Run Content API Integration Tests
+        continue-on-error: true
+        run: pnpm test:int _community
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: content-api
+          CONTENT_API_URL: ${{ secrets.CONTENT_API_URL }}
+          CONTENT_SYSTEM_ID: ${{ secrets.CONTENT_SYSTEM_ID }}
+
   all-green:
     name: All Green
     if: always()
@@ -717,6 +750,7 @@ jobs:
         tests-e2e,
         tests-types,
         tests-type-generation,
+        tests-content-api,
       ]
 
     steps:
@@ -767,4 +801,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
