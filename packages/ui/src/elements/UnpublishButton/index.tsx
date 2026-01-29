@@ -19,7 +19,9 @@ import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-export function UnpublishButton({ label: labelProp }: UnpublishButtonClientProps = {}) {
+export function UnpublishButton({
+  label: labelProp,
+}: { label?: string } & UnpublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,

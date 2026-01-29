@@ -1,8 +1,6 @@
 import type { ServerProps } from '../../config/types.js'
 
-export type UnpublishButtonClientProps = {
-  label?: string
-}
+export type UnpublishButtonClientProps = {}
 
 export type UnpublishButtonServerPropsOnly = {} & ServerProps
 
