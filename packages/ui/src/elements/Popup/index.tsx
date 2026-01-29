@@ -308,8 +308,8 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const handleActionableClick = useEffectEvent((e: MouseEvent) => {
     const target = e.target as HTMLElement
 
-    // Allow opting out with data-popup-keep-open attribute on element or ancestor
-    if (target.closest('[data-popup-keep-open]')) {
+    // Allow opting out with data-popup-prevent-close attribute on element or ancestor
+    if (target.closest('[data-popup-prevent-close]')) {
       return
     }
 
