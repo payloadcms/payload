@@ -136,7 +136,7 @@ The following options are available:
 | **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                         |
 | **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                      |
 | **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                           |
-| **`strictDraftTypes`** | Enable strict type safety for draft mode queries. When enabled, `find` operations with `draft: true` will type required fields as optional, since validation is skipped for drafts. Defaults to `false`. **This will become the default behavior in v4.0.** |
+| **`strictDraftTypes`** | Enable strict type safety for draft mode. When enabled: (1) Query operations (`find`, `findByID`) with `draft: true` will type required fields as optional, since validation is skipped for drafts. (2) The `draft` property is forbidden for collections without drafts in create operations. (3) Create operations enforce proper data requirements via discriminated unions. Defaults to `false`. **This will become the default behavior in v4.0.** |
 
 ## Config Location
 

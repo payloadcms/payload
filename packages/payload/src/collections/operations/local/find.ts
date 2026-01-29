@@ -1,6 +1,7 @@
 import type { PaginatedDocs } from '../../../database/types.js'
 import type {
   CollectionSlug,
+  GeneratedTypes,
   JoinQuery,
   Payload,
   PayloadTypes,
@@ -19,13 +20,16 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type {
+  DraftFlagFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOperation } from '../find.js'
 
-export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
+type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   /**
    * the Collection slug to operate against.
    */
@@ -50,10 +54,6 @@ export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
-  /**
-   * Whether the documents should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -178,6 +178,13 @@ export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   where?: Where
 }
+
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
+  BaseFindOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+
+// Backward compatibility export
+export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
+  Options<TSlug, TSelect>
 
 export async function findLocal<
   TSlug extends CollectionSlug,

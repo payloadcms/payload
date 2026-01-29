@@ -20,6 +20,7 @@ import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
+  DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -60,10 +61,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   disableTransaction?: boolean
-  /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -163,7 +160,8 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
@@ -187,7 +185,8 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export type Options<
   TSlug extends CollectionSlug,

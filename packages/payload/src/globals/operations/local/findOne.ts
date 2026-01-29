@@ -14,13 +14,16 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromGlobalSlug } from '../../config/types.js'
+import type {
+  DraftFlagFromGlobalSlug,
+  SelectFromGlobalSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -37,10 +40,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -83,6 +82,9 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 } & Pick<FindOptions<string, SelectType>, 'select'> &
   Pick<GlobalFindOneArgs, 'flattenLocales'>
+
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
+  BaseFindOneOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,
