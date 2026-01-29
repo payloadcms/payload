@@ -52,7 +52,7 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
-import { countLocal, type Options as CountOptions } from './collections/operations/local/count.js'
+import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
   type Options as CreateOptions,
@@ -67,7 +67,8 @@ import {
   duplicateLocal,
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
-import { findLocal, type Options as FindOptions } from './collections/operations/local/find.js'
+import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+export type { FindOptions }
 import {
   findByIDLocal,
   type Options as FindByIDOptions,
@@ -135,7 +136,10 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import { countVersionsLocal } from './collections/operations/local/countVersions.js'
+import {
+  countVersionsLocal,
+  type CountVersionsOptions,
+} from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
@@ -402,7 +406,7 @@ export class BasePayload {
    * @returns count of document versions satisfying query
    */
   countVersions = async <T extends CollectionSlug>(
-    options: CountOptions<T>,
+    options: CountVersionsOptions<T>,
   ): Promise<{ totalDocs: number }> => {
     return countVersionsLocal(this, options)
   }

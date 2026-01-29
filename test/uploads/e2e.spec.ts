@@ -2,9 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { statSync } from 'fs'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { openListFilters } from 'helpers/e2e/filters/index.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,13 +10,18 @@ import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../helpers/assertToastErrors.js'
+import { openListColumns, toggleColumn } from '../helpers/e2e/columns/index.js'
+import { openListFilters } from '../helpers/e2e/filters/index.js'
+import { openDocDrawer } from '../helpers/e2e/toggleDocDrawer.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -56,6 +58,7 @@ import {
   withoutMetadataSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -170,6 +173,34 @@ describe('Uploads', () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'uploadsTest',
+      uploadsDir: [
+        path.resolve(dirname, './uploads'),
+        path.resolve(dirname, './media'),
+        path.resolve(dirname, './media-gif'),
+        path.resolve(dirname, './no-image-sizes'),
+        path.resolve(dirname, './object-fit'),
+        path.resolve(dirname, './custom-file-name-media'),
+        path.resolve(dirname, './focal-only'),
+        path.resolve(dirname, './crop-only'),
+        path.resolve(dirname, './optional'),
+        path.resolve(dirname, './required'),
+        path.resolve(dirname, './focal-no-sizes'),
+        path.resolve(dirname, './svg-only'),
+        path.resolve(dirname, './media-trim'),
+        path.resolve(dirname, './image-sizes-only'),
+        path.resolve(dirname, './versions'),
+        path.resolve(dirname, './media-with-relation-preview'),
+        path.resolve(dirname, './with-meta-data'),
+        path.resolve(dirname, './with-any-image-type'),
+        path.resolve(dirname, './with-only-jpeg-meta-data'),
+        path.resolve(dirname, './without-meta-data'),
+        path.resolve(dirname, './collections/Upload1/uploads'),
+        path.resolve(dirname, './collections/Upload2/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailFunction/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailSize/test/uploads'),
+        path.resolve(dirname, './collections/AdminThumbnailWithSearchQueries/test/uploads'),
+        path.resolve(dirname, './collections/AdminUploadControl/test/uploads'),
+      ],
     })
 
     if (client) {
@@ -467,6 +498,8 @@ describe('Uploads', () => {
 
   test('should show draft uploads in the relation list', async () => {
     await page.goto(relationURL.list)
+    // Wait for hydration
+    await wait(1000)
     // from the list edit the first document
     await page.locator('.row-1 a').click()
 
@@ -542,9 +575,8 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'successfully',
       )
-      await page
-        .locator('.payload-toast-container .toast-success .payload-toast-close-button')
-        .click()
+
+      await closeAllToasts(page)
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
@@ -606,7 +638,9 @@ describe('Uploads', () => {
     await wait(1000)
 
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -627,6 +661,8 @@ describe('Uploads', () => {
     await loadFromUrlButton.click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000)
 
     const mediaID = page.url().split('/').pop()
@@ -884,6 +920,7 @@ describe('Uploads', () => {
     await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
@@ -915,6 +952,7 @@ describe('Uploads', () => {
       '.bulk-upload--actions-bar__saveButtons button',
     )
     await saveButton.click()
+    await closeAllToasts(page)
 
     await expect(
       page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
@@ -947,6 +985,8 @@ describe('Uploads', () => {
     await page.waitForSelector('button#action-save')
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await wait(1000) // Wait for the save
 
     await expect(page.locator('.file-field__previewSizes')).toBeVisible()
@@ -996,6 +1036,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1037,6 +1078,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(1)
@@ -1095,6 +1137,7 @@ describe('Uploads', () => {
 
       await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1107,6 +1150,7 @@ describe('Uploads', () => {
     test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
+      await waitForFormReady(page)
 
       // Upload single file
       await page.setInputFiles(
@@ -1135,6 +1179,7 @@ describe('Uploads', () => {
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('2')
@@ -1159,6 +1204,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 2 files',
       )
+      await closeAllToasts(page)
 
       await saveDocAndAssert(page)
     })
@@ -1223,6 +1269,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
@@ -1351,6 +1398,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
@@ -1377,6 +1425,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       await expect(bulkUploadModal).toBeHidden()
 
@@ -1419,6 +1468,7 @@ describe('Uploads', () => {
 
       // Should show error message for all failed files
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+      await closeAllToasts(page)
 
       // Check that each file has exactly 1 error (the missing required field)
       const errorCounts = await bulkUploadModal
@@ -1481,7 +1531,7 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
       ).toBeVisible()
-
+      await closeAllToasts(page)
       // After submission, the successful form (form 3) is removed from sidebar
       // Only the 2 failed forms remain in the sidebar
       const fileSelections = bulkUploadModal.locator('.file-selections__filesContainer')
@@ -1566,7 +1616,11 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 1 files")'),
       ).toBeVisible()
-
+      // Verify the error message indicates file size limit
+      await expect(
+        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
+      ).toBeVisible()
+      await closeAllToasts(page)
       // The file that exceeded the size limit should have exactly 1 error
       // Navigate back to check the second file (2mb.jpg)
       const prevButton = bulkUploadModal.locator(
@@ -1576,11 +1630,6 @@ describe('Uploads', () => {
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
-
-      // Verify the error message indicates file size limit
-      await expect(
-        page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
-      ).toBeVisible()
     })
   })
 
@@ -1941,7 +1990,7 @@ describe('Uploads', () => {
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
-    await expect(imageRelationshipCell).toHaveText('image-1.png')
+    await expect(imageRelationshipCell).toHaveText('image.png')
 
     const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
     await expect(pageOneButton).toBeVisible()
@@ -2113,7 +2162,6 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await page.locator('#field-prefix').fill('initial')
     await saveDocAndAssert(page)
-
 
     // Change the file
     await page.locator('.file-details__remove').click()

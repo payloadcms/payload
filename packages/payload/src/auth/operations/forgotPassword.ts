@@ -27,6 +27,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   } & AuthOperationsFromCollectionSlug<TSlug>['forgotPassword']
   disableEmail?: boolean
   expiration?: number
+  overrideAccess?: boolean
   req: PayloadRequest
 }
 
@@ -36,7 +37,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
-  const { data } = incomingArgs
+  const { data, overrideAccess } = incomingArgs
 
   const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
@@ -69,6 +70,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'forgotPassword',
+      overrideAccess,
     })
 
     const {
@@ -211,6 +213,7 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'forgotPassword',
+      overrideAccess,
       result: token,
     })
 

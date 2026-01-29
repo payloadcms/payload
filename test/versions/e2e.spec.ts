@@ -54,6 +54,7 @@ import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveT
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
 import {
   autosaveCollectionSlug,
@@ -189,6 +190,8 @@ describe('Versions', () => {
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       const versionsTab = page.locator('.doc-tab:has-text("Versions")')
@@ -207,6 +210,8 @@ describe('Versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
@@ -226,6 +231,8 @@ describe('Versions', () => {
 
     test('collection — has versions route', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
       await page.goto(`${page.url()}/versions`)
@@ -257,6 +264,8 @@ describe('Versions', () => {
 
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       // Wait for the document to load
@@ -271,6 +280,7 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -723,6 +733,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-id a').click()
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
@@ -748,6 +760,43 @@ describe('Versions', () => {
       await expect(page.locator('#action-save')).not.toBeAttached()
     })
 
+    test('collections — should keep publish button hidden after saving draft when access control prevents update', async () => {
+      const draftDoc = await payload.create({
+        collection: disablePublishSlug,
+        data: {
+          _status: 'draft',
+          title: 'draft title',
+        },
+      })
+
+      await page.goto(disablePublishURL.edit(String(draftDoc.id)))
+
+      // Verify publish button is hidden on initial load
+      await expect(page.locator('#action-save')).not.toBeAttached()
+
+      await page.locator('#field-title').fill('updated title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify publish button is still hidden after saving as draft
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('collections — should hide unpublish button when access control prevents update', async () => {
+      const publishedDoc = await payload.create({
+        collection: disablePublishSlug,
+        data: {
+          _status: 'published',
+          title: 'title',
+        },
+        overrideAccess: true,
+      })
+
+      await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
+
+      // Verify unpublish button is hidden when user doesn't have publish permission
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+    })
+
     test('collections — should show custom error message when unpublishing fails', async () => {
       const publishedDoc = await payload.create({
         collection: errorOnUnpublishSlug,
@@ -762,6 +811,26 @@ describe('Versions', () => {
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
+    })
+
+    test('collections — should render custom unpublish button', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithCustomUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Custom Unpublish',
+        },
+      })
+
+      const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
+      await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
+
+      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+
+      await payload.delete({
+        collection: draftWithCustomUnpublishSlug,
+        id: publishedDoc.id,
+      })
     })
 
     test('should show documents title in relationship even if draft document', async () => {
@@ -874,6 +943,8 @@ describe('Versions', () => {
     describe('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -892,6 +963,8 @@ describe('Versions', () => {
 
       test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -911,6 +984,8 @@ describe('Versions', () => {
 
       test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -933,6 +1008,8 @@ describe('Versions', () => {
 
       test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -1100,6 +1177,40 @@ describe('Versions', () => {
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
       await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('globals — should keep publish button hidden after saving draft when access control prevents update', async () => {
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+
+      // Verify publish button is hidden on initial load
+      await expect(page.locator('#action-save')).not.toBeAttached()
+
+      // Update the title and save as draft
+      await page.locator('#field-title').fill('updated global title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify publish button is still hidden after saving as draft
+      // This is the key regression test - before the fix, the button would appear after save
+      await expect(page.locator('#action-save')).not.toBeAttached()
+    })
+
+    test('globals — should hide unpublish button when access control prevents update', async () => {
+      // Then publish it with override access to create a published version
+      await payload.updateGlobal({
+        slug: disablePublishGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'published global',
+        },
+        overrideAccess: true,
+      })
+
+      const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
+      await page.goto(url.global(disablePublishGlobalSlug))
+
+      // Verify unpublish button is hidden when user doesn't have publish permission
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
     test('global — should show versions drawer when SelectComparison more option is clicked', async () => {

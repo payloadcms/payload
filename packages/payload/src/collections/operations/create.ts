@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
+import type { CollectionSlug, FindOptions, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -56,10 +56,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
   publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,
@@ -88,6 +87,7 @@ export const createOperation = async <
       args,
       collection: args.collection.config,
       operation: 'create',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {
@@ -379,6 +379,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -412,6 +413,7 @@ export const createOperation = async <
             data,
             doc: result,
             operation: 'create',
+            overrideAccess,
             previousDoc: {},
             req: args.req,
           })) || result
@@ -426,6 +428,7 @@ export const createOperation = async <
       args,
       collection: collectionConfig,
       operation: 'create',
+      overrideAccess: args.overrideAccess!,
       result,
     })
 

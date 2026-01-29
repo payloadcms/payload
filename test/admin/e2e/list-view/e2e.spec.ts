@@ -1597,6 +1597,8 @@ describe('List View', () => {
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
+      // Wait until only 1 row is visible
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])

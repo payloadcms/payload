@@ -1,7 +1,10 @@
 'use client'
 
+import type { UnpublishButtonClientProps } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -16,13 +19,16 @@ import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-export function UnpublishButton() {
+export function UnpublishButton({
+  label: labelProp,
+}: { label?: string } & UnpublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,
     data: dataFromProps,
     globalSlug,
     hasPublishedDoc,
+    hasPublishPermission,
     incrementVersionCount,
     isTrashed,
     setHasPublishedDoc,
@@ -57,7 +63,7 @@ export function UnpublishButton() {
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ; (async () => {
+      ;(async () => {
         let url
         let method
 
@@ -72,12 +78,20 @@ export function UnpublishButton() {
         )
 
         if (collectionSlug) {
-          url = `${serverURL}${api}/${collectionSlug}/${id}${queryString}`
+          url = formatAdminURL({
+            apiRoute: api,
+            path: `/${collectionSlug}/${id}${queryString}`,
+            serverURL,
+          })
           method = 'patch'
         }
 
         if (globalSlug) {
-          url = `${serverURL}${api}/globals/${globalSlug}${queryString}`
+          url = formatAdminURL({
+            apiRoute: api,
+            path: `/globals/${globalSlug}${queryString}`,
+            serverURL,
+          })
           method = 'post'
         }
 
@@ -147,7 +161,7 @@ export function UnpublishButton() {
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
-  const canUnpublish = hasPublishedDoc && !isTrashed
+  const canUnpublish = hasPublishPermission && hasPublishedDoc && !isTrashed
   const canUnpublishCurrentLocale = hasLocalizedFields && canUnpublish
 
   return (
@@ -166,26 +180,26 @@ export function UnpublishButton() {
             SubMenuPopupContent={
               canUnpublishCurrentLocale
                 ? ({ close }) => {
-                  return (
-                    <PopupList.ButtonGroup>
-                      <PopupList.Button
-                        id="action-unpublish-locale"
-                        onClick={() => {
-                          setUnpublishAll(false)
-                          toggleModal(unPublishModalSlug)
-                          close()
-                        }}
-                      >
-                        {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
-                      </PopupList.Button>
-                    </PopupList.ButtonGroup>
-                  )
-                }
+                    return (
+                      <PopupList.ButtonGroup>
+                        <PopupList.Button
+                          id="action-unpublish-locale"
+                          onClick={() => {
+                            setUnpublishAll(false)
+                            toggleModal(unPublishModalSlug)
+                            close()
+                          }}
+                        >
+                          {t('version:unpublishIn', { locale: getTranslation(localeLabel, i18n) })}
+                        </PopupList.Button>
+                      </PopupList.ButtonGroup>
+                    )
+                  }
                 : undefined
             }
             type="button"
           >
-            {t('version:unpublish')}
+            {labelProp || t('version:unpublish')}
           </FormSubmit>
           <ConfirmationModal
             body={

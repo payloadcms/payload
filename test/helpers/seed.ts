@@ -51,7 +51,7 @@ export async function seedDB({
         const files = await fs.promises.readdir(dir)
         for (const file of files) {
           const filePath = path.join(dir, file)
-          await fs.promises.rm(filePath, { recursive: true, force: true })
+          await fs.promises.rm(filePath, { force: true, recursive: true })
         }
       } catch (error) {
         if (isErrorWithCode(error, 'ENOENT')) {
@@ -87,31 +87,12 @@ export async function seedDB({
     if (uploadsDirCache[snapshotKey]) {
       for (const cache of uploadsDirCache[snapshotKey]) {
         if (cache.originalDir && fs.existsSync(cache.cacheDir)) {
-          // move all files from inside uploadsDirCacheFolder to uploadsDir
-          await fs.promises
-            .readdir(cache.cacheDir, { withFileTypes: true })
-            .then(async (files) => {
-              for (const file of files) {
-                if (file.isDirectory()) {
-                  await fs.promises.mkdir(path.join(cache.originalDir, file.name), {
-                    recursive: true,
-                  })
-                  await fs.promises.copyFile(
-                    path.join(cache.cacheDir, file.name),
-                    path.join(cache.originalDir, file.name),
-                  )
-                } else {
-                  await fs.promises.copyFile(
-                    path.join(cache.cacheDir, file.name),
-                    path.join(cache.originalDir, file.name),
-                  )
-                }
-              }
-            })
-            .catch((err) => {
-              console.error('Error in operation (restoring uploads dir):', err)
-              throw err
-            })
+          try {
+            fs.cpSync(cache.cacheDir, cache.originalDir, { recursive: true })
+          } catch (err) {
+            console.error('Error in operation (restoring uploads dir):', err)
+            throw err
+          }
         }
       }
     }
@@ -153,9 +134,16 @@ export async function seedDB({
         } | null = null
         if (!uploadsDirCache[snapshotKey].find((cache) => cache.originalDir === dir)) {
           // Define new cache folder path to the OS temp directory (well a random folder inside it)
+          // Use a sanitized version of the original path to make the cache dir unique per upload dir
+          const sanitizedPath = dir.replace(/[^a-z0-9]/gi, '_')
           newObj = {
+            cacheDir: path.join(
+              os.tmpdir(),
+              `${snapshotKey}`,
+              `payload-e2e-tests-uploads-cache`,
+              sanitizedPath,
+            ),
             originalDir: dir,
-            cacheDir: path.join(os.tmpdir(), `${snapshotKey}`, `payload-e2e-tests-uploads-cache`),
           }
         }
         if (!newObj) {
@@ -170,25 +158,7 @@ export async function seedDB({
         // recursively move all files and directories from uploadsDir to uploadsDirCacheFolder
 
         try {
-          const files = await fs.promises.readdir(newObj.originalDir, { withFileTypes: true })
-
-          for (const file of files) {
-            if (file.isDirectory()) {
-              await fs.promises.mkdir(path.join(newObj.cacheDir, file.name), {
-                recursive: true,
-              })
-              await fs.promises.copyFile(
-                path.join(newObj.originalDir, file.name),
-                path.join(newObj.cacheDir, file.name),
-              )
-            } else {
-              await fs.promises.copyFile(
-                path.join(newObj.originalDir, file.name),
-                path.join(newObj.cacheDir, file.name),
-              )
-            }
-          }
-
+          fs.cpSync(newObj.originalDir, newObj.cacheDir, { recursive: true })
           uploadsDirCache[snapshotKey].push(newObj)
         } catch (e) {
           console.error('Error in operation (creating snapshot of uploads dir):', e)

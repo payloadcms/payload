@@ -67,7 +67,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
     "@types/node": "22.15.30",
-    "@types/react": "19.2.8",
+    "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },

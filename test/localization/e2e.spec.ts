@@ -28,6 +28,7 @@ import {
   openLocaleSelector,
   saveDocAndAssert,
   throttleTest,
+  waitForFormReady,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -329,6 +330,7 @@ describe('Localization', () => {
 
     test('should duplicate even if missing some localized data', async () => {
       await page.goto(urlWithRequiredLocalizedFields.create)
+      await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
@@ -762,6 +764,16 @@ describe('Localization', () => {
       )
 
       expect(isActuallyVisible).toBe(true)
+    })
+
+    test('should show locale in slate rich text field label', async () => {
+      await page.goto(urlAllFieldsLocalized.create)
+
+      const richTextLabel = page.locator('label[for="field-richTextSlate"]')
+      await expect(richTextLabel).toContainText('en')
+
+      await changeLocale(page, spanishLocale)
+      await expect(richTextLabel).toContainText('es')
     })
   })
 
