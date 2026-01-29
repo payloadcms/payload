@@ -493,4 +493,162 @@ test.describe('Import Export Plugin', () => {
       await expect(exportCount).toContainText('documents to export')
     })
   })
+
+  test.describe('Max Limit Enforcement', () => {
+    let postsWithLimitsURL: AdminUrlUtil
+    let postsWithLimitsExportURL: AdminUrlUtil
+    let postsWithLimitsImportURL: AdminUrlUtil
+
+    test.beforeAll(async () => {
+      postsWithLimitsURL = new AdminUrlUtil(serverURL, 'posts-with-limits')
+      postsWithLimitsExportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-export')
+      postsWithLimitsImportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-import')
+
+      // Create 10 test documents (more than the limit of 5)
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection: 'posts-with-limits',
+          data: { title: `E2E Limit Test Post ${i}` },
+        })
+      }
+    })
+
+    test.afterAll(async () => {
+      // Clean up test documents
+      await payload.delete({
+        collection: 'posts-with-limits',
+        where: {
+          title: { contains: 'E2E Limit Test Post' },
+        },
+      })
+    })
+
+    test('should show maxLimit in export preview and cap document count', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // The export count should show 5 (the maxLimit), not 10
+      const exportCount = page.locator('.export-preview__export-count')
+      await expect(exportCount).toContainText('5 documents to export')
+    })
+
+    test('should show limit capped warning when user limit exceeds maxLimit', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      const limitField = page.locator('input[name="limit"]')
+      await limitField.fill('10')
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const exportCount = page.locator('.export-preview__export-count')
+      await expect(exportCount).toContainText('5 documents to export')
+
+      const limitCapped = page.locator('.export-preview__limit-capped')
+      await expect(limitCapped).toBeVisible()
+      await expect(limitCapped).toContainText('Limit capped to maximum of 5')
+
+      const tableRows = page.locator('.export-preview table tbody tr')
+      await expect(tableRows).toHaveCount(5)
+    })
+
+    test('should enforce maxLimit when creating export', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await saveDocAndAssert(page, '#action-save')
+      await page.reload()
+
+      const exportFilename = page.locator('.file-details__main-detail')
+      await expect(exportFilename).toBeVisible()
+      await expect(exportFilename).toContainText('.csv')
+
+      const downloadLink = page.locator('.file-details__main-detail a')
+      await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+      const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+      const downloadPath = await download.path()
+      const content = fs.readFileSync(downloadPath, 'utf8')
+      const lines = content.split('\n').filter((line) => line.trim())
+
+      expect(lines.length).toBe(6)
+    })
+
+    test('should show warning in import preview when file exceeds maxLimit', async () => {
+      const csvContent = Array.from({ length: 10 }, (_, i) => `"E2E Import Limit Test ${i}"`).join(
+        '\n',
+      )
+      const csvFile = `title\n${csvContent}`
+
+      await page.goto(postsWithLimitsImportURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+
+      const fileInput = page.locator('input[type="file"]')
+      await fileInput.setInputFiles({
+        name: 'exceed-limit-test.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from(csvFile),
+      })
+
+      await expect(async () => {
+        await expect(page.locator('.import-preview__import-count')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const importCount = page.locator('.import-preview__import-count')
+      await expect(importCount).toContainText('10 documents to import')
+    })
+  })
 })

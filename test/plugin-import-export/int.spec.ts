@@ -6806,4 +6806,406 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
   })
+
+  describe('max limit enforcement', () => {
+    const createdPostIds: (number | string)[] = []
+
+    beforeEach(async () => {
+      // Create 10 test documents (more than the limit of 5)
+      for (let i = 0; i < 10; i++) {
+        const doc = await payload.create({
+          collection: 'posts-with-limits',
+          data: { title: `Limit Test Post ${i}` },
+        })
+        createdPostIds.push(doc.id)
+      }
+    })
+
+    afterAll(async () => {
+      // Clean up all test documents
+      if (createdPostIds.length > 0) {
+        for (const id of createdPostIds) {
+          try {
+            await payload.delete({
+              collection: 'posts-with-limits',
+              id,
+            })
+          } catch {
+            // Document may have already been deleted
+          }
+        }
+        createdPostIds.length = 0
+      }
+    })
+
+    describe('export max limit', () => {
+      it('should limit export to maxLimit when no user limit specified', async () => {
+        const exportDoc = await payload.create({
+          collection: 'posts-with-limits-export',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+          },
+        })
+
+        expect(exportDoc.filename).toBeDefined()
+
+        const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const data = await readCSV(exportPath)
+
+        expect(data).toHaveLength(5)
+      })
+
+      it('should clamp user limit to maxLimit when user limit exceeds maxLimit', async () => {
+        const exportDoc = await payload.create({
+          collection: 'posts-with-limits-export',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            limit: 100,
+          },
+        })
+
+        expect(exportDoc.filename).toBeDefined()
+
+        const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const data = await readCSV(exportPath)
+
+        expect(data).toHaveLength(5)
+      })
+
+      it('should use user limit when it is below maxLimit', async () => {
+        const exportDoc = await payload.create({
+          collection: 'posts-with-limits-export',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            limit: 3,
+          },
+        })
+
+        expect(exportDoc.filename).toBeDefined()
+
+        const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const data = await readCSV(exportPath)
+
+        expect(data).toHaveLength(3)
+      })
+
+      it('should include maxLimit in export preview response', async () => {
+        const response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const result = await response.json()
+
+        expect(result.maxLimit).toBe(5)
+        expect(result.totalDocs).toBe(5)
+      })
+
+      it('should have preview match exactly what is exported', async () => {
+        const previewResponse = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            previewLimit: 10,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const preview = await previewResponse.json()
+
+        expect(preview.maxLimit).toBe(5)
+        expect(preview.exportTotalDocs).toBe(5)
+        expect(preview.totalDocs).toBe(5)
+        expect(preview.docs).toHaveLength(5)
+
+        const exportDoc = await payload.create({
+          collection: 'posts-with-limits-export',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+          },
+        })
+
+        expect(exportDoc.filename).toBeDefined()
+
+        const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const exportedData = await readCSV(exportPath)
+
+        expect(exportedData).toHaveLength(preview.exportTotalDocs)
+        expect(exportedData).toHaveLength(5)
+      })
+
+      it('should have preview pagination respect maxLimit', async () => {
+        const page1Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            previewLimit: 3,
+            previewPage: 1,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const page1 = await page1Response.json()
+
+        expect(page1.docs).toHaveLength(3)
+        expect(page1.totalDocs).toBe(5)
+        expect(page1.totalPages).toBe(2)
+        expect(page1.hasNextPage).toBe(true)
+        expect(page1.hasPrevPage).toBe(false)
+
+        const page2Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            previewLimit: 3,
+            previewPage: 2,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const page2 = await page2Response.json()
+
+        expect(page2.docs).toHaveLength(2)
+        expect(page2.totalDocs).toBe(5)
+        expect(page2.totalPages).toBe(2)
+        expect(page2.hasNextPage).toBe(false)
+        expect(page2.hasPrevPage).toBe(true)
+        expect(page1.docs.length + page2.docs.length).toBe(5)
+      })
+    })
+
+    describe('import max limit', () => {
+      it('should reject import when document count exceeds maxLimit', async () => {
+        const csvContent = Array.from({ length: 10 }, (_, i) => `"Exceed Limit Import ${i}"`).join(
+          '\n',
+        )
+        const csv = `title\n${csvContent}`
+        const csvBuffer = Buffer.from(csv)
+
+        const importDoc = await payload.create({
+          collection: 'posts-with-limits-import',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'exceed-limit-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        expect(importDoc.status).toBe('failed')
+        expect(importDoc.summary?.imported).toBe(0)
+        expect(importDoc.summary?.issues).toBeGreaterThan(0)
+
+        const importedDocs = await payload.find({
+          collection: 'posts-with-limits',
+          where: {
+            title: { contains: 'Exceed Limit Import' },
+          },
+        })
+
+        expect(importedDocs.totalDocs).toBe(0)
+      })
+
+      it('should allow import when document count equals maxLimit', async () => {
+        const csvContent = Array.from({ length: 5 }, (_, i) => `"Exact Limit Import ${i}"`).join(
+          '\n',
+        )
+        const csv = `title\n${csvContent}`
+        const csvBuffer = Buffer.from(csv)
+
+        const importDoc = await payload.create({
+          collection: 'posts-with-limits-import',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'exact-limit-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(5)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        await payload.delete({
+          collection: 'posts-with-limits',
+          where: {
+            title: { contains: 'Exact Limit Import' },
+          },
+        })
+      })
+
+      it('should allow import when document count is below maxLimit', async () => {
+        const csvContent = Array.from({ length: 3 }, (_, i) => `"Below Limit Import ${i}"`).join(
+          '\n',
+        )
+        const csv = `title\n${csvContent}`
+        const csvBuffer = Buffer.from(csv)
+
+        const importDoc = await payload.create({
+          collection: 'posts-with-limits-import',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'below-limit-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        await payload.delete({
+          collection: 'posts-with-limits',
+          where: {
+            title: { contains: 'Below Limit Import' },
+          },
+        })
+      })
+
+      it('should include maxLimit and limitExceeded in import preview response', async () => {
+        const csvContent = Array.from({ length: 10 }, (_, i) => `"Preview Limit Test ${i}"`).join(
+          '\n',
+        )
+        const csv = `title\n${csvContent}`
+        const csvBuffer = Buffer.from(csv)
+
+        const response = await restClient.POST(`/posts-with-limits-import/preview-data`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            fileData: csvBuffer.toString('base64'),
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const result = await response.json()
+
+        expect(result.maxLimit).toBe(5)
+        expect(result.limitExceeded).toBe(true)
+        expect(result.totalDocs).toBe(10)
+      })
+
+      it('should have import preview accurately predict import outcome', async () => {
+        const exceedsLimitCsv = `title\n${Array.from({ length: 10 }, (_, i) => `"Predict Fail ${i}"`).join('\n')}`
+        const exceedsBuffer = Buffer.from(exceedsLimitCsv)
+
+        const exceedsPreview = await restClient.POST(`/posts-with-limits-import/preview-data`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            fileData: exceedsBuffer.toString('base64'),
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const exceedsResult = await exceedsPreview.json()
+
+        expect(exceedsResult.limitExceeded).toBe(true)
+        expect(exceedsResult.maxLimit).toBe(5)
+        expect(exceedsResult.totalDocs).toBe(10)
+
+        const failedImport = await payload.create({
+          collection: 'posts-with-limits-import',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            importMode: 'create',
+          },
+          file: {
+            data: exceedsBuffer,
+            mimetype: 'text/csv',
+            name: 'predict-fail.csv',
+            size: exceedsBuffer.length,
+          },
+        })
+
+        expect(failedImport.status).toBe('failed')
+
+        const withinLimitCsv = `title\n${Array.from({ length: 5 }, (_, i) => `"Predict Success ${i}"`).join('\n')}`
+        const withinBuffer = Buffer.from(withinLimitCsv)
+
+        const withinPreview = await restClient.POST(`/posts-with-limits-import/preview-data`, {
+          body: JSON.stringify({
+            collectionSlug: 'posts-with-limits',
+            format: 'csv',
+            fileData: withinBuffer.toString('base64'),
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const withinResult = await withinPreview.json()
+
+        expect(withinResult.limitExceeded).toBe(false)
+        expect(withinResult.maxLimit).toBe(5)
+        expect(withinResult.totalDocs).toBe(5)
+
+        const successImport = await payload.create({
+          collection: 'posts-with-limits-import',
+          user,
+          data: {
+            collectionSlug: 'posts-with-limits',
+            importMode: 'create',
+          },
+          file: {
+            data: withinBuffer,
+            mimetype: 'text/csv',
+            name: 'predict-success.csv',
+            size: withinBuffer.length,
+          },
+        })
+
+        expect(successImport.status).toBe('completed')
+        expect(successImport.summary?.imported).toBe(5)
+
+        await payload.delete({
+          collection: 'posts-with-limits',
+          where: {
+            title: { contains: 'Predict Success' },
+          },
+        })
+      })
+    })
+  })
 })

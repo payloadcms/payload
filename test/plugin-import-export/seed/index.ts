@@ -394,6 +394,15 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
 
+    for (let i = 0; i < 10; i++) {
+      await payload.create({
+        collection: 'posts-with-limits',
+        data: {
+          title: `Post with limit ${i}`,
+        },
+      })
+    }
+
     return true
   } catch (err) {
     console.error(err)

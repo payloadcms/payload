@@ -59,7 +59,8 @@ export type SupportedTimezones =
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | 'Pacific/Fiji'
+  | 'UTC';
 
 export interface Config {
   auth: {
@@ -73,12 +74,15 @@ export interface Config {
     'posts-exports-only': PostsExportsOnly;
     'posts-imports-only': PostsImportsOnly;
     'posts-no-jobs-queue': PostsNoJobsQueue;
+    'posts-with-limits': PostsWithLimit;
     media: Media;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
+    'posts-with-limits-export': PostsWithLimitsExport;
     imports: Import;
     'posts-import': PostsImport;
+    'posts-with-limits-import': PostsWithLimitsImport;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -93,12 +97,15 @@ export interface Config {
     'posts-exports-only': PostsExportsOnlySelect<false> | PostsExportsOnlySelect<true>;
     'posts-imports-only': PostsImportsOnlySelect<false> | PostsImportsOnlySelect<true>;
     'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
+    'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
+    'posts-with-limits-export': PostsWithLimitsExportSelect<false> | PostsWithLimitsExportSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
     'posts-import': PostsImportSelect<false> | PostsImportSelect<true>;
+    'posts-with-limits-import': PostsWithLimitsImportSelect<false> | PostsWithLimitsImportSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -441,6 +448,17 @@ export interface PostsNoJobsQueue {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits".
+ */
+export interface PostsWithLimit {
+  id: string;
+  title: string;
+  content?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -555,11 +573,56 @@ export interface PostsNoJobsQueueExport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-export".
+ */
+export interface PostsWithLimitsExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "imports".
  */
 export interface Import {
   id: string;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue' | 'media';
+  collectionSlug:
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -596,7 +659,58 @@ export interface Import {
  */
 export interface PostsImport {
   id: string;
-  collectionSlug: 'pages' | 'posts' | 'posts-exports-only' | 'posts-imports-only' | 'posts-no-jobs-queue' | 'media';
+  collectionSlug:
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'media';
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-import".
+ */
+export interface PostsWithLimitsImport {
+  id: string;
+  collectionSlug:
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -766,6 +880,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts-no-jobs-queue';
         value: string | PostsNoJobsQueue;
+      } | null)
+    | ({
+        relationTo: 'posts-with-limits';
+        value: string | PostsWithLimit;
       } | null)
     | ({
         relationTo: 'media';
@@ -965,6 +1083,16 @@ export interface PostsNoJobsQueueSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits_select".
+ */
+export interface PostsWithLimitsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1070,6 +1198,35 @@ export interface PostsNoJobsQueueExportSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-export_select".
+ */
+export interface PostsWithLimitsExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "imports_select".
  */
 export interface ImportsSelect<T extends boolean = true> {
@@ -1103,6 +1260,36 @@ export interface ImportsSelect<T extends boolean = true> {
  * via the `definition` "posts-import_select".
  */
 export interface PostsImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-import_select".
+ */
+export interface PostsWithLimitsImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
@@ -1228,6 +1415,7 @@ export interface TaskCreateCollectionExport {
     userID?: string | null;
     userCollection?: string | null;
     exportsCollection?: string | null;
+    maxLimit?: number | null;
   };
   output?: unknown;
 }
@@ -1244,12 +1432,15 @@ export interface TaskCreateCollectionImport {
       | 'posts-exports-only'
       | 'posts-imports-only'
       | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
       | 'media'
       | 'exports'
       | 'posts-export'
       | 'posts-no-jobs-queue-export'
+      | 'posts-with-limits-export'
       | 'imports'
-      | 'posts-import';
+      | 'posts-import'
+      | 'posts-with-limits-import';
     importMode?: ('create' | 'update' | 'upsert') | null;
     matchField?: string | null;
     status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -1278,6 +1469,7 @@ export interface TaskCreateCollectionImport {
     };
     format?: ('csv' | 'json') | null;
     debug?: boolean | null;
+    maxLimit?: number | null;
   };
   output?: unknown;
 }
