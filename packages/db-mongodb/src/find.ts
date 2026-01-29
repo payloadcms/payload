@@ -34,8 +34,6 @@ export const find: Find = async function find(
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const session = await getSession(this, req)
-
   let hasNearConstraint = false
 
   if (where) {
@@ -65,6 +63,8 @@ export const find: Find = async function find(
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -133,6 +133,7 @@ export const find: Find = async function find(
     draftsEnabled,
     joins,
     locale,
+    projection: paginationOptions.projection,
     query,
   })
 

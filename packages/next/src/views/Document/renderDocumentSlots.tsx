@@ -13,12 +13,14 @@ import type {
   ServerFunction,
   ServerProps,
   StaticDescription,
+  UnpublishButtonServerPropsOnly,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { hasDraftsEnabled } from 'payload/shared'
 
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
@@ -119,8 +121,22 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    const CustomStatus =
+      collectionConfig?.admin?.components?.edit?.Status ||
+      globalConfig?.admin?.components?.elements?.Status
+
+    if (CustomStatus) {
+      components.Status = RenderServerComponent({
+        Component: CustomStatus,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
   if (hasSavePermission) {
-    if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    if (hasDraftsEnabled(collectionConfig || globalConfig)) {
       const CustomPublishButton =
         collectionConfig?.admin?.components?.edit?.PublishButton ||
         globalConfig?.admin?.components?.elements?.PublishButton
@@ -133,13 +149,23 @@ export const renderDocumentSlots: (args: {
         })
       }
 
+      const CustomUnpublishButton =
+        collectionConfig?.admin?.components?.edit?.UnpublishButton ||
+        globalConfig?.admin?.components?.elements?.UnpublishButton
+
+      if (CustomUnpublishButton) {
+        components.UnpublishButton = RenderServerComponent({
+          Component: CustomUnpublishButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
+        })
+      }
+
       const CustomSaveDraftButton =
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
         globalConfig?.admin?.components?.elements?.SaveDraftButton
 
-      const draftsEnabled =
-        (collectionConfig?.versions?.drafts && !collectionConfig?.versions?.drafts?.autosave) ||
-        (globalConfig?.versions?.drafts && !globalConfig?.versions?.drafts?.autosave)
+      const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
       if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
         components.SaveDraftButton = RenderServerComponent({

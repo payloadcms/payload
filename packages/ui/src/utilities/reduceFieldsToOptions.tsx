@@ -7,7 +7,10 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
-import fieldTypes, { arrayOperators } from '../elements/WhereBuilder/field-types.js'
+import {
+  fieldTypeConditions,
+  getValidFieldOperators,
+} from '../elements/WhereBuilder/field-types.js'
 import { createNestedClientFieldPath } from '../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from './combineFieldLabel.js'
 
@@ -41,12 +44,18 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
 
+    // IMPORTANT: We DON'T mutate field.name here because the field object is shared across
+    // multiple components (WhereBuilder, GroupByBuilder, etc.). Mutating it would break
+    // permission checks and cause issues in other components that need the field name.
+    // Instead, we use a flag to determine whether to include the field name in the path.
+    let shouldIgnoreFieldName = false
+
     // Handle virtual:string fields (virtual relationships, e.g. "post.title")
     if ('virtual' in field && typeof field.virtual === 'string') {
       pathPrefix = pathPrefix ? pathPrefix + '.' + field.virtual : field.virtual
       if (fieldAffectsData(field)) {
-        // ignore virtual field names
-        field.name = ''
+        // Mark that we should ignore the field name when constructing the field path
+        shouldIgnoreFieldName = true
       }
     }
 
@@ -76,7 +85,7 @@ export const reduceFieldsToOptions = ({
                   typeof fieldPermissions === 'boolean'
                     ? fieldPermissions
                     : tabHasName(tab) && tab.name
-                      ? fieldPermissions[tab.name]?.fields || fieldPermissions[tab.name]
+                      ? fieldPermissions?.[tab.name]?.fields || fieldPermissions?.[tab.name]
                       : fieldPermissions,
                 fields: tab.fields,
                 i18n,
@@ -145,7 +154,7 @@ export const reduceFieldsToOptions = ({
             fieldPermissions:
               typeof fieldPermissions === 'boolean'
                 ? fieldPermissions
-                : fieldPermissions[field.name]?.fields || fieldPermissions[field.name],
+                : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -188,7 +197,7 @@ export const reduceFieldsToOptions = ({
           fieldPermissions:
             typeof fieldPermissions === 'boolean'
               ? fieldPermissions
-              : fieldPermissions[field.name]?.fields || fieldPermissions[field.name],
+              : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -199,7 +208,7 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
 
-    if (typeof fieldTypes[field.type] === 'object') {
+    if (typeof fieldTypeConditions[field.type] === 'object') {
       if (
         fieldIsID(field) ||
         fieldPermissions === true ||
@@ -208,10 +217,11 @@ export const reduceFieldsToOptions = ({
       ) {
         const operatorKeys = new Set()
 
-        const fieldOperators =
-          'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+        const { validOperators } = getValidFieldOperators({
+          field,
+        })
 
-        const operators = fieldOperators.reduce((acc, operator) => {
+        const operators = validOperators.reduce((acc, operator) => {
           if (!operatorKeys.has(operator.value)) {
             operatorKeys.add(operator.value)
             const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
@@ -233,13 +243,22 @@ export const reduceFieldsToOptions = ({
             })
           : localizedLabel
 
-        const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
+        // For virtual fields, we use just the pathPrefix (the virtual path) without appending the field name
+        // For regular fields, we use createNestedClientFieldPath which appends the field name to the path
+        let fieldPath: string
+        if (shouldIgnoreFieldName) {
+          fieldPath = pathPrefix
+        } else if (pathPrefix) {
+          fieldPath = createNestedClientFieldPath(pathPrefix, field)
+        } else {
+          fieldPath = field.name
+        }
 
         const formattedField: ReducedField = {
           label: formattedLabel,
           plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
           value: fieldPath,
-          ...fieldTypes[field.type],
+          ...fieldTypeConditions[field.type],
           field,
           operators,
         }

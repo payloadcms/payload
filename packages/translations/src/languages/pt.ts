@@ -80,6 +80,11 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  dashboard: {
+    addWidget: 'Adicionar Widget',
+    deleteWidget: 'Excluir widget {{id}}',
+    searchWidgets: 'Pesquisar widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',
     autosaving: 'Ocorreu um problema ao salvar automaticamente esse documento.',
@@ -117,6 +122,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
     restoringTitle:
       'Ocorreu um erro ao restaurar {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    revertingDocument: 'Ocorreu um problema ao reverter este documento.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
     unableToCopy: 'Não é possível copiar.',
@@ -339,6 +345,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     loading: 'Carregando',
     locale: 'Local',
     locales: 'Localizações',
+    lock: 'Bloquear',
     menu: 'Cardápio',
     moreOptions: 'Mais opções',
     move: 'Mova',
@@ -430,6 +437,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} movido para o lixo.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
+    unlock: 'Desbloquear',
     unsavedChanges: 'Você tem alterações não salvas. Salve ou descarte antes de continuar.',
     unsavedChangesDuplicate: 'Você tem mudanças não salvas. Você gostaria de continuar a duplicar?',
     untitled: 'Sem título',
@@ -458,7 +466,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     copyTo: 'Copiar para',
     copyToLocale: 'Copiar para localidade',
     localeToPublish: 'Local para publicar',
+    selectedLocales: 'Locais selecionados',
     selectLocaleToCopy: 'Selecione o local para copiar',
+    selectLocaleToDuplicate: 'Selecione locais para duplicar',
   },
   operators: {
     contains: 'contém',
@@ -547,6 +557,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Você está prestes a reverter as alterações desse documento para seu estado de publicação. Tem certeza?',
     aboutToUnpublish: 'Você está prestes a despublicar esse documento. Tem certeza?',
+    aboutToUnpublishIn: 'Está prestes a não publicar este documento em {{locale}}. Tem a certeza?',
     aboutToUnpublishSelection:
       'Você está prestes a cancelar a publicação de todos os {{label}} na seleção. Tem certeza?',
     autosave: 'Salvamento automático',
@@ -568,6 +579,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Atualmente visualizando',
     currentPublishedVersion: 'Versão Publicada Atual',
     draft: 'Rascunho',
+    draftHasPublishedVersion: 'Rascunho (tem versão publicada)',
     draftSavedSuccessfully: 'Rascunho salvo com sucesso.',
     lastSavedAgo: 'Última gravação há {{distance}}',
     modifiedOnly: 'Modificado apenas',
@@ -593,6 +605,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revertendo...',
     revertToPublished: 'Reverter para publicado',
+    revertUnsuccessful:
+      'Reversão não bem-sucedida. Nenhuma versão publicada anteriormente encontrada.',
     saveDraft: 'Salvar rascunho',
     scheduledSuccessfully: 'Agendado com sucesso.',
     schedulePublish: 'Agendar Publicação',
@@ -603,6 +617,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versão Específica',
     status: 'Status',
     unpublish: 'Despublicar',
+    unpublished: 'Não publicado',
+    unpublishedSuccessfully: 'Não publicado com sucesso.',
+    unpublishIn: 'Despublicar em {{locale}}',
     unpublishing: 'Despublicando...',
     version: 'Versão',
     versionAgo: 'há {{distance}}',

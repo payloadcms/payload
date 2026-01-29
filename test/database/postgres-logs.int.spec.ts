@@ -1,10 +1,10 @@
 import type { Payload } from 'payload'
 
-/* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
 import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { Post } from './payload-types.js'
 
@@ -46,7 +46,7 @@ describePostgres('database - postgres logs', () => {
     })
 
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     const result: any = await payload.db.updateOne({
       collection: 'simple',
@@ -74,7 +74,7 @@ describePostgres('database - postgres logs', () => {
     })
 
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     const result: any = await payload.db.updateOne({
       collection: 'posts',
@@ -115,7 +115,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     await payload.db.deleteMany({
       collection: 'posts',
@@ -155,7 +155,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     await payload.db.deleteMany({
       collection: 'posts',
@@ -187,7 +187,7 @@ describePostgres('database - postgres logs', () => {
         title: 'post',
       },
     })
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     await payload.db.updateOne({
       data: {

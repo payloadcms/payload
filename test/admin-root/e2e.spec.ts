@@ -40,12 +40,12 @@ test.describe('Admin Panel (Root)', () => {
       customRoutes: {
         admin: adminRoute,
       },
+      noAutoLogin: true,
       page,
       serverURL,
-      noAutoLogin: true,
     })
 
-    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
+    await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 
     await ensureCompilationIsDone({
       customRoutes: {
@@ -144,5 +144,17 @@ test.describe('Admin Panel (Root)', () => {
   test('should mount custom root views', async () => {
     await page.goto(`${url.admin}/custom-view`)
     await expect(page.locator('#custom-view')).toBeVisible()
+  })
+
+  test('should close modal on route change', async () => {
+    await page.goto(url.create)
+    const textField = page.locator('#field-text')
+    await textField.fill('updated')
+    await page.click('a[aria-label="Account"]')
+    const modal = page.locator('div.payload__modal-container')
+    await expect(modal).toBeVisible()
+
+    await page.goBack()
+    await expect(modal).toBeHidden()
   })
 })

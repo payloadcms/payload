@@ -3,6 +3,7 @@ import type { Payload, TypeWithID } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
@@ -1834,6 +1835,61 @@ describe('Joins Field', () => {
       where: { 'group.relatedPosts.title': { equals: 'my-category-title' } },
     })
 
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'group.relatedPosts.title': { equals: 'my-category-title' },
+          },
+          {
+            'group.relatedPosts.title': { exists: true },
+          },
+          {
+            'group.relatedPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with hasMany relationship multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { categories: [category.id], title: 'my-title', isFiltered: true },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'hasManyPosts.title': { equals: 'my-title' },
+          },
+          {
+            'hasManyPosts.title': { exists: true },
+          },
+          {
+            'hasManyPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
   })

@@ -1,6 +1,6 @@
 import type { Transporter } from 'nodemailer'
+import { describe, beforeEach, it, expect, Mock, vitest } from 'vitest'
 
-import { jest } from '@jest/globals'
 import nodemailer from 'nodemailer'
 
 import type { NodemailerAdapterArgs } from './index.js'
@@ -14,11 +14,11 @@ const defaultArgs: NodemailerAdapterArgs = {
 
 describe('email-nodemailer', () => {
   describe('transport verification', () => {
-    let mockedVerify: jest.Mock<Transporter['verify']>
+    let mockedVerify: Mock<Transporter['verify']>
     let mockTransport: Transporter
 
     beforeEach(() => {
-      mockedVerify = jest.fn<Transporter['verify']>()
+      mockedVerify = vitest.fn()
       mockTransport = nodemailer.createTransport({
         name: 'existing-transport',
         // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-misused-promises

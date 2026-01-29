@@ -73,6 +73,8 @@ export interface Config {
     'food-menu': FoodMenu;
     'autosave-global': AutosaveGlobal;
     relationships: Relationship;
+    notTenanted: NotTenanted;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -89,16 +91,19 @@ export interface Config {
     'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -130,15 +135,16 @@ export interface UserAuthOperations {
  * via the `definition` "tenants".
  */
 export interface Tenant {
-  id: number;
+  id: string;
   name: string;
   domain: string;
   users?: {
-    docs?: (number | User)[];
+    docs?: (string | User)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   isPublic?: boolean | null;
+  selectedLocales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -147,11 +153,11 @@ export interface Tenant {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   roles?: ('admin' | 'user')[] | null;
   tenants?:
     | {
-        tenant: number | Tenant;
+        tenant: string | Tenant;
         id?: string | null;
       }[]
     | null;
@@ -178,9 +184,10 @@ export interface User {
  * via the `definition` "food-items".
  */
 export interface FoodItem {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
+  localizedName?: string | null;
   content?: {
     root: {
       type: string;
@@ -196,6 +203,41 @@ export interface FoodItem {
     };
     [k: string]: unknown;
   } | null;
+  polymorphicRelationship?:
+    | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'food-items';
+        value: string | FoodItem;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  relationship?: (string | null) | Relationship;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted".
+ */
+export interface NotTenanted {
+  id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -204,8 +246,8 @@ export interface FoodItem {
  * via the `definition` "food-menu".
  */
 export interface FoodMenu {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: string | null;
   menuItems?:
@@ -213,7 +255,7 @@ export interface FoodMenu {
         /**
          * Automatically filtered by selected tenant
          */
-        menuItem: number | FoodItem;
+        menuItem: string | FoodItem;
         active?: boolean | null;
         id?: string | null;
       }[]
@@ -226,8 +268,8 @@ export interface FoodMenu {
  * via the `definition` "autosave-global".
  */
 export interface AutosaveGlobal {
-  id: number;
-  tenant?: (number | null) | Tenant;
+  id: string;
+  tenant?: (string | null) | Tenant;
   title: string;
   description?: string | null;
   updatedAt: string;
@@ -236,51 +278,60 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships".
+ * via the `definition` "payload-kv".
  */
-export interface Relationship {
-  id: number;
-  tenant?: (number | null) | Tenant;
-  title: string;
-  relationship?: (number | null) | Relationship;
-  updatedAt: string;
-  createdAt: string;
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'tenants';
-        value: number | Tenant;
+        value: string | Tenant;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'food-items';
-        value: number | FoodItem;
+        value: string | FoodItem;
       } | null)
     | ({
         relationTo: 'food-menu';
-        value: number | FoodMenu;
+        value: string | FoodMenu;
       } | null)
     | ({
         relationTo: 'autosave-global';
-        value: number | AutosaveGlobal;
+        value: string | AutosaveGlobal;
       } | null)
     | ({
         relationTo: 'relationships';
-        value: number | Relationship;
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -290,10 +341,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -313,7 +364,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -328,6 +379,7 @@ export interface TenantsSelect<T extends boolean = true> {
   domain?: T;
   users?: T;
   isPublic?: T;
+  selectedLocales?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -367,7 +419,9 @@ export interface UsersSelect<T extends boolean = true> {
 export interface FoodItemsSelect<T extends boolean = true> {
   tenant?: T;
   name?: T;
+  localizedName?: T;
   content?: T;
+  polymorphicRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -414,6 +468,23 @@ export interface RelationshipsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted_select".
+ */
+export interface NotTenantedSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -454,6 +525,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

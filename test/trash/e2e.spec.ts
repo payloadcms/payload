@@ -1,15 +1,20 @@
-import type { Page } from '@playwright/test'
-
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/filters/index.js'
+import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
-import { mapAsync } from 'payload'
+import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config, Page as PageType, Post } from './payload-types.js'
+import type { Config, Post } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  closeAllToasts,
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  throttleTest,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -20,18 +25,17 @@ import { usersSlug } from './collections/Users/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe } = test
 
-let page: Page
 let postsUrl: AdminUrlUtil
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 let usersUrl: AdminUrlUtil
 
-let pagesDocOne: PageType
-let postsDocOne: Post
-let postsDocTwo: Post
+let pagesDocOneID: number | string
+let postsDocOneID: number | string
+let postsDocTwoID: number | string
 let devUserID: number | string
 
 describe('Trash', () => {
@@ -42,65 +46,83 @@ describe('Trash', () => {
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
     usersUrl = new AdminUrlUtil(serverURL, usersSlug)
 
-    const context = await browser.newContext()
-    page = await context.newPage()
-
-    initPageConsoleErrorCatch(page)
-
-    await ensureCompilationIsDone({ page, serverURL })
-
-    pagesDocOne = await createPageDoc({
-      title: 'Page',
-    })
+    await ensureCompilationIsDone({ browser, serverURL })
   })
 
-  afterAll(async () => {
-    await payload.delete({
-      collection: pagesSlug,
-      id: pagesDocOne.id,
+  beforeEach(async ({ page, context }) => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'trash',
     })
+    pagesDocOneID = (
+      await payload.find({
+        collection: 'pages',
+        limit: 1,
+        depth: 0,
+        pagination: false,
+      })
+    ).docs[0]!.id
+    postsDocOneID = (
+      await payload.find({
+        collection: 'posts',
+        limit: 1,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'Post 1',
+          },
+        },
+      })
+    ).docs[0]!.id
+    postsDocTwoID = (
+      await payload.find({
+        collection: 'posts',
+        limit: 1,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'Post 2',
+          },
+        },
+      })
+    ).docs[0]!.id
+    initPageConsoleErrorCatch(page)
+    //await throttleTest({ page, context, delay: 'Slow 4G' })
+
+    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Collection view', () => {
     describe('List view', () => {
-      beforeAll(async () => {
-        postsDocOne = await createPostDoc({
-          title: 'Post',
-          _status: 'published',
-        })
-
-        postsDocTwo = await createPostDoc({
-          title: 'Post 2',
-          _status: 'published',
-        })
-      })
-
-      afterAll(async () => {
-        await payload.delete({
-          collection: postsSlug,
-          id: postsDocOne.id,
-          trash: true,
-        })
-      })
-      test('should not show trash tab in the list view of a colleciton without trash enabled', async () => {
+      test('should not show trash tab in the list view of a colleciton without trash enabled', async ({
+        page,
+      }) => {
         await page.goto(pagesUrl.list)
 
         await expect(page.locator('#trash-view-pill')).toBeHidden()
       })
 
-      test('should show trash tab in the list view of a colleciton with trash enabled', async () => {
+      test('should show trash tab in the list view of a colleciton with trash enabled', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.list)
 
         await expect(page.locator('#trash-view-pill')).toBeVisible()
       })
 
-      test('should show all posts tab in list view of a collection with trash enabled', async () => {
+      test('should show all posts tab in list view of a collection with trash enabled', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.list)
 
         await expect(page.locator('#all-posts')).toBeVisible()
       })
 
-      test('Should not show checkbox to delete permanently bulk delete modal in trash disabled collection', async () => {
+      test('Should not show checkbox to delete permanently bulk delete modal in trash disabled collection', async ({
+        page,
+      }) => {
         await page.goto(pagesUrl.list)
 
         await page.locator('.row-1 .cell-_select input').check()
@@ -109,7 +131,9 @@ describe('Trash', () => {
         await expect(page.locator('#delete-forever')).toBeHidden()
       })
 
-      test('Should show checkbox to delete permanently in bulk delete modal in trash enabled collection', async () => {
+      test('Should show checkbox to delete permanently in bulk delete modal in trash enabled collection', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.list)
 
         await page.locator('.row-1 .cell-_select input').check()
@@ -118,7 +142,9 @@ describe('Trash', () => {
         await expect(page.locator('#delete-forever')).toBeVisible()
       })
 
-      test('Bulk delete toast message should properly correspond to trash / perma delete', async () => {
+      test('Bulk delete toast message should properly correspond to trash / perma delete', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.list)
 
         await page.locator('.row-1 .cell-_select input').check()
@@ -149,55 +175,42 @@ describe('Trash', () => {
     })
 
     describe('Edit view', () => {
-      beforeAll(async () => {
-        postsDocOne = await createPostDoc({
-          title: 'Post 1',
-          _status: 'published',
-        })
-
-        postsDocTwo = await createPostDoc({
-          title: 'Post 2',
-          _status: 'published',
-        })
-      })
-
-      afterAll(async () => {
-        await payload.delete({
-          collection: postsSlug,
-          id: postsDocTwo.id,
-          trash: true,
-        })
-      })
-      test('Should not show checkbox to delete permanently doc controls delete modal in trash disabled collection', async () => {
-        await page.goto(pagesUrl.edit(pagesDocOne.id))
+      test('Should not show checkbox to delete permanently doc controls delete modal in trash disabled collection', async ({
+        page,
+      }) => {
+        await page.goto(pagesUrl.edit(pagesDocOneID))
 
         const threeDotMenu = page.locator('.doc-controls__popup')
         await expect(threeDotMenu).toBeVisible()
         await threeDotMenu.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
         await expect(page.locator('#delete-forever')).toBeHidden()
       })
 
-      test('Should show checkbox to delete permanently doc controls delete modal in trash enabled collection', async () => {
-        await page.goto(postsUrl.edit(postsDocOne.id))
+      test('Should show checkbox to delete permanently doc controls delete modal in trash enabled collection', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.edit(postsDocOneID))
 
         const threeDotMenu = page.locator('.doc-controls__popup')
         await expect(threeDotMenu).toBeVisible()
         await threeDotMenu.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
         await expect(page.locator('#delete-forever')).toBeVisible()
       })
 
-      test('Doc view delete toast message should properly correspond to trash / perma delete', async () => {
-        await page.goto(postsUrl.edit(postsDocOne.id))
+      test('Doc view delete toast message should properly correspond to trash / perma delete', async ({
+        page,
+      }) => {
+        await page.goto(postsUrl.edit(postsDocOneID))
 
         const threeDotMenuOne = page.locator('.doc-controls__popup')
         await expect(threeDotMenuOne).toBeVisible()
         await threeDotMenuOne.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
 
         // Check the checkbox to delete permanently
         await page.locator('#delete-forever').check()
@@ -208,13 +221,13 @@ describe('Trash', () => {
           'Post "Post 1" successfully deleted.',
         )
 
-        await page.goto(postsUrl.edit(postsDocTwo.id))
+        await page.goto(postsUrl.edit(postsDocTwoID))
 
         const threeDotMenuTwo = page.locator('.doc-controls__popup')
         await expect(threeDotMenuTwo).toBeVisible()
         await threeDotMenuTwo.click()
 
-        await page.locator('.doc-controls__popup #action-delete').click()
+        await page.locator('.popup__content #action-delete').click()
 
         // Skip the checkbox to delete permanently and default to trashing
 
@@ -229,36 +242,24 @@ describe('Trash', () => {
 
   describe('Trash view', () => {
     describe('List view', () => {
-      beforeEach(async () => {
-        postsDocOne = await createPostDoc({
-          title: 'Post 1',
-          _status: 'published',
-        })
-      })
-
-      afterEach(async () => {
-        await payload.delete({
-          collection: postsSlug,
-          id: postsDocOne.id,
-          trash: true,
-        })
-      })
-
-      test('Should show `Empty trash` button', async () => {
+      test('Should show `Empty trash` button', async ({ page }) => {
         await page.goto(postsUrl.trash)
 
         await expect(page.locator('#empty-trash-button')).toBeVisible()
       })
 
-      test('Should disable Empty trash button when there are no trashed docs', async () => {
+      test('Should disable Empty trash button when there are no trashed docs', async ({ page }) => {
         await page.goto(postsUrl.trash)
 
         await expect(page.locator('#empty-trash-button')).toBeDisabled()
       })
 
-      test('Should successfully trash a doc from the list view and show it in the trash view', async () => {
+      test('Should successfully trash a doc from the list view and show it in the trash view', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.list)
-        await page.locator('.row-1 .cell-_select input').check()
+        const post1Row = page.locator('.table tr:has-text("Post 1")')
+        await post1Row.locator('.cell-_select input').check()
         await page.locator('.list-selection__button[aria-label="Delete"]').click()
 
         // Skip the checkbox to delete permanently and default to trashing
@@ -272,7 +273,7 @@ describe('Trash', () => {
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
       })
 
-      test('Should show `trash` breadcrumb', async () => {
+      test('Should show `trash` breadcrumb', async ({ page }) => {
         await page.goto(postsUrl.trash)
 
         await expect(page.locator('.step-nav.app-header__step-nav .step-nav__last')).toContainText(
@@ -280,7 +281,7 @@ describe('Trash', () => {
         )
       })
 
-      test('Should show `restore` and `delete` buttons', async () => {
+      test('Should show `restore` and `delete` buttons', async ({ page }) => {
         const trashedDoc = await createTrashedPostDoc({
           title: 'Trashed Post',
         })
@@ -316,7 +317,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should successfully perma delete all trashed docs with empty trash button', async () => {
+      test('Should successfully perma delete all trashed docs with empty trash button', async ({
+        page,
+      }) => {
         await mapAsync([...Array(3)], async () => {
           await createTrashedPostDoc({
             title: 'Ready for delete',
@@ -324,6 +327,8 @@ describe('Trash', () => {
         })
 
         await page.goto(postsUrl.trash)
+        // Wait until hydration is complete
+        await wait(1000)
 
         await page.locator('#empty-trash-button').click()
 
@@ -339,7 +344,9 @@ describe('Trash', () => {
         )
       })
 
-      test('Should successfully restore all trashed docs with restore button as draft by default', async () => {
+      test('Should successfully restore all trashed docs with restore button as draft by default', async ({
+        page,
+      }) => {
         await mapAsync([...Array(2)], async () => {
           await createTrashedPostDoc({
             title: 'Ready for restore',
@@ -410,7 +417,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should successfully restore all trashed docs with restore button as published', async () => {
+      test('Should successfully restore all trashed docs with restore button as published', async ({
+        page,
+      }) => {
         await mapAsync([...Array(2)], async () => {
           await createTrashedPostDoc({
             title: 'Ready for restore',
@@ -483,7 +492,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should successfully delete permanently all selected trashed docs with delete button', async () => {
+      test('Should successfully delete permanently all selected trashed docs with delete button', async ({
+        page,
+      }) => {
         await mapAsync([...Array(2)], async () => {
           await createTrashedPostDoc({
             title: 'Ready for delete from delete button',
@@ -543,7 +554,7 @@ describe('Trash', () => {
           .toBe(0)
       })
 
-      test('Should properly filter trashed docs through where query builder', async () => {
+      test('Should properly filter trashed docs through where query builder', async ({ page }) => {
         const createdDocs: Post[] = []
 
         // Create 2 "Test Post" docs
@@ -594,14 +605,7 @@ describe('Trash', () => {
         })
       })
 
-      afterEach(async () => {
-        await payload.delete({
-          collection: postsSlug,
-          id: trashedPostDocOne.id,
-          trash: true,
-        })
-      })
-      test('Should show `trash` and doc name in breadcrumbs', async () => {
+      test('Should show `trash` and doc name in breadcrumbs', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         await expect(page.locator('.step-nav.app-header__step-nav a').nth(2)).toContainText('Trash')
@@ -610,13 +614,15 @@ describe('Trash', () => {
         )
       })
 
-      test('should show trash banner in the edit view', async () => {
+      test('should show trash banner in the edit view', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         await expect(page.locator('.trash-banner')).toBeVisible()
       })
 
-      test('Should navigate back to the trash view using the `trash` breadcrumb', async () => {
+      test('Should navigate back to the trash view using the `trash` breadcrumb', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         await page.locator('.step-nav.app-header__step-nav a').nth(2).click()
@@ -624,14 +630,14 @@ describe('Trash', () => {
         await expect(page).toHaveURL(/\/admin\/collections\/posts\/trash/)
       })
 
-      test('Should not render dot menu popup', async () => {
+      test('Should not render dot menu popup', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const threeDotMenu = page.locator('.doc-controls__popup')
         await expect(threeDotMenu).toBeHidden()
       })
 
-      test('Should render status block with correct status', async () => {
+      test('Should render status block with correct status', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const statusBlock = page.locator('.doc-controls__status')
@@ -639,7 +645,9 @@ describe('Trash', () => {
         await expect(statusBlock).toContainText('Previously Published')
       })
 
-      test('Should render Permanently Delete and Restore buttons in doc controls', async () => {
+      test('Should render Permanently Delete and Restore buttons in doc controls', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const permanentlyDeleteButton = page.locator(
@@ -651,7 +659,9 @@ describe('Trash', () => {
         await expect(restoreButton).toBeVisible()
       })
 
-      test('should successfully permanently delete a trashed doc with Permanently Delete button', async () => {
+      test('should successfully permanently delete a trashed doc with Permanently Delete button', async ({
+        page,
+      }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const permanentlyDeleteButton = page.locator(
@@ -698,7 +708,7 @@ describe('Trash', () => {
           .toBe(0)
       })
 
-      test('should successfully restore a trashed doc with Restore button', async () => {
+      test('should successfully restore a trashed doc with Restore button', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         const restoreButton = page.locator('.doc-controls__controls #action-restore')
@@ -743,7 +753,7 @@ describe('Trash', () => {
           .toBe(true)
       })
 
-      test('Should render fields as read-only', async () => {
+      test('Should render fields as read-only', async ({ page }) => {
         await page.goto(postsUrl.trashEdit(trashedPostDocOne.id))
 
         // Check that the title field is read-only
@@ -751,7 +761,9 @@ describe('Trash', () => {
         await expect(titleField).toBeDisabled()
       })
 
-      test('Should allow viewing of the Versions tab view from trash edit view', async () => {
+      test('Should allow viewing of the Versions tab view from trash edit view', async ({
+        page,
+      }) => {
         const incomingTrashedDoc = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -767,6 +779,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
 
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
@@ -797,7 +810,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should navigate back to the trashed doc view using the post name breadcrumb from the Versions tab view', async () => {
+      test('Should navigate back to the trashed doc view using the post name breadcrumb from the Versions tab view', async ({
+        page,
+      }) => {
         const incomingTrashedDoc = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -813,6 +828,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -848,7 +864,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should allow viewing of a specific version from the versions tab in the trash document view', async () => {
+      test('Should allow viewing of a specific version from the versions tab in the trash document view', async ({
+        page,
+      }) => {
         const incomingTrashedDoc = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -864,6 +882,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -901,7 +920,7 @@ describe('Trash', () => {
         })
       })
 
-      test('Should allow viewing of the API tab view from trash edit view', async () => {
+      test('Should allow viewing of the API tab view from trash edit view', async ({ page }) => {
         const incomingTrashedDoc = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -917,6 +936,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -946,7 +966,9 @@ describe('Trash', () => {
         })
       })
 
-      test('Should navigate back to the trashed doc view using the post name breadcrumb from the API tab view', async () => {
+      test('Should navigate back to the trashed doc view using the post name breadcrumb from the API tab view', async ({
+        page,
+      }) => {
         const incomingTrashedDoc = await createPostDoc({
           title: 'Post 1',
           _status: 'published',
@@ -962,6 +984,7 @@ describe('Trash', () => {
         await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
           '1 Post moved to trash.',
         )
+        await closeAllToasts(page)
         // Navigate to the trash view
         await page.locator('#trash-view-pill').click()
 
@@ -998,13 +1021,15 @@ describe('Trash', () => {
     })
   })
   describe('Auth enabled collection', () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       // Ensure Dev user exists and store its ID
       const { docs } = await payload.find({
         collection: usersSlug,
         limit: 1,
         where: { name: { equals: 'Dev' } },
         trash: true,
+        depth: 0,
+        pagination: false,
       })
       if (docs.length === 0) {
         throw new Error('Dev user not found! Ensure test seed data includes a Dev user.')
@@ -1032,13 +1057,17 @@ describe('Trash', () => {
       }
     }
 
-    test('Should show trash tab in the list view of a collection with auth enabled', async () => {
+    test('Should show trash tab in the list view of a collection with auth enabled', async ({
+      page,
+    }) => {
       await page.goto(usersUrl.list)
 
       await expect(page.locator('#trash-view-pill')).toBeVisible()
     })
 
-    test('Should successfully trash a user from the list view and show it in the trash view', async () => {
+    test('Should successfully trash a user from the list view and show it in the trash view', async ({
+      page,
+    }) => {
       await page.goto(usersUrl.list)
 
       await page.locator('.row-1 .cell-_select input').check()
@@ -1054,7 +1083,7 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
     })
 
-    test('Should be able to access trashed doc edit view from the trash view', async () => {
+    test('Should be able to access trashed doc edit view from the trash view', async ({ page }) => {
       await ensureDevUserTrashed()
 
       await page.goto(usersUrl.trash)
@@ -1065,7 +1094,7 @@ describe('Trash', () => {
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
     })
 
-    test('Should properly disable auth fields in the trashed user edit view', async () => {
+    test('Should properly disable auth fields in the trashed user edit view', async ({ page }) => {
       await ensureDevUserTrashed()
 
       await page.goto(usersUrl.trash)
@@ -1079,7 +1108,7 @@ describe('Trash', () => {
       await expect(page.locator('#field-roles .rs__input')).toBeDisabled()
     })
 
-    test('Should properly restore trashed user as draft', async () => {
+    test('Should properly restore trashed user as draft', async ({ page }) => {
       await ensureDevUserTrashed()
 
       await page.goto(usersUrl.trash)
@@ -1103,21 +1132,14 @@ describe('Trash', () => {
   })
 })
 
-async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
-  return payload.create({
-    collection: pagesSlug,
-    data,
-  }) as unknown as Promise<PageType>
-}
-
-async function createPostDoc(data: Partial<Post>): Promise<Post> {
+async function createPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
     collection: postsSlug,
     data,
   }) as unknown as Promise<Post>
 }
 
-async function createTrashedPostDoc(data: Partial<Post>): Promise<Post> {
+async function createTrashedPostDoc(data: RequiredDataFromCollectionSlug<'posts'>): Promise<Post> {
   return payload.create({
     collection: postsSlug,
     data: {

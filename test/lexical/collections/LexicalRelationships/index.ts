@@ -15,6 +15,7 @@ export const LexicalRelationshipsFields: CollectionConfig = {
   access: {
     read: () => true,
   },
+  versions: { drafts: true },
   fields: [
     {
       name: 'richText',
@@ -46,6 +47,22 @@ export const LexicalRelationshipsFields: CollectionConfig = {
           ...defaultEditorFeatures,
           UploadFeature({
             disabledCollections: ['uploads'],
+          }),
+        ],
+      }),
+    },
+    {
+      name: 'richTextLocalized',
+      type: 'richText',
+      localized: true,
+      editor: lexicalEditor({
+        features: [
+          ...defaultEditorFeatures,
+          RelationshipFeature({
+            enabledCollections: ['array-fields'],
+          }),
+          UploadFeature({
+            enabledCollections: ['uploads'],
           }),
         ],
       }),

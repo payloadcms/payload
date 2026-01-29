@@ -40,7 +40,7 @@ This page is divided into two parts: first, the settings of the Blocks Field, an
 
 ## Block Field
 
-### Config Options
+### Block Config Options
 
 | Option                 | Description                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -65,7 +65,7 @@ This page is divided into two parts: first, the settings of the Blocks Field, an
 
 _\* An asterisk denotes that a property is required._
 
-### Admin Options
+### Block Admin Options
 
 To customize the appearance and behavior of the Blocks Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
@@ -148,17 +148,62 @@ Blocks are defined as separate configs of their own.
   trivializes their reusability.
 </Banner>
 
-| Option                     | Description                                                                                                                                                                         |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
-| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
-| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.     |
-| **`imageURL`**             | Provide a custom image thumbnail to help editors identify this block in the Admin UI.                                                                                               |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                    |
-| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
-| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
-| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
+| Option                     | Description                                                                                                                                                                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                                                                                        |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                                                                                     |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.                                                                 |
+| **`imageURL`**             | Provide a custom image thumbnail URL to help editors identify this block in the Admin UI. The image will be displayed in a 3:2 aspect ratio container and cropped using `object-fit: cover` if needed. [More details](#block-image-guidelines). |
+| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                                                                                |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                             |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                                                                                    |
+| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                                                                                           |
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                       |
+
+_\* An asterisk denotes that a property is required._
+
+### Block Image Guidelines
+
+When providing a custom thumbnail via `imageURL`, it's important to understand how images are displayed in the Admin UI to ensure they look correct.
+
+**Aspect Ratio and Cropping**:
+
+- The image container uses a **3:2 aspect ratio** (e.g., 480x320 pixels)
+- Images are scaled using `object-fit: cover`, which means:
+  - Images that don't match 3:2 will be **cropped** to fill the container
+  - The image maintains its aspect ratio while being scaled
+  - Cropping is centered, removing edges as needed
+
+**Display Contexts**:
+
+1. **Block Selection Drawer**: Images appear as thumbnails in a responsive grid when editors add blocks
+2. **Lexical Editor**: Images are scaled down to 20x20px icons in menus and toolbars
+
+**Recommendations**:
+
+- Use images with a **3:2 aspect ratio** to avoid unwanted cropping (e.g., 480x320, 600x400, 900x600)
+- Keep important visual content **centered** in your image, as edges may be cropped
+- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
+- Always include `imageAltText` for accessibility
+
+**Example**:
+
+```ts
+const QuoteBlock: Block = {
+  slug: 'quote',
+  imageURL: 'https://example.com/thumbnails/quote-block-480x320.jpg',
+  imageAltText: 'Quote block with text and attribution',
+  fields: [
+    {
+      name: 'quoteText',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+```
+
+If no `imageURL` is provided, a default placeholder graphic is displayed automatically.
 
 ### Admin Options
 

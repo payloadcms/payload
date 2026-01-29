@@ -74,14 +74,15 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
       await updateCondition({
+        type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null ? '' : debouncedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })
@@ -98,6 +99,7 @@ export const Condition: React.FC<Props> = (props) => {
     async (field: Option<string>) => {
       setInternalValue(undefined)
       await updateCondition({
+        type: 'field',
         andIndex,
         field: reducedFields.find((option) => option.value === field.value),
         operator,
@@ -124,6 +126,7 @@ export const Condition: React.FC<Props> = (props) => {
       }
 
       await updateCondition({
+        type: 'operator',
         andIndex,
         field: reducedField,
         operator: operator.value,

@@ -9,7 +9,8 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
-  '**/jest.config.js',
+  '**/vitest.config.ts',
+  '**/vitest.setup.ts',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
@@ -23,7 +24,6 @@ export const defaultESLintIgnores = [
   'next-env.d.ts',
   '**/app',
   'src/**/*.spec.ts',
-  '**/jest.setup.js',
   'packages/payload/rollup.dts.config.mjs',
 ]
 
@@ -58,6 +58,12 @@ export const rootEslintConfig = [
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
       'payload/proper-payload-logger-usage': 'error',
+    },
+  },
+  {
+    files: ['packages/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'error',
     },
   },
   {

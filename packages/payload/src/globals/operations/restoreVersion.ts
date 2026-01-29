@@ -117,7 +117,6 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         autosave: false,
         createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
         globalSlug: globalConfig.slug,
-        parent: id,
         req,
         updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
         versionData: result,

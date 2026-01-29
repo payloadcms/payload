@@ -12,7 +12,7 @@ import type {
 } from 'payload'
 
 import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
-import { isNumber } from 'payload/shared'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'
@@ -99,6 +99,8 @@ const buildTableState = async (
     importMap: payload.importMap,
     user,
   })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   const permissions = await getAccessResults({ req })
 

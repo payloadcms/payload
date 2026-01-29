@@ -35,6 +35,7 @@ jobs:
             test
           scopes: |
             cpa
+            claude
             db-\*
             db-d1-sqlite
             db-mongodb
@@ -48,6 +49,8 @@ jobs:
             email-resend
             eslint
             graphql
+            kv
+            kv-redis
             live-preview
             live-preview-react
             live-preview-vue
@@ -58,6 +61,7 @@ jobs:
             plugin-ecommerce
             plugin-form-builder
             plugin-import-export
+            plugin-mcp
             plugin-multi-tenant
             plugin-nested-docs
             plugin-redirects

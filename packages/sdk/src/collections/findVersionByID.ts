@@ -1,16 +1,17 @@
-import type { ApplyDisableErrors, SelectType, TypeWithVersion } from 'payload'
+import type {
+  ApplyDisableErrors,
+  CollectionSlug,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+  TypeWithVersion,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type {
-  CollectionSlug,
-  DataFromCollectionSlug,
-  PayloadGeneratedTypes,
-  PopulateType,
-  TypedLocale,
-} from '../types.js'
+import type { DataFromCollectionSlug, PopulateType } from '../types.js'
 
 export type FindVersionByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
 > = {
@@ -63,7 +64,7 @@ export type FindVersionByIDOptions<
 }
 
 export async function findVersionByID<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
 >(
@@ -79,17 +80,13 @@ export async function findVersionByID<
       path: `/${options.collection}/versions/${options.id}`,
     })
 
-    if (response.ok) {
-      return response.json()
-    } else {
-      throw new Error()
-    }
-  } catch {
+    return response.json()
+  } catch (err) {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw new Error(`Error retrieving the version document ${options.collection}/${options.id}`)
+    throw err
   }
 }

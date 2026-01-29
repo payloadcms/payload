@@ -1,8 +1,9 @@
 import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
+import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -14,13 +15,14 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-import { buildAfterOperation } from './utils.js'
-
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 export type Arguments = {
   collection: Collection
   currentDepth?: number
@@ -32,11 +34,12 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
-export const restoreVersionOperation = async <TData extends TypeWithID = any>(
+export const restoreVersionOperation = async <
+  TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
+>(
   args: Arguments,
 ): Promise<TData> => {
   const {
@@ -59,18 +62,11 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'restoreVersion',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'restoreVersion',
+    })
 
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
@@ -89,13 +85,13 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       where: { id: { equals: id } },
     })
 
-    const [rawVersion] = versionDocs
+    const [rawVersionToRestore] = versionDocs
 
-    if (!rawVersion) {
+    if (!rawVersionToRestore) {
       throw new NotFound(req.t)
     }
 
-    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersion
+    const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
 
     // /////////////////////////////////////
     // Access
@@ -118,7 +114,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     }
 
     // Get the document from the non versioned collection
-    const doc = await req.payload.db.findOne(findOneArgs)
+    const doc = await req.payload.db.findOne<TData>(findOneArgs)
 
     if (!doc && !hasWherePolicy) {
       throw new NotFound(req.t)
@@ -165,7 +161,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       collection: collectionConfig,
       context: req.context,
       depth: 0,
-      doc: deepCopyObjectSimple(versionToRestoreWithLocales),
+      doc: deepCopyObjectSimple(rawVersionToRestore.version),
       draft: draftArg,
       fallbackLocale: null,
       global: null,
@@ -175,17 +171,15 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       showHiddenFields: true,
     })
 
-    let data = deepCopyObjectSimple(prevVersionDoc)
-
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    data = await beforeValidate({
+    let data = await beforeValidate({
       id: parentDocID,
       collection: collectionConfig,
       context: req.context,
-      data,
+      data: deepCopyObjectSimple(prevVersionDoc),
       doc: originalDoc,
       global: null,
       operation: 'update',
@@ -244,8 +238,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
       operation: 'update',
       overrideAccess,
       req,
-      skipValidation:
-        draftArg && collectionConfig.versions.drafts && !collectionConfig.versions.drafts.validate,
+      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////
@@ -262,16 +255,18 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    result = await req.payload.db.updateOne({
-      id: parentDocID,
-      collection: collectionConfig.slug,
-      data: result,
-      req,
-      select,
-    })
+    if (!draftArg) {
+      result = await req.payload.db.updateOne({
+        id: parentDocID,
+        collection: collectionConfig.slug,
+        data: result,
+        req,
+        select,
+      })
+    }
 
     // /////////////////////////////////////
-    // Save `previousDoc` as a version after restoring
+    // Save restored doc as a new version
     // /////////////////////////////////////
 
     result = await saveVersion({

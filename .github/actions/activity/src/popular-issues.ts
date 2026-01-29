@@ -8,7 +8,7 @@ import { SlimIssue } from './types'
 
 const DAYS_WINDOW = 90
 
-function generateText(issues: SlimIssue[]) {
+function generateText(issues: { issue: SlimIssue; linkedPRUrl?: string }[]) {
   let text = `*A list of the top 10 issues sorted by the most reactions over the last ${DAYS_WINDOW} days:*\n\n`
 
   // Format date as "X days ago"
@@ -20,11 +20,31 @@ function generateText(issues: SlimIssue[]) {
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
   }
 
-  issues.forEach((issue) => {
-    text += `• ${issue?.reactions?.total_count || 0} 👍  ${issue.title} - <${issue.html_url}|#${issue.number}>, ${formattedDaysAgo(issue.created_at)}\n`
+  issues.forEach(({ issue, linkedPRUrl }) => {
+    text += `• ${issue?.reactions?.total_count || 0} 👍  ${issue.title} - <${issue.html_url}|#${issue.number}>, ${formattedDaysAgo(issue.created_at)}`
+    if (linkedPRUrl) {
+      text += ` - <${linkedPRUrl}|:link: Linked PR>`
+    }
+    text += `\n`
   })
 
   return text.trim()
+}
+
+async function getLinkedPRUrl(
+  octoClient: ReturnType<typeof getOctokit>,
+  issue: SlimIssue,
+): Promise<string | undefined> {
+  const { data: events } = await octoClient.rest.issues.listEventsForTimeline({
+    owner: 'payloadcms',
+    repo: 'payload',
+    issue_number: issue.number,
+  })
+
+  const crossReferencedEvent = events.find(
+    (event) => event.event === 'cross-referenced' && event.source?.issue?.pull_request,
+  )
+  return crossReferencedEvent?.source?.issue?.html_url
 }
 
 export async function run() {
@@ -47,7 +67,14 @@ export async function run() {
       return
     }
 
-    const messageText = generateText(data.items)
+    const issuesWithLinkedPRs = await Promise.all(
+      data.items.map(async (issue) => {
+        const linkedPRUrl = await getLinkedPRUrl(octoClient, issue)
+        return { issue, linkedPRUrl }
+      }),
+    )
+
+    const messageText = generateText(issuesWithLinkedPRs)
     console.log(messageText)
 
     await slackClient.chat.postMessage({

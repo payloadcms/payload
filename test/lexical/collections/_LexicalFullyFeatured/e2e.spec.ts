@@ -23,7 +23,9 @@ const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
 // PLEASE do not reset the database or perform any operations that modify it in this file.
-test.describe.configure({ mode: 'parallel' })
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+//test.describe.configure({ mode: 'parallel' })
 
 describe('Lexical Fully Featured', () => {
   let lexical: LexicalHelpers
@@ -32,9 +34,7 @@ describe('Lexical Fully Featured', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ serverURL, browser })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -44,7 +44,7 @@ describe('Lexical Fully Featured', () => {
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
     await lexical.slashCommand('myblock')
-    await expect(lexical.editor.locator('.lexical-block')).toBeVisible()
+    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
     await lexical.slashCommand('relationship', true, 'Relationship')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.save('drawer')
@@ -62,6 +62,29 @@ describe('Lexical Fully Featured', () => {
     await expect(lexical.decorator).toHaveCount(3)
     const paragraph = lexical.editor.locator('> p')
     await expect(paragraph).toHaveText('')
+  })
+
+  test('ensure upload node can be aligned', async ({ page }) => {
+    await lexical.slashCommand('upload')
+    await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
+    await lexical.drawer.getByText('Paste URL').click()
+    const url =
+      'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
+    await lexical.drawer.locator('.file-field__remote-file').fill(url)
+    await lexical.drawer.getByText('Add file').click()
+    await lexical.save('drawer')
+    const img = lexical.editor.locator('img').first()
+    await img.click()
+    const imgBoxBeforeCenter = await img.boundingBox()
+    await expect(() => {
+      expect(imgBoxBeforeCenter?.x).toBeLessThan(150)
+    }).toPass({ timeout: 100 })
+    await page.getByLabel('align dropdown').click()
+    await page.getByLabel('Align Center').click()
+    const imgBoxAfterCenter = await img.boundingBox()
+    await expect(() => {
+      expect(imgBoxAfterCenter?.x).toBeGreaterThan(150)
+    }).toPass({ timeout: 100 })
   })
 
   test('ControlOrMeta+A inside input should select all the text inside the input', async ({
@@ -154,7 +177,7 @@ describe('Lexical Fully Featured', () => {
 
   test('ensure code block can be created using slash commands', async ({ page }) => {
     await lexical.slashCommand('code')
-    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 
@@ -174,7 +197,7 @@ describe('Lexical Fully Featured', () => {
     page,
   }) => {
     await page.keyboard.type('```ts ')
-    const codeBlock = lexical.editor.locator('.lexical-block-Code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 
@@ -193,7 +216,7 @@ describe('Lexical Fully Featured', () => {
     page,
   }) => {
     await lexical.slashCommand('payloadcode')
-    const codeBlock = lexical.editor.locator('.lexical-block-PayloadCode')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-PayloadCode')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
 
@@ -207,6 +230,70 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
+
+  test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello ')
+    await lexical.slashCommand('inline')
+    await lexical.drawer.locator('input').first().fill('World')
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+    const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock')
+    await expect(inlineBlock).toHaveCount(1)
+
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.press('ControlOrMeta+C')
+    // needed for some reason
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(1000)
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ControlOrMeta+V')
+    await expect(inlineBlock).toHaveCount(2)
+    await inlineBlock.nth(1).locator('button').first().click()
+    await expect(lexical.drawer).toBeVisible()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
+    await lexical.drawer.locator('input').first().fill('World changed')
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
+    await lexical.drawer.getByText('Save changes').click()
+    await inlineBlock.nth(0).locator('button').first().click()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
+    await lexical.drawer.getByLabel('Close').click()
+    await expect(lexical.drawer).toBeHidden()
+    await inlineBlock.nth(1).locator('button').first().click()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
+  })
+
+  test('copy pasting a inline block within node selection should not duplicate the inline block id', async ({
+    page,
+  }) => {
+    await page.keyboard.type('Hello ')
+    await lexical.slashCommand('inline')
+    await lexical.drawer.locator('input').first().fill('World')
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+    const inlineBlock = lexical.editor.locator('.LexicalEditorTheme__inlineBlock')
+    await expect(inlineBlock).toHaveCount(1)
+    await inlineBlock.click()
+    await expect(lexical.drawer).toBeHidden()
+    await page.keyboard.press('ControlOrMeta+C')
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ControlOrMeta+V')
+    await expect(inlineBlock).toHaveCount(2)
+    await inlineBlock.nth(1).locator('button').first().click()
+    await expect(lexical.drawer).toBeVisible()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
+    await lexical.drawer.locator('input').first().fill('World changed')
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
+    await lexical.drawer.getByText('Save changes').click()
+    await expect(lexical.drawer).toBeHidden()
+    await inlineBlock.nth(0).locator('button').first().click()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World')
+    await lexical.drawer.getByLabel('Close').click()
+    await expect(lexical.drawer).toBeHidden()
+    await inlineBlock.nth(1).locator('button').first().click()
+    await expect(lexical.drawer.locator('input').first()).toHaveValue('World changed')
+  })
 })
 
 describe('Lexical Fully Featured, admin panel in RTL', () => {
@@ -216,9 +303,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)

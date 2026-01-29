@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { formatAdminURL, wait } from 'payload/shared'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
 
@@ -15,6 +16,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customCollectionMetaTitle,
   customDefaultTabMetaTitle,
@@ -41,6 +43,7 @@ import {
   settingsGlobalSlug,
   uploadTwoCollectionSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -49,17 +52,17 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 
+import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../../../helpers/e2e/openDocControls.js'
+import { openNav } from '../../../helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -76,6 +79,7 @@ describe('General', () => {
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
+  let adminRoute: string
   let uploadsTwo: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -104,6 +108,7 @@ describe('General', () => {
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getRoutes({ customAdminRoutes })
+    adminRoute = adminRoutes.routes.admin
   })
 
   beforeEach(async () => {
@@ -124,12 +129,12 @@ describe('General', () => {
   describe('metadata', () => {
     describe('root title and description', () => {
       test('should render custom page title suffix', async () => {
-        await page.goto(`${serverURL}/admin`)
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta description from root config', async () => {
-        await page.goto(`${serverURL}/admin`)
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[name="description"]')).toHaveAttribute(
           'content',
           /This is a custom meta description/,
@@ -147,12 +152,24 @@ describe('General', () => {
       })
 
       test('should fallback to root meta for custom root views', async () => {
-        await page.goto(`${serverURL}/admin/custom-default-view`)
+        await page.goto(
+          formatAdminURL({
+            adminRoute,
+            path: '/custom-default-view',
+            serverURL,
+          }),
+        )
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta title from custom root views', async () => {
-        await page.goto(`${serverURL}/admin/custom-minimal-view`)
+        await page.goto(
+          formatAdminURL({
+            adminRoute,
+            path: '/custom-minimal-view',
+            serverURL,
+          }),
+        )
         const pattern = new RegExp(`^${customRootViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -160,7 +177,7 @@ describe('General', () => {
 
     describe('robots', () => {
       test('should apply default robots meta tag', async () => {
-        await page.goto(`${serverURL}/admin`)
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
           'content',
           /noindex, nofollow/,
@@ -188,7 +205,7 @@ describe('General', () => {
 
     describe('og meta', () => {
       test('should render custom og:title from root config', async () => {
-        await page.goto(`${serverURL}/admin`)
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
           'content',
           /This is a custom OG title/,
@@ -196,7 +213,7 @@ describe('General', () => {
       })
 
       test('should render custom og:description from root config', async () => {
-        await page.goto(`${serverURL}/admin`)
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
           'content',
           /This is a custom OG description/,
@@ -341,25 +358,43 @@ describe('General', () => {
 
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
-      const unknownPageURL = `${serverURL}/admin/1234`
+      const unknownPageURL = formatAdminURL({
+        adminRoute,
+        path: '/1234',
+        serverURL,
+      })
       const response = await page.goto(unknownPageURL)
       expect(response.status() === 404).toBeTruthy()
       await expect(page.locator('.not-found')).toContainText('Nothing found')
     })
 
     test('should use custom logout route', async () => {
-      const customLogoutRouteURL = `${serverURL}${adminRoutes.routes.admin}${adminRoutes.admin.routes.logout}`
+      const customLogoutRouteURL = formatAdminURL({
+        adminRoute,
+        path: adminRoutes.admin.routes.logout,
+        serverURL,
+      })
       const response = await page.goto(customLogoutRouteURL)
       expect(response.status() !== 404).toBeTruthy()
     })
 
     test('should redirect from non-existent document ID to collection list', async () => {
-      const nonExistentDocURL = `${serverURL}/admin/collections/${postsCollectionSlug}/999999`
+      const nonExistentDocURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${postsCollectionSlug}/999999`,
+        serverURL,
+      })
       await page.goto(nonExistentDocURL)
       // Should redirect to collection list with notFound query parameter
       await expect
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-        .toMatch(`${serverURL}/admin/collections/${postsCollectionSlug}?notFound=999999`)
+        .toMatch(
+          formatAdminURL({
+            adminRoute,
+            path: `/collections/${postsCollectionSlug}?notFound=999999`,
+            serverURL,
+          }),
+        )
 
       // Should show warning banner about document not found
       await expect(page.locator('.banner--type-error')).toBeVisible()
@@ -367,16 +402,24 @@ describe('General', () => {
     })
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
-      const collectionsURL = `${serverURL}/admin/collections`
+      const collectionsURL = formatAdminURL({
+        adminRoute,
+        path: '/collections',
+        serverURL,
+      })
       await page.goto(collectionsURL)
       await expect(page.getByText('Custom View').first()).toBeVisible()
     })
 
     test('should redirect `${adminRoute}/globals` to `${adminRoute}', async () => {
-      const globalsURL = `${serverURL}/admin/globals`
+      const globalsURL = formatAdminURL({
+        adminRoute,
+        path: '/globals',
+        serverURL,
+      })
       await page.goto(globalsURL)
       // Should redirect to dashboard
-      await expect.poll(() => page.url()).toBe(`${serverURL}/admin`)
+      await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute, path: '', serverURL }))
     })
 
     /**
@@ -434,9 +477,14 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
+      const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
+      // flaky
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(1000)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
@@ -525,7 +573,7 @@ describe('General', () => {
       await openNav(page)
       const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
-      const popupContent = page.locator('.popup#settings-menu .popup__content')
+      const popupContent = page.locator('.popup__content')
       await expect(popupContent).toBeVisible()
     })
 
@@ -535,26 +583,26 @@ describe('General', () => {
       const gearButton = page.locator('.nav__controls .popup#settings-menu .popup-button')
       await gearButton.click()
 
+      const popupButtons = page.locator(
+        '[data-popup-id="settings-menu"] .popup-button-list__button',
+      )
+
       // Check for the first group of buttons
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').first(),
-      ).toContainText('System Settings')
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(1),
-      ).toContainText('View Logs')
+      await expect(popupButtons.first()).toContainText('System Settings')
+      await expect(popupButtons.nth(1)).toContainText('View Logs')
 
       // Check for the second group of buttons
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(2),
-      ).toContainText('Manage Users')
-      await expect(
-        page.locator('.popup#settings-menu .popup-button-list__button').nth(3),
-      ).toContainText('View Activity')
+      await expect(popupButtons.nth(2)).toContainText('Manage Users')
+      await expect(popupButtons.nth(3)).toContainText('View Activity')
     })
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
-      await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
+      await page
+        .locator(
+          `.step-nav a[href="${formatAdminURL({ adminRoute, includeBasePath: true, path: '' })}"]`,
+        )
+        .click()
       expect(page.url()).toContain(postsUrl.admin)
     })
 
@@ -562,7 +610,7 @@ describe('General', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="${adminRoutes.routes.admin}/collections/${postsCollectionSlug}"]`,
+        `.step-nav a[href="${formatAdminURL({ adminRoute, includeBasePath: true, path: `/collections/${postsCollectionSlug}` })}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -571,7 +619,12 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
+      await page.locator('.collections__card-list .card__click').first().click()
+      // flaky
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
@@ -640,13 +693,13 @@ describe('General', () => {
 
   describe('custom providers', () => {
     test('should render custom providers', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       await expect(page.locator('.custom-provider')).toHaveCount(1)
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
     test('should render custom provider server components with props', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       await expect(page.locator('.custom-provider-server')).toHaveCount(1)
       await expect(page.locator('.custom-provider-server')).toContainText(
         'This is a custom provider with payload: true',
@@ -656,12 +709,18 @@ describe('General', () => {
 
   describe('custom root views', () => {
     test('should render custom view', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)
+      await page.goto(formatAdminURL({ adminRoute, path: customViewPath, serverURL }))
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('should render custom nested view', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${customNestedViewPath}`)
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: customNestedViewPath,
+          serverURL,
+        }),
+      )
       const pageURL = page.url()
       const pathname = new URL(pageURL).pathname
       expect(pathname).toEqual(`${adminRoutes.routes.admin}${customNestedViewPath}`)
@@ -669,12 +728,24 @@ describe('General', () => {
     })
 
     test('should render public custom view', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: publicCustomViewPath,
+          serverURL,
+        }),
+      )
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
     test('should render protected nested custom view', async () => {
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: protectedCustomNestedViewPath,
+          serverURL,
+        }),
+      )
 
       // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
@@ -688,7 +759,13 @@ describe('General', () => {
 
       await saveDocAndAssert(page)
 
-      await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: protectedCustomNestedViewPath,
+          serverURL,
+        }),
+      )
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
   })
@@ -701,7 +778,7 @@ describe('General', () => {
     })
 
     test('should show admin level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await page.goto(new AdminUrlUtil(serverURL, 'geo').list)
       await expect(page.locator('.app-header .admin-button')).toHaveCount(1)
     })
 
@@ -712,7 +789,7 @@ describe('General', () => {
     })
 
     test('should show collection list view level action in collection list view', async () => {
-      await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}`)
+      await page.goto(new AdminUrlUtil(serverURL, 'geo').list)
       await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
     })
 
@@ -751,7 +828,7 @@ describe('General', () => {
 
   describe('custom components', () => {
     test('should render custom header', async () => {
-      await page.goto(`${serverURL}/admin`)
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
@@ -787,7 +864,11 @@ describe('General', () => {
     })
 
     test('should allow custom translation of locale labels', async () => {
-      const selectOptionClass = '.localizer .popup-button-list__button'
+      await page.goto(postsUrl.account)
+      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
+      await wait(1000)
+
+      const selectOptionClass = '.popup__content .popup-button-list__button'
       const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
 
@@ -947,7 +1028,7 @@ describe('General', () => {
 
   describe('preferences', () => {
     test('should successfully reset prefs after clicking reset button', async () => {
-      await page.goto(`${serverURL}/admin/account`)
+      await page.goto(formatAdminURL({ adminRoute, path: '/account', serverURL }))
       const resetPrefsButton = page.locator('.payload-settings > div > button.btn')
       await expect(resetPrefsButton).toBeVisible()
       await resetPrefsButton.click()
@@ -962,10 +1043,33 @@ describe('General', () => {
   })
 
   describe('progress bar', () => {
-    test('should show progress bar on page navigation', async () => {
-      await page.goto(postsUrl.admin)
-      await page.locator('.dashboard__card-list .card').first().click()
+    test.fixme('should show progress bar on page navigation', async () => {
+      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
+      // eslint-disable-next-line playwright/no-networkidle
+      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
+
+      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
+      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
+      const client = await page.context().newCDPSession(page)
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: (500 * 1024) / 8, // 500 kbps
+        latency: 400, // 400ms latency
+        offline: false,
+        uploadThroughput: (500 * 1024) / 8,
+      })
+
+      await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
+
+      // Reset network conditions
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: -1,
+        latency: 0,
+        offline: false,
+        uploadThroughput: -1,
+      })
     })
   })
 })

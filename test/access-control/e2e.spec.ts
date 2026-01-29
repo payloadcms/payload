@@ -3,7 +3,7 @@ import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -17,12 +17,14 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { login } from '../helpers/e2e/auth/login.js'
 import { openListFilters } from '../helpers/e2e/filters/index.js'
 import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
 import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
@@ -45,6 +47,7 @@ import {
   userRestrictedCollectionSlug,
   userRestrictedGlobalSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -61,6 +64,7 @@ let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
   let page: Page
   let url: AdminUrlUtil
+  let usersUrl: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
   let unrestrictedURL: AdminUrlUtil
   let readOnlyCollectionUrl: AdminUrlUtil
@@ -81,6 +85,7 @@ describe('Access Control', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     url = new AdminUrlUtil(serverURL, slug)
+    usersUrl = new AdminUrlUtil(serverURL, 'users')
     restrictedUrl = new AdminUrlUtil(serverURL, fullyRestrictedSlug)
     richTextUrl = new AdminUrlUtil(serverURL, 'rich-text')
     unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug)
@@ -98,7 +103,7 @@ describe('Access Control', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
     await login({ page, serverURL })
   })
@@ -140,6 +145,87 @@ describe('Access Control', () => {
       await page.goto(url.account)
       await expect(page.locator('#field-roles')).toBeHidden()
     })
+
+    test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
+      async function waitForFormState(action: 'reload' | 'save') {
+        await assertNetworkRequests(
+          page,
+          '/admin/collections/field-restricted-update-based-on-data',
+          async () => {
+            if (action === 'save') {
+              await saveDocAndAssert(page)
+            } else {
+              await page.reload()
+            }
+          },
+          {
+            allowedNumberOfRequests: action === 'save' ? 2 : 1,
+            minimumNumberOfRequests: action === 'save' ? 2 : 1,
+          },
+        )
+      }
+      // Reproduces a bug where the shape of the `data` object passed to the field update access control function is incorrect
+      // after saving the document, and correct on initial load.
+
+      await payload.delete({
+        collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const collectionURL = new AdminUrlUtil(serverURL, 'field-restricted-update-based-on-data')
+
+      // Create document via UI, to test if the field's readOnly state is correct throughout the entire lifecycle of the document.
+
+      await page.goto(collectionURL.create)
+
+      const restrictedField = page.locator('#field-restricted')
+      const isRestrictedCheckbox = page.locator('#field-isRestricted')
+
+      await expect(restrictedField).toBeEnabled()
+
+      await isRestrictedCheckbox.check()
+      await expect(isRestrictedCheckbox).toBeChecked()
+
+      await waitForFormState('save')
+      await expect(restrictedField).toBeDisabled()
+
+      await waitForFormState('reload')
+      await expect(restrictedField).toBeDisabled()
+
+      await isRestrictedCheckbox.uncheck()
+      await expect(isRestrictedCheckbox).not.toBeChecked()
+
+      await waitForFormState('save')
+      await expect(restrictedField).toBeEnabled()
+
+      await isRestrictedCheckbox.check()
+      await expect(isRestrictedCheckbox).toBeChecked()
+
+      await waitForFormState('save')
+
+      // Important: keep all the wait's, so that tests don't accidentally pass due to flashing of the field's readOnly state.
+      // While the new results are still coming in.
+      // The issue starts here, where saving a document without reload does not update the field's state from enabled to disabled,
+      // because the data object passed to the update access control function is incorrect.
+      await expect(restrictedField).toBeDisabled()
+
+      await waitForFormState('reload')
+
+      await expect(restrictedField).toBeDisabled()
+
+      await payload.delete({
+        collection: 'field-restricted-update-based-on-data',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
   })
 
   describe('rich text', () => {
@@ -175,7 +261,7 @@ describe('Access Control', () => {
       await expect(async () => {
         const isAttached = page.locator('#field-group1 .rich-text-lexical--read-only')
         await expect(isAttached).toBeHidden()
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
       await expect(page.locator('#field-group1 #field-group1__text')).toBeEnabled()
 
       // Click on button with text Tab1
@@ -253,7 +339,7 @@ describe('Access Control', () => {
       await expect(async () => {
         const isAttached = page.locator('#field-group .rich-text-lexical--read-only')
         await expect(isAttached).toBeHidden()
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
       await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
 
       await expect(
@@ -324,7 +410,6 @@ describe('Access Control', () => {
 
       await page.goto(restrictedUrl.list)
 
-      // eslint-disable-next-line payload/no-flaky-assertions
       expect(errors).not.toHaveLength(0)
     })
 
@@ -403,8 +488,7 @@ describe('Access Control', () => {
       await page.locator('#field-name').fill('name')
       await expect(page.locator('#field-name')).toHaveValue('name')
       await expect(page.locator('#action-save')).toBeVisible()
-      await page.locator('#action-save').click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await saveDocAndAssert(page)
       await expect(page.locator('#action-save')).toBeHidden()
       await expect(page.locator('#field-name')).toBeDisabled()
     })
@@ -458,16 +542,14 @@ describe('Access Control', () => {
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill('anonymous@email.com')
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
 
         await page.goto(userRestrictedCollectionURL.create)
         await expect(page.locator('#field-name')).toBeVisible()
         await page.locator('#field-name').fill(devUser.email)
-        await page.locator('#action-save').click()
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+        await saveDocAndAssert(page)
         await expect(page.locator('#field-name')).toBeEnabled()
         await expect(page.locator('#action-save')).toBeVisible()
       })
@@ -537,7 +619,7 @@ describe('Access Control', () => {
       })
 
       test('should restrict access based on user settings', async () => {
-        const url = `${serverURL}/admin/globals/settings`
+        const url = formatAdminURL({ adminRoute: '/admin', path: '/globals/settings', serverURL })
         await page.goto(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()
@@ -566,8 +648,8 @@ describe('Access Control', () => {
       })
 
       await payload.update({
-        collection: restrictedVersionsAdminPanelSlug,
         id: existingDoc.id,
+        collection: restrictedVersionsAdminPanelSlug,
         data: {
           hidden: true,
         },
@@ -613,6 +695,35 @@ describe('Access Control', () => {
       await saveDocAndAssert(page)
       await openDocControls(page)
       await expect(page.locator('#action-delete')).toBeVisible()
+    })
+
+    test('can only unlock self when admin', async () => {
+      await page.goto(usersUrl.list)
+
+      const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
+      const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
+
+      // Wait for hydration
+      await wait(1000)
+
+      // Ensure admin user cannot unlock other users
+      await adminUserRow.locator('.cell-id a').click()
+      await page.waitForURL(`**/collections/users/**`)
+
+      const unlockButton = page.locator('#force-unlock')
+      await expect(unlockButton).toBeVisible()
+      await unlockButton.click()
+      await expect(page.locator('.payload-toast-container')).toContainText('Successfully unlocked')
+
+      await page.goto(usersUrl.list)
+
+      // Wait for hydration
+      await wait(1000)
+
+      // Ensure non-admin user cannot see unlock button
+      await nonAdminUserRow.locator('.cell-id a').click()
+      await page.waitForURL(`**/collections/users/**`)
+      await expect(page.locator('#force-unlock')).toBeHidden()
     })
   })
 
@@ -662,6 +773,9 @@ describe('Access Control', () => {
     test('public users should not have access to access admin', async () => {
       await page.goto(url.logout)
 
+      const client = new RESTClient({ defaultSlug: 'users', serverURL })
+      await client.logout()
+
       const user = await payload.login({
         collection: publicUsersSlug,
         data: {
@@ -673,15 +787,13 @@ describe('Access Control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          value: user.token,
           domain: 'localhost',
-          path: '/',
           httpOnly: true,
+          path: '/',
           secure: true,
+          value: user.token,
         },
       ])
-
-      await page.reload()
 
       await page.goto(url.admin)
 
@@ -1315,6 +1427,223 @@ describe('Access Control', () => {
       })
     })
 
+    describe('virtual fields', () => {
+      test('should show virtual field in filter dropdown when collection has field with access control', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field should be visible in the filter dropdown
+        const virtualFieldOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Field Name',
+        })
+        await expect(virtualFieldOption).toBeVisible()
+      })
+
+      test('should show virtual field in groupBy dropdown when collection has field with access control', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field should be visible in the groupBy dropdown
+        const virtualFieldOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Field Name',
+        })
+        await expect(virtualFieldOption).toBeVisible()
+      })
+
+      test('should show nested fields within virtual group field in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Nested fields within the virtual group should be visible
+        const virtualGroupTitleOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Title',
+        })
+        await expect(virtualGroupTitleOption).toBeVisible()
+
+        const virtualGroupDescriptionOption = initialField.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Description',
+        })
+        await expect(virtualGroupDescriptionOption).toBeVisible()
+      })
+
+      test('should show nested fields within virtual group field in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Nested fields within the virtual group should be visible
+        const virtualGroupTitleOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Title',
+        })
+        await expect(virtualGroupTitleOption).toBeVisible()
+
+        const virtualGroupDescriptionOption = field.locator('.rs__option', {
+          hasText: 'Unrestricted Virtual Group Info > Description',
+        })
+        await expect(virtualGroupDescriptionOption).toBeVisible()
+      })
+
+      test('should show virtual field nested inside group in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field nested inside contactInfo group should be visible
+        const nestedVirtualFieldOption = initialField.locator('.rs__option', {
+          hasText: 'Contact Info > Virtual Contact Name',
+        })
+        await expect(nestedVirtualFieldOption).toBeVisible()
+      })
+
+      test('should show virtual field nested inside group in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Virtual field nested inside contactInfo group should be visible
+        const nestedVirtualFieldOption = field.locator('.rs__option', {
+          hasText: 'Contact Info > Virtual Contact Name',
+        })
+        await expect(nestedVirtualFieldOption).toBeVisible()
+      })
+
+      test('should hide top-level virtual field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
+        await expect(
+          initialField.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+        ).toBeHidden()
+      })
+
+      test('should hide top-level virtual field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
+        await expect(
+          field.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+        ).toBeHidden()
+      })
+
+      test('should hide nested virtual field with read: false in filter dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        await openListFilters(page, {})
+        await page.locator('.where-builder__add-first-filter').click()
+
+        const initialField = page.locator('.condition__field')
+        await initialField.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = initialField.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field nested in contactInfo should be hidden
+        await expect(
+          initialField.locator('.rs__option', {
+            hasText: 'Contact Info > Restricted Virtual Contact Info',
+          }),
+        ).toBeHidden()
+      })
+
+      test('should hide nested virtual field with read: false in groupBy dropdown', async () => {
+        await page.goto(readRestrictedUrl.list)
+        const { groupByContainer } = await openGroupBy(page)
+
+        const field = groupByContainer.locator('#group-by--field-select')
+        await field.click()
+
+        // Wait for dropdown options to load
+        const visibleOption = field.locator('.rs__option', {
+          hasText: 'Visible Top Level',
+        })
+        await expect(visibleOption).toBeVisible()
+
+        // Restricted virtual field nested in contactInfo should be hidden
+        await expect(
+          field.locator('.rs__option', {
+            hasText: 'Contact Info > Restricted Virtual Contact Info',
+          }),
+        ).toBeHidden()
+      })
+    })
+
     describe('default list view columns', () => {
       test('should not render column for top-level field with read: false by default', async () => {
         await page.goto(readRestrictedUrl.list)
@@ -1401,25 +1730,17 @@ describe('Access Control', () => {
       const doc = await payload.create({
         collection: blocksFieldAccessSlug,
         data: {
-          title: 'Test Document',
-          editableBlocks: [
-            {
-              blockType: 'testBlock',
-              title: 'Editable Block Title',
-              content: 'Editable block content',
-            },
-          ],
-          readOnlyBlocks: [
-            {
-              blockType: 'testBlock2',
-              title: 'Read-Only Block Title',
-              content: 'Read-only block content',
-            },
-          ],
           editableBlockRefs: [
             {
               blockType: 'titleblock',
               title: 'Editable Block Reference Title',
+            },
+          ],
+          editableBlocks: [
+            {
+              blockType: 'testBlock',
+              content: 'Editable block content',
+              title: 'Editable Block Title',
             },
           ],
           readOnlyBlockRefs: [
@@ -1428,21 +1749,29 @@ describe('Access Control', () => {
               title: 'Read-Only Block Reference Title',
             },
           ],
+          readOnlyBlocks: [
+            {
+              blockType: 'testBlock2',
+              content: 'Read-only block content',
+              title: 'Read-Only Block Title',
+            },
+          ],
           tabReadOnlyTest: {
-            tabReadOnlyBlocks: [
-              {
-                blockType: 'testBlock3',
-                title: 'Tab Read-Only Block Title',
-                content: 'Tab read-only block content',
-              },
-            ],
             tabReadOnlyBlockRefs: [
               {
                 blockType: 'titleblock',
                 title: 'Tab Read-Only Block Reference Title',
               },
             ],
+            tabReadOnlyBlocks: [
+              {
+                blockType: 'testBlock3',
+                content: 'Tab read-only block content',
+                title: 'Tab Read-Only Block Title',
+              },
+            ],
           },
+          title: 'Test Document',
         },
       })
 

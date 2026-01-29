@@ -3,6 +3,7 @@ import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import {
   $applyNodeReplacement,
@@ -90,6 +91,12 @@ export class ServerBlockNode extends DecoratorBlockNode {
 
   static isInline(): false {
     return false
+  }
+
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.block)
+    return element
   }
 
   override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {

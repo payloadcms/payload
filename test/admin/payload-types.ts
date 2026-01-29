@@ -74,6 +74,7 @@ export interface Config {
     'hidden-collection': HiddenCollection;
     'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
+    'custom-document-controls': CustomDocumentControl;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
     'reorder-tabs': ReorderTab;
@@ -98,6 +99,8 @@ export interface Config {
     'list-view-select-api': ListViewSelectApi;
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
+    localized: Localized;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -111,6 +114,7 @@ export interface Config {
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
     'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
+    'custom-document-controls': CustomDocumentControlsSelect<false> | CustomDocumentControlsSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
     'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
@@ -135,6 +139,8 @@ export interface Config {
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
+    localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -142,11 +148,13 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
     'hidden-global': HiddenGlobal;
     'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
+    'custom-global-document-controls': CustomGlobalDocumentControl;
     'custom-global-views-one': CustomGlobalViewsOne;
     'custom-global-views-two': CustomGlobalViewsTwo;
     'group-globals-one': GroupGlobalsOne;
@@ -158,6 +166,7 @@ export interface Config {
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'custom-global-document-controls': CustomGlobalDocumentControlsSelect<false> | CustomGlobalDocumentControlsSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
     'custom-global-views-two': CustomGlobalViewsTwoSelect<false> | CustomGlobalViewsTwoSelect<true>;
     'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
@@ -345,6 +354,17 @@ export interface CollectionNoApiView {
   id: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls".
+ */
+export interface CustomDocumentControl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -624,6 +644,7 @@ export interface ListViewSelectApi {
 export interface Virtual {
   id: string;
   virtualTitleFromPost?: string | null;
+  textField?: string | null;
   virtualText?: string | null;
   post?: (string | null) | Post;
   updatedAt: string;
@@ -636,6 +657,34 @@ export interface Virtual {
 export interface NoTimestamp {
   id: string;
   title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized".
+ */
+export interface Localized {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -671,6 +720,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-no-api-view';
         value: string | CollectionNoApiView;
+      } | null)
+    | ({
+        relationTo: 'custom-document-controls';
+        value: string | CustomDocumentControl;
       } | null)
     | ({
         relationTo: 'custom-views-one';
@@ -767,6 +820,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'no-timestamps';
         value: string | NoTimestamp;
+      } | null)
+    | ({
+        relationTo: 'localized';
+        value: string | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -959,6 +1016,16 @@ export interface NotInViewCollectionSelect<T extends boolean = true> {
 export interface CollectionNoApiViewSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls_select".
+ */
+export interface CustomDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1215,6 +1282,7 @@ export interface ListViewSelectApiSelect<T extends boolean = true> {
  */
 export interface VirtualsSelect<T extends boolean = true> {
   virtualTitleFromPost?: T;
+  textField?: T;
   virtualText?: T;
   post?: T;
   updatedAt?: T;
@@ -1226,6 +1294,24 @@ export interface VirtualsSelect<T extends boolean = true> {
  */
 export interface NoTimestampsSelect<T extends boolean = true> {
   title?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_select".
+ */
+export interface LocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1296,6 +1382,17 @@ export interface Global {
   id: string;
   title?: string | null;
   sidebarField?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls".
+ */
+export interface CustomGlobalDocumentControl {
+  id: string;
+  title?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1386,6 +1483,17 @@ export interface GlobalNoApiViewSelect<T extends boolean = true> {
 export interface GlobalSelect<T extends boolean = true> {
   title?: T;
   sidebarField?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls_select".
+ */
+export interface CustomGlobalDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -21,7 +21,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   const {
     admin = {},
     clientFeatures,
-    featureClientImportMap,
+    featureClientImportMap = {},
     featureClientSchemaMap,
     field,
     lexicalEditorConfig = defaultEditorLexicalConfig,
@@ -39,7 +39,7 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
     }
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
-    for (const [_featureKey, clientFeature] of Object.entries(clientFeatures)) {
+    for (const clientFeature of Object.values(clientFeatures)) {
       if (!clientFeature.clientFeatureProvider) {
         continue
       }
@@ -47,10 +47,6 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
         clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
       ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
     }
-
-    const finalLexicalEditorConfig = lexicalEditorConfig
-      ? lexicalEditorConfig
-      : defaultEditorLexicalConfig
 
     const resolvedClientFeatures = loadClientFeatures({
       config,
@@ -60,22 +56,22 @@ export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
       schemaPath: schemaPath ?? field.name,
       unSanitizedEditorConfig: {
         features: featureProvidersLocal,
-        lexical: finalLexicalEditorConfig,
+        lexical: lexicalEditorConfig,
       },
     })
 
     setFinalSanitizedEditorConfig(
-      sanitizeClientEditorConfig(resolvedClientFeatures, finalLexicalEditorConfig, admin),
+      sanitizeClientEditorConfig(resolvedClientFeatures, lexicalEditorConfig, admin),
     )
   }, [
-    lexicalEditorConfig,
     admin,
-    finalSanitizedEditorConfig,
     clientFeatures,
+    config,
     featureClientImportMap,
     featureClientSchemaMap,
     field,
-    config,
+    finalSanitizedEditorConfig,
+    lexicalEditorConfig,
     schemaPath,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 

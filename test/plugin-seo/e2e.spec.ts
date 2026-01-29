@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { wait } from 'payload/shared'
@@ -17,16 +19,20 @@ import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 
 let url: AdminUrlUtil
 let page: Page
 let id: string
+let serverURL: string
 
 describe('SEO Plugin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { payload, serverURL: serverURLFromInit } = await initPayloadE2ENoConfig<Config>({
+      dirname,
+    })
+    serverURL = serverURLFromInit
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
@@ -59,6 +65,10 @@ describe('SEO Plugin', () => {
     id = createdPage.id
   })
 
+  beforeEach(async () => {
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
   describe('Core functionality', () => {
     test('Config tab should be merged in correctly', async () => {
       await page.goto(url.edit(id))
@@ -69,6 +79,7 @@ describe('SEO Plugin', () => {
     })
 
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
+      await page.goto(url.edit(id))
       const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaTitleClass = '#field-meta__title'
@@ -97,6 +108,16 @@ describe('SEO Plugin', () => {
     }) */
 
     test('Indicator should be orangered and characters counted', async () => {
+      await page.goto(url.edit(id))
+      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+      const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+
+      const secondTab = page.locator(contentTabsClass).nth(1)
+      await secondTab.click()
+
+      const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
+      await autoGenButton.click()
+
       const indicatorClass =
         '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(2) > div:nth-child(3) > div > div:nth-child(3) > div'
       const indicatorLabelClass =
@@ -164,6 +185,42 @@ describe('SEO Plugin', () => {
       await wait(600)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('SEO fields should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.edit(id))
+      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+
+      const secondTab = page.locator(contentTabsClass).nth(1)
+      await secondTab.click()
+
+      const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['#field-meta'],
+        page,
+        testInfo,
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('SEO fields inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.edit(id))
+      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
+
+      const secondTab = page.locator(contentTabsClass).nth(1)
+      await secondTab.click()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        selector: '#field-meta',
+        testInfo,
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
     })
   })
 })

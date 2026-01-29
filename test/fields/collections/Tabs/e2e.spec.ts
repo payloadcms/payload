@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -77,7 +79,9 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)
     await page.locator('#field-numberInRow').fill(numberInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(300)
 
@@ -98,7 +102,8 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
     await page.locator('#field-textInRow').fill(textInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(500)
 
@@ -126,7 +131,7 @@ describe('Tabs', () => {
 
   test('should render array data within named tabs', async () => {
     await navigateToDoc(page, url)
-    await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Name")')
+    await switchTab(page, '.tabs-field__tab-button:text-is("Tab with Name")')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
@@ -137,12 +142,7 @@ describe('Tabs', () => {
     await wait(200)
 
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
-    const button = page.locator(conditionalTabSelector)
-    await expect(
-      async () => await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/),
-    ).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/)
 
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()
@@ -194,6 +194,9 @@ describe('Tabs', () => {
   test('should save preferences for tab order', async () => {
     await page.goto(url.list)
 
+    // Wait for hydration
+    await wait(1000)
+
     const firstItem = page.locator('.cell-id a').nth(0)
     const href = await firstItem.getAttribute('href')
     await firstItem.click()
@@ -210,6 +213,36 @@ describe('Tabs', () => {
 
     await expect(async () => await expect(tab2).toHaveClass(/--active/)).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('.tabs-field__tabs').first().waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Tab fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('.tabs-field__tabs').first().waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
     })
   })
 })

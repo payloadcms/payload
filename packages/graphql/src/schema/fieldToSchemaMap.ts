@@ -49,7 +49,7 @@ import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
-import { resolveSelect} from '../utilities/select.js'
+import { resolveSelect } from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
 import { isFieldNullable } from './isFieldNullable.js'
 import { withNullableType } from './withNullableType.js'
@@ -57,7 +57,11 @@ import { withNullableType } from './withNullableType.js'
 function formattedNameResolver({
   field,
   ...rest
-}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<any, Context, any> {
+}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<
+  any,
+  Context,
+  any
+> {
   if ('name' in field) {
     if (formatName(field.name) !== field.name) {
       return {
@@ -438,6 +442,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         if (Array.isArray(collection)) {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
+        }
+
+        if (count && limit === 0) {
+          return await req.payload.count({
+            collection,
+            overrideAccess: false,
+            req,
+            where: fullWhere,
+          })
         }
 
         const { docs, totalDocs } = await req.payload.find({
@@ -973,6 +986,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     let type
     let relationToType = null
 
+    const graphQLCollections = config.collections.filter(
+      (collectionConfig) => collectionConfig.graphQL !== false,
+    )
+
     if (Array.isArray(relationTo)) {
       relationToType = new GraphQLEnumType({
         name: `${relationshipName}_RelationTo`,
@@ -1073,39 +1090,44 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           const createPopulationPromise = async (relatedDoc, i) => {
             let id = relatedDoc
             let collectionSlug = field.relationTo
+            const isValidGraphQLCollection = isRelatedToManyCollections
+              ? graphQLCollections.some((collection) => collectionSlug.includes(collection.slug))
+              : graphQLCollections.some((collection) => collectionSlug === collection.slug)
 
-            if (isRelatedToManyCollections) {
-              collectionSlug = relatedDoc.relationTo
-              id = relatedDoc.value
-            }
-
-            const result = await context.req.payloadDataLoader.load(
-              createDataloaderCacheKey({
-                collectionSlug,
-                currentDepth: 0,
-                depth: 0,
-                docID: id,
-                draft,
-                fallbackLocale,
-                locale,
-                overrideAccess: false,
-                select,
-                showHiddenFields: false,
-                transactionID: context.req.transactionID,
-              }),
-            )
-
-            if (result) {
+            if (isValidGraphQLCollection) {
               if (isRelatedToManyCollections) {
-                results.push({
-                  relationTo: collectionSlug,
-                  value: {
-                    ...result,
-                    collection: collectionSlug,
-                  },
-                })
-              } else {
-                results.push(result)
+                collectionSlug = relatedDoc.relationTo
+                id = relatedDoc.value
+              }
+
+              const result = await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  select,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
+
+              if (result) {
+                if (isRelatedToManyCollections) {
+                  results.push({
+                    relationTo: collectionSlug,
+                    value: {
+                      ...result,
+                      collection: collectionSlug,
+                    },
+                  })
+                } else {
+                  results.push(result)
+                }
               }
             }
           }
@@ -1127,34 +1149,36 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         }
 
         if (id) {
-          const relatedDocument = await context.req.payloadDataLoader.load(
-            createDataloaderCacheKey({
-              collectionSlug: relatedCollectionSlug,
-              currentDepth: 0,
-              depth: 0,
-              docID: id,
-              draft,
-              fallbackLocale,
-              locale,
-              overrideAccess: false,
-              select,
-              showHiddenFields: false,
-              transactionID: context.req.transactionID,
-            }),
-          )
+          if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
+            const relatedDocument = await context.req.payloadDataLoader.load(
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug as string,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
+                fallbackLocale,
+                locale,
+                overrideAccess: false,
+                select,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
+            )
 
-          if (relatedDocument) {
-            if (isRelatedToManyCollections) {
-              return {
-                relationTo: relatedCollectionSlug,
-                value: {
-                  ...relatedDocument,
-                  collection: relatedCollectionSlug,
-                },
+            if (relatedDocument) {
+              if (isRelatedToManyCollections) {
+                return {
+                  relationTo: relatedCollectionSlug,
+                  value: {
+                    ...relatedDocument,
+                    collection: relatedCollectionSlug,
+                  },
+                }
               }
-            }
 
-            return relatedDocument
+              return relatedDocument
+            }
           }
 
           return null

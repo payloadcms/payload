@@ -6,6 +6,9 @@ export const ConditionalURL: CollectionConfig = {
     livePreview: {
       url: ({ data }) => (data?.enabled ? '/live-preview/static' : null),
     },
+    preview: (doc) => {
+      return doc?.enabled ? '/live-preview/static' : null
+    },
   },
   fields: [
     {

@@ -1,7 +1,7 @@
 import type { AllOperations, PayloadRequest } from '../types/index.js'
 import type { Permissions, SanitizedPermissions } from './types.js'
 
-import { getEntityPolicies } from '../utilities/getEntityPolicies.js'
+import { getEntityPermissions } from '../utilities/getEntityPermissions/getEntityPermissions.js'
 import { sanitizePermissions } from '../utilities/sanitizePermissions.js'
 
 type GetAccessResultsArgs = {
@@ -27,7 +27,7 @@ export async function getAccessResults({
   } else {
     results.canAccessAdmin = false
   }
-  const blockPolicies = {}
+  const blockReferencesPermissions = {}
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
@@ -45,14 +45,15 @@ export async function getAccessResults({
         collectionOperations.push('readVersions')
       }
 
-      const collectionPolicy = await getEntityPolicies({
-        type: 'collection',
-        blockPolicies,
+      const collectionPermissions = await getEntityPermissions({
+        blockReferencesPermissions,
         entity: collection,
+        entityType: 'collection',
+        fetchData: false,
         operations: collectionOperations,
         req,
       })
-      results.collections![collection.slug] = collectionPolicy
+      results.collections![collection.slug] = collectionPermissions
     }),
   )
 
@@ -64,14 +65,15 @@ export async function getAccessResults({
         globalOperations.push('readVersions')
       }
 
-      const globalPolicy = await getEntityPolicies({
-        type: 'global',
-        blockPolicies,
+      const globalPermissions = await getEntityPermissions({
+        blockReferencesPermissions,
         entity: global,
+        entityType: 'global',
+        fetchData: false,
         operations: globalOperations,
         req,
       })
-      results.globals![global.slug] = globalPolicy
+      results.globals![global.slug] = globalPermissions
     }),
   )
 

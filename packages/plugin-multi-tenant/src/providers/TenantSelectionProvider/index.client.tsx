@@ -4,6 +4,7 @@ import type { OptionObject } from 'payload'
 
 import { toast, useAuth, useConfig } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext } from 'react'
 
 import { generateCookie } from '../../utilities/generateCookie.js'
@@ -171,7 +172,10 @@ export const TenantSelectionProviderClient = ({
   const syncTenants = React.useCallback(async () => {
     try {
       const req = await fetch(
-        `${config.serverURL}${config.routes.api}/${tenantsCollectionSlug}/populate-tenant-options`,
+        formatAdminURL({
+          apiRoute: config.routes.api,
+          path: `/${tenantsCollectionSlug}/populate-tenant-options`,
+        }),
         {
           credentials: 'include',
           method: 'GET',
@@ -191,7 +195,7 @@ export const TenantSelectionProviderClient = ({
     } catch (e) {
       toast.error(`Error fetching tenants`)
     }
-  }, [config.serverURL, config.routes.api, tenantsCollectionSlug, userID])
+  }, [config.routes.api, tenantsCollectionSlug, userID])
 
   const updateTenants = React.useCallback<ContextType['updateTenants']>(
     ({ id, label }) => {
@@ -224,10 +228,11 @@ export const TenantSelectionProviderClient = ({
         if (tenantOptions.length > 0) {
           setTenantOptions([])
         }
+        router.refresh()
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions, initialValue])
+  }, [userID, userChanged, syncTenants, tenantOptions, initialValue, router])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.

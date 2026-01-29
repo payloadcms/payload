@@ -76,8 +76,10 @@ export interface Config {
     'force-select': ForceSelect;
     upload: Upload;
     rels: Rel;
+    'relationships-blocks': RelationshipsBlock;
     'custom-ids': CustomId;
     users: User;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -93,15 +95,18 @@ export interface Config {
     'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
+    'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {
     'global-post': GlobalPost;
     'force-select-global': ForceSelectGlobal;
@@ -142,7 +147,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -182,17 +187,17 @@ export interface Post {
   };
   unnamedTabText?: string | null;
   unnamedTabNumber?: number | null;
-  hasOne?: (number | null) | Rel;
-  hasMany?: (number | Rel)[] | null;
-  hasManyUpload?: (number | Upload)[] | null;
+  hasOne?: (string | null) | Rel;
+  hasMany?: (string | Rel)[] | null;
+  hasManyUpload?: (string | Upload)[] | null;
   hasOnePoly?: {
     relationTo: 'rels';
-    value: number | Rel;
+    value: string | Rel;
   } | null;
   hasManyPoly?:
     | {
         relationTo: 'rels';
-        value: number | Rel;
+        value: string | Rel;
       }[]
     | null;
   updatedAt: string;
@@ -203,7 +208,8 @@ export interface Post {
  * via the `definition` "rels".
  */
 export interface Rel {
-  id: number;
+  id: string;
+  text?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -212,7 +218,7 @@ export interface Rel {
  * via the `definition` "upload".
  */
 export interface Upload {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -230,7 +236,7 @@ export interface Upload {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -301,7 +307,7 @@ export interface LocalizedPost {
  * via the `definition` "versioned-posts".
  */
 export interface VersionedPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   array?:
@@ -327,7 +333,7 @@ export interface VersionedPost {
  * via the `definition` "deep-posts".
  */
 export interface DeepPost {
-  id: number;
+  id: string;
   group?: {
     array?:
       | {
@@ -369,22 +375,22 @@ export interface DeepPost {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
-  relatedPage?: (number | null) | Page;
+  id: string;
+  relatedPage?: (string | null) | Page;
   content?:
     | {
         title: string;
         link: {
           docPoly?: {
             relationTo: 'pages';
-            value: number | Page;
+            value: string | Page;
           } | null;
-          doc?: (number | null) | Page;
-          docMany?: (number | Page)[] | null;
+          doc?: (string | null) | Page;
+          docMany?: (string | Page)[] | null;
           docHasManyPoly?:
             | {
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               }[]
             | null;
           label: string;
@@ -393,7 +399,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -440,7 +446,7 @@ export interface Page {
  * via the `definition` "points".
  */
 export interface Point {
-  id: number;
+  id: string;
   text?: string | null;
   /**
    * @minItems 2
@@ -455,13 +461,31 @@ export interface Point {
  * via the `definition` "force-select".
  */
 export interface ForceSelect {
-  id: number;
+  id: string;
   text?: string | null;
   forceSelected?: string | null;
   array?:
     | {
         forceSelected?: string | null;
         id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks".
+ */
+export interface RelationshipsBlock {
+  id: string;
+  blocks?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
       }[]
     | null;
   updatedAt: string;
@@ -482,7 +506,7 @@ export interface CustomId {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -505,46 +529,67 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: number | LocalizedPost;
+        value: string | LocalizedPost;
       } | null)
     | ({
         relationTo: 'versioned-posts';
-        value: number | VersionedPost;
+        value: string | VersionedPost;
       } | null)
     | ({
         relationTo: 'deep-posts';
-        value: number | DeepPost;
+        value: string | DeepPost;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'points';
-        value: number | Point;
+        value: string | Point;
       } | null)
     | ({
         relationTo: 'force-select';
-        value: number | ForceSelect;
+        value: string | ForceSelect;
       } | null)
     | ({
         relationTo: 'upload';
-        value: number | Upload;
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'rels';
-        value: number | Rel;
+        value: string | Rel;
+      } | null)
+    | ({
+        relationTo: 'relationships-blocks';
+        value: string | RelationshipsBlock;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -552,12 +597,12 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -567,10 +612,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -590,7 +635,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -908,6 +953,27 @@ export interface UploadSelect<T extends boolean = true> {
  * via the `definition` "rels_select".
  */
 export interface RelsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks_select".
+ */
+export interface RelationshipsBlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasMany?: T;
+              hasOne?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -947,6 +1013,14 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -982,9 +1056,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "global-post".
  */
 export interface GlobalPost {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -993,7 +1068,7 @@ export interface GlobalPost {
  * via the `definition` "force-select-global".
  */
 export interface ForceSelectGlobal {
-  id: number;
+  id: string;
   text?: string | null;
   forceSelected?: string | null;
   array?:
@@ -1012,6 +1087,7 @@ export interface ForceSelectGlobal {
 export interface GlobalPostSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1043,6 +1119,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

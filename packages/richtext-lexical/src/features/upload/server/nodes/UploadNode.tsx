@@ -2,6 +2,7 @@ import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecorat
 import type {
   DOMConversionMap,
   DOMExportOutput,
+  EditorConfig,
   ElementFormatType,
   LexicalNode,
   NodeKey,
@@ -16,6 +17,7 @@ import type {
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
 
@@ -142,6 +144,12 @@ export class UploadServerNode extends DecoratorBlockNode {
 
   static isInline(): false {
     return false
+  }
+
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.upload)
+    return element
   }
 
   override decorate(): JSX.Element {
