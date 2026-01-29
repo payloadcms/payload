@@ -2054,6 +2054,125 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
     })
+
+    describe('Excel compatibility', () => {
+      it('should include UTF-8 BOM at the start of CSV files', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'BOM Test',
+            excerpt: 'Testing BOM presence',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // UTF-8 BOM is bytes: 0xEF 0xBB 0xBF
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should correctly encode UTF-8 characters for Excel', async () => {
+        const unicodeTitle = 'Ümlauts, émojis 🎉, 日本語, and spëcial çharacters'
+        const unicodeExcerpt = 'Ñoño señor • bullet points • áéíóú'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: unicodeTitle,
+            excerpt: unicodeExcerpt,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'excerpt'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+
+        // Read the raw file content to verify UTF-8 encoding
+        const rawContent = fs.readFileSync(csvPath, 'utf-8')
+
+        // Verify the UTF-8 characters are present and not corrupted
+        expect(rawContent).toContain(unicodeTitle)
+        expect(rawContent).toContain(unicodeExcerpt)
+
+        // Also verify through the CSV parser
+        const data = await readCSV(csvPath)
+
+        expect(data[0].title).toBe(unicodeTitle)
+        expect(data[0].excerpt).toBe(unicodeExcerpt)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should handle special CSV characters that could break Excel parsing', async () => {
+        const specialCharsTitle = 'Title with "quotes" and, commas'
+        const specialCharsExcerpt = 'Line1\nLine2\nLine3 with\ttabs'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: specialCharsTitle,
+            excerpt: specialCharsExcerpt,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'excerpt'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        // Verify special characters are preserved after CSV roundtrip
+        expect(data[0].title).toBe(specialCharsTitle)
+        expect(data[0].excerpt).toBe(specialCharsExcerpt)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
   })
 
   describe('imports', () => {

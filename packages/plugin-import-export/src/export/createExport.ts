@@ -340,6 +340,7 @@ export const createExport = async (args: CreateExportArgs) => {
           })
 
           const csvString = stringify(paddedRows, {
+            bom: isFirstBatch,
             header: isFirstBatch,
             columns: allColumns,
           })
@@ -451,6 +452,7 @@ export const createExport = async (args: CreateExportArgs) => {
     // Always output CSV with header, even if empty
     outputData.push(
       stringify(paddedRows, {
+        bom: true,
         header: true,
         columns: finalColumns,
       }),
