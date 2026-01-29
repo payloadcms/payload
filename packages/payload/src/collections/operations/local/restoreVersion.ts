@@ -7,13 +7,16 @@ import type {
 } from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+import type {
+  DataFromCollectionSlug,
+  DraftFlagFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+type BaseOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -29,10 +32,6 @@ export type Options<TSlug extends CollectionSlug> = {
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -70,6 +69,9 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   user?: Document
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
+
+export type Options<TSlug extends CollectionSlug> =
+  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
 
 export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
