@@ -32,6 +32,7 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Ներմուծման ամփոփում',
     importDocumentLabel: 'Ներմուծել {{label}}',
     importResults: 'Ներմուծման արդյունքներ',
+    limitCapped: 'Սdelays {{limit}}',
     matchBy: 'Համընկնեցվել է',
     mode: 'Ռեժիմ',
     noDataToPreview:
