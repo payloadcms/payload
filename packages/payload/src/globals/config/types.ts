@@ -29,6 +29,7 @@ import type {
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
+  GeneratedTypes,
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
@@ -42,6 +43,41 @@ import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../vers
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
+
+/**
+ * Global slugs that do not have drafts enabled.
+ * Detects globals without drafts by checking for the absence of the `_status` field.
+ */
+export type GlobalsWithoutDrafts = {
+  [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[GlobalSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on global configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ */
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends GlobalsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
 
 export type BeforeValidateHook = (args: {
   context: RequestContext
