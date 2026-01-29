@@ -34,11 +34,18 @@ export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
+  /**
+   * The class name to apply to the button that triggers the popup.
+   */
   buttonClassName?: string
   buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode
+  /**
+   * The class name to apply to the popup container containing the trigger.
+   * This does not wrap the actual popup content, which is rendered in a portal.
+   */
   className?: string
   disabled?: boolean
   /**
@@ -56,6 +63,10 @@ export type PopupProps = {
   noBackground?: boolean
   onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
+  /**
+   * Class name to apply to the portal container.
+   */
+  portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
   showOnHover?: boolean
   /**
@@ -101,6 +112,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     noBackground,
     onToggleClose,
     onToggleOpen,
+    portalClassName,
     render,
     showOnHover = false,
     showScrollbar = false,
@@ -421,6 +433,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                       `${baseClass}__content`,
                       `${baseClass}--size-${size}`,
                       isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
+                      portalClassName,
                     ]
                       .filter(Boolean)
                       .join(' ')
