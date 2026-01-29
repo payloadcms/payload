@@ -3,6 +3,7 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
+import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -382,6 +383,26 @@ export type CollectionAdminOptions = {
     }
     listMenuItems?: CustomComponent[]
     views?: {
+      /**
+       * Add custom collection views.
+       * Any additional keys define custom collection views that are matched by path and rendered at the collection level.
+       * @link https://payloadcms.com/docs/custom-components/custom-views
+       * @example
+       * ```ts
+       * views: {
+       *   grid: {
+       *     Component: '/path/to/GridView',
+       *     path: '/grid',
+       *     exact: true,
+       *   }
+       * }
+       * ```
+       */
+      [key: string]:
+        | { actions?: CustomComponent[]; Component?: PayloadComponent }
+        | AdminViewConfig
+        | EditConfig
+        | undefined
       /**
        * Replace, modify, or add new "document" views.
        * @link https://payloadcms.com/docs/custom-components/document-views
