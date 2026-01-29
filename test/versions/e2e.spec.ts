@@ -50,6 +50,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
+import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
@@ -781,6 +782,8 @@ describe('Versions', () => {
 
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
+      await openDocControls(page)
+
       // Verify unpublish button is hidden when user doesn't have publish permission
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
@@ -794,6 +797,9 @@ describe('Versions', () => {
         },
       })
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+
+      await openDocControls(page)
+
       await page.locator('#action-unpublish').click()
       await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
       await expect(
@@ -998,6 +1004,7 @@ describe('Versions', () => {
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
 
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
 
@@ -1016,6 +1023,7 @@ describe('Versions', () => {
           'Published',
         )
 
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeVisible()
       })
 
@@ -1031,6 +1039,7 @@ describe('Versions', () => {
         await page.locator('#field-description').fill('Updated Description')
         await saveDocAndAssert(page, '#action-save-draft')
 
+        await openDocControls(page)
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
@@ -1168,6 +1177,8 @@ describe('Versions', () => {
 
       const url = new AdminUrlUtil(serverURL, disablePublishGlobalSlug)
       await page.goto(url.global(disablePublishGlobalSlug))
+
+      await openDocControls(page)
 
       // Verify unpublish button is hidden when user doesn't have publish permission
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
