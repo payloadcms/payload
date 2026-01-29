@@ -3,7 +3,7 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { CollectionSlug, TypedUser } from '../../index.js'
+import type { AuthCollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -28,13 +28,13 @@ import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
-export type Result = {
+export type LoginResult<TSlug extends AuthCollectionSlug> = {
   exp?: number
   token?: string
-  user?: TypedUser
+  user?: DataFromCollectionSlug<TSlug>
 }
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
@@ -43,10 +43,10 @@ export type Arguments<TSlug extends CollectionSlug> = {
   showHiddenFields?: boolean
 }
 
-type CheckLoginPermissionArgs = {
+type CheckLoginPermissionArgs<TSlug extends AuthCollectionSlug> = {
   loggingInWithUsername?: boolean
   req: PayloadRequest
-  user: any
+  user: DataFromCollectionSlug<TSlug>
 }
 
 /**
@@ -54,11 +54,11 @@ type CheckLoginPermissionArgs = {
  * This does not check the login attempts, only the lock status. Whoever increments login attempts
  * is responsible for locking the user properly, not whoever checks the login permission.
  */
-export const checkLoginPermission = ({
+export const checkLoginPermission = <TSlug extends AuthCollectionSlug>({
   loggingInWithUsername,
   req,
   user,
-}: CheckLoginPermissionArgs) => {
+}: CheckLoginPermissionArgs<TSlug>) => {
   if (!user) {
     throw new AuthenticationError(req.t, Boolean(loggingInWithUsername))
   }
@@ -68,9 +68,9 @@ export const checkLoginPermission = ({
   }
 }
 
-export const loginOperation = async <TSlug extends CollectionSlug>(
+export const loginOperation = async <TSlug extends AuthCollectionSlug>(
   incomingArgs: Arguments<TSlug>,
-): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> => {
+): Promise<LoginResult<TSlug>> => {
   let args = incomingArgs
 
   if (args.collection.config.auth.disableLocalStrategy) {
@@ -379,7 +379,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       }
     }
 
-    let result: { user: DataFromCollectionSlug<TSlug> } & Result = {
+    let result: LoginResult<TSlug> = {
       exp,
       token,
       user,

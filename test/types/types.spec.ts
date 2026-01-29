@@ -69,7 +69,7 @@ describe('Types testing', () => {
   })
 
   test('payload.update many', () => {
-    expect(payload.update({ where: {}, collection: 'users', data: {} })).type.toBe<
+    expect(payload.update({ collection: 'users', data: {}, where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -79,7 +79,7 @@ describe('Types testing', () => {
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ where: {}, collection: 'users' })).type.toBe<
+    expect(payload.delete({ collection: 'users', where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -89,7 +89,7 @@ describe('Types testing', () => {
   })
 
   test('payload.updateGlobal', () => {
-    expect(payload.updateGlobal({ data: {}, slug: 'menu' })).type.toBe<Promise<Menu>>()
+    expect(payload.updateGlobal({ slug: 'menu', data: {} })).type.toBe<Promise<Menu>>()
   })
 
   test('payload.findVersions', () => {
@@ -118,20 +118,20 @@ describe('Types testing', () => {
 
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
-      expect(payload.findByID({ collection: 'posts', id: 'id', select: {} })).type.toBe<
+      expect(payload.findByID({ id: 'id', collection: 'posts', select: {} })).type.toBe<
         Promise<{ id: Post['id'] }>
       >()
     })
 
     test('should include only title and ID', () => {
       expect(
-        payload.findByID({ collection: 'posts', id: 'id', select: { title: true } }),
+        payload.findByID({ id: 'id', collection: 'posts', select: { title: true } }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
 
     test('should exclude title', () => {
       expect(
-        payload.findByID({ collection: 'posts', id: 'id', select: { title: false } }),
+        payload.findByID({ id: 'id', collection: 'posts', select: { title: false } }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
   })
@@ -155,6 +155,32 @@ describe('Types testing', () => {
   describe('generated types', () => {
     test('has SupportedTimezones', () => {
       expect<SupportedTimezones>().type.toBeAssignableTo<string>()
+    })
+
+    test('auth collection has collection property in generated User type', () => {
+      // The collection property should be directly on the User interface, not an intersection
+      expect<User>().type.toHaveProperty('collection')
+      expect<User['collection']>().type.toBe<'users'>()
+    })
+
+    test('payload operations return users with collection property', async () => {
+      const user = await payload.findByID({ id: 'id', collection: 'users' })
+      expect<typeof user>().type.toHaveProperty('collection')
+      expect<(typeof user)['collection']>().type.toBe<'users'>()
+    })
+
+    test('collection property is not required in update data for auth collections', () => {
+      // The collection property should not be required when updating users
+      // It is auto-populated by the system
+      expect(
+        payload.update({
+          id: 'id',
+          collection: 'users',
+          data: {
+            email: 'test@example.com',
+          },
+        }),
+      ).type.not.toRaiseError()
     })
 
     test('has global generated options interface based on select field', () => {
@@ -484,7 +510,6 @@ describe('Types testing', () => {
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
       const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -499,6 +524,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -519,7 +545,6 @@ describe('Types testing', () => {
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
       const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -534,6 +559,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -547,8 +573,8 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
           ],
           direction: 'ltr',
@@ -567,7 +593,6 @@ describe('Types testing', () => {
 
       const headingNode: SerializedHeadingNode<DefaultChildren> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -582,6 +607,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -595,8 +621,8 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
             {
               type: 'paragraph',
@@ -605,22 +631,22 @@ describe('Types testing', () => {
                   type: 'link',
                   children: [headingNode],
                   direction: 'ltr',
-                  format: 'left',
-                  indent: 0,
-                  version: 0,
-                  textFormat: 0,
                   fields: {
                     linkType: 'custom',
                     newTab: false,
                     url: 'https://www.payloadcms.com',
                   },
+                  format: 'left',
+                  indent: 0,
+                  textFormat: 0,
+                  version: 0,
                 },
               ],
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
           ],
           direction: 'ltr',
@@ -718,7 +744,6 @@ describe('Types testing', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         result.root.children.push({
           type: 'heading',
-          tag: 'h1',
           children: [
             {
               type: 'text',
@@ -733,6 +758,7 @@ describe('Types testing', () => {
           direction: 'ltr',
           format: '',
           indent: 0,
+          tag: 'h1',
           version: 1,
         })
         expect(result).type.toBe<DefaultTypedEditorState>()
@@ -829,7 +855,6 @@ describe('Types testing', () => {
           nodes: [
             {
               type: 'heading',
-              tag: 'h1',
               children: [
                 {
                   type: 'text',
@@ -844,6 +869,7 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: '',
               indent: 0,
+              tag: 'h1',
               version: 1,
             },
           ],
@@ -857,7 +883,6 @@ describe('Types testing', () => {
             nodes: [
               {
                 type: 'heading',
-                tag: 'h1',
                 children: [
                   {
                     type: 'text',
@@ -876,6 +901,7 @@ describe('Types testing', () => {
                 direction: 'ltr',
                 format: '',
                 indent: 0,
+                tag: 'h1',
                 version: 1,
               },
             ],
@@ -889,7 +915,6 @@ describe('Types testing', () => {
 
         const headingNode: SerializedHeadingNode<DefaultChildren> = {
           type: 'heading',
-          tag: 'h1',
           children: [
             {
               type: 'text',
@@ -904,6 +929,7 @@ describe('Types testing', () => {
           direction: 'ltr',
           format: '',
           indent: 0,
+          tag: 'h1',
           version: 1,
         }
         const result = buildEditorState<DefaultNodeTypes>({
@@ -955,12 +981,12 @@ describe('Types testing', () => {
       const result = await _sdk.create({
         collection: 'posts',
         data: {
-          title: 'Test Post',
+          radioField: 'option-1',
           richText: {
             root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
           },
           selectField: 'option-1',
-          radioField: 'option-1',
+          title: 'Test Post',
         },
       })
       expect(result).type.toBe<LocalConfig['collections']['posts']>()
@@ -972,13 +998,13 @@ describe('Types testing', () => {
         _sdk.create({
           collection: 'posts',
           data: {
-            title: 'Test Post',
+            invalidProperty: 'should error',
+            radioField: 'option-1',
             richText: {
               root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
             },
             selectField: 'option-1',
-            radioField: 'option-1',
-            invalidProperty: 'should error',
+            title: 'Test Post',
           },
         }),
       ).type.toRaiseError()
@@ -987,9 +1013,9 @@ describe('Types testing', () => {
     test('SDK with select in findByID returns correct types', async () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       const result = await _sdk.findByID({
-        collection: 'posts',
         id: 'id',
-        select: { title: true, namedGroup: true },
+        collection: 'posts',
+        select: { namedGroup: true, title: true },
       })
       expect(result).type.toBe<Pick<Post, 'id' | 'namedGroup' | 'title'>>()
     })
@@ -998,8 +1024,8 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
 
       const result = await _sdk.findByID({
-        collection: 'posts',
         id: 'id',
+        collection: 'posts',
         select: {},
       })
       expect(result).type.toBe<{ id: string }>()
@@ -1008,8 +1034,8 @@ describe('Types testing', () => {
     test('SDK with select excluding field in findByID returns correct types', async () => {
       const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
       const result = await _sdk.findByID({
-        collection: 'posts',
         id: 'id',
+        collection: 'posts',
         select: { richText: false },
       })
       expect(result).type.toBe<Omit<Post, 'richText'>>()

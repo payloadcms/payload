@@ -96,9 +96,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -203,9 +201,10 @@ export interface RestrictedMedia {
  */
 export interface TestMetadatum {
   id: string;
-  testUrl?: string | null;
-  testEtag?: string | null;
-  customField?: string | null;
+  /**
+   * Test note to identify this upload
+   */
+  testNote?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -251,6 +250,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -421,9 +421,7 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  * via the `definition` "test-metadata_select".
  */
 export interface TestMetadataSelect<T extends boolean = true> {
-  testUrl?: T;
-  testEtag?: T;
-  customField?: T;
+  testNote?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

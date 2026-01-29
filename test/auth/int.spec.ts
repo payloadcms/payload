@@ -126,16 +126,16 @@ describe('Auth', () => {
       const testUser = await payload.create({
         collection: slug,
         data: {
-          roles: ['user'],
           email: testEmail,
-          password: testPassword,
           loginMetadata: originalArrayData,
+          password: testPassword,
+          roles: ['user'],
         },
       })
 
       const userBefore: any = await payload.findByID({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
       const sessionCountBefore = userBefore.sessions?.length || 0
 
@@ -170,8 +170,8 @@ describe('Auth', () => {
       }
 
       const userAfter: any = await payload.findByID({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
 
       expect(userAfter.loginMetadata).toHaveLength(2)
@@ -182,8 +182,8 @@ describe('Auth', () => {
 
       // Clean up
       await payload.delete({
-        collection: slug,
         id: testUser.id,
+        collection: slug,
       })
     })
 
@@ -335,7 +335,7 @@ describe('Auth', () => {
         const apiKey = '987e6543-e21b-12d3-a456-426614174999'
         const user = await payload.create({
           collection: slug,
-          data: { email: 'user@example.com', password: 'Password123', apiKey, enableAPIKey: true },
+          data: { apiKey, email: 'user@example.com', enableAPIKey: true, password: 'Password123' },
         })
         const { token } = await payload.login({
           collection: 'users',
@@ -1022,9 +1022,9 @@ describe('Auth', () => {
       })
       expect(doc.password).toBe('123')
       const updated = await payload.update({
+        id: doc.id,
         collection: 'disable-local-strategy-password',
         data: { password: '1234' },
-        id: doc.id,
       })
       expect(updated.password).toBe('1234')
     })
@@ -1070,11 +1070,11 @@ describe('Auth', () => {
         .digest('hex')
 
       await payload.db.updateOne({
+        id: user.id,
         collection: apiKeysSlug,
         data: {
           apiKeyIndex: sha1Index,
         },
-        id: user.id,
       })
 
       const response = await restClient
@@ -1195,6 +1195,90 @@ describe('Auth', () => {
       expect(authenticated.token).toBeTruthy()
     })
 
+    it('should return collection property on user documents', async () => {
+      const testEmail = `collection-test-${Date.now()}@example.com`
+
+      const createdUser = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password: 'test',
+          roles: ['user'],
+        },
+      })
+
+      expect(createdUser.collection).toBe(slug)
+
+      const foundUser = await payload.findByID({
+        id: createdUser.id,
+        collection: slug,
+      })
+
+      expect(foundUser.collection).toBe(slug)
+
+      const foundUsers = await payload.find({
+        collection: slug,
+        where: { id: { equals: createdUser.id } },
+      })
+
+      expect(foundUsers.docs[0]?.collection).toBe(slug)
+
+      const updatedUser = await payload.update({
+        id: createdUser.id,
+        collection: slug,
+        data: { roles: ['admin'] },
+      })
+
+      expect(updatedUser.collection).toBe(slug)
+
+      const deletedUser = await payload.delete({
+        id: createdUser.id,
+        collection: slug,
+      })
+
+      expect(deletedUser.collection).toBe(slug)
+    })
+
+    it('should return collection property on api-keys auth collection', async () => {
+      const createdApiKey = await payload.create({
+        collection: apiKeysSlug,
+        data: {
+          enableAPIKey: true,
+        },
+      })
+
+      expect(createdApiKey.collection).toBe(apiKeysSlug)
+
+      const foundApiKey = await payload.findByID({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+      })
+
+      expect(foundApiKey.collection).toBe(apiKeysSlug)
+
+      const foundApiKeys = await payload.find({
+        collection: apiKeysSlug,
+        where: { id: { equals: createdApiKey.id } },
+      })
+
+      expect(foundApiKeys.docs[0]?.collection).toBe(apiKeysSlug)
+
+      const updatedApiKey = await payload.update({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+        data: { enableAPIKey: false },
+      })
+
+      expect(updatedApiKey.collection).toBe(apiKeysSlug)
+
+      const deletedApiKey = await payload.delete({
+        id: createdApiKey.id,
+        collection: apiKeysSlug,
+      })
+
+      expect(deletedApiKey.collection).toBe(apiKeysSlug)
+    })
+
     it('should forget and reset password', async () => {
       const forgot = await payload.forgotPassword({
         collection: 'users',
@@ -1290,8 +1374,8 @@ describe('Auth', () => {
         expect(successfulLogin2).toBeDefined()
 
         const user = await payload.findByID({
-          collection: slug,
           id: successfulLogin2.user.id,
+          collection: slug,
           overrideAccess: true,
           showHiddenFields: true,
         })
@@ -1385,6 +1469,10 @@ describe('Auth', () => {
 
     const mockContext: Parameters<EmailFieldValidation>[1] = {
       // @ts-expect-error: Mocking context for email validation
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
       req: {
         payload: {
           collections: {} as Record<string, never>,
@@ -1394,10 +1482,6 @@ describe('Auth', () => {
       },
       required: true,
       siblingData: {},
-      blockData: {},
-      data: {},
-      path: ['email'],
-      preferences: { fields: {} },
     }
     it('should allow standard formatted emails', () => {
       expect(emailValidation('user@example.com', mockContext)).toBe(true)

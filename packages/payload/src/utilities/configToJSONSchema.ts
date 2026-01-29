@@ -179,19 +179,7 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
   const properties: JSONSchema4[] = [...entities]
     .filter(({ auth }) => Boolean(auth))
     .map(({ slug }) => {
-      return {
-        allOf: [
-          { $ref: `#/definitions/${slug}` },
-          {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              collection: { type: 'string', enum: [slug] },
-            },
-            required: ['collection'],
-          },
-        ],
-      }
+      return { $ref: `#/definitions/${slug}` }
     }, {})
 
   return {
@@ -831,17 +819,30 @@ export function entityToJSONSchema(
     })
   }
 
+  const isAuthCollection = 'auth' in entity && entity.auth
+
+  const fieldsSchema = fieldsToJSONSchema(
+    collectionIDFieldTypes,
+    mutableFields,
+    interfaceNameDefinitions,
+    config,
+    i18n,
+  )
+
+  // Add collection property to auth collections
+  if (isAuthCollection) {
+    fieldsSchema.properties = {
+      ...fieldsSchema.properties,
+      collection: { type: 'string', enum: [entity.slug] },
+    }
+    fieldsSchema.required = [...(fieldsSchema.required || []), 'collection']
+  }
+
   const jsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
     title,
-    ...fieldsToJSONSchema(
-      collectionIDFieldTypes,
-      mutableFields,
-      interfaceNameDefinitions,
-      config,
-      i18n,
-    ),
+    ...fieldsSchema,
   }
 
   const entityDescription = entityOrFieldToJsDocs({ entity, i18n })

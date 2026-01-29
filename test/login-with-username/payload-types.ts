@@ -94,16 +94,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (LoginWithEither & {
-        collection: 'login-with-either';
-      })
-    | (RequireEmail & {
-        collection: 'require-email';
-      });
+  user: User | LoginWithEither | RequireEmail;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -196,6 +187,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -221,6 +213,7 @@ export interface LoginWithEither {
       }[]
     | null;
   password?: string | null;
+  collection: 'login-with-either';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -246,6 +239,7 @@ export interface RequireEmail {
       }[]
     | null;
   password?: string | null;
+  collection: 'require-email';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -462,6 +456,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

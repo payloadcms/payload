@@ -70,6 +70,7 @@ export interface Config {
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
+    'simple-localized': SimpleLocalized;
     'categories-custom-id': CategoriesCustomId;
     posts: Post;
     'error-on-unnamed-fields': ErrorOnUnnamedField;
@@ -99,6 +100,7 @@ export interface Config {
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'simple-localized': SimpleLocalizedSelect<false> | SimpleLocalizedSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
@@ -142,9 +144,7 @@ export interface Config {
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'uk';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -346,6 +346,17 @@ export interface CategoriesCustomId {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-localized".
+ */
+export interface SimpleLocalized {
+  id: string;
+  text?: string | null;
+  number?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -722,6 +733,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -741,6 +753,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'simple';
         value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'simple-localized';
+        value: string | SimpleLocalized;
       } | null)
     | ({
         relationTo: 'categories-custom-id';
@@ -892,6 +908,16 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "simple_select".
  */
 export interface SimpleSelect<T extends boolean = true> {
+  text?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-localized_select".
+ */
+export interface SimpleLocalizedSelect<T extends boolean = true> {
   text?: T;
   number?: T;
   updatedAt?: T;

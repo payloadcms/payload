@@ -4,7 +4,7 @@ import type {
   AuthOperationsFromCollectionSlug,
   Collection,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -19,14 +19,14 @@ import { executeAccess } from '../executeAccess.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess?: boolean
   req: PayloadRequest
 }
 
-export const unlockOperation = async <TSlug extends CollectionSlug>(
+export const unlockOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<boolean> => {
   const {

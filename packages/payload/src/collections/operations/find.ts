@@ -216,6 +216,14 @@ export const findOperation = async <
       })
     }
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result.docs = result.docs.map((doc) => ({ ...doc, collection: collectionConfig.slug }))
+    }
+
     if (includeLockStatus) {
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments

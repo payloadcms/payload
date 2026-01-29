@@ -124,9 +124,7 @@ export interface Config {
     'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
   };
   locale: null;
-  user: HooksUser & {
-    collection: 'hooks-users';
-  };
+  user: HooksUser;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -341,6 +339,7 @@ export interface HooksUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'hooks-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
