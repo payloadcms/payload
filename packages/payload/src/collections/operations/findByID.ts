@@ -72,6 +72,7 @@ export const findByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -274,6 +275,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -313,6 +315,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -327,6 +330,7 @@ export const findByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'findByID',
+      overrideAccess,
       result,
     })
 

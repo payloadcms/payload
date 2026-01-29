@@ -221,6 +221,10 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
 }) => any
@@ -230,6 +234,10 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -240,6 +248,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
 }) => any

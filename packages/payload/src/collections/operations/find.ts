@@ -73,6 +73,7 @@ export const findOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -291,6 +292,7 @@ export const findOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -343,6 +345,7 @@ export const findOperation = async <
                 context: req.context,
                 doc: docRef,
                 findMany: true,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -361,6 +364,7 @@ export const findOperation = async <
       args,
       collection: collectionConfig,
       operation: 'find',
+      overrideAccess: overrideAccess!,
       result,
     })
 

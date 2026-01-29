@@ -86,6 +86,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -320,6 +321,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      overrideAccess,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })
