@@ -2,6 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
+import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
@@ -382,6 +383,8 @@ export type CollectionAdminOptions = {
     }
     listMenuItems?: CustomComponent[]
     views?: {
+      /** Add custom collection views */
+      [key: string]: AdminViewConfig
       /**
        * Replace, modify, or add new "document" views.
        * @link https://payloadcms.com/docs/custom-components/document-views
