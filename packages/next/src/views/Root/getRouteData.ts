@@ -31,6 +31,7 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
+import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getDocumentViewInfo } from './getDocumentViewInfo.js'
@@ -370,6 +371,22 @@ export const getRouteData = ({
 
             viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
           } else {
+            // Check for custom collection views before assuming it's an edit view
+            const baseRoute = `/${segmentOne}/${segmentTwo}`
+            const customCollectionView = getCustomCollectionViewByRoute({
+              baseRoute,
+              currentRoute,
+              views: collectionConfig.admin.components?.views,
+            })
+
+            if (customCollectionView.viewKey && customCollectionView.view.payloadComponent) {
+              // --> /collections/:collectionSlug/:customViewPath
+              ViewToRender = customCollectionView.view
+
+              templateClassName = `collection-${customCollectionView.viewKey}`
+              templateType = 'default'
+              viewType = customCollectionView.viewKey as ViewTypes
+            } else {
             // Collection Edit Views
             // --> /collections/:collectionSlug/create
             // --> /collections/:collectionSlug/:id
@@ -396,6 +413,7 @@ export const getRouteData = ({
                 viewKeyArg: documentSubViewType,
               }),
             )
+            }
           }
         }
       } else if (globalConfig) {

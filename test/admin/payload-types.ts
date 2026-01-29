@@ -77,6 +77,7 @@ export interface Config {
     'custom-document-controls': CustomDocumentControl;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
+    'custom-collection-view': CustomCollectionView;
     'reorder-tabs': ReorderTab;
     'custom-fields': CustomField;
     'group-one-collection-ones': GroupOneCollectionOne;
@@ -117,6 +118,7 @@ export interface Config {
     'custom-document-controls': CustomDocumentControlsSelect<false> | CustomDocumentControlsSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
+    'custom-collection-view': CustomCollectionViewSelect<false> | CustomCollectionViewSelect<true>;
     'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
     'group-one-collection-ones': GroupOneCollectionOnesSelect<false> | GroupOneCollectionOnesSelect<true>;
@@ -381,6 +383,16 @@ export interface CustomViewsOne {
  * via the `definition` "custom-views-two".
  */
 export interface CustomViewsTwo {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-collection-view".
+ */
+export interface CustomCollectionView {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -734,6 +746,10 @@ export interface PayloadLockedDocument {
         value: string | CustomViewsTwo;
       } | null)
     | ({
+        relationTo: 'custom-collection-view';
+        value: string | CustomCollectionView;
+      } | null)
+    | ({
         relationTo: 'reorder-tabs';
         value: string | ReorderTab;
       } | null)
@@ -1041,6 +1057,15 @@ export interface CustomViewsOneSelect<T extends boolean = true> {
  * via the `definition` "custom-views-two_select".
  */
 export interface CustomViewsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-collection-view_select".
+ */
+export interface CustomCollectionViewSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
