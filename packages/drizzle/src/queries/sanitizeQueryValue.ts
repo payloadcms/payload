@@ -262,6 +262,16 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  if (
+    (operator === 'equals' || operator === 'not_equals') &&
+    (field.type === 'relationship' || field.type === 'upload') &&
+    !relationOrPath.endsWith('relationTo') &&
+    Array.isArray(formattedValue) &&
+    formattedValue.length > 0
+  ) {
+    formattedValue = formattedValue[0]
+  }
+
   return {
     columns: formattedColumns,
     operator,
