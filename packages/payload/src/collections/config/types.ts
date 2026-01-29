@@ -2,7 +2,15 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
+import type {
+  CustomStatus,
+  CustomUpload,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  ViewTypes,
+} from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -358,7 +366,7 @@ export type CollectionAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomComponent
+      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -374,6 +382,11 @@ export type CollectionAdminOptions = {
        * Replaces the "Status" section
        */
       Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
       /**
        * Replaces the "Upload" section
        * + upload must be enabled

@@ -77,6 +77,7 @@ export interface Config {
     'drafts-no-read-versions': DraftsNoReadVersion;
     'draft-with-max-posts': DraftWithMaxPost;
     'draft-posts-with-change-hook': DraftPostsWithChangeHook;
+    'drafts-with-custom-unpublish': DraftsWithCustomUnpublish;
     'draft-with-validate-posts': DraftWithValidatePost;
     'error-on-unpublish': ErrorOnUnpublish;
     'localized-posts': LocalizedPost;
@@ -105,6 +106,7 @@ export interface Config {
     'drafts-no-read-versions': DraftsNoReadVersionsSelect<false> | DraftsNoReadVersionsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
     'draft-posts-with-change-hook': DraftPostsWithChangeHookSelect<false> | DraftPostsWithChangeHookSelect<true>;
+    'drafts-with-custom-unpublish': DraftsWithCustomUnpublishSelect<false> | DraftsWithCustomUnpublishSelect<true>;
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
     'error-on-unpublish': ErrorOnUnpublishSelect<false> | ErrorOnUnpublishSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
@@ -357,6 +359,17 @@ export interface DraftPostsWithChangeHook {
   id: string;
   title: string;
   description: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts-with-custom-unpublish".
+ */
+export interface DraftsWithCustomUnpublish {
+  id: string;
+  title: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -803,6 +816,10 @@ export interface PayloadLockedDocument {
         value: string | DraftPostsWithChangeHook;
       } | null)
     | ({
+        relationTo: 'drafts-with-custom-unpublish';
+        value: string | DraftsWithCustomUnpublish;
+      } | null)
+    | ({
         relationTo: 'draft-with-validate-posts';
         value: string | DraftWithValidatePost;
       } | null)
@@ -1028,6 +1045,16 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
 export interface DraftPostsWithChangeHookSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drafts-with-custom-unpublish_select".
+ */
+export interface DraftsWithCustomUnpublishSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

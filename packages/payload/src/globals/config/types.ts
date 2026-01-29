@@ -4,10 +4,13 @@ import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
-  CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
   CustomStatus,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
 } from '../../admin/types.js'
 import type {
   Access,
@@ -20,6 +23,7 @@ import type {
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  PayloadComponent,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -120,7 +124,7 @@ export type GlobalAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -136,6 +140,11 @@ export type GlobalAdminOptions = {
        * Replaces the "Status" section
        */
       Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
     }
     views?: {
       /**
