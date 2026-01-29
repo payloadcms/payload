@@ -19,7 +19,7 @@ import { useTranslation } from '../Translation/index.js'
 import { UploadEditsProvider, useUploadEdits } from '../UploadEdits/index.js'
 import { useGetDocPermissions } from './useGetDocPermissions.js'
 
-const Context = createContext({} as DocumentInfoContext)
+const Context = createContext(undefined)
 
 export type * from './types.js'
 
@@ -28,6 +28,10 @@ export const useDocumentInfo = (): DocumentInfoContext => use(Context)
 const DocumentInfo: React.FC<
   {
     readonly children: React.ReactNode
+    /**
+     * Note: This is intentionally left out of `DocumentInfoProps` as it is automatically provided.
+     */
+    readonly parents?: DocumentInfoContext['parents']
   } & DocumentInfoProps
 > = ({ children, ...props }) => {
   const {
@@ -44,6 +48,7 @@ const DocumentInfo: React.FC<
     isLocked: isLockedFromProps,
     lastUpdateTime: lastUpdateTimeFromProps,
     mostRecentVersionIsAutosaved: mostRecentVersionIsAutosavedFromProps,
+    parents,
     unpublishedVersionCount: unpublishedVersionCountFromProps,
     versionCount: versionCountFromProps,
   } = props
@@ -394,6 +399,7 @@ const DocumentInfo: React.FC<
     isInitializing,
     lastUpdateTime,
     mostRecentVersionIsAutosaved,
+    parents,
     preferencesKey,
     savedDocumentData: data,
     setCurrentEditor,
@@ -427,9 +433,19 @@ export const DocumentInfoProvider: React.FC<
     readonly children: React.ReactNode
   } & DocumentInfoProps
 > = (props) => {
+  const parentDocInfo = useDocumentInfo()
+
+  const parents = useMemo(() => {
+    if (parentDocInfo) {
+      return [...(parentDocInfo?.parents || []), parentDocInfo]
+    }
+
+    return undefined
+  }, [parentDocInfo])
+
   return (
     <UploadEditsProvider>
-      <DocumentInfo {...props} />
+      <DocumentInfo {...props} parents={parents} />
     </UploadEditsProvider>
   )
 }
