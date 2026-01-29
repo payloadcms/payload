@@ -87,6 +87,7 @@ export const createOperation = async <
       args,
       collection: args.collection.config,
       operation: 'create',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {
@@ -378,7 +379,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
-            overrideAccess: overrideAccess!,
+            overrideAccess,
             req,
           })) || result
       }
@@ -412,6 +413,7 @@ export const createOperation = async <
             data,
             doc: result,
             operation: 'create',
+            overrideAccess,
             previousDoc: {},
             req: args.req,
           })) || result
@@ -426,6 +428,7 @@ export const createOperation = async <
       args,
       collection: collectionConfig,
       operation: 'create',
+      overrideAccess: args.overrideAccess!,
       result,
     })
 

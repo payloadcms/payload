@@ -453,6 +453,7 @@ export const updateDocument = async <
           data,
           doc: result,
           operation: 'update',
+          overrideAccess,
           previousDoc: originalDoc,
           req,
         })) || result

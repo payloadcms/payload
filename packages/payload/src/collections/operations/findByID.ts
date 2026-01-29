@@ -72,6 +72,7 @@ export const findByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -329,6 +330,7 @@ export const findByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'findByID',
+      overrideAccess,
       result,
     })
 

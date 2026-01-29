@@ -55,6 +55,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -231,7 +232,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
-            overrideAccess: overrideAccess!,
+            overrideAccess,
             req,
           })) || result
       }
@@ -262,6 +263,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
+      overrideAccess,
       result,
     })
 

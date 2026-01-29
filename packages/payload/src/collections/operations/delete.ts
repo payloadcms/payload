@@ -62,6 +62,7 @@ export const deleteOperation = async <
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -254,7 +255,7 @@ export const deleteOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: result || doc,
-                overrideAccess: overrideAccess!,
+                overrideAccess,
                 req,
               })) || result
           }
@@ -336,6 +337,7 @@ export const deleteOperation = async <
       args,
       collection: collectionConfig,
       operation: 'delete',
+      overrideAccess,
       result,
     })
 

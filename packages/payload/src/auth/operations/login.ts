@@ -85,6 +85,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     args,
     collection: args.collection.config,
     operation: 'login',
+    overrideAccess: args.overrideAccess!,
   })
 
   const {
@@ -394,6 +395,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'login',
+      overrideAccess: args.overrideAccess!,
       result,
     })
 

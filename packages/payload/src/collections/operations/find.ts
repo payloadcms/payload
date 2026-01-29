@@ -73,6 +73,7 @@ export const findOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -363,6 +364,7 @@ export const findOperation = async <
       args,
       collection: collectionConfig,
       operation: 'find',
+      overrideAccess: overrideAccess!,
       result,
     })
 

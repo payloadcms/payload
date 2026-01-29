@@ -45,6 +45,10 @@ export type BeforeValidateHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -54,6 +58,10 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -63,6 +71,10 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: any
   req: PayloadRequest
 }) => any
@@ -72,6 +84,10 @@ export type BeforeReadHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -81,6 +97,10 @@ export type AfterReadHook = (args: {
   findMany?: boolean
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
 }) => any
@@ -98,6 +118,10 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
