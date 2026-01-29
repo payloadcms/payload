@@ -1,4 +1,9 @@
-import type { AdminViewConfig, AdminViewServerProps, PayloadComponent, SanitizedCollectionConfig  } from 'payload'
+import type {
+  AdminViewConfig,
+  AdminViewServerProps,
+  PayloadComponent,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import type { ViewFromConfig } from './getRouteData.js'
 
@@ -16,7 +21,7 @@ export const getCustomCollectionViewByRoute = ({
   view: ViewFromConfig
   viewKey?: string
 } => {
-  if (typeof views === 'object') {
+  if (views && typeof views === 'object') {
     let viewKey: string
 
     const foundViewConfig = Object.entries(views).find(([key, view]) => {
@@ -70,6 +75,6 @@ export const getCustomCollectionViewByRoute = ({
     view: {
       Component: null,
     },
-    viewKey: null,
+    viewKey: undefined,
   }
 }
