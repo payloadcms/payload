@@ -322,6 +322,10 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ *
+ * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
+ * auth-enabled collections.
+ *
  * @todo rename to `User` in 4.0
  */
 export type TypedUser = PayloadTypes['user']
