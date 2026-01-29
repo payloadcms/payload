@@ -431,7 +431,7 @@ Here's an example of a custom `PublishButton` component:
 ```tsx
 import React from 'react'
 import { PublishButton } from '@payloadcms/ui'
-import type { PublishButtonClientProps } from 'payload'
+import type { PublishButtonServerProps } from 'payload'
 
 export function MyPublishButton(props: PublishButtonServerProps) {
   return <PublishButton label="Publish" />
@@ -444,9 +444,8 @@ export function MyPublishButton(props: PublishButtonServerProps) {
 'use client'
 import React from 'react'
 import { PublishButton } from '@payloadcms/ui'
-import type { PublishButtonClientProps } from 'payload'
 
-export function MyPublishButton(props: PublishButtonClientProps) {
+export function MyPublishButton() {
   return <PublishButton label="Publish" />
 }
 ```
@@ -494,9 +493,8 @@ export function MyUnpublishButton(props: UnpublishButtonServerProps) {
 'use client'
 import React from 'react'
 import { UnpublishButton } from '@payloadcms/ui'
-import type { UnpublishButtonClientProps } from 'payload'
 
-export function MyUnpublishButton(props: UnpublishButtonClientProps) {
+export function MyUnpublishButton() {
   return <UnpublishButton label="Unpublish" />
 }
 ```

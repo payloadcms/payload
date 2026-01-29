@@ -6,4 +6,4 @@ export type PublishButtonClientProps = {
 
 export type PublishButtonServerPropsOnly = {} & ServerProps
 
-export type PublishButtonServerProps = PublishButtonClientProps & PublishButtonServerPropsOnly
+export type PublishButtonServerProps = PublishButtonServerPropsOnly
