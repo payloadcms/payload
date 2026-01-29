@@ -5,6 +5,7 @@ import path from 'path'
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
+import { getBeforeChangeHook } from '../hooks/beforeChange.js'
 
 interface Args {
   adapter?: GeneratedAdapter
@@ -73,6 +74,10 @@ export const getFields = ({
           getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
           ...(existingURLField?.hooks?.afterRead || []),
         ],
+        beforeChange: [
+          getBeforeChangeHook({ adapter, collection, disablePayloadAccessControl }),
+          ...(existingURLField?.hooks?.beforeChange || []),
+        ],
       },
     } as TextField)
   } else {
@@ -131,6 +136,18 @@ export const getFields = ({
                   ...((typeof existingSizeURLField === 'object' &&
                     'hooks' in existingSizeURLField &&
                     existingSizeURLField?.hooks?.afterRead) ||
+                    []),
+                ],
+                beforeChange: [
+                  getBeforeChangeHook({
+                    adapter,
+                    collection,
+                    disablePayloadAccessControl,
+                    size,
+                  }),
+                  ...((typeof existingSizeURLField === 'object' &&
+                    'hooks' in existingSizeURLField &&
+                    existingSizeURLField?.hooks?.beforeChange) ||
                     []),
                 ],
               },
