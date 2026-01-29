@@ -18,7 +18,9 @@ import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-export function UnpublishButton({ label: labelProp }: UnpublishButtonClientProps = {}) {
+export function UnpublishButton({
+  label: labelProp,
+}: { label?: string } & UnpublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,
@@ -191,17 +193,19 @@ export function UnpublishButton({ label: labelProp }: UnpublishButtonClientProps
             }}
           >
             {labelProp || t('version:unpublish')}
-          </PopupList.Button>}
-          {canUnpublishCurrentLocale && <PopupList.Button
-            id="action-unpublish-locale"
-            onClick={() => {
-              setUnpublishAll(false)
-              toggleModal(unPublishModalSlug)
-              close()
-            }}
-          >
-            {labelProp ? labelProp + ` [${label}]` : t('version:unpublishIn', { locale: label })}
-          </PopupList.Button>}
+          </PopupList.Button >}
+          {
+            canUnpublishCurrentLocale && <PopupList.Button
+              id="action-unpublish-locale"
+              onClick={() => {
+                setUnpublishAll(false)
+                toggleModal(unPublishModalSlug)
+                close()
+              }}
+            >
+              {labelProp ? labelProp + ` [${label}]` : t('version:unpublishIn', { locale: label })}
+            </PopupList.Button>
+          }
           <ConfirmationModal
             body={
               !unpublishAll
@@ -215,6 +219,6 @@ export function UnpublishButton({ label: labelProp }: UnpublishButtonClientProps
           />
         </>
       )}
-    </React.Fragment>
+    </React.Fragment >
   )
 }
