@@ -828,6 +828,7 @@ describe('Versions', () => {
       const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
       await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
 
+      await openDocControls(page)
       await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
 
       await payload.delete({
@@ -1214,7 +1215,6 @@ describe('Versions', () => {
       await page.goto(url.global(disablePublishGlobalSlug))
 
       // Verify unpublish button is hidden when user doesn't have publish permission
-      await openDocControls(page)
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
