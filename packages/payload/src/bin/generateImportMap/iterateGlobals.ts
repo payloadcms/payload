@@ -31,6 +31,7 @@ export function iterateGlobals({
 
     addToImportMap(global.admin?.components?.elements?.beforeDocumentControls)
     addToImportMap(global.admin?.components?.elements?.Description)
+    addToImportMap(global.admin?.components?.elements?.LivePreviewToggler)
     addToImportMap(global.admin?.components?.elements?.PreviewButton)
     addToImportMap(global.admin?.components?.elements?.PublishButton)
     addToImportMap(global.admin?.components?.elements?.SaveButton)

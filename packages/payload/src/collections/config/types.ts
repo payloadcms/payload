@@ -351,6 +351,10 @@ export type CollectionAdminOptions = {
        */
       editMenuItems?: CustomComponent[]
       /**
+       * Replaces the "LivePreviewToggler" button
+       */
+      LivePreviewToggler?: CustomComponent
+      /**
        * Replaces the "Preview" button
        */
       PreviewButton?: CustomComponent

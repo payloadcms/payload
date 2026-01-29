@@ -58,6 +58,7 @@ export function DefaultEditView({
   Description,
   EditMenuItems,
   LivePreview: CustomLivePreview,
+  LivePreviewToggler,
   PreviewButton,
   PublishButton,
   SaveButton,
@@ -638,6 +639,7 @@ export function DefaultEditView({
             apiURL={apiURL}
             BeforeDocumentControls={BeforeDocumentControls}
             customComponents={{
+              LivePreviewToggler,
               PreviewButton,
               PublishButton,
               SaveButton,

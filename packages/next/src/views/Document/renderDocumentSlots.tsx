@@ -2,6 +2,7 @@ import type {
   BeforeDocumentControlsServerPropsOnly,
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
+  LivePreviewTogglerServerPropsOnly,
   PayloadRequest,
   PreviewButtonServerPropsOnly,
   PublishButtonServerPropsOnly,
@@ -38,6 +39,8 @@ export const renderDocumentSlots: (args: {
   const unsavedDraftWithValidations = undefined
 
   const isPreviewEnabled = collectionConfig?.admin?.preview || globalConfig?.admin?.preview
+  const isLivePreviewEnabled =
+    collectionConfig?.admin?.livePreview || globalConfig?.admin?.livePreview
 
   const serverProps: ServerProps = {
     id,
@@ -90,6 +93,18 @@ export const renderDocumentSlots: (args: {
       Component: LivePreview.Component,
       importMap: req.payload.importMap,
       serverProps,
+    })
+  }
+
+  const CustomLivePreviewToggler =
+    collectionConfig?.admin?.components?.edit?.LivePreviewToggler ||
+    globalConfig?.admin?.components?.elements?.LivePreviewToggler
+
+  if (isLivePreviewEnabled && CustomLivePreviewToggler) {
+    components.LivePreviewToggler = RenderServerComponent({
+      Component: CustomLivePreviewToggler,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies LivePreviewTogglerServerPropsOnly,
     })
   }
 

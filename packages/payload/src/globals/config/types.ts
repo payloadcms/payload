@@ -2,13 +2,7 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
-import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-} from '../../admin/types.js'
+import type { CustomStatus } from '../../admin/types.js'
 import type {
   Access,
   CustomComponent,
@@ -113,25 +107,29 @@ export type GlobalAdminOptions = {
       beforeDocumentControls?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
+       * Replaces the "LivePreviewToggler" button
+       */
+      LivePreviewToggler?: CustomComponent
+      /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButton
+      PreviewButton?: CustomComponent
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: CustomComponent
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButton
+      SaveButton?: CustomComponent
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButton
+      SaveDraftButton?: CustomComponent
       /**
        * Replaces the "Status" section
        */
@@ -241,8 +239,10 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   versions?: boolean | IncomingGlobalVersions
 }
 
-export interface SanitizedGlobalConfig
-  extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {
+export interface SanitizedGlobalConfig extends Omit<
+  DeepRequired<GlobalConfig>,
+  'endpoints' | 'fields' | 'slug' | 'versions'
+> {
   endpoints: Endpoint[] | false
   fields: Field[]
   /**

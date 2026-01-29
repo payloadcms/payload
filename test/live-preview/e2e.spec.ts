@@ -38,6 +38,7 @@ import {
 import {
   collectionLevelConfigSlug,
   customLivePreviewSlug,
+  customTogglerSlug,
   desktopBreakpoint,
   mobileBreakpoint,
   pagesSlug,
@@ -61,6 +62,7 @@ describe('Live Preview', () => {
   let ssrPagesURLUtil: AdminUrlUtil
   let ssrAutosavePagesURLUtil: AdminUrlUtil
   let customLivePreviewURLUtil: AdminUrlUtil
+  let customTogglerURLUtil: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
   let user: any
   let context: any
@@ -73,6 +75,7 @@ describe('Live Preview', () => {
     postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
     ssrPagesURLUtil = new AdminUrlUtil(serverURL, ssrPagesSlug)
     customLivePreviewURLUtil = new AdminUrlUtil(serverURL, customLivePreviewSlug)
+    customTogglerURLUtil = new AdminUrlUtil(serverURL, customTogglerSlug)
     ssrAutosavePagesURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     context = await browser.newContext()
@@ -803,5 +806,26 @@ describe('Live Preview', () => {
         expect(scanResults.violations.length).toBe(0)
       },
     )
+  })
+
+  test('renders custom live preview toggler', async () => {
+    await navigateToDoc(page, customTogglerURLUtil)
+
+    const customToggler = page.locator('#custom-live-preview-toggler')
+
+    await expect(customToggler).toBeVisible()
+    await expect(customToggler).toContainText('🟢 Enter Custom Live Preview')
+
+    // Click the custom toggler to enable live preview
+    await customToggler.click()
+
+    await expect(customToggler).toContainText('🔴 Exit Custom Live Preview')
+    await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+
+    // Click again to disable
+    await customToggler.click()
+
+    await expect(customToggler).toContainText('🟢 Enter Custom Live Preview')
+    await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
   })
 })
