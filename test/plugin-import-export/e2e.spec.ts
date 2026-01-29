@@ -160,6 +160,65 @@ test.describe('Import Export Plugin', () => {
       const suggestedFilename = download.suggestedFilename()
       expect(suggestedFilename).toMatch(/\.csv|\.json/)
     })
+
+    test('should enforce format restriction in UI and API when format is configured', async () => {
+      // Navigate to posts-no-jobs-queue collection list (which has format: 'csv' configured)
+      const postsNoJobsQueueURL = new AdminUrlUtil(serverURL, 'posts-no-jobs-queue')
+      await page.goto(postsNoJobsQueueURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      // Open the list menu and click Export
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      // Wait for the export drawer to open
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      // The format field should be readonly and only show CSV option when format is enforced
+      const formatField = page.locator('#field-format')
+      await expect(formatField).toBeVisible()
+
+      // Check that the field is disabled/readonly
+      const formatControl = formatField.locator('.rs__control')
+      await expect(formatControl).toHaveClass(/rs__control--is-disabled/)
+
+      // The value should be CSV (the enforced format)
+      await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
+
+      // Try to call the download API directly with JSON format (bypassing UI restrictions)
+      // This should return an error since the collection only allows CSV
+      const response = await page.request.post(
+        `${serverURL}/api/posts-no-jobs-queue-export/download`,
+        {
+          data: {
+            data: {
+              collectionSlug: 'posts-no-jobs-queue',
+              format: 'json',
+              name: 'test-export',
+              sort: '-createdAt',
+            },
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
+
+      // The API should reject the request with a format not supported error
+      expect(response.status()).toBe(400)
+      const responseBody = await response.json()
+      expect(responseBody.errors).toBeDefined()
+      expect(responseBody.errors[0].message).toContain('format')
+    })
   })
 
   test.describe('Import', () => {

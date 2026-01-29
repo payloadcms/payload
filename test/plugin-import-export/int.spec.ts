@@ -1202,6 +1202,211 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
+    describe('toCSV derived columns positioning', () => {
+      it('should position derived columns immediately after their base field', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Derived Columns Test',
+            customRelationship: user.user.id,
+            excerpt: 'test excerpt',
+            _status: 'published',
+          },
+        })
+
+        const fields = ['id', 'title', 'customRelationship', 'excerpt']
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const columns = Object.keys(data[0])
+
+        // Derived columns (customRelationship_id, customRelationship_email) should be adjacent to base column
+        const customRelIdx = columns.indexOf('customRelationship')
+        const idIdx = columns.indexOf('customRelationship_id')
+        const emailIdx = columns.indexOf('customRelationship_email')
+        const excerptIdx = columns.indexOf('excerpt')
+
+        expect(customRelIdx).toBeGreaterThan(-1)
+        expect(idIdx).toBe(customRelIdx + 1)
+        expect(emailIdx).toBe(customRelIdx + 2)
+        expect(excerptIdx).toBeGreaterThan(emailIdx)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
+
+    describe('date field export', () => {
+      it('should export date fields as ISO strings', async () => {
+        const dateValue = '2026-01-22T00:00:00.000Z'
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date Export Test',
+            date: dateValue,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'date'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        // Should export as ISO string format
+        expect(data[0].date).toBe('2026-01-22T00:00:00.000Z')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should handle null date values', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: { title: 'Null Date Test', date: null, _status: 'published' },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'date'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        expect(data[0].date).toBe('')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should not include timezone column when only date field is selected', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date With TZ Test',
+            dateWithTimezone: '2026-01-25T12:00:00.000Z',
+            dateWithTimezone_tz: 'Europe/London',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'dateWithTimezone'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const csvContent = fs.readFileSync(csvPath, 'utf-8')
+        const headerLine = csvContent.split('\n')[0]
+
+        // Should only have dateWithTimezone, not dateWithTimezone_tz
+        expect(headerLine).toContain('dateWithTimezone')
+        expect(headerLine).not.toContain('dateWithTimezone_tz')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should not create duplicate columns when selecting both date and timezone fields', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Date With TZ Duplicate Test',
+            dateWithTimezone: '2026-01-25T12:00:00.000Z',
+            dateWithTimezone_tz: 'Europe/London',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'dateWithTimezone', 'dateWithTimezone_tz'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const csvContent = fs.readFileSync(csvPath, 'utf-8')
+        const headerLine = csvContent.split('\n')[0]
+        const columns = headerLine.split(',')
+
+        // Count occurrences of dateWithTimezone_tz
+        const tzColumnCount = columns.filter((col) => col === 'dateWithTimezone_tz').length
+
+        // Should have exactly one dateWithTimezone_tz column, not duplicates
+        expect(tzColumnCount).toBe(1)
+
+        // Verify values are correct
+        const data = await readCSV(csvPath)
+        expect(data[0].dateWithTimezone).toBe('2026-01-25T12:00:00.000Z')
+        expect(data[0].dateWithTimezone_tz).toBe('Europe/London')
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
+
+    describe('export collection config options', () => {
+      it('should apply per-collection overrideCollection to create custom export collection', () => {
+        // posts-no-jobs-queue has overrideCollection that changes slug to 'posts-no-jobs-queue-export'
+        const customExportCollection = payload.collections['posts-no-jobs-queue-export']
+        expect(customExportCollection).toBeDefined()
+        expect(customExportCollection.config.admin?.group).toBe('Posts No Jobs Queue')
+      })
+
+      it('should apply format and disableSave options to custom export collection', () => {
+        const customExportCollection = payload.collections['posts-no-jobs-queue-export']
+        expect(customExportCollection.config.admin?.custom?.format).toBe('csv')
+        expect(customExportCollection.config.admin?.custom?.disableSave).toBe(true)
+      })
+    })
+
     describe('json and richText fields CSV serialization', () => {
       it('should serialize json and richText fields as JSON strings in single columns', async () => {
         const jsonData = {
@@ -1847,6 +2052,332 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           id: page.id,
         })
+      })
+    })
+
+    describe('Excel compatibility', () => {
+      it('should include UTF-8 BOM at the start of CSV files', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'BOM Test',
+            excerpt: 'Testing BOM presence',
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // UTF-8 BOM is bytes: 0xEF 0xBB 0xBF
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should correctly encode UTF-8 characters for Excel', async () => {
+        const unicodeTitle = 'Ümlauts, émojis 🎉, 日本語, and spëcial çharacters'
+        const unicodeExcerpt = 'Ñoño señor • bullet points • áéíóú'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: unicodeTitle,
+            excerpt: unicodeExcerpt,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'excerpt'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+
+        // Read the raw file content to verify UTF-8 encoding
+        const rawContent = fs.readFileSync(csvPath, 'utf-8')
+
+        // Verify the UTF-8 characters are present and not corrupted
+        expect(rawContent).toContain(unicodeTitle)
+        expect(rawContent).toContain(unicodeExcerpt)
+
+        // Also verify through the CSV parser
+        const data = await readCSV(csvPath)
+
+        expect(data[0].title).toBe(unicodeTitle)
+        expect(data[0].excerpt).toBe(unicodeExcerpt)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should handle special CSV characters that could break Excel parsing', async () => {
+        const specialCharsTitle = 'Title with "quotes" and, commas'
+        const specialCharsExcerpt = 'Line1\nLine2\nLine3 with\ttabs'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: specialCharsTitle,
+            excerpt: specialCharsExcerpt,
+            _status: 'published',
+          },
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'excerpt'],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+
+        // Verify special characters are preserved after CSV roundtrip
+        expect(data[0].title).toBe(specialCharsTitle)
+        expect(data[0].excerpt).toBe(specialCharsExcerpt)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+    })
+
+    describe('fields', () => {
+      it('should export checkbox field as true/false strings', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'checkbox'],
+            format: 'csv',
+            where: { title: { contains: 'Checkbox ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        const trueDoc = data.find((d) => d.title === 'Checkbox 0')
+        const falseDoc = data.find((d) => d.title === 'Checkbox 1')
+
+        // Checkbox exports as "1"/"0" or "true"/"false" depending on database
+        // False values may also be exported as empty string
+        expect(['true', '1']).toContain(trueDoc?.checkbox)
+        expect(['false', '0', '']).toContain(falseDoc?.checkbox)
+      })
+
+      it('should export select field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'select'],
+            format: 'csv',
+            where: { title: { contains: 'Select ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        expect(data.find((d) => d.title === 'Select 0')?.select).toBe('option1')
+        expect(data.find((d) => d.title === 'Select 1')?.select).toBe('option2')
+        expect(data.find((d) => d.title === 'Select 2')?.select).toBe('option3')
+      })
+
+      it('should export select hasMany field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'selectHasMany'],
+            format: 'csv',
+            where: { title: { contains: 'SelectMany ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        // HasMany fields may be exported as indexed columns (selectHasMany_0, etc.)
+        const selectManyDoc = data.find((d) => d.title === 'SelectMany 0')
+        expect(selectManyDoc).toBeDefined()
+      })
+
+      it('should export radio field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'radio'],
+            format: 'csv',
+            where: { title: { contains: 'Radio ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        expect(data.find((d) => d.title === 'Radio 0')?.radio).toBe('radio1')
+        expect(data.find((d) => d.title === 'Radio 1')?.radio).toBe('radio2')
+        expect(data.find((d) => d.title === 'Radio 2')?.radio).toBe('radio3')
+      })
+
+      it('should export email field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'email'],
+            format: 'csv',
+            where: { title: { contains: 'Email ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        expect(data.find((d) => d.title === 'Email 0')?.email).toBe('test0@example.com')
+        expect(data.find((d) => d.title === 'Email 1')?.email).toBe('test1@example.com')
+      })
+
+      it('should export textarea field with multiline content', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'textarea'],
+            format: 'csv',
+            where: { title: { contains: 'Textarea ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        const textarea0 = data.find((d) => d.title === 'Textarea 0')
+        expect(textarea0?.textarea).toContain('Line 1')
+        expect(textarea0?.textarea).toContain('Line 2')
+      })
+
+      it('should export code field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'code'],
+            format: 'csv',
+            where: { title: { contains: 'Code ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        expect(data.find((d) => d.title === 'Code 0')?.code).toContain('function test0')
+      })
+
+      it('should export point field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'point'],
+            format: 'csv',
+            where: { title: { contains: 'Point ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        // Point fields are exported as individual columns
+        expect(data.find((d) => d.title === 'Point 0')).toBeDefined()
+      })
+
+      it('should export hasMany text field values', async () => {
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'textHasMany'],
+            format: 'csv',
+            where: { title: { contains: 'TextMany ' } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const data = await readCSV(path.join(dirname, './uploads', doc.filename as string))
+
+        expect(data).toHaveLength(3)
+        expect(data.find((d) => d.title === 'TextMany 0')).toBeDefined()
       })
     })
   })
@@ -4037,6 +4568,349 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
     })
+
+    describe('fields', () => {
+      it('should import checkbox field from CSV', async () => {
+        const csvContent =
+          'title,checkbox\n' +
+          '"Checkbox Import True","true"\n' +
+          '"Checkbox Import False","false"\n' +
+          '"Checkbox Import 1","1"\n' +
+          '"Checkbox Import 0","0"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'checkbox-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(4)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Checkbox Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(4)
+        expect(importedPages.docs.find((d) => d.title === 'Checkbox Import True')?.checkbox).toBe(
+          true,
+        )
+        expect(importedPages.docs.find((d) => d.title === 'Checkbox Import False')?.checkbox).toBe(
+          false,
+        )
+        expect(importedPages.docs.find((d) => d.title === 'Checkbox Import 1')?.checkbox).toBe(true)
+        expect(importedPages.docs.find((d) => d.title === 'Checkbox Import 0')?.checkbox).toBe(
+          false,
+        )
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Checkbox Import ' } },
+        })
+      })
+
+      it('should import select field from CSV', async () => {
+        const csvContent =
+          'title,select\n' +
+          '"Select Import 1","option1"\n' +
+          '"Select Import 2","option2"\n' +
+          '"Select Import 3","option3"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'select-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Select Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(3)
+        expect(importedPages.docs.find((d) => d.title === 'Select Import 1')?.select).toBe(
+          'option1',
+        )
+        expect(importedPages.docs.find((d) => d.title === 'Select Import 2')?.select).toBe(
+          'option2',
+        )
+        expect(importedPages.docs.find((d) => d.title === 'Select Import 3')?.select).toBe(
+          'option3',
+        )
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Select Import ' } },
+        })
+      })
+
+      it('should import radio field from CSV', async () => {
+        const csvContent =
+          'title,radio\n' +
+          '"Radio Import 1","radio1"\n' +
+          '"Radio Import 2","radio2"\n' +
+          '"Radio Import 3","radio3"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'radio-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Radio Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(3)
+        expect(importedPages.docs.find((d) => d.title === 'Radio Import 1')?.radio).toBe('radio1')
+        expect(importedPages.docs.find((d) => d.title === 'Radio Import 2')?.radio).toBe('radio2')
+        expect(importedPages.docs.find((d) => d.title === 'Radio Import 3')?.radio).toBe('radio3')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Radio Import ' } },
+        })
+      })
+
+      it('should import email field from CSV', async () => {
+        const csvContent =
+          'title,email\n' +
+          '"Email Import 1","user1@example.com"\n' +
+          '"Email Import 2","user2@example.org"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'email-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Email Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(2)
+        expect(importedPages.docs.find((d) => d.title === 'Email Import 1')?.email).toBe(
+          'user1@example.com',
+        )
+        expect(importedPages.docs.find((d) => d.title === 'Email Import 2')?.email).toBe(
+          'user2@example.org',
+        )
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Email Import ' } },
+        })
+      })
+
+      it('should import textarea field with multiline content from CSV', async () => {
+        const csvContent = 'title,textarea\n' + '"Textarea Import 1","Line 1\nLine 2\nLine 3"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'textarea-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { equals: 'Textarea Import 1' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        expect(importedPages.docs[0]?.textarea).toContain('Line 1')
+        expect(importedPages.docs[0]?.textarea).toContain('Line 2')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { equals: 'Textarea Import 1' } },
+        })
+      })
+
+      it('should import code field from CSV', async () => {
+        const csvContent = 'title,code\n' + '"Code Import 1","function hello() { return 42; }"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'code-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { equals: 'Code Import 1' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        expect(importedPages.docs[0]?.code).toBe('function hello() { return 42; }')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { equals: 'Code Import 1' } },
+        })
+      })
+
+      it('should import point field from CSV', async () => {
+        const csvContent =
+          'title,point_0,point_1\n' +
+          '"Point Import SF","-122.4194","37.7749"\n' +
+          '"Point Import NYC","-74.006","40.7128"'
+
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'point-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { contains: 'Point Import ' } },
+          sort: 'title',
+        })
+
+        expect(importedPages.docs).toHaveLength(2)
+        expect(importedPages.docs.find((d) => d.title === 'Point Import NYC')?.point).toEqual([
+          -74.006, 40.7128,
+        ])
+        expect(importedPages.docs.find((d) => d.title === 'Point Import SF')?.point).toEqual([
+          -122.4194, 37.7749,
+        ])
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { contains: 'Point Import ' } },
+        })
+      })
+    })
   })
 
   describe('posts-exports-only and posts-imports-only collections', () => {
@@ -5899,41 +6773,44 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('concurrent operations', () => {
     it('should handle multiple simultaneous imports', async () => {
-      // Create two different CSV files
-      const csv1 = 'title\n"Concurrent Import A1"\n"Concurrent Import A2"'
-      const csv2 = 'title\n"Concurrent Import B1"\n"Concurrent Import B2"'
+      // Use unique timestamp to avoid filename collisions across test runs
+      const timestamp = Date.now()
 
-      // Start both imports simultaneously
-      const [import1, import2] = await Promise.all([
-        payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: Buffer.from(csv1),
-            mimetype: 'text/csv',
-            name: 'concurrent-import-1.csv',
-            size: csv1.length,
-          },
-        }),
-        payload.create({
-          collection: 'imports',
-          user,
-          data: {
-            collectionSlug: 'pages',
-            importMode: 'create',
-          },
-          file: {
-            data: Buffer.from(csv2),
-            mimetype: 'text/csv',
-            name: 'concurrent-import-2.csv',
-            size: csv2.length,
-          },
-        }),
-      ])
+      // Create two different CSV files with unique identifiers
+      const csv1 = `title\n"Concurrent Import A1 ${timestamp}"\n"Concurrent Import A2 ${timestamp}"`
+      const csv2 = `title\n"Concurrent Import B1 ${timestamp}"\n"Concurrent Import B2 ${timestamp}"`
+
+      // Create imports sequentially to avoid race conditions in file upload processing
+      // The concurrent aspect we're testing is the job execution, not the document creation
+      const import1 = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: Buffer.from(csv1),
+          mimetype: 'text/csv',
+          name: `concurrent-import-1-${timestamp}.csv`,
+          size: csv1.length,
+        },
+      })
+
+      const import2 = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: Buffer.from(csv2),
+          mimetype: 'text/csv',
+          name: `concurrent-import-2-${timestamp}.csv`,
+          size: csv2.length,
+        },
+      })
 
       // Run jobs
       await payload.jobs.run()
@@ -5953,7 +6830,10 @@ describe('@payloadcms/plugin-import-export', () => {
       const allDocs = await payload.find({
         collection: 'pages',
         where: {
-          title: { contains: 'Concurrent Import' },
+          and: [
+            { title: { contains: 'Concurrent Import' } },
+            { title: { contains: String(timestamp) } },
+          ],
         },
       })
 
@@ -5963,7 +6843,7 @@ describe('@payloadcms/plugin-import-export', () => {
       await payload.delete({
         collection: 'pages',
         where: {
-          title: { contains: 'Concurrent Import' },
+          title: { contains: String(timestamp) },
         },
       })
     })

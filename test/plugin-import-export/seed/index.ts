@@ -184,6 +184,112 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
 
+    // Seed pages with checkbox field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Checkbox ${i}`,
+          checkbox: i % 2 === 0,
+        },
+      })
+    }
+
+    // Seed pages with select field
+    for (let i = 0; i < 3; i++) {
+      const options = ['option1', 'option2', 'option3'] as const
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Select ${i}`,
+          select: options[i % 3],
+        },
+      })
+    }
+
+    // Seed pages with select hasMany field
+    for (let i = 0; i < 3; i++) {
+      const tagSets: Array<Array<'tagA' | 'tagB' | 'tagC' | 'tagD'>> = [
+        ['tagA'],
+        ['tagA', 'tagB'],
+        ['tagB', 'tagC', 'tagD'],
+      ]
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `SelectMany ${i}`,
+          selectHasMany: tagSets[i],
+        },
+      })
+    }
+
+    // Seed pages with radio field
+    for (let i = 0; i < 3; i++) {
+      const radios = ['radio1', 'radio2', 'radio3'] as const
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Radio ${i}`,
+          radio: radios[i % 3],
+        },
+      })
+    }
+
+    // Seed pages with email field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Email ${i}`,
+          email: `test${i}@example.com`,
+        },
+      })
+    }
+
+    // Seed pages with textarea field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Textarea ${i}`,
+          textarea: `Line 1 for textarea ${i}\nLine 2\nLine 3`,
+        },
+      })
+    }
+
+    // Seed pages with code field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Code ${i}`,
+          code: `function test${i}() {\n  return ${i};\n}`,
+        },
+      })
+    }
+
+    // Seed pages with point field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Point ${i}`,
+          point: [-122.4194 + i * 0.01, 37.7749 + i * 0.01],
+        },
+      })
+    }
+
+    // Seed pages with hasMany text field
+    for (let i = 0; i < 3; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `TextMany ${i}`,
+          textHasMany: [`tag${i}a`, `tag${i}b`, `tag${i}c`],
+        },
+      })
+    }
+
     for (let i = 0; i < 2; i++) {
       await payload.create({
         collection: 'pages',

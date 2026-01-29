@@ -16,9 +16,20 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
       throw new APIError('Request data is required.')
     }
 
-    const { collectionSlug } = body.data || {}
+    const { collectionSlug, format } = body.data || {}
 
     req.payload.logger.info(`Download request received ${collectionSlug}`)
+
+    const targetCollection = req.payload.collections[collectionSlug]
+    if (targetCollection) {
+      const forcedFormat =
+        targetCollection.config.admin?.custom?.['plugin-import-export']?.exportFormat
+      if (forcedFormat && format && format !== forcedFormat) {
+        throw new APIError(
+          `Export format '${format}' is not supported for collection '${collectionSlug}'. Only '${forcedFormat}' format is allowed.`,
+        )
+      }
+    }
 
     const { user } = req
 

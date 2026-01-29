@@ -127,12 +127,20 @@ export const importExportPlugin =
       // Find fields explicitly marked as disabled for import/export
       const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
 
-      // Store disabled field accessors in the admin config for use in the UI
+      // Get export format restriction for this collection (if any)
+      const exportConfig =
+        typeof collectionPluginConfig?.export === 'object'
+          ? collectionPluginConfig.export
+          : undefined
+      const exportFormat = exportConfig?.format
+
+      // Store disabled field accessors and export format in the admin config for use in the UI
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
           ...(collection.admin.custom?.['plugin-import-export'] || {}),
           disabledFields: disabledFieldAccessors,
+          ...(exportFormat !== undefined && { exportFormat }),
         },
       }
 
@@ -188,6 +196,11 @@ declare module 'payload' {
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.
        */
       disabledFields?: string[]
+      /**
+       * When set, forces exports from this collection to use this format.
+       * This value is read from the plugin config's `export.format` option.
+       */
+      exportFormat?: 'csv' | 'json'
     }
   }
 }

@@ -1,6 +1,7 @@
 import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
+import { getObjectDotNotation } from 'payload/shared'
 
 import type { ExportPreviewResponse } from '../types.js'
 
@@ -10,12 +11,12 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneCompanionFields.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
 import { getSchemaColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
-import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
@@ -101,6 +102,11 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   const disabledFields =
     targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
+  // Collect auto-generated timezone companion fields from schema
+  const timezoneCompanionFields = collectTimezoneCompanionFields(
+    targetCollection.config.flattenedFields,
+  )
+
   // Always compute columns for CSV (even if no docs) for consistent schema
   const columns = isCSV
     ? getSchemaColumns({
@@ -109,6 +115,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         fields,
         locale: locale ?? undefined,
         localeCodes,
+        timezoneCompanionFields,
       })
     : undefined
 
@@ -171,6 +178,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       const row = flattenObject({
         doc,
         fields,
+        timezoneCompanionFields,
         toCSVFunctions,
       })
 
@@ -194,7 +202,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         const trimmed: Record<string, unknown> = {}
 
         for (const key of fields) {
-          const value = getValueAtPath(output, key)
+          const value = getObjectDotNotation(output, key)
           setNestedValue(trimmed, key, value ?? null)
         }
 
