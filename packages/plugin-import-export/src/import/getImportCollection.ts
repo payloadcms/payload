@@ -5,12 +5,10 @@ import type {
   Config,
 } from 'payload'
 
-import fs from 'fs'
-import path from 'path'
-
 import type { ImportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
+import { getFileFromDoc } from '../utilities/getFileFromDoc.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
@@ -83,29 +81,16 @@ export const getImportCollection = ({
       const debug = pluginConfig.debug || false
 
       try {
-        // Get file data from the uploaded document
-        let fileData: Buffer
-        let fileMimetype: string
-
-        if (doc.url && doc.url.startsWith('http')) {
-          // File has been uploaded to external storage (S3, etc.) - fetch it
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
-          }
-          fileData = Buffer.from(await response.arrayBuffer())
-          fileMimetype = doc.mimeType || 'text/csv'
-        } else {
-          // File is stored locally - read from filesystem
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-          fileMimetype = doc.mimeType || 'text/csv'
-        }
+        // Get file data from the uploaded document (handles both local and cloud storage)
+        const { data: fileData, mimetype: fileMimetype } = await getFileFromDoc({
+          collectionConfig,
+          doc: {
+            filename: doc.filename,
+            mimeType: doc.mimeType,
+            url: doc.url,
+          },
+          req,
+        })
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
@@ -250,22 +235,16 @@ export const getImportCollection = ({
 
       try {
         // Get file data for job - need to read from disk/URL since req.file is not available in afterChange
-        let fileData: Buffer
-        if (doc.url && doc.url.startsWith('http')) {
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
-          }
-          fileData = Buffer.from(await response.arrayBuffer())
-        } else {
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-        }
+        // Uses getFileFromDoc which handles both local and cloud storage correctly
+        const { data: fileData, mimetype: fileMimetype } = await getFileFromDoc({
+          collectionConfig,
+          doc: {
+            filename: doc.filename,
+            mimeType: doc.mimeType,
+            url: doc.url,
+          },
+          req,
+        })
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
@@ -285,9 +264,9 @@ export const getImportCollection = ({
             name: doc.filename,
             // Convert to base64 for job serialization - will be converted back to Buffer in task handler
             data: fileData.toString('base64') as unknown as Buffer,
-            mimetype: doc.mimeType || 'text/csv',
+            mimetype: fileMimetype,
           },
-          format: doc.mimeType === 'text/csv' ? 'csv' : 'json',
+          format: fileMimetype === 'text/csv' ? 'csv' : 'json',
           importId: doc.id,
           importMode: doc.importMode || 'create',
           importsCollection: collectionConfig.slug,
