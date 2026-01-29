@@ -28,9 +28,57 @@ Then, you could configure two different runner strategies:
 
 As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in four ways:
 
-### Cron jobs
+### Bin script (Recommended for Dedicated Servers)
 
-The `jobs.autoRun` property allows you to configure cron jobs that automatically **execute** jobs from your queue at specified intervals.
+For dedicated servers, the recommended approach is to use Payload's bin script to run jobs. This creates a completely separate process from your Next.js server, making it easier to deploy, scale, and manage workers independently.
+
+```sh
+# Basic usage - run jobs from default queue
+pnpm payload jobs:run
+
+# Run with custom queue and limit
+pnpm payload jobs:run --queue myQueue --limit 15
+
+# Run on a cron schedule (recommended for production)
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue
+
+# Run and also handle schedules (both queuing and running)
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules
+
+# Run all jobs from all queues
+pnpm payload jobs:run --all-queues
+```
+
+**Benefits of using bin scripts:**
+
+- **Separate process**: Runs completely independently from your Next.js server, preventing any impact on API response times
+- **Easy deployment**: Can be deployed as a separate service/container, making it simple to scale workers independently
+- **Simple monitoring**: Each worker process can be monitored, restarted, and scaled independently
+- **No Next.js overhead**: Workers don't load the entire Next.js application, making them lighter and faster
+
+**Deployment example:**
+
+```yaml
+# docker-compose.yml or similar
+services:
+  nextjs:
+    # Your main Next.js app
+    command: pnpm start
+
+  worker-default:
+    # Worker for default queue
+    command: pnpm payload jobs:run --cron "*/5 * * * *" --queue default
+
+  worker-nightly:
+    # Worker for nightly queue
+    command: pnpm payload jobs:run --cron "* * * * *" --queue nightly --handle-schedules
+```
+
+This makes it easy to run multiple workers for different queues, scale them independently, and deploy them to different servers if needed.
+
+### autoRun (Alternative for Dedicated Servers)
+
+The `jobs.autoRun` property allows you to configure cron jobs that automatically **execute** jobs from your queue at specified intervals. This runs within your Next.js process.
 
 <Banner type="warning">
   **Important Distinction:** `autoRun` does NOT queue new jobs—it only **runs**
@@ -114,7 +162,9 @@ In this example:
 
 <Banner type="warning">
   autoRun is intended for use with a dedicated server that is always running,
-  and should not be used on serverless platforms like Vercel.
+  and should not be used on serverless platforms like Vercel. For dedicated
+  servers, consider using bin scripts instead, as they run in a separate process
+  and are easier to deploy and scale.
 </Banner>
 
 ### Endpoint
@@ -193,7 +243,7 @@ This works because Vercel automatically makes the `CRON_SECRET` environment vari
 
 After the project is deployed to Vercel, the Vercel Cron job will automatically trigger the `/api/payload-jobs/run` endpoint in the specified schedule, running the queued jobs in the background.
 
-### Local API
+### Local API (For Programmatic Control)
 
 If you want to process jobs programmatically from your server-side code, you can use the Local API:
 
@@ -221,38 +271,6 @@ await payload.jobs.run({
 const results = await payload.jobs.runByID({
   id: myJobID,
 })
-```
-
-### Bin script
-
-Finally, you can process jobs via the bin script that comes with Payload out of the box. By default, this script will run jobs from the `default` queue, with a limit of 10 jobs per invocation:
-
-```sh
-pnpm payload jobs:run
-```
-
-You can override the default queue and limit by passing the `--queue` and `--limit` flags:
-
-```sh
-pnpm payload jobs:run --queue myQueue --limit 15
-```
-
-If you want to run all jobs from all queues, you can pass the `--all-queues` flag:
-
-```sh
-pnpm payload jobs:run --all-queues
-```
-
-In addition, the bin script allows you to pass a `--cron` flag to the `jobs:run` command to run the jobs on a scheduled, cron basis:
-
-```sh
-pnpm payload jobs:run --cron "*/5 * * * *"
-```
-
-You can also pass `--handle-schedules` flag to the `jobs:run` command to make it schedule jobs according to configured schedules:
-
-```sh
-pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
 ```
 
 ## Processing Order
@@ -441,17 +459,17 @@ This makes it easy to:
 
 Here's a quick guide to help you choose:
 
-| Method                    | Best For                               | Pros                                   | Cons                                               |
-| ------------------------- | -------------------------------------- | -------------------------------------- | -------------------------------------------------- |
-| **Cron jobs** (`autoRun`) | Dedicated servers, long-running apps   | Simple setup, automatic execution      | Not for serverless, requires always-running server |
-| **Endpoint**              | Serverless platforms (Vercel, Netlify) | Works with serverless, easy to trigger | Requires external cron (Vercel Cron, etc.)         |
-| **Local API**             | Custom scheduling, testing             | Full control, good for tests           | Must implement your own scheduling                 |
-| **Bin script**            | Development, manual execution          | Quick testing, manual control          | Manual invocation only                             |
+| Method         | Best For                               | Pros                                   | Cons                                       |
+| -------------- | -------------------------------------- | -------------------------------------- | ------------------------------------------ |
+| **Bin script** | Dedicated servers (Recommended)        | Separate process, easy to deploy/scale | Requires dedicated server                  |
+| **autoRun**    | Dedicated servers (Alternative)        | Simple setup, automatic execution      | Runs in Next.js process                    |
+| **Endpoint**   | Serverless platforms (Vercel, Netlify) | Works with serverless, easy to trigger | Requires external cron (Vercel Cron, etc.) |
+| **Local API**  | Custom scheduling, testing             | Full control, good for tests           | Must implement your own scheduling         |
 
 **Recommendations:**
 
+- **Production (Dedicated Server):** Use Bin script with `--cron` flag
 - **Production (Serverless):** Use Endpoint + Vercel Cron
-- **Production (Server):** Use Cron jobs (`autoRun`)
 - **Development:** Use Bin script or Local API
 - **Testing:** Use Local API with `payload.jobs.runByID()`
 
@@ -493,7 +511,7 @@ jobs: {
   tasks: [
     {
       slug: 'myTask',
-      schedule: [{ cron: '0 8 * * *', queue: 'default' }], // ✅ Now jobs will be queued
+      schedule: [{ cron: '0 8 * * *', queue: 'default' }], //  Now jobs will be queued
       handler: async () => {},
     },
   ]
@@ -512,7 +530,7 @@ jobs: {
 // Task queues to 'reports'
 schedule: [{ cron: '0 8 * * *', queue: 'reports' }]
 
-// But autoRun processes 'default' ❌
+// But autoRun processes 'default'
 autoRun: [{ queue: 'default' }] // Won't pick up the job!
 ```
 
@@ -522,7 +540,7 @@ autoRun: [{ queue: 'default' }] // Won't pick up the job!
 // Task queues to 'reports'
 schedule: [{ cron: '0 8 * * *', queue: 'reports' }]
 
-// autoRun also processes 'reports' ✅
+// autoRun also processes 'reports'
 autoRun: [{ cron: '* * * * *', queue: 'reports' }] // Now they match!
 ```
 

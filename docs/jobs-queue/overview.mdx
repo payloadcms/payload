@@ -73,7 +73,7 @@ Here's a quick overview:
 
 Here's a visual representation of how the pieces fit together:
 
-```
+```plaintext
 ┌─────────────────────────────────────────────────────────────┐
 │  1. DEFINE WORK                                             │
 ├─────────────────────────────────────────────────────────────┤
@@ -92,6 +92,10 @@ Here's a visual representation of how the pieces fit together:
 │  Option B: Automatic Queuing (Scheduled)                    │
 │    → schedule: [{ cron: '0 8 * * *', queue: 'emails' }]     │
 │    → Used for recurring tasks                               │
+│                                                             │
+│  Option C: Bin Script (for handling schedules)              │
+│    → pnpm payload jobs:handle-schedules --cron "* * * * *"  │
+│    → Triggers schedule queuing in separate process          │
 └─────────────────────────────────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -106,15 +110,19 @@ Here's a visual representation of how the pieces fit together:
 ┌─────────────────────────────────────────────────────────────┐
 │  4. RUN JOBS (Choose one)                                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Option A: autoRun (Dedicated Server)                       │
-│    → autoRun: [{ cron: '* * * * *', queue: 'emails' }]      │
-│    → Automatic execution on schedule                        │
+│  Option A: Bin Scripts (Dedicated Server) [RECOMMENDED]    │
+│    → pnpm payload jobs:run --cron "* * * * *" --queue...   │
+│    → Separate process, easier to deploy/scale               │
 │                                                             │
-│  Option B: API Endpoint (Serverless)                        │
+│  Option B: autoRun (Dedicated Server)                       │
+│    → autoRun: [{ cron: '* * * * *', queue: 'emails' }]      │
+│    → Runs within Next.js process                            │
+│                                                             │
+│  Option C: API Endpoint (Serverless)                        │
 │    → GET /api/payload-jobs/run?queue=emails                 │
 │    → Triggered by external cron (Vercel Cron, etc.)         │
 │                                                             │
-│  Option C: Manual                                           │
+│  Option D: Manual                                           │
 │    → payload.jobs.run({ queue: 'emails' })                  │
 │    → Programmatic control                                   │
 └─────────────────────────────────────────────────────────────┘
