@@ -2,8 +2,8 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
+import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -389,11 +389,13 @@ export type CollectionAdminOptions = {
        * Replace, modify, or add new "document" views.
        * @link https://payloadcms.com/docs/custom-components/document-views
        */
+      // @ts-expect-error - edit allows more complex nested structure than AdminViewConfig
       edit?: EditConfig
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
        */
+      // @ts-expect-error - list allows actions array which doesn't match AdminViewConfig
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent

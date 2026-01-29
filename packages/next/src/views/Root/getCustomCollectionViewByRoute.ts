@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { AdminViewConfig, AdminViewServerProps, PayloadComponent, SanitizedCollectionConfig  } from 'payload'
 
 import type { ViewFromConfig } from './getRouteData.js'
 
@@ -25,15 +25,24 @@ export const getCustomCollectionViewByRoute = ({
         return false
       }
 
-      if (typeof view === 'object' && 'path' in view) {
-        const viewPath = `${baseRoute}${view.path}`
+      // Type guard: custom views should be AdminViewConfig with path and Component
+      const isAdminViewConfig =
+        typeof view === 'object' &&
+        view !== null &&
+        'path' in view &&
+        'Component' in view &&
+        typeof view.path === 'string'
+
+      if (isAdminViewConfig) {
+        const adminView = view as AdminViewConfig
+        const viewPath = `${baseRoute}${adminView.path}`
 
         const isMatching = isPathMatchingRoute({
           currentRoute,
-          exact: view.exact,
+          exact: adminView.exact,
           path: viewPath,
-          sensitive: view.sensitive,
-          strict: view.strict,
+          sensitive: adminView.sensitive,
+          strict: adminView.strict,
         })
 
         if (isMatching) {
@@ -47,9 +56,10 @@ export const getCustomCollectionViewByRoute = ({
     })?.[1]
 
     if (foundViewConfig && 'Component' in foundViewConfig) {
+      const adminView = foundViewConfig as AdminViewConfig
       return {
         view: {
-          payloadComponent: foundViewConfig.Component,
+          payloadComponent: adminView.Component as PayloadComponent<AdminViewServerProps>,
         },
         viewKey,
       }
