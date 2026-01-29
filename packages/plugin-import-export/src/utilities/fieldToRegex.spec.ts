@@ -117,5 +117,80 @@ describe('fieldToRegex', () => {
       // Should not match if title is a prefix of another word
       expect(regex.test('meta_titleExtra')).toBe(false)
     })
+
+    it('should handle field names starting with underscore', () => {
+      const regex = fieldToRegex('_status')
+
+      expect(regex.test('_status')).toBe(true)
+      expect(regex.test('_status_0')).toBe(true)
+      expect(regex.test('_statusExtra')).toBe(false)
+    })
+
+    it('should handle field names containing underscores', () => {
+      const regex = fieldToRegex('my_field')
+
+      expect(regex.test('my_field')).toBe(true)
+      expect(regex.test('my_field_0')).toBe(true)
+      expect(regex.test('my_fieldExtra')).toBe(false)
+    })
+
+    it('should handle nested paths with underscore fields', () => {
+      const regex = fieldToRegex('group._status')
+
+      expect(regex.test('group__status')).toBe(true)
+      expect(regex.test('group_0__status')).toBe(true)
+    })
+  })
+
+  describe('date fields with timezone companions', () => {
+    it('should match date field and its _tz companion', () => {
+      const regex = fieldToRegex('publishedDate')
+
+      expect(regex.test('publishedDate')).toBe(true)
+      expect(regex.test('publishedDate_tz')).toBe(true)
+    })
+
+    it('should match nested date field and its _tz companion', () => {
+      const regex = fieldToRegex('meta.publishedDate')
+
+      expect(regex.test('meta_publishedDate')).toBe(true)
+      expect(regex.test('meta_publishedDate_tz')).toBe(true)
+      expect(regex.test('meta_0_publishedDate')).toBe(true)
+      expect(regex.test('meta_0_publishedDate_tz')).toBe(true)
+    })
+
+    it('should match date fields in arrays with _tz companions', () => {
+      const regex = fieldToRegex('events.startDate')
+
+      expect(regex.test('events_0_startDate')).toBe(true)
+      expect(regex.test('events_0_startDate_tz')).toBe(true)
+      expect(regex.test('events_1_startDate')).toBe(true)
+      expect(regex.test('events_1_startDate_tz')).toBe(true)
+    })
+
+    it('should match deeply nested date fields with _tz companions', () => {
+      const regex = fieldToRegex('blocks.content.scheduledAt')
+
+      expect(regex.test('blocks_0_content_scheduledAt')).toBe(true)
+      expect(regex.test('blocks_0_content_scheduledAt_tz')).toBe(true)
+      expect(regex.test('blocks_0_content_0_scheduledAt')).toBe(true)
+      expect(regex.test('blocks_0_content_0_scheduledAt_tz')).toBe(true)
+    })
+
+    it('should not match _tz suffix on unrelated fields', () => {
+      const regex = fieldToRegex('title')
+
+      expect(regex.test('title')).toBe(true)
+      expect(regex.test('title_tz')).toBe(true) // _tz is treated as a nested field suffix
+      expect(regex.test('publishedDate_tz')).toBe(false)
+    })
+
+    it('should handle date fields with underscores in name', () => {
+      const regex = fieldToRegex('start_date')
+
+      expect(regex.test('start_date')).toBe(true)
+      expect(regex.test('start_date_tz')).toBe(true)
+      expect(regex.test('start_date_0')).toBe(true)
+    })
   })
 })

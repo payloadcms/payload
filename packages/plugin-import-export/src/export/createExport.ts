@@ -185,13 +185,13 @@ export const createExport = async (args: CreateExportArgs) => {
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-  const disabledRegexes: RegExp[] = disabledFields.map(buildDisabledFieldRegex)
+  const disabledMatchers = disabledFields.map(buildDisabledFieldRegex)
 
   const filterDisabledCSV = (row: Record<string, unknown>): Record<string, unknown> => {
     const filtered: Record<string, unknown> = {}
 
     for (const [key, value] of Object.entries(row)) {
-      const isDisabled = disabledRegexes.some((regex) => regex.test(key))
+      const isDisabled = disabledMatchers.some((matcher) => matcher.test(key))
       if (!isDisabled) {
         filtered[key] = value
       }
