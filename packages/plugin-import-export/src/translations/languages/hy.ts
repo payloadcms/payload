@@ -32,7 +32,10 @@ export const hyTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Ներմուծման ամփոփում',
     importDocumentLabel: 'Ներմուծել {{label}}',
     importResults: 'Ներմուծման արդյունքներ',
-    limitCapped: 'Սdelays {{limit}}',
+    limitCapped: 'Սահմանափակումը սահմանափակված է {{limit}} առավելագույնով',
+    limitExceededExport: 'Արտահանումը սահմանափակված է {{limit}} փաստաթղթերով',
+    limitExceededImport:
+      'Ներմուծման ֆայլը պարունակում է {{count}} փաստաթուղթ, բայց սահմանաչափը {{limit}} է',
     matchBy: 'Համընկնեցվել է',
     mode: 'Ռեժիմ',
     noDataToPreview:
