@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { AuthCollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../forgotPassword.js'
 
@@ -6,8 +6,8 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { forgotPasswordOperation } from '../forgotPassword.js'
 
-export type Options<T extends CollectionSlug> = {
-  collection: T
+export type Options<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
   context?: RequestContext
   data: {
     email: string
@@ -17,7 +17,7 @@ export type Options<T extends CollectionSlug> = {
   req?: Partial<PayloadRequest>
 }
 
-export async function forgotPasswordLocal<T extends CollectionSlug>(
+export async function forgotPasswordLocal<T extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {

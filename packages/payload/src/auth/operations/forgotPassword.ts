@@ -6,7 +6,7 @@ import type {
   AuthOperationsFromCollectionSlug,
   Collection,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -20,7 +20,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: {
     [key: string]: unknown
@@ -32,7 +32,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
 
 export type Result = string
 
-export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
+export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   incomingArgs: Arguments<TSlug>,
 ): Promise<null | string> => {
   const loginWithUsername = incomingArgs.collection.config.auth.loginWithUsername
