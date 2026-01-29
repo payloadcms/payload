@@ -18,6 +18,7 @@ import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
 import { getSchemaColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
 export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
@@ -58,6 +59,12 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     )
   }
 
+  const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
+  const maxLimit = await resolveLimit({
+    limit: pluginConfig?.exportLimit,
+    req,
+  })
+
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
   const draft = draftFromReq === 'yes'
   const collectionHasVersions = Boolean(targetCollection.config.versions)
@@ -79,9 +86,20 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
   const totalMatchingDocs = countResult.totalDocs
 
-  // Calculate actual export count (respecting export limit)
-  const exportTotalDocs =
-    exportLimit && exportLimit > 0 ? Math.min(totalMatchingDocs, exportLimit) : totalMatchingDocs
+  // Calculate actual export count (respecting both export limit and max limit)
+  let effectiveLimit = totalMatchingDocs
+
+  // Apply user's export limit if provided
+  if (exportLimit && exportLimit > 0) {
+    effectiveLimit = Math.min(effectiveLimit, exportLimit)
+  }
+
+  // Apply max limit if configured
+  if (typeof maxLimit === 'number' && maxLimit > 0) {
+    effectiveLimit = Math.min(effectiveLimit, maxLimit)
+  }
+
+  const exportTotalDocs = effectiveLimit
 
   // Calculate preview pagination that respects export limit
   // Preview should only show docs that will actually be exported
@@ -119,8 +137,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       })
     : undefined
 
-  // If we're beyond the export limit, return empty docs with columns
-  if (exportLimit && exportLimit > 0 && previewStartIndex >= exportLimit) {
+  // If we're beyond the effective limit (considering both user limit and maxLimit), return empty docs
+  if (exportTotalDocs > 0 && previewStartIndex >= exportTotalDocs) {
     const response: ExportPreviewResponse = {
       columns,
       docs: [],
@@ -128,6 +146,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       hasNextPage: false,
       hasPrevPage: previewPage > 1,
       limit: previewLimit,
+      maxLimit,
       page: previewPage,
       totalDocs: exportTotalDocs,
       totalPages: previewTotalPages,
@@ -151,10 +170,10 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     where,
   })
 
-  // Trim docs to respect export limit boundary
+  // Trim docs to respect effective limit boundary (user limit clamped by maxLimit)
   let docs = result.docs
-  if (exportLimit && exportLimit > 0) {
-    const remainingInExport = exportLimit - previewStartIndex
+  if (exportTotalDocs > 0) {
+    const remainingInExport = exportTotalDocs - previewStartIndex
     if (remainingInExport < docs.length) {
       docs = docs.slice(0, remainingInExport)
     }
@@ -223,6 +242,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     hasNextPage,
     hasPrevPage,
     limit: previewLimit,
+    maxLimit,
     page: previewPage,
     totalDocs: exportTotalDocs,
     totalPages: previewTotalPages,

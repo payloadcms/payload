@@ -6,6 +6,7 @@ import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
   FromCSVFunction,
   ImportExportPluginConfig,
+  Limit,
   PluginCollectionConfig,
   ToCSVFunction,
 } from './types.js'
@@ -127,14 +128,23 @@ export const importExportPlugin =
       // Find fields explicitly marked as disabled for import/export
       const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
 
-      // Get export format restriction for this collection (if any)
       const exportConfig =
         typeof collectionPluginConfig?.export === 'object'
           ? collectionPluginConfig.export
           : undefined
       const exportFormat = exportConfig?.format
 
+      const importConfig =
+        typeof collectionPluginConfig?.import === 'object'
+          ? collectionPluginConfig.import
+          : undefined
+
+      const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
+
+      const importLimit = importConfig?.limit ?? pluginConfig.importLimit
+
       // Store disabled field accessors and export format in the admin config for use in the UI
+      // Note: limits are stored in collection.custom (server-only) because they can be functions
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
@@ -142,6 +152,18 @@ export const importExportPlugin =
           disabledFields: disabledFieldAccessors,
           ...(exportFormat !== undefined && { exportFormat }),
         },
+      }
+
+      // Store limits in collection.custom (server-only) since they can be functions
+      if (exportLimit !== undefined || importLimit !== undefined) {
+        collection.custom = {
+          ...(collection.custom || {}),
+          'plugin-import-export': {
+            ...(collection.custom?.['plugin-import-export'] || {}),
+            ...(exportLimit !== undefined && { exportLimit }),
+            ...(importLimit !== undefined && { importLimit }),
+          },
+        }
       }
 
       collection.admin.components = components
@@ -201,6 +223,23 @@ declare module 'payload' {
        * This value is read from the plugin config's `export.format` option.
        */
       exportFormat?: 'csv' | 'json'
+    }
+  }
+
+  export interface CollectionCustom {
+    'plugin-import-export'?: {
+      /**
+       * Maximum number of documents that can be exported from this collection.
+       * Set to 0 for unlimited (default). Can be a number or function.
+       * Stored in collection.custom (server-only) since functions cannot be serialized to client.
+       */
+      exportLimit?: Limit
+      /**
+       * Maximum number of documents that can be imported to this collection.
+       * Set to 0 for unlimited (default). Can be a number or function.
+       * Stored in collection.custom (server-only) since functions cannot be serialized to client.
+       */
+      importLimit?: Limit
     }
   }
 }

@@ -2,6 +2,7 @@ import type { PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
 
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 
 export const handleDownload = async (req: PayloadRequest, debug = false) => {
@@ -21,14 +22,24 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     req.payload.logger.info(`Download request received ${collectionSlug}`)
 
     const targetCollection = req.payload.collections[collectionSlug]
+    let maxLimit: number | undefined
+
     if (targetCollection) {
-      const forcedFormat =
-        targetCollection.config.admin?.custom?.['plugin-import-export']?.exportFormat
+      const adminPluginConfig = targetCollection.config.admin?.custom?.['plugin-import-export']
+      const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
+
+      const forcedFormat = adminPluginConfig?.exportFormat
       if (forcedFormat && format && format !== forcedFormat) {
         throw new APIError(
           `Export format '${format}' is not supported for collection '${collectionSlug}'. Only '${forcedFormat}' format is allowed.`,
         )
       }
+
+      // Resolve max limit from the collection config
+      maxLimit = await resolveLimit({
+        limit: pluginConfig?.exportLimit,
+        req,
+      })
     }
 
     const { user } = req
@@ -40,6 +51,7 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
       ...body.data,
       debug,
       download: true,
+      maxLimit,
       req,
       user: req.user,
     })

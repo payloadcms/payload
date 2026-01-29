@@ -58,6 +58,10 @@ export const getCreateCollectionImportTask = (
       name: 'debug',
       type: 'checkbox',
     },
+    {
+      name: 'maxLimit',
+      type: 'number',
+    },
   )
 
   return {

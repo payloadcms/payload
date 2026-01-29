@@ -34,6 +34,11 @@ export type Export = {
   id: number | string
   limit?: number
   locale?: string
+  /**
+   * Maximum number of documents that can be exported in a single operation.
+   * This value has already been resolved from the plugin config.
+   */
+  maxLimit?: number
   name: string
   page?: number
   slug: string
@@ -64,6 +69,7 @@ export const createExport = async (args: CreateExportArgs) => {
     fields,
     format,
     limit: incomingLimit,
+    maxLimit,
     locale: localeFromInput,
     page,
     req,
@@ -127,8 +133,24 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
   }
 
-  const maxExportDocuments =
-    typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
+  // Determine maximum export documents:
+  // 1. If maxLimit is defined, it sets the absolute ceiling
+  // 2. User's limit is applied but clamped to maxLimit if it exceeds it
+  let maxExportDocuments: number | undefined
+
+  if (typeof maxLimit === 'number' && maxLimit > 0) {
+    if (typeof incomingLimit === 'number' && incomingLimit > 0) {
+      // User provided a limit - clamp it to maxLimit
+      maxExportDocuments = Math.min(incomingLimit, maxLimit)
+    } else {
+      // No user limit - use maxLimit as the ceiling
+      maxExportDocuments = maxLimit
+    }
+  } else {
+    // No maxLimit - use user's limit if provided
+    maxExportDocuments =
+      typeof incomingLimit === 'number' && incomingLimit > 0 ? incomingLimit : undefined
+  }
 
   // Try to count documents - if access is denied, treat as 0 documents
   let totalDocs = 0
