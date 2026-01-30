@@ -180,12 +180,20 @@ describe('@payloadcms/plugin-import-export', () => {
         id: doc.id,
       })
 
+      const pages = await payload.find({
+        collection: 'pages',
+        limit: 100,
+        page: 1,
+      })
+
+      const firstDocOnPage1 = pages.docs?.[0]
+
       expect(doc.filename).toBeDefined()
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
       expect(data[0].id).toBeDefined()
-      expect(data[0].title).toStrictEqual('Polymorphic 4')
+      expect(data[0].title).toStrictEqual(firstDocOnPage1?.title)
     })
 
     it('should create a file for collection csv from limit and page 2', async () => {

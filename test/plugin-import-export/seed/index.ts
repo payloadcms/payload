@@ -306,7 +306,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
     const imageFilePath = path.resolve(dirname, '../image.png')
     const imageFile = await getFileByPath(imageFilePath)
 
-    const mediaIds: string[] = []
+    const mediaIds: (number | string)[] = []
     for (let i = 0; i < 3; i++) {
       const media = await payload.create({
         collection: mediaSlug,
@@ -318,7 +318,7 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           name: `test-media-${i}.png`,
         } as File,
       })
-      mediaIds.push(String(media.id))
+      mediaIds.push(media.id)
     }
 
     // Seed pages with upload field
@@ -332,37 +332,43 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
 
-    for (let i = 0; i < 2; i++) {
-      await payload.create({
-        collection: 'pages',
-        data: {
-          title: `Monomorphic ${i}`,
-          hasManyMonomorphic: [posts[1]?.id ?? ''],
-        },
-      })
+    // Only create Monomorphic pages if we have posts
+    if (posts[1]?.id) {
+      for (let i = 0; i < 2; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Monomorphic ${i}`,
+            hasManyMonomorphic: [posts[1].id],
+          },
+        })
+      }
     }
 
-    for (let i = 0; i < 5; i++) {
-      await payload.create({
-        collection: 'pages',
-        data: {
-          title: `Polymorphic ${i}`,
-          hasOnePolymorphic: {
-            relationTo: 'posts',
-            value: posts[0]?.id ?? '',
-          },
-          hasManyPolymorphic: [
-            {
-              relationTo: 'users',
-              value: user.id,
-            },
-            {
+    // Only create Polymorphic pages if we have posts
+    if (posts[0]?.id && posts[1]?.id) {
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Polymorphic ${i}`,
+            hasOnePolymorphic: {
               relationTo: 'posts',
-              value: posts[1]?.id ?? '',
+              value: posts[0].id,
             },
-          ],
-        },
-      })
+            hasManyPolymorphic: [
+              {
+                relationTo: 'users',
+                value: user.id,
+              },
+              {
+                relationTo: 'posts',
+                value: posts[1].id,
+              },
+            ],
+          },
+        })
+      }
     }
 
     // Seed posts-exports-only collection
