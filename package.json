@@ -186,7 +186,7 @@
     "escape-html": "^1.0.3",
     "eslint": "9.22.0",
     "execa": "5.1.1",
-    "form-data": "3.0.1",
+    "form-data": "3.0.4",
     "fs-extra": "10.1.0",
     "globby": "11.1.0",
     "husky": "9.0.11",
@@ -218,7 +218,7 @@
     "turbo": "^2.5.4",
     "typescript": "5.7.3",
     "vitest": "4.0.15",
-    "wrangler": "~4.42.0"
+    "wrangler": "~4.61.1"
   },
   "packageManager": "pnpm@10.27.0",
   "engines": {
