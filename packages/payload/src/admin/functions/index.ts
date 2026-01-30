@@ -127,7 +127,6 @@ export type BuildTableStateArgs = {
   }
   query?: ListQuery
   renderRowTypes?: boolean
-  req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
 }
 
