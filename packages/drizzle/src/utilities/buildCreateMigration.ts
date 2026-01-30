@@ -98,13 +98,21 @@ export const buildCreateMigration = ({
         }
       }
 
-      const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
-      const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
       const sqlExecute = `await db.${executeMethod}(` + 'sql`'
+      payload.logger.info({
+        msg: 'Generating SQL statements to migrate previous schema up to the current config.',
+      })
+      const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+      let sqlStatementsDown: string[] = []
 
-      if (sqlStatementsUp?.length) {
+      if (sqlStatementsUp.length) {
+        payload.logger.info({
+          msg: 'Generating SQL statements to migrate current config down to the previous schema.',
+        })
+        sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
         upSQL = sanitizeStatements({ sqlExecute, statements: sqlStatementsUp })
       }
+
       if (sqlStatementsDown?.length) {
         downSQL = sanitizeStatements({ sqlExecute, statements: sqlStatementsDown })
       }
