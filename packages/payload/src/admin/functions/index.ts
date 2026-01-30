@@ -17,7 +17,9 @@ import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.
 
 export type InitReqResult = {
   cookies: Map<string, string>
+  // TODO: Remove in 4.0. Duplicative, already available in req.headers
   headers: Headers
+  // TODO: Remove in 4.0. Duplicative, already available in req.i18n.language
   languageCode: AcceptedLanguages
   locale?: Locale
   permissions: SanitizedPermissions
@@ -26,7 +28,7 @@ export type InitReqResult = {
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
-} & InitReqResult
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>

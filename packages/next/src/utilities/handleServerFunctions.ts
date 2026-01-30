@@ -38,7 +38,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     serverFunctions: extraServerFunctions,
   } = args
 
-  const initReqResult = await initReq({
+  const { cookies, locale, permissions, req } = await initReq({
     configPromise,
     importMap,
     key: 'RootLayout',
@@ -46,8 +46,11 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
 
   const augmentedArgs: DefaultServerFunctionArgs = {
     ...fnArgs,
-    ...initReqResult,
+    cookies,
     importMap,
+    locale,
+    permissions,
+    req,
   }
 
   const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
