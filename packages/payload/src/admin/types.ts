@@ -50,12 +50,6 @@ export type {
    * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
    */
   CustomComponent as CustomSaveDraftButton,
-  /**
-   * @deprecated
-   * The `CustomUnpublishButton` type is deprecated and will be removed in the next major version.
-   * This type is only used for the Payload Config. Use `UnpublishButtonClientProps` instead.
-   */
-  CustomComponent as CustomUnpublishButton,
 } from '../config/types.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
