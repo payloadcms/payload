@@ -733,8 +733,9 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: content-api
-          CONTENT_API_URL: ${{ secrets.CONTENT_API_URL }}
-          CONTENT_SYSTEM_ID: ${{ secrets.CONTENT_SYSTEM_ID }}
+          CONTENT_API_URL: https://us-east-1.cms-tenants-001-staging.figmacontentstaging.com
+          CONTENT_API_KEY: ${{ secrets.CONTENT_API_KEY }}
+          CONTENT_SYSTEM_ID: 00000000-0000-4000-8000-000000000001
 
   all-green:
     name: All Green
