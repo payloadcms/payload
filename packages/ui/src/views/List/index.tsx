@@ -46,7 +46,6 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
-    disableSetStepNav,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
@@ -121,7 +120,7 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
-    if (!isInDrawer && !disableSetStepNav) {
+    if (!isInDrawer) {
       const baseLabel = {
         label: getTranslation(labels?.plural, i18n),
         url:
@@ -152,7 +151,6 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
     i18n,
     collectionSlug,
-    disableSetStepNav,
   ])
 
   return (
