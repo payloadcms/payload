@@ -60,33 +60,33 @@ export const Posts: CollectionConfig = {
 
 The following options are available:
 
-| Option               | Description                                                                                                                                                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `admin`              | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                                   |
-| `access`             | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                               |
-| `auth`               | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                                         |
-| `custom`             | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                        |
-| `disableDuplicate`   | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                              |
-| `defaultSort`        | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array.             |
-| `dbName`             | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                                      |
-| `endpoints`          | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                                      |
-| `fields` \*          | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                                          |
-| `graphQL`            | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                                          |
-| `hooks`              | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                                                                       |
-| `orderable`          | If true, enables custom ordering for the collection, and documents can be reordered via drag and drop. Uses [fractional indexing](https://observablehq.com/@dgreensp/implementing-fractional-indexing) for efficient reordering. |
-| `labels`             | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                                   |
-| `enableQueryPresets` | Enable query presets for this Collection. [More details](../query-presets/overview).                                                                                                                                             |
-| `lockDocuments`      | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                                   |
-| `slug` \*            | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                                  |
-| `timestamps`         | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                               |
-| `trash`              | A boolean to enable soft deletes for this collection. Defaults to `false`. [More details](../trash/overview).                                                                                                                    |
-| `typescript`         | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                              |
-| `upload`             | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                                    |
-| `versions`           | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                              |
-| `defaultPopulate`    | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                            |
-| `indexes`            | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                                           |
-| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).                                        |
-| `disableBulkEdit`    | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                                           |
+| Option               | Description                                                                                                                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `admin`              | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                       |
+| `access`             | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                   |
+| `auth`               | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                             |
+| `custom`             | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
+| `disableDuplicate`   | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                  |
+| `defaultSort`        | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array. |
+| `dbName`             | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                          |
+| `endpoints`          | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                          |
+| `fields` \*          | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                              |
+| `graphQL`            | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                              |
+| `hooks`              | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                                                           |
+| `orderable`          | If true, enables custom ordering for the collection, and documents can be reordered via drag and drop. Uses [orderable](#orderable) for efficient reordering.                                                        |
+| `labels`             | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                       |
+| `enableQueryPresets` | Enable query presets for this Collection. [More details](../query-presets/overview).                                                                                                                                 |
+| `lockDocuments`      | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                       |
+| `slug` \*            | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                      |
+| `timestamps`         | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                   |
+| `trash`              | A boolean to enable soft deletes for this collection. Defaults to `false`. [More details](../trash/overview).                                                                                                        |
+| `typescript`         | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
+| `upload`             | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                        |
+| `versions`           | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                  |
+| `defaultPopulate`    | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                |
+| `indexes`            | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                               |
+| `forceSelect`        | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks. [More details](../queries/select).                            |
+| `disableBulkEdit`    | Disable the bulk edit operation for the collection in the admin panel and the REST API                                                                                                                               |
 
 _\* An asterisk denotes that a property is required._
 
@@ -101,6 +101,34 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 ### Hooks
 
 [Collection Hooks](../hooks/collections) allow you to tie into the lifecycle of your Documents so you can execute your own logic during specific events. To learn more, go to the [Hooks](../hooks/overview) documentation.
+
+### Orderable
+
+When `orderable` is enabled, Payload uses [fractional indexing](https://observablehq.com/@dgreensp/implementing-fractional-indexing) to efficiently manage document order. When enabled on collections, this allows you to manually drag and drop documents in the Admin Panel to reorder them, as well as programmatically set the order of documents via the Local API, REST API, or GraphQL API.
+
+Orderable can also be added to [joins fields](../fields/join).
+
+#### Fractional indexing
+
+If you need to generate order keys programmatically (e.g., when creating documents via the Local API with a specific order), you can import the utilities directly:
+
+```ts
+import { generateKeyBetween, generateNKeysBetween } from 'payload/shared'
+
+// Generate a key between two existing keys (or null for start/end)
+const newKey = generateKeyBetween('a0', 'a1')
+
+// Generate a key at the start (before 'a0')
+const startKey = generateKeyBetween(null, 'a0')
+
+// Generate a key at the end (after 'a1')
+const endKey = generateKeyBetween('a1', null)
+
+// Generate multiple keys between two existing keys
+const keys = generateNKeysBetween('a0', 'a1', 5)
+```
+
+These utilities are useful when you need fine-grained control over document ordering, such as inserting documents at specific positions or batch-creating documents with predetermined order.
 
 ## Admin Options
 
@@ -214,6 +242,7 @@ The following options are available:
 | `SaveDraftButton`        | Replace the default Save Draft Button within the Edit View. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
 | `Status`                 | Replace the default Status component within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#status).                                         |
 | `PublishButton`          | Replace the default Publish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |
+| `UnpublishButton`        | Replace the default Unpublish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#unpublishbutton).                                |
 | `PreviewButton`          | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
 | `Upload`                 | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload).                                         |
 

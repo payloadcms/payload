@@ -65,6 +65,7 @@ import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
 import { openNav } from '../../../helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -122,6 +123,8 @@ describe('Document View', () => {
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
+      // Wait for hydration
+      await wait(1000)
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })

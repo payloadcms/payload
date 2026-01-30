@@ -69,6 +69,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'resetPassword',
+      overrideAccess,
     })
 
     // /////////////////////////////////////
@@ -236,6 +237,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'resetPassword',
+      overrideAccess,
       result,
     })
 

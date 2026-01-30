@@ -52,7 +52,7 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
-import { countLocal, type Options as CountOptions } from './collections/operations/local/count.js'
+import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
   type Options as CreateOptions,
@@ -67,7 +67,8 @@ import {
   duplicateLocal,
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
-import { findLocal, type Options as FindOptions } from './collections/operations/local/find.js'
+import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+export type { FindOptions }
 import {
   findByIDLocal,
   type Options as FindByIDOptions,
@@ -140,7 +141,10 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import { countVersionsLocal } from './collections/operations/local/countVersions.js'
+import {
+  countVersionsLocal,
+  type CountVersionsOptions,
+} from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
@@ -403,7 +407,7 @@ export class BasePayload {
    * @returns count of document versions satisfying query
    */
   countVersions = async <T extends CollectionSlug>(
-    options: CountOptions<T>,
+    options: CountVersionsOptions<T>,
   ): Promise<{ totalDocs: number }> => {
     return countVersionsLocal(this, options)
   }
@@ -1149,6 +1153,7 @@ export const getPayload = async (
       await reload(config, cached.payload, false, options)
 
       resolve()
+      cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
@@ -1189,6 +1194,14 @@ export const getPayload = async (
         )
 
         cached.ws.onmessage = (event) => {
+          if (cached.reload instanceof Promise) {
+            // If there is an in-progress reload in the same getPayload
+            // cache instance, do not set reload to true again, which would
+            // trigger another reload.
+            // Instead, wait for the in-progress reload to finish.
+            return
+          }
+
           if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
 
@@ -1439,7 +1452,9 @@ export type {
   Upsert,
   UpsertArgs,
 } from './database/types.js'
+export type { DynamicMigrationTemplate } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+
 export {
   APIError,
   APIErrorName,
@@ -1472,16 +1487,25 @@ export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-
 export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
 
-export { type SlugField } from './fields/baseFields/slug/index.js'
+export type { SlugField } from './fields/baseFields/slug/index.js'
 export {
   createClientField,
   createClientFields,
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { sanitizeFields } from './fields/config/sanitize.js'
 
@@ -1604,7 +1628,6 @@ export interface GlobalCustom extends Record<string, any> {}
 export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
@@ -1670,9 +1693,9 @@ export type {
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
-
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
@@ -1722,22 +1745,22 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-export { JobCancelledError } from './queues/errors/index.js'
 
+export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
-
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-export type * from './uploads/types.js'
 
+export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
@@ -1767,6 +1790,7 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export { dynamicImport } from './utilities/dynamicImport.js'
 export {
   findUp,
   findUpSync,
@@ -1807,9 +1831,9 @@ export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
+
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
-
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
@@ -1820,5 +1844,6 @@ export type {
 } from './versions/migrations/localizeStatus/index.js'
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
+
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

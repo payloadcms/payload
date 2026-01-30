@@ -447,7 +447,6 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         if (count && limit === 0) {
           return await req.payload.count({
             collection,
-            depth: 0,
             overrideAccess: false,
             req,
             where: fullWhere,

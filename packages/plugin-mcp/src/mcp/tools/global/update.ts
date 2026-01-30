@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
@@ -25,6 +25,7 @@ export const updateGlobalTool = (
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
+    select?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -62,6 +63,24 @@ export const updateGlobalTool = (
         }
       }
 
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON for global: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
         slug: globalSlug,
         data: parsedData,
@@ -76,6 +95,9 @@ export const updateGlobalTool = (
       }
       if (fallbackLocale) {
         updateOptions.fallbackLocale = fallbackLocale
+      }
+      if (selectClause) {
+        updateOptions.select = selectClause
       }
 
       const result = await payload.updateGlobal(updateOptions)
@@ -146,6 +168,12 @@ ${JSON.stringify(result, null, 2)}
         .describe(
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
         ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
+        ),
     })
 
     server.tool(
@@ -153,7 +181,7 @@ ${JSON.stringify(result, null, 2)}
       `${toolSchemas.updateGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
       updateGlobalSchema.shape,
       async (params: Record<string, unknown>) => {
-        const { depth, draft, fallbackLocale, locale, ...rest } = params
+        const { depth, draft, fallbackLocale, locale, select, ...rest } = params
         const data = JSON.stringify(rest)
         return await tool(
           data,
@@ -161,6 +189,7 @@ ${JSON.stringify(result, null, 2)}
           depth as number,
           locale as string,
           fallbackLocale as string,
+          select as string | undefined,
         )
       },
     )

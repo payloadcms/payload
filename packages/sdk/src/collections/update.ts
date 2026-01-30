@@ -22,7 +22,7 @@ import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 export type UpdateBaseOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * Whether the current update should be marked as from autosave.

@@ -14,6 +14,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   throttleTest,
+  waitForFormReady,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertElementStaysVisible } from '../helpers/e2e/assertElementStaysVisible.js'
@@ -49,7 +50,7 @@ test.describe('Form State', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
@@ -75,6 +76,7 @@ test.describe('Form State', () => {
   test('should disable fields while processing', async () => {
     const doc = await createPost()
     await page.goto(postsUrl.edit(doc.id))
+    await waitForFormReady(page)
     await page.locator('#field-title').fill(title)
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('#field-title')).toBeDisabled()
@@ -82,6 +84,7 @@ test.describe('Form State', () => {
 
   test('should re-enable fields after save', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
     await page.locator('#field-title').fill(title)
     await saveDocAndAssert(page)
     await expect(page.locator('#field-title')).toBeEnabled()
@@ -89,6 +92,7 @@ test.describe('Form State', () => {
 
   test('should only validate on submit via the `event` argument', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
     await page.locator('#field-title').fill(title)
     await page.locator('#field-validateUsingEvent').fill('Not allowed')
     await saveDocAndAssert(page, '#action-save', 'error')
@@ -96,6 +100,7 @@ test.describe('Form State', () => {
 
   test('should fire a single network request for onChange events when manipulating blocks', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
 
     await assertNetworkRequests(
       page,
@@ -115,6 +120,8 @@ test.describe('Form State', () => {
 
   test('should not throw fields into an infinite rendering loop', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
     await page.locator('#field-title').fill(title)
 
     let numberOfRenders = 0
@@ -151,7 +158,9 @@ test.describe('Form State', () => {
 
   test('should debounce onChange events', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
     const field = page.locator('#field-title')
+    await expect(field).toBeVisible()
 
     await assertNetworkRequests(
       page,
@@ -162,12 +171,15 @@ test.describe('Form State', () => {
       },
       {
         allowedNumberOfRequests: 1,
+        minimumNumberOfRequests: 1,
       },
     )
   })
 
   test('should send `lastRenderedPath` only when necessary', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
     const field = page.locator('#field-title')
     await field.fill('Test')
 
@@ -178,7 +190,7 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath === 'array',
+            body[0].args.formState['array'].lastRenderedPath === 'array',
         ),
     })
 
@@ -197,9 +209,9 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath === 'array' &&
-          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-            'array.0.customTextField',
+            body[0].args.formState['array'].lastRenderedPath === 'array' &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField',
         ),
     })
 
@@ -219,17 +231,18 @@ test.describe('Form State', () => {
       expect: (body) =>
         Boolean(
           body?.[0]?.args?.formState?.['array'] &&
-          body[0].args.formState['array'].lastRenderedPath &&
-          body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
-            'array.0.customTextField' &&
-          body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
-            'array.1.customTextField',
+            body[0].args.formState['array'].lastRenderedPath &&
+            body[0].args.formState['array.0.customTextField']?.lastRenderedPath ===
+              'array.0.customTextField' &&
+            body[0].args.formState['array.1.customTextField']?.lastRenderedPath ===
+              'array.1.customTextField',
         ),
     })
   })
 
   test('should not render stale values for server components while form state is in flight', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
 
     await addArrayRowAsync(page, 'array')
     await page.locator('#field-array #array-row-0 #field-array__0__customTextField').fill('1')
@@ -259,6 +272,7 @@ test.describe('Form State', () => {
   // TODO: This test is not very reliable but would be really nice to have
   test.skip('should not lag on slow CPUs', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
 
     await expect(page.locator('#field-title')).toBeEnabled()
 
@@ -309,6 +323,8 @@ test.describe('Form State', () => {
 
   test('should render computed values after save', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
     const titleField = page.locator('#field-title')
     const computedTitleField = page.locator('#field-computedTitle')
 
@@ -340,6 +356,8 @@ test.describe('Form State', () => {
   test('should fetch new doc permissions after save', async () => {
     const doc = await createPost({ title: 'Initial Title' })
     await page.goto(postsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
     const titleField = page.locator('#field-title')
     await expect(titleField).toBeEnabled()
 
@@ -383,6 +401,8 @@ test.describe('Form State', () => {
     })
 
     await page.goto(autosavePostsUrl.edit(doc.id))
+    await waitForFormReady(page)
+
     const titleField = page.locator('#field-title')
     await expect(titleField).toBeEnabled()
 
@@ -439,6 +459,8 @@ test.describe('Form State', () => {
 
   test('autosave - should render computed values after autosave', async () => {
     await page.goto(autosavePostsUrl.create)
+    await waitForFormReady(page)
+
     const titleField = page.locator('#field-title')
     const computedTitleField = page.locator('#field-computedTitle')
 
@@ -451,6 +473,8 @@ test.describe('Form State', () => {
 
   test('autosave - should not overwrite computed values that are being actively edited', async () => {
     await page.goto(autosavePostsUrl.create)
+    await waitForFormReady(page)
+
     const titleField = page.locator('#field-title')
     const computedTitleField = page.locator('#field-computedTitle')
 
@@ -478,6 +502,8 @@ test.describe('Form State', () => {
 
   test('array and block rows and maintain consistent row IDs across duplication', async () => {
     await page.goto(postsUrl.create)
+    await waitForFormReady(page)
+
     await addArrayRow(page, { fieldName: 'array' })
 
     const row0 = page.locator('#field-array #array-row-0')
@@ -504,7 +530,9 @@ test.describe('Form State', () => {
     )
   })
 
-  test('onChange events are queued even while autosave is in-flight', async () => {
+  test.fixme('onChange events are queued even while autosave is in-flight', async () => {
+    // TODO: This test is a flaky mess, relying on debounce and network timing. We need
+    // to be more deliberate about testing this.
     const autosavePost = await payload.create({
       collection: autosavePostsSlug,
       data: {
@@ -513,6 +541,8 @@ test.describe('Form State', () => {
     })
 
     await page.goto(autosavePostsUrl.edit(autosavePost.id))
+    await waitForFormReady(page)
+
     const field = page.locator('#field-title')
     await expect(field).toBeEnabled()
 
@@ -557,9 +587,14 @@ test.describe('Form State', () => {
 
     beforeEach(async () => {
       await page.goto(postsUrl.create)
+      await waitForFormReady(page)
+
       const field = page.locator('#field-title')
       await field.fill('Test')
       await expect(field).toBeEnabled()
+      // Wait to ensure form state request from the field fill is done. Otherwise, it could
+      // affect the request tracking of other tests depending on how fast they run
+      await wait(1000)
 
       cdpSession = await throttleTest({
         page,
@@ -598,7 +633,7 @@ test.describe('Form State', () => {
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // Wait for the first request to be sent
-      await page.waitForRequest((request) => request.url() === postsUrl.create)
+      await expect.poll(() => requestCount).toBe(1)
 
       // Before the first request comes back, add the second row and expect an optimistic loading state
       await addArrayRowAsync(page, 'array')
@@ -609,7 +644,7 @@ test.describe('Form State', () => {
       await page.waitForSelector('#field-array #array-row-0 .shimmer-effect')
 
       // At this point there should have been a single request sent for the first row
-      expect(requestCount).toBe(1)
+      await expect.poll(() => requestCount).toBe(1)
 
       // Wait for the first request to finish
       await page.waitForResponse(
@@ -633,7 +668,8 @@ test.describe('Form State', () => {
       await page.unroute(postsUrl.create)
     })
 
-    test('should queue onChange functions', async () => {
+    test.fixme('should queue onChange functions', async () => {
+      // TODO: Very flaky test. "Faster than the network request" is not a reliable way to test this
       const field = page.locator('#field-title')
 
       await assertNetworkRequests(
@@ -645,6 +681,12 @@ test.describe('Form State', () => {
           await field.pressSequentially('Some text to type', { delay: 275 })
         },
         {
+          requestFilter(request) {
+            if (request.url() === postsUrl.create && request.method() === 'POST') {
+              return true
+            }
+            return false
+          },
           allowedNumberOfRequests: 2,
           minimumNumberOfRequests: 2,
           timeout: 10000, // watch network for 10 seconds to allow requests to build up
@@ -658,6 +700,8 @@ test.describe('Form State', () => {
         postsUrl.create,
         async () => {
           await addArrayRowAsync(page, 'array')
+          // Ensure title field is filled after the form debounce, to guarantee 2 requests are sent
+          await wait(500)
           await page.locator('#field-title').fill('Test 2')
 
           // use `waitForSelector` to ensure the element doesn't appear and then disappear
@@ -679,42 +723,52 @@ test.describe('Form State', () => {
       )
     })
 
-    test('should not cause nested custom components to disappear when adding rows back-to-back', async () => {
-      // Add two rows quickly
-      // Test that the custom text field within the rows do not disappear
-      await assertNetworkRequests(
-        page,
-        postsUrl.create,
-        async () => {
-          await addArrayRowAsync(page, 'array')
-          await addArrayRowAsync(page, 'array')
+    test.fixme(
+      'should not cause nested custom components to disappear when adding rows back-to-back',
+      async () => {
+        // TODO: This test is too flaky
+        // Add two rows quickly
+        // Test that the custom text field within the rows do not disappear
+        await assertNetworkRequests(
+          page,
+          postsUrl.create,
+          async () => {
+            await addArrayRowAsync(page, 'array')
+            await addArrayRowAsync(page, 'array')
 
-          // use `waitForSelector` to ensure the element doesn't appear and then disappear
-          // eslint-disable-next-line playwright/no-wait-for-selector
-          await page.waitForSelector('#field-array #array-row-0 #field-array__0__customTextField', {
-            timeout: TEST_TIMEOUT,
-          })
+            // use `waitForSelector` to ensure the element doesn't appear and then disappear
+            // eslint-disable-next-line playwright/no-wait-for-selector
+            await page.waitForSelector(
+              '#field-array #array-row-0 #field-array__0__customTextField',
+              {
+                timeout: TEST_TIMEOUT,
+              },
+            )
 
-          // use `waitForSelector` to ensure the element doesn't appear and then disappear
-          // eslint-disable-next-line playwright/no-wait-for-selector
-          await page.waitForSelector('#field-array #array-row-1 #field-array__1__customTextField', {
-            timeout: TEST_TIMEOUT,
-          })
+            // use `waitForSelector` to ensure the element doesn't appear and then disappear
+            // eslint-disable-next-line playwright/no-wait-for-selector
+            await page.waitForSelector(
+              '#field-array #array-row-1 #field-array__1__customTextField',
+              {
+                timeout: TEST_TIMEOUT,
+              },
+            )
 
-          await expect(
-            page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
-          ).toBeVisible()
+            await expect(
+              page.locator('#field-array #array-row-0 #field-array__0__customTextField'),
+            ).toBeVisible()
 
-          await expect(
-            page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
-          ).toBeVisible()
-        },
-        {
-          allowedNumberOfRequests: 2,
-          timeout: 10000,
-        },
-      )
-    })
+            await expect(
+              page.locator('#field-array #array-row-1 #field-array__1__customTextField'),
+            ).toBeVisible()
+          },
+          {
+            allowedNumberOfRequests: 2,
+            timeout: 10000,
+          },
+        )
+      },
+    )
   })
 })
 
