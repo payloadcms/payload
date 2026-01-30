@@ -116,6 +116,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     serverProps,
   })
 
+  const sidebarMode = payload.config.admin?.components?.sidebar?.mode || 'tabs'
+  const hasSidebarTabs =
+    (payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []).length >
+    0
+
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
@@ -134,7 +139,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 </NavToggler>
               </div>
             </div>
-            <Wrapper baseClass={baseClass} className={className}>
+            <Wrapper
+              baseClass={baseClass}
+              className={className}
+              railMode={sidebarMode === 'rail' && hasSidebarTabs}
+            >
               {NavComponent}
               <div className={`${baseClass}__wrap`}>
                 <AppHeader

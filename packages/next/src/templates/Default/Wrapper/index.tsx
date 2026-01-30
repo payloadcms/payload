@@ -8,8 +8,9 @@ export const Wrapper: React.FC<{
   baseClass?: string
   children?: React.ReactNode
   className?: string
+  railMode?: boolean
 }> = (props) => {
-  const { baseClass, children, className } = props
+  const { baseClass, children, className, railMode } = props
   const { hydrated, navOpen, shouldAnimate } = useNav()
 
   return (
@@ -20,6 +21,7 @@ export const Wrapper: React.FC<{
         navOpen && `${baseClass}--nav-open`,
         shouldAnimate && `${baseClass}--nav-animate`,
         hydrated && `${baseClass}--nav-hydrated`,
+        railMode && `${baseClass}--rail-mode`,
       ]
         .filter(Boolean)
         .join(' ')}

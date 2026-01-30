@@ -140,6 +140,7 @@ export default buildConfigWithDefaults({
         },
       },
       sidebar: {
+        mode: 'rail',
         tabs: [
           {
             slug: 'custom-tab',

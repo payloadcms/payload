@@ -10,7 +10,11 @@ import { DefaultNavClient } from './index.client.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
+import { SidebarRail } from './SidebarRail/index.js'
+import { DEFAULT_NAV_TAB_SLUG } from './SidebarTabs/constants.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
+import { SidebarItemsContent } from './SidebarTabs/SidebarItemsContent.js'
+import { SidebarItemsProvider } from './SidebarTabs/SidebarItemsProvider.js'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -80,6 +84,83 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   const sidebarTabs =
     payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []
 
+  const sidebarMode = payload.config.admin?.components?.sidebar?.mode || 'tabs'
+
+  const initialActiveTabID =
+    navPreferences.activeTab ||
+    sidebarTabs.find((tab) => tab.isDefaultActive)?.slug ||
+    DEFAULT_NAV_TAB_SLUG
+
+  const renderedBeforeNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const renderedAfterNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const initialTabContents: Record<string, React.ReactNode> = {
+    [DEFAULT_NAV_TAB_SLUG]: (
+      <DefaultNavClient
+        afterNavLinks={renderedAfterNavLinks}
+        beforeNavLinks={renderedBeforeNavLinks}
+        groups={groups}
+        navPreferences={navPreferences}
+      />
+    ),
+  }
+
+  if (sidebarMode === 'rail' && initialActiveTabID !== DEFAULT_NAV_TAB_SLUG) {
+    const activeTab = sidebarTabs.find((t) => t.slug === initialActiveTabID)
+    if (activeTab) {
+      initialTabContents[activeTab.slug] = RenderServerComponent({
+        clientProps: {
+          documentSubViewType,
+          viewType,
+        },
+        Component: activeTab.component,
+        importMap: payload.importMap,
+        serverProps: {
+          i18n,
+          locale,
+          params,
+          payload,
+          permissions,
+          searchParams,
+          user,
+        },
+      })
+    }
+  }
+
   const LogoutComponent = RenderServerComponent({
     clientProps: {
       documentSubViewType,
@@ -123,28 +204,14 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         )
       : []
 
-  return (
-    <NavWrapper baseClass={baseClass}>
-      <nav className={`${baseClass}__wrap`}>
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: beforeNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
-        {sidebarTabs.length > 0 ? (
+  // Render tabs mode (self-contained with provider)
+  if (sidebarMode === 'tabs' && sidebarTabs.length > 0) {
+    return (
+      <NavWrapper baseClass={baseClass}>
+        <nav className={`${baseClass}__wrap`}>
           <SidebarTabs
+            afterNavLinks={renderedAfterNavLinks}
+            beforeNavLinks={renderedBeforeNavLinks}
             documentSubViewType={documentSubViewType}
             groups={groups}
             i18n={i18n}
@@ -158,26 +225,67 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             user={user}
             viewType={viewType}
           />
-        ) : (
-          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        )}
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: afterNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
+          <div className={`${baseClass}__controls`}>
+            <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
+            {LogoutComponent}
+          </div>
+        </nav>
+        <div className={`${baseClass}__header`}>
+          <div className={`${baseClass}__header-content`}>
+            <NavHamburger baseClass={baseClass} />
+          </div>
+        </div>
+      </NavWrapper>
+    )
+  }
+
+  // Render rail mode (shared provider wraps rail + sidebar content)
+  if (sidebarMode === 'rail' && sidebarTabs.length > 0) {
+    return (
+      <SidebarItemsProvider
+        initialActiveID={initialActiveTabID}
+        initialContents={initialTabContents}
+      >
+        <SidebarRail
+          documentSubViewType={documentSubViewType}
+          i18n={i18n}
+          locale={locale}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          tabs={sidebarTabs}
+          user={user}
+          viewType={viewType}
+        />
+        <NavWrapper baseClass={baseClass}>
+          <nav className={`${baseClass}__wrap`}>
+            <SidebarItemsContent />
+            <div className={`${baseClass}__controls`}>
+              <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
+              {LogoutComponent}
+            </div>
+          </nav>
+          <div className={`${baseClass}__header`}>
+            <div className={`${baseClass}__header-content`}>
+              <NavHamburger baseClass={baseClass} />
+            </div>
+          </div>
+        </NavWrapper>
+      </SidebarItemsProvider>
+    )
+  }
+
+  // Render default (no tabs)
+  return (
+    <NavWrapper baseClass={baseClass}>
+      <nav className={`${baseClass}__wrap`}>
+        <DefaultNavClient
+          afterNavLinks={renderedAfterNavLinks}
+          beforeNavLinks={renderedBeforeNavLinks}
+          groups={groups}
+          navPreferences={navPreferences}
+        />
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
           {LogoutComponent}

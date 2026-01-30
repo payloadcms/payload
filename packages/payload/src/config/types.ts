@@ -917,6 +917,8 @@ export type Config = {
       settingsMenu?: CustomComponent[]
       /** Sidebar configuration */
       sidebar?: {
+        /** Layout mode for sidebar items */
+        mode?: 'rail' | 'tabs'
         /** Extensible tab system */
         tabs?: SidebarTab[]
       }

@@ -11,9 +11,19 @@ import type { NavProps } from '../index.js'
 import { DefaultNavClient } from '../index.client.js'
 import { DEFAULT_NAV_TAB_SLUG } from './constants.js'
 import { SidebarTabsClient } from './index.client.js'
+import { SidebarItemsProvider } from './SidebarItemsProvider.js'
 import './index.scss'
 
+export type TabMetadata = {
+  icon: React.ReactNode
+  isDefaultActive?: boolean
+  label: string
+  slug: string
+}
+
 export type SidebarTabsProps = {
+  afterNavLinks?: React.ReactNode
+  beforeNavLinks?: React.ReactNode
   groups: NavGroupType[]
   navPreferences: NavPreferences
   tabs: SidebarTab[]
@@ -23,6 +33,8 @@ const baseClass = 'sidebar-tabs'
 
 export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
   const {
+    afterNavLinks,
+    beforeNavLinks,
     documentSubViewType,
     groups,
     i18n,
@@ -45,7 +57,14 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
 
   // Build initial tab contents - always include nav, conditionally include active custom tab
   const initialTabContents: Record<string, React.ReactNode> = {
-    [DEFAULT_NAV_TAB_SLUG]: <DefaultNavClient groups={groups} navPreferences={navPreferences} />,
+    [DEFAULT_NAV_TAB_SLUG]: (
+      <DefaultNavClient
+        afterNavLinks={afterNavLinks}
+        beforeNavLinks={beforeNavLinks}
+        groups={groups}
+        navPreferences={navPreferences}
+      />
+    ),
   }
 
   if (initialActiveTabID !== DEFAULT_NAV_TAB_SLUG) {
@@ -72,46 +91,46 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
   }
 
   return (
-    <SidebarTabsClient
-      baseClass={baseClass}
-      initialActiveTabID={initialActiveTabID}
-      initialTabContents={initialTabContents}
-      tabs={[
-        {
-          slug: DEFAULT_NAV_TAB_SLUG,
-          icon: <ListViewIcon />,
-          isDefaultActive: true,
-          label: i18n.t('general:collections'),
-        },
-        ...tabs.map((tab) => {
-          const iconComponent = RenderServerComponent({
-            clientProps: {
-              documentSubViewType,
-              viewType,
-            },
-            Component: tab.icon,
-            importMap: payload.importMap,
-            serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            },
-          })
+    <SidebarItemsProvider initialActiveID={initialActiveTabID} initialContents={initialTabContents}>
+      <SidebarTabsClient
+        baseClass={baseClass}
+        tabs={[
+          {
+            slug: DEFAULT_NAV_TAB_SLUG,
+            icon: <ListViewIcon />,
+            isDefaultActive: true,
+            label: i18n.t('general:collections'),
+          },
+          ...tabs.map((tab) => {
+            const iconComponent = RenderServerComponent({
+              clientProps: {
+                documentSubViewType,
+                viewType,
+              },
+              Component: tab.icon,
+              importMap: payload.importMap,
+              serverProps: {
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              },
+            })
 
-          const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
+            const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
 
-          return {
-            slug: tab.slug,
-            icon: iconComponent,
-            isDefaultActive: tab.isDefaultActive,
-            label: labelText,
-          }
-        }),
-      ]}
-    />
+            return {
+              slug: tab.slug,
+              icon: iconComponent,
+              isDefaultActive: tab.isDefaultActive,
+              label: labelText,
+            }
+          }),
+        ]}
+      />
+    </SidebarItemsProvider>
   )
 }

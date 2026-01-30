@@ -1,6 +1,10 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
+  :root {
+    --sidebar-rail-width: calc(var(--base) * 3);
+  }
+
   .nav {
     position: sticky;
     top: 0;
