@@ -5,14 +5,16 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
+import { postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -7214,6 +7216,169 @@ describe('@payloadcms/plugin-import-export', () => {
           },
         })
       })
+    })
+  })
+
+  // S3 storage integration tests are skipped here because they require an HTTP server.
+  // The int test environment uses in-process route handlers, but getFileFromDoc uses
+  // fetch() which requires a real HTTP server. See e2e.spec.ts for S3 tests that run
+  // with a real server.
+  describe.skip('S3 storage', () => {
+    const createdPostIDs: (number | string)[] = []
+
+    beforeAll(async () => {
+      await createTestBucket()
+      await clearTestBucket()
+    })
+
+    afterEach(async () => {
+      for (const id of createdPostIDs) {
+        try {
+          await payload.delete({
+            collection: postsWithS3Slug as CollectionSlug,
+            id,
+          })
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+      createdPostIDs.length = 0
+      await clearTestBucket()
+    })
+
+    it('should import CSV file stored in S3', async () => {
+      const csvContent = `title\n"S3 Import Test 1"\n"S3 Import Test 2"\n"S3 Import Test 3"`
+      const csvBuffer = Buffer.from(csvContent)
+
+      const importDoc = await payload.create({
+        collection: 'posts-with-s3-import' as CollectionSlug,
+        user,
+        data: {
+          collectionSlug: postsWithS3Slug,
+          importMode: 'create',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 's3-import-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      expect((importDoc as any).status).toBe('completed')
+      expect((importDoc as any).summary?.imported).toBe(3)
+      expect((importDoc as any).summary?.issues).toBe(0)
+
+      const posts = await payload.find({
+        collection: postsWithS3Slug as CollectionSlug,
+        where: {
+          title: { contains: 'S3 Import Test' },
+        },
+      })
+
+      expect(posts.totalDocs).toBe(3)
+      posts.docs.forEach((post) => createdPostIDs.push(post.id))
+    })
+
+    it('should export to S3 and verify file is accessible', async () => {
+      const testPosts = await Promise.all([
+        payload.create({
+          collection: postsWithS3Slug as CollectionSlug,
+          data: { title: 'S3 Export Test 1' },
+        }),
+        payload.create({
+          collection: postsWithS3Slug as CollectionSlug,
+          data: { title: 'S3 Export Test 2' },
+        }),
+      ])
+
+      testPosts.forEach((post) => createdPostIDs.push(post.id))
+
+      const exportDoc = await payload.create({
+        collection: 'posts-with-s3-export' as CollectionSlug,
+        user,
+        data: {
+          collectionSlug: postsWithS3Slug,
+          format: 'csv',
+          where: {
+            title: { contains: 'S3 Export Test' },
+          },
+        },
+      })
+
+      expect((exportDoc as any).status).toBe('completed')
+      expect((exportDoc as any).filename).toBeDefined()
+      expect((exportDoc as any).url).toBeDefined()
+
+      const exportedFileResponse = await restClient.GET(
+        `/posts-with-s3-export/file/${(exportDoc as any).filename}`,
+      )
+
+      expect(exportedFileResponse.status).toBe(200)
+
+      const exportedCSV = await exportedFileResponse.text()
+
+      expect(exportedCSV).toContain('S3 Export Test 1')
+      expect(exportedCSV).toContain('S3 Export Test 2')
+    })
+
+    it('should handle import errors gracefully when file is in S3', async () => {
+      const csvContent = `wrongfield\n"Some Value"`
+      const csvBuffer = Buffer.from(csvContent)
+
+      const importDoc = await payload.create({
+        collection: 'posts-with-s3-import' as CollectionSlug,
+        user,
+        data: {
+          collectionSlug: postsWithS3Slug,
+          importMode: 'create',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 's3-import-error-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      expect((importDoc as any).status).toBe('failed')
+      expect((importDoc as any).summary?.issues).toBeGreaterThan(0)
+    })
+
+    it('should import JSON file stored in S3', async () => {
+      const jsonContent = JSON.stringify([
+        { title: 'S3 JSON Import 1' },
+        { title: 'S3 JSON Import 2' },
+      ])
+      const jsonBuffer = Buffer.from(jsonContent)
+
+      const importDoc = await payload.create({
+        collection: 'posts-with-s3-import' as CollectionSlug,
+        user,
+        data: {
+          collectionSlug: postsWithS3Slug,
+          importMode: 'create',
+        },
+        file: {
+          data: jsonBuffer,
+          mimetype: 'application/json',
+          name: 's3-json-import-test.json',
+          size: jsonBuffer.length,
+        },
+      })
+
+      expect((importDoc as any).status).toBe('completed')
+      expect((importDoc as any).summary?.imported).toBe(2)
+
+      const posts = await payload.find({
+        collection: postsWithS3Slug as CollectionSlug,
+        where: {
+          title: { contains: 'S3 JSON Import' },
+        },
+      })
+
+      expect(posts.totalDocs).toBe(2)
+      posts.docs.forEach((post) => createdPostIDs.push(post.id))
     })
   })
 })

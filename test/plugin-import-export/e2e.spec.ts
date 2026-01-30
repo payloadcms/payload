@@ -5,6 +5,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
@@ -17,27 +20,29 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { postsWithS3ExportSlug, postsWithS3ImportSlug, postsWithS3Slug } from './shared.js'
 
 test.describe('Import Export Plugin', () => {
   let page: Page
   let exportsURL: AdminUrlUtil
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let s3ExportsURL: AdminUrlUtil
+  let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
   let serverURL: string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
-      dirname,
+      dirname: __dirname,
     })
     serverURL = url
     exportsURL = new AdminUrlUtil(serverURL, 'exports')
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
+    s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
+    s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
     payload = payloadFromInit
 
@@ -204,7 +209,7 @@ test.describe('Import Export Plugin', () => {
     test('should import a CSV file successfully', async () => {
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
-      const csvPath = path.join(dirname, 'uploads', 'e2e-test-import.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
       fs.writeFileSync(csvPath, csvContent)
 
       try {
@@ -259,7 +264,7 @@ test.describe('Import Export Plugin', () => {
         { title: 'E2E JSON Import 1', excerpt: 'JSON excerpt 1' },
         { title: 'E2E JSON Import 2', excerpt: 'JSON excerpt 2' },
       ])
-      const jsonPath = path.join(dirname, 'uploads', 'e2e-test-import.json')
+      const jsonPath = path.join(__dirname, 'uploads', 'e2e-test-import.json')
       fs.writeFileSync(jsonPath, jsonContent)
 
       try {
@@ -306,7 +311,7 @@ test.describe('Import Export Plugin', () => {
 
     test('should show import in list view after creation', async () => {
       const csvContent = 'title\n"E2E List View Test"'
-      const csvPath = path.join(dirname, 'uploads', 'e2e-list-test.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-list-test.csv')
       fs.writeFileSync(csvPath, csvContent)
 
       try {
@@ -371,7 +376,7 @@ test.describe('Import Export Plugin', () => {
       })
 
       const csvContent = `id,title,excerpt\n${existingDoc.id},"E2E Update Test Modified","Modified excerpt"`
-      const csvPath = path.join(dirname, 'uploads', 'e2e-update-test.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-update-test.csv')
       fs.writeFileSync(csvPath, csvContent)
 
       try {
@@ -649,6 +654,95 @@ test.describe('Import Export Plugin', () => {
 
       const importCount = page.locator('.import-preview__import-count')
       await expect(importCount).toContainText('10 documents to import')
+    })
+  })
+
+  test.describe('S3 Storage', () => {
+    test('should import CSV file stored in S3 via jobs queue', async () => {
+      // Use unique filename to avoid collisions with previous test runs
+      const uniqueId = Date.now()
+      const csvFilename = `s3-e2e-import-${uniqueId}.csv`
+      const csvPath = path.join(__dirname, 'uploads', csvFilename)
+
+      // Create a temp CSV file for upload
+      const csvContent = `title\n"S3 E2E Import 1"\n"S3 E2E Import 2"\n"S3 E2E Import 3"`
+      fs.writeFileSync(csvPath, csvContent)
+
+      // Navigate to the S3-enabled imports collection
+      await page.goto(s3ImportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      // Upload the file (will be stored in S3)
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
+
+      // Select the target collection
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
+
+      // Save the import document (file goes to S3, job is queued)
+      await saveDocAndAssert(page)
+
+      // Wait for import to complete
+      await expect(async () => {
+        await runJobsQueue({ serverURL })
+        const { docs } = await payload.find({
+          collection: postsWithS3ImportSlug as any,
+          where: {},
+          sort: '-createdAt',
+          limit: 1,
+        })
+        expect(docs[0]?.status).toBe('completed')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Verify the data was imported
+      const posts = await payload.find({
+        collection: postsWithS3Slug,
+        where: {
+          title: { contains: 'S3 E2E Import' },
+        },
+      })
+
+      expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
+    })
+
+    test('should export to S3 via jobs queue and download file', async () => {
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 1' },
+      })
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 2' },
+      })
+
+      await page.goto(s3ExportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      // For S3 export collections created via overrideCollection, the collectionSlug
+      // is pre-set and hidden - just save the document to trigger the export job
+      await saveDocAndAssert(page, '#action-save')
+
+      // Wait for export to complete (run jobs queue in loop until done)
+      await expect(async () => {
+        await runJobsQueue({ serverURL })
+        await page.reload()
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const downloadLink = page.locator('.file-details__main-detail a')
+      await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+      const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+      const downloadPath = await download.path()
+      const content = fs.readFileSync(downloadPath, 'utf8')
+
+      expect(content).toContain('S3 E2E Export 1')
+      expect(content).toContain('S3 E2E Export 2')
     })
   })
 })
