@@ -4,6 +4,8 @@ import { jsonSchemaToZod } from 'json-schema-to-zod'
 import * as ts from 'typescript'
 import { z } from 'zod'
 
+import { transformPointFieldsForMCP } from './transformPointFields.js'
+
 /**
  * Recursively processes JSON schema properties to simplify relationship fields.
  * For create/update validation we only need to accept IDs (string/number),
@@ -65,7 +67,8 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
     }
   }
 
-  const simplifiedSchema = simplifyRelationshipFields(schemaClone)
+  const pointTransformed = transformPointFieldsForMCP(schemaClone)
+  const simplifiedSchema = simplifyRelationshipFields(pointTransformed)
 
   const zodSchemaAsString = jsonSchemaToZod(simplifiedSchema)
 

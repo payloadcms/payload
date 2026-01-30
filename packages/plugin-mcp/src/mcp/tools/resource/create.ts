@@ -8,6 +8,7 @@ import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const createResourceTool = (
   server: McpServer,
@@ -44,6 +45,10 @@ export const createResourceTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
