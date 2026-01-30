@@ -15,6 +15,8 @@ const mongooseAdapterArgs = `
 
 export const defaultPostgresUrl = 'postgres://payload:payload@127.0.0.1:5433/payload'
 
+export const defaultReadReplicaPostgresUrl = 'postgres://payload:payload@127.0.0.1:5434/payload'
+
 export const allDatabaseAdapters = {
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
@@ -91,9 +93,9 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
-    readReplicas: [process.env.POSTGRES_REPLICA_URL],
+    readReplicas: [process.env.POSTGRES_REPLICA_URL || '${defaultReadReplicaPostgresUrl}'],
   })
         `,
   'content-api': `
