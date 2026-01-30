@@ -421,6 +421,7 @@ export const updateDocument = async <
           collection: collectionConfig,
           context: req.context,
           doc: result,
+          overrideAccess,
           req,
         })) || result
     }
@@ -454,6 +455,7 @@ export const updateDocument = async <
           data,
           doc: result,
           operation: 'update',
+          overrideAccess,
           previousDoc: originalDoc,
           req,
         })) || result

@@ -1322,18 +1322,69 @@ export type Config = {
    * @see https://payloadcms.com/docs/query-presets/overview
    */
   queryPresets?: {
+    /**
+     * Define collection-level access control that applies to all presets globally.
+     * This is separate from document-level access (constraints) which users can configure per-preset.
+     */
     access: {
       create?: Access<QueryPreset>
       delete?: Access<QueryPreset>
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
+    /**
+     * Define custom document-level access control options for presets.
+     *
+     * Payload provides sensible defaults (Only Me, Everyone, Specific Users), but you can
+     * add custom constraints for more complex patterns like RBAC.
+     *
+     * @example
+     * ```ts
+     * constraints: {
+     *   read: [
+     *     {
+     *       label: 'Specific Roles',
+     *       value: 'specificRoles',
+     *       fields: [
+     *         {
+     *           name: 'roles',
+     *           type: 'select',
+     *           hasMany: true,
+     *           options: [
+     *             { label: 'Admin', value: 'admin' },
+     *             { label: 'User', value: 'user' },
+     *           ],
+     *         },
+     *       ],
+     *       access: ({ req: { user } }) => ({
+     *         'access.read.roles': { in: [user?.roles] },
+     *       }),
+     *     },
+     *   ],
+     * }
+     * ```
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#custom-access-control
+     */
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    /**
+     * Used to dynamically filter which constraints are available based on the current user, document data,
+     * or other criteria.
+     *
+     * Some examples of this might include:
+     *
+     * - Ensuring that only "admins" are allowed to make a preset available to "everyone"
+     * - Preventing the "onlyMe" option from being selected based on a hypothetical "disablePrivatePresets" checkbox
+     *
+     * When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#constraint-access-control
+     */
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
@@ -1425,8 +1476,10 @@ export type Config = {
     >
 
     /**
-     * Enable strict type safety for draft mode queries.
-     * When enabled, find operations with draft: true will type required fields as optional.
+     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+     * on collections without drafts, and query results with `draft: true` type required fields as optional.
+     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+     *
      * @default false
      * @todo Remove in v4. Strict draft types will become the default behavior.
      */

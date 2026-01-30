@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-ecommerce",
-  "version": "3.72.0",
+  "version": "3.74.0",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
@@ -92,8 +92,8 @@
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*",
     "stripe": "18.3.0"
   },

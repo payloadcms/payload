@@ -63,6 +63,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'unlock',
+      overrideAccess,
     })
 
     const shouldCommit = await initTransaction(req)
@@ -135,6 +136,7 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'unlock',
+      overrideAccess,
       result,
     })
 

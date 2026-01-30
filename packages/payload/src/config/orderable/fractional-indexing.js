@@ -1,12 +1,32 @@
 // @ts-no-check
 
 /**
- * THIS FILE IS COPIED FROM:
+ * THIS FILE IS BASED ON:
  * https://github.com/rocicorp/fractional-indexing/blob/main/src/index.js
  *
- * I AM NOT INSTALLING THAT LIBRARY BECAUSE JEST COMPLAINS ABOUT THE ESM MODULE AND THE TESTS FAIL.
- * DO NOT MODIFY IT
- * ALSO, I'M DISABLING TS WITH `@ts-no-check` BECAUSE THEY DON'T USE STRICT NULL CHECKS IN THAT REPOSITORY
+ * MODIFIED FOR PAYLOAD CMS:
+ * - Changed the integer part encoding to use only digits for "small" keys and
+ *   only lowercase letters for "large" keys, ensuring consistent ordering
+ *   across databases with different collations.
+ *
+ * - Original algorithm used A-Z (uppercase) for "smaller" integers and a-z (lowercase)
+ *   for "larger" integers, relying on ASCII ordering where 'Z' < 'a'.
+ *
+ * - Some databases (e.g., PostgreSQL with default collation) use case-insensitive
+ *   comparison, treating 'Z' as 'z', which breaks the ordering.
+ *
+ * - New encoding:
+ *   - Uses digits '0'-'9' for "small" integers (10 values, lengths 11 down to 2)
+ *   - Uses lowercase 'a'-'z' for "large" integers (26 values, lengths 2 up to 27)
+ *   - Digits ALWAYS sort before letters in both ASCII and case-insensitive orderings.
+ *
+ * - Ordering: '0...' < '1...' < ... < '9..' < 'a.' < 'b..' < ... < 'z...'
+ *
+ * BACKWARD COMPATIBILITY:
+ * - Existing keys starting with lowercase 'a'-'z' remain valid and work correctly.
+ * - Keys starting with uppercase 'A'-'Z' (from the old algorithm) will still be
+ *   parsed for backward compatibility, but they may sort incorrectly in
+ *   case-insensitive databases. Consider running a migration to convert them.
  */
 
 // License: CC0 (no rights reserved).
@@ -80,14 +100,25 @@ function validateInteger(int) {
 }
 
 /**
+ * Returns the length of the integer part based on the head character.
+ *
+ * New encoding (case-insensitive safe):
+ * - SMALL range (digits): '0' = 11 chars, '1' = 10 chars, ..., '9' = 2 chars
+ * - LARGE range (lowercase): 'a' = 2 chars, 'b' = 3 chars, ..., 'z' = 27 chars
+ *
+ * Legacy encoding (for backward compatibility with existing keys):
+ * - 'A'-'Z' uppercase: 'A' = 27 chars, 'B' = 26 chars, ..., 'Z' = 2 chars
+ *
  * @param {string} head
  * @return {number}
  */
-
 function getIntegerLength(head) {
-  if (head >= 'a' && head <= 'z') {
+  if (head >= '0' && head <= '9') {
+    return 11 - (head.charCodeAt(0) - '0'.charCodeAt(0))
+  } else if (head >= 'a' && head <= 'z') {
     return head.charCodeAt(0) - 'a'.charCodeAt(0) + 2
   } else if (head >= 'A' && head <= 'Z') {
+    // Legacy encoding
     return 'Z'.charCodeAt(0) - head.charCodeAt(0) + 2
   } else {
     throw new Error('invalid order key head: ' + head)
@@ -108,12 +139,22 @@ function getIntegerPart(key) {
 }
 
 /**
+ * Smallest possible key (for validation)
+ * '0' + 10 zeros = smallest valid key in new format
+ */
+const SMALLEST_KEY = '0' + BASE_36_DIGITS[0].repeat(10)
+
+/**
  * @param {string} key
  * @param {string} digits
  * @return {void}
  */
 
 function validateOrderKey(key, digits) {
+  if (key === SMALLEST_KEY) {
+    throw new Error('invalid order key: ' + key)
+  }
+  // Legacy check for old format
   if (key === 'A' + digits[0].repeat(26)) {
     throw new Error('invalid order key: ' + key)
   }
@@ -147,17 +188,30 @@ function incrementInteger(x, digits) {
     }
   }
   if (carry) {
+    if (head === '9') {
+      return 'a' + digits[0]
+    }
+    // Handle legacy uppercase transition
     if (head === 'Z') {
       return 'a' + digits[0]
     }
     if (head === 'z') {
       return null
     }
-    const h = String.fromCharCode(head.charCodeAt(0) + 1)
-    if (h > 'a') {
-      digs.push(digits[0])
-    } else {
+
+    let h
+    if (head >= '0' && head <= '8') {
+      h = String.fromCharCode(head.charCodeAt(0) + 1)
       digs.pop()
+    } else if (head >= 'a' && head <= 'y') {
+      h = String.fromCharCode(head.charCodeAt(0) + 1)
+      digs.push(digits[0])
+    } else if (head >= 'A' && head <= 'Y') {
+      // Legacy uppercase
+      h = String.fromCharCode(head.charCodeAt(0) + 1)
+      digs.pop()
+    } else {
+      throw new Error('invalid head: ' + head)
     }
     return h + digs.join('')
   } else {
@@ -187,16 +241,28 @@ function decrementInteger(x, digits) {
   }
   if (borrow) {
     if (head === 'a') {
-      return 'Z' + digits.slice(-1)
+      return '9' + digits.slice(-1)
     }
-    if (head === 'A') {
+    if (head === '0') {
       return null
     }
-    const h = String.fromCharCode(head.charCodeAt(0) - 1)
-    if (h < 'Z') {
+
+    let h
+    if (head >= '1' && head <= '9') {
+      h = String.fromCharCode(head.charCodeAt(0) - 1)
       digs.push(digits.slice(-1))
-    } else {
+    } else if (head >= 'b' && head <= 'z') {
+      h = String.fromCharCode(head.charCodeAt(0) - 1)
       digs.pop()
+    } else if (head >= 'B' && head <= 'Z') {
+      // Legacy uppercase
+      h = String.fromCharCode(head.charCodeAt(0) - 1)
+      digs.push(digits.slice(-1))
+    } else if (head === 'A') {
+      // Legacy uppercase
+      return null
+    } else {
+      throw new Error('invalid head: ' + head)
     }
     return h + digs.join('')
   } else {
@@ -232,6 +298,10 @@ export function generateKeyBetween(a, b, digits = BASE_36_DIGITS) {
 
     const ib = getIntegerPart(b)
     const fb = b.slice(ib.length)
+    if (ib === SMALLEST_KEY) {
+      return ib + midpoint('', fb, digits)
+    }
+    // Legacy check
     if (ib === 'A' + digits[0].repeat(26)) {
       return ib + midpoint('', fb, digits)
     }

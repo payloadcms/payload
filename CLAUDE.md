@@ -67,6 +67,10 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+- Logger Usage (`payload.logger.error`)
+  - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
+  - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
+  - Use `err` not `error`, use `msg` not `message` in object form
 
 ### Running Dev Server
 

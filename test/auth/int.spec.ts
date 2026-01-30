@@ -560,8 +560,8 @@ describe('Auth', () => {
             },
           })
 
-          expect(result.docs[0].value.property).toStrictEqual('updated')
-          expect(result.docs[0].value.property2).toStrictEqual('updated')
+          expect((result.docs[0]?.value as any)?.property).toStrictEqual('updated')
+          expect((result.docs[0]?.value as any)?.property2).toStrictEqual('updated')
 
           expect(result.docs).toHaveLength(1)
         })
@@ -597,6 +597,105 @@ describe('Auth', () => {
           })
 
           expect(result.docs).toHaveLength(0)
+        })
+      })
+
+      describe('Cross-Collection Preference Isolation', () => {
+        const adminKey = 'cross-collection-admin'
+        const publicKey = 'cross-collection-public'
+        let publicUserToken: string
+        let publicUserId: number | string
+        const createdIDs: (number | string)[] = []
+
+        beforeAll(async () => {
+          // Admin creates preference
+          const adminPref = await restClient.POST(`/payload-preferences/${adminKey}`, {
+            body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
+            headers: { Authorization: `JWT ${token}` },
+          })
+          createdIDs.push(((await adminPref.json()) as any).doc.id)
+
+          // Create and verify public user
+          const userRes = await restClient.POST(`/${publicUsersSlug}`, {
+            body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
+            headers: { Authorization: `JWT ${token}` },
+          })
+          publicUserId = ((await userRes.json()) as any).doc.id
+
+          const user = await payload.findByID({
+            collection: publicUsersSlug,
+            id: publicUserId,
+            showHiddenFields: true,
+          })
+          await restClient.POST(`/${publicUsersSlug}/verify/${(user as any)._verificationToken}`)
+
+          // Login as public user
+          const login = await restClient.POST(`/${publicUsersSlug}/login`, {
+            body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
+          })
+          publicUserToken = ((await login.json()) as any).token
+
+          // Public user creates preference
+          const publicPref = await restClient.POST(`/payload-preferences/${publicKey}`, {
+            body: JSON.stringify({ value: { data: 'public-data' } }),
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+          createdIDs.push(((await publicPref.json()) as any).doc.id)
+        })
+
+        afterAll(async () => {
+          await Promise.all(
+            createdIDs.map((id) =>
+              payload.delete({ collection: 'payload-preferences', id }).catch(() => {}),
+            ),
+          )
+          if (publicUserId) {
+            await payload.delete({ collection: publicUsersSlug, id: publicUserId }).catch(() => {})
+          }
+        })
+
+        it('should only return own preferences via REST find', async () => {
+          const res = await restClient.GET('/payload-preferences', {
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+          const data: any = await res.json()
+
+          expect(data.docs).toHaveLength(1)
+          expect(data.docs[0].user.relationTo).toBe(publicUsersSlug)
+          expect(data.docs.some((doc: any) => doc.user.relationTo === 'users')).toBe(false)
+        })
+
+        it('should not delete other collection preferences via REST', async () => {
+          const before = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(before.docs).toHaveLength(1)
+
+          await restClient.DELETE(`/payload-preferences?where[key][equals]=${adminKey}`, {
+            headers: { Authorization: `JWT ${publicUserToken}` },
+          })
+
+          const after = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(after.docs).toHaveLength(1)
+          expect((after.docs[0]?.value as any)?.data).toBe('admin-sensitive')
+        })
+
+        it('should isolate preferences by user ID and collection', async () => {
+          const publicPrefs = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: publicUsersSlug } },
+          })
+          expect(publicPrefs.docs).toHaveLength(1)
+
+          const adminPrefs = await payload.find({
+            collection: 'payload-preferences',
+            where: { 'user.relationTo': { equals: 'users' } },
+          })
+          expect(adminPrefs.docs).toHaveLength(1)
         })
       })
 

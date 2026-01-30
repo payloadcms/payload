@@ -22,6 +22,12 @@ export const toolSchemas = {
         .describe(
           'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
         ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
     }),
   },
 
@@ -73,6 +79,12 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       sort: z
         .string()
         .optional()
@@ -112,6 +124,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
     }),
   },
@@ -154,6 +172,12 @@ export const toolSchemas = {
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       where: z
         .string()
         .optional()
@@ -215,6 +239,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
         ),
     }),
   },

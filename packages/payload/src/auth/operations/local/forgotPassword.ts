@@ -14,6 +14,7 @@ export type Options<T extends CollectionSlug> = {
   }
   disableEmail?: boolean
   expiration?: number
+  overrideAccess?: boolean
   req?: Partial<PayloadRequest>
 }
 
@@ -21,7 +22,13 @@ export async function forgotPasswordLocal<T extends CollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<Result> {
-  const { collection: collectionSlug, data, disableEmail, expiration } = options
+  const {
+    collection: collectionSlug,
+    data,
+    disableEmail,
+    expiration,
+    overrideAccess = true,
+  } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -38,6 +45,7 @@ export async function forgotPasswordLocal<T extends CollectionSlug>(
     data,
     disableEmail,
     expiration,
+    overrideAccess,
     req: await createLocalReq(options, payload),
   }) as Promise<Result>
 }

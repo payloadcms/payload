@@ -68,11 +68,11 @@ export const ConfigProvider: React.FC<{
 
   const getEntityConfig = useCallback<GetEntityConfigFn>(
     (args) => {
-      if ('collectionSlug' in args) {
+      if ('collectionSlug' in args && args.collectionSlug) {
         return collectionsBySlug[args.collectionSlug] ?? null
       }
 
-      if ('globalSlug' in args) {
+      if ('globalSlug' in args && args.globalSlug) {
         return globalsBySlug[args.globalSlug] ?? null
       }
 
