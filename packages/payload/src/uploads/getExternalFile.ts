@@ -37,38 +37,59 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
           cookie: cookies.join(';'),
         }
 
-    // Check if URL is allowed because of skipSafeFetch allowList
-    const skipSafeFetch: boolean =
-      uploadConfig.skipSafeFetch === true
-        ? uploadConfig.skipSafeFetch
-        : Array.isArray(uploadConfig.skipSafeFetch) &&
-          isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
-
-    // Check if URL is allowed because of pasteURL allowList
-    const isAllowedPasteUrl: boolean | undefined =
-      uploadConfig.pasteURL &&
-      uploadConfig.pasteURL.allowList &&
-      isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
-
     let res
-    if (skipSafeFetch || isAllowedPasteUrl) {
-      // Allowed
-      res = await fetch(fileURL, {
-        credentials: 'include',
-        headers,
-        method: 'GET',
-      })
-    } else {
-      // Default
-      res = await safeFetch(fileURL, {
-        credentials: 'include',
-        headers,
-        method: 'GET',
-      })
+    let redirectCount = 0
+    const maxRedirects = 3
+
+    while (redirectCount <= maxRedirects) {
+      // Check if URL is allowed because of skipSafeFetch allowList
+      const skipSafeFetch: boolean =
+        uploadConfig.skipSafeFetch === true
+          ? uploadConfig.skipSafeFetch
+          : Array.isArray(uploadConfig.skipSafeFetch) &&
+            isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
+
+      // Check if URL is allowed because of pasteURL allowList
+      const isAllowedPasteUrl: boolean | undefined =
+        uploadConfig.pasteURL &&
+        uploadConfig.pasteURL.allowList &&
+        isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
+
+      if (skipSafeFetch || isAllowedPasteUrl) {
+        // Allowed
+        res = await fetch(fileURL, {
+          credentials: 'include',
+          headers,
+          method: 'GET',
+          redirect: 'manual',
+        })
+      } else {
+        // Default
+        res = await safeFetch(fileURL, {
+          credentials: 'include',
+          headers,
+          method: 'GET',
+        })
+      }
+
+      // Throw redirects errors
+      if (res.status >= 300 && res.status < 400) {
+        redirectCount++
+        if (redirectCount > maxRedirects) {
+          throw new APIError(`Too many redirects (max ${maxRedirects})`, 403)
+        }
+        const location = res.headers.get('location')
+        if (location) {
+          fileURL = new URL(location, fileURL).toString()
+          continue
+        }
+      }
+
+      break
     }
 
-    if (!res.ok) {
-      throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
+    if (!res || !res.ok) {
+      throw new APIError(`Failed to fetch file from ${fileURL}`, res?.status)
     }
 
     const data = await res.arrayBuffer()
