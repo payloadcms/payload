@@ -101,7 +101,7 @@ export const getExportCollection = ({
         ...exportData,
         batchSize,
         debug,
-        exportsCollection: collectionConfig.slug,
+        exportCollection: collectionConfig.slug,
         maxLimit,
         req,
         userCollection: user?.collection || user?.user?.collection,
@@ -130,7 +130,7 @@ export const getExportCollection = ({
       const input: Export = {
         ...doc,
         batchSize,
-        exportsCollection: collectionConfig.slug,
+        exportCollection: collectionConfig.slug,
         maxLimit,
         userCollection: user?.collection || user?.user?.collection,
         userID: user?.id || user?.user?.id,

@@ -808,23 +808,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(input).toBeDefined()
 
-      // @ts-ignore
       expect(input.id).toBeDefined()
-      // @ts-ignore
       expect(input.name).toBeDefined()
-      // @ts-ignore
       expect(input.format).toStrictEqual('csv')
-      // @ts-ignore
       expect(input.locale).toStrictEqual('all')
-      // @ts-ignore
       expect(input.fields).toStrictEqual(['id', 'title'])
-      // @ts-ignore
       expect(input.collectionSlug).toStrictEqual('pages')
-      // @ts-ignore
-      expect(input.exportsCollection).toStrictEqual('exports')
-      // @ts-ignore
+      expect(input.exportCollection).toStrictEqual('exports')
       expect(input.userID).toBeDefined()
-      // @ts-ignore
       expect(input.userCollection).toBeDefined()
 
       await payload.jobs.run()
@@ -3657,8 +3648,8 @@ describe('@payloadcms/plugin-import-export', () => {
 
       interface JobWithInput {
         input: {
+          importCollection?: string
           importId?: string
-          importsCollection?: string
           userCollection?: string
           userID?: number | string
         }
@@ -3666,7 +3657,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const { input } = job as JobWithInput
 
       expect(input.importId).toBeDefined()
-      expect(input.importsCollection).toStrictEqual('imports')
+      expect(input.importCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
 
       await payload.jobs.run()

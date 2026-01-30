@@ -7,8 +7,8 @@ export type ImportTaskInput = {
   batchSize?: number
   debug?: boolean
   defaultVersionStatus?: 'draft' | 'published'
+  importCollection: string
   importId: string
-  importsCollection: string
   maxLimit?: number
   userCollection?: string
   userID?: number | string
@@ -27,8 +27,8 @@ export const getCreateCollectionImportTask = (
         batchSize,
         debug,
         defaultVersionStatus,
+        importCollection,
         importId,
-        importsCollection,
         maxLimit,
         userCollection,
         userID,
@@ -37,7 +37,7 @@ export const getCreateCollectionImportTask = (
       // Fetch the import document to get all necessary data
       const importDoc = await req.payload.findByID({
         id: importId,
-        collection: importsCollection,
+        collection: importCollection,
       })
 
       if (!importDoc) {
@@ -46,11 +46,11 @@ export const getCreateCollectionImportTask = (
 
       // Get the collection config for the imports collection
       const collectionConfig = req.payload.config.collections.find(
-        (c) => c.slug === importsCollection,
+        (c) => c.slug === importCollection,
       )
 
       if (!collectionConfig) {
-        throw new Error(`Collection config not found for: ${importsCollection}`)
+        throw new Error(`Collection config not found for: ${importCollection}`)
       }
 
       // Retrieve the file using getFileFromDoc (handles both local and cloud storage)
@@ -89,7 +89,7 @@ export const getCreateCollectionImportTask = (
       // Update the import document with results
       await req.payload.update({
         id: importId,
-        collection: importsCollection,
+        collection: importCollection,
         data: {
           status:
             result.errors.length === 0
@@ -125,7 +125,7 @@ export const getCreateCollectionImportTask = (
         required: true,
       },
       {
-        name: 'importsCollection',
+        name: 'importCollection',
         type: 'text',
         required: true,
       },
