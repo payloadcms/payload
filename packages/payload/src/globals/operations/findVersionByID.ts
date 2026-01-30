@@ -118,6 +118,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result.version
       }
@@ -155,6 +156,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             query: findGlobalVersionsArgs.where,
             req,
           })) || result.version

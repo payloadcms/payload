@@ -50,10 +50,12 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
+import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
 import {
   autosaveCollectionSlug,
@@ -793,6 +795,7 @@ describe('Versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       // Verify unpublish button is hidden when user doesn't have publish permission
+      await openDocControls(page)
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
@@ -805,11 +808,33 @@ describe('Versions', () => {
         },
       })
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+      await openDocControls(page)
       await page.locator('#action-unpublish').click()
       await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
+    })
+
+    test('collections — should render custom unpublish button', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithCustomUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Custom Unpublish',
+        },
+      })
+
+      const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
+      await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
+
+      await openDocControls(page)
+      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+
+      await payload.delete({
+        collection: draftWithCustomUnpublishSlug,
+        id: publishedDoc.id,
+      })
     })
 
     test('should show documents title in relationship even if draft document', async () => {
@@ -1016,7 +1041,7 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
 
@@ -1034,7 +1059,7 @@ describe('Versions', () => {
         await expect(page.locator('.doc-controls__status .status__value')).toContainText(
           'Published',
         )
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeVisible()
       })
 
@@ -1051,6 +1076,7 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
     })

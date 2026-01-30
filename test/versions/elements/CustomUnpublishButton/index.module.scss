@@ -1,0 +1,29 @@
+.customUnpublishButton {
+  :global(.btn) {
+    background-color: var(--theme-error-150);
+    color: var(--theme-error-750);
+
+    &:hover {
+      background-color: var(--theme-error-100) !important;
+    }
+
+    &:disabled {
+      background-color: var(--theme-error-100);
+      color: var(--theme-error-750);
+    }
+  }
+
+  :global(.popup-button) {
+    background-color: var(--theme-error-150);
+    color: var(--theme-error-750);
+
+    &:hover {
+      background-color: var(--theme-error-100) !important;
+    }
+
+    &:disabled {
+      background-color: var(--theme-error-100);
+      color: var(--theme-error-750);
+    }
+  }
+}
