@@ -81,16 +81,28 @@ export const getImportCollection = ({
       const debug = pluginConfig.debug || false
 
       try {
-        // Get file data from the uploaded document (handles both local and cloud storage)
-        const { data: fileData, mimetype: fileMimetype } = await getFileFromDoc({
-          collectionConfig,
-          doc: {
-            filename: doc.filename,
-            mimeType: doc.mimeType,
-            url: doc.url,
-          },
-          req,
-        })
+        // Get file data from the uploaded document
+        // First try req.file which is available during the same request (especially important for cloud storage)
+        // Fall back to getFileFromDoc for cases where req.file isn't available
+        let fileData: Buffer
+        let fileMimetype: string
+
+        if (req.file?.data) {
+          fileData = req.file.data
+          fileMimetype = req.file.mimetype || doc.mimeType || 'text/csv'
+        } else {
+          const fileFromDoc = await getFileFromDoc({
+            collectionConfig,
+            doc: {
+              filename: doc.filename,
+              mimeType: doc.mimeType,
+              url: doc.url,
+            },
+            req,
+          })
+          fileData = fileFromDoc.data
+          fileMimetype = fileFromDoc.mimetype
+        }
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
@@ -234,17 +246,28 @@ export const getImportCollection = ({
       }
 
       try {
-        // Get file data for job - need to read from disk/URL since req.file is not available in afterChange
-        // Uses getFileFromDoc which handles both local and cloud storage correctly
-        const { data: fileData, mimetype: fileMimetype } = await getFileFromDoc({
-          collectionConfig,
-          doc: {
-            filename: doc.filename,
-            mimeType: doc.mimeType,
-            url: doc.url,
-          },
-          req,
-        })
+        // Get file data for job
+        // First try req.file which is available during the same request (especially important for cloud storage)
+        // Fall back to getFileFromDoc for cases where req.file isn't available
+        let fileData: Buffer
+        let fileMimetype: string
+
+        if (req.file?.data) {
+          fileData = req.file.data
+          fileMimetype = req.file.mimetype || doc.mimeType || 'text/csv'
+        } else {
+          const fileFromDoc = await getFileFromDoc({
+            collectionConfig,
+            doc: {
+              filename: doc.filename,
+              mimeType: doc.mimeType,
+              url: doc.url,
+            },
+            req,
+          })
+          fileData = fileFromDoc.data
+          fileMimetype = fileFromDoc.mimetype
+        }
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
