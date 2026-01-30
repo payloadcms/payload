@@ -196,6 +196,37 @@ test.describe('Import Export Plugin', () => {
   })
 
   test.describe('Import', () => {
+    const tempFiles: string[] = []
+    const createdPageTitlePatterns: string[] = []
+    const createdPageIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const filePath of tempFiles) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      tempFiles.length = 0
+
+      for (const pattern of createdPageTitlePatterns) {
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: pattern },
+          },
+        })
+      }
+      createdPageTitlePatterns.length = 0
+
+      for (const id of createdPageIDs) {
+        await payload.delete({
+          collection: 'pages',
+          id,
+        })
+      }
+      createdPageIDs.length = 0
+    })
+
     test('should navigate to imports collection and see upload interface', async () => {
       await page.goto(importsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -210,53 +241,44 @@ test.describe('Import Export Plugin', () => {
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
+
       fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Import Test')
 
-      try {
-        await page.goto(importsURL.create)
-        await expect(page.locator('.collection-edit')).toBeVisible()
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
 
-        await page.setInputFiles('input[type="file"]', csvPath)
+      await page.setInputFiles('input[type="file"]', csvPath)
 
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        const importModeField = page.locator('#field-importMode')
-        if (await importModeField.isVisible()) {
-          await importModeField.click()
-          await page.locator('.rs__option:has-text("create")').first().click()
-        }
-
-        await saveDocAndAssert(page)
-
-        const statusField = page.locator('[data-field-name="status"]')
-        if (await statusField.isVisible()) {
-          await expect(statusField).toContainText(/completed|partial/i)
-        }
-
-        await runJobsQueue({ serverURL })
-
-        const importedDocs = await payload.find({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E Import Test' },
-          },
-        })
-        expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
-      } finally {
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E Import Test' },
-          },
-        })
+      const importModeField = page.locator('#field-importMode')
+      if (await importModeField.isVisible()) {
+        await importModeField.click()
+        await page.locator('.rs__option:has-text("create")').first().click()
       }
+
+      await saveDocAndAssert(page)
+
+      const statusField = page.locator('[data-field-name="status"]')
+      if (await statusField.isVisible()) {
+        await expect(statusField).toContainText(/completed|partial/i)
+      }
+
+      await runJobsQueue({ serverURL })
+
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E Import Test' },
+        },
+      })
+      expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
     test('should import a JSON file successfully', async () => {
@@ -265,81 +287,63 @@ test.describe('Import Export Plugin', () => {
         { title: 'E2E JSON Import 2', excerpt: 'JSON excerpt 2' },
       ])
       const jsonPath = path.join(__dirname, 'uploads', 'e2e-test-import.json')
+
       fs.writeFileSync(jsonPath, jsonContent)
+      tempFiles.push(jsonPath)
+      createdPageTitlePatterns.push('E2E JSON Import')
 
-      try {
-        await page.goto(importsURL.create)
-        await expect(page.locator('.collection-edit')).toBeVisible()
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
 
-        await page.setInputFiles('input[type="file"]', jsonPath)
+      await page.setInputFiles('input[type="file"]', jsonPath)
 
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        const importModeField = page.locator('#field-importMode')
-        if (await importModeField.isVisible()) {
-          await importModeField.click()
-          await page.locator('.rs__option:has-text("create")').first().click()
-        }
-
-        await saveDocAndAssert(page)
-
-        await runJobsQueue({ serverURL })
-
-        const importedDocs = await payload.find({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E JSON Import' },
-          },
-        })
-        expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
-      } finally {
-        if (fs.existsSync(jsonPath)) {
-          fs.unlinkSync(jsonPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E JSON Import' },
-          },
-        })
+      const importModeField = page.locator('#field-importMode')
+      if (await importModeField.isVisible()) {
+        await importModeField.click()
+        await page.locator('.rs__option:has-text("create")').first().click()
       }
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E JSON Import' },
+        },
+      })
+      expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
     test('should show import in list view after creation', async () => {
       const csvContent = 'title\n"E2E List View Test"'
       const csvPath = path.join(__dirname, 'uploads', 'e2e-list-test.csv')
+
       fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E List View Test')
 
-      try {
-        await page.goto(importsURL.create)
+      await page.goto(importsURL.create)
 
-        await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        await saveDocAndAssert(page)
+      await saveDocAndAssert(page)
 
-        await page.goto(importsURL.list)
+      await page.goto(importsURL.list)
 
-        await expect(page.locator('.row-1')).toBeVisible()
-      } finally {
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { equals: 'E2E List View Test' },
-          },
-        })
-      }
+      await expect(page.locator('.row-1')).toBeVisible()
     })
 
     test('should access import from list menu in pages collection', async () => {
@@ -375,51 +379,44 @@ test.describe('Import Export Plugin', () => {
         },
       })
 
+      createdPageIDs.push(existingDoc.id)
+
       const csvContent = `id,title,excerpt\n${existingDoc.id},"E2E Update Test Modified","Modified excerpt"`
       const csvPath = path.join(__dirname, 'uploads', 'e2e-update-test.csv')
+
       fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
 
-      try {
-        await page.goto(importsURL.create)
+      await page.goto(importsURL.create)
 
-        await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        const importModeField = page.locator('#field-importMode')
-        await expect(importModeField).toBeVisible()
-        await importModeField.click()
-        await page.locator('.rs__option:has-text("Update existing documents")').click()
+      const importModeField = page.locator('#field-importMode')
+      await expect(importModeField).toBeVisible()
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("Update existing documents")').click()
 
-        await saveDocAndAssert(page)
+      await saveDocAndAssert(page)
 
-        await runJobsQueue({ serverURL })
+      await runJobsQueue({ serverURL })
 
-        const {
-          docs: [updatedDoc],
-        } = await payload.find({
-          collection: 'pages',
-          where: {
-            id: {
-              equals: existingDoc.id,
-            },
+      const {
+        docs: [updatedDoc],
+      } = await payload.find({
+        collection: 'pages',
+        where: {
+          id: {
+            equals: existingDoc.id,
           },
-        })
-        expect(updatedDoc?.title).toBe('E2E Update Test Modified')
-        expect(updatedDoc?.excerpt).toBe('Modified excerpt')
-      } finally {
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          id: existingDoc.id,
-        })
-      }
+        },
+      })
+      expect(updatedDoc?.title).toBe('E2E Update Test Modified')
+      expect(updatedDoc?.excerpt).toBe('Modified excerpt')
     })
   })
 

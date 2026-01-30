@@ -1601,53 +1601,13 @@ export interface TaskCreateCollectionExport {
  */
 export interface TaskCreateCollectionImport {
   input: {
-    collectionSlug:
-      | 'users'
-      | 'pages'
-      | 'posts'
-      | 'posts-exports-only'
-      | 'posts-imports-only'
-      | 'posts-no-jobs-queue'
-      | 'posts-with-limits'
-      | 'posts-with-s3'
-      | 'media'
-      | 'exports'
-      | 'posts-export'
-      | 'posts-no-jobs-queue-export'
-      | 'posts-with-limits-export'
-      | 'posts-with-s3-export'
-      | 'imports'
-      | 'posts-import'
-      | 'posts-with-limits-import'
-      | 'posts-with-s3-import';
-    importMode?: ('create' | 'update' | 'upsert') | null;
-    matchField?: string | null;
-    status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
-    summary?: {
-      imported?: number | null;
-      updated?: number | null;
-      total?: number | null;
-      issues?: number | null;
-      issueDetails?:
-        | {
-            [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    };
-    user?: string | null;
+    importId: string;
+    importsCollection: string;
+    userID?: string | null;
     userCollection?: string | null;
-    importsCollection?: string | null;
-    file?: {
-      data?: string | null;
-      mimetype?: string | null;
-      name?: string | null;
-    };
-    format?: ('csv' | 'json') | null;
+    batchSize?: number | null;
     debug?: boolean | null;
+    defaultVersionStatus?: ('draft' | 'published') | null;
     maxLimit?: number | null;
   };
   output?: unknown;

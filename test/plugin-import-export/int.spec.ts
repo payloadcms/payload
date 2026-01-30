@@ -3661,22 +3661,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
       interface JobWithInput {
         input: {
-          collectionSlug?: string
-          file?: unknown
-          format?: string
           importId?: string
-          importMode?: string
           importsCollection?: string
-          user?: string
           userCollection?: string
+          userID?: number | string
         }
       }
       const { input } = job as JobWithInput
+      // The job input now only contains identifiers - file data is fetched by the job handler
       expect(input.importId).toBeDefined()
-      expect(input.collectionSlug).toStrictEqual('pages')
-      expect(input.importMode).toStrictEqual('create')
-      expect(input.format).toStrictEqual('csv')
-      expect(input.file).toBeDefined()
       expect(input.importsCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
 
