@@ -1,6 +1,7 @@
 'use client'
 
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { formatAdminURL } from 'payload/shared'
 
 import type {
   R2MultipartUpload,
@@ -19,15 +20,20 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     serverHandlerPath,
     serverURL,
   }): Promise<R2StorageClientUploadContext | undefined> => {
-    const endpoint = () =>
-      `${serverURL}${apiRoute}${serverHandlerPath}?${new URLSearchParams(params)}`
     const params: R2StorageMultipartUploadHandlerParams = {
       collection: collectionSlug,
       fileName: file.name,
       fileType: file.type,
     }
+    const baseURL = formatAdminURL({
+      apiRoute,
+      path: serverHandlerPath,
+      serverURL,
+    })
 
-    const multipart = await fetch(endpoint(), { method: 'POST' })
+    const endpoint = `${baseURL}?${String(new URLSearchParams(params))}`
+
+    const multipart = await fetch(endpoint, { method: 'POST' })
     if (!multipart.ok) {
       throw new Error('Failed to initialize multipart upload')
     }
@@ -51,7 +57,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
         'Content-Length': String(body.size),
         'Content-Type': 'application/octet-stream',
       }
-      const uploaded = await fetch(endpoint(), { body, headers, method: 'POST' })
+      const uploaded = await fetch(endpoint, { body, headers, method: 'POST' })
       if (!uploaded.ok) {
         throw new Error(`Failed to upload part ${part} / ${partTotal}`)
       }
@@ -63,7 +69,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
 
         const body = JSON.stringify(multipartUploadedParts)
         const headers = { 'Content-Type': 'application/json' }
-        const complete = await fetch(endpoint(), { body, headers, method: 'POST' })
+        const complete = await fetch(endpoint, { body, headers, method: 'POST' })
         if (!complete.ok) {
           throw new Error(`Failed to complete multipart upload`)
         }
