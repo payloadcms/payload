@@ -1590,7 +1590,7 @@ export interface TaskCreateCollectionExport {
       | null;
     userID?: string | null;
     userCollection?: string | null;
-    exportsCollection?: string | null;
+    exportCollection?: string | null;
     maxLimit?: number | null;
   };
   output?: unknown;
@@ -1602,7 +1602,7 @@ export interface TaskCreateCollectionExport {
 export interface TaskCreateCollectionImport {
   input: {
     importId: string;
-    importsCollection: string;
+    importCollection: string;
     userID?: string | null;
     userCollection?: string | null;
     batchSize?: number | null;

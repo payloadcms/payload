@@ -8,6 +8,7 @@ import path from 'path'
 import { defaultTimezones } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { createTestBucket } from '../plugin-cloud-storage/utils.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -25,7 +26,7 @@ const dirname = path.dirname(filename)
 
 // Load config to work with emulated services
 dotenv.config({
-  path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated'),
+  path: path.resolve(dirname, './.env.emulated'),
 })
 
 export default buildConfigWithDefaults({
@@ -71,6 +72,7 @@ export default buildConfigWithDefaults({
     },
   },
   onInit: async (payload) => {
+    await createTestBucket()
     await seed(payload)
   },
   plugins: [
