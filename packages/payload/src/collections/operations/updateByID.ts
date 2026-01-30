@@ -223,6 +223,14 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     })
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
     await unlinkTempFiles({
       collectionConfig,
       config,

@@ -246,7 +246,7 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
-        const updatedDoc = await updateDocument({
+        let updatedDoc = await updateDocument({
           id,
           autosave,
           collectionConfig,
@@ -269,6 +269,14 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         })
+
+        // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
+        }
 
         if (docShouldCommit) {
           await commitTransaction(req)

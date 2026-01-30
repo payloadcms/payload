@@ -94,6 +94,7 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
    */
   unpublishAllLocales?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
