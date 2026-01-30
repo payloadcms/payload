@@ -1,5 +1,7 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
-import type { SanitizedConfig } from '../../config/types.js'
+import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/index.js'
 import type {
@@ -8,14 +10,23 @@ import type {
   FieldPaths,
   FolderSortKeys,
   GlobalSlug,
+  SanitizedPermissions,
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
-export type DefaultServerFunctionArgs = {
-  importMap: ImportMap
+export type InitReqResult = {
+  cookies: Map<string, string>
+  headers: Headers
+  languageCode: AcceptedLanguages
+  locale?: Locale
+  permissions: SanitizedPermissions
   req: PayloadRequest
 }
+
+export type DefaultServerFunctionArgs = {
+  importMap: ImportMap
+} & InitReqResult
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>
