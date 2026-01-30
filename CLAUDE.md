@@ -63,9 +63,19 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - Commenting Guidelines
+
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+  - Prefer self describing function and variable names over generic names with comments to explain their purpose.
+  - Valid: `const titleToUse = doc.title`
+  - Invalid:
+
+    ```ts
+    // Title to use for hook
+    const title = doc.title
+    ```
+
 - Logger Usage (`payload.logger.error`)
   - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
   - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
@@ -93,6 +103,8 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - If you create a database record in a test, you MUST delete it before the test completes
 - For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
 - Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+- Do not use conditionals in tests where it can be avoided such as `if else`
+- Do not use `try {} finally {}` and prefer Playwright cleanup hooks instead
 
 **Example pattern:**
 
@@ -124,6 +136,7 @@ describe('My Feature', () => {
 - Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
 - One test should verify one behavior - keep tests focused
 - When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
+- When automatically running int tests you should run them with postgres as well to verify coverage
 
 ### How to run tests
 
