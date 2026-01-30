@@ -43,6 +43,7 @@ export type ListViewClientProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
+  disableSetStepNav?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
