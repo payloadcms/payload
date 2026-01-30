@@ -191,11 +191,11 @@ export default buildConfig({
 })
 ```
 
-The `schedule` property tells Payload to automatically queue this job every day at 8 AM.
+The `schedule` property defines when this job should run (every day at 8 AM).
 
 ### Step 2: Configure the Job Runner
 
-The `schedule` property only **queues** jobs—it doesn't run them. You also need to configure how queued jobs are executed:
+To actually queue and execute scheduled jobs, you need to configure the `autoRun` property. This handles both queuing jobs based on their schedule and running them:
 
 ```ts
 export default buildConfig({

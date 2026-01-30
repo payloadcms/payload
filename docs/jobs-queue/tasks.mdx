@@ -193,6 +193,9 @@ schedule: [{ cron: '0 9 * * 1', queue: 'weekly' }]
 
 // Every 5 minutes
 schedule: [{ cron: '*/5 * * * *', queue: 'frequent' }]
+
+// Every 3 seconds (extended cron syntax with seconds field)
+schedule: [{ cron: '*/3 * * * * *', queue: 'realtime' }]
 ```
 
 See [Job Schedules](/docs/jobs-queue/schedules) for comprehensive scheduling documentation, including hooks, concurrency controls, and troubleshooting.
