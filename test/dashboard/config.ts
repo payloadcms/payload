@@ -42,10 +42,6 @@ export default buildConfigWithDefaults({
             widgetSlug: 'revenue',
             width: 'full',
           },
-          {
-            widgetSlug: 'page-query',
-            width: 'medium',
-          },
         ]
 
         if (user?.email === 'dev@payloadcms.com') {

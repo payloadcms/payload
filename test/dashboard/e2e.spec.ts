@@ -203,6 +203,12 @@ describe('Dashboard', () => {
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('page query')
+    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.saveChangesAndValidate()
+
     // Find the page-query widget
     const pageQueryWidget = page.locator('.page-query-widget')
     await expect(pageQueryWidget).toBeVisible()
