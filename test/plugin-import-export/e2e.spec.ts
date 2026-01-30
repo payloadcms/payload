@@ -143,7 +143,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should enforce format restriction in UI and API when format is configured', async () => {
-      // posts-no-jobs-queue has format: 'csv' configured
       const postsNoJobsQueueURL = new AdminUrlUtil(serverURL, 'posts-no-jobs-queue')
       await page.goto(postsNoJobsQueueURL.list)
       await expect(page.locator('.collection-list')).toBeVisible()
@@ -170,7 +169,6 @@ test.describe('Import Export Plugin', () => {
 
       await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
 
-      // API should also reject non-CSV format
       const response = await page.request.post(
         `${serverURL}/api/posts-no-jobs-queue-export/download`,
         {
@@ -506,7 +504,6 @@ test.describe('Import Export Plugin', () => {
       postsWithLimitsExportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-export')
       postsWithLimitsImportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-import')
 
-      // Create 10 test documents (more than the limit of 5)
       for (let i = 0; i < 10; i++) {
         await payload.create({
           collection: 'posts-with-limits',
@@ -516,7 +513,6 @@ test.describe('Import Export Plugin', () => {
     })
 
     test.afterAll(async () => {
-      // Clean up test documents
       await payload.delete({
         collection: 'posts-with-limits',
         where: {
@@ -547,7 +543,6 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      // The export count should show 5 (the maxLimit), not 10
       const exportCount = page.locator('.export-preview__export-count')
       await expect(exportCount).toContainText('5 documents to export')
     })
@@ -656,32 +651,25 @@ test.describe('Import Export Plugin', () => {
 
   test.describe('S3 Storage', () => {
     test('should import CSV file stored in S3 via jobs queue', async () => {
-      // Use unique filename to avoid collisions with previous test runs
       const uniqueId = Date.now()
       const csvFilename = `s3-e2e-import-${uniqueId}.csv`
       const csvPath = path.join(__dirname, 'uploads', csvFilename)
 
-      // Create a temp CSV file for upload
       const csvContent = `title\n"S3 E2E Import 1"\n"S3 E2E Import 2"\n"S3 E2E Import 3"`
       fs.writeFileSync(csvPath, csvContent)
 
-      // Navigate to the S3-enabled imports collection
       await page.goto(s3ImportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
-      // Upload the file (will be stored in S3)
       await page.setInputFiles('input[type="file"]', csvPath)
       await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
 
-      // Select the target collection
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
       await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
 
-      // Save the import document (file goes to S3, job is queued)
       await saveDocAndAssert(page)
 
-      // Wait for import to complete
       await expect(async () => {
         await runJobsQueue({ serverURL })
         const { docs } = await payload.find({
@@ -693,7 +681,6 @@ test.describe('Import Export Plugin', () => {
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      // Verify the data was imported
       const posts = await payload.find({
         collection: postsWithS3Slug,
         where: {
@@ -717,11 +704,8 @@ test.describe('Import Export Plugin', () => {
       await page.goto(s3ExportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
-      // For S3 export collections created via overrideCollection, the collectionSlug
-      // is pre-set and hidden - just save the document to trigger the export job
       await saveDocAndAssert(page, '#action-save')
 
-      // Wait for export to complete (run jobs queue in loop until done)
       await expect(async () => {
         await runJobsQueue({ serverURL })
         await page.reload()

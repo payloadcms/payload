@@ -1054,10 +1054,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
     describe('schema-based column inference', () => {
       it('should generate columns from schema without scanning documents', async () => {
-        // This test verifies that columns are derived from schema, not data
-        // We create an export with specific fields and verify the columns are correct
-        // even if the data doesn't have all possible values
-
         let doc = await payload.create({
           collection: 'exports',
           user,
@@ -3668,7 +3664,7 @@ describe('@payloadcms/plugin-import-export', () => {
         }
       }
       const { input } = job as JobWithInput
-      // The job input now only contains identifiers - file data is fetched by the job handler
+
       expect(input.importId).toBeDefined()
       expect(input.importsCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
@@ -3754,13 +3750,9 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
       const exportedData = await readCSV(csvPath)
 
-      // Verify export applied toCSV functions
       expect(exportedData[0].custom).toBe('custom value toCSV')
       expect(exportedData[0].group_custom).toBe('group custom value toCSV')
-      // Note: customRelationship_id and customRelationship_email columns won't be created
-      // because relationships are not populated during export (just IDs)
 
-      // Clear the collection
       await payload.delete({
         collection: 'pages',
         where: {
@@ -3768,7 +3760,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Re-import the exported CSV
       let importDoc = await payload.create({
         collection: 'imports',
         user,
@@ -3786,18 +3777,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.jobs.run()
 
-      // Re-fetch the import document to get updated status after job runs
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
       })
 
-      // Verify import succeeded
       expect(importDoc.status).toBe('completed')
       expect(importDoc.summary?.imported).toBe(3)
       expect(importDoc.summary?.issues).toBe(0)
 
-      // Verify the imported documents match original (after transformation)
       const importedPages = await payload.find({
         collection: 'pages',
         where: {
@@ -3809,20 +3797,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(importedPages.docs).toHaveLength(3)
 
-      // The custom field should have been transformed by toCSV and then back by fromCSV
-      // Since we don't have a fromCSV defined for custom fields, they'll import as the transformed value
       expect(importedPages.docs[0]?.custom).toBe('custom value toCSV')
       expect(importedPages.docs[0]?.group?.custom).toBe('group custom value toCSV')
-
-      // Relationship won't be preserved because:
-      // 1. The toCSV function doesn't return a value (it tries to modify row with _id and _email columns)
-      // 2. Relationships aren't populated during export (just IDs)
-      // 3. The toCSV function expects a populated object but gets just an ID
-      // So the customRelationship field is effectively lost during export
     })
 
     it('should handle all field types in export/import roundtrip', async () => {
-      // Create a comprehensive test document with all field types
       const testUser = await payload.find({
         collection: 'users',
         limit: 1,
@@ -3880,15 +3859,14 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Export all fields
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
         data: {
           collectionSlug: 'pages',
-          fields: [], // Empty means all fields
+          fields: [],
           format: 'csv',
-          locale: 'all', // Export all locales
+          locale: 'all',
           where: {
             id: { equals: testPage.id },
           },
@@ -3904,13 +3882,11 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
 
-      // Delete the original document
       await payload.delete({
         collection: 'pages',
         id: testPage.id,
       })
 
-      // Re-import
       let importDoc = await payload.create({
         collection: 'imports',
         user,
@@ -3928,7 +3904,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       await payload.jobs.run()
 
-      // Re-fetch the import document to get updated status after job runs
       importDoc = await payload.findByID({
         collection: 'imports',
         id: importDoc.id,
@@ -3938,7 +3913,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importDoc.summary?.imported).toBe(1)
       expect(importDoc.summary?.issues).toBe(0)
 
-      // Verify the imported document
       const importedPages = await payload.find({
         collection: 'pages',
         where: {
@@ -3950,7 +3924,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs).toHaveLength(1)
       const imported = importedPages.docs[0]
 
-      // Verify all field types
       expect(imported?.title).toBe('Complete Roundtrip Test')
       expect(imported?.excerpt).toBe('Test excerpt')
       expect(imported?.localized).toBeDefined()
@@ -3969,7 +3942,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(imported?.group?.value).toBe('Group value')
       expect(imported?.group?.array).toHaveLength(1)
 
-      // Clean up
       await payload.delete({
         collection: 'posts',
         id: testPost.id,
@@ -3978,7 +3950,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
     describe('batch processing', () => {
       it('should process large imports in batches', async () => {
-        // Create a large CSV with 250 documents (will be processed in 3 batches with default size 100)
         const rows = ['title,excerpt']
         for (let i = 0; i < 250; i++) {
           rows.push(`"Batch Test ${i}","Excerpt ${i}"`)
@@ -4003,18 +3974,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Verify the import succeeded
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(250)
         expect(importDoc.summary?.issues).toBe(0)
 
-        // Verify all documents were imported
         const importedPages = await payload.find({
           collection: 'pages',
           where: {
@@ -4025,7 +3993,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(importedPages.totalDocs).toBe(250)
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4035,7 +4002,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should handle errors in batch processing and continue', async () => {
-        // Create CSV with some invalid documents
         const csvContent = `title,excerpt,relationship
 "Valid Doc 1","Excerpt 1",""
 "Valid Doc 2","Excerpt 2","invalid-id"
@@ -4062,19 +4028,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Should import valid documents and skip invalid ones
-        // Documents with invalid relationship IDs will fail entirely
-        expect(importDoc.status).toBe('partial') // Partial because some have issues
-        expect(importDoc.summary?.imported).toBe(3) // Only docs without invalid relationships
-        expect(importDoc.summary?.issues).toBe(2) // Two docs have invalid relationship IDs
+        expect(importDoc.status).toBe('partial')
+        expect(importDoc.summary?.imported).toBe(3)
+        expect(importDoc.summary?.issues).toBe(2)
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4084,14 +4046,12 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should report row numbers in errors correctly', async () => {
-        // Create a user for relationship testing
         const testUser = await payload.find({
           collection: 'users',
           limit: 1,
         })
         const userId = testUser.docs[0]?.id
 
-        // Create CSV with an error in the middle
         const csvContent = `title,excerpt
 "Row 1","Valid"
 "Row 2","Valid"
@@ -4117,25 +4077,21 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Should have imported 3 valid documents and have 1 error
         expect(importDoc.summary?.imported).toBe(3)
 
         if (importDoc.summary?.issueDetails && Array.isArray(importDoc.summary.issueDetails)) {
           const issues = importDoc.summary.issueDetails as Array<{ error: string; row: number }>
           // eslint-disable-next-line vitest/no-conditional-expect
           expect(issues).toHaveLength(1)
-          // The issue should be for row 3 (1-indexed)
           // eslint-disable-next-line vitest/no-conditional-expect
           expect(issues[0]?.row).toBe(3)
         }
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4145,7 +4101,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should handle batch processing with localized fields', async () => {
-        // Create CSV with localized fields in batches
         const rows = ['title,localized_en,localized_es']
         for (let i = 0; i < 150; i++) {
           rows.push(`"Batch Localized ${i}","English ${i}","Spanish ${i}"`)
@@ -4170,18 +4125,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Verify the import succeeded
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(150)
         expect(importDoc.summary?.issues).toBe(0)
 
-        // Verify localized data
         const importedPagesEn = await payload.find({
           collection: 'pages',
           where: {
@@ -4205,7 +4157,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(importedPagesEs.docs[0]?.localized).toContain('Spanish')
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4215,10 +4166,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should respect defaultVersionStatus configuration', async () => {
-        // Test that without _status field, documents are created as published by default
-        // (or as draft when defaultVersionStatus is configured as 'draft')
-
-        // Create CSV without _status field
         const csvContent =
           'title,excerpt\n"Default Status Test 1","Test excerpt 1"\n"Default Status Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
@@ -4240,29 +4187,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Verify the import succeeded
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
         expect(importDoc.summary?.issues).toBe(0)
 
-        // Verify documents were created as published (the default)
         const publishedPages = await payload.find({
           collection: 'pages',
           where: {
             title: { contains: 'Default Status Test ' },
           },
-          draft: false, // Only get published versions
+          draft: false,
         })
 
         expect(publishedPages.totalDocs).toBe(2)
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4272,7 +4215,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should handle manual CSV with localized fields without locale suffix', async () => {
-        // Test that localized fields without locale suffix import to Payload's default locale
         const csvContent =
           'title,localized\n"Manual Locale Test 1","Default locale content 1"\n"Manual Locale Test 2","Default locale content 2"'
         const csvBuffer = Buffer.from(csvContent)
@@ -4294,35 +4236,30 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // Verify the import succeeded
         expect(importDoc.status).toBe('completed')
         expect(importDoc.summary?.imported).toBe(2)
         expect(importDoc.summary?.issues).toBe(0)
 
-        // Verify localized field was imported to Payload's default locale
         const importedPages = await payload.find({
           collection: 'pages',
           where: {
             title: { contains: 'Manual Locale Test ' },
           },
-          // Don't specify locale - let Payload use its default
         })
 
         expect(importedPages.totalDocs).toBe(2)
-        // Sort the docs by title to ensure consistent ordering
+
         const sortedDocs = importedPages.docs.sort((a, b) =>
           (a?.title || '').localeCompare(b?.title || ''),
         )
         expect(sortedDocs[0]?.localized).toBe('Default locale content 1')
         expect(sortedDocs[1]?.localized).toBe('Default locale content 2')
 
-        // Clean up
         await payload.delete({
           collection: 'pages',
           where: {
@@ -4849,7 +4786,6 @@ describe('@payloadcms/plugin-import-export', () => {
   describe('posts-exports-only and posts-imports-only collections', () => {
     describe('posts-exports-only', () => {
       it('should export from posts-exports-only collection (no jobs queue)', async () => {
-        // This collection uses the base exports collection but should work
         const doc = await payload.create({
           collection: 'exports',
           user,
@@ -4866,7 +4802,6 @@ describe('@payloadcms/plugin-import-export', () => {
           id: doc.id,
         })
 
-        // Filename is generated with timestamp, just verify it exists and ends with .csv
         expect(exportDoc.filename).toBeDefined()
         expect(exportDoc.filename).toMatch(/\.csv$/)
         const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
@@ -4877,8 +4812,6 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should not allow restricted user to export from posts-exports-only (access control)', async () => {
-        // Restricted user should not be able to read from posts-exports-only
-        // So an export should return no documents
         const doc = await payload.create({
           collection: 'exports',
           user: restrictedUser,
@@ -4900,18 +4833,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Job may be deleted after successful completion (deleteJobOnComplete: true is default)
-        // So we just verify the export document was updated
         const exportDoc = await payload.findByID({
           collection: 'exports',
           id: doc.id,
         })
 
-        // The export should complete but have no documents due to access control
         const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
         const data = await readCSV(expectedPath)
 
-        // Should be empty because restricted user can't read from posts-exports-only
         expect(data).toHaveLength(0)
       })
     })
@@ -4921,8 +4850,6 @@ describe('@payloadcms/plugin-import-export', () => {
         const csvContent = 'title\n"Sync Import Test 1"\n"Sync Import Test 2"\n"Sync Import Test 3"'
         const csvBuffer = Buffer.from(csvContent)
 
-        // Note: The base 'imports' collection uses jobs queue. disableJobsQueue config on
-        // the target collection only affects custom import collections with overrideCollection.
         let importDoc = await payload.create({
           collection: 'imports',
           user,
@@ -4940,7 +4867,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
@@ -4950,7 +4876,6 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(importDoc.summary?.imported).toBe(3)
         expect(importDoc.summary?.issues).toBe(0)
 
-        // Verify the documents were created
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
           where: {
@@ -4960,7 +4885,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(importedDocs.totalDocs).toBe(3)
 
-        // Clean up
         await payload.delete({
           collection: 'posts-imports-only',
           where: {
@@ -4973,7 +4897,6 @@ describe('@payloadcms/plugin-import-export', () => {
         const csvContent = 'title\n"Restricted Import Test 1"\n"Restricted Import Test 2"'
         const csvBuffer = Buffer.from(csvContent)
 
-        // Restricted user should not be able to create in posts-imports-only
         let importDoc = await payload.create({
           collection: 'imports',
           user: restrictedUser,
@@ -4991,18 +4914,15 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.jobs.run()
 
-        // Re-fetch the import document to get updated status after job runs
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
         })
 
-        // The import should fail or have errors due to access control
         expect(importDoc.status).toBe('failed')
         expect(importDoc.summary?.imported).toBe(0)
         expect(importDoc.summary?.issues).toBeGreaterThan(0)
 
-        // Verify no documents were created
         const importedDocs = await payload.find({
           collection: 'posts-imports-only',
           where: {
@@ -5017,7 +4937,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('access control with jobs queue', () => {
     it('should respect access control when export uses jobs queue', async () => {
-      // Create some test data first (the imports beforeEach clears pages)
       for (let i = 0; i < 3; i++) {
         await payload.create({
           collection: 'pages',
@@ -5027,8 +4946,6 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       }
 
-      // pages collection uses the jobs queue (default behavior)
-      // Admin user should be able to export
       const doc = await payload.create({
         collection: 'exports',
         user,
@@ -5039,7 +4956,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Wait for job to complete
       await payload.jobs.run()
 
       const exportDoc = await payload.findByID({
@@ -5055,7 +4971,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should respect access control when import uses jobs queue', async () => {
-      // pages collection uses the jobs queue (default behavior)
       const csvContent = 'title\n"Jobs Queue Import 1"\n"Jobs Queue Import 2"'
       const csvBuffer = Buffer.from(csvContent)
 
@@ -5074,7 +4989,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Wait for job to complete
       await payload.jobs.run()
 
       const updatedImportDoc = await payload.findByID({
@@ -5085,7 +4999,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(updatedImportDoc.status).toBe('completed')
       expect(updatedImportDoc.summary?.imported).toBe(2)
 
-      // Verify the documents were created
       const importedDocs = await payload.find({
         collection: 'pages',
         where: {
@@ -5095,7 +5008,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(importedDocs.totalDocs).toBe(2)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5107,7 +5019,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('preview endpoints', () => {
     it('should return export preview data for CSV format', async () => {
-      // Create some test data for preview (published, since pages has versions)
       await payload.create({
         collection: 'pages',
         data: {
@@ -5149,7 +5060,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.docs[0]).toHaveProperty('id')
       expect(response.docs[0]).toHaveProperty('title')
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5189,11 +5099,9 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(response.docs).toBeDefined()
       expect(response.totalDocs).toBe(1)
-      // JSON format should preserve nested structure
       expect(response.docs[0]?.group).toBeDefined()
       expect(response.docs[0]?.group?.value).toBe('nested group value')
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5304,7 +5212,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should paginate import preview data for CSV', async () => {
-      // Create CSV with 15 rows
       const rows = ['title,excerpt']
       for (let i = 0; i < 15; i++) {
         rows.push(`"Import Pagination Test ${i}","Excerpt ${i}"`)
@@ -5312,7 +5219,6 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvContent = rows.join('\n')
       const base64Data = Buffer.from(csvContent).toString('base64')
 
-      // Request page 1 with limit 10
       const responsePage1: {
         docs: unknown[]
         hasNextPage: boolean
@@ -5342,7 +5248,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responsePage1.hasNextPage).toBe(true)
       expect(responsePage1.hasPrevPage).toBe(false)
 
-      // Request page 2
       const responsePage2: {
         docs: unknown[]
         hasNextPage: boolean
@@ -5374,7 +5279,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should paginate import preview data for JSON', async () => {
-      // Create JSON with 11 items
       const items = []
       for (let i = 0; i < 11; i++) {
         items.push({ title: `JSON Import Test ${i}`, excerpt: `Excerpt ${i}` })
@@ -5382,7 +5286,6 @@ describe('@payloadcms/plugin-import-export', () => {
       const jsonContent = JSON.stringify(items)
       const base64Data = Buffer.from(jsonContent).toString('base64')
 
-      // Request page 1 with limit 10
       const responsePage1: {
         docs: unknown[]
         hasNextPage: boolean
@@ -5412,7 +5315,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responsePage1.hasNextPage).toBe(true)
       expect(responsePage1.hasPrevPage).toBe(false)
 
-      // Request page 2 - should only have 1 item
       const responsePage2: {
         docs: unknown[]
         hasNextPage: boolean
@@ -5443,7 +5345,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should default to previewLimit 10 and previewPage 1 for import preview', async () => {
-      // Create CSV with 25 rows
       const rows = ['title,excerpt']
       for (let i = 0; i < 25; i++) {
         rows.push(`"Default Pagination Test ${i}","Excerpt ${i}"`)
@@ -5451,7 +5352,6 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvContent = rows.join('\n')
       const base64Data = Buffer.from(csvContent).toString('base64')
 
-      // Request without pagination params
       const response: {
         docs: unknown[]
         limit: number
@@ -5479,7 +5379,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should respect preview limit (max 10)', async () => {
-      // Create more than 10 documents
       for (let i = 0; i < 15; i++) {
         await payload.create({
           collection: 'pages',
@@ -5506,10 +5405,8 @@ describe('@payloadcms/plugin-import-export', () => {
         })
         .then((res) => res.json())
 
-      // Should be capped at 10
       expect(response.docs.length).toBeLessThanOrEqual(10)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5519,7 +5416,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should respect export limit when paginating preview (limit 11, per page 10)', async () => {
-      // Create 15 documents
       for (let i = 0; i < 15; i++) {
         await payload.create({
           collection: 'pages',
@@ -5530,8 +5426,6 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       }
 
-      // Request preview with export limit 11, preview per page 10
-      // Page 1 should have 10 docs
       const responsePage1: {
         docs: unknown[]
         exportTotalDocs: number
@@ -5564,7 +5458,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(responsePage1.hasNextPage).toBe(true)
       expect(responsePage1.hasPrevPage).toBe(false)
 
-      // Page 2 should only have 1 doc (not 10)
       const responsePage2: {
         docs: unknown[]
         exportTotalDocs: number
@@ -5590,14 +5483,13 @@ describe('@payloadcms/plugin-import-export', () => {
         })
         .then((res) => res.json())
 
-      expect(responsePage2.docs).toHaveLength(1) // Only 1 doc remaining within export limit
+      expect(responsePage2.docs).toHaveLength(1)
       expect(responsePage2.exportTotalDocs).toBe(11)
       expect(responsePage2.page).toBe(2)
       expect(responsePage2.totalPages).toBe(2)
       expect(responsePage2.hasNextPage).toBe(false)
       expect(responsePage2.hasPrevPage).toBe(true)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5607,7 +5499,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should return empty docs when preview page exceeds export limit boundary', async () => {
-      // Create 5 documents
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
@@ -5618,8 +5509,6 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       }
 
-      // Request page 2 when export limit is 5 and preview per page is 10
-      // Page 2 would start at index 10, which is beyond export limit 5
       const response: {
         docs: unknown[]
         exportTotalDocs: number
@@ -5647,10 +5536,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.docs).toHaveLength(0)
       expect(response.exportTotalDocs).toBe(5)
       expect(response.page).toBe(2)
-      expect(response.totalPages).toBe(1) // Only 1 page needed for 5 docs at 10 per page
+      expect(response.totalPages).toBe(1)
       expect(response.hasNextPage).toBe(false)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5660,7 +5548,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should have matching column order between preview and export when no fields selected', async () => {
-      // Get preview response (no fields selected - uses default ordering)
       const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
         .POST('/posts-export/export-preview', {
           body: JSON.stringify({
@@ -5677,7 +5564,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(previewResponse.columns).toBeDefined()
       expect(previewResponse.columns.length).toBeGreaterThan(0)
 
-      // Create actual export (no fields selected)
       const exportDoc = await payload.create({
         collection: 'posts-export',
         user,
@@ -5696,19 +5582,14 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(finalExportDoc.filename).toBeDefined()
       const exportPath = path.join(dirname, './uploads', finalExportDoc.filename as string)
       const exportData = await readCSV(exportPath)
-
-      // Get column order from exported CSV
       const exportColumns = Object.keys(exportData[0])
 
-      // Preview and export should have the same column order
       expect(previewResponse.columns).toStrictEqual(exportColumns)
     })
 
     it('should have matching column order between preview and export with selected fields', async () => {
-      // User-specified field order: title first, then id, then createdAt
       const selectedFields = ['title', 'id', 'createdAt']
 
-      // Get preview response with selected fields
       const previewResponse: { columns: string[]; docs: unknown[] } = await restClient
         .POST('/posts-export/export-preview', {
           body: JSON.stringify({
@@ -5726,7 +5607,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(previewResponse.columns).toBeDefined()
       expect(previewResponse.columns.length).toBeGreaterThan(0)
 
-      // Create actual export with same selected fields
       const exportDoc = await payload.create({
         collection: 'posts-export',
         user,
@@ -5746,21 +5626,15 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(finalExportDoc.filename).toBeDefined()
       const exportPath = path.join(dirname, './uploads', finalExportDoc.filename as string)
       const exportData = await readCSV(exportPath)
-
-      // Get column order from exported CSV
       const exportColumns = Object.keys(exportData[0])
 
-      // Preview and export should have the same column order
       expect(previewResponse.columns).toStrictEqual(exportColumns)
-
-      // Both should respect user's specified order (title first, not id first)
       expect(exportColumns).toStrictEqual(selectedFields)
     })
   })
 
   describe('rich text field handling', () => {
     it('should preserve Lexical numeric properties on JSON export/import', async () => {
-      // Create a page with rich text data
       const page = await payload.create({
         collection: 'pages',
         data: {
@@ -5775,7 +5649,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Export to JSON
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -5798,11 +5671,9 @@ describe('@payloadcms/plugin-import-export', () => {
       const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
       const exportedData = await readJSON(jsonPath)
 
-      // Verify the rich text structure was preserved
       expect(exportedData[0].blocks[0].richText.root.version).toBe(1)
       expect(exportedData[0].blocks[0].richText.root.children[0].version).toBe(1)
 
-      // Now import it back
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5835,7 +5706,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(importDoc.status).toBe('completed')
 
-      // Verify numeric properties are numbers, not strings
       const importedPage = await payload.find({
         collection: 'pages',
         where: {
@@ -5849,7 +5719,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(typeof richText?.root?.version).toBe('number')
       expect(richText?.root?.version).toBe(1)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5873,7 +5742,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Export to CSV
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -5895,7 +5763,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
 
-      // Delete original
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5903,7 +5770,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Import CSV back
       let importDoc = await payload.create({
         collection: 'imports',
         user,
@@ -5928,7 +5794,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(importDoc.status).toBe('completed')
 
-      // Verify the rich text was preserved
       const importedPage = await payload.find({
         collection: 'pages',
         where: {
@@ -5942,7 +5807,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(richText?.root?.type).toBe('root')
       expect(richText?.root?.children?.length).toBeGreaterThan(0)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -5954,9 +5818,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('error recovery', () => {
     it('should continue processing after individual document errors', async () => {
-      // Create CSV with some valid and some invalid rows
-      // The second row has duplicate title which should be fine,
-      // but we can test with missing required fields
       const csvContent =
         'title\n' +
         '"Error Recovery Test 1"\n' +
@@ -6436,7 +6297,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('limit and pagination edge cases', () => {
     it('should handle page exceeding total pages', async () => {
-      // Create just 2 pages
       await payload.create({
         collection: 'pages',
         data: { title: 'Pagination Test 1', _status: 'published' },
@@ -6446,7 +6306,6 @@ describe('@payloadcms/plugin-import-export', () => {
         data: { title: 'Pagination Test 2', _status: 'published' },
       })
 
-      // Request page 999 which doesn't exist
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -6472,12 +6331,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
       const data = await readCSV(csvPath)
 
-      // Payload returns an empty page when page exceeds total
-      // The batch processor may still process available pages
-      // This test validates the export completes without error
       expect(data.length).toBeLessThanOrEqual(2)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6487,7 +6342,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should handle very large limit values', async () => {
-      // Create a few documents
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
@@ -6495,7 +6349,6 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       }
 
-      // Request with very large limit
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -6520,10 +6373,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
       const data = await readCSV(csvPath)
 
-      // Should return all available documents (5)
       expect(data).toHaveLength(5)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6567,7 +6418,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(data).toHaveLength(1)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6579,7 +6429,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('streaming export edge cases', () => {
     it('should stream large exports without memory issues', async () => {
-      // Create 100 published documents for streaming test
       const promises = []
       for (let i = 0; i < 100; i++) {
         promises.push(
@@ -6595,7 +6444,6 @@ describe('@payloadcms/plugin-import-export', () => {
       }
       await Promise.all(promises)
 
-      // Use the exports collection to create a downloadable export
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -6619,10 +6467,8 @@ describe('@payloadcms/plugin-import-export', () => {
       const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
       const data = await readCSV(csvPath)
 
-      // Should have exported all 100 documents
       expect(data).toHaveLength(100)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6632,7 +6478,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should handle empty result set in streaming export', async () => {
-      // Export with a where clause that matches nothing
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -6652,23 +6497,17 @@ describe('@payloadcms/plugin-import-export', () => {
         id: exportDoc.id,
       })
 
-      // Export should complete (may or may not have filename depending on implementation)
-      // The key is that it doesn't error out
       expect(exportedDoc).toBeDefined()
     })
   })
 
   describe('concurrent operations', () => {
     it('should handle multiple simultaneous imports', async () => {
-      // Use unique timestamp to avoid filename collisions across test runs
       const timestamp = Date.now()
 
-      // Create two different CSV files with unique identifiers
       const csv1 = `title\n"Concurrent Import A1 ${timestamp}"\n"Concurrent Import A2 ${timestamp}"`
       const csv2 = `title\n"Concurrent Import B1 ${timestamp}"\n"Concurrent Import B2 ${timestamp}"`
 
-      // Create imports sequentially to avoid race conditions in file upload processing
-      // The concurrent aspect we're testing is the job execution, not the document creation
       const import1 = await payload.create({
         collection: 'imports',
         user,
@@ -6699,10 +6538,8 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Run jobs
       await payload.jobs.run()
 
-      // Check both imports completed
       const [finalImport1, finalImport2] = await Promise.all([
         payload.findByID({ collection: 'imports', id: import1.id }),
         payload.findByID({ collection: 'imports', id: import2.id }),
@@ -6713,7 +6550,6 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(finalImport1.summary?.imported).toBe(2)
       expect(finalImport2.summary?.imported).toBe(2)
 
-      // Verify all documents were created
       const allDocs = await payload.find({
         collection: 'pages',
         where: {
@@ -6726,7 +6562,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(allDocs.totalDocs).toBe(4)
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6736,7 +6571,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should handle export during active import', async () => {
-      // Create some existing data (published)
       for (let i = 0; i < 5; i++) {
         await payload.create({
           collection: 'pages',
@@ -6744,7 +6578,6 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       }
 
-      // Start an import
       const csvData =
         'title\n"Concurrent Import During Export 1"\n"Concurrent Import During Export 2"'
       const importDoc = await payload.create({
@@ -6762,7 +6595,6 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Immediately start an export
       const exportDoc = await payload.create({
         collection: 'exports',
         user,
@@ -6775,21 +6607,16 @@ describe('@payloadcms/plugin-import-export', () => {
         },
       })
 
-      // Run all jobs
       await payload.jobs.run()
 
-      // Check both completed
       const [finalImport, finalExport] = await Promise.all([
         payload.findByID({ collection: 'imports', id: importDoc.id }),
         payload.findByID({ collection: 'exports', id: exportDoc.id }),
       ])
 
       expect(finalImport.status).toBe('completed')
-      // Export may or may not have filename depending on when jobs queue processed
-      // The key is that neither operation crashes when run concurrently
       expect(finalExport).toBeDefined()
 
-      // If export has a filename, verify data
       if (finalExport.filename) {
         const csvPath = path.join(dirname, './uploads', finalExport.filename)
         const exportedData = await readCSV(csvPath)
@@ -6797,7 +6624,6 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(exportedData).toHaveLength(5)
       }
 
-      // Clean up
       await payload.delete({
         collection: 'pages',
         where: {
@@ -6814,7 +6640,6 @@ describe('@payloadcms/plugin-import-export', () => {
     const createdPostIds: (number | string)[] = []
 
     beforeEach(async () => {
-      // Create 10 test documents (more than the limit of 5)
       for (let i = 0; i < 10; i++) {
         const doc = await payload.create({
           collection: 'posts-with-limits',
@@ -6825,7 +6650,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     afterAll(async () => {
-      // Clean up all test documents
       if (createdPostIds.length > 0) {
         for (const id of createdPostIds) {
           try {
@@ -6834,7 +6658,7 @@ describe('@payloadcms/plugin-import-export', () => {
               id,
             })
           } catch {
-            // Document may have already been deleted
+            // Ignore - document may have already been deleted
           }
         }
         createdPostIds.length = 0
