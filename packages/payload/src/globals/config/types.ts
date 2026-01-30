@@ -29,6 +29,7 @@ import type {
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type {
+  GeneratedTypes,
   GlobalAdminCustom,
   GlobalCustom,
   GlobalSlug,
@@ -43,12 +44,51 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
+/**
+ * Global slugs that do not have drafts enabled.
+ * Detects globals without drafts by checking for the absence of the `_status` field.
+ */
+export type GlobalsWithoutDrafts = {
+  [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[GlobalSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on global configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ */
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends GlobalsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
+
 export type BeforeValidateHook = (args: {
   context: RequestContext
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -58,6 +98,10 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -67,6 +111,10 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: any
   req: PayloadRequest
 }) => any
@@ -76,6 +124,10 @@ export type BeforeReadHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -85,6 +137,10 @@ export type AfterReadHook = (args: {
   findMany?: boolean
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
 }) => any
@@ -102,6 +158,10 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 

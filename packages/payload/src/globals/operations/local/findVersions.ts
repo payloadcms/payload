@@ -88,6 +88,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */

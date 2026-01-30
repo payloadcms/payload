@@ -73,6 +73,7 @@ export const updateByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {
@@ -222,6 +223,14 @@ export const updateByIDOperation = async <
       unpublishAllLocales,
     })
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
     await unlinkTempFiles({
       collectionConfig,
       config,
@@ -236,6 +245,7 @@ export const updateByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'updateByID',
+      overrideAccess,
       result,
     })) as TransformCollectionWithSelect<TSlug, TSelect>
 

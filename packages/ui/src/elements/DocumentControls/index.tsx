@@ -277,15 +277,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
-                    <RenderCustomComponent
-                      CustomComponent={CustomUnpublishButton}
-                      Fallback={<UnpublishButton />}
-                    />
+                        <RenderCustomComponent
+                          CustomComponent={CustomSaveDraftButton}
+                          Fallback={<SaveDraftButton />}
+                        />
+                      )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -403,6 +399,10 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                <RenderCustomComponent
+                  CustomComponent={CustomUnpublishButton}
+                  Fallback={<UnpublishButton />}
+                />
                 {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>

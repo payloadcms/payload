@@ -30,7 +30,7 @@ import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
-import { afterReadSlug, beforeValidateSlug } from './shared.js'
+import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -1006,6 +1006,132 @@ describe('Hooks', () => {
       expect(docFromFind.title).toEqual('afterRead')
       expect(docFromFindMany.title).toEqual('afterRead')
       expect(docFromFind.title).toEqual(docFromFindMany.title)
+    })
+  })
+
+  describe('overrideAccess in hooks', () => {
+    const createdIDs: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: overrideAccessSlug, id })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should pass overrideAccess: false to hooks when not overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+        overrideAccess: false,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
+    })
+
+    it('should pass overrideAccess: true to hooks when overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
+    })
+
+    it('should pass overrideAccess to hooks in find operation', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Find' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const { docs } = await payload.find({
+        collection: overrideAccessSlug,
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      const result = docs[0]
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
+    })
+
+    it('should pass overrideAccess: false to hooks in find operation when not overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Find No Override' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const { docs } = await payload.find({
+        collection: overrideAccessSlug,
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+        overrideAccess: false,
+      })
+
+      const result = docs[0]
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
+    })
+
+    it('should default to true when overrideAccess is not specified in Local API', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Default' },
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
     })
   })
 })
