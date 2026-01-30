@@ -73,68 +73,75 @@ Here's a quick overview:
 
 Here's a visual representation of how the pieces fit together:
 
-```plaintext
-┌─────────────────────────────────────────────────────────────┐
-│  1. DEFINE WORK                                             │
-├─────────────────────────────────────────────────────────────┤
-│  Task/Workflow Definition                                   │
-│  - slug: 'sendEmail'                                        │
-│  - handler: async () => { /* your logic */ }                │
-└─────────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────────┐
-│  2. QUEUE JOBS (Choose one or both)                         │
-├─────────────────────────────────────────────────────────────┤
-│  Option A: Manual Queuing                                   │
-│    → payload.jobs.queue({ task: 'sendEmail' })              │
-│    → Used for user-triggered actions                        │
-│                                                             │
-│  Option B: Automatic Queuing (Scheduled)                    │
-│    → schedule: [{ cron: '0 8 * * *', queue: 'emails' }]     │
-│    → Used for recurring tasks                               │
-│                                                             │
-│  Option C: Bin Script (for handling schedules)              │
-│    → pnpm payload jobs:handle-schedules --cron "* * * * *"  │
-│    → Triggers schedule queuing in separate process          │
-└─────────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────────┐
-│  3. STORAGE                                                 │
-├─────────────────────────────────────────────────────────────┤
-│  payload-jobs collection (database)                         │
-│  - Stores queued jobs waiting to run                        │
-│  - Tracks job status, retries, errors                       │
-│  - Jobs remain here until processed                         │
-└─────────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────────┐
-│  4. RUN JOBS (Choose one)                                   │
-├─────────────────────────────────────────────────────────────┤
-│  Option A: Bin Scripts (Dedicated Server) [RECOMMENDED]    │
-│    → pnpm payload jobs:run --cron "* * * * *" --queue...   │
-│    → Separate process, easier to deploy/scale               │
-│                                                             │
-│  Option B: autoRun (Dedicated Server)                       │
-│    → autoRun: [{ cron: '* * * * *', queue: 'emails' }]      │
-│    → Runs within Next.js process                            │
-│                                                             │
-│  Option C: API Endpoint (Serverless)                        │
-│    → GET /api/payload-jobs/run?queue=emails                 │
-│    → Triggered by external cron (Vercel Cron, etc.)         │
-│                                                             │
-│  Option D: Manual                                           │
-│    → payload.jobs.run({ queue: 'emails' })                  │
-│    → Programmatic control                                   │
-└─────────────────────────────────────────────────────────────┘
-                           ↓
-┌─────────────────────────────────────────────────────────────┐
-│  5. EXECUTION                                               │
-├─────────────────────────────────────────────────────────────┤
-│  Task/Workflow handler runs                                 │
-│  - Success → Job marked complete (optionally deleted)       │
-│  - Failure → Retry (if configured) or mark as failed        │
-└─────────────────────────────────────────────────────────────┘
+<Pill text="Define Work" />
+
+```ts
+slug: 'sendEmail'
+handler: async () => {
+  /* your logic */
+}
 ```
+
+<Arrow direction="down" />
+
+<Pill text="Queue Jobs" />
+
+```ts
+// Option A: Manual Queuing—Used for user-triggered actions
+  payload.jobs.queue({ task: 'sendEmail' })
+
+// Option B: Automatic Queuing (Scheduled)— Used for recurring tasks
+  schedule: [{ cron: '0 8 * * *', queue: 'emails' }]
+
+// Option C: Bin Script (for handling schedules)—Triggers schedule queuing in separate process
+pnpm payload jobs:handle-schedules --cron "* * * * *"
+```
+
+<Arrow direction="down" />
+
+<Pill text="Storage (Jobs Collection)" />
+
+<BulletList
+  items={[
+    { text: 'Stores queued jobs waiting to run', icon: 'check' },
+    { text: 'Tracks job status, retries, errors', icon: 'check' },
+    { text: 'Jobs remain here until processed', icon: 'check' },
+  ]}
+/>
+
+<Arrow direction="down" />
+
+<Pill text="Run Jobs" />
+
+```
+// Option A: Bin Scripts (Dedicated Server) [RECOMMENDED]—Separate process,
+easier to deploy/scale pnpm payload jobs:run --cron "* * * * *" --queue...
+
+// Option B: autoRun (Dedicated Server)—Runs within Next.js process
+autoRun: [{ cron: '* * * * *', queue: 'emails' }]
+
+//Option C: API Endpoint (Serverless)—Triggered by external
+//cron (Vercel Cron, etc.)
+GET /api/payload-jobs/run?queue=emails
+
+// Option D: Manual
+payload.jobs.run({ queue: 'emails' })
+
+```
+
+<Arrow direction="down" />
+
+<Pill text="Execution(Task/Workflow handler runs)" />
+
+<BulletList
+  items={[
+    {
+      text: 'Success → Job marked complete',
+      icon: 'check',
+    },
+    { text: 'Failure → Retry or mark as failed', icon: 'x' },
+  ]}
+/>
 
 **Key Insights:**
 
