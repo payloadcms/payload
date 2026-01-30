@@ -558,12 +558,12 @@ test.describe('Import Export Plugin', () => {
       const createExportButton = page.locator('.popup__scroll-container button', {
         hasText: 'Export Posts With Limits',
       })
-      await expect(createExportButton).toBeVisible()
-      await createExportButton.click()
 
       await expect(async () => {
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('10')
@@ -631,6 +631,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
+      await expect(page.locator('.rs__menu')).toBeVisible()
       await page.locator('.rs__option:has-text("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
