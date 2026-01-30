@@ -2,6 +2,7 @@ import type { CollectionConfig, FileData, PayloadRequest, UploadConfig } from 'p
 
 import { getFileByPath } from 'payload'
 import { getExternalFile } from 'payload/internal'
+import { formatAdminURL } from 'payload/shared'
 
 type Args = {
   collectionConfig: CollectionConfig
@@ -51,8 +52,21 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
     // Cloud storage or external - fetch via Payload's file endpoint
     // getExternalFile constructs full URL, includes cookies for auth, and
     // the request goes through Payload's handler chain (including storage adapter)
+
+    // For relative URLs, construct a full URL using formatAdminURL which properly
+    // handles serverURL, basePath, and other config. This is important in job contexts
+    // where request headers may not be available for URL construction.
+    // Use serverURL from config, falling back to req.origin for local/job requests.
+    const fileUrl = doc.url.startsWith('http')
+      ? doc.url
+      : formatAdminURL({
+          apiRoute: '',
+          path: doc.url as `/${string}`,
+          serverURL: serverURL || req.origin,
+        })
+
     const file = await getExternalFile({
-      data: { filename: doc.filename, url: doc.url } as FileData,
+      data: { filename: doc.filename, url: fileUrl } as FileData,
       req,
       uploadConfig,
     })

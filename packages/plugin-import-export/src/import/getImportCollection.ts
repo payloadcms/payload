@@ -240,35 +240,14 @@ export const getImportCollection = ({
     })
   } else {
     // When jobs queue is enabled, queue the import as a job
+    // The job handler will fetch the file from storage using getFileFromDoc
     afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
       if (operation !== 'create') {
         return
       }
 
       try {
-        // Get file data for job
-        // First try req.file which is available during the same request (especially important for cloud storage)
-        // Fall back to getFileFromDoc for cases where req.file isn't available
-        let fileData: Buffer
-        let fileMimetype: string
-
-        if (req.file?.data) {
-          fileData = req.file.data
-          fileMimetype = req.file.mimetype || doc.mimeType || 'text/csv'
-        } else {
-          const fileFromDoc = await getFileFromDoc({
-            collectionConfig,
-            doc: {
-              filename: doc.filename,
-              mimeType: doc.mimeType,
-              url: doc.url,
-            },
-            req,
-          })
-          fileData = fileFromDoc.data
-          fileMimetype = fileFromDoc.mimetype
-        }
-
+        // Resolve maxLimit ahead of time since it may involve async config resolution
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
           targetCollection?.config.custom?.['plugin-import-export']?.importLimit
@@ -277,23 +256,13 @@ export const getImportCollection = ({
           req,
         })
 
+        // Only pass minimal data to the job - the handler will fetch the file from storage
         const input: ImportTaskInput = {
-          name: doc.filename,
           batchSize,
-          collectionSlug: doc.collectionSlug,
           debug: pluginConfig.debug,
           defaultVersionStatus,
-          file: {
-            name: doc.filename,
-            // Convert to base64 for job serialization - will be converted back to Buffer in task handler
-            data: fileData.toString('base64') as unknown as Buffer,
-            mimetype: fileMimetype,
-          },
-          format: fileMimetype === 'text/csv' ? 'csv' : 'json',
           importId: doc.id,
-          importMode: doc.importMode || 'create',
           importsCollection: collectionConfig.slug,
-          matchField: doc.matchField,
           maxLimit,
           userCollection: req.user?.collection || req?.user?.user?.collection,
           userID: req?.user?.id || req?.user?.user?.id,
