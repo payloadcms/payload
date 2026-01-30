@@ -283,12 +283,310 @@ Define the parent field yourself for custom validation or UI:
 
 ## Config Options
 
-| Option               | Type       | Required | Description                                                                      |
-| -------------------- | ---------- | -------- | -------------------------------------------------------------------------------- |
-| `parentFieldName`    | `string`   | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist. |
-| `slugify`            | `function` | No       | Custom function to slugify text for path generation. Default uses basic slugify. |
-| `slugPathFieldName`  | `string`   | No       | Name for the virtual slugified path field. Default: `'_h_slugPath'`              |
-| `titlePathFieldName` | `string`   | No       | Name for the virtual title path field. Default: `'_h_titlePath'`                 |
+| Option               | Type                 | Required | Description                                                                                                                                                             |
+| -------------------- | -------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `parentFieldName`    | `string`             | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist.                                                                                        |
+| `relationTo`         | `string \| string[]` | No       | Collection(s) that can be used as parents. Single string for monomorphic (same collection), array for polymorphic (multiple collections). Defaults to self-referential. |
+| `slugify`            | `function`           | No       | Custom function to slugify text for path generation. Default uses basic slugify.                                                                                        |
+| `slugPathFieldName`  | `string`             | No       | Name for the virtual slugified path field. Default: `'_h_slugPath'`                                                                                                     |
+| `titlePathFieldName` | `string`             | No       | Name for the virtual title path field. Default: `'_h_titlePath'`                                                                                                        |
+
+## Polymorphic Hierarchies
+
+<Banner type="success">
+  Polymorphic hierarchies allow documents to have parents from different
+  collections, enabling flexible content organization like blog posts under
+  pages, products under categories, or mixed content trees.
+</Banner>
+
+### Basic Example
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+// Pages collection - self-referential hierarchy
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    // No relationTo specified = self-referential (pages under pages only)
+  },
+}
+
+// Posts collection - polymorphic hierarchy
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  // highlight-start
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Posts can nest under pages OR other posts
+  },
+  // highlight-end
+}
+```
+
+This enables organizing content like:
+
+```
+Pages Hierarchy:
+- Home (page)
+  └─ About (page)
+  └─ Blog (page)
+     ├─ First Post (post under page)
+     │  └─ Reply (post under post)
+     └─ Second Post (post under page)
+```
+
+### Creating Documents with Polymorphic Parents
+
+When creating a document with a polymorphic parent, specify both the collection and ID:
+
+```ts
+// Create a page
+const blogPage = await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'Blog',
+    parent: null,
+  },
+})
+
+// Create a post under the page (cross-collection parent)
+const post = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'First Post',
+    parent: {
+      relationTo: 'pages', // Parent is a page
+      value: blogPage.id,
+    },
+  },
+})
+
+// Create a reply post under the post (same-collection parent)
+const reply = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'Reply',
+    parent: {
+      relationTo: 'posts', // Parent is another post
+      value: post.id,
+    },
+  },
+})
+```
+
+### Path Computation
+
+Paths are computed across collections automatically:
+
+```ts
+// Get post with computed paths
+const post = await payload.findByID({
+  collection: 'posts',
+  id: post.id,
+  context: { computeHierarchyPaths: true },
+})
+
+// post._h_slugPath: 'blog/first-post'
+// post._h_titlePath: 'Blog/First Post'
+
+// Get reply with nested path
+const reply = await payload.findByID({
+  collection: 'posts',
+  id: reply.id,
+  context: { computeHierarchyPaths: true },
+})
+
+// reply._h_slugPath: 'blog/first-post/reply'
+// reply._h_titlePath: 'Blog/First Post/Reply'
+```
+
+### Use Cases
+
+#### Blog Posts Under Pages
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  hierarchy: {
+    parentFieldName: 'parent',
+    // Self-referential only
+  },
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Posts can go under pages or nest under other posts
+  },
+}
+```
+
+**Result:** Blog section can be a page with posts nested underneath, posts can have threaded replies.
+
+#### Products Under Categories
+
+```ts
+export const Categories: CollectionConfig = {
+  slug: 'categories',
+  hierarchy: {
+    parentFieldName: 'parent',
+    // Self-referential only
+  },
+}
+
+export const Products: CollectionConfig = {
+  slug: 'products',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['categories', 'products'], // Products under categories, or product variants under products
+  },
+}
+```
+
+**Result:** Categories form the main tree, products nest within categories, product variants can nest under products.
+
+#### Mixed Content Tree
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  hierarchy: {
+    parentFieldName: 'parent',
+  },
+}
+
+export const Folders: CollectionConfig = {
+  slug: 'folders',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'folders'], // Folders under pages or folders
+  },
+}
+
+export const Documents: CollectionConfig = {
+  slug: 'documents',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'folders'], // Documents under pages or folders
+  },
+}
+```
+
+**Result:** Flexible organization where pages are top-level, folders and documents can nest under pages or folders.
+
+### Important Behaviors
+
+#### Circular Reference Protection
+
+Circular reference detection works across collections:
+
+```ts
+// This will fail:
+// Page A -> Post B -> Page A (circular)
+
+const pageA = await payload.create({
+  collection: 'pages',
+  data: { title: 'Page A', parent: null },
+})
+
+const postB = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'Post B',
+    parent: { relationTo: 'pages', value: pageA.id },
+  },
+})
+
+// ❌ This throws an error
+await payload.update({
+  collection: 'pages',
+  id: pageA.id,
+  data: { parent: { relationTo: 'posts', value: postB.id } },
+})
+// Error: Circular reference detected
+```
+
+#### Draft and Localization
+
+Polymorphic hierarchies fully support drafts and localization:
+
+- **Drafts:** Path computation follows draft context across collections
+- **Localization:** Paths computed per locale using each collection's localized title fields
+
+#### Target Collection Requirements
+
+When using `relationTo` with multiple collections:
+
+- Target collections should also have hierarchy enabled
+- Target collections must exist in the config
+- If a target collection doesn't have hierarchy enabled, you'll see a warning (but it will still work for simple parent relationships)
+
+### Limitations
+
+#### Parent Field Cannot Be Localized
+
+The `parent` field stores the relationship and must be consistent across all locales. This means:
+
+- ✅ Tree structure is the same across all locales
+- ✅ Path titles can differ per locale
+- ❌ Cannot have different parent relationships per locale
+
+#### Manual Parent Field
+
+If you manually define the parent field for a polymorphic hierarchy:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: ['pages', 'posts'], // Must match hierarchy config
+      hasMany: false,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'title',
+      type: 'text',
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Must match field config
+  },
+}
+```
+
+<Banner type="warning">
+  **Important:** The `relationTo` in your manual field must exactly match the
+  `relationTo` in the hierarchy config, otherwise validation will fail.
+</Banner>
 
 ## Use Cases
 

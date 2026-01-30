@@ -14,6 +14,8 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
+import { HIERARCHY_PARENT_FIELD } from '../constants.js'
+
 type Args = {
   /**
    * The name of the field that contains the parent document ID
@@ -34,17 +36,21 @@ export const hierarchyCollectionBeforeChange =
 
     // Validate circular references when parent is changing
     if (parentChanged && newParentID) {
+      // Extract parent ID (could be plain ID or populated object with id)
+      const parentId =
+        typeof newParentID === 'object' && 'id' in newParentID ? newParentID.id : newParentID
+
       // Prevent self-referential parent
-      if (newParentID === (originalDoc?.id || data.id)) {
+      if (parentId === (originalDoc?.id || data.id)) {
         throw new Error('Document cannot be its own parent')
       }
 
       // Prevent circular references by walking up the parent chain
+      // Parent is always from the same collection (self-referential)
       await validateNoCircularReference({
         collection,
         currentDocId: originalDoc?.id,
-        newParentId: newParentID,
-        parentFieldName,
+        parentId,
         req,
       })
     }
@@ -54,26 +60,45 @@ export const hierarchyCollectionBeforeChange =
 
 /**
  * Walks up the parent chain to detect circular references
+ * Hierarchies are always self-referential, so we only check within the same collection
  */
 async function validateNoCircularReference({
   collection,
   currentDocId,
-  newParentId,
-  parentFieldName,
+  parentId,
   req,
 }: {
   collection: CollectionConfig
   currentDocId: number | string
-  newParentId: number | string
-  parentFieldName: string
+  parentId: number | string
   req: PayloadRequest
 }) {
-  async function checkAncestor(ancestorId: number | string): Promise<void> {
+  const parentFieldName =
+    collection.hierarchy && collection.hierarchy !== true
+      ? collection.hierarchy.parentFieldName
+      : HIERARCHY_PARENT_FIELD
+
+  async function checkAncestor(
+    ancestorId: number | string,
+    visitedNodes: Set<string> = new Set(),
+  ): Promise<void> {
+    // Create unique key for this node
+    const nodeKey = `${collection.slug}:${ancestorId}`
+
+    // Check if we've visited this node (circular reference)
+    if (visitedNodes.has(nodeKey)) {
+      throw new Error(`Circular reference detected: the parent chain contains a loop`)
+    }
+
+    // Check if we've looped back to the current document
     if (ancestorId === currentDocId) {
       throw new Error(
         'Circular reference detected: the new parent is a descendant of this document',
       )
     }
+
+    // Add this node to visited set
+    visitedNodes.add(nodeKey)
 
     try {
       const ancestor = (await req.payload.findByID({
@@ -86,21 +111,35 @@ async function validateNoCircularReference({
         },
       })) as JsonObject
 
-      const nextParentId = ancestor?.[parentFieldName]
+      const nextParent = ancestor?.[parentFieldName]
 
-      // Continue traversal if parent exists and is valid
+      if (!nextParent) {
+        return // No parent, end of chain
+      }
+
+      // Extract next parent ID (could be plain ID or populated object)
+      let nextParentId = nextParent
+      if (typeof nextParent === 'object' && 'id' in nextParent) {
+        nextParentId = nextParent.id
+      }
+
+      // Continue traversal if parent exists
       if (
         nextParentId !== null &&
         nextParentId !== undefined &&
         (typeof nextParentId === 'string' || typeof nextParentId === 'number')
       ) {
-        return checkAncestor(nextParentId)
+        return checkAncestor(nextParentId, visitedNodes)
       }
-    } catch (_) {
-      // a non-existent parent can't create a circular reference
+    } catch (error) {
+      // If it's our validation error, re-throw it
+      if (error instanceof Error && error.message?.includes('Circular reference detected')) {
+        throw error
+      }
+      // Non-existent parent can't create a circular reference
       return
     }
   }
 
-  await checkAncestor(newParentId)
+  await checkAncestor(parentId)
 }

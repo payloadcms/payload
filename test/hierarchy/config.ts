@@ -104,8 +104,8 @@ export const Products: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
-      required: true,
       localized: true,
+      required: true,
     },
     {
       name: 'description',
@@ -115,6 +115,34 @@ export const Products: CollectionConfig = {
   ],
   hierarchy: {
     parentFieldName: 'parent',
+    // Self-referential: products nest under other products
+  },
+  versions: {
+    drafts: true,
+  },
+}
+
+// Posts collection with localized title field for testing localization
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'content',
+      type: 'text',
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    // Self-referential: posts can nest under other posts
   },
   versions: {
     drafts: true,
@@ -127,12 +155,12 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Categories, Departments, Organizations, Products],
+  collections: [Pages, Categories, Departments, Organizations, Products, Posts],
   debug: true,
   localization: {
-    locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
+    locales: ['en', 'es', 'de'],
   },
   onInit: async (payload) => {
     await payload.create({
@@ -153,5 +181,6 @@ export {
   Departments as DepartmentsCollection,
   Organizations as OrganizationsCollection,
   Pages as PagesCollection,
+  Posts as PostsCollection,
   Products as ProductsCollection,
 }

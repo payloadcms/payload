@@ -5,7 +5,7 @@
  * - Only computes when explicitly requested via:
  *   1. context.computeHierarchyPaths flag
  *   2. ?computeHierarchyPaths=true query param
- *   3. Selecting path fields in query (select parameter or GraphQL fields)
+ *   3. Selecting path fields in query (select parameter)
  */
 
 import type { CollectionAfterReadHook, PayloadRequest } from '../../index.js'
@@ -36,10 +36,6 @@ function isPathFieldSelected(
       return selectParam.includes(slugPathFieldName) || selectParam.includes(titlePathFieldName)
     }
   }
-
-  // TODO: Check GraphQL field selection
-  // This would require inspecting GraphQL resolveInfo if available
-  // For now, GraphQL users can use query param or context flag
 
   return false
 }
@@ -81,8 +77,6 @@ export const hierarchyCollectionAfterRead =
       const { localized: isTitleLocalized } = findUseAsTitleField(collection)
 
       const { slugPath, titlePath } = await computePaths({
-        // TODO: PR to thread `overrideAccess` through afterRead hooks
-        // overrideAccess,
         collection,
         doc,
         draft: doc._status === 'draft',

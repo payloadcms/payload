@@ -4,6 +4,11 @@ import type { CollectionConfig } from './types.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { addHierarchyToCollection } from '../../hierarchy/addHierarchyToCollection.js'
 import { buildParentField } from '../../hierarchy/buildParentField.js'
+import {
+  HIERARCHY_PARENT_FIELD,
+  HIERARCHY_SLUG_PATH_FIELD,
+  HIERARCHY_TITLE_PATH_FIELD,
+} from '../../hierarchy/constants.js'
 
 /**
  * Sanitize and apply hierarchy configuration to a collection config
@@ -21,7 +26,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   // Normalize boolean to object
   if (collectionConfig.hierarchy === true) {
     collectionConfig.hierarchy = {
-      parentFieldName: 'parent',
+      parentFieldName: HIERARCHY_PARENT_FIELD,
     }
   }
 
@@ -37,12 +42,6 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
     if (existingParentField.type !== 'relationship') {
       throw new Error(
         `Hierarchy parent field "${parentFieldName}" in collection "${collectionConfig.slug}" must be a relationship field`,
-      )
-    }
-
-    if (existingParentField.relationTo !== collectionConfig.slug) {
-      throw new Error(
-        `Hierarchy parent field "${parentFieldName}" in collection "${collectionConfig.slug}" must relate to the same collection (expected relationTo: "${collectionConfig.slug}", got: "${existingParentField.relationTo}")`,
       )
     }
 
@@ -68,8 +67,10 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   }
 
   // Apply defaults for optional fields
-  const slugPathFieldName = collectionConfig.hierarchy.slugPathFieldName || '_h_slugPath'
-  const titlePathFieldName = collectionConfig.hierarchy.titlePathFieldName || '_h_titlePath'
+  const slugPathFieldName =
+    collectionConfig.hierarchy.slugPathFieldName || HIERARCHY_SLUG_PATH_FIELD
+  const titlePathFieldName =
+    collectionConfig.hierarchy.titlePathFieldName || HIERARCHY_TITLE_PATH_FIELD
 
   // Apply hierarchy to collection (adds fields and hooks)
   addHierarchyToCollection({

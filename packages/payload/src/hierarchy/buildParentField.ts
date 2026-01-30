@@ -19,20 +19,19 @@ export const buildParentField = ({
     index: true,
     label: 'Parent',
     localized: false,
-    relationTo: collectionSlug,
+    relationTo: collectionSlug, // Always self-referential
   }
 
-  // Apply overrides
   if (overrides?.admin) {
     field.admin = {
-      ...field.admin,
-      ...(overrides.admin || {}),
+      ...(field.admin || {}),
+      ...overrides.admin,
     }
 
-    if (overrides.admin.components) {
+    if (overrides.admin.components && field.admin) {
       field.admin.components = {
-        ...field.admin.components,
-        ...(overrides.admin.components || {}),
+        ...(field.admin.components || {}),
+        ...overrides.admin.components,
       }
     }
   }

@@ -88,6 +88,7 @@ describe('Hierarchy', () => {
     it('should compute correct paths for root document', async () => {
       const rootPage = await payload.create({
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: {
           parent: null,
           title: 'Root Page',
@@ -111,6 +112,7 @@ describe('Hierarchy', () => {
       // Create child
       const childPage = await payload.create({
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: {
           parent: rootPage.id,
           title: 'Child',
@@ -123,6 +125,7 @@ describe('Hierarchy', () => {
       // Create grandchild
       const grandchildPage = await payload.create({
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: {
           parent: childPage.id,
           title: 'Grandchild',
@@ -159,6 +162,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.update({
         id: childPage.id,
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: { parent: anotherRoot.id },
       })
 
@@ -170,6 +174,7 @@ describe('Hierarchy', () => {
       const updatedGrandchild = await payload.findByID({
         id: grandchildPage.id,
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
       })
 
       expect(updatedGrandchild._h_slugPath).toBe('another-root/child/grandchild')
@@ -199,6 +204,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.findByID({
         id: childPage.id,
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
       })
 
       expect(updatedChild._h_slugPath).toBe('updated-root/child')
@@ -221,6 +227,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.update({
         id: childPage.id,
         collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: { parent: null },
       })
 
@@ -246,8 +253,8 @@ describe('Hierarchy', () => {
 
       await expect(
         payload.update({
-          collection: 'pages',
           id: page.id,
+          collection: 'pages',
           data: { parent: page.id },
         }),
       ).rejects.toThrow('Document cannot be its own parent')
@@ -266,8 +273,8 @@ describe('Hierarchy', () => {
 
       await expect(
         payload.update({
-          collection: 'pages',
           id: parentPage.id,
+          collection: 'pages',
           data: { parent: childPage.id },
         }),
       ).rejects.toThrow('Circular reference detected')
@@ -291,8 +298,8 @@ describe('Hierarchy', () => {
 
       await expect(
         payload.update({
-          collection: 'pages',
           id: grandparent.id,
+          collection: 'pages',
           data: { parent: child.id },
         }),
       ).rejects.toThrow('Circular reference detected')
@@ -316,8 +323,9 @@ describe('Hierarchy', () => {
 
       // Moving child from page1 to page2 should work
       const updated = await payload.update({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
         data: { parent: page2.id },
         depth: 0,
       })
@@ -407,6 +415,7 @@ describe('Hierarchy', () => {
     it('should use custom field names for path fields', async () => {
       const parentDept = await payload.create({
         collection: 'departments',
+        context: { computeHierarchyPaths: true },
         data: { deptName: 'Engineering' },
       })
 
@@ -415,6 +424,7 @@ describe('Hierarchy', () => {
 
       const childDept = await payload.create({
         collection: 'departments',
+        context: { computeHierarchyPaths: true },
         data: {
           deptName: 'Frontend',
           parentDept: parentDept.id,
@@ -444,6 +454,7 @@ describe('Hierarchy', () => {
       for (let i = 0; i < 10; i++) {
         currentParent = await payload.create({
           collection: 'pages',
+          context: { computeHierarchyPaths: true },
           data: {
             parent: currentParent?.id || null,
             title: `Level ${i}`,
@@ -471,39 +482,40 @@ describe('Hierarchy', () => {
       // Create parent and child
       const parent = await payload.create({
         collection: 'pages',
-        data: { title: 'Products', parent: null },
+        data: { parent: null, title: 'Products' },
       })
 
       // Publish child
       const child = await payload.create({
         collection: 'pages',
-        data: { title: 'Clothing', parent: parent.id, _status: 'published' },
+        data: { _status: 'published', parent: parent.id, title: 'Clothing' },
       })
 
       // Create draft with different title
       await payload.update({
-        collection: 'pages',
         id: child.id,
-        draft: true,
+        collection: 'pages',
         data: { title: 'Apparel' },
+        draft: true,
       })
 
       // Move parent
       const grandParent = await payload.create({
         collection: 'pages',
-        data: { title: 'Categories', parent: null, _status: 'published' },
+        data: { _status: 'published', parent: null, title: 'Categories' },
       })
 
       await payload.update({
-        collection: 'pages',
         id: parent.id,
-        data: { parent: grandParent.id, _status: 'published' },
+        collection: 'pages',
+        data: { _status: 'published', parent: grandParent.id },
       })
 
       // Paths are computed on read - published version uses published title
       const publishedChild = await payload.findByID({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
         draft: false,
       })
 
@@ -511,8 +523,9 @@ describe('Hierarchy', () => {
 
       // Draft version uses draft title
       const draftChild = await payload.findByID({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
         draft: true,
       })
 
@@ -522,29 +535,30 @@ describe('Hierarchy', () => {
     it('should compute paths when no draft exists', async () => {
       const parent = await payload.create({
         collection: 'pages',
-        data: { title: 'Services', parent: null, _status: 'published' },
+        data: { _status: 'published', parent: null, title: 'Services' },
       })
 
       const child = await payload.create({
         collection: 'pages',
-        data: { title: 'Consulting', parent: parent.id, _status: 'published' },
+        data: { _status: 'published', parent: parent.id, title: 'Consulting' },
       })
 
       const newParent = await payload.create({
         collection: 'pages',
-        data: { title: 'Offerings', parent: null },
+        data: { parent: null, title: 'Offerings' },
       })
 
       await payload.update({
-        collection: 'pages',
         id: parent.id,
+        collection: 'pages',
         data: { parent: newParent.id },
       })
 
       // Path is computed from current parent chain
       const publishedChild = await payload.findByID({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
       })
 
       expect(publishedChild._h_slugPath).toBe('offerings/services/consulting')
@@ -552,8 +566,9 @@ describe('Hierarchy', () => {
 
       // When no draft exists, draft: true returns published version
       const draftChild = await payload.findByID({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
         draft: true,
       })
 
@@ -564,33 +579,34 @@ describe('Hierarchy', () => {
     it('should compute paths for draft-only documents', async () => {
       const parent1 = await payload.create({
         collection: 'pages',
-        data: { title: 'Future', parent: null },
+        data: { parent: null, title: 'Future' },
         draft: true,
       })
 
       const child = await payload.create({
         collection: 'pages',
-        data: { title: 'Plans', parent: parent1.id },
+        data: { parent: parent1.id, title: 'Plans' },
         draft: true,
       })
 
       const newParent = await payload.create({
         collection: 'pages',
-        data: { title: 'Roadmap', parent: null },
+        data: { parent: null, title: 'Roadmap' },
         draft: true,
       })
 
       await payload.update({
-        collection: 'pages',
         id: parent1.id,
+        collection: 'pages',
         data: { parent: newParent.id },
         draft: true,
       })
 
       // Path is computed from current draft parent chain
       const draftChild = await payload.findByID({
-        collection: 'pages',
         id: child.id,
+        collection: 'pages',
+        context: { computeHierarchyPaths: true },
         draft: true,
       })
 
@@ -615,15 +631,16 @@ describe('Hierarchy', () => {
       })
 
       await payload.update({
-        collection: 'categories',
         id: parent.id,
+        collection: 'categories',
         data: { parentCategory: newParent.id },
       })
 
       // Path is computed from current parent chain
       const updatedChild = await payload.findByID({
-        collection: 'categories',
         id: child.id,
+        collection: 'categories',
+        context: { computeHierarchyPaths: true },
       })
 
       expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
@@ -634,312 +651,315 @@ describe('Hierarchy', () => {
     it('should generate localized paths for each locale', async () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Clothing',
+          title: 'Clothing',
           parent: null,
         },
       })
 
       // Update parent for Spanish
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Ropa' },
+        collection: 'posts',
+        data: { title: 'Ropa' },
         locale: 'es',
       })
 
       // Update parent for German
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Kleidung' },
+        collection: 'posts',
+        data: { title: 'Kleidung' },
         locale: 'de',
       })
 
       // Create child with default locale (en)
       const child = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Shirts',
+          title: 'Shirts',
           parent: parent.id,
         },
       })
 
       // Update child for Spanish
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Camisas' },
+        collection: 'posts',
+        data: { title: 'Camisas' },
         locale: 'es',
       })
 
       // Update child for German
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Hemden' },
+        collection: 'posts',
+        data: { title: 'Hemden' },
         locale: 'de',
       })
 
       // Fetch with locale: 'all' to get all locales
       const childWithAllLocales = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         locale: 'all',
       })
 
       // Verify paths are localized
       expect(childWithAllLocales._h_slugPath).toEqual({
+        de: 'kleidung/hemden',
         en: 'clothing/shirts',
         es: 'ropa/camisas',
-        de: 'kleidung/hemden',
       })
 
       expect(childWithAllLocales._h_titlePath).toEqual({
+        de: 'Kleidung/Hemden',
         en: 'Clothing/Shirts',
         es: 'Ropa/Camisas',
-        de: 'Kleidung/Hemden',
       })
     })
 
     it('should update localized paths when parent moves', async () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Clothing',
+          title: 'Clothing',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Ropa' },
+        collection: 'posts',
+        data: { title: 'Ropa' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Kleidung' },
+        collection: 'posts',
+        data: { title: 'Kleidung' },
         locale: 'de',
       })
 
       // Create child with default locale (en)
       const child = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Shirts',
+          title: 'Shirts',
           parent: parent.id,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Camisas' },
+        collection: 'posts',
+        data: { title: 'Camisas' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Hemden' },
+        collection: 'posts',
+        data: { title: 'Hemden' },
         locale: 'de',
       })
 
       // Create new parent with default locale (en)
       const newParent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Apparel',
+          title: 'Apparel',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Indumentaria' },
+        collection: 'posts',
+        data: { title: 'Indumentaria' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Bekleidung' },
+        collection: 'posts',
+        data: { title: 'Bekleidung' },
         locale: 'de',
       })
 
       // Move parent under newParent
       await payload.update({
-        collection: 'products',
         id: parent.id,
+        collection: 'posts',
         data: { parent: newParent.id },
       })
 
       // Fetch child with all locales
       const updatedChild = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         locale: 'all',
       })
 
       expect(updatedChild._h_slugPath).toEqual({
+        de: 'bekleidung/kleidung/hemden',
         en: 'apparel/clothing/shirts',
         es: 'indumentaria/ropa/camisas',
-        de: 'bekleidung/kleidung/hemden',
       })
 
       expect(updatedChild._h_titlePath).toEqual({
+        de: 'Bekleidung/Kleidung/Hemden',
         en: 'Apparel/Clothing/Shirts',
         es: 'Indumentaria/Ropa/Camisas',
-        de: 'Bekleidung/Kleidung/Hemden',
       })
     })
 
     it('should update localized paths when title changes', async () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Clothing',
+          title: 'Clothing',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Ropa' },
+        collection: 'posts',
+        data: { title: 'Ropa' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Kleidung' },
+        collection: 'posts',
+        data: { title: 'Kleidung' },
         locale: 'de',
       })
 
       // Create child with default locale (en)
       const child = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Shirts',
+          title: 'Shirts',
           parent: parent.id,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Camisas' },
+        collection: 'posts',
+        data: { title: 'Camisas' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Hemden' },
+        collection: 'posts',
+        data: { title: 'Hemden' },
         locale: 'de',
       })
 
       // Update parent title for all locales
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Apparel' },
+        collection: 'posts',
+        data: { title: 'Apparel' },
         locale: 'en',
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Indumentaria' },
+        collection: 'posts',
+        data: { title: 'Indumentaria' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Bekleidung' },
+        collection: 'posts',
+        data: { title: 'Bekleidung' },
         locale: 'de',
       })
 
       // Fetch child with all locales
       const updatedChild = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         locale: 'all',
       })
 
       expect(updatedChild._h_slugPath).toEqual({
+        de: 'bekleidung/hemden',
         en: 'apparel/shirts',
         es: 'indumentaria/camisas',
-        de: 'bekleidung/hemden',
       })
 
       expect(updatedChild._h_titlePath).toEqual({
+        de: 'Bekleidung/Hemden',
         en: 'Apparel/Shirts',
         es: 'Indumentaria/Camisas',
-        de: 'Bekleidung/Hemden',
       })
     })
 
     it('should handle localized drafts with different titles per locale', async () => {
       // Create parent with default locale (en)
       const parent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Clothing',
+          title: 'Clothing',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Ropa' },
+        collection: 'posts',
+        data: { title: 'Ropa' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Kleidung' },
+        collection: 'posts',
+        data: { title: 'Kleidung' },
         locale: 'de',
       })
 
       // Create child with default locale (en)
       const child = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Shirts',
+          title: 'Shirts',
           parent: parent.id,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Camisas' },
+        collection: 'posts',
+        data: { title: 'Camisas' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Hemden' },
+        collection: 'posts',
+        data: { title: 'Hemden' },
         locale: 'de',
       })
 
       // Publish
       await payload.update({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
         data: { _status: 'published' },
         draft: false,
       })
@@ -947,15 +967,15 @@ describe('Hierarchy', () => {
       // Create draft with different title for each locale
       for (const locale of ['en', 'es', 'de']) {
         const titleMap = {
+          de: 'T-Shirts',
           en: 'T-Shirts',
           es: 'Playeras',
-          de: 'T-Shirts',
         }
         await payload.update({
-          collection: 'products',
           id: child.id,
+          collection: 'posts',
           data: {
-            name: titleMap[locale],
+            title: titleMap[locale],
           },
           draft: true,
           locale,
@@ -964,68 +984,70 @@ describe('Hierarchy', () => {
 
       // Create newParent with default locale (en)
       const newParent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Apparel',
+          title: 'Apparel',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Indumentaria' },
+        collection: 'posts',
+        data: { title: 'Indumentaria' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Bekleidung' },
+        collection: 'posts',
+        data: { title: 'Bekleidung' },
         locale: 'de',
       })
 
       // Move parent under newParent
       await payload.update({
-        collection: 'products',
         id: parent.id,
+        collection: 'posts',
         data: { parent: newParent.id },
       })
 
       // Verify published version
       const publishedChild = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         locale: 'all',
       })
 
       expect(publishedChild._h_slugPath).toEqual({
+        de: 'bekleidung/kleidung/hemden',
         en: 'apparel/clothing/shirts',
         es: 'indumentaria/ropa/camisas',
-        de: 'bekleidung/kleidung/hemden',
       })
 
       // Verify draft version
       const draftChild = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         draft: true,
         locale: 'all',
       })
 
       expect(draftChild._h_slugPath).toEqual({
+        de: 'bekleidung/kleidung/t-shirts',
         en: 'apparel/clothing/t-shirts',
         es: 'indumentaria/ropa/playeras',
-        de: 'bekleidung/kleidung/t-shirts',
       })
     })
 
     it('should handle draft-only documents with localized paths', async () => {
       // Create parent as draft for default locale first
       const parent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Future',
+          title: 'Future',
           parent: null,
         },
         draft: true,
@@ -1034,25 +1056,25 @@ describe('Hierarchy', () => {
 
       // Update other locales for parent
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Futuro' },
+        collection: 'posts',
+        data: { title: 'Futuro' },
         draft: true,
         locale: 'es',
       })
       await payload.update({
-        collection: 'products',
         id: parent.id,
-        data: { name: 'Zukunft' },
+        collection: 'posts',
+        data: { title: 'Zukunft' },
         draft: true,
         locale: 'de',
       })
 
       // Create child as draft
       const child = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Plans',
+          title: 'Plans',
           parent: parent.id,
         },
         draft: true,
@@ -1061,69 +1083,70 @@ describe('Hierarchy', () => {
 
       // Update other locales for child
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Planes' },
+        collection: 'posts',
+        data: { title: 'Planes' },
         draft: true,
         locale: 'es',
       })
       await payload.update({
-        collection: 'products',
         id: child.id,
-        data: { name: 'Pläne' },
+        collection: 'posts',
+        data: { title: 'Pläne' },
         draft: true,
         locale: 'de',
       })
 
       // Create new parent (published) with default locale
       const newParent = await payload.create({
-        collection: 'products',
+        collection: 'posts',
         data: {
-          name: 'Roadmap',
+          title: 'Roadmap',
           parent: null,
         },
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Hoja de Ruta' },
+        collection: 'posts',
+        data: { title: 'Hoja de Ruta' },
         locale: 'es',
       })
 
       await payload.update({
-        collection: 'products',
         id: newParent.id,
-        data: { name: 'Fahrplan' },
+        collection: 'posts',
+        data: { title: 'Fahrplan' },
         locale: 'de',
       })
 
       // Move parent
       await payload.update({
-        collection: 'products',
         id: parent.id,
+        collection: 'posts',
         data: { parent: newParent.id },
         draft: true,
         locale: 'en',
       })
 
       const draftChild = await payload.findByID({
-        collection: 'products',
         id: child.id,
+        collection: 'posts',
+        context: { computeHierarchyPaths: true },
         draft: true,
         locale: 'all',
       })
 
       expect(draftChild._h_slugPath).toEqual({
+        de: 'fahrplan/zukunft/plne', // Note: Default slugify removes umlauts
         en: 'roadmap/future/plans',
         es: 'hoja-de-ruta/futuro/planes',
-        de: 'fahrplan/zukunft/plne', // Note: Default slugify removes umlauts
       })
 
       expect(draftChild._h_titlePath).toEqual({
+        de: 'Fahrplan/Zukunft/Pläne',
         en: 'Roadmap/Future/Plans',
         es: 'Hoja de Ruta/Futuro/Planes',
-        de: 'Fahrplan/Zukunft/Pläne',
       })
     })
   })
@@ -1170,6 +1193,7 @@ describe('Hierarchy', () => {
       const results = await payload.find({
         collection: 'pages',
         context: {
+          computeHierarchyPaths: true,
           hierarchyCacheStats: cacheStats,
         },
         where: {
@@ -1244,6 +1268,7 @@ describe('Hierarchy', () => {
       await payload.find({
         collection: 'pages',
         context: {
+          computeHierarchyPaths: true,
           hierarchyCacheStats: cacheStats,
         },
         where: {
