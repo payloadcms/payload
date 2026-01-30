@@ -49,6 +49,7 @@ export type RenderListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
+  disableSetStepNav?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
@@ -84,6 +85,7 @@ export const renderListView = async (
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
+    disableSetStepNav,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -413,6 +415,7 @@ export const renderListView = async (
               disableBulkDelete,
               disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
               disableQueryPresets,
+              disableSetStepNav,
               enableRowSelections,
               hasCreatePermission,
               hasDeletePermission,
