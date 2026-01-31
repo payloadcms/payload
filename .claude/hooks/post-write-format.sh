@@ -21,20 +21,20 @@ fi
 # Format based on file type
 case "$FILE" in
   */package.json)
-    npx sort-package-json "$FILE" 2>/dev/null
+    pnpm sort-package-json "$FILE" >/dev/null 2>&1
     ;;
   *.yml|*.json)
-    npx prettier --write "$FILE" 2>/dev/null
+    pnpm prettier --write "$FILE" >/dev/null 2>&1
     ;;
   *.md|*.mdx)
-    npx prettier --write "$FILE" 2>/dev/null
+    pnpm prettier --write "$FILE" >/dev/null 2>&1
     if command -v markdownlint >/dev/null 2>&1; then
-      markdownlint -i node_modules "$FILE" 2>/dev/null
+      markdownlint -i node_modules "$FILE" >/dev/null 2>&1
     fi
     ;;
   *.js|*.jsx|*.ts|*.tsx)
-    npx prettier --write "$FILE" 2>/dev/null
-    npx eslint --cache --fix "$FILE" 2>/dev/null
+    pnpm eslint --cache --fix "$FILE" >/dev/null 2>&1
+    pnpm prettier --write "$FILE" >/dev/null 2>&1
     ;;
 esac
 
