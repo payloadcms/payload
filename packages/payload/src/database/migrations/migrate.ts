@@ -12,6 +12,20 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
   args,
 ): Promise<void> {
   const { payload } = this
+
+  // Skip migrations in development mode when using push (drizzle adapters)
+  // The `push` property only exists on drizzle adapters and defaults to enabled when undefined
+  // Only skip if the adapter has push capability AND it's not explicitly disabled
+  if ('push' in this && process.env.NODE_ENV !== 'production') {
+    const adapterPush = (this as unknown as { push: boolean }).push
+    if (adapterPush !== false) {
+      payload.logger.info({
+        msg: 'Skipping migrations in development mode when using push. In production, migrations will run automatically.',
+      })
+      return
+    }
+  }
+
   const migrationFiles = args?.migrations || (await readMigrationFiles({ payload }))
   const { existingMigrations, latestBatch } = await getMigrations({ payload })
 
