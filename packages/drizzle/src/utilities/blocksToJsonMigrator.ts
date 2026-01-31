@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
   SanitizedConfig,
 } from 'payload'
+import type { SourceFile, Visitor } from 'typescript'
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import path from 'path'
@@ -16,7 +17,6 @@ import {
 } from 'payload'
 import { findConfig } from 'payload/node'
 import { fieldShouldBeLocalized } from 'payload/shared'
-import * as ts from 'typescript'
 
 import type {
   BlocksToJsonBlockToMigrate,
@@ -627,6 +627,8 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
   }
 
   async updatePayloadConfigFile(): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    const ts = await dynamicImport<typeof import('typescript')>('typescript')
     let configPath: string
 
     try {
@@ -648,7 +650,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
       (ctx) => (sourceFile) => {
         const factory = ctx.factory
 
-        const visit: ts.Visitor = (node) => {
+        const visit: Visitor = (node) => {
           if (
             ts.isPropertyAssignment(node) &&
             ts.isIdentifier(node.name) &&
@@ -691,7 +693,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
           return ts.visitEachChild(node, visit, ctx)
         }
 
-        return ts.visitNode(sourceFile, visit) as ts.SourceFile
+        return ts.visitNode(sourceFile, visit) as SourceFile
       },
     ])
 
