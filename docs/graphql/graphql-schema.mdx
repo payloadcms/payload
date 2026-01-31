@@ -22,6 +22,14 @@ Run the following command to generate the schema:
 pnpm payload-graphql generate:schema
 ```
 
+To generate a lexicographically sorted schema (useful for stable diffs), add the `--sort-schema` flag:
+
+```bash
+pnpm payload-graphql generate:schema --sort-schema
+```
+
+You can also use the short alias `--sort`.
+
 ## Custom Field Schemas
 
 For `array`, `block`, `group` and named `tab` fields, you can generate top level reusable interfaces. The following group field config:
