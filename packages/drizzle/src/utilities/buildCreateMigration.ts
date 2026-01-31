@@ -98,8 +98,14 @@ export const buildCreateMigration = ({
         }
       }
 
+      payload.logger.info('Starting migration: generating UP statements...')
       const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+
+      payload.logger.info('Migration UP complete. Generating DOWN statements...')
       const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
+
+      payload.logger.info('Migration DOWN statements generation complete.')
+
       const sqlExecute = `await db.${executeMethod}(` + 'sql`'
 
       if (sqlStatementsUp?.length) {
