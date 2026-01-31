@@ -431,7 +431,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('Failed to load resource: net::ERR_FAILED')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
-      // the the server responded with a status of error happens frequently. Will ignore it for now.
+      // the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
       const { url, lineNumber, columnNumber } = msg.location() || {}
       const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
