@@ -99,7 +99,22 @@ You should have access to the Playwright MCP server. This MCP server enables LLM
 - `browser_snapshot` - Get accessibility snapshot of current page
 - `browser_click` - Click elements (requires `ref` from snapshot)
 - `browser_fill_form` - Fill form fields
-- `browser_take_screenshot` - Capture screenshot
+- `browser_take_screenshot` - Capture screenshot (use `fullPage: true` for full page)
+
+**Screenshots for visual verification:**
+
+Use `browser_take_screenshot` to visually verify UI state. Useful for:
+
+- Confirming layout and styling look correct
+- Checking component rendering (tags, forms, tables)
+- Debugging UI issues that aren't visible in accessibility snapshots
+
+```
+browser_take_screenshot()                    # Viewport only
+browser_take_screenshot({ fullPage: true })  # Full scrollable page
+```
+
+Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 **Usage flow:**
 
