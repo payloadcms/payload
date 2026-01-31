@@ -33,6 +33,7 @@ export type PluginCollectionsResult = {
  * - Applies top-level overrideExportCollection/overrideImportCollection if provided
  * - For each collection in `pluginConfig.collections` that has a function override
  *   for `export` or `import`, applies the override to create customized collections
+ * - Applies settings from collections without overrideCollection to the base collection
  *
  * @param config - The Payload config
  * @param pluginConfig - The import/export plugin config
@@ -45,7 +46,6 @@ export const getPluginCollections = async ({
   config: Config
   pluginConfig: ImportExportPluginConfig
 }): Promise<PluginCollectionsResult> => {
-  // Get the base export and import collections with default configs (no per-collection settings)
   let baseExportCollection = getExportCollection({
     config,
     pluginConfig,
@@ -55,7 +55,6 @@ export const getPluginCollections = async ({
     pluginConfig,
   })
 
-  // Apply top-level collection overrides if provided
   if (
     pluginConfig.overrideExportCollection &&
     typeof pluginConfig.overrideExportCollection === 'function'
@@ -77,15 +76,12 @@ export const getPluginCollections = async ({
   const exportCollections: CollectionConfig[] = []
   const importCollections: CollectionConfig[] = []
 
-  // Maps from target collection slug to the export/import collection slug to use
   const customExportSlugMap = new Map<string, string>()
   const customImportSlugMap = new Map<string, string>()
 
   // Process each collection config for custom collection overrides
   if (pluginConfig.collections && pluginConfig.collections.length > 0) {
     for (const collectionConfig of pluginConfig.collections) {
-      // Handle export config - only process if overrideCollection is provided
-      // Settings like disableJobsQueue require a custom slug to work properly
       const exportConfig =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
       if (exportConfig?.overrideCollection) {
@@ -102,17 +98,21 @@ export const getPluginCollections = async ({
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customExport.slug !== baseExportCollection.slug) {
+          // Store the source collection slug so CollectionField can use it as default
+          customExport.admin = {
+            ...customExport.admin,
+            custom: {
+              ...customExport.admin?.custom,
+              defaultCollectionSlug: collectionConfig.slug,
+            },
+          }
           exportCollections.push(customExport)
-          // Map this target collection to its custom export collection
           customExportSlugMap.set(collectionConfig.slug, customExport.slug)
         } else {
-          // Full override - replace the base
           baseExportCollection = customExport
         }
       }
 
-      // Handle import config - only process if overrideCollection is provided
-      // Settings like disableJobsQueue require a custom slug to work properly
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
       if (importConf?.overrideCollection) {
@@ -129,6 +129,14 @@ export const getPluginCollections = async ({
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customImport.slug !== baseImportCollection.slug) {
+          // Store the source collection slug so CollectionField can use it as default
+          customImport.admin = {
+            ...customImport.admin,
+            custom: {
+              ...customImport.admin?.custom,
+              defaultCollectionSlug: collectionConfig.slug,
+            },
+          }
           importCollections.push(customImport)
           // Map this target collection to its custom import collection
           customImportSlugMap.set(collectionConfig.slug, customImport.slug)
@@ -140,7 +148,52 @@ export const getPluginCollections = async ({
     }
   }
 
-  // Add base collections to the front of the arrays
+  // Apply settings from collections without overrideCollection to the base collection
+  // This is done AFTER all overrides so these settings take precedence
+  if (pluginConfig.collections && pluginConfig.collections.length > 0) {
+    let mergedExportSettings: Partial<ExportConfig> = {}
+    let mergedImportSettings: Partial<ImportConfig> = {}
+
+    for (const collectionConfig of pluginConfig.collections) {
+      const exportConf =
+        typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
+      const importConf =
+        typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
+
+      if (exportConf && !exportConf.overrideCollection) {
+        mergedExportSettings = { ...mergedExportSettings, ...exportConf }
+      }
+      if (importConf && !importConf.overrideCollection) {
+        mergedImportSettings = { ...mergedImportSettings, ...importConf }
+      }
+    }
+
+    if (
+      mergedExportSettings.format !== undefined ||
+      mergedExportSettings.disableSave !== undefined ||
+      mergedExportSettings.disableDownload !== undefined
+    ) {
+      baseExportCollection = {
+        ...baseExportCollection,
+        admin: {
+          ...baseExportCollection.admin,
+          custom: {
+            ...baseExportCollection.admin?.custom,
+            ...(mergedExportSettings.disableDownload !== undefined && {
+              disableDownload: mergedExportSettings.disableDownload,
+            }),
+            ...(mergedExportSettings.disableSave !== undefined && {
+              disableSave: mergedExportSettings.disableSave,
+            }),
+            ...(mergedExportSettings.format !== undefined && {
+              format: mergedExportSettings.format,
+            }),
+          },
+        },
+      }
+    }
+  }
+
   exportCollections.unshift(baseExportCollection)
   importCollections.unshift(baseImportCollection)
 
