@@ -56,15 +56,25 @@ export const getConfig: () => Partial<Config> = () => ({
       },
       hooks: {
         afterChange: [
-          async ({ req, doc, context }) => {
-            await req.payload.jobs.queue({
-              workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
-              input: {
-                post: doc.id,
-                message: 'hello',
-              },
-              req,
-            })
+          async ({ req, doc, context, operation, previousDoc }) => {
+            // Prevent infinite loop: skip if update is from job execution
+            const isJobUpdate =
+              previousDoc &&
+              (doc.jobStep1Ran !== previousDoc.jobStep1Ran ||
+                doc.jobStep2Ran !== previousDoc.jobStep2Ran) &&
+              doc.title === previousDoc.title
+
+            if (operation === 'create' || (operation === 'update' && !isJobUpdate)) {
+              await req.payload.jobs.queue({
+                workflow: context.useJSONWorkflow ? 'updatePostJSONWorkflow' : 'updatePost',
+                input: {
+                  post: doc.id,
+                  message: 'hello',
+                },
+                queue: 'autorunSecond',
+                req,
+              })
+            }
           },
         ],
       },
