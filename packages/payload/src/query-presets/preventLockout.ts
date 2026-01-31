@@ -37,10 +37,14 @@ export const preventLockout: Validate = async (
     const transaction = await initTransaction(req)
 
     // create a temp record to validate the constraints, using the req
+    // TODO: Exclude 'id' to avoid unique constraint violations in query-presets suite
+    // Review this because It shouldn't be necessary to deviate from other db-adapters
+    const { id: _id, ...dataWithoutId } = data
     const tempPreset = await req.payload.create({
       collection: queryPresetsCollectionSlug,
       data: {
-        ...data,
+        // ...data,
+        ...dataWithoutId,
         isTemp: true,
       },
       req,
