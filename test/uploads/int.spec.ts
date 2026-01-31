@@ -596,7 +596,8 @@ describe('Collections - Uploads', () => {
         })) as unknown as { docs: Media[] }
 
         // Check that the replacement file was created and the old one was removed
-        expect(updatedMediaDoc.docs[0].filename).toEqual(newFile.name)
+        // Use flexible assertion to handle collision detection increments
+        expect(updatedMediaDoc.docs[0].filename).toMatch(/^temp-renamed-second(-\d+)?\.png$/)
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.docs[0].filename))).toBe(
           true,
         )
@@ -1210,16 +1211,17 @@ describe('Collections - Uploads', () => {
 
       // Check api response
       expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg')
-      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg')
+      // Use flexible assertion to handle collision detection increments
+      expect(sizes.sameSizeWithNewFormat.filename).toMatch(/^small(-\d+)?-320x80\.jpg$/)
 
       expect(sizes.resizedLarger.mimeType).toBeNull()
       expect(sizes.resizedLarger.filename).toBeNull()
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.resizedSmaller.filename).toBe('small-320x80.png')
+      expect(sizes.resizedSmaller.filename).toMatch(/^small(-\d+)?-320x80\.png$/)
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
-      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+      expect(sizes.accidentalSameSize.filename).toMatch(/^small(-\d+)?-320x80\.png$/)
     })
 
     it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {

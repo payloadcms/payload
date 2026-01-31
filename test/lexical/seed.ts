@@ -478,7 +478,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'lexicalTest',
     uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
 }

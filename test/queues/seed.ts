@@ -21,6 +21,5 @@ export async function clearAndSeedEverything(_payload: Payload) {
       'payload-jobs',
     ],
     seedFunction: seed,
-    snapshotKey: 'queuesTest',
   })
 }

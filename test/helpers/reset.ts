@@ -33,15 +33,15 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       return
     }
 
-    const queries = Object.values(schema)
-      .map((table: any) => {
-        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
+    // Execute DELETE statements sequentially for SQLite compatibility
+    // SQLite doesn't support multiple statements in a single execute() call
+    for (const table of Object.values(schema)) {
+      const tableName = (table as any).dbName
+      const query = `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${tableName};`
+      await db.execute({
+        drizzle: db.drizzle,
+        raw: query,
       })
-      .join('')
-
-    await db.execute({
-      drizzle: db.drizzle,
-      raw: queries,
-    })
+    }
   }
 }

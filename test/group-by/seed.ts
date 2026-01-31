@@ -176,7 +176,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs: [postsSlug, categoriesSlug, pagesSlug, relationshipsSlug, 'users', 'media'],
     seedFunction: seed,
-    snapshotKey: 'groupByTests',
     // uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
 }

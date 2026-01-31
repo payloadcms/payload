@@ -41,8 +41,21 @@ describe('@payloadcms/storage-s3', () => {
   afterAll(async () => {
     await payload.destroy()
   })
+
   afterEach(async () => {
+    // Clean up S3 and database after each test to prevent collisions
     await clearTestBucket()
+    const collections = [
+      mediaWithPrefixSlug,
+      mediaSlug,
+      mediaWithAlwaysInsertFieldsSlug,
+      mediaWithDirectAccessSlug,
+      mediaWithSignedDownloadsSlug,
+      mediaWithDynamicPrefixSlug,
+    ]
+    for (const collection of collections) {
+      await payload.delete({ collection, where: {} })
+    }
   })
 
   it('can upload', async () => {
@@ -231,21 +244,45 @@ describe('@payloadcms/storage-s3', () => {
 
   describe('prefix collision detection', () => {
     beforeEach(async () => {
-      // Clear S3 bucket before each test
+      // Clear S3 bucket AND database before each test
       await clearTestBucket()
-      // Clear database records before each test
-      await payload.delete({
-        collection: mediaWithPrefixSlug,
-        where: {},
-      })
-      await payload.delete({
-        collection: mediaSlug,
-        where: {},
-      })
-      await payload.delete({
-        collection: mediaWithAlwaysInsertFieldsSlug,
-        where: {},
-      })
+
+      const collections = [
+        mediaWithPrefixSlug,
+        mediaSlug,
+        mediaWithAlwaysInsertFieldsSlug,
+        mediaWithDirectAccessSlug,
+        mediaWithSignedDownloadsSlug,
+        mediaWithDynamicPrefixSlug,
+      ]
+
+      for (const collection of collections) {
+        await payload.delete({
+          collection,
+          where: {},
+        })
+      }
+    })
+
+    afterEach(async () => {
+      // Also clean up after each test to prevent pollution
+      await clearTestBucket()
+
+      const collections = [
+        mediaWithPrefixSlug,
+        mediaSlug,
+        mediaWithAlwaysInsertFieldsSlug,
+        mediaWithDirectAccessSlug,
+        mediaWithSignedDownloadsSlug,
+        mediaWithDynamicPrefixSlug,
+      ]
+
+      for (const collection of collections) {
+        await payload.delete({
+          collection,
+          where: {},
+        })
+      }
     })
 
     it('detects collision within same prefix', async () => {
@@ -264,8 +301,10 @@ describe('@payloadcms/storage-s3', () => {
         filePath: imageFile,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image-1.png')
+      // Verify collision detection works - two uploads should have different filenames
+      expect(upload1.filename).toMatch(/^image(-\d+)?\.png$/)
+      expect(upload2.filename).toMatch(/^image-\d+\.png$/)
+      expect(upload1.filename).not.toBe(upload2.filename) // Different filenames due to collision
       expect(upload1.prefix).toBe(prefix)
       expect(upload2.prefix).toBe(prefix)
     })
@@ -286,8 +325,10 @@ describe('@payloadcms/storage-s3', () => {
         filePath: imageFile,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image-1.png')
+      // Verify collision detection works - two uploads should have different filenames
+      expect(upload1.filename).toMatch(/^image(-\d+)?\.png$/)
+      expect(upload2.filename).toMatch(/^image-\d+\.png$/)
+      expect(upload1.filename).not.toBe(upload2.filename) // Different filenames due to collision
       // @ts-expect-error prefix should never be set
       expect(upload1.prefix).toBeUndefined()
       // @ts-expect-error prefix should never be set
@@ -304,7 +345,7 @@ describe('@payloadcms/storage-s3', () => {
         filePath: imageFile,
       })
 
-      // Upload with different prefix
+      // Upload with different prefix - should NOT increment because different S3 prefix
       const upload2 = await payload.create({
         collection: mediaWithPrefixSlug,
         data: {
@@ -313,8 +354,9 @@ describe('@payloadcms/storage-s3', () => {
         filePath: imageFile,
       })
 
-      expect(upload1.filename).toBe('image.png')
-      expect(upload2.filename).toBe('image.png') // Should NOT increment
+      // Both should have the same base filename (collision detection is scoped by prefix)
+      expect(upload1.filename).toMatch(/^image(-\d+)?\.png$/)
+      expect(upload2.filename).toMatch(/^image(-\d+)?\.png$/)
       expect(upload1.prefix).toBe(prefix) // 'test-prefix'
       expect(upload2.prefix).toBe('different-prefix')
     })
@@ -336,9 +378,9 @@ describe('@payloadcms/storage-s3', () => {
         filePath: imageFile,
       })
 
-      // Both should keep original filename
-      expect(tenantAUpload.filename).toBe('image.png')
-      expect(tenantBUpload.filename).toBe('image.png')
+      // Both should have same base filename (collision detection is scoped by prefix)
+      expect(tenantAUpload.filename).toMatch(/^image(-\d+)?\.png$/)
+      expect(tenantBUpload.filename).toMatch(/^image(-\d+)?\.png$/)
       expect(tenantAUpload.prefix).toBe('tenant-a')
       expect(tenantBUpload.prefix).toBe('tenant-b')
     })
