@@ -22,14 +22,16 @@ export async function initTransaction(
   }
   if (typeof payload.db.beginTransaction === 'function') {
     // create a new transaction
-    req.transactionID = payload.db.beginTransaction().then((transactionID) => {
-      if (transactionID) {
-        req.transactionID = transactionID
-      }
+    const promise = payload.db.beginTransaction()
+    req.transactionID = promise as Promise<number | string>
+    const transactionID = await promise
 
-      return transactionID!
-    })
-    return !!(await req.transactionID)
+    if (typeof transactionID === 'string' || typeof transactionID === 'number') {
+      req.transactionID = transactionID
+    } else {
+      req.transactionID = undefined
+    }
+    return !!req.transactionID
   }
   return false
 }
