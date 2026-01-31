@@ -48,7 +48,8 @@
   },
   "dependencies": {
     "@google-cloud/storage": "7.17.2",
-    "@payloadcms/plugin-cloud-storage": "workspace:*"
+    "@payloadcms/plugin-cloud-storage": "workspace:*",
+    "sanitize-filename": "1.6.3"
   },
   "devDependencies": {
     "payload": "workspace:*"
