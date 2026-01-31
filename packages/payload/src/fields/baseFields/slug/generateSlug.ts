@@ -12,7 +12,7 @@ type HookArgs = {
   Required<Pick<SlugFieldArgs, 'useAsSlug'>>
 
 const slugify = ({
-  customSlugify,
+  customSlugify: fieldLevelSlugify,
   data,
   req,
   valueToSlugify,
@@ -22,6 +22,9 @@ const slugify = ({
   req: PayloadRequest
   valueToSlugify?: string
 }) => {
+  const configLevelSlugify = req.payload.config.slugify
+  const customSlugify = fieldLevelSlugify || configLevelSlugify
+
   if (customSlugify) {
     return customSlugify({ data, req, valueToSlugify })
   }
