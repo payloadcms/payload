@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) and Cursor when working with code in this repository.
 
 ## Project Structure
 
@@ -83,6 +83,30 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
 - Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
+
+### Playwright MCP
+
+You should have access to the Playwright MCP server. This MCP server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+
+**Prerequisites:**
+
+- The dev server MUST be running (`pnpm run dev`) before using the MCP
+- First call `browser_install` to set up the browser if needed
+
+**Key tools (not exhaustive):**
+
+- `browser_navigate` - Navigate to a URL
+- `browser_snapshot` - Get accessibility snapshot of current page
+- `browser_click` - Click elements (requires `ref` from snapshot)
+- `browser_fill_form` - Fill form fields
+- `browser_take_screenshot` - Capture screenshot
+
+**Usage flow:**
+
+1. Ensure dev server is running on `localhost:3000`
+2. Call `browser_navigate` to open a page
+3. Call `browser_snapshot` to get element refs
+4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
 
 ## Testing
 
