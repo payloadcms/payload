@@ -354,3 +354,6 @@ licenses.csv
 
 # SQLite DB
 payload.db
+
+# Screenshots created by Playwright MCP
+.playwright-mcp
