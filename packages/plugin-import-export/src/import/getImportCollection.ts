@@ -8,9 +8,10 @@ import type {
 import fs from 'fs'
 import path from 'path'
 
-import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
+import type { ImportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
 import { handlePreview } from './handlePreview.js'
@@ -106,6 +107,14 @@ export const getImportCollection = ({
           fileMimetype = doc.mimeType || 'text/csv'
         }
 
+        const targetCollection = req.payload.collections[doc.collectionSlug]
+        const importLimitConfig: Limit | undefined =
+          targetCollection?.config.custom?.['plugin-import-export']?.importLimit
+        const maxLimit = await resolveLimit({
+          limit: importLimitConfig,
+          req,
+        })
+
         const result = await createImport({
           id: doc.id,
           name: doc.filename || 'import',
@@ -121,6 +130,7 @@ export const getImportCollection = ({
           format: fileMimetype === 'text/csv' ? 'csv' : 'json',
           importMode: doc.importMode || 'create',
           matchField: doc.matchField,
+          maxLimit,
           req,
           userCollection: req?.user?.collection || req?.user?.user?.collection,
           userID: req?.user?.id || req?.user?.user?.id,
@@ -257,6 +267,14 @@ export const getImportCollection = ({
           fileData = await fs.promises.readFile(fullPath)
         }
 
+        const targetCollection = req.payload.collections[doc.collectionSlug]
+        const importLimitConfig: Limit | undefined =
+          targetCollection?.config.custom?.['plugin-import-export']?.importLimit
+        const maxLimit = await resolveLimit({
+          limit: importLimitConfig,
+          req,
+        })
+
         const input: ImportTaskInput = {
           name: doc.filename,
           batchSize,
@@ -274,6 +292,7 @@ export const getImportCollection = ({
           importMode: doc.importMode || 'create',
           importsCollection: collectionConfig.slug,
           matchField: doc.matchField,
+          maxLimit,
           userCollection: req.user?.collection || req?.user?.user?.collection,
           userID: req?.user?.id || req?.user?.user?.id,
         }

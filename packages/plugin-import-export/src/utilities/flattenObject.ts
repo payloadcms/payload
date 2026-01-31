@@ -2,10 +2,18 @@ import type { Document } from 'payload'
 
 import type { ToCSVFunction } from '../types.js'
 
+import { fieldToRegex } from './fieldToRegex.js'
+
 type Args = {
   doc: Document
   fields?: string[]
   prefix?: string
+  /**
+   * Set of auto-generated timezone companion field names (from collectTimezoneCompanionFields).
+   * These fields are excluded unless explicitly selected.
+   * If not provided, no timezone filtering is applied.
+   */
+  timezoneCompanionFields?: Set<string>
   toCSVFunctions: Record<string, ToCSVFunction>
 }
 
@@ -13,6 +21,7 @@ export const flattenObject = ({
   doc,
   fields,
   prefix,
+  timezoneCompanionFields,
   toCSVFunctions,
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
@@ -147,25 +156,44 @@ export const flattenObject = ({
   if (Array.isArray(fields) && fields.length > 0) {
     const orderedResult: Record<string, unknown> = {}
 
-    const fieldToRegex = (field: string): RegExp => {
-      const parts = field.split('.').map((part) => `${part}(?:_\\d+)?`)
-      const pattern = `^${parts.join('_')}`
-      return new RegExp(pattern)
-    }
+    // Build all field regexes once
+    const fieldPatterns = fields.map((field) => ({
+      field,
+      regex: fieldToRegex(field),
+    }))
 
-    fields.forEach((field) => {
-      if (row[field.replace(/\./g, '_')]) {
-        const sanitizedField = field.replace(/\./g, '_')
-        orderedResult[sanitizedField] = row[sanitizedField]
-      } else {
-        const regex = fieldToRegex(field)
-        Object.keys(row).forEach((key) => {
-          if (regex.test(key)) {
-            orderedResult[key] = row[key]
-          }
+    // Track which timezone companion fields were explicitly selected
+    // Convert dotted notation to underscore for matching against flattened keys
+    const explicitlySelectedTzFields = new Set(
+      fields
+        .filter((f) => {
+          const underscored = f.replace(/\./g, '_')
+          return timezoneCompanionFields?.has(underscored)
         })
+        .map((f) => f.replace(/\./g, '_')),
+    )
+
+    // Single pass through row keys - O(keys * fields) regex tests but only one iteration
+    const rowKeys = Object.keys(row)
+
+    // Process in field order to maintain user's specified ordering
+    for (const { regex } of fieldPatterns) {
+      for (const key of rowKeys) {
+        // Skip if already added (a key might match multiple field patterns)
+        if (key in orderedResult) {
+          continue
+        }
+
+        // Skip auto-generated timezone companion fields unless explicitly selected
+        if (timezoneCompanionFields?.has(key) && !explicitlySelectedTzFields.has(key)) {
+          continue
+        }
+
+        if (regex.test(key)) {
+          orderedResult[key] = row[key]
+        }
       }
-    })
+    }
 
     return orderedResult
   }

@@ -39,6 +39,14 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, ToCSVF
         }
         return value
       }
+    } else if (field.type === 'date') {
+      // Handle date fields - return value as-is (ISO string format)
+      // This prevents the flattener from treating the document as having
+      // nested sibling properties like _tz that shouldn't be auto-included
+      // @ts-expect-error ref is untyped
+      const fieldKey = `${ref.prefix}${field.name}`
+
+      result[fieldKey] = ({ value }) => value
     } else if (field.type === 'relationship' || field.type === 'upload') {
       if (field.hasMany !== true) {
         if (!Array.isArray(field.relationTo)) {

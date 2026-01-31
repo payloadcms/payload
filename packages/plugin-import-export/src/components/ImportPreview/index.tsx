@@ -16,7 +16,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDocTitle } from '@payloadcms/ui/shared'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, getObjectDotNotation } from 'payload/shared'
 import React, { useState, useTransition } from 'react'
 
 import type {
@@ -211,7 +211,7 @@ export const ImportPreview: React.FC = () => {
 
               // Skip if this field doesn't exist in any document
               const hasData = docs.some((doc) => {
-                const value = getValueAtPath(doc, fieldPath)
+                const value = getObjectDotNotation(doc, fieldPath)
                 return value !== undefined && value !== null
               })
 
@@ -225,7 +225,7 @@ export const ImportPreview: React.FC = () => {
                 field,
                 Heading: label,
                 renderedCells: docs.map((doc) => {
-                  const value = getValueAtPath(doc, fieldPath)
+                  const value = getObjectDotNotation(doc, fieldPath)
 
                   if (value === undefined || value === null) {
                     return null
@@ -625,19 +625,4 @@ export const ImportPreview: React.FC = () => {
       )}
     </div>
   )
-}
-
-// Helper function to get nested values
-const getValueAtPath = (obj: Record<string, unknown>, path: string): unknown => {
-  const segments = path.split('.')
-  let current: any = obj
-
-  for (const segment of segments) {
-    if (current === null || current === undefined) {
-      return undefined
-    }
-    current = current[segment]
-  }
-
-  return current
 }

@@ -34,6 +34,10 @@ export const getCreateCollectionExportTask = (
       name: 'exportsCollection',
       type: 'text',
     },
+    {
+      name: 'maxLimit',
+      type: 'number',
+    },
   )
 
   return {

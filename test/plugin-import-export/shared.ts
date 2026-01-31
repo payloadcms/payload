@@ -7,3 +7,7 @@ export const postsExportsOnlySlug = 'posts-exports-only'
 export const postsImportsOnlySlug = 'posts-imports-only'
 
 export const postsNoJobsQueueSlug = 'posts-no-jobs-queue'
+
+export const postsWithLimitsSlug = 'posts-with-limits'
+
+export const mediaSlug = 'media'

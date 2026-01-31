@@ -30,6 +30,10 @@ export const koTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': '수입 요약',
     importDocumentLabel: '{{label}} 가져오기',
     importResults: '수입 결과',
+    limitCapped: '제한이 최대 {{limit}}으로 설정됨',
+    limitExceededExport: '수출은 {{limit}} 문서로 제한됩니다.',
+    limitExceededImport:
+      '수입 파일에는 {{count}}개의 문서가 포함되어 있지만, 제한은 {{limit}}입니다.',
     matchBy: '일치시키다',
     mode: '모드',
     noDataToPreview: '미리볼 데이터가 없습니다',

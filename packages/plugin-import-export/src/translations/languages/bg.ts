@@ -30,6 +30,10 @@ export const bgTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Обобщение за импортирането',
     importDocumentLabel: 'Импортиране {{label}}',
     importResults: 'Резултати от импортирането',
+    limitCapped: 'Лимитът е ограничен до максимум {{limit}}',
+    limitExceededExport: 'Експортирането е ограничено до {{limit}} документа',
+    limitExceededImport:
+      'Файлът за импортиране съдържа {{count}} документи, но лимитът е {{limit}}',
     matchBy: 'Съвпадение по',
     mode: 'Могощности',
     noDataToPreview: 'Няма данни за преглед.',
