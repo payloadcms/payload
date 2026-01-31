@@ -98,6 +98,7 @@ export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
+export { ListSelectionButton } from '../../elements/ListSelection/index.js'
 export type {
   ListDrawerProps,
   ListTogglerProps,
