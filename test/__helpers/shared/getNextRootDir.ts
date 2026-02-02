@@ -2,7 +2,7 @@ import fs from 'fs'
 import path, { resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-import { adminRoute as rootAdminRoute } from '../admin-root/shared.js'
+import { adminRoute as rootAdminRoute } from '../../admin-root/shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
