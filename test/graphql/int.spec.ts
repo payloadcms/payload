@@ -163,7 +163,7 @@ query {
         },
       })
 
-      // Query WITHOUT select: true
+      // Query without select: true
       const queryWithoutSelect = `query {
         Post(id: ${idToString(createdPost.id, payload)}) {
           title
@@ -186,7 +186,7 @@ query {
         'Hello World from Block',
       )
 
-      // Query WITH select: true
+      // Query with select: true
       const queryWithSelect = `query {
         Posts(select: true, where: { id: { equals: ${idToString(createdPost.id, payload)} } }) {
           docs {
@@ -212,7 +212,6 @@ query {
         'Hello World from Block',
       )
 
-      // Clean up
       await payload.delete({
         collection: 'posts',
         id: createdPost.id,
