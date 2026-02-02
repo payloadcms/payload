@@ -105,12 +105,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -129,12 +131,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -150,13 +154,13 @@ jobs:
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github/workflows
             .tool-versions
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .tool-versions
 
@@ -197,12 +201,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -235,13 +241,13 @@ jobs:
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           sparse-checkout: |
             .github/workflows
             .tool-versions
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .tool-versions
 
@@ -264,12 +270,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Prepare prod test environment
         run: pnpm prepare-run-test-against-prod:ci
@@ -302,12 +310,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Restore prepared test environment
         uses: actions/cache/restore@v4
@@ -492,12 +502,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -592,17 +604,19 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -690,12 +704,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -751,12 +767,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
@@ -767,4 +785,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
