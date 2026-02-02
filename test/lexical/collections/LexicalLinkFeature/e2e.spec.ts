@@ -70,4 +70,37 @@ describe('Lexical Link Feature', () => {
 
     await expect(checkboxField).toBeChecked()
   })
+
+  test('can add links with fields wrapped in row layout', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+
+    // Use the second editor which has fields wrapped in a row
+    const secondEditor = lexical.editor.nth(1)
+    await secondEditor.focus()
+    await secondEditor.fill('nested link')
+    await page.keyboard.press('Control+a')
+
+    const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
+    const linkButton = page.locator(linkButtonClass).nth(1)
+
+    await linkButton.click()
+
+    // Verify the url field is visible (it's inside a row layout)
+    const urlField = lexical.drawer.locator('#field-url')
+    await expect(urlField).toBeVisible()
+
+    // Verify the custom field is also visible
+    const customField = lexical.drawer.locator('#field-customField')
+    await expect(customField).toBeVisible()
+
+    // Fill in the URL and verify it works
+    await urlField.fill('https://example.com')
+
+    // Submit the link
+    const submitButton = lexical.drawer.locator('button[type="submit"]')
+    await submitButton.click()
+
+    // Verify the link was created
+    await expect(secondEditor.locator('a')).toBeVisible()
+  })
 })
