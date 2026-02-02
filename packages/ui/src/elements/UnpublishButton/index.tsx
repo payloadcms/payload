@@ -40,6 +40,7 @@ export function UnpublishButton({
   const { reset: resetForm } = useForm()
   const { code: localeCode, label: localeLabel } = useLocale()
   const [unpublishAll, setUnpublishAll] = useState(false)
+  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
   const unPublishModalSlug = `confirm-un-publish-${id}`
 
   const {
@@ -61,7 +62,7 @@ export function UnpublishButton({
 
   const unpublish = useCallback(
     (unpublishAll?: boolean) => {
-      ; (async () => {
+      void (async () => {
         let url
         let method
 
@@ -152,73 +153,68 @@ export function UnpublishButton({
     ],
   )
 
-  const [hasLocalizedFields, setHasLocalizedFields] = useState(false)
-
   useEffect(() => {
     const hasLocalizedField = traverseForLocalizedFields(entityConfig?.fields)
     setHasLocalizedFields(hasLocalizedField)
   }, [entityConfig?.fields])
 
-  const canUnpublish = React.useMemo(
-    () => hasPublishPermission && hasPublishedDoc && !isTrashed,
-    [hasPublishPermission, hasPublishedDoc, isTrashed],
-  )
+  const drafts = entityConfig?.versions?.drafts
+  const hasDraftsEnabled = typeof drafts === 'object' && drafts !== null
+
+  const canUnpublish = React.useMemo(() => {
+    return hasPublishPermission && hasPublishedDoc && !isTrashed && hasDraftsEnabled
+  }, [hasPublishPermission, hasPublishedDoc, isTrashed, hasDraftsEnabled])
 
   const canUnpublishCurrentLocale = React.useMemo(() => {
-    if (!canUnpublish || !hasLocalizedFields) { return false }
+    if (!canUnpublish || !hasLocalizedFields || !hasDraftsEnabled) {
+      return false
+    }
 
-    const drafts = entityConfig?.versions?.drafts
-    const hasDraftsConfig = typeof drafts === 'object' && drafts !== null
-    const localizeStatusConfigured = hasDraftsConfig && drafts.localizeStatus === true
-    const experimentalLocalizeStatus =
-      config.experimental &&
-      'localizeStatus' in config.experimental &&
-      config.experimental.localizeStatus === true
+    const isLocalizeStatusEnabled = drafts.localizeStatus === true
+    const isExperimentalEnabled = config.experimental?.localizeStatus === true
 
-    return localizeStatusConfigured && experimentalLocalizeStatus
-  }, [canUnpublish, hasLocalizedFields, entityConfig?.versions?.drafts, config.experimental])
-
+    return isLocalizeStatusEnabled && isExperimentalEnabled
+  }, [canUnpublish, hasLocalizedFields, hasDraftsEnabled, drafts, config.experimental?.localizeStatus])
 
   const label = getTranslation(localeLabel, i18n)
 
+  if (!canUnpublish) {
+    return null
+  }
+
   return (
     <React.Fragment>
-      {canUnpublish && (
-        <>
-          {canUnpublish && <PopupList.Button
-            id="action-unpublish"
-            onClick={() => {
-              setUnpublishAll(true)
-              toggleModal(unPublishModalSlug)
-            }}
-          >
-            {labelProp || t('version:unpublish')}
-          </PopupList.Button >}
-          {
-            canUnpublishCurrentLocale && <PopupList.Button
-              id="action-unpublish-locale"
-              onClick={() => {
-                setUnpublishAll(false)
-                toggleModal(unPublishModalSlug)
-                close()
-              }}
-            >
-              {labelProp ? labelProp + ` [${label}]` : t('version:unpublishIn', { locale: label })}
-            </PopupList.Button>
-          }
-          <ConfirmationModal
-            body={
-              !unpublishAll
-                ? t('version:aboutToUnpublishIn', { locale: label })
-                : t('version:aboutToUnpublish')
-            }
-            confirmingLabel={t('version:unpublishing')}
-            heading={t('version:confirmUnpublish')}
-            modalSlug={unPublishModalSlug}
-            onConfirm={() => unpublish(unpublishAll)}
-          />
-        </>
+      <PopupList.Button
+        id="action-unpublish"
+        onClick={() => {
+          setUnpublishAll(true)
+          toggleModal(unPublishModalSlug)
+        }}
+      >
+        {labelProp || t('version:unpublish')}
+      </PopupList.Button>
+      {canUnpublishCurrentLocale && (
+        <PopupList.Button
+          id="action-unpublish-locale"
+          onClick={() => {
+            setUnpublishAll(false)
+            toggleModal(unPublishModalSlug)
+          }}
+        >
+          {labelProp ? `${labelProp} [${label}]` : t('version:unpublishIn', { locale: label })}
+        </PopupList.Button>
       )}
-    </React.Fragment >
+      <ConfirmationModal
+        body={
+          !unpublishAll
+            ? t('version:aboutToUnpublishIn', { locale: label })
+            : t('version:aboutToUnpublish')
+        }
+        confirmingLabel={t('version:unpublishing')}
+        heading={t('version:confirmUnpublish')}
+        modalSlug={unPublishModalSlug}
+        onConfirm={() => unpublish(unpublishAll)}
+      />
+    </React.Fragment>
   )
 }

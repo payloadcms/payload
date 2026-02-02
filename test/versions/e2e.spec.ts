@@ -78,6 +78,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  versionCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -105,6 +106,7 @@ describe('Versions', () => {
   let postURL: AdminUrlUtil
   let errorOnUnpublishURL: AdminUrlUtil
   let draftsNoReadVersionsURL: AdminUrlUtil
+  let versionURL: AdminUrlUtil
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -150,6 +152,7 @@ describe('Versions', () => {
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
       draftsNoReadVersionsURL = new AdminUrlUtil(serverURL, draftsNoReadVersionsSlug)
+      versionURL = new AdminUrlUtil(serverURL, versionCollectionSlug)
     })
 
     test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
@@ -834,6 +837,26 @@ describe('Versions', () => {
       await payload.delete({
         collection: draftWithCustomUnpublishSlug,
         id: publishedDoc.id,
+      })
+    })
+
+    test('collections — should not show unpublish button when drafts are not enabled', async () => {
+      const doc = await payload.create({
+        collection: versionCollectionSlug,
+        data: {
+          title: 'No Drafts Doc',
+          description: 'This collection has drafts disabled',
+        },
+      })
+
+      await page.goto(versionURL.edit(String(doc.id)))
+      await openDocControls(page)
+
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+
+      await payload.delete({
+        collection: versionCollectionSlug,
+        id: doc.id,
       })
     })
 
