@@ -7,7 +7,7 @@ import { localizeStatus } from 'payload/migrations'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

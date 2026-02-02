@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { buildFieldSchemaMap } from '../../packages/ui/src/utilities/buildFieldSchemaMap/index.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
 

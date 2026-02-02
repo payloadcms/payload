@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vites
 
 import type { Point, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 

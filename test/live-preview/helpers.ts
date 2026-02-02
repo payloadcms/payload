@@ -2,9 +2,9 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
-import { toggleLivePreview } from '../helpers/e2e/live-preview/toggleLivePreview.js'
-import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { toggleLivePreview } from '../__helpers/e2e/live-preview/toggleLivePreview.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../__helpers/e2e/navigateToDoc.js'
 import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
 
 export const goToCollectionLivePreview = async (

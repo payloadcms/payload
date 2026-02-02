@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import { reInitializeDB } from 'helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
@@ -16,8 +16,8 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../helpers/e2e/helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 

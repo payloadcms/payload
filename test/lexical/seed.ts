@@ -27,7 +27,7 @@ import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-le
 import { getFileByPath } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/shared/clearAndSeed/seed.js'
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'

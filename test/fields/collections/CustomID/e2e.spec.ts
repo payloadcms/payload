@@ -5,14 +5,17 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/shared/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/shared/clearAndSeed/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/shared/rest.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { customIDSlug, customRowIDSlug, customTabIDSlug } from '../../slugs.js'
 import { customRowID, customTabID, nonStandardID } from './shared.js'

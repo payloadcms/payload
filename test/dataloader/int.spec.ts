@@ -5,10 +5,10 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { postDoc } from './config.js'
 
 let restClient: NextRESTClient

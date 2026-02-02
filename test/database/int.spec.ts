@@ -35,9 +35,9 @@ import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
-import { describe, it } from '../helpers/int/vitest.js'
-import { removeFiles } from '../helpers/shared/removeFiles.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { describe, it } from '../__helpers/int/vitest.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { seed } from './seed.js'
 import {
   defaultValuesSlug,

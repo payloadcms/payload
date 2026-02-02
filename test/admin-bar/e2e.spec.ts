@@ -5,9 +5,9 @@ import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

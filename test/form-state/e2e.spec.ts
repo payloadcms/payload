@@ -6,7 +6,7 @@ import * as path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
@@ -15,20 +15,20 @@ import {
   saveDocAndAssert,
   throttleTest,
   waitForFormReady,
-} from '../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
-import { assertElementStaysVisible } from '../helpers/e2e/assertElementStaysVisible.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { assertRequestBody } from '../helpers/e2e/assertRequestBody.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertElementStaysVisible } from '../__helpers/e2e/assertElementStaysVisible.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { assertRequestBody } from '../__helpers/e2e/assertRequestBody.js'
 import {
   addArrayRow,
   addArrayRowAsync,
   duplicateArrayRow,
   removeArrayRow,
-} from '../helpers/e2e/fields/array/index.js'
-import { addBlock } from '../helpers/e2e/fields/blocks/index.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { autosavePostsSlug } from './collections/Autosave/index.js'
 import { postsSlug } from './collections/Posts/index.js'

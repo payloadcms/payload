@@ -4,10 +4,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { idToString } from '../helpers/shared/idToString.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 let restClient: NextRESTClient

@@ -7,10 +7,10 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports

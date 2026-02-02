@@ -4,11 +4,11 @@ import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Collection1 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 let payload: Payload

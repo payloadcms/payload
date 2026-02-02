@@ -3,7 +3,7 @@
 import type { BlockSlug } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { autoDedupeBlocksPlugin } from '../helpers/shared/autoDedupeBlocksPlugin/index.js'
+import { autoDedupeBlocksPlugin } from '../__helpers/shared/autoDedupeBlocksPlugin/index.js'
 import { baseConfig } from './baseConfig.js'
 import {
   getLexicalFieldsCollection,

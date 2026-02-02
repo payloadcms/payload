@@ -9,9 +9,9 @@ import {
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
-} from '../helpers/e2e/helpers.js'
-import { checkFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
-import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 
 /**
  * This test suite validates the checkFocusIndicators utility against

@@ -12,9 +12,9 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -57,13 +57,13 @@ let payload: PayloadTestSDK<Config>
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/shared/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { selectInput } from '../../../helpers/e2e/selectInput.js'
-import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../../../helpers/shared/clearAndSeed/reInitializeDB.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/shared/executePromises.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 
 export async function seedSortable(payload: Payload) {
