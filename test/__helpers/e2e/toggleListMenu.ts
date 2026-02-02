@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { exactText } from 'helpers/e2e/helpers.js'
+
+import { exactText } from './helpers.js'
 
 export async function openListMenu({ page }: { page: Page }) {
   const listMenu = page.locator('#list-menu')

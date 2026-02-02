@@ -1,6 +1,7 @@
-import type { PayloadTestSDK } from 'helpers/shared/sdk/index.js'
-import type { GeneratedTypes } from 'helpers/shared/sdk/types.js'
 import type { TypedUser, User } from 'payload'
+
+import type { PayloadTestSDK } from '../shared/sdk/index.js'
+import type { GeneratedTypes } from '../shared/sdk/types.js'
 
 export const upsertPreferences = async <
   TConfig extends GeneratedTypes<any>,
