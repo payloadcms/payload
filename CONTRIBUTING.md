@@ -66,7 +66,7 @@ Without this, you'll need to manually explain covered testing patterns and other
 
 Auto-format code on file write. Located in `.claude/hooks/`.
 
-Without this, AI-generated code won't be automatically formatted. You'll need to manually ensure the code is formatted correctly by running eslint and prettier.
+Without this, files will show eslint errors after AI edits. While lint-staged will fix them on commit, you may not want to commit yet during large edits. The AI may also waste time manually fixing automatically fixable eslint errors instead of moving on to the next task.
 
 ### MCP (Model Context Protocol)
 
