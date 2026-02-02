@@ -3,7 +3,7 @@ import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { getNextRootDir } from './helpers/shared/getNextRootDir.js'
+import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 
 const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)

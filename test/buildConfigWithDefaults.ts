@@ -31,9 +31,9 @@ import { en } from 'payload/i18n/en'
 import { es } from 'payload/i18n/es'
 import sharp from 'sharp'
 
+import { reInitEndpoint } from './__helpers/shared/clearAndSeed/reInitEndpoint.js'
+import { localAPIEndpoint } from './__helpers/shared/sdk/endpoint.js'
 import { databaseAdapter } from './databaseAdapter.js'
-import { reInitEndpoint } from './helpers/shared/clearAndSeed/reInitEndpoint.js'
-import { localAPIEndpoint } from './helpers/shared/sdk/endpoint.js'
 import { testEmailAdapter } from './testEmailAdapter.js'
 
 // process.env.POSTGRES_URL = 'postgres://postgres:postgres@127.0.0.1:5432/payloadtests'
