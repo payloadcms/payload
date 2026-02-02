@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { lexicalViews2Slug } from '../../slugs.js'
+import { lexicalViewsBlocks } from '../LexicalViews/blocks.js'
 
 export const LexicalViews2: CollectionConfig = {
   slug: lexicalViews2Slug,
@@ -23,17 +24,7 @@ export const LexicalViews2: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: [
-              {
-                slug: 'viewsTestBlock',
-                fields: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
+            blocks: lexicalViewsBlocks,
           }),
         ],
       }),

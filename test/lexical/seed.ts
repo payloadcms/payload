@@ -23,12 +23,10 @@ import {
 
 // import type { Payload } from 'payload'
 
-import {
-  buildEditorState,
-  type DefaultNodeTypes,
-  type SerializedBlockNode,
-} from '@payloadcms/richtext-lexical'
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
+
+import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
@@ -213,7 +211,7 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
-  const editorState = buildEditorState<DefaultNodeTypes | SerializedBlockNode>({
+  const editorState = buildEditorState<LexicalViewsNodes>({
     nodes: [
       {
         type: 'paragraph',
@@ -245,6 +243,17 @@ export const seed = async (_payload: Payload) => {
           id: '68f6d92d965ad2082111b96d',
           blockName: '',
           blockType: 'viewsTestBlock',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d924965ad2082111b96d',
+          blockName: '',
+          blockType: 'customAdminComponentBlock',
+          text: 'mytext',
         },
         format: '',
         version: 2,

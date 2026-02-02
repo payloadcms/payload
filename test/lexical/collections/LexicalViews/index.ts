@@ -2,12 +2,20 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  DebugJsxConverterFeature,
+  type DefaultNodeTypes,
   lexicalEditor,
+  type SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
 
+import type { CustomAdminComponentBlock, ViewsTestBlock } from '../../payload-types.js'
+
 import { lexicalViewsSlug } from '../../slugs.js'
+import { lexicalViewsBlocks } from './blocks.js'
 import { DebugViewsJSXConverterFeature } from './viewsJSXConverter/server/index.js'
+
+export type LexicalViewsNodes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<CustomAdminComponentBlock | ViewsTestBlock>
 
 export const LexicalViews: CollectionConfig = {
   slug: lexicalViewsSlug,
@@ -24,17 +32,7 @@ export const LexicalViews: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: [
-              {
-                slug: 'viewsTestBlock',
-                fields: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
+            blocks: lexicalViewsBlocks,
           }),
           DebugViewsJSXConverterFeature({ type: 'default' }),
         ],
@@ -48,17 +46,7 @@ export const LexicalViews: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: [
-              {
-                slug: 'viewsTestBlock',
-                fields: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
+            blocks: lexicalViewsBlocks,
           }),
           DebugViewsJSXConverterFeature({ type: 'frontend' }),
         ],
@@ -71,17 +59,7 @@ export const LexicalViews: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           BlocksFeature({
-            blocks: [
-              {
-                slug: 'viewsTestBlock',
-                fields: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                ],
-              },
-            ],
+            blocks: lexicalViewsBlocks,
           }),
         ],
       }),

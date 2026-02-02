@@ -3,7 +3,9 @@ import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 import { type BlockNode, defaultEditorLexicalConfig } from '@payloadcms/richtext-lexical/client'
 
-export const lexicalViews: LexicalEditorViewMap = {
+import type { LexicalViewsNodes } from './index.js'
+
+export const lexicalViews: LexicalEditorViewMap<LexicalViewsNodes> = {
   default: {
     nodes: {
       blocks: {
@@ -37,7 +39,7 @@ export const lexicalViews: LexicalEditorViewMap = {
   },
 }
 
-export const lexicalFrontendViews: LexicalEditorViewMap = {
+export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsNodes> = {
   frontend: {
     admin: {
       hideGutter: true,
@@ -52,6 +54,11 @@ export const lexicalFrontendViews: LexicalEditorViewMap = {
     },
     nodes: {
       blocks: {
+        customAdminComponentBlock: {
+          Block: () => {
+            return <div>testtt</div>
+          },
+        },
         viewsTestBlock: {
           Component: (args) => {
             const nodeFields: any = args?.isEditor

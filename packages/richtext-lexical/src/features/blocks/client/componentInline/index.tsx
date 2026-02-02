@@ -44,6 +44,16 @@ type Props = {
    */
   readonly cacheBuster: number
   readonly className: string
+  /**
+   * Directly pass a custom block component to be rendered instead of the default one.
+   * This will have priority over the custom block component passed in the field's config.
+   */
+  readonly CustomBlock?: React.ReactNode
+  /**
+   * Directly pass a custom label component to be rendered instead of the default one.
+   * This will have priority over the custom label component passed in the field's config.
+   */
+  readonly CustomLabel?: React.ReactNode
   readonly formData: InlineBlockFields
   readonly nodeKey: string
 }
@@ -64,7 +74,14 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -118,13 +135,15 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
+    CustomLabelFromProps ??
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      initialState?.['_components']?.customComponents?.BlockLabel ??
+      undefined,
   )
 
   const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
+    CustomBlockFromProps ?? initialState?.['_components']?.customComponents?.Block ?? undefined,
   )
 
   const drawerSlug = formatDrawerSlug({
@@ -223,8 +242,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         })
 
         setInitialState(state)
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
     }
 
@@ -240,6 +263,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     editor,
     nodeKey,
     isEditable,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     schemaFieldsPath,
     id,
     formData,

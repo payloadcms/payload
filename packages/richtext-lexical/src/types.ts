@@ -170,6 +170,25 @@ export type NodeMapValue<
 }
 
 /**
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ * @internal
+ */
+export type NodeMapBlockValue<
+  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> = {
+  /**
+   * This will replace the entire block component, including the block header / collapsible.
+   * This is identical to passing a field.admin.components.Block to the field config.
+   */
+  Block?: React.ReactNode
+  /**
+   * This is identical to passing a field.admin.components.Label to the field config.
+   */
+  Label?: React.ReactNode
+} & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
+
+/**
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
@@ -198,7 +217,7 @@ export type LexicalEditorNodeMap<
           : never
         : never,
       string
-    >]?: NodeMapValue<
+    >]?: NodeMapBlockValue<
       Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
         ? SerializedBlockNode<Extract<B, { blockType: K }>>
         : SerializedBlockNode
@@ -212,7 +231,7 @@ export type LexicalEditorNodeMap<
           : never
         : never,
       string
-    >]?: NodeMapValue<
+    >]?: NodeMapBlockValue<
       Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
         ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
         : SerializedInlineBlockNode

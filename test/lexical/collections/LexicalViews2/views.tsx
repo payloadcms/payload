@@ -2,7 +2,7 @@
 import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 // Do not change this - needs to only have one frontend view
-export const lexicalViews: LexicalEditorViewMap = {
+export const lexicalViews: LexicalEditorViewMap<LexicalViewsNodes> = {
   frontend: {
     nodes: {
       heading: {

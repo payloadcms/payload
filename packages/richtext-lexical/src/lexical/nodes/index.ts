@@ -9,7 +9,7 @@ import type {
 import React from 'react'
 
 import type { NodeWithHooks } from '../../features/typesServer.js'
-import type { LexicalEditorNodeMap, NodeMapValue } from '../../types.js'
+import type { LexicalEditorNodeMap, NodeMapBlockValue, NodeMapValue } from '../../types.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 // Store view definitions for each editor and node type
@@ -158,6 +158,19 @@ function applyNodeOverride({
         // createDOM will handle it, so decorate returns empty fragment
         if (viewDef.html && hasCreateDOM && !viewDef.createDOM) {
           return React.createElement(React.Fragment)
+        }
+
+        if (nodeType === 'block' || nodeType === 'inlineBlock') {
+          const blockViewDef: NodeMapBlockValue = viewDef as NodeMapBlockValue
+          if (blockViewDef.Block || blockViewDef.Label) {
+            return NodeClass.prototype._originalDecorate.call(
+              this,
+              editor,
+              config,
+              blockViewDef.Block,
+              blockViewDef.Label,
+            )
+          }
         }
       }
 
