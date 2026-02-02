@@ -2,12 +2,17 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { addArrayRow, openArrayRowActions, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
 import path from 'path'
-import { wait } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
@@ -25,16 +30,25 @@ describe('Field Error States', () => {
   let prevValue: AdminUrlUtil
   let prevValueRelation: AdminUrlUtil
   let errorFieldsURL: AdminUrlUtil
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
-    validateDraftsOff = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOff)
-    validateDraftsOn = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOn)
-    validateDraftsOnAutosave = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOnAutosave)
-    prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue)
-    prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation)
-    errorFieldsURL = new AdminUrlUtil(serverURL, collectionSlugs.errorFields)
+    validateDraftsOff = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOff!)
+    validateDraftsOn = new AdminUrlUtil(serverURL, collectionSlugs.validateDraftsOn!)
+    validateDraftsOnAutosave = new AdminUrlUtil(
+      serverURL,
+      collectionSlugs.validateDraftsOnAutosave!,
+    )
+    prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue!)
+    prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation!)
+    errorFieldsURL = new AdminUrlUtil(serverURL, collectionSlugs.errorFields!)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -43,7 +57,9 @@ describe('Field Error States', () => {
   })
 
   test('Remove row should remove error states from parent fields', async () => {
-    await page.goto(`${serverURL}/admin/collections/error-fields/create`)
+    await page.goto(
+      formatAdminURL({ adminRoute, path: '/collections/error-fields/create', serverURL }),
+    )
 
     // add parent array
     await addArrayRow(page, { fieldName: 'parentArray' })
@@ -93,6 +109,38 @@ describe('Field Error States', () => {
       await saveDocAndAssert(page)
       await page.locator('#field-title').fill('')
       await saveDocAndAssert(page, '#action-save', 'error')
+    })
+
+    test('should keep save draft button enabled after validation failure on update', async () => {
+      await page.goto(validateDraftsOn.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      await page.waitForURL(/\/admin\/collections\/validate-drafts-on\/[a-zA-Z0-9]+/)
+
+      await page.locator('#field-title').fill('Modified Document')
+      await page.locator('#field-failValidation').check()
+      await page.locator('#field-validatedField').fill('This will fail')
+
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
+
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+    })
+
+    test('should keep save draft button enabled after successful save when form is modified again', async () => {
+      await page.goto(validateDraftsOn.create)
+      await page.locator('#field-title').fill('Test Document')
+      await page.click('#action-save-draft')
+      await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible()
+
+      await page.locator('#field-title').fill('Modified Document')
+
+      const saveDraftButton = page.locator('#action-save-draft')
+      await expect(saveDraftButton).toBeEnabled()
     })
   })
 

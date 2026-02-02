@@ -15,6 +15,7 @@ import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -528,6 +529,9 @@ describe('lexicalMain', () => {
     )
     await wait(500)
     await createUploadDrawer.getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await expect(createUploadDrawer).toBeHidden()
     await expect(uploadListDrawer).toBeHidden()
     await wait(500)
@@ -873,6 +877,8 @@ describe('lexicalMain', () => {
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
     await expect(docDrawer).toBeHidden()
     await wait(1500) // Ensure doc is saved in the database
 
@@ -1442,9 +1448,9 @@ describe('lexicalMain', () => {
 
     // Move block 1 to the end
     await page.locator('#blocks-row-0 .array-actions__button').click()
-    await expect(page.locator('#blocks-row-0 .popup__content')).toBeVisible()
+    await expect(page.locator('.popup__content')).toBeVisible()
 
-    await page.locator('#blocks-row-0 .popup__content').getByText('Move Down').click()
+    await page.locator('.popup__content').getByText('Move Down').click()
 
     await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('2')
     await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('2') // block name

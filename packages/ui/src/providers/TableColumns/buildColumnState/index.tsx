@@ -236,9 +236,16 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     // Convert accessor to dot notation specifically for SortColumn sorting behavior
     const dotAccessor = accessor?.replace(/-/g, '.')
 
+    const isVirtualField = serverField && 'virtual' in serverField && serverField.virtual === true
+
     const Heading = (
       <SortColumn
-        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(clientField) || undefined}
+        disable={
+          fieldAffectsDataSubFields ||
+          fieldIsPresentationalOnly(clientField) ||
+          isVirtualField ||
+          undefined
+        }
         Label={CustomLabel}
         label={label as StaticLabel}
         name={dotAccessor}

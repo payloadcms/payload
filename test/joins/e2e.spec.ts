@@ -472,7 +472,7 @@ describe('Join Field', () => {
     const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
-    const deleteButton = drawer.locator('#action-delete')
+    const deleteButton = page.locator('.popup__content #action-delete')
     await expect(deleteButton).toBeVisible()
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
@@ -630,7 +630,9 @@ describe('Join Field', () => {
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
     await addNewPopupBtn.click()
-    const pageOption = joinField.locator('.relationship-table__relation-button--example-pages')
+    const pageOption = page.locator(
+      '.popup__content .relationship-table__relation-button--example-pages',
+    )
     await expect(pageOption).toHaveText('Example Page')
     await pageOption.click()
     await page.locator('.drawer__content input#field-title').fill('Some new page')

@@ -11,6 +11,7 @@ import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
+import { hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
 import type { CompareOption } from './Default/types.js'
@@ -38,7 +39,7 @@ export async function VersionView(props: DocumentViewServerProps) {
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
 
-  const draftsEnabled = (collectionConfig ?? globalConfig)?.versions?.drafts
+  const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
   const localeCodesFromParams = searchParams.localeCodes
     ? JSON.parse(searchParams.localeCodes as string)
@@ -120,7 +121,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
-          locale: 'all',
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
@@ -143,33 +144,36 @@ export async function VersionView(props: DocumentViewServerProps) {
         })
       : Promise.resolve(null),
     // Previous published version
-    fetchVersions({
-      collectionSlug,
-      depth: 0,
-      draft: true,
-      globalSlug,
-      limit: 1,
-      locale: 'all',
-      overrideAccess: false,
-      parentID: id,
-      req,
-      sort: '-updatedAt',
-      user,
-      where: {
-        and: [
-          {
-            updatedAt: {
-              less_than: versionTo.updatedAt,
-            },
+    // Only query for published versions if drafts are enabled (since _status field only exists with drafts)
+    draftsEnabled
+      ? fetchVersions({
+          collectionSlug,
+          depth: 0,
+          draft: true,
+          globalSlug,
+          limit: 1,
+          locale: 'all',
+          overrideAccess: false,
+          parentID: id,
+          req,
+          sort: '-updatedAt',
+          user,
+          where: {
+            and: [
+              {
+                updatedAt: {
+                  less_than: versionTo.updatedAt,
+                },
+              },
+              {
+                'version._status': {
+                  equals: 'published',
+                },
+              },
+            ],
           },
-          {
-            'version._status': {
-              equals: 'published',
-            },
-          },
-        ],
-      },
-    }),
+        })
+      : Promise.resolve(null),
   ])
 
   const previousVersion: null | TypeWithVersion<object> = previousVersionResult?.docs?.[0] ?? null

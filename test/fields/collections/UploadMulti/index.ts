@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { uploadsMulti, uploadsSlug } from '../../slugs.js'
+import { uploads2Slug, uploadsMulti, uploadsSlug } from '../../slugs.js'
 
 const Uploads: CollectionConfig = {
   slug: uploadsMulti,

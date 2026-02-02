@@ -7,7 +7,7 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -70,6 +70,12 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  const getNestedValue = (data: JsonObject, path: string[]) =>
+    path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), data)
+  const previousValData =
+    previousSiblingDoc && Object.keys(previousSiblingDoc).length > 0
+      ? previousSiblingDoc
+      : previousDoc
 
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -88,12 +94,13 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc?.[field.name],
+          previousValue:
+            getNestedValue(previousValData, pathSegments) ?? previousValData?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
-          value: siblingDoc?.[field.name],
+          value: getNestedValue(siblingDoc, pathSegments) ?? siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
@@ -170,7 +177,7 @@ export const promise = async ({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
-                previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
+                previousSiblingDoc: previousValData?.[field.name]?.[rowIndex] || ({} as JsonObject),
                 req,
                 siblingData: siblingData?.[field.name]?.[rowIndex] || {},
                 siblingDoc: row ? { ...row } : {},
@@ -300,14 +307,14 @@ export const promise = async ({
     case 'tab': {
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
-      let tabPreviousSiblingDoc = siblingDoc
+      let tabPreviousSiblingDoc = { ...previousDoc }
 
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
         tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
         tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
-        tabPreviousSiblingDoc = (previousDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousSiblingDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({

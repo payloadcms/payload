@@ -79,6 +79,11 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  dashboard: {
+    addWidget: 'উইজেট যোগ করুন',
+    deleteWidget: 'উইজেট মুছে ফেলুন {{id}}',
+    searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
+  },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
     autosaving: 'এই ডকুমেন্টটি স্বয়ংক্রিয়ভাবে সংরক্ষণ করার সময় একটি সমস্যা হয়েছে।',
@@ -116,6 +121,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     restoringTitle:
       '{{title}} পুনরুদ্ধার করার সময় একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    revertingDocument: 'এই ডকুমেন্টটি ফিরে আনার সময় একটি সমস্যা হয়েছিল।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করা সম্ভব নয়।',
@@ -342,6 +348,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     loading: 'লোড হচ্ছে',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
+    lock: 'লক',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',
@@ -433,6 +440,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে মুভ করা হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:
@@ -463,7 +471,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     copyTo: 'কপি করুন',
     copyToLocale: 'লোকেলে কপি করুন',
     localeToPublish: 'প্রকাশ করার লোকেল',
+    selectedLocales: 'নির্বাচিত ভাষা অথবা এলাকা',
     selectLocaleToCopy: 'কপি করার জন্য লোকেল নির্বাচন করুন',
+    selectLocaleToDuplicate: 'নির্বাচনকৃত লোকেলগুলি প্রতিলিপি করুন',
   },
   operators: {
     contains: 'ধারণ করে',
@@ -550,6 +560,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'আপনি এই ডকুমেন্টের পরিবর্তনগুলি তার প্রকাশিত অবস্থায় ফিরিয়ে আনতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublish: 'আপনি এই ডকুমেন্টটি আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
+    aboutToUnpublishIn: 'আপনি এই ডকুমেন্টটি {{locale}} এ অপ্রকাশ্য করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublishSelection:
       'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     autosave: 'স্বয়ংক্রিয় সংরক্ষণ',
@@ -571,6 +582,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'বর্তমানে দেখছেন',
     currentPublishedVersion: 'বর্তমান প্রকাশিত সংস্করণ',
     draft: 'খসড়া',
+    draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
@@ -597,6 +609,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     reverting: 'পূর্বাবস্থায় ফেরানো হচ্ছে...',
     revertToPublished: 'প্রকাশিত সংস্করণে ফিরে যান',
+    revertUnsuccessful:
+      'পূর্বাবস্থায় ফেরার ব্যর্থ হয়েছে। কোনও পূর্বে প্রকাশিত সংস্করণ পাওয়া যায়নি।',
     saveDraft: 'খসড়া সংরক্ষণ করুন',
     scheduledSuccessfully: 'সফলভাবে নির্ধারিত হয়েছে।',
     schedulePublish: 'প্রকাশের সময়সূচী নির্ধারণ করুন',
@@ -607,6 +621,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
+    unpublished: 'অপ্রকাশিত',
+    unpublishedSuccessfully: 'সফলভাবে অপ্রকাশিত করা হয়েছে।',
+    unpublishIn: '{{locale}} এ অপ্রকাশিত করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',
     version: 'সংস্করণ',
     versionAgo: '{{distance}} পূর্বে',

@@ -27,7 +27,6 @@ export async function updateVersion<T extends JsonObject = JsonObject>(
     where: whereArg,
   }: UpdateVersionArgs<T>,
 ): Promise<TypeWithVersion<T>> {
-  const db = await getTransaction(this, req)
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(
@@ -44,9 +43,12 @@ export async function updateVersion<T extends JsonObject = JsonObject>(
     where: whereToUse,
   })
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
+    collectionSlug: collection,
     data: versionData,
     db,
     fields,

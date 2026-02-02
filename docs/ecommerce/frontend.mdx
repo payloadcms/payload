@@ -10,14 +10,15 @@ The package provides a set of React utilities to help you manage your ecommerce 
 
 The following hooks and components are available:
 
-| Hook / Component    | Description                                                                    |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `EcommerceProvider` | A context provider to wrap your application and provide the ecommerce context. |
-| `useCart`           | A hook to manage the cart state and actions.                                   |
-| `useAddresses`      | A hook to fetch and manage addresses.                                          |
-| `usePayments`       | A hook to manage the checkout process.                                         |
-| `useCurrency`       | A hook to format prices based on the selected currency.                        |
-| `useEcommerce`      | A hook that encompasses all of the above in one.                               |
+| Hook / Component     | Description                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `EcommerceProvider`  | A context provider to wrap your application and provide the ecommerce context. |
+| `useCart`            | A hook to manage the cart state and actions.                                   |
+| `useAddresses`       | A hook to fetch and manage addresses.                                          |
+| `usePayments`        | A hook to manage the checkout process.                                         |
+| `useCurrency`        | A hook to format prices based on the selected currency.                        |
+| `useEcommerceConfig` | A hook to access the ecommerce configuration (collection slugs, API settings). |
+| `useEcommerce`       | A hook that encompasses all of the above in one.                               |
 
 ### EcommerceProvider
 
@@ -112,6 +113,7 @@ The `useCart` hook is used to manage the cart state and actions. It provides met
 | `clearCart`     | `() => void`                                       | Method to clear the cart.                                                                 |
 | `decrementItem` | `(item: IDType) => void`                           | Method to decrement the quantity of an item. Will remove it entirely if it reaches 0.     |
 | `incrementItem` | `(item: IDType) => void`                           | Method to increment the quantity of an item.                                              |
+| `isLoading`     | `boolean`                                          | Boolean indicating if any async operation is in progress (e.g., adding/removing items).   |
 | `removeItem`    | `(item: IDType) => void`                           | Method to remove an item from the cart.                                                   |
 
 Example usage:
@@ -120,10 +122,18 @@ Example usage:
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 
 const CartComponent = () => {
-  const { addItem, cart, clearCart, decrementItem, incrementItem, removeItem } =
-    useCart()
+  const {
+    addItem,
+    cart,
+    clearCart,
+    decrementItem,
+    incrementItem,
+    isLoading,
+    removeItem,
+  } = useCart()
 
   // Your component logic here
+  // Use isLoading to show loading states in your UI
 }
 ```
 
@@ -131,11 +141,12 @@ const CartComponent = () => {
 
 The `useAddresses` hook is used to fetch and manage addresses. It provides methods to create, update, and delete addresses, as well as to fetch the list of addresses. It has the following properties:
 
-| Property        | Type                                                              | Description                                                       |
-| --------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `addresses`     | `Address[]`                                                       | The list of addresses, if any are available for the current user. |
-| `createAddress` | `(data: Address) => Promise<Address>`                             | Method to create a new address.                                   |
-| `updateAddress` | `(addressID: IDType, data: Partial<Address>) => Promise<Address>` | Method to update an existing address by ID.                       |
+| Property        | Type                                                              | Description                                                                                 |
+| --------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `addresses`     | `Address[]`                                                       | The list of addresses, if any are available for the current user.                           |
+| `createAddress` | `(data: Address) => Promise<Address>`                             | Method to create a new address.                                                             |
+| `isLoading`     | `boolean`                                                         | Boolean indicating if any async operation is in progress (e.g., creating/updating address). |
+| `updateAddress` | `(addressID: IDType, data: Partial<Address>) => Promise<Address>` | Method to update an existing address by ID.                                                 |
 
 Example usage:
 
@@ -143,9 +154,10 @@ Example usage:
 import { useAddresses } from '@payloadcms/plugin-ecommerce/client/react'
 
 const AddressesComponent = () => {
-  const { addresses, createAddress, updateAddress } = useAddresses()
+  const { addresses, createAddress, isLoading, updateAddress } = useAddresses()
 
   // Your component logic here
+  // Use isLoading to show loading states while creating or updating addresses
 }
 ```
 
@@ -153,12 +165,13 @@ const AddressesComponent = () => {
 
 The `usePayments` hook is used to manage the checkout process. It provides methods to initiate payments, confirm orders, and handle payment status. It has the following properties:
 
-| Property                | Type                       | Description                                                         |
-| ----------------------- | -------------------------- | ------------------------------------------------------------------- |
-| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)             |
-| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment) |
-| `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                              |
-| `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                      |
+| Property                | Type                       | Description                                                                                   |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| `confirmOrder`          | `(args) => Promise<Order>` | Method to confirm an order by ID. [More](#confirmOrder)                                       |
+| `initiatePayment`       | `(args) => Promise<void>`  | Method to initiate a payment for an order. [More](#initiatePayment)                           |
+| `isLoading`             | `boolean`                  | Boolean indicating if any async operation is in progress (e.g., initiating/confirming order). |
+| `paymentMethods`        | `PaymentMethod[]`          | The list of available payment methods.                                                        |
+| `selectedPaymentMethod` | `PaymentMethod`            | The currently selected payment method, if any.                                                |
 
 Example usage:
 
@@ -169,11 +182,13 @@ const CheckoutComponent = () => {
   const {
     confirmOrder,
     initiatePayment,
+    isLoading,
     paymentMethods,
     selectedPaymentMethod,
   } = usePayments()
 
   // Your component logic here
+  // Use isLoading to show loading states during payment initiation or order confirmation
 }
 ```
 
@@ -253,9 +268,35 @@ const PriceComponent = ({ amount }) => {
 }
 ```
 
+### useEcommerceConfig
+
+The `useEcommerceConfig` hook provides access to the ecommerce configuration. This is useful when you need to build custom API calls or queries using the correct collection slugs and API settings.
+
+| Property        | Type     | Description                            |
+| --------------- | -------- | -------------------------------------- |
+| `addressesSlug` | `string` | The slug for the addresses collection. |
+| `cartsSlug`     | `string` | The slug for the carts collection.     |
+| `customersSlug` | `string` | The slug for the customers collection. |
+| `api.apiRoute`  | `string` | The base API route (e.g., `/api`).     |
+
+Example usage:
+
+```tsx
+import { useEcommerceConfig } from '@payloadcms/plugin-ecommerce/client/react'
+
+const CustomComponent = () => {
+  const { cartsSlug, customersSlug, api } = useEcommerceConfig()
+
+  // Build custom API URLs
+  const cartsEndpoint = `${api.apiRoute}/${cartsSlug}`
+
+  // Your component logic here
+}
+```
+
 ### useEcommerce
 
-The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks.
+The `useEcommerce` hook encompasses all of the above hooks in one. It provides access to the cart, addresses, and payments hooks, along with a unified `isLoading` state that tracks any async operations across all these features. It also includes the `config` property for accessing collection slugs and API settings.
 
 Example usage:
 
@@ -263,8 +304,196 @@ Example usage:
 import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 const EcommerceComponent = () => {
-  const { cart, addresses, selectedPaymentMethod } = useEcommerce()
+  const {
+    cart,
+    addresses,
+    clearSession,
+    config,
+    isLoading,
+    selectedPaymentMethod,
+  } = useEcommerce()
 
   // Your component logic here
+  // isLoading tracks loading states for cart, addresses, and payment operations
+  // config provides access to collection slugs and API settings
 }
 ```
+
+## Hooks
+
+The ecommerce provider exposes several hooks for handling authentication events, session management, and cart operations. These hooks are accessible via `useEcommerce()`.
+
+### onLogin
+
+Called after a successful login to properly set up cart state. This hook handles:
+
+- Fetching the authenticated user's data
+- Merging any guest cart items into the user's existing cart
+- Transferring a guest cart to the user if they don't have one
+- Clearing guest cart secrets (authenticated users don't need them)
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const LoginForm = () => {
+  const { onLogin } = useEcommerce()
+
+  const handleLogin = async (credentials) => {
+    // Perform your login logic
+    const response = await fetch('/api/users/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
+
+    if (response.ok) {
+      // Set up ecommerce state after successful login
+      await onLogin()
+    }
+  }
+
+  return <form onSubmit={handleLogin}>{/* form fields */}</form>
+}
+```
+
+### onLogout
+
+Called during logout to clear all ecommerce session data. Currently this is just an alias for `clearSession()` but named for semantic clarity when used in logout flows and it could change in the future.
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const LogoutButton = () => {
+  const { onLogout } = useEcommerce()
+
+  const handleLogout = async () => {
+    // Perform your logout logic
+    await fetch('/api/users/logout', { method: 'POST' })
+
+    // Clear ecommerce session data
+    onLogout()
+  }
+
+  return <button onClick={handleLogout}>Logout</button>
+}
+```
+
+### clearSession
+
+Clears all ecommerce session data from state and localStorage. This includes:
+
+- Cart data and cart ID
+- Cart secret (for guest carts)
+- User addresses
+- User state
+
+Use this when you need to reset the ecommerce state, such as during logout or when switching users.
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const ResetButton = () => {
+  const { clearSession } = useEcommerce()
+
+  return <button onClick={clearSession}>Reset Session</button>
+}
+```
+
+### mergeCart
+
+Merges items from a source cart into a target cart. This is useful when you need to manually merge a guest cart into an authenticated user's cart, or when implementing custom cart merge logic.
+
+| Parameter      | Type     | Description                                               |
+| -------------- | -------- | --------------------------------------------------------- |
+| `targetCartID` | `string` | The ID of the cart to merge items into                    |
+| `sourceCartID` | `string` | The ID of the cart to merge items from                    |
+| `sourceSecret` | `string` | The secret for the source cart (required for guest carts) |
+
+When items are merged:
+
+- Matching items (same product and variant) have their quantities combined
+- Non-matching items are added to the target cart
+- The source cart is deleted after successful merge
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const MergeCartsButton = () => {
+  const { mergeCart, isLoading } = useEcommerce()
+
+  const handleMerge = async () => {
+    try {
+      const mergedCart = await mergeCart(
+        'user-cart-id',
+        'guest-cart-id',
+        'guest-cart-secret',
+      )
+      console.log('Merged cart:', mergedCart)
+    } catch (error) {
+      console.error('Failed to merge carts:', error)
+    }
+  }
+
+  return (
+    <button onClick={handleMerge} disabled={isLoading}>
+      Merge Carts
+    </button>
+  )
+}
+```
+
+### refreshCart
+
+Fetches the latest cart data from the server and updates the local state. Use this when you need to ensure the cart is in sync with the server, such as after external cart modifications.
+
+```tsx
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
+
+const RefreshCartButton = () => {
+  const { refreshCart, isLoading } = useEcommerce()
+
+  return (
+    <button onClick={refreshCart} disabled={isLoading}>
+      Refresh Cart
+    </button>
+  )
+}
+```
+
+## Session Management
+
+The provider includes built-in session management for handling user authentication flows. This ensures cart data, addresses, and user state are properly managed when users log in or out.
+
+### Handling Login
+
+When a user logs in, call `onLogin()` to set up the ecommerce state. This automatically:
+
+1. Fetches the authenticated user's data
+2. Merges any guest cart items into the user's existing cart (if both exist)
+3. Transfers the guest cart to the user (if they don't have an existing cart)
+4. Clears guest cart secrets (authenticated users don't need them)
+
+```tsx
+const handleLogin = async (credentials) => {
+  const response = await fetch('/api/users/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  })
+
+  if (response.ok) {
+    await onLogin() // Set up ecommerce state
+  }
+}
+```
+
+### Handling Logout
+
+When a user logs out, call `onLogout()` or `clearSession()` to clear all ecommerce data:
+
+```tsx
+const handleLogout = async () => {
+  await fetch('/api/users/logout', { method: 'POST' })
+  onLogout() // or clearSession()
+}
+```
+
+Both methods clear cart data, cart ID, cart secret, addresses, and user state from memory and localStorage.

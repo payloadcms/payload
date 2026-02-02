@@ -16,6 +16,7 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customEditLabel,
   customNestedTabViewPath,
@@ -28,19 +29,23 @@ import {
   overriddenDefaultRouteTabLabel,
 } from '../../shared.js'
 import {
+  customDocumentControlsSlug,
   customFieldsSlug,
+  customGlobalDocumentControlsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   editMenuItemsSlug,
   globalSlug,
   group1Collection1Slug,
   group1GlobalSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   noApiViewGlobalSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
   reorderTabsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -70,11 +75,13 @@ describe('Document View', () => {
   let globalURL: AdminUrlUtil
   let serverURL: string
   let customViewsURL: AdminUrlUtil
+  let customDocumentControlsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
   let placeholderURL: AdminUrlUtil
   let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
   let reorderTabsURL: AdminUrlUtil
+  let localizedURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -89,10 +96,12 @@ describe('Document View', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    customDocumentControlsURL = new AdminUrlUtil(serverURL, customDocumentControlsSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
     reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
+    localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -536,6 +545,38 @@ describe('Document View', () => {
     })
   })
 
+  describe('collection — custom document controls', () => {
+    test('should render status component', async () => {
+      await navigateToDoc(page, postsUrl)
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await navigateToDoc(page, customDocumentControlsURL)
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
+    })
+  })
+
+  describe('global — custom document controls', () => {
+    test('should render status component', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await page.goto(globalURL.global(customGlobalDocumentControlsSlug))
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
+    })
+  })
+
   describe('custom fields', () => {
     test('should render custom field component', async () => {
       await page.goto(customFieldsURL.create)
@@ -688,11 +729,19 @@ describe('Document View', () => {
   })
 
   describe('publish button', () => {
-    test('should show publish active locale button with defaultLocalePublishOption', async () => {
-      await navigateToDoc(page, postsUrl)
+    test('should show publish active locale button with defaultLocalePublishOption set to active', async () => {
+      await navigateToDoc(page, localizedURL)
       const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
+    })
+
+    test('should not show publish active locale button with defaultLocalePublishOption set to active but no localized fields', async () => {
+      await navigateToDoc(page, postsUrl)
+      const publishButton = page.locator('#action-save')
+      await expect(publishButton).toBeVisible()
+      await expect(publishButton).toContainText('Publish changes')
+      await expect(publishButton).not.toContainText('Publish in')
     })
   })
 
@@ -755,7 +804,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
+      const customEditMenuItem = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Custom Edit Menu Item',
       })
 
@@ -771,7 +820,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {
@@ -790,7 +839,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {

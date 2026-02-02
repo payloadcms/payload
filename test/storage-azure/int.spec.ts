@@ -4,6 +4,7 @@ import type { CollectionSlug, Payload } from 'payload'
 import { BlobServiceClient } from '@azure/storage-blob'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
@@ -31,7 +32,7 @@ describe('@payloadcms/storage-azure', () => {
 
     await client.createIfNotExists()
     await clearContainer()
-  })
+  }, 90000)
 
   afterAll(async () => {
     await payload.destroy()

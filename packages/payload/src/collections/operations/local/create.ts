@@ -18,6 +18,7 @@ import { APIError } from '../../../errors/index.js'
 import {
   type CollectionSlug,
   deepCopyObjectSimple,
+  type FindOptions,
   type Payload,
   type RequestContext,
   type TypedLocale,
@@ -89,14 +90,14 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
+   * Publish to all locales
+   */
+  publishAllLocales?: boolean
+  /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -106,7 +107,7 @@ type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = {
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
   | ({
@@ -151,6 +152,7 @@ export async function createLocal<
     overrideAccess = true,
     overwriteExistingFiles = false,
     populate,
+    publishAllLocales,
     select,
     showHiddenFields,
   } = options
@@ -178,6 +180,7 @@ export async function createLocal<
     overrideAccess,
     overwriteExistingFiles,
     populate,
+    publishAllLocales,
     req,
     select,
     showHiddenFields,

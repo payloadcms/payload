@@ -80,6 +80,11 @@ export const enTranslations = {
     youDidNotRequestPassword:
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
+  dashboard: {
+    addWidget: 'Add Widget',
+    deleteWidget: 'Delete widget {{id}}',
+    searchWidgets: 'Search widgets...',
+  },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',
     autosaving: 'There was a problem while autosaving this document.',
@@ -117,6 +122,7 @@ export const enTranslations = {
     problemUploadingFile: 'There was a problem while uploading the file.',
     restoringTitle:
       'There was an error while restoring {{title}}. Please check your connection and try again.',
+    revertingDocument: 'There was a problem while reverting this document.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
     unableToCopy: 'Unable to copy.',
@@ -339,6 +345,7 @@ export const enTranslations = {
     loading: 'Loading',
     locale: 'Locale',
     locales: 'Locales',
+    lock: 'Lock',
     menu: 'Menu',
     moreOptions: 'More options',
     move: 'Move',
@@ -429,6 +436,7 @@ export const enTranslations = {
     trashedCountSuccessfully: '{{count}} {{label}} moved to trash.',
     true: 'True',
     unauthorized: 'Unauthorized',
+    unlock: 'Unlock',
     unsavedChanges: 'You have unsaved changes. Save or discard before continuing.',
     unsavedChangesDuplicate: 'You have unsaved changes. Would you like to continue to duplicate?',
     untitled: 'Untitled',
@@ -457,7 +465,9 @@ export const enTranslations = {
     copyTo: 'Copy to',
     copyToLocale: 'Copy to locale',
     localeToPublish: 'Locale to publish',
+    selectedLocales: 'Selected Locales',
     selectLocaleToCopy: 'Select locale to copy',
+    selectLocaleToDuplicate: 'Select locales to duplicate',
   },
   operators: {
     contains: 'contains',
@@ -546,6 +556,7 @@ export const enTranslations = {
     aboutToRevertToPublished:
       "You are about to revert this document's changes to its published state. Are you sure?",
     aboutToUnpublish: 'You are about to unpublish this document. Are you sure?',
+    aboutToUnpublishIn: 'You are about to unpublish this document in {{locale}}. Are you sure?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Autosave',
@@ -567,6 +578,7 @@ export const enTranslations = {
     currentlyViewing: 'Currently viewing',
     currentPublishedVersion: 'Current Published Version',
     draft: 'Draft',
+    draftHasPublishedVersion: 'Draft (has published version)',
     draftSavedSuccessfully: 'Draft saved successfully.',
     lastSavedAgo: 'Last saved {{distance}} ago',
     modifiedOnly: 'Modified only',
@@ -592,6 +604,7 @@ export const enTranslations = {
     restoring: 'Restoring...',
     reverting: 'Reverting...',
     revertToPublished: 'Revert to published',
+    revertUnsuccessful: 'Revert unsuccessful. No previously published version found.',
     saveDraft: 'Save Draft',
     scheduledSuccessfully: 'Scheduled successfully.',
     schedulePublish: 'Schedule Publish',
@@ -602,6 +615,9 @@ export const enTranslations = {
     specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
+    unpublished: 'Unpublished',
+    unpublishedSuccessfully: 'Unpublished successfully.',
+    unpublishIn: 'Unpublish in {{locale}}',
     unpublishing: 'Unpublishing...',
     version: 'Version',
     versionAgo: '{{distance}} ago',

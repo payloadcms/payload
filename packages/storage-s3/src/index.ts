@@ -24,8 +24,18 @@ export type S3StorageOptions = {
   /**
    * Access control list for uploaded files.
    */
-
   acl?: 'private' | 'public-read'
+
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
 
   /**
    * Bucket name to upload files to.
@@ -147,6 +157,29 @@ export const s3Storage: S3StoragePlugin =
     })
 
     if (isPluginDisabled) {
+      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
+      if (s3StorageOptions.alwaysInsertFields) {
+        // Build collections with adapter: null since plugin is disabled
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          s3StorageOptions.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: {
+              ...(collOptions === true ? {} : collOptions),
+              adapter: null,
+            },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+        })(incomingConfig)
+      }
+
       return incomingConfig
     }
 
@@ -185,6 +218,7 @@ export const s3Storage: S3StoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

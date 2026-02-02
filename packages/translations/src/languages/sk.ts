@@ -80,6 +80,11 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  dashboard: {
+    addWidget: 'Pridať Widget',
+    deleteWidget: 'Odstrániť widget {{id}}',
+    searchWidgets: 'Hľadať doplnky...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet už bol aktivovaný.',
     autosaving: 'Pri automatickom ukladaní tohto dokumentu došlo k chybe.',
@@ -117,6 +122,7 @@ export const skTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nahrávaní súboru došlo k chybe.',
     restoringTitle:
       'Pri obnovovaní {{title}} sa vyskytla chyba. Skontrolujte prosím svoje pripojenie a skúste to znova.',
+    revertingDocument: 'Pri obnovení tohto dokumentu sa vyskytol problém.',
     tokenInvalidOrExpired: 'Token je neplatný alebo vypršal.',
     tokenNotProvided: 'Token nie je poskytnutý.',
     unableToCopy: 'Kopírovanie nie je možné.',
@@ -339,6 +345,7 @@ export const skTranslations: DefaultTranslationsObject = {
     loading: 'Načítavanie',
     locale: 'Jazyk',
     locales: 'Jazyky',
+    lock: 'Zámok',
     menu: 'Menu',
     moreOptions: 'Viac možností',
     move: 'Presuňte sa',
@@ -427,6 +434,7 @@ export const skTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} presunuté do koša.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',
+    unlock: 'Odomknúť',
     unsavedChanges: 'Máte neuložené zmeny. Uložte alebo zahoďte pred pokračovaním.',
     unsavedChangesDuplicate: 'Máte neuložené zmeny. Chceli by ste pokračovať v duplikovaní?',
     untitled: 'Bez názvu',
@@ -455,7 +463,9 @@ export const skTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopírovať do',
     copyToLocale: 'Kopírovať do lokalizácie',
     localeToPublish: 'Miesto na publikovanie',
+    selectedLocales: 'Vybrané miestne nastavenia',
     selectLocaleToCopy: 'Vyberte miestny systém na kopírovanie',
+    selectLocaleToDuplicate: 'Vyberte miestne nastavenia na duplikáciu',
   },
   operators: {
     contains: 'obsahuje',
@@ -543,6 +553,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
     aboutToUnpublish: 'Chystáte sa zrušiť publikovanie tohto dokumentu. Ste si istý?',
+    aboutToUnpublishIn:
+      'Chystáte sa zrušiť publikovanie tohto dokumentu v {{locale}}. Ste si istý?',
     aboutToUnpublishSelection:
       'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
     autosave: 'Automatické uloženie',
@@ -564,6 +576,7 @@ export const skTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Práve prezeráte',
     currentPublishedVersion: 'Aktuálne publikovaná verzia',
     draft: 'Návrh',
+    draftHasPublishedVersion: 'Koncept (má publikovanú verziu)',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
     modifiedOnly: 'Iba upravené',
@@ -589,6 +602,8 @@ export const skTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovovanie...',
     reverting: 'Vracanie...',
     revertToPublished: 'Vrátiť sa k publikovanému',
+    revertUnsuccessful:
+      'Vrátenie neúspešné. Nebola nájdená žiadna predchádzajúca publikovaná verzia.',
     saveDraft: 'Uložiť návrh',
     scheduledSuccessfully: 'Úspešne naplánované.',
     schedulePublish: 'Naplánovať publikovanie',
@@ -599,6 +614,9 @@ export const skTranslations: DefaultTranslationsObject = {
     specificVersion: 'Špecifická verzia',
     status: 'Stav',
     unpublish: 'Zrušiť publikovanie',
+    unpublished: 'Neuverejnené',
+    unpublishedSuccessfully: 'Úspešne nezverejnené.',
+    unpublishIn: 'Zrušiť publikovanie v {{locale}}',
     unpublishing: 'Zrušujem publikovanie...',
     version: 'Verzia',
     versionAgo: 'pred {{distance}}',

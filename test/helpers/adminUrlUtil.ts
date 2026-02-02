@@ -108,4 +108,12 @@ export class AdminUrlUtil {
   trashEdit(id: number | string): string {
     return `${this.trash}/${id}`
   }
+
+  version(id: number | string, versionID: number | string): string {
+    return `${this.list}/${id}/versions/${versionID}`
+  }
+
+  versions(id: number | string): string {
+    return `${this.list}/${id}/versions`
+  }
 }

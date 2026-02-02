@@ -7,7 +7,7 @@ import type {
   ServerFunction,
 } from 'payload'
 
-import { canAccessAdmin, formatErrors } from 'payload'
+import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -22,7 +22,7 @@ import { handlePreview } from './handlePreview.js'
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
-  user: ClientUser | number | string
+  user?: ClientUser | number | string
 }
 
 type BuildFormStateSuccessResult = {
@@ -70,7 +70,7 @@ export const buildFormStateHandler: ServerFunction<
     }
 
     if (err.message === 'Unauthorized') {
-      throw new Error('Unauthorized')
+      throw new UnauthorizedError()
     }
 
     return formatErrors(err)

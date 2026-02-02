@@ -15,6 +15,8 @@ import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
+import { NoFilesRequired } from './collections/NoFilesRequired/index.js'
+import { RelationToNoFilesRequired } from './collections/RelationToNoFilesRequired/index.js'
 import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
@@ -37,9 +39,11 @@ import {
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
+  pdfOnlySlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
+  restrictedMimeTypesSlug,
   restrictFileTypesSlug,
   skipAllowListSafeFetchMediaSlug,
   skipSafeFetchHeaderFilterSlug,
@@ -560,6 +564,22 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: pdfOnlySlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['application/pdf'],
+      },
+    },
+    {
+      slug: restrictedMimeTypesSlug,
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+        mimeTypes: ['image/png'],
+      },
+    },
+    {
       slug: animatedTypeMedia,
       fields: [],
       upload: {
@@ -773,6 +793,8 @@ export default buildConfigWithDefaults({
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
     AdminUploadControl,
+    NoFilesRequired,
+    RelationToNoFilesRequired,
     {
       slug: 'optional-file',
       fields: [],
