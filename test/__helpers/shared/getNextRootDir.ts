@@ -17,7 +17,7 @@ export function getNextRootDir(testSuite?: string) {
    * Handle test suites that have their own app directory
    */
   if (testSuite) {
-    const testSuiteDir = resolve(dirname, `../${testSuite}`)
+    const testSuiteDir = resolve(dirname, `../../${testSuite}`)
 
     let hasNextConfig = false
 
@@ -56,13 +56,13 @@ export function getNextRootDir(testSuite?: string) {
    */
   if (process.env.PAYLOAD_TEST_PROD === 'true') {
     return {
-      rootDir: path.resolve(dirname, '..'),
+      rootDir: path.resolve(dirname, '..', '..'),
       adminRoute,
     }
   }
 
   return {
-    rootDir: path.resolve(dirname, '..', '..'),
+    rootDir: path.resolve(dirname, '..', '..', '..'),
     adminRoute,
   }
 }
