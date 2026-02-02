@@ -1,10 +1,12 @@
 'use client'
 
-import { usePreferences, useServerFunctions } from '@payloadcms/ui'
+import { Spinner, usePreferences, useServerFunctions } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
+
+import { TabError } from './TabError/index.js'
 
 export type TabMetadata = {
   icon: React.ReactNode
@@ -17,6 +19,11 @@ export type SidebarTabsClientProps = {
   baseClass: string
   initialActiveTabID: string
   initialTabContents: Record<string, React.ReactNode>
+  /**
+   * Minimum time (in ms) to show the loading overlay, prevents flashing on fast loads
+   * @default 1000
+   */
+  minLoadingTime?: number
   tabs: TabMetadata[]
 }
 
@@ -24,6 +31,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   baseClass,
   initialActiveTabID,
   initialTabContents,
+  minLoadingTime = 1000,
   tabs,
 }) => {
   const { setPreference } = usePreferences()
@@ -32,13 +40,20 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const [activeTabID, setActiveTabID] = useState(initialActiveTabID)
   const [tabContent, setTabContent] = useState<Record<string, React.ReactNode>>(initialTabContents)
   const [loadingTab, setLoadingTab] = useState<null | string>(null)
+  const loadingTabsRef = useRef<Set<string>>(new Set())
+  const tabContentRef = useRef(initialTabContents)
+  const loadingStartTimeRef = useRef<null | number>(null)
 
   const loadTabContent = useCallback(
     async (tabSlug: string) => {
-      if (tabContent[tabSlug]) {
+      // Check if already loaded or currently loading
+      if (tabContentRef.current[tabSlug] || loadingTabsRef.current.has(tabSlug)) {
         return
       }
 
+      // Mark as loading and record start time
+      loadingTabsRef.current.add(tabSlug)
+      loadingStartTimeRef.current = Date.now()
       setLoadingTab(tabSlug)
 
       try {
@@ -47,20 +62,44 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           args: { tabSlug } as RenderTabServerFnArgs,
         })) as RenderTabServerFnReturnType
 
-        setTabContent((prev) => ({
-          ...prev,
+        const newContent = {
+          ...tabContentRef.current,
           [tabSlug]: result.component,
-        }))
-      } catch (_) {
-        setTabContent((prev) => ({
-          ...prev,
-          [tabSlug]: null,
-        }))
+        }
+
+        tabContentRef.current = newContent
+        setTabContent(newContent)
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+        const handleRetry = () => {
+          // Clear the error and retry loading
+          const clearedContent = { ...tabContentRef.current }
+          delete clearedContent[tabSlug]
+          tabContentRef.current = clearedContent
+          setTabContent(clearedContent)
+          void loadTabContent(tabSlug)
+        }
+
+        const newContent = {
+          ...tabContentRef.current,
+          [tabSlug]: <TabError message={errorMessage} onRetry={handleRetry} />,
+        }
+
+        tabContentRef.current = newContent
+        setTabContent(newContent)
       } finally {
-        setLoadingTab(null)
+        // Ensure minimum loading time before hiding overlay
+        const elapsedTime = Date.now() - (loadingStartTimeRef.current || 0)
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime)
+        setTimeout(() => {
+          loadingTabsRef.current.delete(tabSlug)
+          setLoadingTab(null)
+          loadingStartTimeRef.current = null
+        }, remainingTime)
       }
     },
-    [serverFunction, tabContent],
+    [minLoadingTime, serverFunction],
   )
 
   const handleTabChange = (slug: string) => {
@@ -92,7 +131,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         })}
       </div>
       <div className={`${baseClass}__content`}>
-        {loadingTab === activeTabID ? null : activeContent}
+        {loadingTab === activeTabID ? <Spinner loadingText={null} /> : activeContent}
       </div>
     </div>
   )

@@ -115,6 +115,8 @@ export { GroupByPageControls } from '../../elements/PageControls/GroupByPageCont
 export { LoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
+export { Spinner } from '../../elements/Spinner/index.js'
+export type { SpinnerProps } from '../../elements/Spinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
 export { Modal, useModal } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'

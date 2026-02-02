@@ -1,4 +1,4 @@
-@import '~@payloadcms/ui/scss';
+@import '@payloadcms/ui/scss';
 
 @layer payload-default {
   .sidebar-tabs {
@@ -67,6 +67,7 @@
     &__content {
       width: 100%;
       flex-grow: 1;
+      position: relative;
     }
   }
 }

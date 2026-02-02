@@ -1,0 +1,33 @@
+@import '@payloadcms/ui/scss';
+
+@layer payload-default {
+  .sidebar-tab-error {
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      line-height: 1.4;
+
+      strong {
+        font-weight: 600;
+      }
+
+      span {
+        opacity: 0.8;
+        font-size: base(0.65);
+      }
+    }
+
+    &__retry {
+      all: unset;
+      margin-top: calc(var(--base) / 4);
+      font-size: base(0.65);
+      text-decoration: underline;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}

@@ -355,13 +355,5 @@ licenses.csv
 # SQLite DB
 payload.db
 
-# Local Claude development files (apply to main via separate PR)
-.claude/skills/refactoring/
-.claude/skills/writing-scss/
-.claude/guide/config/translation-patterns.md
-.claude/skills/build-extensible-component/
-.claude/skills/log-pattern/
-.claude/guide/
-
 # Screenshots created by Playwright MCP
 .playwright-mcp
