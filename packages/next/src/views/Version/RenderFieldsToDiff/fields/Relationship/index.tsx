@@ -30,7 +30,9 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   req,
   versionValue: valueTo,
 }) => {
-  const hasMany = 'hasMany' in field && field.hasMany
+  // Check field schema and data structure (handles block swaps where schema may not match data)
+  const hasMany =
+    ('hasMany' in field && field.hasMany) || Array.isArray(valueFrom) || Array.isArray(valueTo)
   const polymorphic = Array.isArray(field.relationTo)
 
   if (hasMany) {
