@@ -26,17 +26,70 @@ When it comes to design-related changes or additions, it's crucial for us to ens
 
 Our design review ensures that proposed changes fit seamlessly with other components, both existing and planned. This step is meant to prevent unintentional design inconsistencies and to save you from investing time in implementing features that might need significant design alterations later.
 
-### Before Starting
+## Before Starting
 
 To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
 
-### Installation & Requirements
+## Installation & Requirements
 
 Payload is structured as a Monorepo, encompassing not only the core Payload platform but also various plugins and packages. To install all required dependencies, you have to run `pnpm install` once in the root directory. **PNPM IS REQUIRED!** Yarn or npm will not work - you will have to use pnpm to develop in the core repository. In most systems, the easiest way to install pnpm is to run `npm add -g pnpm` in your terminal.
 
 If you're coming from a very outdated version of payload, it is recommended to perform a clean install, which nukes the node_modules folder and reinstalls all dependencies. You can easily do that using the `pnpm reinstall` command.
 
 It is also recommended to use the exact Node.js and pnpm version defined in the .tool-versions file. You can check your current node version by typing `node --version` in your terminal. The Payload team uses [mise](https://mise.jdx.dev) to manage Node.js versions.
+
+## AI Code Tool Compatibility
+
+This project includes configuration files for AI-assisted development.
+
+| Tool              | Context | Skills | Hooks | MCP |
+| ----------------- | ------- | ------ | ----- | --- |
+| Claude Code       | ✅      | ✅     | ✅    | ✅  |
+| Cursor            | ✅      | ✅     | ✅    | ✅  |
+| VS Code + Copilot | ❌      | ✅     | ❌    | ✅  |
+
+We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. If you're using VS Code + Copilot, or another IDE that doesn't recognize `CLAUDE.md`, you can manually add your own `AGENTS.md` file to the root of the project. The easiest way is to create a symlink with `ln -s CLAUDE.md AGENTS.md`. This file is gitignored, so it won't be committed to the repository.
+
+### Context
+
+Project purpose, architecture, and coding guidelines. Located in `CLAUDE.md`.
+
+Without this, the AI won't know project conventions and may generate code that doesn't match the codebase conventions.
+
+### Skills
+
+Task-specific guidance (e.g., how to generate translations). Located in `.claude/skills/<name>/SKILL.md`.
+
+Without this, you'll need to manually explain covered testing patterns and other workflows in each conversation.
+
+### Hooks
+
+Auto-format code on file write. Located in `.claude/hooks/`.
+
+Without this, AI-generated code won't be automatically formatted. You'll need to manually ensure the code is formatted correctly by running eslint and prettier.
+
+### MCP (Model Context Protocol)
+
+External tool servers that extend AI capabilities. Located in `.cursor/mcp.json`, `.mcp.json` (for Claude Code) and `.vscode/mcp.json` (for VS Code).
+
+This project includes:
+
+- **Playwright MCP** - Interactive browser automation (navigate, click, fill forms, screenshots)
+
+**Configuration flags explained:**
+
+| Flag                                    | Purpose                                                                                                                                 |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `--caps=vision,verify,tracing,devtools` | Enables vision (screenshots), verification, tracing, and devtools capabilities                                                          |
+| `--isolated`                            | Uses an isolated browser profile instead of system Chrome, avoiding enterprise policy restrictions that block DevTools remote debugging |
+| `--headless`                            | Runs browser without visible UI for faster automation                                                                                   |
+
+**Prerequisites:**
+
+- The dev server must be running (`pnpm dev`) before using the Playwright MCP
+- The AI will navigate to `localhost:3000` to interact with the app
+
+Without MCP, the AI cannot interactively browse and test the running application. It would be limited to writing test code without being able to verify the UI directly.
 
 ### Code
 

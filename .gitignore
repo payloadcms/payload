@@ -357,3 +357,6 @@ payload.db
 
 # Screenshots created by Playwright MCP
 .playwright-mcp
+
+# Gitignored, so that users can manually add their own AGENTS.md file
+AGENTS.md
