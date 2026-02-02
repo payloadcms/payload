@@ -48,7 +48,7 @@ This project includes configuration files for AI-assisted development.
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
 | VS Code + Copilot | ❌      | ✅     | ❌    | ✅  |
 
-We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. If you're using VS Code + Copilot, or another IDE that doesn't recognize `CLAUDE.md`, you can manually add your own `AGENTS.md` file to the root of the project. The easiest way is to create a symlink with `ln -s CLAUDE.md AGENTS.md`. This file is gitignored, so it won't be committed to the repository.
+We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
 
 ### Context
 
