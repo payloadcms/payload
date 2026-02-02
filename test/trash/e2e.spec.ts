@@ -1101,6 +1101,8 @@ describe('Trash', () => {
 
       await page.locator('.row-1 .cell-name').click()
 
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
+
       await expect(page.locator('input[name="email"]')).toBeDisabled()
       await expect(page.locator('#change-password')).toBeDisabled()
 
@@ -1115,6 +1117,8 @@ describe('Trash', () => {
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
+
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
 
       await page.locator('.doc-controls__controls #action-restore').click()
 
