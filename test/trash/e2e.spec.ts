@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { reInitializeDB } from 'helpers/shared/clearAndSeed/reInitializeDB.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
 import { wait } from 'payload/shared'

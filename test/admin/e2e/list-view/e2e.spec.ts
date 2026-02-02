@@ -39,28 +39,28 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
-import {
-  openListColumns,
-  reorderColumns,
-  sortColumn,
-  toggleColumn,
-  waitForColumnInURL,
-} from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
-import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
-import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
+import { deletePreferences } from 'helpe../../../__helpers/e2e/preferences.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
+import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from '../../__helpers/e2e/columns/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)

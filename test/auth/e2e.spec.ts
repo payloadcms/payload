@@ -2,9 +2,6 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { login } from 'helpers/e2e/auth/login.js'
-import { logout } from 'helpers/e2e/auth/logout.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,6 +10,8 @@ import { v4 as uuid } from 'uuid'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { login } from '../__helpers/e2e/auth/login.js'
+import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
   ensureCompilationIsDone,
   exactText,
@@ -20,9 +19,10 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 

@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'

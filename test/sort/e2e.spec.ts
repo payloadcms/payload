@@ -1,8 +1,8 @@
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
-import { moveRow } from 'helpers/e2e/sort/moveRow.js'
+import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
+import { moveRow } from '__helpers/e2e/sort/moveRow.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'

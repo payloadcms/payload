@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/shared/sdk/index.js'
+import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'

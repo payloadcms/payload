@@ -1,16 +1,16 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
+import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
 import {
   addBlock,
   addBlockBelow,
   duplicateBlock,
   openBlocksDrawer,
   reorderBlocks,
-} from 'helpers/e2e/fields/blocks/index.js'
-import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
-import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
+} from '__helpers/e2e/fields/blocks/index.js'
+import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'

@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { reInitializeDB } from 'helpers/shared/clearAndSeed/reInitializeDB.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { lexicalJSXConverterSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'

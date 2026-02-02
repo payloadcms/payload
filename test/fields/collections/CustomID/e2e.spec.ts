@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

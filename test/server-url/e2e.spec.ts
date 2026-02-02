@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { login } from 'helpers/e2e/auth/login.js'
-import { logoutViaNav } from 'helpers/e2e/auth/logout.js'
+import { login } from '__helpers/e2e/auth/login.js'
+import { logoutViaNav } from '__helpers/e2e/auth/logout.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
