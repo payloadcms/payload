@@ -3,7 +3,7 @@ import { getPayload, type SanitizedConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+import { setTestEnvPaths } from './helpers/shared/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 

@@ -1,5 +1,5 @@
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
-import type { GeneratedTypes } from 'helpers/sdk/types.js'
+import type { PayloadTestSDK } from 'helpers/shared/sdk/index.js'
+import type { GeneratedTypes } from 'helpers/shared/sdk/types.js'
 import type { TypedUser, User } from 'payload'
 
 export const upsertPreferences = async <

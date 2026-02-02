@@ -8,7 +8,7 @@ import path from 'path'
 import { getPayload } from 'payload'
 import { expect, it } from 'vitest'
 
-import { describe } from '../../helpers/vitest.js'
+import { describe } from '../../helpers/int/vitest.js'
 import config from './config.js'
 
 const filename = fileURLToPath(import.meta.url)

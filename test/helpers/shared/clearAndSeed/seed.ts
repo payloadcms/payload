@@ -3,7 +3,7 @@ import * as os from 'node:os'
 import path from 'path'
 import { type Payload } from 'payload'
 
-import { isErrorWithCode } from './isErrorWithCode.js'
+import { isErrorWithCode } from '../isErrorWithCode.js'
 import { resetDB } from './reset.js'
 import { createSnapshot, dbSnapshot, restoreFromSnapshot, uploadsDirCache } from './snapshot.js'
 

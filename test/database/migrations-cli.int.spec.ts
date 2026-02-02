@@ -11,8 +11,8 @@ import { migrateCLI } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterEach, beforeEach, expect } from 'vitest'
 
-import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
+import { removeFiles } from '../helpers/shared/removeFiles.js'
+import { describe, it } from '../helpers/int/vitest.js'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)

@@ -2,7 +2,7 @@
  * Test script to verify MongoDB Atlas Local connection and vector search functionality
  *
  * Usage:
- *   pnpm tsx test/helpers/db/mongodb-atlas/test-connection.ts
+ *   pnpm tsx test/helpers/shared/db/mongodb-atlas/test-connection.ts
  */
 
 import { testConnection } from '../mongodb/test-connection.js'

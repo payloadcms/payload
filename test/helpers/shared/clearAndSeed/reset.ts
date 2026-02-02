@@ -1,7 +1,7 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Payload } from 'payload'
 
-import { isMongoose } from './isMongoose.js'
+import { isMongoose } from '../isMongoose.js'
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
   if (isMongoose(_payload) && 'collections' in _payload.db && collectionSlugs.length > 0) {

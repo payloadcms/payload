@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
 

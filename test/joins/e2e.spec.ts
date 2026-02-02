@@ -5,7 +5,7 @@ import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRu
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -15,13 +15,13 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+} from '../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
 import { reorderColumns } from '../helpers/e2e/columns/index.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { RESTClient } from '../helpers/rest.js'
+import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../helpers/shared/rest.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,

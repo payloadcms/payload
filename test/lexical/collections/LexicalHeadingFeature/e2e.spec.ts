@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
+import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
 import { lexicalHeadingFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../../../helpers.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)

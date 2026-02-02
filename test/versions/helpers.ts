@@ -4,7 +4,7 @@ import { toSnakeCase } from 'drizzle-orm/casing'
 
 import type { DraftPost } from './payload-types.js'
 
-import { isMongoose } from '../helpers/isMongoose.js'
+import { isMongoose } from '../helpers/shared/isMongoose.js'
 
 /**
  * Creates multiple versions of a document by updating it sequentially

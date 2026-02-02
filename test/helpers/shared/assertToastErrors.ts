@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { closeAllToasts } from '../helpers.js'
+import { closeAllToasts } from './e2e/helpers.js'
 
 export async function assertToastErrors({
   page,

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Page } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { pagesSlug } from './shared.js'
 
 let payload: Payload

@@ -3,8 +3,8 @@ import type { Endpoint, PayloadHandler } from 'payload'
 import { status as httpStatus } from 'http-status'
 import * as qs from 'qs-esm'
 
-import { path } from './reInitializeDB.js'
-import { seedDB } from './seed.js'
+import { path } from '../reInitializeDB.js'
+import { seedDB } from '../seed.js'
 
 const handler: PayloadHandler = async (req) => {
   process.env.SEED_IN_CONFIG_ONINIT = 'true'

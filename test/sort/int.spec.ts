@@ -5,10 +5,10 @@ import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'

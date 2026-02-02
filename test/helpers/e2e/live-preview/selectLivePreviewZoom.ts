@@ -1,6 +1,6 @@
 import type { Page } from 'playwright'
 
-import { exactText } from 'helpers.js'
+import { exactText } from 'helpers/e2e/helpers.js'
 import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'
 

@@ -2,7 +2,7 @@ import type { Locator, Page } from 'playwright'
 
 import { expect } from 'playwright/test'
 
-import { closeAllToasts } from '../../../helpers.js'
+import { closeAllToasts } from '../helpers.js'
 
 export async function moveRow(
   page: Page,

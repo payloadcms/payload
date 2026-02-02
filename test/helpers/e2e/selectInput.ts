@@ -1,6 +1,6 @@
 import { expect, type Locator } from '@playwright/test'
 
-import { exactText } from '../../helpers.js'
+import { exactText } from './helpers.js'
 
 type SelectReactOptionsParams = {
   filter?: string // Optional filter text to narrow down options

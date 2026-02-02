@@ -6,7 +6,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
 import type {
   Collection1,
   FieldsRelationship as CollectionWithRelationships,
@@ -23,9 +23,9 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../helpers/assertToastErrors.js'
+} from '../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../helpers/shared/assertToastErrors.js'
 import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { addArrayRow } from '../helpers/e2e/fields/array/addArrayRow.js'
 import { openCreateDocDrawer } from '../helpers/e2e/fields/relationship/openCreateDocDrawer.js'
@@ -33,7 +33,7 @@ import { addListFilter } from '../helpers/e2e/filters/index.js'
 import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
 import { openDocControls } from '../helpers/e2e/openDocControls.js'
 import { openDocDrawer } from '../helpers/e2e/toggleDocDrawer.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   collection1Slug,

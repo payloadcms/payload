@@ -3,12 +3,12 @@ import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { reInitializeDB } from 'helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
 import {
@@ -16,9 +16,9 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'

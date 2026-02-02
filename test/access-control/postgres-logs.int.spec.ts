@@ -7,7 +7,7 @@ import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { whereCacheSameSlug, whereCacheUniqueSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)

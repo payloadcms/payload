@@ -2,7 +2,10 @@ import type { SuiteFactory, TestFunction } from 'vitest'
 
 import { describe as vitestDescribe, it as vitestIt } from 'vitest'
 
-import { type DatabaseAdapterType, getCurrentDatabaseAdapter } from '../generateDatabaseAdapter.js'
+import {
+  type DatabaseAdapterType,
+  getCurrentDatabaseAdapter,
+} from '../../generateDatabaseAdapter.js'
 import { mongooseList } from './isMongoose.js'
 
 type ItOptions = {

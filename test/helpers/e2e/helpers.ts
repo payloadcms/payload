@@ -13,7 +13,7 @@ import { defaults } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
-import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
+import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 

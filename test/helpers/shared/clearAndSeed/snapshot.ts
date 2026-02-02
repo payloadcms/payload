@@ -6,7 +6,7 @@ import type { Payload } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
-import { isMongoose } from './isMongoose.js'
+import { isMongoose } from '../isMongoose.js'
 
 export const uploadsDirCache: {
   [key: string]: {

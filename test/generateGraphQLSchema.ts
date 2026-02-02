@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+import { setTestEnvPaths } from './helpers/shared/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 

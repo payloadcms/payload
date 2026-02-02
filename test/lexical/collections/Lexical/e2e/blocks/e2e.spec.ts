@@ -15,7 +15,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../helpers/shared/sdk/index.js'
 import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
 import {
@@ -23,13 +23,13 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
+} from '../../../../../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../../../helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../helpers/shared/assertToastErrors.js'
 import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+import { initPayloadE2ENoConfig } from '../../../../../helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../../../helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../../../helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'

@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import type { AdminUrlUtil } from '../adminUrlUtil.js'
 
-import { waitForFormReady } from '../../helpers.js'
+import { waitForFormReady } from './helpers.js'
 
 export const goToFirstCell = async (page: Page, serverURL: string) => {
   const cellLink = page.locator(`tbody tr:first-child td a`).first()

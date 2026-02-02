@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../../credentials.js'
-import removeFiles from '../../helpers/removeFiles.js'
+import { removeFiles } from '../../helpers/shared/removeFiles.js'
 import {
   customLivePreviewSlug,
   pagesSlug,

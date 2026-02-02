@@ -1,6 +1,6 @@
 import type { Page } from 'playwright'
 
-import { getRoutes } from 'helpers.js'
+import { getRoutes } from 'helpers/e2e/helpers.js'
 import { formatAdminURL } from 'payload/shared'
 import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'

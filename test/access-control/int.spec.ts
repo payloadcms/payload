@@ -1,4 +1,4 @@
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
+import type { NextRESTClient } from 'helpers/shared/NextRESTClient.js'
 import type {
   CollectionPermission,
   CollectionSlug,
@@ -16,7 +16,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,

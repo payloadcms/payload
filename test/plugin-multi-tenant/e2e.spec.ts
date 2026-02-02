@@ -5,7 +5,7 @@ import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -14,8 +14,8 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+} from '../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
 import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
@@ -26,8 +26,8 @@ import {
   selectInput,
 } from '../helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'

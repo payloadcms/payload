@@ -10,7 +10,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
 const filename = fileURLToPath(import.meta.url)

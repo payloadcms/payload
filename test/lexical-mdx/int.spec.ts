@@ -12,7 +12,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
 import { codeTest1 } from './tests/code1.test.js'

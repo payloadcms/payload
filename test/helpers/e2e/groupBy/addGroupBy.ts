@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
-import { exactText } from 'helpers.js'
+import { exactText } from 'helpers/e2e/helpers.js'
 
 import { openGroupBy } from './openGroupBy.js'
 

@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import { closeAllToasts } from '../../helpers.js'
+import { closeAllToasts } from './helpers.js'
 
 export async function copyPasteField({
   fieldName,

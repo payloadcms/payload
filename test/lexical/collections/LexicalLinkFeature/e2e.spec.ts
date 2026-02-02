@@ -3,9 +3,9 @@ import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, waitForFormReady } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone, waitForFormReady } from '../../../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)

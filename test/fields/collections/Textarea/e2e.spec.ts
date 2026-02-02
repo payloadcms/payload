@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from 'helpers/sdk/types.js'
+import type { GeneratedTypes } from 'helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
@@ -11,7 +11,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
@@ -20,11 +20,11 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textareaFieldsSlug } from '../../slugs.js'
 import { textareaDoc } from './shared.js'

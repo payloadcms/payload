@@ -10,12 +10,12 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   allowListMediaSlug,

@@ -6,11 +6,11 @@ import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../helpers/shared/idToString.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)

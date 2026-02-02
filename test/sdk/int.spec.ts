@@ -6,10 +6,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { TypedPayloadSDK } from '../helpers/getSDK.js'
+import type { TypedPayloadSDK } from '../helpers/shared/getSDK.js'
 import type { Email, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { emailsSlug } from './collections/Emails.js'
 

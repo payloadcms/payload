@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 
-import { closeAllToasts } from '../../helpers.js'
+import { closeAllToasts } from './helpers.js'
 
 export async function waitForAutoSaveToRunAndComplete(
   page: Locator | Page,

@@ -3,20 +3,20 @@ import type { BrowserContext, Locator, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import { moveRow } from 'helpers/e2e/sort/moveRow.js'
-import { RESTClient } from 'helpers/rest.js'
+import { RESTClient } from '../helpers/shared/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   // throttleTest
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
 import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
