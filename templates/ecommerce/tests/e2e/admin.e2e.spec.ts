@@ -5,7 +5,7 @@ import { seedTestUser, cleanupTestUser, testUser } from '../helpers/seedUser'
 test.describe('Admin Panel', () => {
   let page: Page
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async ({ browser }, testInfo) => {
     await seedTestUser()
 
     const context = await browser.newContext()
@@ -26,16 +26,16 @@ test.describe('Admin Panel', () => {
   })
 
   test('can navigate to list view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/pages')
-    await expect(page).toHaveURL('http://localhost:3000/admin/collections/pages')
-    const listViewArtifact = page.locator('h1', { hasText: 'Pages' }).first()
+    await page.goto('http://localhost:3000/admin/collections/users')
+    await expect(page).toHaveURL('http://localhost:3000/admin/collections/users')
+    const listViewArtifact = page.locator('h1', { hasText: 'Users' }).first()
     await expect(listViewArtifact).toBeVisible()
   })
 
   test('can navigate to edit view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/pages/create')
-    await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
-    const editViewArtifact = page.locator('input[name="title"]')
+    await page.goto('http://localhost:3000/admin/collections/users/create')
+    await expect(page).toHaveURL(/\/admin\/collections\/users\/[a-zA-Z0-9-_]+/)
+    const editViewArtifact = page.locator('input[name="email"]')
     await expect(editViewArtifact).toBeVisible()
   })
 })
