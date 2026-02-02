@@ -41,6 +41,40 @@ export type ClientComponentProps = {
   schemaPath?: string
 }
 
+// TODO: maybe we can come up with a better name?
+export type FieldPaths = {
+  /**
+   * @default ''
+   */
+  indexPath?: string
+  /**
+   * @default ''
+   */
+  parentPath?: string
+  /**
+   * The path built up to the point of the field
+   * excluding the field name.
+   *
+   * @default ''
+   */
+  parentSchemaPath?: string
+  /**
+   * A built up path to access FieldState in the form state.
+   * Nested fields will have a path that includes the parent field names
+   * if they are nested within a group, array, block or named tab.
+   *
+   * Collapsibles and unnamed tabs will have arbitrary paths
+   * that look like _index-0, _index-1, etc.
+   *
+   * Row fields will not have a path.
+   *
+   * @example 'parentGroupField.childTextField'
+   *
+   * @default field.name
+   */
+  path: string
+}
+
 /**
  * TODO: This should be renamed to `FieldComponentServerProps` or similar
  */
