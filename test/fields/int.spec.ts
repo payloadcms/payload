@@ -2375,6 +2375,48 @@ describe('Fields', () => {
       expect(res.totalDocs).toBe(1)
       expect(res.docs[0].id).toBe(withoutCollapsed.id)
     })
+
+    it('should properly handle richText inside array', async () => {
+      const richTextValue = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Hello from array', format: 1 }],
+            },
+          ],
+        },
+      }
+
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              text: 'required',
+              richTextField: richTextValue,
+            },
+          ],
+          localized: [{ text: 'req' }],
+        },
+      })
+
+      // Verify richText is returned as an object, not a string
+      expect(doc.items[0].richTextField).toBeDefined()
+      expect(typeof doc.items[0].richTextField).toBe('object')
+      expect(doc.items[0].richTextField).toEqual(richTextValue)
+
+      // Also verify on read
+      const found = await payload.findByID({
+        collection,
+        id: doc.id,
+      })
+
+      expect(found.items[0].richTextField).toBeDefined()
+      expect(typeof found.items[0].richTextField).toBe('object')
+      expect(found.items[0].richTextField).toEqual(richTextValue)
+    })
   })
 
   describe('group', () => {
