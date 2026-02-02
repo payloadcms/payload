@@ -26,7 +26,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets = [] } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
-  const { req } = props.initPageResult
+  const { cookies, locale, permissions, req } = props.initPageResult
   const { i18n } = req
 
   const layout =
@@ -40,6 +40,9 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
         Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
         importMap,
         serverProps: {
+          cookies,
+          locale,
+          permissions,
           req,
           widgetSlug,
           // TODO: widgets will support state in the future

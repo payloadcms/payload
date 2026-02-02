@@ -59,7 +59,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       },
       localization,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
@@ -158,18 +157,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }),
     )
     setUpcoming(docs)
-  }, [
-    collectionSlug,
-    globalSlug,
-    serverURL,
-    api,
-    i18n,
-    dateFormat,
-    localization,
-    supportedTimezones,
-    t,
-    id,
-  ])
+  }, [collectionSlug, globalSlug, api, i18n, dateFormat, localization, supportedTimezones, t, id])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -198,10 +186,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
 
     setProcessing(true)
 
-    let publishSpecificLocale: string
+    let localeToPublish: string
 
     if (typeof locale === 'object' && locale.value !== 'all' && type === 'publish') {
-      publishSpecificLocale = locale.value
+      localeToPublish = locale.value
     }
 
     try {
@@ -215,7 +203,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
             }
           : undefined,
         global: globalSlug || undefined,
-        locale: publishSpecificLocale,
+        localeToPublish,
         timezone,
       })
 

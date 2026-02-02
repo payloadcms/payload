@@ -18,7 +18,5 @@ export const getHandleUpload = ({ bucket, prefix = '' }: Args): HandleUpload => 
     await bucket.put(path.posix.join(data.prefix || prefix, file.filename), buffer, {
       httpMetadata: { contentType: file.mimeType },
     })
-
-    return data
   }
 }

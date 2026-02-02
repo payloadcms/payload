@@ -10,7 +10,7 @@ import {
   useServerFunctions,
 } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
@@ -25,6 +25,13 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
   const { serverFunction } = useServerFunctions()
+
+  // Sync state when initialLayout prop changes (e.g., when query params change and server component re-renders)
+  useEffect(() => {
+    if (!isEditing) {
+      setCurrentLayout(initialLayout)
+    }
+  }, [initialLayout, isEditing])
 
   const saveLayout = useCallback(async () => {
     try {

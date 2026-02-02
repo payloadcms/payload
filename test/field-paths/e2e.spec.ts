@@ -64,9 +64,9 @@ test.describe('Field Paths', () => {
     })
 
     await navigateToDiffVersionView({
-      page,
-      docID,
       collectionSlug: fieldPathsSlug,
+      docID,
+      page,
       serverURL,
     })
 

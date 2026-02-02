@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import removeFiles from '../helpers/removeFiles.js'
@@ -17,6 +17,7 @@ let payload: Payload
 describe('@payloadcms/plugin-seo', () => {
   let page = null
   let mediaDoc = null
+  let mediaDoc2 = null
 
   beforeAll(async () => {
     const uploadsDir = path.resolve(dirname, './media')
@@ -38,16 +39,44 @@ describe('@payloadcms/plugin-seo', () => {
       data: {
         title: 'Test page',
         slug: 'test-page',
+        featuredMedia: mediaDoc.id,
         meta: {
           title: 'Test page',
         },
       },
       depth: 0,
     })
+
+    mediaDoc2 = await payload.create({
+      collection: mediaSlug,
+      data: {},
+      file,
+    })
   })
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  it('should return different previousValue and value in afterChange hooks when relationship changes', async () => {
+    // The existing page has mediaDoc as featuredMedia
+    // Update it to mediaDoc2 and we expect to see different previousValue and value in the hook
+    const context: { identicalCount?: number } = {}
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: {
+        // this field has an afterChange hook that will increment req.context.identicalCount
+        // when previousValue === value
+        featuredMedia: mediaDoc2.id,
+      },
+      depth: 0,
+      context,
+    })
+
+    // If identicalCount was incremented, it means previousValue === value incorrectly
+    // Since we updated the field, they should be different, so count should be undefined
+    expect(context.identicalCount).toBeUndefined()
   })
 
   it('should add meta title', async () => {

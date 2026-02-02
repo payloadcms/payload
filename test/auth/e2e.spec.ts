@@ -6,7 +6,7 @@ import { login } from 'helpers/e2e/auth/login.js'
 import { logout } from 'helpers/e2e/auth/logout.js'
 import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -315,7 +315,10 @@ describe('Auth', () => {
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)
 
+        // Wait for hydration
+        await wait(1000)
         await page.locator('.table .row-1 .cell-custom a').click()
+        await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
         await expect(textInput).toBeVisible()

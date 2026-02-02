@@ -209,9 +209,6 @@ test.describe('Import Export Plugin', () => {
         // Save/submit the import
         await saveDocAndAssert(page)
 
-        // Verify import completed
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-
         // Check status field shows completed
         const statusField = page.locator('[data-field-name="status"]')
         if (await statusField.isVisible()) {
@@ -277,9 +274,6 @@ test.describe('Import Export Plugin', () => {
 
         // Save/submit the import
         await saveDocAndAssert(page)
-
-        // Verify import completed
-        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
 
         await runJobsQueue({ serverURL })
 

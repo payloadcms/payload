@@ -1,4 +1,4 @@
-import type { ServerFunction, ServerFunctionHandler } from 'payload'
+import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
 import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
@@ -40,24 +40,22 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     serverFunctions: extraServerFunctions,
   } = args
 
-  const { req } = await initReq({
+  const { cookies, locale, permissions, req } = await initReq({
     configPromise,
     importMap,
     key: 'RootLayout',
   })
 
-  const augmentedArgs: Parameters<ServerFunction>[0] = {
+  const augmentedArgs: DefaultServerFunctionArgs = {
     ...fnArgs,
+    cookies,
     importMap,
+    locale,
+    permissions,
     req,
   }
 
-  const serverFunctions = {
-    ...baseServerFunctions,
-    ...(extraServerFunctions || {}),
-  }
-
-  const fn = serverFunctions[fnKey]
+  const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
 
   if (!fn) {
     throw new Error(`Unknown Server Function: ${fnKey}`)

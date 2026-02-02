@@ -2,7 +2,7 @@
 
 import type { TypeWithVersion } from 'payload'
 
-import { Pill, useConfig, useTranslation } from '@payloadcms/ui'
+import { Pill, useConfig, useLocale, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import React from 'react'
 
@@ -63,8 +63,10 @@ export const VersionPillLabel: React.FC<{
     },
   } = useConfig()
   const { i18n, t } = useTranslation()
+  const { code: currentLocale } = useLocale()
 
   const { label, pillStyle } = getVersionLabel({
+    currentLocale,
     currentlyPublishedVersion,
     latestDraftVersion,
     t,

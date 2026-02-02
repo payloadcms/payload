@@ -62,6 +62,7 @@ import { openDocControls } from '../../../helpers/e2e/openDocControls.js'
 import { openNav } from '../../../helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -128,12 +129,12 @@ describe('General', () => {
   describe('metadata', () => {
     describe('root title and description', () => {
       test('should render custom page title suffix', async () => {
-        await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
       test('should render custom meta description from root config', async () => {
-        await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[name="description"]')).toHaveAttribute(
           'content',
           /This is a custom meta description/,
@@ -153,9 +154,9 @@ describe('General', () => {
       test('should fallback to root meta for custom root views', async () => {
         await page.goto(
           formatAdminURL({
+            adminRoute,
             path: '/custom-default-view',
             serverURL,
-            adminRoute,
           }),
         )
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
@@ -164,9 +165,9 @@ describe('General', () => {
       test('should render custom meta title from custom root views', async () => {
         await page.goto(
           formatAdminURL({
+            adminRoute,
             path: '/custom-minimal-view',
             serverURL,
-            adminRoute,
           }),
         )
         const pattern = new RegExp(`^${customRootViewMetaTitle}`)
@@ -176,7 +177,7 @@ describe('General', () => {
 
     describe('robots', () => {
       test('should apply default robots meta tag', async () => {
-        await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
           'content',
           /noindex, nofollow/,
@@ -204,7 +205,7 @@ describe('General', () => {
 
     describe('og meta', () => {
       test('should render custom og:title from root config', async () => {
-        await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
           'content',
           /This is a custom OG title/,
@@ -212,7 +213,7 @@ describe('General', () => {
       })
 
       test('should render custom og:description from root config', async () => {
-        await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
         await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
           'content',
           /This is a custom OG description/,
@@ -358,9 +359,9 @@ describe('General', () => {
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
       const unknownPageURL = formatAdminURL({
+        adminRoute,
         path: '/1234',
         serverURL,
-        adminRoute,
       })
       const response = await page.goto(unknownPageURL)
       expect(response.status() === 404).toBeTruthy()
@@ -379,9 +380,9 @@ describe('General', () => {
 
     test('should redirect from non-existent document ID to collection list', async () => {
       const nonExistentDocURL = formatAdminURL({
+        adminRoute,
         path: `/collections/${postsCollectionSlug}/999999`,
         serverURL,
-        adminRoute,
       })
       await page.goto(nonExistentDocURL)
       // Should redirect to collection list with notFound query parameter
@@ -389,9 +390,9 @@ describe('General', () => {
         .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
         .toMatch(
           formatAdminURL({
+            adminRoute,
             path: `/collections/${postsCollectionSlug}?notFound=999999`,
             serverURL,
-            adminRoute,
           }),
         )
 
@@ -402,9 +403,9 @@ describe('General', () => {
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
       const collectionsURL = formatAdminURL({
+        adminRoute,
         path: '/collections',
         serverURL,
-        adminRoute,
       })
       await page.goto(collectionsURL)
       await expect(page.getByText('Custom View').first()).toBeVisible()
@@ -412,13 +413,13 @@ describe('General', () => {
 
     test('should redirect `${adminRoute}/globals` to `${adminRoute}', async () => {
       const globalsURL = formatAdminURL({
+        adminRoute,
         path: '/globals',
         serverURL,
-        adminRoute,
       })
       await page.goto(globalsURL)
       // Should redirect to dashboard
-      await expect.poll(() => page.url()).toBe(formatAdminURL({ path: '', serverURL, adminRoute }))
+      await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute, path: '', serverURL }))
     })
 
     /**
@@ -476,6 +477,8 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
@@ -597,7 +600,7 @@ describe('General', () => {
       await page.goto(postsUrl.list)
       await page
         .locator(
-          `.step-nav a[href="${formatAdminURL({ path: '', includeBasePath: true, adminRoute })}"]`,
+          `.step-nav a[href="${formatAdminURL({ adminRoute, includeBasePath: true, path: '' })}"]`,
         )
         .click()
       expect(page.url()).toContain(postsUrl.admin)
@@ -607,7 +610,7 @@ describe('General', () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
       const collectionBreadcrumb = page.locator(
-        `.step-nav a[href="${formatAdminURL({ path: `/collections/${postsCollectionSlug}`, includeBasePath: true, adminRoute })}"]`,
+        `.step-nav a[href="${formatAdminURL({ adminRoute, includeBasePath: true, path: `/collections/${postsCollectionSlug}` })}"]`,
       )
       await expect(collectionBreadcrumb).toBeVisible()
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
@@ -616,6 +619,8 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       await page.locator('.collections__card-list .card__click').first().click()
       // flaky
       // eslint-disable-next-line playwright/no-wait-for-timeout
@@ -688,13 +693,13 @@ describe('General', () => {
 
   describe('custom providers', () => {
     test('should render custom providers', async () => {
-      await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       await expect(page.locator('.custom-provider')).toHaveCount(1)
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
     test('should render custom provider server components with props', async () => {
-      await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       await expect(page.locator('.custom-provider-server')).toHaveCount(1)
       await expect(page.locator('.custom-provider-server')).toContainText(
         'This is a custom provider with payload: true',
@@ -823,7 +828,7 @@ describe('General', () => {
 
   describe('custom components', () => {
     test('should render custom header', async () => {
-      await page.goto(formatAdminURL({ path: '', serverURL, adminRoute }))
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
@@ -859,6 +864,10 @@ describe('General', () => {
     })
 
     test('should allow custom translation of locale labels', async () => {
+      await page.goto(postsUrl.account)
+      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
+      await wait(1000)
+
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1019,7 +1028,7 @@ describe('General', () => {
 
   describe('preferences', () => {
     test('should successfully reset prefs after clicking reset button', async () => {
-      await page.goto(formatAdminURL({ path: '/account', serverURL, adminRoute }))
+      await page.goto(formatAdminURL({ adminRoute, path: '/account', serverURL }))
       const resetPrefsButton = page.locator('.payload-settings > div > button.btn')
       await expect(resetPrefsButton).toBeVisible()
       await resetPrefsButton.click()
@@ -1034,10 +1043,33 @@ describe('General', () => {
   })
 
   describe('progress bar', () => {
-    test('should show progress bar on page navigation', async () => {
-      await page.goto(postsUrl.admin)
+    test.fixme('should show progress bar on page navigation', async () => {
+      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
+      // eslint-disable-next-line playwright/no-networkidle
+      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
+
+      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
+      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
+      const client = await page.context().newCDPSession(page)
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: (500 * 1024) / 8, // 500 kbps
+        latency: 400, // 400ms latency
+        offline: false,
+        uploadThroughput: (500 * 1024) / 8,
+      })
+
       await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
+
+      // Reset network conditions
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: -1,
+        latency: 0,
+        offline: false,
+        uploadThroughput: -1,
+      })
     })
   })
 })

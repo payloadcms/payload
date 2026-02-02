@@ -79,7 +79,7 @@ export interface Config {
     'fully-restricted': FullyRestricted;
     'read-only-collection': ReadOnlyCollection;
     'user-restricted-collection': UserRestrictedCollection;
-    'create-not-update-collection': CreateNotUpdateCollection;
+    'can-create-not-update-collection': CanCreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
     'restricted-versions-admin-panel': RestrictedVersionsAdminPanel;
     'sibling-data': SiblingDatum;
@@ -116,7 +116,7 @@ export interface Config {
     'fully-restricted': FullyRestrictedSelect<false> | FullyRestrictedSelect<true>;
     'read-only-collection': ReadOnlyCollectionSelect<false> | ReadOnlyCollectionSelect<true>;
     'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
-    'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
+    'can-create-not-update-collection': CanCreateNotUpdateCollectionSelect<false> | CanCreateNotUpdateCollectionSelect<true>;
     'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
     'restricted-versions-admin-panel': RestrictedVersionsAdminPanelSelect<false> | RestrictedVersionsAdminPanelSelect<true>;
     'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
@@ -162,16 +162,7 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      })
-    | (AuthCollection & {
-        collection: 'auth-collection';
-      });
+  user: User | PublicUser | AuthCollection;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -265,6 +256,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -289,6 +281,7 @@ export interface PublicUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -317,7 +310,7 @@ export interface Unrestricted {
     description?: string | null;
   };
   userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
-  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
+  createNotUpdateDocs?: (string | CanCreateNotUpdateCollection)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -333,9 +326,9 @@ export interface UserRestrictedCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "create-not-update-collection".
+ * via the `definition` "can-create-not-update-collection".
  */
-export interface CreateNotUpdateCollection {
+export interface CanCreateNotUpdateCollection {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -833,6 +826,7 @@ export interface AuthCollection {
         expiresAt: string;
       }[]
     | null;
+  collection: 'auth-collection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1003,8 +997,8 @@ export interface PayloadLockedDocument {
         value: string | UserRestrictedCollection;
       } | null)
     | ({
-        relationTo: 'create-not-update-collection';
-        value: string | CreateNotUpdateCollection;
+        relationTo: 'can-create-not-update-collection';
+        value: string | CanCreateNotUpdateCollection;
       } | null)
     | ({
         relationTo: 'restricted-versions';
@@ -1267,9 +1261,9 @@ export interface UserRestrictedCollectionSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "create-not-update-collection_select".
+ * via the `definition` "can-create-not-update-collection_select".
  */
-export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
+export interface CanCreateNotUpdateCollectionSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1874,6 +1868,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
