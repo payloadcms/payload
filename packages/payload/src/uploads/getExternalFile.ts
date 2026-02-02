@@ -42,21 +42,18 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     const maxRedirects = 3
 
     while (redirectCount <= maxRedirects) {
-      // Check if URL is allowed because of skipSafeFetch allowList
       const skipSafeFetch: boolean =
         uploadConfig.skipSafeFetch === true
           ? uploadConfig.skipSafeFetch
           : Array.isArray(uploadConfig.skipSafeFetch) &&
             isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
 
-      // Check if URL is allowed because of pasteURL allowList
       const isAllowedPasteUrl: boolean | undefined =
         uploadConfig.pasteURL &&
         uploadConfig.pasteURL.allowList &&
         isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
 
       if (skipSafeFetch || isAllowedPasteUrl) {
-        // Allowed
         res = await fetch(fileURL, {
           credentials: 'include',
           headers,
@@ -72,7 +69,6 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
         })
       }
 
-      // Throw redirects errors
       if (res.status >= 300 && res.status < 400) {
         redirectCount++
         if (redirectCount > maxRedirects) {
