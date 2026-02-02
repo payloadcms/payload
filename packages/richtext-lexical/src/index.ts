@@ -967,7 +967,8 @@ export {
   RelationshipServerNode,
 } from './features/relationship/server/nodes/RelationshipNode.js'
 export { defaultColors } from './features/textState/defaultColors.js'
-export { TextStateFeature } from './features/textState/feature.server.js'
+export { TextStateFeature, TextStateFeature as TextColorFeature } from './features/textState/feature.server.js'
+export type { TextStateFeatureProps } from './features/textState/feature.server.js'
 
 export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'
 
