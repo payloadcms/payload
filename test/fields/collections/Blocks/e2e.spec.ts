@@ -20,13 +20,13 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../../../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
-import { assertToastErrors } from '../../../helpers/shared/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/shared/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/shared/clearAndSeed/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/shared/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

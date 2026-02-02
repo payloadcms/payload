@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { lexicalHeadingFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'

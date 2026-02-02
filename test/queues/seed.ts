@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/shared/clearAndSeed/seed.js'
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({

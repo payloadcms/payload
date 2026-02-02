@@ -16,7 +16,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,

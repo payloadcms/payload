@@ -6,9 +6,9 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   clearTestBucket,
   createTestBucket,

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../../../helpers/shared/adminUrlUtil.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from 'helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/shared'

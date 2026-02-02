@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/shared/executePromises.js'
-import { seedDB } from '../helpers/shared/clearAndSeed/seed.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { categoriesSlug } from './collections/Categories/index.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'

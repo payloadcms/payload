@@ -11,23 +11,23 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../helpers/shared/adminUrlUtil.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
   getSelectInputOptions,
   getSelectInputValue,
   openSelectMenu,
-} from '../helpers/e2e/selectInput.js'
-import { applyBrowseByFolderTypeFilter } from '../helpers/e2e/folders/applyBrowseByFolderTypeFilter.js'
-import { clickFolderCard } from '../helpers/e2e/folders/clickFolderCard.js'
-import { createFolder } from '../helpers/e2e/folders/createFolder.js'
-import { createFolderDoc } from '../helpers/e2e/folders/createFolderDoc.js'
-import { createFolderFromDoc } from '../helpers/e2e/folders/createFolderFromDoc.js'
-import { expectNoResultsAndCreateFolderButton } from '../helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
-import { selectFolderAndConfirmMove } from '../helpers/e2e/folders/selectFolderAndConfirmMove.js'
-import { selectFolderAndConfirmMoveFromList } from '../helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
-import { initPayloadE2ENoConfig } from '../helpers/shared/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/shared/clearAndSeed/reInitializeDB.js'
+} from '../__helpers/e2e/selectInput.js'
+import { applyBrowseByFolderTypeFilter } from '../__helpers/e2e/folders/applyBrowseByFolderTypeFilter.js'
+import { clickFolderCard } from '../__helpers/e2e/folders/clickFolderCard.js'
+import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
+import { createFolderDoc } from '../__helpers/e2e/folders/createFolderDoc.js'
+import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDoc.js'
+import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
+import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
+import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 

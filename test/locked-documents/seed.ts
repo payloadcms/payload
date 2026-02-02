@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { devUser, regularUser } from '../credentials.js'
-import { executePromises } from '../helpers/shared/executePromises.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 
 export const seed = async (_payload: Payload) => {
