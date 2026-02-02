@@ -41,9 +41,10 @@ describe('Lexical Link Feature', () => {
 
   test('can add new custom fields in link feature modal', async ({ page }) => {
     const lexical = new LexicalHelpers(page)
+    const firstEditor = lexical.editor.first()
 
-    await lexical.editor.fill('link')
-    await lexical.editor.selectText()
+    await firstEditor.fill('link')
+    await firstEditor.selectText()
 
     const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
     const linkButton = page.locator(linkButtonClass).first()
@@ -57,9 +58,10 @@ describe('Lexical Link Feature', () => {
 
   test('can set default value of newTab checkbox to checked', async ({ page }) => {
     const lexical = new LexicalHelpers(page)
+    const firstEditor = lexical.editor.first()
 
-    await lexical.editor.fill('link')
-    await lexical.editor.selectText()
+    await firstEditor.fill('link')
+    await firstEditor.selectText()
 
     const linkButtonClass = `.rich-text-lexical__wrap .fixed-toolbar .toolbar-popup__button-link`
     const linkButton = page.locator(linkButtonClass).first()
