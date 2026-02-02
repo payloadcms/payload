@@ -12,6 +12,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
+import { PREFERENCE_KEYS } from 'payload'
 import React from 'react'
 
 export type BuildFolderViewArgs = {
@@ -111,7 +112,7 @@ export const buildBrowseByFolderView = async (
     sort?: FolderSortKeys
     viewPreference?: 'grid' | 'list'
   }>({
-    key: 'browse-by-folder',
+    key: PREFERENCE_KEYS.BROWSE_BY_FOLDER,
     req: initPageResult.req,
     value: {
       sort: query?.sort as FolderSortKeys,
