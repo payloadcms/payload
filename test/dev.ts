@@ -105,7 +105,7 @@ const availablePort = await findOpenPort(port)
 // @ts-expect-error - PORT is a string from somewhere
 process.env.PORT = availablePort
 
-// @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
+// @ts-expect-error the same as in test/__helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
   hostname: 'localhost',

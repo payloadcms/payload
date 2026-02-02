@@ -2,7 +2,7 @@
  * Test script to verify MongoDB connection, replica set, and transaction functionality
  *
  * Usage:
- *   pnpm tsx test/helpers/shared/db/mongodb/run-test-connection.ts
+ *   pnpm tsx test/__helpers/shared/db/mongodb/run-test-connection.ts
  */
 
 import { testConnection } from './test-connection.js'
