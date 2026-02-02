@@ -64,7 +64,7 @@ export function CartModal() {
                   const product = item.product
                   const variant = item.variant
 
-                  if (typeof product !== 'object' || !item || !product || !product.slug)
+                  if (typeof product !== 'object' || !item || !product)
                     return <React.Fragment key={i} />
 
                   const metaImage =
@@ -113,7 +113,7 @@ export function CartModal() {
                         </div>
                         <Link
                           className="z-30 flex flex-row space-x-4"
-                          href={`/products/${(item.product as Product)?.slug}`}
+                          href={product?.slug ? `/products/${product.slug}` : '#'}
                         >
                           <div className="relative h-16 w-16 cursor-pointer overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
                             {image?.url && (
