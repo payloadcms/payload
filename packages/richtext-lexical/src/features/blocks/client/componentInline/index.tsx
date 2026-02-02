@@ -213,7 +213,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: formData,
         initialBlockFormState: formData,
@@ -226,7 +228,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         const newFormStateData: InlineBlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state),
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
           true,
         ) as InlineBlockFields
 
@@ -292,7 +294,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,

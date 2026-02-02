@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
@@ -29,6 +29,7 @@ export const updateResourceTool = (
     overwriteExistingFiles: boolean = false,
     locale?: string,
     fallbackLocale?: string,
+    select?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -107,6 +108,25 @@ export const updateResourceTool = (
         }
       }
 
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // Update by ID or where clause
       if (id) {
         // Single document update
@@ -124,6 +144,7 @@ export const updateResourceTool = (
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
+          ...(selectClause && { select: selectClause }),
         }
 
         if (verboseLogs) {
@@ -174,6 +195,7 @@ ${JSON.stringify(result, null, 2)}
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
+          ...(selectClause && { select: selectClause }),
         }
 
         if (verboseLogs) {
@@ -296,6 +318,12 @@ ${JSON.stringify(errors, null, 2)}
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+        ),
       where: z
         .string()
         .optional()
@@ -316,6 +344,7 @@ ${JSON.stringify(errors, null, 2)}
           locale,
           overrideLock,
           overwriteExistingFiles,
+          select,
           where,
           ...fieldData
         } = params
@@ -332,6 +361,7 @@ ${JSON.stringify(errors, null, 2)}
           overwriteExistingFiles as boolean,
           locale as string | undefined,
           fallbackLocale as string | undefined,
+          select as string | undefined,
         )
       },
     )

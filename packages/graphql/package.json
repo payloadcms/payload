@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/graphql",
-  "version": "3.68.5",
+  "version": "3.74.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -56,7 +56,7 @@
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.20.6"
+    "tsx": "4.21.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

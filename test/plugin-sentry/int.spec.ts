@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'

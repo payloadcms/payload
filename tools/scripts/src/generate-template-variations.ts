@@ -81,7 +81,7 @@ async function main() {
       db: 'vercel-postgres',
       dirname: 'with-vercel-postgres',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: false,
@@ -106,7 +106,7 @@ async function main() {
       db: 'vercel-postgres',
       dirname: 'with-vercel-website',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: true,
@@ -139,7 +139,7 @@ async function main() {
       db: 'mongodb',
       dirname: 'with-vercel-mongodb',
       envNames: {
-        dbUri: 'MONGODB_URI',
+        dbUri: 'MONGODB_URL',
       },
       sharp: false,
       storage: 'vercelBlobStorage',
@@ -292,7 +292,7 @@ async function main() {
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
-      // Replace DATABASE_URI with the correct env name if set
+      // Replace DATABASE_URL with the correct env name if set
       await writeEnvExample({
         dbType: db,
         destDir,
@@ -361,7 +361,7 @@ async function main() {
         env: {
           ...process.env,
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
+          DATABASE_URL: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
       })
@@ -506,25 +506,25 @@ async function writeEnvExample({
       if (
         dbType === 'vercel-postgres' &&
         (l.startsWith('# Or use a PG connection string') ||
-          l.startsWith('#DATABASE_URI=postgresql://'))
+          l.startsWith('#DATABASE_URL=postgresql://'))
       ) {
         return false // Skip this line
       }
       return true // Keep other lines
     })
     .map((l) => {
-      if (l.startsWith('DATABASE_URI')) {
+      if (l.startsWith('DATABASE_URL')) {
         if (dbType === 'mongodb') {
-          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+          l = 'MONGODB_URL=mongodb://127.0.0.1/your-database-name'
         }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
+          l = 'DATABASE_URL=postgresql://127.0.0.1:5432/your-database-name'
         }
 
-        // Replace DATABASE_URI with the correct env name if set
+        // Replace DATABASE_URL with the correct env name if set
         if (envNames?.dbUri) {
-          l = l.replace('DATABASE_URI', envNames.dbUri)
+          l = l.replace('DATABASE_URL', envNames.dbUri)
         }
       }
       return l

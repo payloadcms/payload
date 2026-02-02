@@ -7,12 +7,15 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
 } from './shared.js'
+
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
   admin: {
@@ -79,6 +82,17 @@ export default buildConfigWithDefaults({
           options: ['admin', 'editor', 'moderator', 'user', 'viewer'],
           required: true,
           saveToJWT: true,
+        },
+        {
+          name: 'loginMetadata',
+          type: 'array',
+          label: 'Login Metadata',
+          fields: [
+            {
+              name: 'info',
+              type: 'text',
+            },
+          ],
         },
         {
           name: 'namedSaveToJWT',

@@ -43,7 +43,6 @@ export function ResetPassword({ initPageResult, params }: AdminViewServerProps) 
                     href={formatAdminURL({
                       adminRoute,
                       path: accountRoute,
-                      serverURL: config.serverURL,
                     })}
                     prefetch={false}
                   >
@@ -72,7 +71,6 @@ export function ResetPassword({ initPageResult, params }: AdminViewServerProps) 
         href={formatAdminURL({
           adminRoute,
           path: loginRoute,
-          serverURL: config.serverURL,
         })}
         prefetch={false}
       >

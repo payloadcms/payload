@@ -41,6 +41,11 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
+  // Resolve user's current locale for version label comparison (not 'all')
+  const userLocale =
+    (searchParams.locale as string) ||
+    (req.locale !== 'all' ? req.locale : localization && localization.defaultLocale)
+
   const localeCodesFromParams = searchParams.localeCodes
     ? JSON.parse(searchParams.localeCodes as string)
     : null
@@ -121,7 +126,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
-          locale: 'all',
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
@@ -393,6 +398,7 @@ export async function VersionView(props: DocumentViewServerProps) {
           const label =
             optionWithSameID.labelOverride ||
             getVersionLabel({
+              currentLocale: userLocale,
               currentlyPublishedVersion,
               latestDraftVersion,
               t: i18n.t,

@@ -866,7 +866,19 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 export { AlignFeature } from './features/align/server/index.js'
 export { BlockquoteFeature } from './features/blockquote/server/index.js'
 export { CodeBlock } from './features/blocks/premade/CodeBlock/index.js'
-export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
+export { BlocksFeature } from './features/blocks/server/index.js'
+export type {
+  BlocksFeatureProps,
+  LexicalBlockClientProps,
+  LexicalBlockLabelClientProps,
+  LexicalBlockLabelServerProps,
+  LexicalBlockServerProps,
+  LexicalInlineBlockClientProps,
+  LexicalInlineBlockLabelClientProps,
+  LexicalInlineBlockLabelServerProps,
+  LexicalInlineBlockServerProps,
+} from './features/blocks/server/index.js'
+
 export {
   $createServerBlockNode,
   $isServerBlockNode,

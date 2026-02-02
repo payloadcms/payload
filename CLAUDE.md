@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) and Cursor when working with code in this repository.
 
 ## Project Structure
 
@@ -66,13 +66,16 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+- Logger Usage (`payload.logger.error`)
+  - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
+  - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
+  - Use `err` not `error`, use `msg` not `message` in object form
 
 ### Running Dev Server
 
 - `pnpm run dev` - Start dev server with default config (`test/_community/config.ts`)
 - `pnpm run dev <directory_name>` - Start dev server with specific test config (e.g. `pnpm run dev fields` loads `test/fields/config.ts`)
 - `pnpm run dev:postgres` - Run dev server with Postgres
-- `pnpm run dev:memorydb` - Run dev server with in-memory MongoDB
 
 ### Development Environment
 
@@ -81,7 +84,87 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
 - Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
 
+### Playwright MCP
+
+You should have access to the Playwright MCP server. This MCP server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+
+**Prerequisites:**
+
+- The dev server MUST be running (`pnpm run dev`) before using the MCP
+- First call `browser_install` to set up the browser if needed
+
+**Key tools (not exhaustive):**
+
+- `browser_navigate` - Navigate to a URL
+- `browser_snapshot` - Get accessibility snapshot of current page
+- `browser_click` - Click elements (requires `ref` from snapshot)
+- `browser_fill_form` - Fill form fields
+- `browser_take_screenshot` - Capture screenshot (use `fullPage: true` for full page)
+
+**Screenshots for visual verification:**
+
+Use `browser_take_screenshot` to visually verify UI state. Useful for:
+
+- Confirming layout and styling look correct
+- Checking component rendering (tags, forms, tables)
+- Debugging UI issues that aren't visible in accessibility snapshots
+
+```
+browser_take_screenshot()                    # Viewport only
+browser_take_screenshot({ fullPage: true })  # Full scrollable page
+```
+
+Screenshots are saved to `.playwright-mcp/` and displayed inline.
+
+**Usage flow:**
+
+1. Ensure dev server is running on `localhost:3000`
+2. Call `browser_navigate` to open a page
+3. Call `browser_snapshot` to get element refs
+4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
+
 ## Testing
+
+### Writing Tests - Required Practices
+
+**Tests MUST be self-contained and clean up after themselves:**
+
+- If you create a database record in a test, you MUST delete it before the test completes
+- For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
+- Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+
+**Example pattern:**
+
+```typescript
+describe('My Feature', () => {
+  const createdIDs: number[] = []
+
+  afterEach(async () => {
+    for (const id of createdIDs) {
+      await payload.delete({ collection: 'my-collection', id })
+    }
+    createdIDs.length = 0
+  })
+
+  it('should create a record', async () => {
+    const id = 123
+    createdIDs.push(id)
+
+    await payload.create({ collection: 'my-collection', data: { id, title: 'Test' } })
+    // assertions...
+  })
+})
+```
+
+**Additional test guidelines:**
+
+- Use descriptive test names starting with "should" (e.g., "should create document with custom ID")
+- Add blank lines after variable declarations to improve readability
+- Collection and global slugs should be kept in a shared file and re-used i.e. on relationship fields `relationTo: collectionSlug`
+- One test should verify one behavior - keep tests focused
+- When adding a new collection for testing, add it to both `collections/` directory and the config file import statements
+
+### How to run tests
 
 - `pnpm run test` - Run all tests (integration + components + e2e)
 - `pnpm run test:int` - Integration tests (MongoDB, recommended)
@@ -97,7 +180,7 @@ Each test directory in `test/` follows this pattern:
 ```
 test/<feature-name>/
 ├── config.ts        # Lightweight Payload config for testing
-├── int.spec.ts      # Integration tests (Jest)
+├── int.spec.ts      # Integration tests (Vitest)
 ├── e2e.spec.ts      # End-to-end tests (Playwright)
 └── payload-types.ts # Generated types
 ```
@@ -148,4 +231,4 @@ Examples:
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
-- pnpm version: ^9.7.0
+- pnpm version: ^10.27.0

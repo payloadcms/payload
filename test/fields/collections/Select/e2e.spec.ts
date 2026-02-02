@@ -1,8 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,8 +11,11 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { checkFocusIndicators } from '../../../helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from '../../../helpers/e2e/runAxeScan.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -67,6 +68,7 @@ describe('Select', () => {
 
   test('should use i18n option labels', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
 
     const field = page.locator('#field-selectI18n')
     await field.click({ delay: 100 })
@@ -100,6 +102,8 @@ describe('Select', () => {
 
   test('should reduce options', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
+
     const field = page.locator('#field-selectWithFilteredOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
@@ -115,6 +119,7 @@ describe('Select', () => {
 
   test('should retain search when reducing options', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
     const field = page.locator('#field-selectWithFilteredOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')

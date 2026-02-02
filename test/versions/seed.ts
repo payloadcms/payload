@@ -58,18 +58,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile2,
   })
 
+  const { id: devUserID } = await _payload.create({
+    collection: 'users',
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
   await executePromises(
     [
-      () =>
-        _payload.create({
-          collection: 'users',
-          data: {
-            email: devUser.email,
-            password: devUser.password,
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
       () =>
         _payload.create({
           collection: draftCollectionSlug,
@@ -459,6 +459,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
 
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],
+      zeroDepthRelationship: devUserID,
     },
     depth: 0,
   })

@@ -213,6 +213,22 @@ export class NextRESTClient {
     return result
   }
 
+  async OPTIONS(
+    path: ValidPath,
+    options: Omit<RequestInit, 'body'> & RequestOptions = {},
+  ): Promise<Response> {
+    const { slug, params, url } = this.generateRequestParts(path)
+    const { query, ...rest } = options || {}
+    const queryParams = generateQueryString(query, params)
+
+    const request = new Request(`${url}${queryParams}`, {
+      ...rest,
+      headers: this.buildHeaders(options),
+      method: 'OPTIONS',
+    })
+    return this._GET(request, { params: Promise.resolve({ slug }) })
+  }
+
   async PATCH(path: ValidPath, options: FileArg & RequestInit & RequestOptions): Promise<Response> {
     const { slug, params, url } = this.generateRequestParts(path)
     const { query, ...rest } = options

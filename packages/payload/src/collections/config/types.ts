@@ -2,7 +2,15 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomUpload, ViewTypes } from '../../admin/types.js'
+import type {
+  CustomStatus,
+  CustomUpload,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  ViewTypes,
+} from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -38,6 +46,7 @@ import type {
   CollectionAdminCustom,
   CollectionCustom,
   CollectionSlug,
+  GeneratedTypes,
   JsonObject,
   RequestContext,
   TypedAuthOperations,
@@ -68,28 +77,78 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
+/**
+ * Collection slugs that do not have drafts enabled.
+ * Detects collections without drafts by checking for the absence of the `_status` field.
+ */
+export type CollectionsWithoutDrafts = {
+  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[CollectionSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on collection configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ */
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends CollectionsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
+  'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
   RequiredDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 /**
- * Helper type for draft data - makes all fields optional except auto-generated ones
+ * Helper type for draft data INPUT (e.g., create operations) - makes all fields optional except system fields
  * When creating a draft, required fields don't need to be provided as validation is skipped
+ * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  MarkOptional<TData, 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'>
->
+  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
 >
+
+/**
+ * Helper type for draft data OUTPUT (e.g., query results) - makes user fields optional but keeps id required
+ * When querying drafts, required fields may be null/undefined as validation is skipped, but system fields like id are always present
+ */
+export type QueryDraftDataFromCollection<TData extends JsonObject> = Partial<
+  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+> &
+  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'sizes' | 'updatedAt'>> &
+  Pick<TData, 'id'>
+
+export type QueryDraftDataFromCollectionSlug<TSlug extends CollectionSlug> =
+  QueryDraftDataFromCollection<DataFromCollectionSlug<TSlug>>
 
 export type HookOperationType =
   | 'autosave'
@@ -162,6 +221,10 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
 }) => any
@@ -171,6 +234,10 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -181,6 +248,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -343,7 +414,7 @@ export type CollectionAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomComponent
+      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -355,6 +426,15 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomComponent
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
@@ -501,6 +581,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Use `true` to enable with default options
    */
   auth?: boolean | IncomingAuthType
+  /**
+   * Configuration for bulk operations
+   */
   /** Extension point to add your custom data. Server only. */
   custom?: CollectionCustom
   /**
@@ -618,7 +701,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   * Under the hood, a field with {@link https://payloadcms.com/docs/configuration/collections#fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
    *

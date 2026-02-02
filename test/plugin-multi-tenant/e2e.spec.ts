@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { BasePayload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -14,6 +13,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForFormReady,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { loginClientSide } from '../helpers/e2e/auth/login.js'
@@ -30,7 +30,6 @@ import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { seed } from './seed/index.js'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -48,6 +47,7 @@ test.describe('Multi Tenant', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
@@ -62,15 +62,16 @@ test.describe('Multi Tenant', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'multiTenant',
     })
-    if (seed) {
-      await seed(payload as unknown as BasePayload)
-      await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
-    }
+    await page.goto(usersURL.admin)
   })
 
   test.describe('Filters', () => {
@@ -407,14 +408,56 @@ test.describe('Multi Tenant', () => {
       await page.keyboard.up('Shift')
       await page.locator('.toolbar-popup__button-link').click()
       await expect(page.locator('.lexical-link-edit-drawer')).toBeVisible()
+      await wait(1000)
       const linkRadio = page.locator('.radio-input__styled-radio').last()
       await expect(linkRadio).toBeVisible()
       await linkRadio.click({
         delay: 100,
       })
+      await wait(300)
+
       await page.locator('.drawer__content').locator('.rs__input').click()
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
+    })
+
+    test('should filter relationship fields in Lexical BlocksFeature', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+      await page.goto(menuItemsURL.create)
+      await selectDocumentTenant({
+        page,
+        payload,
+        tenant: 'Blue Dog',
+      })
+
+      // Fill in the required name field
+      await page.fill('#field-name', 'Test Menu Item')
+
+      // Find the bug-repro richtext field and insert a block
+      const rte = page.locator('.rich-text-lexical [data-lexical-editor="true"]')
+      await rte.click()
+      await rte.focus()
+
+      // Open slash menu and insert block
+      await page.keyboard.type('/')
+      await expect(page.locator('.slash-menu-popup')).toBeVisible()
+      await page.getByText('Block With Relationship').click()
+
+      // Wait for block to be inserted
+      await expect(page.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+      // Open the relationship field in the block
+      await page.locator('.LexicalEditorTheme__block .rs__input').click()
+
+      // Should only show Blue Dog Menu, not Steel Cat Menu or others
+      await expect(page.getByText('Blue Dog Menu')).toBeVisible()
+      await expect(page.getByText('Steel Cat Menu')).toBeHidden()
+      await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
+      await expect(page.locator('.rs__menu')).toHaveCount(1)
     })
   })
 
@@ -746,15 +789,19 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(tenantsURL.create)
-      await wait(300)
-      await expect(page.locator('#field-name')).toBeVisible()
-      await expect(page.locator('#field-domain')).toBeVisible()
+      await waitForFormReady(page)
+      await wait(500)
 
       await page.locator('#field-name').fill('House Rules')
+      await wait(500)
+
       await page.locator('#field-domain').fill('house-rules.com')
+      await wait(500)
+
       await saveDocAndAssert(page)
 
       await page.goto(tenantsURL.list)
+      await wait(500)
 
       // Check the tenant selector
       await expect
@@ -762,6 +809,80 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'Public Tenant', 'House Rules'].sort())
+    })
+
+    test('should allow clearing tenant filter from dashboard view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
+      })
+
+      // Navigate to dashboard view
+      await page.goto(`${serverURL}/admin`)
+
+      // Clear the tenant filter from the dashboard
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
+
+    test('should allow clearing tenant filter from list view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: menuItemsURL,
+      })
+
+      // Verify tenant is set
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBe('Steel Cat')
+
+      // Clear the tenant filter from the list view
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
     })
   })
 })

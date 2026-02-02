@@ -96,9 +96,9 @@ describe('Radio', () => {
       await page.locator('#field-radio').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       // On this page there's a known custom label without a clear name, expect 1 violation
@@ -111,8 +111,8 @@ describe('Radio', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

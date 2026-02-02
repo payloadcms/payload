@@ -186,7 +186,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: formData,
         operation: 'update',
@@ -205,7 +207,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         }
 
         const newFormStateData: BlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state),
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
           true,
         ) as BlockFields
 
@@ -289,7 +291,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
@@ -310,7 +314,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       const newFormStateData: BlockFields = reduceFieldsToValues(
         removeEmptyArrayValues({
-          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
         }),
         true,
       ) as BlockFields

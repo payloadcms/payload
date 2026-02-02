@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
@@ -31,7 +32,7 @@ test.describe('Admin Bar', () => {
   })
 
   test('should render admin bar', async () => {
-    await page.goto(`${serverURL}/admin-bar`)
+    await page.goto(formatAdminURL({ adminRoute: '/admin-bar', path: '', serverURL }))
     await expect(page.locator('#payload-admin-bar')).toBeVisible()
   })
 })

@@ -132,6 +132,7 @@ export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
+export { UnpublishButton } from '../../elements/UnpublishButton/index.js'
 
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
@@ -184,6 +185,7 @@ export {
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
 export { SectionTitle } from '../../fields/Blocks/SectionTitle/index.js'
+export { ItemsDrawer } from '../../elements/ItemsDrawer/index.js'
 
 // fields
 export { HiddenField } from '../../fields/Hidden/index.js'

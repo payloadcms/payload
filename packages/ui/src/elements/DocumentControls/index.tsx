@@ -38,6 +38,7 @@ import { SaveButton } from '../SaveButton/index.js'
 import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
+import { UnpublishButton } from '../UnpublishButton/index.js'
 
 const baseClass = 'doc-controls'
 
@@ -49,6 +50,8 @@ export const DocumentControls: React.FC<{
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
+    readonly Status?: React.ReactNode
+    readonly UnpublishButton?: React.ReactNode
   }
   readonly data?: Data
   readonly disableActions?: boolean
@@ -85,6 +88,8 @@ export const DocumentControls: React.FC<{
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,
       SaveDraftButton: CustomSaveDraftButton,
+      Status: CustomStatus,
+      UnpublishButton: CustomUnpublishButton,
     } = {},
     data,
     disableActions,
@@ -210,7 +215,7 @@ export const DocumentControls: React.FC<{
                       .filter(Boolean)
                       .join(' ')}
                   >
-                    <Status />
+                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                   </li>
                 )}
                 {hasSavePermission &&
@@ -272,11 +277,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
+                        <RenderCustomComponent
+                          CustomComponent={CustomSaveDraftButton}
+                          Fallback={<SaveDraftButton />}
+                        />
+                      )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -352,7 +357,6 @@ export const DocumentControls: React.FC<{
                             href={formatAdminURL({
                               adminRoute,
                               path: `/collections/${collectionConfig?.slug}/create`,
-                              serverURL,
                             })}
                             id="action-create"
                           >
@@ -395,6 +399,10 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                <RenderCustomComponent
+                  CustomComponent={CustomUnpublishButton}
+                  Fallback={<UnpublishButton />}
+                />
                 {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
