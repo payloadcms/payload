@@ -12,7 +12,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 export type BuildFolderViewArgs = {

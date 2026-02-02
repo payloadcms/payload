@@ -1,7 +1,7 @@
 'use client'
 import type { NavPreferences } from 'payload'
 
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'

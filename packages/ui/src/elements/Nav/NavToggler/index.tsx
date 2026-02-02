@@ -1,6 +1,6 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 import { usePreferences } from '../../../providers/Preferences/index.js'

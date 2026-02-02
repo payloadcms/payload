@@ -153,5 +153,6 @@ export { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 export { wait } from '../utilities/wait.js'
 export { wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'
+export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export { deepMergeSimple } from '@payloadcms/translations/utilities'
