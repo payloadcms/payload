@@ -46,7 +46,7 @@ This project includes configuration files for AI-assisted development.
 | ----------------- | ------- | ------ | ----- | --- |
 | Claude Code       | ✅      | ✅     | ✅    | ✅  |
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
-| VS Code + Copilot | ❌      | ✅     | ❌    | ✅  |
+| VS Code + Copilot | ⚠      | ✅     | ❌    | ✅  |
 
 We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
 
