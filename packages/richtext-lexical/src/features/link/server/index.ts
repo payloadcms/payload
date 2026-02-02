@@ -33,16 +33,16 @@ const filterFieldByName = (fields: Field[], name: string): Field[] => {
     .filter((field) => !('name' in field) || field.name !== name)
     .map((field) => {
       if (field.type === 'row' || field.type === 'collapsible') {
-        return { ...field, fields: filterFieldByName(field.fields, name) }
+        return { ...field, fields: filterFieldByName(field.fields, name) } as typeof field
       }
       if (field.type === 'tabs') {
         return {
           ...field,
-          tabs: field.tabs.map((tab: { fields: Field[] }) => ({
+          tabs: field.tabs.map((tab) => ({
             ...tab,
             fields: filterFieldByName(tab.fields, name),
           })),
-        }
+        } as typeof field
       }
       return field
     })
@@ -136,13 +136,10 @@ export const LinkFeature = createServerFeature<
 
     // Use flattenTopLevelFields to find linkType and url fields, which may be nested inside layout fields (row, collapsible, etc.)
     const flattenedFields = flattenTopLevelFields(sanitizedFields)
-    const linkTypeField =
-      flattenedFields.find(
-        (field): field is Field => 'name' in field && field.name === 'linkType',
-      ) ?? null
-    const linkURLField =
-      flattenedFields.find((field): field is Field => 'name' in field && field.name === 'url') ??
-      null
+    const linkTypeField = flattenedFields.find(
+      (field) => 'name' in field && field.name === 'linkType',
+    )
+    const linkURLField = flattenedFields.find((field) => 'name' in field && field.name === 'url')
 
     const defaultLinkType = linkTypeField
       ? 'defaultValue' in linkTypeField && typeof linkTypeField.defaultValue === 'string'
