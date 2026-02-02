@@ -110,6 +110,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Unit Tests
@@ -134,6 +135,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Types Tests
@@ -202,6 +204,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Start LocalStack
@@ -269,6 +272,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Prepare prod test environment
@@ -307,6 +311,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Restore prepared test environment
@@ -497,6 +502,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Start LocalStack
@@ -597,12 +603,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -695,6 +702,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - name: Generate Payload Types
@@ -756,6 +764,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
+          fail-on-cache-miss: true
           key: ${{ github.sha }}
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
@@ -767,4 +776,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
