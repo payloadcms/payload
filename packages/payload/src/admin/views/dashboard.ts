@@ -1,4 +1,4 @@
-import type { PayloadRequest } from '../../index.js'
+import type { InitReqResult } from '../../index.js'
 
 export enum EntityType {
   collection = 'collections',
@@ -6,7 +6,6 @@ export enum EntityType {
 }
 
 export type WidgetServerProps = {
-  req: PayloadRequest
   widgetData?: Record<string, unknown>
   widgetSlug: string
-}
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>

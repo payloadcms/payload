@@ -199,4 +199,33 @@ describe('Dashboard', () => {
       expect(labels).toContain('Collections')
     }).toPass({ timeout: 1000 })
   })
+
+  test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('page query')
+    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.saveChangesAndValidate()
+
+    // Find the page-query widget
+    const pageQueryWidget = page.locator('.page-query-widget')
+    await expect(pageQueryWidget).toBeVisible()
+
+    // Initially, page should be 0 (default)
+    await expect(pageQueryWidget.getByText(/Current page from query: 0/)).toBeVisible()
+
+    // Click the increment button
+    const incrementButton = pageQueryWidget.getByRole('button', { name: /Increment Page/ })
+    await incrementButton.click()
+
+    // The page number should update to 1 without a page refresh
+    // This test will fail until the server component re-renders when query params change
+    await expect(pageQueryWidget.getByText(/Current page from query: 1/)).toBeVisible()
+
+    // Click again to increment to 2
+    await incrementButton.click()
+    await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
+  })
 })

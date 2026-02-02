@@ -13,9 +13,6 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
     components: {
       afterDashboard: ['./components/BeforeOrAfterDashboard.js'],
       beforeDashboard: ['./components/BeforeOrAfterDashboard.js'],
@@ -78,7 +75,15 @@ export default buildConfigWithDefaults({
           label: ({ i18n }) => (i18n.language === 'es' ? 'Gráfico de Ingresos' : 'Revenue Chart'),
           minWidth: 'medium',
         },
+        {
+          slug: 'page-query',
+          ComponentPath: './components/PageQuery.tsx#default',
+          label: 'Page Query Widget',
+        },
       ],
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
     },
   },
   collections: [

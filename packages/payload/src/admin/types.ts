@@ -585,6 +585,7 @@ export type {
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
   GetFolderResultsComponentAndDataArgs,
+  InitReqResult,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
