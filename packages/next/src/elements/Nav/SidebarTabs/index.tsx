@@ -1,22 +1,22 @@
-import type { NavGroupType } from '@payloadcms/ui/shared'
 import type { NavPreferences, SidebarTab } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { ListViewIcon } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import type { NavProps } from '../index.js'
 
-import { DefaultNavClient } from '../index.client.js'
-import { DEFAULT_NAV_TAB_SLUG } from './constants.js'
 import { SidebarTabsClient } from './index.client.js'
 import './index.scss'
 
+type SidebarTabWithReactNode = {
+  component: React.ReactNode | SidebarTab['component']
+  icon: React.ReactNode | SidebarTab['icon']
+} & Omit<SidebarTab, 'component' | 'icon'>
+
 export type SidebarTabsProps = {
-  groups: NavGroupType[]
   navPreferences: NavPreferences
-  tabs: SidebarTab[]
+  tabs: SidebarTabWithReactNode[]
 } & NavProps
 
 const baseClass = 'sidebar-tabs'
@@ -24,7 +24,6 @@ const baseClass = 'sidebar-tabs'
 export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
   const {
     documentSubViewType,
-    groups,
     i18n,
     locale,
     navPreferences,
@@ -39,24 +38,24 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
 
   // Determine which tab should be active on initial load
   const initialActiveTabID =
-    navPreferences.activeTab ||
-    tabs.find((tab) => tab.isDefaultActive)?.slug ||
-    DEFAULT_NAV_TAB_SLUG
+    navPreferences.activeTab || tabs.find((tab) => tab.isDefaultActive)?.slug || tabs[0]?.slug
 
-  // Build initial tab contents - always include nav, conditionally include active custom tab
-  const initialTabContents: Record<string, React.ReactNode> = {
-    [DEFAULT_NAV_TAB_SLUG]: <DefaultNavClient groups={groups} navPreferences={navPreferences} />,
-  }
+  // Build initial tab contents - render the initially active tab on server
+  const initialTabContents: Record<string, React.ReactNode> = {}
 
-  if (initialActiveTabID !== DEFAULT_NAV_TAB_SLUG) {
-    const activeTab = tabs.find((t) => t.slug === initialActiveTabID)
-    if (activeTab) {
+  const activeTab = tabs.find((t) => t.slug === initialActiveTabID)
+  if (activeTab) {
+    // Check if component is already a React node
+    if (React.isValidElement(activeTab.component)) {
+      initialTabContents[activeTab.slug] = activeTab.component
+    } else {
+      // Otherwise render it as a CustomComponent
       initialTabContents[activeTab.slug] = RenderServerComponent({
         clientProps: {
           documentSubViewType,
           viewType,
         },
-        Component: activeTab.component,
+        Component: activeTab.component as SidebarTab['component'],
         importMap: payload.importMap,
         serverProps: {
           i18n,
@@ -76,42 +75,37 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
       baseClass={baseClass}
       initialActiveTabID={initialActiveTabID}
       initialTabContents={initialTabContents}
-      tabs={[
-        {
-          slug: DEFAULT_NAV_TAB_SLUG,
-          icon: <ListViewIcon />,
-          isDefaultActive: true,
-          label: i18n.t('general:collections'),
-        },
-        ...tabs.map((tab) => {
-          const iconComponent = RenderServerComponent({
-            clientProps: {
-              documentSubViewType,
-              viewType,
-            },
-            Component: tab.icon,
-            importMap: payload.importMap,
-            serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            },
-          })
+      tabs={tabs.map((tab) => {
+        // Check if icon is already a React element
+        const iconComponent = React.isValidElement(tab.icon)
+          ? tab.icon
+          : RenderServerComponent({
+              clientProps: {
+                documentSubViewType,
+                viewType,
+              },
+              Component: tab.icon as SidebarTab['icon'],
+              importMap: payload.importMap,
+              serverProps: {
+                i18n,
+                locale,
+                params,
+                payload,
+                permissions,
+                searchParams,
+                user,
+              },
+            })
 
-          const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
+        const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
 
-          return {
-            slug: tab.slug,
-            icon: iconComponent,
-            isDefaultActive: tab.isDefaultActive,
-            label: labelText,
-          }
-        }),
-      ]}
+        return {
+          slug: tab.slug,
+          icon: iconComponent,
+          isDefaultActive: tab.isDefaultActive,
+          label: labelText,
+        }
+      })}
     />
   )
 }

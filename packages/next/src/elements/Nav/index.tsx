@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { Logout } from '@payloadcms/ui'
+import { ListViewIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
@@ -77,8 +77,61 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const navPreferences = await getNavPrefs(req)
 
-  const sidebarTabs =
-    payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []
+  // Render beforeNavLinks and afterNavLinks once
+  const renderedBeforeNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const renderedAfterNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  // Build the full tabs array, starting with the default nav tab
+  const allTabs = [
+    {
+      slug: 'nav',
+      component: (
+        <DefaultNavClient
+          afterNavLinks={renderedAfterNavLinks}
+          beforeNavLinks={renderedBeforeNavLinks}
+          groups={groups}
+          navPreferences={navPreferences}
+        />
+      ),
+      icon: <ListViewIcon />,
+      isDefaultActive: true,
+      label: i18n.t('general:collections'),
+    },
+    ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
+  ]
 
   const LogoutComponent = RenderServerComponent({
     clientProps: {
@@ -126,58 +179,19 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   return (
     <NavWrapper baseClass={baseClass}>
       <nav className={`${baseClass}__wrap`}>
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: beforeNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
-        {sidebarTabs.length > 0 ? (
-          <SidebarTabs
-            documentSubViewType={documentSubViewType}
-            groups={groups}
-            i18n={i18n}
-            locale={locale}
-            navPreferences={navPreferences}
-            params={params}
-            payload={payload}
-            permissions={permissions}
-            searchParams={searchParams}
-            tabs={sidebarTabs}
-            user={user}
-            viewType={viewType}
-          />
-        ) : (
-          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        )}
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: afterNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
+        <SidebarTabs
+          documentSubViewType={documentSubViewType}
+          i18n={i18n}
+          locale={locale}
+          navPreferences={navPreferences}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          tabs={allTabs}
+          user={user}
+          viewType={viewType}
+        />
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
           {LogoutComponent}

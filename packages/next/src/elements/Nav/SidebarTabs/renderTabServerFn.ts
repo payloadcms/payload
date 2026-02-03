@@ -1,4 +1,5 @@
 import type { ServerFunction } from 'payload'
+import type React from 'react'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 

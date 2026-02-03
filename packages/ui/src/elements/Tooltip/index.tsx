@@ -24,7 +24,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     boundingRef,
     children,
     className,
-    delay = 350,
+    delay = 500,
     position: positionFromProps,
     show: showFromProps = true,
     staticPositioning = false,
