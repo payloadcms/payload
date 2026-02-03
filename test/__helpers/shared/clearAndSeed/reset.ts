@@ -43,5 +43,16 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       drizzle: db.drizzle,
       raw: queries,
     })
+  } else if (
+    'clearDatabase' in _payload.db &&
+    typeof (_payload.db as any).clearDatabase === 'function'
+  ) {
+    console.log('[resetDB] using clearDatabase method')
+    await (_payload.db as any).clearDatabase()
+  } else {
+    // Fallback for other unknown adapters
+    console.warn(
+      '[resetDB] No reset method available for this adapter. Database will not be cleared.',
+    )
   }
 }

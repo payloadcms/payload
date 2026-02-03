@@ -127,7 +127,16 @@ export async function createSnapshot(
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
-    await createDrizzleSnapshot(db, snapshotKey)
+    // Only create snapshot if drizzle is available (Postgres/SQLite adapters)
+    if (db.drizzle) {
+      await createDrizzleSnapshot(db, snapshotKey)
+    }
+    // For adapters that don't support snapshots (e.g., content-api), we intentionally
+    // don't set dbSnapshot[snapshotKey] at all. This is important because:
+    // 1. seedDB() checks if dbSnapshot[snapshotKey] exists (line 78)
+    // 2. If it exists but is empty {}, seedDB() won't restore BUT also won't create a snapshot
+    // 3. By not setting it, subsequent test runs will always do reset + seed (no snapshot caching)
+    // 4. This is correct for remote services like Content API where snapshots aren't possible
   }
 }
 
@@ -145,6 +154,12 @@ export async function restoreFromSnapshot(
     await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
     const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
-    await restoreFromDrizzleSnapshot(db, snapshotKey)
+    // Only restore from snapshot if drizzle is available (Postgres/SQLite adapters)
+    if (db.drizzle) {
+      await restoreFromDrizzleSnapshot(db, snapshotKey)
+    } else {
+      // Skip restore for other adapters (e.g., content-api)
+      // These adapters typically re-seed or handle cleanup differently
+    }
   }
 }

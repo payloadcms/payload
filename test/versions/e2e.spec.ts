@@ -78,6 +78,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  textCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -2571,6 +2572,87 @@ describe('Versions', () => {
 
       await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText('textInArray2')
       await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText('textInArray2Modified')
+    })
+
+    test('should handle swapping blocks with polymorphic relationships (single vs hasMany)', async () => {
+      const textDoc = await payload.create({
+        collection: textCollectionSlug,
+        data: {
+          text: 'Test text document',
+        },
+      })
+
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      // Swap the order of the blocks
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      // This should not throw "Cannot read properties of undefined (reading 'config')"
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await expect(blocks).toBeVisible()
     })
   })
 
