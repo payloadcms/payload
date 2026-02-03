@@ -17,7 +17,7 @@ const TEST_SUITES = [
   'collections-graphql',
   'collections-rest',
   'config',
-  // 'create-payload-app', // Does not use DB adapter - tests CLI tool
+  //   'create-payload-app', // Does not use DB adapter - tests CLI tool
   // 'custom-graphql', We don't support transactions
   'database',
   'dataloader',
