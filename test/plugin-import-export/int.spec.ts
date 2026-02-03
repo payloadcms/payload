@@ -2302,6 +2302,131 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(uploadDoc?.upload).not.toBe('')
       })
     })
+    describe('custom ID exports', () => {
+      const createdCustomIdPages: string[] = []
+
+      afterEach(async () => {
+        for (const id of createdCustomIdPages) {
+          try {
+            await payload.delete({
+              collection: 'custom-id-pages' as CollectionSlug,
+              id,
+            })
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+        createdCustomIdPages.length = 0
+      })
+
+      it('should export documents with custom text IDs to CSV', async () => {
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'export-custom-1',
+            title: 'Export Custom Page 1',
+          },
+        })
+
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'export-custom-2',
+            title: 'Export Custom Page 2',
+          },
+        })
+
+        createdCustomIdPages.push('export-custom-1', 'export-custom-2')
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            format: 'csv',
+            fields: ['id', 'title'],
+            where: {
+              id: { in: ['export-custom-1', 'export-custom-2'] },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        expect(exportDoc.filename).toContain('.csv')
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const csvData = await readCSV(csvPath)
+
+        expect(csvData).toHaveLength(2)
+        expect(csvData.map((row: any) => row.id).sort()).toEqual([
+          'export-custom-1',
+          'export-custom-2',
+        ])
+        expect(csvData.find((row: any) => row.id === 'export-custom-1')?.title).toBe(
+          'Export Custom Page 1',
+        )
+      })
+
+      it('should export documents with custom text IDs to JSON', async () => {
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'export-json-1',
+            title: 'Export JSON Page 1',
+          },
+        })
+
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'export-json-2',
+            title: 'Export JSON Page 2',
+          },
+        })
+
+        createdCustomIdPages.push('export-json-1', 'export-json-2')
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            format: 'json',
+            fields: ['id', 'title'],
+            where: {
+              id: { in: ['export-json-1', 'export-json-2'] },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        expect(exportDoc.filename).toContain('.json')
+
+        const jsonPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const jsonData = await readJSON(jsonPath)
+
+        expect(jsonData).toHaveLength(2)
+        expect(jsonData.map((row: any) => row.id).sort()).toEqual([
+          'export-json-1',
+          'export-json-2',
+        ])
+        expect(jsonData.find((row: any) => row.id === 'export-json-1')?.title).toBe(
+          'Export JSON Page 1',
+        )
+      })
+    })
   })
 
   describe('imports', () => {
@@ -4770,6 +4895,214 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'media',
           id: media.id,
         })
+      })
+    })
+    describe('custom ID imports', () => {
+      const createdCustomIdPages: string[] = []
+
+      afterEach(async () => {
+        for (const id of createdCustomIdPages) {
+          try {
+            await payload.delete({
+              collection: 'custom-id-pages' as CollectionSlug,
+              id,
+            })
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+        createdCustomIdPages.length = 0
+      })
+
+      it('should import documents with custom text IDs in create mode', async () => {
+        const testData = [
+          { id: 'custom-page-1', title: 'Custom ID Page 1' },
+          { id: 'custom-page-2', title: 'Custom ID Page 2' },
+          { id: 'custom-page-3', title: 'Custom ID Page 3' },
+        ]
+
+        const jsonBuffer = Buffer.from(JSON.stringify(testData))
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'create',
+          },
+          file: {
+            data: jsonBuffer,
+            mimetype: 'application/json',
+            name: 'custom-id-import.json',
+            size: jsonBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(completedImport.status).toBe('completed')
+        expect(completedImport.summary?.imported).toBe(3)
+        expect(completedImport.summary?.issues).toBe(0)
+
+        const importedPages = await payload.find({
+          collection: 'custom-id-pages' as CollectionSlug,
+          sort: 'id',
+        })
+
+        expect(importedPages.docs).toHaveLength(3)
+        expect(importedPages.docs[0]?.id).toBe('custom-page-1')
+        expect(importedPages.docs[0]?.title).toBe('Custom ID Page 1')
+        expect(importedPages.docs[1]?.id).toBe('custom-page-2')
+        expect(importedPages.docs[2]?.id).toBe('custom-page-3')
+
+        createdCustomIdPages.push('custom-page-1', 'custom-page-2', 'custom-page-3')
+      })
+
+      it('should import documents with custom text IDs from CSV', async () => {
+        const csvContent = `id,title\ncustom-csv-1,CSV Custom Page 1\ncustom-csv-2,CSV Custom Page 2`
+        const csvBuffer = Buffer.from(csvContent)
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'custom-id-import.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(completedImport.status).toBe('completed')
+        expect(completedImport.summary?.imported).toBe(2)
+
+        const importedPages = await payload.find({
+          collection: 'custom-id-pages' as CollectionSlug,
+          where: {
+            id: { in: ['custom-csv-1', 'custom-csv-2'] },
+          },
+          sort: 'id',
+        })
+
+        expect(importedPages.docs).toHaveLength(2)
+        expect(importedPages.docs[0]?.id).toBe('custom-csv-1')
+        expect(importedPages.docs[1]?.id).toBe('custom-csv-2')
+
+        createdCustomIdPages.push('custom-csv-1', 'custom-csv-2')
+      })
+
+      it('should preserve custom IDs in upsert mode when creating new documents', async () => {
+        const testData = [
+          { id: 'upsert-custom-1', title: 'Upsert Custom Page 1' },
+          { id: 'upsert-custom-2', title: 'Upsert Custom Page 2' },
+        ]
+
+        const jsonBuffer = Buffer.from(JSON.stringify(testData))
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'upsert',
+            matchField: 'id',
+          },
+          file: {
+            data: jsonBuffer,
+            mimetype: 'application/json',
+            name: 'upsert-custom-id.json',
+            size: jsonBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(completedImport.status).toBe('completed')
+        expect(completedImport.summary?.imported).toBe(2)
+
+        const importedPages = await payload.find({
+          collection: 'custom-id-pages' as CollectionSlug,
+          where: {
+            id: { in: ['upsert-custom-1', 'upsert-custom-2'] },
+          },
+          sort: 'id',
+        })
+
+        expect(importedPages.docs).toHaveLength(2)
+        expect(importedPages.docs[0]?.id).toBe('upsert-custom-1')
+        expect(importedPages.docs[1]?.id).toBe('upsert-custom-2')
+
+        createdCustomIdPages.push('upsert-custom-1', 'upsert-custom-2')
+      })
+
+      it('should update existing documents with custom IDs in upsert mode', async () => {
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'existing-custom-1',
+            title: 'Original Title',
+          },
+        })
+
+        createdCustomIdPages.push('existing-custom-1')
+
+        const testData = [{ id: 'existing-custom-1', title: 'Updated Title via Upsert' }]
+
+        const jsonBuffer = Buffer.from(JSON.stringify(testData))
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'upsert',
+            matchField: 'id',
+          },
+          file: {
+            data: jsonBuffer,
+            mimetype: 'application/json',
+            name: 'upsert-update-custom-id.json',
+            size: jsonBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(completedImport.status).toBe('completed')
+        expect(completedImport.summary?.updated).toBe(1)
+
+        const updatedPage = await payload.findByID({
+          collection: 'custom-id-pages' as CollectionSlug,
+          id: 'existing-custom-1',
+        })
+
+        expect(updatedPage.title).toBe('Updated Title via Upsert')
       })
     })
   })

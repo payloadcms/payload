@@ -27,6 +27,7 @@ test.describe('Import Export Plugin', () => {
   let exportsURL: AdminUrlUtil
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let customIdPagesURL: AdminUrlUtil
   let s3ExportsURL: AdminUrlUtil
   let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -41,6 +42,7 @@ test.describe('Import Export Plugin', () => {
     exportsURL = new AdminUrlUtil(serverURL, 'exports')
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
+    customIdPagesURL = new AdminUrlUtil(serverURL, 'custom-id-pages')
     s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
     s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
@@ -191,6 +193,67 @@ test.describe('Import Export Plugin', () => {
       expect(responseBody.errors).toBeDefined()
       expect(responseBody.errors[0].message).toContain('format')
     })
+    test.describe('Custom ID Exports', () => {
+      test('should export documents with custom IDs through UI', async () => {
+        const uniqueId = Date.now()
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `e2e-export-${uniqueId}-1`,
+            title: 'E2E Export Custom Page 1',
+          },
+        })
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `e2e-export-${uniqueId}-2`,
+            title: 'E2E Export Custom Page 2',
+          },
+        })
+
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await saveDocAndAssert(page, '#action-save')
+
+        await runJobsQueue({ serverURL })
+
+        await page.reload()
+
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+
+        const downloadLink = page.locator('.file-details__main-detail a')
+        await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+        const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+        const downloadPath = await download.path()
+        const content = fs.readFileSync(downloadPath, 'utf8')
+
+        expect(content).toContain(`e2e-export-${uniqueId}-1`)
+        expect(content).toContain(`e2e-export-${uniqueId}-2`)
+        expect(content).toContain('E2E Export Custom Page 1')
+        expect(content).toContain('E2E Export Custom Page 2')
+      })
+    })
   })
 
   test.describe('Import', () => {
@@ -253,7 +316,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       if (await importModeField.isVisible()) {
@@ -299,7 +362,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       if (await importModeField.isVisible()) {
@@ -335,7 +398,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("pages")').click()
 
       await saveDocAndAssert(page)
 
@@ -392,7 +455,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await expect(importModeField).toBeVisible()
@@ -415,6 +478,78 @@ test.describe('Import Export Plugin', () => {
       })
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
+    })
+    test.describe('Custom ID Imports', () => {
+      test('should show custom IDs in import preview', async () => {
+        const csvContent = `id,title\ncustom-preview-1,Preview Custom Page 1\ncustom-preview-2,Preview Custom Page 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("custom-id-pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'custom-id-preview.csv',
+          mimeType: 'text/csv',
+          buffer: Buffer.from(csvContent),
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const previewTable = page.locator('.import-preview table')
+        await expect(previewTable).toContainText('custom-preview-1')
+        await expect(previewTable).toContainText('Preview Custom Page 1')
+        await expect(previewTable).toContainText('custom-preview-2')
+      })
+
+      test('should import documents with custom IDs through UI', async () => {
+        const uniqueId = Date.now()
+        const csvContent = `id,title\ne2e-custom-${uniqueId}-1,E2E Custom Page 1\ne2e-custom-${uniqueId}-2,E2E Custom Page 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("custom-id-pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'custom-id-import.csv',
+          mimeType: 'text/csv',
+          buffer: Buffer.from(csvContent),
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await saveDocAndAssert(page, '#action-save')
+
+        const statusField = page.locator('[data-field-name="status"]')
+        if (await statusField.isVisible()) {
+          await expect(statusField).toContainText(/completed|partial/i)
+        }
+
+        await runJobsQueue({ serverURL })
+
+        const importedPages = await payload.find({
+          collection: 'custom-id-pages' as any,
+          where: {
+            id: { contains: `e2e-custom-${uniqueId}` },
+          },
+        })
+
+        expect(importedPages.totalDocs).toBe(2)
+        expect(importedPages.docs[0]?.id).toContain(`e2e-custom-${uniqueId}`)
+      })
     })
   })
 

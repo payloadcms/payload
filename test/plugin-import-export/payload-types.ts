@@ -77,6 +77,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimit;
     'posts-with-s3': PostsWithS3;
     media: Media;
+    'custom-id-pages': CustomIdPage;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
@@ -103,6 +104,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
     'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
@@ -476,6 +478,16 @@ export interface PostsWithS3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages".
+ */
+export interface CustomIdPage {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -490,7 +502,17 @@ export interface Export {
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collectionSlug: string;
+  collectionSlug:
+    | 'users'
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'posts-with-s3'
+    | 'media'
+    | 'custom-id-pages';
   where?:
     | {
         [k: string]: unknown;
@@ -528,7 +550,17 @@ export interface PostsExport {
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collectionSlug: string;
+  collectionSlug:
+    | 'users'
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'posts-with-s3'
+    | 'media'
+    | 'custom-id-pages';
   where?:
     | {
         [k: string]: unknown;
@@ -566,7 +598,17 @@ export interface PostsNoJobsQueueExport {
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collectionSlug: string;
+  collectionSlug:
+    | 'users'
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'posts-with-s3'
+    | 'media'
+    | 'custom-id-pages';
   where?:
     | {
         [k: string]: unknown;
@@ -604,7 +646,17 @@ export interface PostsWithLimitsExport {
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collectionSlug: string;
+  collectionSlug:
+    | 'users'
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'posts-with-s3'
+    | 'media'
+    | 'custom-id-pages';
   where?:
     | {
         [k: string]: unknown;
@@ -642,7 +694,17 @@ export interface PostsWithS3Export {
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collectionSlug: string;
+  collectionSlug:
+    | 'users'
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-limits'
+    | 'posts-with-s3'
+    | 'media'
+    | 'custom-id-pages';
   where?:
     | {
         [k: string]: unknown;
@@ -671,14 +733,16 @@ export interface PostsWithS3Export {
 export interface Import {
   id: string;
   collectionSlug:
+    | 'users'
     | 'pages'
     | 'posts'
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
     | 'posts-with-limits'
+    | 'posts-with-s3'
     | 'media'
-    | 'posts-with-s3';
+    | 'custom-id-pages';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -716,14 +780,16 @@ export interface Import {
 export interface PostsImport {
   id: string;
   collectionSlug:
+    | 'users'
     | 'pages'
     | 'posts'
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
     | 'posts-with-limits'
+    | 'posts-with-s3'
     | 'media'
-    | 'posts-with-s3';
+    | 'custom-id-pages';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -761,14 +827,16 @@ export interface PostsImport {
 export interface PostsWithLimitsImport {
   id: string;
   collectionSlug:
+    | 'users'
     | 'pages'
     | 'posts'
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
     | 'posts-with-limits'
+    | 'posts-with-s3'
     | 'media'
-    | 'posts-with-s3';
+    | 'custom-id-pages';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -806,14 +874,16 @@ export interface PostsWithLimitsImport {
 export interface PostsWithS3Import {
   id: string;
   collectionSlug:
+    | 'users'
     | 'pages'
     | 'posts'
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
     | 'posts-with-limits'
+    | 'posts-with-s3'
     | 'media'
-    | 'posts-with-s3';
+    | 'custom-id-pages';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -995,6 +1065,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'custom-id-pages';
+        value: string | CustomIdPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1225,6 +1299,16 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages_select".
+ */
+export interface CustomIdPagesSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1578,7 +1662,26 @@ export interface TaskCreateCollectionExport {
     drafts?: ('yes' | 'no') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
-    collectionSlug: string;
+    collectionSlug:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-limits-export'
+      | 'posts-with-s3-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-limits-import'
+      | 'posts-with-s3-import';
     where?:
       | {
           [k: string]: unknown;
