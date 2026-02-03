@@ -24,6 +24,7 @@ import { LexicalObjectReferenceBugCollection } from './collections/LexicalObject
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import { LexicalViews } from './collections/LexicalViews/index.js'
 import { LexicalViews2 } from './collections/LexicalViews2/index.js'
+import { LexicalViewsFrontend } from './collections/LexicalViewsFrontend/index.js'
 import { OnDemandForm } from './collections/OnDemandForm/index.js'
 import { OnDemandOutsideForm } from './collections/OnDemandOutsideForm/index.js'
 import RichTextFields from './collections/RichText/index.js'
@@ -49,6 +50,7 @@ export const baseConfig: Partial<Config> = {
     }),
     LexicalViews,
     LexicalViews2,
+    LexicalViewsFrontend,
     LexicalMigrateFields,
     LexicalLocalizedFields,
     LexicalObjectReferenceBugCollection,
@@ -66,33 +68,22 @@ export const baseConfig: Partial<Config> = {
   globals: [TabsWithRichText],
 
   admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
     components: {
+      beforeDashboard: [
+        {
+          path: './components/CollectionsExplained.js#CollectionsExplained',
+        },
+      ],
       views: {
         custom: {
           Component: './components/Image.js#Image',
           path: '/custom-image',
         },
       },
-      beforeDashboard: [
-        {
-          path: './components/CollectionsExplained.js#CollectionsExplained',
-        },
-      ],
     },
-  },
-  onInit: async (payload) => {
-    // IMPORTANT: This should only seed, not clear the database.
-    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await seed(payload)
-    }
-  },
-  localization: {
-    defaultLocale: 'en',
-    fallback: true,
-    locales: ['en', 'es', 'he'],
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
   },
   i18n: {
     supportedLanguages: {
@@ -100,6 +91,17 @@ export const baseConfig: Partial<Config> = {
       es,
       he,
     },
+  },
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es', 'he'],
+  },
+  onInit: async (payload) => {
+    // IMPORTANT: This should only seed, not clear the database.
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

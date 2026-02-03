@@ -91,6 +91,7 @@ export interface Config {
     'lexical-fields': LexicalField;
     'lexical-views': LexicalView;
     'lexical-views-2': LexicalViews2;
+    'lexical-views-frontend': LexicalViewsFrontend;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
@@ -120,6 +121,7 @@ export interface Config {
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
     'lexical-views': LexicalViewsSelect<false> | LexicalViewsSelect<true>;
     'lexical-views-2': LexicalViews2Select<false> | LexicalViews2Select<true>;
+    'lexical-views-frontend': LexicalViewsFrontendSelect<false> | LexicalViewsFrontendSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
@@ -377,21 +379,6 @@ export interface LexicalView {
     };
     [k: string]: unknown;
   } | null;
-  customFrontendViews?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   vanillaView?: {
     root: {
       type: string;
@@ -419,6 +406,30 @@ export interface LexicalView {
 export interface LexicalViews2 {
   id: string;
   customView?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend".
+ */
+export interface LexicalViewsFrontend {
+  id: string;
+  customFrontendViews?: {
     root: {
       type: string;
       children: {
@@ -1162,6 +1173,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalViews2;
       } | null)
     | ({
+        relationTo: 'lexical-views-frontend';
+        value: string | LexicalViewsFrontend;
+      } | null)
+    | ({
         relationTo: 'lexical-migrate-fields';
         value: string | LexicalMigrateField;
       } | null)
@@ -1323,7 +1338,6 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
  */
 export interface LexicalViewsSelect<T extends boolean = true> {
   customDefaultView?: T;
-  customFrontendViews?: T;
   vanillaView?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1334,6 +1348,15 @@ export interface LexicalViewsSelect<T extends boolean = true> {
  */
 export interface LexicalViews2Select<T extends boolean = true> {
   customView?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend_select".
+ */
+export interface LexicalViewsFrontendSelect<T extends boolean = true> {
+  customFrontendViews?: T;
   updatedAt?: T;
   createdAt?: T;
 }

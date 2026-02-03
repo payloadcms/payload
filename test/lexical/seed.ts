@@ -27,6 +27,7 @@ import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-le
 import { getFileByPath } from 'payload'
 
 import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
+import type { LexicalViewsFrontendNodes } from './collections/LexicalViewsFrontend/index.js'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
@@ -120,15 +121,15 @@ export const seed = async (_payload: Payload) => {
   const createdPNGDoc = await _payload.create({
     collection: uploadsSlug,
     data: {},
-    file: pngFile,
     depth: 0,
+    file: pngFile,
   })
 
   const createdPNGDoc2 = await _payload.create({
     collection: uploads2Slug,
     data: {},
-    file: pngFile,
     depth: 0,
+    file: pngFile,
   })
 
   const createdJPGDoc = await _payload.create({
@@ -137,8 +138,8 @@ export const seed = async (_payload: Payload) => {
       ...uploadsDoc,
       media: createdPNGDoc.id,
     },
-    file: jpgFile,
     depth: 0,
+    file: jpgFile,
   })
 
   const formattedID =
@@ -198,11 +199,11 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: usersSlug,
-    depth: 0,
     data: {
       email: devUser.email,
       password: devUser.password,
     },
+    depth: 0,
   })
 
   await _payload.create({
@@ -211,27 +212,87 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
-  const editorState = buildEditorState<LexicalViewsNodes>({
+  // Editor state without customAdminComponentBlock (for lexical-views)
+  const editorStateBasic = buildEditorState<LexicalViewsNodes>({
     nodes: [
       {
         type: 'paragraph',
-        format: '',
-        indent: 0,
-        version: 1,
         children: [
           {
-            mode: 'normal',
-            text: 'English text',
             type: 'text',
-            style: '',
             detail: 0,
             format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'English text',
             version: 1,
           },
         ],
         direction: 'ltr',
-        textStyle: '',
+        format: '',
+        indent: 0,
         textFormat: 0,
+        textStyle: '',
+        version: 1,
+      },
+      {
+        type: 'horizontalrule',
+        version: 1,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96d',
+          blockName: '',
+          blockType: 'viewsTestBlock',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'heading',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'My Heading',
+            version: 1,
+          },
+        ],
+        direction: null,
+        format: '',
+        indent: 0,
+        tag: 'h2',
+        version: 1,
+      },
+    ],
+  })
+
+  // Editor state with customAdminComponentBlock (for lexical-views-frontend)
+  const editorStateFrontend = buildEditorState<LexicalViewsFrontendNodes>({
+    nodes: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'English text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        textFormat: 0,
+        textStyle: '',
+        version: 1,
       },
       {
         type: 'horizontalrule',
@@ -259,57 +320,64 @@ export const seed = async (_payload: Payload) => {
         version: 2,
       },
       {
-        tag: 'h2',
         type: 'heading',
-        format: '',
-        indent: 0,
-        version: 1,
         children: [
           {
-            mode: 'normal',
-            text: 'My Heading',
             type: 'text',
-            style: '',
             detail: 0,
             format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'My Heading',
             version: 1,
           },
         ],
         direction: null,
+        format: '',
+        indent: 0,
+        tag: 'h2',
+        version: 1,
       },
     ],
   })
 
   await _payload.create({
     collection: 'lexical-views',
-    depth: 0,
     data: {
-      customDefaultView: editorState,
-      customFrontendViews: editorState,
-      vanillaView: editorState,
+      customDefaultView: editorStateBasic,
+      vanillaView: editorStateBasic,
     },
+    depth: 0,
+  })
+
+  await _payload.create({
+    collection: 'lexical-views-frontend',
+    data: {
+      customFrontendViews: editorStateFrontend,
+    },
+    depth: 0,
   })
 
   await _payload.create({
     collection: 'lexical-views-2',
-    depth: 0,
     data: {
-      customView: editorState,
+      customView: editorStateBasic,
     },
+    depth: 0,
   })
 
   const lexicalLocalizedDoc1 = await _payload.create({
     collection: lexicalLocalizedFieldsSlug,
     data: {
-      title: 'Localized Lexical en',
       lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
       ) as any,
+      title: 'Localized Lexical en',
     },
-    locale: 'en',
     depth: 0,
+    locale: 'en',
   })
 
   await _payload.create({
@@ -321,19 +389,19 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.update({
-    collection: lexicalLocalizedFieldsSlug,
     id: lexicalLocalizedDoc1.id,
+    collection: lexicalLocalizedFieldsSlug,
     data: {
-      title: 'Localized Lexical es',
       lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
         (lexicalLocalizedDoc1.lexicalBlocksSubLocalized.root.children[1].fields as any).id,
       ) as any,
+      title: 'Localized Lexical es',
     },
-    locale: 'es',
     depth: 0,
+    locale: 'es',
   })
 
   const lexicalLocalizedDoc2 = await _payload.create({
@@ -342,55 +410,55 @@ export const seed = async (_payload: Payload) => {
       title: 'Localized Lexical en 2',
 
       lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
-        text: 'English text 2',
         nodes: [
           {
-            format: '',
             type: 'relationship',
-            version: 2,
+            format: '',
             relationTo: lexicalLocalizedFieldsSlug,
             value: lexicalLocalizedDoc1.id,
+            version: 2,
           },
         ],
+        text: 'English text 2',
       }),
       lexicalBlocksSubLocalized: buildEditorState<DefaultNodeTypes>({
-        text: 'English text 2',
         nodes: [
           {
-            format: '',
             type: 'relationship',
-            version: 2,
+            format: '',
             relationTo: lexicalLocalizedFieldsSlug,
             value: lexicalLocalizedDoc1.id,
+            version: 2,
           },
         ],
+        text: 'English text 2',
       }),
     },
-    locale: 'en',
     depth: 0,
+    locale: 'en',
   })
 
   await _payload.update({
-    collection: lexicalLocalizedFieldsSlug,
     id: lexicalLocalizedDoc2.id,
+    collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical es 2',
 
       lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
-        text: 'Spanish text 2',
         nodes: [
           {
-            format: '',
             type: 'relationship',
-            version: 2,
+            format: '',
             relationTo: lexicalLocalizedFieldsSlug,
             value: lexicalLocalizedDoc1.id,
+            version: 2,
           },
         ],
+        text: 'Spanish text 2',
       }),
     },
-    locale: 'es',
     depth: 0,
+    locale: 'es',
   })
 
   await _payload.create({
@@ -403,77 +471,77 @@ export const seed = async (_payload: Payload) => {
     type: 'inlineBlock',
     fields: {
       id: Math.random().toString(36).substring(2, 15),
-      text: 'text',
       blockType: 'inlineBlockInLexical',
+      text: 'text',
     },
     version: 1,
   })
 
   await _payload.create({
     collection: 'LexicalInBlock',
-    depth: 0,
     data: {
-      content: {
-        root: {
-          children: [
-            {
-              format: '',
-              type: 'block',
-              version: 2,
-              fields: {
-                id: '6773773284be8978db7a498d',
-                lexicalInBlock: buildEditorState<DefaultNodeTypes>({ text: 'text' }),
-                blockName: '',
-                blockType: 'blockInLexical',
-              },
-            },
-          ],
-          direction: null,
-          format: '',
-          indent: 0,
-          type: 'root',
-          version: 1,
-        },
-      },
       blocks: [
         {
-          blockType: 'lexicalInBlock2',
           blockName: '1',
+          blockType: 'lexicalInBlock2',
           lexical: buildEditorState<DefaultNodeTypes>({ text: '1' }),
         },
         {
-          blockType: 'lexicalInBlock2',
           blockName: '2',
+          blockType: 'lexicalInBlock2',
           lexical: buildEditorState<DefaultNodeTypes>({ text: '2' }),
         },
         {
+          id: '67e1af0b78de3228e23ef1d5',
+          blockName: '1',
           blockType: 'lexicalInBlock2',
           lexical: {
             root: {
+              type: 'root',
               children: [
                 {
+                  type: 'paragraph',
                   children: [...Array.from({ length: 20 }, () => getInlineBlock())],
                   direction: null,
                   format: '',
                   indent: 0,
-                  type: 'paragraph',
-                  version: 1,
                   textFormat: 0,
                   textStyle: '',
+                  version: 1,
                 },
               ],
               direction: null,
               format: '',
               indent: 0,
-              type: 'root',
               version: 1,
             },
           },
-          id: '67e1af0b78de3228e23ef1d5',
-          blockName: '1',
         },
       ],
+      content: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'block',
+              fields: {
+                id: '6773773284be8978db7a498d',
+                blockName: '',
+                blockType: 'blockInLexical',
+                lexicalInBlock: buildEditorState<DefaultNodeTypes>({ text: 'text' }),
+              },
+              format: '',
+              version: 2,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
     },
+    depth: 0,
   })
 
   await _payload.create({
@@ -481,62 +549,62 @@ export const seed = async (_payload: Payload) => {
     data: {
       richText: {
         root: {
+          type: 'root',
           children: [
             {
+              type: 'paragraph',
               children: [
                 {
+                  type: 'text',
                   detail: 0,
                   format: 0,
                   mode: 'normal',
                   style: '',
                   text: 'text ',
-                  type: 'text',
                   version: 1,
                 },
                 {
+                  id: '67e4566fcbd5181ca8cbeef5',
+                  type: 'link',
                   children: [
                     {
+                      type: 'text',
                       detail: 0,
                       format: 0,
                       mode: 'normal',
                       style: '',
                       text: 'link',
-                      type: 'text',
                       version: 1,
                     },
                   ],
                   direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  type: 'link',
-                  version: 3,
                   fields: {
-                    url: 'https://',
-                    newTab: false,
-                    linkType: 'custom',
                     blocks: [
                       {
                         id: '67e45673cbd5181ca8cbeef7',
                         blockType: 'block',
                       },
                     ],
+                    linkType: 'custom',
+                    newTab: false,
+                    url: 'https://',
                   },
-                  id: '67e4566fcbd5181ca8cbeef5',
+                  format: '',
+                  indent: 0,
+                  version: 3,
                 },
               ],
               direction: 'ltr',
               format: '',
               indent: 0,
-              type: 'paragraph',
-              version: 1,
               textFormat: 0,
               textStyle: '',
+              version: 1,
             },
           ],
           direction: 'ltr',
           format: '',
           indent: 0,
-          type: 'root',
           version: 1,
         },
       },

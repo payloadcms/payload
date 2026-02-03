@@ -11,7 +11,8 @@ import { useEffect, useState } from 'react'
 
 import type { DebugViewsJSXConverterFeatureProps } from '../../server/index.js'
 
-import { lexicalFrontendViews, lexicalViews } from '../../../views.js'
+import { lexicalFrontendViews } from '../../../../LexicalViewsFrontend/views.js'
+import { lexicalViews } from '../../../views.js'
 
 export const RichTextPlugin: PluginComponent<DebugViewsJSXConverterFeatureProps> = ({
   clientProps,
