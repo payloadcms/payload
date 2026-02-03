@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { closeAllToasts } from '../helpers.js'
+import { closeAllToasts } from './helpers.js'
 
 export async function assertToastErrors({
   page,
@@ -22,13 +22,13 @@ export async function assertToastErrors({
   // Check single error
   if (isSingleError) {
     await expect(page.locator('.payload-toast-container [data-testid="field-error"]')).toHaveText(
-      errors[0]!,
+      errors[0],
     )
   } else {
     // Check multiple errors
     const errorItems = page.locator('.payload-toast-container [data-testid="field-errors"] li')
     for (let i = 0; i < errors.length; i++) {
-      await expect(errorItems.nth(i)).toHaveText(errors[i]!)
+      await expect(errorItems.nth(i)).toHaveText(errors[i])
     }
   }
 

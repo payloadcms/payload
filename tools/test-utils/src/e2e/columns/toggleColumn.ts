@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText } from '../../../helpers.js'
+import { exactText } from '../helpers.js'
 import { openListColumns } from './openListColumns.js'
 import { waitForColumnInURL } from './waitForColumnsInURL.js'
 

@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { formatAdminURL } from 'payload/shared'
 
-import type { AdminUrlUtil } from '../../helpers/adminUrlUtil.js'
+import type { AdminUrlUtil } from './adminUrlUtil.js'
 
 import { getRowByCellValueAndAssert } from './getRowByCellValueAndAssert.js'
 

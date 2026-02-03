@@ -14,22 +14,43 @@
     "./database": "./src/shared/database/index.ts",
     "./shared": "./src/shared/index.ts"
   },
-  "peerDependencies": {
-    "@payloadcms/next": ">=3.0.0",
-    "@payloadcms/sdk": ">=0.0.1",
-    "@playwright/test": ">=1.40.0",
-    "payload": ">=3.0.0",
-    "vitest": ">=2.0.0"
+  "scripts": {
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
     "http-status": "^2.0.0",
-    "qs-esm": "^7.0.0"
+    "qs-esm": "^7.0.0",
+    "ts-essentials": "^10.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2"
+    "@axe-core/playwright": "^4.11.0",
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/sdk": "workspace:*",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.10.2",
+    "axe-core": "^4.11.0",
+    "drizzle-orm": "^0.44.0",
+    "mongoose": "^8.15.0",
+    "payload": "workspace:*",
+    "typescript": "5.7.3",
+    "vitest": "^4.0.0"
+  },
+  "peerDependencies": {
+    "@axe-core/playwright": ">=4.0.0",
+    "@payloadcms/next": ">=3.0.0",
+    "@payloadcms/sdk": ">=0.1.0",
+    "@playwright/test": ">=1.40.0",
+    "axe-core": ">=4.0.0",
+    "drizzle-orm": ">=0.30.0",
+    "mongoose": ">=8.0.0",
+    "payload": ">=3.0.0",
+    "vitest": ">=2.0.0"
   },
   "peerDependenciesMeta": {
+    "@axe-core/playwright": {
+      "optional": true
+    },
     "@payloadcms/next": {
       "optional": true
     },
@@ -37,6 +58,15 @@
       "optional": true
     },
     "@playwright/test": {
+      "optional": true
+    },
+    "axe-core": {
+      "optional": true
+    },
+    "drizzle-orm": {
+      "optional": true
+    },
+    "mongoose": {
       "optional": true
     },
     "vitest": {

@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
+import { POLL_TOPASS_TIMEOUT } from './helpers.js'
 
 export const goToNextPage = async (
   page: Page,

@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import { exactText } from '../../../helpers.js'
+import { exactText } from '../helpers.js'
 
 export const reorderColumns = async (
   page: Page,

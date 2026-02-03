@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
-import { closeAllToasts } from '../../helpers.js'
-import { selectInput } from '../../helpers/e2e/selectInput.js'
+import { closeAllToasts } from '../helpers.js'
+import { selectInput } from '../selectInput.js'
 export const createFolderDoc = async ({
   folderName,
   page,

@@ -1,7 +1,8 @@
 import type { Page } from 'playwright'
 
-import { POLL_TOPASS_TIMEOUT } from 'playwright.config.js'
 import { expect } from 'playwright/test'
+
+import { POLL_TOPASS_TIMEOUT } from '../helpers.js'
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
   const breakpointSelector = page.locator(
