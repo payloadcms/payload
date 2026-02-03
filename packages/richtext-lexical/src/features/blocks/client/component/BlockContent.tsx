@@ -75,7 +75,7 @@ export type BlockContentProps = {
   RemoveButton: React.FC
 }
 
-type BlockComponentContextType = {
+export type BlockComponentContextType = {
   BlockCollapsible: React.FC<BlockCollapsibleProps>
 } & Omit<BlockContentProps, 'Collapsible' | 'CustomBlock' | 'CustomLabel'>
 

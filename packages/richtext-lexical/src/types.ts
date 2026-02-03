@@ -22,7 +22,13 @@ import type {
 } from 'payload'
 import type { JSX } from 'react'
 
-import type { JSXConverterArgs } from './features/converters/lexicalToJSX/converter/types.js'
+import type { BlockComponentContextType } from './features/blocks/client/component/BlockContent.js'
+export type { BlockComponentContextType }
+import type {
+  JSXConverterArgs,
+  JSXConverters,
+  SerializedLexicalNodeWithParent,
+} from './features/converters/lexicalToJSX/converter/types.js'
 import type {
   BaseClientFeatureProps,
   FeatureProviderProviderClient,
@@ -175,15 +181,12 @@ export type NodeMapValue<TNode extends SerializedNodeBase = SerializedLexicalNod
 }
 
 /**
- * Props passed to custom Block components in view maps.
- * Similar to Component props but for block-level customization.
- *
- * For React UI props (BlockCollapsible, EditButton, etc.), use the
- * `useBlockComponentContext()` hook inside your component.
+ * Props passed to a custom Block component in editor mode.
+ * Use `isEditor` to discriminate between editor and JSX converter modes.
  *
  * @experimental - This API is experimental and may change in a minor release.
  */
-export type ViewMapBlockComponentProps = {
+export type ViewMapBlockEditorProps = {
   /**
    * The Lexical editor configuration.
    */
@@ -197,11 +200,11 @@ export type ViewMapBlockComponentProps = {
    */
   formData: Record<string, unknown>
   /**
-   * Always true when rendering in the editor.
+   * True when rendering in the admin editor.
    */
   isEditor: true
   /**
-   * Always false when rendering in the editor (true only in JSX converter).
+   * False when rendering in the admin editor.
    */
   isJSXConverter: false
   /**
@@ -212,7 +215,87 @@ export type ViewMapBlockComponentProps = {
    * The unique key identifying this block node.
    */
   nodeKey: string
+  /**
+   * Hook to access block UI components (BlockCollapsible, EditButton, etc.).
+   * Call this inside your component to get the context values.
+   * Passed as a prop so you don't need to import from @payloadcms/richtext-lexical/client.
+   */
+  useBlockComponentContext: () => BlockComponentContextType
 }
+
+/**
+ * Props passed to a custom Block component in JSX converter mode (frontend).
+ * Use `isEditor` to discriminate between editor and JSX converter modes.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ */
+export type ViewMapBlockJSXConverterProps<TNode extends SerializedBlockNode = SerializedBlockNode> =
+  {
+    /**
+     * Index of this node among its siblings.
+     */
+    childIndex: number
+    /**
+     * Available JSX converters for nested content.
+     */
+    converters: JSXConverters
+    /**
+     * The block's form data (field values).
+     */
+    formData: Record<string, unknown>
+    /**
+     * False when rendering via JSX converter (frontend).
+     */
+    isEditor: false
+    /**
+     * True when rendering via JSX converter (frontend).
+     */
+    isJSXConverter: true
+    /**
+     * The serialized block node.
+     */
+    node: TNode
+    /**
+     * Function to convert child nodes to JSX.
+     */
+    nodesToJSX: (args: {
+      converters?: JSXConverters
+      disableIndent?: boolean | string[]
+      disableTextAlign?: boolean | string[]
+      nodes: SerializedLexicalNode[]
+      parent?: SerializedLexicalNodeWithParent
+    }) => React.ReactNode[]
+    /**
+     * The parent node in the tree.
+     */
+    parent: SerializedLexicalNodeWithParent
+  }
+
+/**
+ * Props passed to a custom Block component in a view map.
+ * This is a discriminated union - use `isEditor` to narrow the type.
+ *
+ * When `isEditor` is true, you're in the admin editor with access to `blockContext`.
+ * When `isEditor` is false, you're in the frontend JSX converter with `nodesToJSX`.
+ *
+ * @example
+ * ```tsx
+ * const MyBlock: React.FC<ViewMapBlockComponentProps> = (props) => {
+ *   if (props.isEditor) {
+ *     // Admin editor - blockContext available
+ *     const { BlockCollapsible, EditButton } = props.blockContext
+ *     return <BlockCollapsible>{props.formData.title}</BlockCollapsible>
+ *   }
+ *   // Frontend - readonly render
+ *   return <div>{props.formData.title}</div>
+ * }
+ * ```
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ */
+export type ViewMapBlockComponentProps<TNode extends SerializedBlockNode = SerializedBlockNode> =
+  | ViewMapBlockEditorProps
+  | ViewMapBlockJSXConverterProps<TNode>
 
 /**
  *
@@ -222,10 +305,22 @@ export type ViewMapBlockComponentProps = {
 export type NodeMapBlockValue<TNode extends SerializedNodeBase = SerializedLexicalNode> = {
   /**
    * A React component that replaces the entire block, including the header/collapsible.
-   * Receives Lexical-level props (editor, config, node, formData, nodeKey).
+   * Works for both admin editor and frontend JSX conversion.
    *
-   * For React UI props (BlockCollapsible, EditButton, RemoveButton, etc.),
-   * use the `useBlockComponentContext()` hook inside your component.
+   * Use `isEditor` to discriminate between modes:
+   * - Editor mode: `blockContext` is available with UI components (BlockCollapsible, EditButton, etc.)
+   * - JSX converter mode: `nodesToJSX` is available for rendering nested content
+   *
+   * @example
+   * ```tsx
+   * Block: (props) => {
+   *   if (props.isEditor) {
+   *     const { BlockCollapsible } = props.blockContext
+   *     return <BlockCollapsible>{props.formData.title}</BlockCollapsible>
+   *   }
+   *   return <div>{props.formData.title}</div>
+   * }
+   * ```
    */
   Block?: React.FC<ViewMapBlockComponentProps>
   /**
@@ -306,7 +401,19 @@ export type LexicalEditorViewMap<
 > = {
   [viewKey: string]: {
     admin?: LexicalFieldAdminClientProps
-    lexical?: LexicalEditorConfig
+    /**
+     * Lexical editor configuration. Can be an object or a function that receives the default config.
+     * Using a function avoids needing to import defaultEditorLexicalConfig.
+     *
+     * @example
+     * ```ts
+     * lexical: (defaultConfig) => ({
+     *   ...defaultConfig,
+     *   theme: { ...defaultConfig.theme, paragraph: 'my-paragraph' },
+     * })
+     * ```
+     */
+    lexical?: ((defaultConfig: LexicalEditorConfig) => LexicalEditorConfig) | LexicalEditorConfig
     nodes: LexicalEditorNodeMap<TNodes>
   }
 }

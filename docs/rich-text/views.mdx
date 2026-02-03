@@ -164,11 +164,12 @@ Available admin options:
 
 ### Lexical Editor Configuration
 
-Override Lexical editor settings like theme classes and editor behavior:
+Override Lexical editor settings like theme classes and editor behavior. You can provide either a config object or a function that receives the default config:
 
 ```tsx
 {
   myView: {
+    // Option 1: Direct object (requires importing defaultEditorLexicalConfig)
     lexical: {
       theme: {
         link: 'custom-link-class',
@@ -183,8 +184,25 @@ Override Lexical editor settings like theme classes and editor behavior:
       // ... node overrides
     },
   },
+
+  // Option 2: Function form (recommended - no imports needed)
+  frontend: {
+    lexical: (defaultConfig) => ({
+      ...defaultConfig,
+      theme: {
+        ...defaultConfig.theme,
+        link: 'frontend-link-class',
+        paragraph: 'frontend-paragraph-class',
+      },
+    }),
+    nodes: {
+      // ... node overrides
+    },
+  },
 }
 ```
+
+The function form is recommended as it avoids needing to import `defaultEditorLexicalConfig` from `@payloadcms/richtext-lexical/client`, keeping your bundle smaller.
 
 The `lexical` property accepts any standard [Lexical Editor Config](https://lexical.dev/docs/api/interfaces/lexical.EditorConfig) options, allowing you to customize themes, namespace, and other editor-level settings per view.
 
@@ -307,45 +325,56 @@ Override specific block types:
 
 ### Block and Label Components
 
-For blocks and inline blocks, you can also use `Block` and `Label` to replace the entire block UI or just the label. These receive Lexical-level props and can use the `useBlockComponentContext()` hook for React UI components.
+For blocks and inline blocks, you can also use `Block` and `Label` to replace the entire block UI or just the label.
 
 #### Block
 
-The `Block` property replaces the entire block component, including the collapsible header. It receives Lexical-level props:
+The `Block` property replaces the entire block component, including the collapsible header. It works for **both** the admin editor and JSX converter (frontend), using a discriminated union based on `isEditor`:
 
 ```tsx
 import type { ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
-import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
+// No imports needed from /client - the hook is passed as a prop!
 
 {
   myView: {
     nodes: {
       blocks: {
         myBlockType: {
-          // Block receives: formData, nodeKey, editor, config, node, isEditor, isJSXConverter
-          Block: ({ formData, nodeKey }: ViewMapBlockComponentProps) => {
-            // Use the hook to access React UI components
-            const {
-              BlockCollapsible,  // Pre-styled collapsible wrapper
-              BlockDrawer,       // Drawer for editing fields
-              EditButton,        // Button to open the drawer
-              RemoveButton,      // Button to remove the block
-              errorCount,        // Number of validation errors
-              formSchema,        // Block field definitions
-              initialState,      // Form state
-            } = useBlockComponentContext()
+          // Block works for both editor and JSX converter
+          // Use isEditor to discriminate between modes
+          Block: (props: ViewMapBlockComponentProps) => {
+            if (props.isEditor) {
+              // Editor mode - call the hook to get UI components
+              const {
+                BlockCollapsible,  // Pre-styled collapsible wrapper
+                BlockDrawer,       // Drawer for editing fields
+                EditButton,        // Button to open the drawer
+                RemoveButton,      // Button to remove the block
+                errorCount,        // Number of validation errors
+                formSchema,        // Block field definitions
+                initialState,      // Form state
+              } = props.useBlockComponentContext()
 
-            return (
-              <BlockCollapsible>
-                <div style={{ padding: '16px' }}>
-                  <p>Block: {nodeKey}</p>
-                  <p>Text field: {formData?.text}</p>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <EditButton />
-                    <RemoveButton />
+              return (
+                <BlockCollapsible>
+                  <div style={{ padding: '16px' }}>
+                    <p>Block: {props.nodeKey}</p>
+                    <p>Text field: {props.formData?.text}</p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <EditButton />
+                      <RemoveButton />
+                    </div>
                   </div>
-                </div>
-              </BlockCollapsible>
+                </BlockCollapsible>
+              )
+            }
+
+            // JSX converter mode - readonly frontend render
+            // nodesToJSX is available for nested content
+            return (
+              <div className="my-block">
+                <p>Text: {props.formData?.text}</p>
+              </div>
             )
           },
         },
@@ -354,6 +383,24 @@ import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
   },
 }
 ```
+
+**Editor mode props** (`isEditor: true`):
+
+- `useBlockComponentContext` - Hook that returns UI components (BlockCollapsible, EditButton, RemoveButton, etc.)
+- `editor` - Lexical editor instance
+- `config` - Editor configuration
+- `node` - Live DecoratorNode instance
+- `nodeKey` - Block node key
+- `formData` - Block field values
+
+**JSX converter mode props** (`isEditor: false`):
+
+- `node` - Serialized block node
+- `formData` - Block field values
+- `nodesToJSX` - Function to convert child nodes to JSX
+- `converters` - Available JSX converters
+- `childIndex` - Index among siblings
+- `parent` - Parent node
 
 The `BlockCollapsible` component accepts these props:
 
@@ -368,9 +415,11 @@ The `BlockCollapsible` component accepts these props:
 
 #### Label
 
-The `Label` property replaces just the block label in the collapsible header:
+The `Label` property replaces just the block label in the collapsible header. Unlike `Block`, `Label` is only used in the editor and requires the `useBlockComponentContext()` hook:
 
 ```tsx
+import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
+
 {
   myView: {
     nodes: {
@@ -613,23 +662,55 @@ type NodeMapValue<T = any> = {
   html?: string | ((args: WithinEditorArgs | JSXConverterArgs<T>) => string)
 }
 
-// Props for Block components in view maps
-type ViewMapBlockComponentProps = {
+// Props for Block components in view maps (discriminated union)
+type ViewMapBlockComponentProps =
+  | ViewMapBlockEditorProps // When isEditor: true
+  | ViewMapBlockJSXConverterProps // When isEditor: false
+
+// Editor mode props
+type ViewMapBlockEditorProps = {
+  blockContext: BlockComponentContextType // UI components (see below)
   config: EditorConfig // Lexical editor configuration
   editor: LexicalEditor // Lexical editor instance
   formData: Record<string, unknown> // Block field values
-  isEditor: true // Always true in editor
-  isJSXConverter: false // Always false in editor
+  isEditor: true // Use to discriminate
+  isJSXConverter: false
   node: DecoratorNode // Lexical block node
   nodeKey: string // Unique node identifier
+}
+
+// JSX converter mode props
+type ViewMapBlockJSXConverterProps = {
+  childIndex: number // Index among siblings
+  converters: JSXConverters // Available converters
+  formData: Record<string, unknown> // Block field values
+  isEditor: false // Use to discriminate
+  isJSXConverter: true
+  node: SerializedBlockNode // Serialized block node
+  nodesToJSX: Function // Convert child nodes to JSX
+  parent: SerializedLexicalNodeWithParent
+}
+
+// Block context type (available in blockContext prop when isEditor: true)
+type BlockComponentContextType = {
+  baseClass: string // CSS base class
+  BlockCollapsible: FC // Styled collapsible wrapper
+  BlockDrawer: FC // Drawer for editing fields
+  EditButton: FC // Opens the BlockDrawer
+  RemoveButton: FC // Removes the block
+  errorCount: number // Validation error count
+  formSchema: ClientField[] // Block field definitions
+  initialState: FormState // Current form state
+  nodeKey: string // Block node key
 }
 ```
 
 ### useBlockComponentContext Hook
 
-Use this hook inside `Block` or `Label` components to access React UI components:
+Use this hook inside `Label` components to access React UI components. For `Block` components, use the `blockContext` prop instead (when `isEditor: true`):
 
 ```ts
+// For Label components only
 import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
 
 const {
@@ -643,4 +724,16 @@ const {
   nodeKey, // string - Block node key
   baseClass, // string - CSS base class
 } = useBlockComponentContext()
+```
+
+For `Block` components, access the same values via the `blockContext` prop:
+
+```tsx
+Block: (props) => {
+  if (props.isEditor) {
+    const { BlockCollapsible, EditButton } = props.blockContext
+    // ... use UI components
+  }
+  // ... frontend render
+}
 ```

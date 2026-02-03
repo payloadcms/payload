@@ -160,9 +160,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  // CustomLabel and CustomBlock are always React.ReactNode
-  // - From view maps: FC is pre-rendered in nodes/index.ts
-  // - From form state: RSC-rendered on server
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     CustomLabelFromProps ??
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve

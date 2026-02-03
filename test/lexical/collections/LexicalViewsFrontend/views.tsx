@@ -22,11 +22,12 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
       blocks: {
         customAdminComponentBlock: {
           // Block works for both editor and JSX converter modes
-          // Use isEditor to discriminate - blockContext available in editor mode
+          // Use isEditor to discriminate - useBlockComponentContext hook available in editor mode
           Block: (props: ViewMapBlockComponentProps) => {
             if (props.isEditor) {
-              // Editor mode - blockContext is available
-              const { BlockCollapsible, EditButton, RemoveButton } = props.blockContext
+              // Editor mode - call the hook to get UI components
+              const { BlockCollapsible, EditButton, RemoveButton } =
+                props.useBlockComponentContext()
               return (
                 <BlockCollapsible>
                   <div style={{ padding: '16px' }}>

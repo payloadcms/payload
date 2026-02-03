@@ -4,7 +4,13 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import React from 'react'
 
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
-import type { LexicalEditorNodeMap, NodeMapValue, SerializedNodeBase } from '../../../../types.js'
+import type {
+  LexicalEditorNodeMap,
+  NodeMapBlockValue,
+  NodeMapValue,
+  SerializedNodeBase,
+  ViewMapBlockJSXConverterProps,
+} from '../../../../types.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
@@ -39,6 +45,54 @@ function createConverterFromNodeMapValue(viewDef: NodeMapValue): JSXConverter {
 }
 
 /**
+ * Creates a JSX converter from a NodeMapBlockValue (for blocks/inlineBlocks)
+ * This also checks for Block FC as a fallback when Component is not defined.
+ */
+function createConverterFromBlockValue(viewDef: NodeMapBlockValue): JSXConverter {
+  return (args) => {
+    // Priority: Component > Block > html
+    if (viewDef.Component) {
+      const converterArgs = {
+        ...args,
+        isEditor: false as const,
+        isJSXConverter: true as const,
+      }
+      return viewDef.Component(converterArgs)
+    }
+
+    // Use Block FC with JSX converter props
+    if (viewDef.Block) {
+      const blockNode = args.node as SerializedBlockNode
+      const blockProps: ViewMapBlockJSXConverterProps = {
+        childIndex: args.childIndex,
+        converters: args.converters,
+        formData: blockNode.fields ?? {},
+        isEditor: false,
+        isJSXConverter: true,
+        node: blockNode,
+        nodesToJSX: args.nodesToJSX,
+        parent: args.parent,
+      }
+      return React.createElement(viewDef.Block, blockProps)
+    }
+
+    if (viewDef.html) {
+      const converterArgs = {
+        ...args,
+        isEditor: false as const,
+        isJSXConverter: true as const,
+      }
+      const htmlContent =
+        typeof viewDef.html === 'function' ? viewDef.html(converterArgs) : viewDef.html
+
+      return <span dangerouslySetInnerHTML={{ __html: htmlContent }} />
+    }
+
+    return null
+  }
+}
+
+/**
  * Converts a LexicalEditorNodeMap into JSXConverters
  */
 function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeBase>(
@@ -55,9 +109,10 @@ function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeB
     if (nodeType === 'blocks') {
       converters.blocks = {}
       for (const [blockType, _viewDef] of Object.entries(value)) {
-        const viewDef = _viewDef as NodeMapValue
-        if (viewDef.Component || viewDef.html) {
-          converters.blocks[blockType] = createConverterFromNodeMapValue(viewDef)
+        const viewDef = _viewDef as NodeMapBlockValue
+        // Check for Component, Block, or html
+        if (viewDef.Component || viewDef.Block || viewDef.html) {
+          converters.blocks[blockType] = createConverterFromBlockValue(viewDef)
         }
       }
       continue
@@ -66,9 +121,10 @@ function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeB
     if (nodeType === 'inlineBlocks') {
       converters.inlineBlocks = {}
       for (const [blockType, _viewDef] of Object.entries(value)) {
-        const viewDef = _viewDef as NodeMapValue
-        if (viewDef.Component || viewDef.html) {
-          converters.inlineBlocks[blockType] = createConverterFromNodeMapValue(viewDef)
+        const viewDef = _viewDef as NodeMapBlockValue
+        // Check for Component, Block, or html
+        if (viewDef.Component || viewDef.Block || viewDef.html) {
+          converters.inlineBlocks[blockType] = createConverterFromBlockValue(viewDef)
         }
       }
       continue

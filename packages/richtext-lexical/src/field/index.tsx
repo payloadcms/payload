@@ -40,8 +40,12 @@ export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) =>
   } = props
   const { currentView } = useRichTextView()
   const currentViewAdminConfig: LexicalFieldAdminClientProps = views?.[currentView]?.admin ?? _admin
+  const viewLexical = views?.[currentView]?.lexical
+  // Resolve function form of lexical config if provided
   const currentViewLexicalEditorConfig: LexicalEditorConfig =
-    views?.[currentView]?.lexical ?? _lexicalEditorConfig
+    typeof viewLexical === 'function'
+      ? viewLexical(_lexicalEditorConfig)
+      : (viewLexical ?? _lexicalEditorConfig)
 
   const { config } = useConfig()
 
