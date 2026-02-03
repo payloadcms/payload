@@ -37,25 +37,37 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
   } = props
 
   // Determine which tab should be active on initial load
-  const initialActiveTabID =
+  // First try saved preference, then default tab, then first tab
+  const preferredTabSlug =
     navPreferences.activeTab || tabs.find((tab) => tab.isDefaultActive)?.slug || tabs[0]?.slug
 
-  // Build initial tab contents - render the initially active tab on server
+  // Verify the preferred tab actually exists, otherwise fall back to default or first tab
+  const activeTab =
+    tabs.find((t) => t.slug === preferredTabSlug) ||
+    tabs.find((tab) => tab.isDefaultActive) ||
+    tabs[0]
+
+  const initialActiveTabID = activeTab?.slug || tabs[0]?.slug
+
+  // Build initial tab contents
+  // Strategy: Pre-render tabs that are already React elements (can't be lazy-loaded),
+  // and only render the initially active tab if it's a CustomComponent (can be lazy-loaded)
   const initialTabContents: Record<string, React.ReactNode> = {}
 
-  const activeTab = tabs.find((t) => t.slug === initialActiveTabID)
-  if (activeTab) {
-    // Check if component is already a React node
-    if (React.isValidElement(activeTab.component)) {
-      initialTabContents[activeTab.slug] = activeTab.component
+  const renderComponent = (
+    component: React.ReactNode | SidebarTab['component'],
+  ): React.ReactNode => {
+    // Check if component is already a React node (payload provided React component)
+    if (React.isValidElement(component)) {
+      return component
     } else {
       // Otherwise render it as a CustomComponent
-      initialTabContents[activeTab.slug] = RenderServerComponent({
+      return RenderServerComponent({
         clientProps: {
           documentSubViewType,
           viewType,
         },
-        Component: activeTab.component as SidebarTab['component'],
+        Component: component as SidebarTab['component'],
         importMap: payload.importMap,
         serverProps: {
           i18n,
@@ -70,38 +82,28 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
     }
   }
 
+  for (const tab of tabs) {
+    if (React.isValidElement(tab.component)) {
+      initialTabContents[tab.slug] = tab.component
+    }
+  }
+
+  // If the active tab is a CustomComponent (lazy-loadable), render it now
+  if (activeTab && !React.isValidElement(activeTab.component)) {
+    initialTabContents[activeTab.slug] = renderComponent(activeTab.component)
+  }
+
   return (
     <SidebarTabsClient
       baseClass={baseClass}
       initialActiveTabID={initialActiveTabID}
       initialTabContents={initialTabContents}
       tabs={tabs.map((tab) => {
-        // Check if icon is already a React element
-        const iconComponent = React.isValidElement(tab.icon)
-          ? tab.icon
-          : RenderServerComponent({
-              clientProps: {
-                documentSubViewType,
-                viewType,
-              },
-              Component: tab.icon as SidebarTab['icon'],
-              importMap: payload.importMap,
-              serverProps: {
-                i18n,
-                locale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-              },
-            })
-
         const labelText = tab.label ? getTranslation(tab.label, i18n) : tab.slug
 
         return {
           slug: tab.slug,
-          icon: iconComponent,
+          icon: renderComponent(tab.icon),
           isDefaultActive: tab.isDefaultActive,
           label: labelText,
         }
