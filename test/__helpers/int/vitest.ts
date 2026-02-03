@@ -6,7 +6,7 @@ import {
   type DatabaseAdapterType,
   getCurrentDatabaseAdapter,
 } from '../../generateDatabaseAdapter.js'
-import { mongooseList } from './isMongoose.js'
+import { mongooseList } from '../shared/isMongoose.js'
 
 type ItOptions = {
   /**
