@@ -6,6 +6,7 @@ import type { FolderListViewClientProps } from 'payload'
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
@@ -171,7 +172,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
 
   const handleSetViewType = React.useCallback(
     (view: 'grid' | 'list') => {
-      void setPreference('browse-by-folder', {
+      void setPreference(PREFERENCE_KEYS.BROWSE_BY_FOLDER, {
         viewPreference: view,
       })
       setActiveView(view)

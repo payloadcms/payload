@@ -9,6 +9,7 @@ import {
   usePreferences,
   useServerFunctions,
 } from '@payloadcms/ui'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
@@ -206,7 +207,7 @@ function useSetLayoutPreference() {
   const { setPreference } = usePreferences()
   return useCallback(
     async (layout: null | WidgetItem[]) => {
-      await setPreference('dashboard-layout', { layouts: layout }, false)
+      await setPreference(PREFERENCE_KEYS.DASHBOARD_LAYOUT, { layouts: layout }, false)
     },
     [setPreference],
   )
