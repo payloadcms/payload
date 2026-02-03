@@ -34,6 +34,7 @@ import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { type UnrenderedCustomBlock } from '../component/BlockContent.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
 type Props = {
@@ -45,10 +46,10 @@ type Props = {
   readonly cacheBuster: number
   readonly className: string
   /**
-   * Directly pass a custom block component to be rendered instead of the default one.
-   * This will have priority over the custom block component passed in the field's config.
+   * Custom block component from view map (FC + props).
+   * Will be rendered with useInlineBlockComponentContext hook.
    */
-  readonly CustomBlock?: React.ReactNode
+  readonly CustomBlock?: UnrenderedCustomBlock
   /**
    * Directly pass a custom label component to be rendered instead of the default one.
    * This will have priority over the custom label component passed in the field's config.
@@ -141,10 +142,16 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       undefined,
   )
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      const { BlockFC, editorProps } = CustomBlockFromProps
+      // Pass useInlineBlockComponentContext as useBlockComponentContext for inline blocks
+      // @ts-expect-error - inline blocks use same view map type but different context
+      return <BlockFC {...editorProps} useBlockComponentContext={useInlineBlockComponentContext} />
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    CustomBlockFromProps ?? initialState?.['_components']?.customComponents?.Block ?? undefined,
-  )
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
