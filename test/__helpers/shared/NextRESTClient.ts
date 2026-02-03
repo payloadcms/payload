@@ -11,7 +11,7 @@ import {
 } from '@payloadcms/next/routes'
 import * as qs from 'qs-esm'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '../../credentials.js'
 import { getFormDataSize } from './getFormDataSize.js'
 
 type ValidPath = `/${string}`

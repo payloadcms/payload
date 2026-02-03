@@ -4,7 +4,7 @@ import type { GeneratedTypes, Payload, SanitizedConfig } from 'payload'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { runInit } from '../runInit.js'
+import { runInit } from '../../runInit.js'
 import { getSDK } from './getSDK.js'
 import { NextRESTClient } from './NextRESTClient.js'
 

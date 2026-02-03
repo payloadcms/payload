@@ -3,7 +3,7 @@ import type { PaginatedDocs, TypedUser, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '../../credentials.js'
 
 type Args = {
   defaultSlug: string
