@@ -4,24 +4,25 @@ import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
 import React from 'react'
 
-const baseClass = 'after-nav'
+const baseClass = 'before-nav-links'
 
-export const AfterNav: PayloadClientReactComponent<
-  SanitizedConfig['admin']['components']['afterNav'][0]
+export const BeforeNavLinks: PayloadClientReactComponent<
+  SanitizedConfig['admin']['components']['beforeNavLinks'][0]
 > = () => {
   return (
     <div
       className={baseClass}
-      id="after-nav-component"
+      id="before-nav-links-component"
       style={{
         backgroundColor: 'var(--theme-success-100)',
         borderRadius: 'var(--style-radius-m)',
         color: 'var(--theme-success-750)',
-        marginTop: 'var(--base)',
+        marginBottom: 'var(--base)',
         padding: 'calc(var(--base) * 0.5)',
+        width: '100%',
       }}
     >
-      <p style={{ margin: 0 }}>afterNav</p>
+      beforeNavLinks
     </div>
   )
 }

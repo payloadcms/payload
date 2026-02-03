@@ -73,6 +73,7 @@ export default buildConfigWithDefaults({
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
+      beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
       graphics: {
         Icon: '/components/graphics/Icon.js#Icon',
         Logo: '/components/graphics/Logo.js#Logo',

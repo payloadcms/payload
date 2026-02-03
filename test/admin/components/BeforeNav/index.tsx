@@ -21,7 +21,7 @@ export const BeforeNav: PayloadClientReactComponent<
         padding: 'calc(var(--base) * 0.5)',
       }}
     >
-      <p style={{ margin: 0 }}>Before Nav Content</p>
+      <p style={{ margin: 0 }}>beforeNav</p>
     </div>
   )
 }
