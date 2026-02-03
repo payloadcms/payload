@@ -15,8 +15,8 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "eslint --cache --fix",
+      "prettier --write"
     ],
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
     "tsconfig.json": "node scripts/reset-tsconfig.js"
@@ -44,6 +44,7 @@
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
+    "@payloadcms/figma": "latest",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/kv-redis": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",

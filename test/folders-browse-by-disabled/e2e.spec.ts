@@ -1,13 +1,17 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, getRoutes, initPageConsoleErrorCatch } from '../helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import {
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+} from '../__helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
