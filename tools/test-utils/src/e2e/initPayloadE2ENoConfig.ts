@@ -2,10 +2,10 @@ import { spawn } from 'node:child_process'
 import path, { dirname, resolve } from 'path'
 import { fileURLToPath } from 'url'
 
-import type { GeneratedTypes } from './sdk/types.js'
+import type { GeneratedTypes } from '../int/sdk/types.js'
 
-import { getNextRootDir } from './getNextRootDir.js'
-import { PayloadTestSDK } from './sdk/index.js'
+import { getNextRootDir } from '../int/getNextRootDir.js'
+import { PayloadTestSDK } from '../int/sdk/index.js'
 
 const _filename = fileURLToPath(import.meta.url)
 const _dirname = dirname(_filename)
@@ -51,7 +51,7 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
         if (code === 0) {
           res()
         }
-        rej()
+        rej(new Error(`Build process exited with code ${code}`))
       })
     })
   }
