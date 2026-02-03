@@ -1,7 +1,10 @@
 'use client'
+
+import type { SidebarTabClientProps } from 'payload'
+
 import React from 'react'
 
-export const CustomIcon: React.FC = () => {
+export const CustomIcon: React.FC<SidebarTabClientProps> = () => {
   return (
     <svg height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
       <path
