@@ -46,5 +46,3 @@ export function setupVitest(options: VitestSetupOptions = {}): void {
 
   generateDatabaseAdapter(process.env.PAYLOAD_DATABASE as DatabaseAdapterType, outputDir)
 }
-
-setupVitest()
