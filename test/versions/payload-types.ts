@@ -148,7 +148,9 @@ export interface Config {
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
-  user: User;
+  user: User & {
+    collection: 'users';
+  };
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -452,6 +454,28 @@ export interface Diff {
   blocks?:
     | (
         | {
+            title?: string | null;
+            relatedItem?: {
+              relationTo: 'text';
+              value: string | Text;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'SingleRelationshipBlock';
+          }
+        | {
+            title?: string | null;
+            relatedItem?:
+              | {
+                  relationTo: 'text';
+                  value: string | Text;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ManyRelationshipBlock';
+          }
+        | {
             textInBlock?: string | null;
             id?: string | null;
             blockName?: string | null;
@@ -621,7 +645,6 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1146,6 +1169,22 @@ export interface DiffSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
+        SingleRelationshipBlock?:
+          | T
+          | {
+              title?: T;
+              relatedItem?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ManyRelationshipBlock?:
+          | T
+          | {
+              title?: T;
+              relatedItem?: T;
+              id?: T;
+              blockName?: T;
+            };
         TextBlock?:
           | T
           | {

@@ -362,8 +362,8 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "eslint --cache --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {
