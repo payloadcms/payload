@@ -119,12 +119,11 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     {
       slug: 'nav',
       component: (
-        <DefaultNavClient
-          afterNavLinks={renderedAfterNavLinks}
-          beforeNavLinks={renderedBeforeNavLinks}
-          groups={groups}
-          navPreferences={navPreferences}
-        />
+        <>
+          {renderedBeforeNavLinks}
+          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+          {renderedAfterNavLinks}
+        </>
       ),
       icon: <ListViewIcon />,
       isDefaultActive: true,
