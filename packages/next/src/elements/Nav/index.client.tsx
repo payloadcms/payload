@@ -16,11 +16,9 @@ const baseClass = 'nav'
  * @internal
  */
 export const DefaultNavClient: React.FC<{
-  afterNavLinks?: React.ReactNode
-  beforeNavLinks?: React.ReactNode
   groups: ReturnType<typeof groupNavItems>
   navPreferences: NavPreferences
-}> = ({ afterNavLinks, beforeNavLinks, groups, navPreferences }) => {
+}> = ({ groups, navPreferences }) => {
   const pathname = usePathname()
 
   const {
@@ -44,7 +42,6 @@ export const DefaultNavClient: React.FC<{
 
   return (
     <Fragment>
-      {beforeNavLinks}
       {folders && folders.browseByFolder && <BrowseByFolderButton active={viewingRootFolderView} />}
       {groups.map(({ entities, label }, key) => {
         return (
@@ -91,7 +88,6 @@ export const DefaultNavClient: React.FC<{
           </NavGroup>
         )
       })}
-      {afterNavLinks}
     </Fragment>
   )
 }
