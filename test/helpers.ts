@@ -1,4 +1,5 @@
 import type {
+  Browser,
   BrowserContext,
   CDPSession,
   ChromiumBrowserContext,
@@ -54,23 +55,37 @@ const networkConditions = {
 export async function ensureCompilationIsDone({
   customAdminRoutes,
   customRoutes,
-  page,
+  page: pageFromArgs,
   serverURL,
   noAutoLogin,
+  browser,
   readyURL,
 }: {
+  /**
+   * Provide a browser if you need this utility to create and close a temporary page for you.
+   */
+  browser?: Browser
   customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
-  page: Page
+  page?: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
+  if (!pageFromArgs && !browser) {
+    throw new Error('Either page or browser must be provided')
+  }
+  if (pageFromArgs && browser) {
+    throw new Error('Either page or browser must be provided, not both')
+  }
+
+  const page = pageFromArgs ?? (await browser!.newPage())
+
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
-  const maxAttempts = 50
+  const maxAttempts = 15
   let attempt = 1
 
   while (attempt <= maxAttempts) {
@@ -81,10 +96,11 @@ export async function ensureCompilationIsDone({
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
       )
 
-      await page.goto(adminURL)
+      // Commit is faster than waiting for the default waitUntil: load
+      await page.goto(adminURL, { waitUntil: 'commit' })
 
       if (readyURL) {
-        await page.waitForURL(readyURL)
+        await page.waitForURL(readyURL, { waitUntil: 'commit' })
       } else {
         await expect
           .poll(
@@ -105,22 +121,28 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      if (browser) {
+        await page.close()
+      }
       return
     } catch (error) {
-      console.error(`Compilation not done yet`)
-
       if (attempt === maxAttempts) {
-        console.error('Max retry attempts reached. Giving up.')
+        console.error(
+          'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
+        )
         throw error
       }
 
-      console.log('Retrying in 3 seconds...')
-      await wait(3000)
+      console.log('Compilation not done yet. Retrying in 2 seconds...')
+      await wait(2000)
       attempt++
     }
   }
 
   if (noAutoLogin) {
+    if (browser) {
+      await page.close()
+    }
     return
   }
   await expect(() => expect(page.locator('.template-default')).toBeVisible()).toPass({
@@ -128,6 +150,10 @@ export async function ensureCompilationIsDone({
   })
 
   await expect(page.locator('.dashboard__label').first()).toBeVisible()
+
+  if (browser) {
+    await page.close()
+  }
 }
 
 /**

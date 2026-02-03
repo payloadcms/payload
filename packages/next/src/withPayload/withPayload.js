@@ -36,7 +36,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
   const consoleWarn = console.warn
   const sassWarningText =
-    'SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary'
+    'Future import deprecation is not yet active, so silencing it is unnecessary'
   console.warn = (...args) => {
     if (
       (typeof args[1] === 'string' && args[1].includes(sassWarningText)) ||
@@ -202,6 +202,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           'sharp',
           'libsql',
           'require-in-the-middle',
+          'json-schema-to-typescript',
         ],
         plugins: [
           ...(incomingWebpackConfig?.plugins || []),
@@ -260,6 +261,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         'sharp',
         'libsql',
         'require-in-the-middle',
+        'json-schema-to-typescript',
         // Prevents turbopack build errors by the thread-stream package which is installed by pino
         'pino',
       ],

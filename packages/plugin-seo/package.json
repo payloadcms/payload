@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "3.72.0",
+  "version": "3.74.0",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",
@@ -74,7 +74,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
-    "@types/react": "19.2.8",
+    "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },

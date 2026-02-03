@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
@@ -18,6 +18,7 @@ export const findGlobalTool = (
     depth: number = 0,
     locale?: string,
     fallbackLocale?: string,
+    select?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -39,12 +40,33 @@ export const findGlobalTool = (
         user,
       }
 
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON for global: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (globals?.[globalSlug]?.overrideResponse?.(response, {}, req) || response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // Add locale parameters if provided
       if (locale) {
         findOptions.locale = locale
       }
       if (fallbackLocale) {
         findOptions.fallbackLocale = fallbackLocale
+      }
+      if (selectClause) {
+        findOptions.select = selectClause
       }
 
       const result = await payload.findGlobal(findOptions)
@@ -96,8 +118,8 @@ ${JSON.stringify(result, null, 2)}
       `find${globalSlug.charAt(0).toUpperCase() + toCamelCase(globalSlug).slice(1)}`,
       `${toolSchemas.findGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
       toolSchemas.findGlobal.parameters.shape,
-      async ({ depth, fallbackLocale, locale }) => {
-        return await tool(depth, locale, fallbackLocale)
+      async ({ depth, fallbackLocale, locale, select }) => {
+        return await tool(depth, locale, fallbackLocale, select)
       },
     )
   }

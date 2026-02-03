@@ -83,6 +83,7 @@ export interface Config {
     'before-delete-hooks': BeforeDeleteHook;
     'before-delete-2-hooks': BeforeDelete2Hook;
     'value-hooks': ValueHook;
+    'after-read': AfterRead;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -106,6 +107,7 @@ export interface Config {
     'before-delete-hooks': BeforeDeleteHooksSelect<false> | BeforeDeleteHooksSelect<true>;
     'before-delete-2-hooks': BeforeDelete2HooksSelect<false> | BeforeDelete2HooksSelect<true>;
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
+    'after-read': AfterReadSelect<false> | AfterReadSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -122,9 +124,7 @@ export interface Config {
     'data-hooks-global': DataHooksGlobalSelect<false> | DataHooksGlobalSelect<true>;
   };
   locale: null;
-  user: HooksUser & {
-    collection: 'hooks-users';
-  };
+  user: HooksUser;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -339,6 +339,7 @@ export interface HooksUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'hooks-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -385,6 +386,16 @@ export interface ValueHook {
   slug?: string | null;
   beforeValidate_value?: string | null;
   beforeChange_value?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "after-read".
+ */
+export interface AfterRead {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -475,6 +486,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'value-hooks';
         value: string | ValueHook;
+      } | null)
+    | ({
+        relationTo: 'after-read';
+        value: string | AfterRead;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -727,6 +742,15 @@ export interface ValueHooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "after-read_select".
+ */
+export interface AfterReadSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -803,6 +827,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

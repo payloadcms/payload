@@ -47,6 +47,7 @@ import {
   userRestrictedCollectionSlug,
   userRestrictedGlobalSlug,
 } from './shared.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -102,7 +103,7 @@ describe('Access Control', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
     await login({ page, serverURL })
   })
@@ -158,8 +159,8 @@ describe('Access Control', () => {
             }
           },
           {
-            minimumNumberOfRequests: action === 'save' ? 2 : 1,
             allowedNumberOfRequests: action === 'save' ? 2 : 1,
+            minimumNumberOfRequests: action === 'save' ? 2 : 1,
           },
         )
       }
@@ -260,7 +261,7 @@ describe('Access Control', () => {
       await expect(async () => {
         const isAttached = page.locator('#field-group1 .rich-text-lexical--read-only')
         await expect(isAttached).toBeHidden()
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
       await expect(page.locator('#field-group1 #field-group1__text')).toBeEnabled()
 
       // Click on button with text Tab1
@@ -338,7 +339,7 @@ describe('Access Control', () => {
       await expect(async () => {
         const isAttached = page.locator('#field-group .rich-text-lexical--read-only')
         await expect(isAttached).toBeHidden()
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
       await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
 
       await expect(
@@ -409,7 +410,6 @@ describe('Access Control', () => {
 
       await page.goto(restrictedUrl.list)
 
-      // eslint-disable-next-line payload/no-flaky-assertions
       expect(errors).not.toHaveLength(0)
     })
 
@@ -648,8 +648,8 @@ describe('Access Control', () => {
       })
 
       await payload.update({
-        collection: restrictedVersionsAdminPanelSlug,
         id: existingDoc.id,
+        collection: restrictedVersionsAdminPanelSlug,
         data: {
           hidden: true,
         },
@@ -703,6 +703,9 @@ describe('Access Control', () => {
       const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
       const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
 
+      // Wait for hydration
+      await wait(1000)
+
       // Ensure admin user cannot unlock other users
       await adminUserRow.locator('.cell-id a').click()
       await page.waitForURL(`**/collections/users/**`)
@@ -713,6 +716,9 @@ describe('Access Control', () => {
       await expect(page.locator('.payload-toast-container')).toContainText('Successfully unlocked')
 
       await page.goto(usersUrl.list)
+
+      // Wait for hydration
+      await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
       await nonAdminUserRow.locator('.cell-id a').click()
@@ -781,11 +787,11 @@ describe('Access Control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          value: user.token,
           domain: 'localhost',
-          path: '/',
           httpOnly: true,
+          path: '/',
           secure: true,
+          value: user.token,
         },
       ])
 
@@ -1724,25 +1730,17 @@ describe('Access Control', () => {
       const doc = await payload.create({
         collection: blocksFieldAccessSlug,
         data: {
-          title: 'Test Document',
-          editableBlocks: [
-            {
-              blockType: 'testBlock',
-              title: 'Editable Block Title',
-              content: 'Editable block content',
-            },
-          ],
-          readOnlyBlocks: [
-            {
-              blockType: 'testBlock2',
-              title: 'Read-Only Block Title',
-              content: 'Read-only block content',
-            },
-          ],
           editableBlockRefs: [
             {
               blockType: 'titleblock',
               title: 'Editable Block Reference Title',
+            },
+          ],
+          editableBlocks: [
+            {
+              blockType: 'testBlock',
+              content: 'Editable block content',
+              title: 'Editable Block Title',
             },
           ],
           readOnlyBlockRefs: [
@@ -1751,21 +1749,29 @@ describe('Access Control', () => {
               title: 'Read-Only Block Reference Title',
             },
           ],
+          readOnlyBlocks: [
+            {
+              blockType: 'testBlock2',
+              content: 'Read-only block content',
+              title: 'Read-Only Block Title',
+            },
+          ],
           tabReadOnlyTest: {
-            tabReadOnlyBlocks: [
-              {
-                blockType: 'testBlock3',
-                title: 'Tab Read-Only Block Title',
-                content: 'Tab read-only block content',
-              },
-            ],
             tabReadOnlyBlockRefs: [
               {
                 blockType: 'titleblock',
                 title: 'Tab Read-Only Block Reference Title',
               },
             ],
+            tabReadOnlyBlocks: [
+              {
+                blockType: 'testBlock3',
+                content: 'Tab read-only block content',
+                title: 'Tab Read-Only Block Title',
+              },
+            ],
           },
+          title: 'Test Document',
         },
       })
 

@@ -86,12 +86,16 @@ describe('Date', () => {
 
   test('should display formatted date in useAsTitle', async () => {
     await goToListView(page)
+    // Wait for hydration
+    await wait(1000)
     await page.locator('.row-1 .cell-default a').click()
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
   })
 
   test('should retain date format in useAsTitle after modifying value', async () => {
     await goToListView(page)
+    // Wait for hydration
+    await wait(1000)
     await page.locator('.row-1 .cell-default a').click()
     await expect(page.locator('.doc-header__title.render-title')).toContainText('August')
 
