@@ -2,6 +2,9 @@
 import type { LexicalEditorViewMap, ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
 import type { BlockNode } from '@payloadcms/richtext-lexical/client'
 
+import { RichText } from '@payloadcms/richtext-lexical/react'
+
+import type { BannerBlock } from '../../payload-types.js'
 import type { LexicalViewsFrontendNodes } from './index.js'
 
 export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNodes> = {
@@ -20,20 +23,53 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
     }),
     nodes: {
       blocks: {
-        customAdminComponentBlock: {
-          // Block works for both editor and JSX converter modes
-          // Use isEditor to discriminate - useBlockComponentContext hook available in editor mode
+        banner: {
           Block: (props: ViewMapBlockComponentProps) => {
+            const formData = props.formData as unknown as BannerBlock
+
             if (props.isEditor) {
-              // Editor mode - call the hook to get UI components
+              // Editor mode - render a simple placeholder
               const { BlockCollapsible, EditButton, RemoveButton } =
                 props.useBlockComponentContext()
+
+              const isImportant = formData?.type === 'important'
+
               return (
                 <BlockCollapsible>
-                  <div style={{ padding: '16px' }}>
-                    <p>Custom Block for: {props.nodeKey}</p>
-                    <p>Form data: {JSON.stringify(props.formData)}</p>
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <div
+                    style={{
+                      backgroundColor: isImportant ? '#fef2f2' : '#f0f9ff',
+                      borderLeft: `4px solid ${isImportant ? '#ef4444' : '#3b82f6'}`,
+                      padding: '16px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        gap: '8px',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <span style={{ fontSize: '20px' }}>{isImportant ? '⚠️' : 'ℹ️'}</span>
+                      <strong>{formData?.title || 'Untitled Banner'}</strong>
+                      <span
+                        style={{
+                          backgroundColor: isImportant ? '#ef4444' : '#3b82f6',
+                          borderRadius: '4px',
+                          color: 'white',
+                          fontSize: '11px',
+                          marginLeft: 'auto',
+                          padding: '2px 8px',
+                        }}
+                      >
+                        {isImportant ? 'Important' : 'Normal'}
+                      </span>
+                    </div>
+                    <div style={{ color: '#6b7280', fontSize: '14px' }}>
+                      [Rich text content - edit to modify]
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                       <EditButton />
                       <RemoveButton />
                     </div>
@@ -41,11 +77,47 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
                 </BlockCollapsible>
               )
             }
-            // JSX converter mode - readonly frontend render
+
+            // JSX converter mode - full frontend render
+            const isImportant = formData?.type === 'important'
+
             return (
-              <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '16px' }}>
-                <p>Custom Block (readonly)</p>
-                <p>Form data: {JSON.stringify(props.formData)}</p>
+              <div
+                style={{
+                  backgroundColor: isImportant ? '#fef2f2' : '#f0f9ff',
+                  borderLeft: `4px solid ${isImportant ? '#ef4444' : '#3b82f6'}`,
+                  borderRadius: '8px',
+                  margin: '16px 0',
+                  padding: '20px',
+                }}
+              >
+                <div
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <span style={{ fontSize: '24px' }}>{isImportant ? '⚠️' : 'ℹ️'}</span>
+                  <h3
+                    style={{
+                      color: isImportant ? '#b91c1c' : '#1d4ed8',
+                      fontSize: '18px',
+                      fontWeight: 600,
+                      margin: 0,
+                    }}
+                  >
+                    {formData?.title || 'Banner'}
+                  </h3>
+                </div>
+                <div style={{ color: '#374151', lineHeight: 1.6 }}>
+                  {formData?.content ? (
+                    <RichText data={formData.content} />
+                  ) : (
+                    <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>No content</p>
+                  )}
+                </div>
               </div>
             )
           },

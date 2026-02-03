@@ -12,13 +12,28 @@ export const lexicalViewsFrontendBlocks: Block[] = [
     interfaceName: 'ViewsTestBlock',
   },
   {
-    slug: 'customAdminComponentBlock',
+    slug: 'banner',
     fields: [
       {
-        name: 'text',
+        name: 'type',
+        type: 'select',
+        defaultValue: 'normal',
+        options: [
+          { label: 'Normal', value: 'normal' },
+          { label: 'Important', value: 'important' },
+        ],
+        required: true,
+      },
+      {
+        name: 'title',
         type: 'text',
+        required: true,
+      },
+      {
+        name: 'content',
+        type: 'richText',
       },
     ],
-    interfaceName: 'CustomAdminComponentBlock',
+    interfaceName: 'BannerBlock',
   },
 ]

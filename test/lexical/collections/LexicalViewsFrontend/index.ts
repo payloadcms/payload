@@ -7,7 +7,7 @@ import {
   type SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
 
-import type { CustomAdminComponentBlock, ViewsTestBlock } from '../../payload-types.js'
+import type { BannerBlock, ViewsTestBlock } from '../../payload-types.js'
 
 import { lexicalViewsFrontendSlug } from '../../slugs.js'
 import { DebugViewsJSXConverterFeature } from '../LexicalViews/viewsJSXConverter/server/index.js'
@@ -15,7 +15,7 @@ import { lexicalViewsFrontendBlocks } from './blocks.js'
 
 export type LexicalViewsFrontendNodes =
   | DefaultNodeTypes
-  | SerializedBlockNode<CustomAdminComponentBlock | ViewsTestBlock>
+  | SerializedBlockNode<BannerBlock | ViewsTestBlock>
 
 export const LexicalViewsFrontend: CollectionConfig = {
   slug: lexicalViewsFrontendSlug,

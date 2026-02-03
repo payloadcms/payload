@@ -271,7 +271,7 @@ export const seed = async (_payload: Payload) => {
     ],
   })
 
-  // Editor state with customAdminComponentBlock (for lexical-views-frontend)
+  // Editor state with banner block (for lexical-views-frontend)
   const editorStateFrontend = buildEditorState<LexicalViewsFrontendNodes>({
     nodes: [
       {
@@ -283,7 +283,7 @@ export const seed = async (_payload: Payload) => {
             format: 0,
             mode: 'normal',
             style: '',
-            text: 'English text',
+            text: 'This page demonstrates the banner block with custom view map rendering.',
             version: 1,
           },
         ],
@@ -295,15 +295,44 @@ export const seed = async (_payload: Payload) => {
         version: 1,
       },
       {
-        type: 'horizontalrule',
-        version: 1,
-      },
-      {
         type: 'block',
         fields: {
-          id: '68f6d92d965ad2082111b96d',
+          id: '68f6d92d965ad2082111b96a',
+          type: 'normal',
           blockName: '',
-          blockType: 'viewsTestBlock',
+          blockType: 'banner',
+          content: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'This is an informational banner with some helpful content.',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Welcome to Views',
         },
         format: '',
         version: 2,
@@ -311,10 +340,62 @@ export const seed = async (_payload: Payload) => {
       {
         type: 'block',
         fields: {
-          id: '68f6d924965ad2082111b96d',
+          id: '68f6d92d965ad2082111b96b',
+          type: 'important',
           blockName: '',
-          blockType: 'customAdminComponentBlock',
-          text: 'mytext',
+          blockType: 'banner',
+          content: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 1,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Warning:',
+                      version: 1,
+                    },
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' Please read the documentation before proceeding.',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Important Notice',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96c',
+          blockName: '',
+          blockType: 'viewsTestBlock',
+          text: 'This is a test block with custom styling',
         },
         format: '',
         version: 2,
@@ -328,7 +409,7 @@ export const seed = async (_payload: Payload) => {
             format: 0,
             mode: 'normal',
             style: '',
-            text: 'My Heading',
+            text: 'Custom Styled Heading',
             version: 1,
           },
         ],
