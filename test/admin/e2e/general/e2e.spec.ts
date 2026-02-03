@@ -832,6 +832,59 @@ describe('General', () => {
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
+
+    test('should render beforeNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      await expect(beforeNav).toContainText('beforeNav')
+    })
+
+    test('should render afterNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      await expect(afterNav).toContainText('afterNav')
+    })
+
+    test('should render beforeNav and afterNav outside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNav is outside the nav element
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      const beforeNavInNav = page.locator('nav.nav__wrap #before-nav-component')
+      await expect(beforeNavInNav).toHaveCount(0)
+
+      // Verify afterNav is outside the nav element
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      const afterNavInNav = page.locator('nav.nav__wrap #after-nav-component')
+      await expect(afterNavInNav).toHaveCount(0)
+    })
+
+    test('should render beforeNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNavLinks is inside the nav element
+      const beforeNavLinksInNav = page.locator('nav.nav__wrap #before-nav-links-component')
+      await expect(beforeNavLinksInNav).toBeVisible()
+      await expect(beforeNavLinksInNav).toContainText('beforeNavLinks')
+    })
+
+    test('should render afterNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify afterNavLinks is inside the nav element
+      const afterNavLinksInNav = page.locator('nav.nav__wrap #after-nav-links-component')
+      await expect(afterNavLinksInNav).toBeVisible()
+      await expect(afterNavLinksInNav).toContainText('afterNavLinks')
+    })
   })
 
   describe('i18n', () => {
