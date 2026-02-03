@@ -312,14 +312,14 @@ export const createOperation = async <
     }
 
     const verificationToken = doc._verificationToken
-    const resultWithLocales: Document = sanitizeInternalFields(doc)
+    let resultWithLocales: Document = sanitizeInternalFields(doc)
 
     // /////////////////////////////////////
     // Add collection property for auth collections
     // /////////////////////////////////////
 
     if (collectionConfig.auth) {
-      result = { ...result, collection: collectionConfig.slug }
+      resultWithLocales = { ...resultWithLocales, collection: collectionConfig.slug }
     }
 
     // /////////////////////////////////////
