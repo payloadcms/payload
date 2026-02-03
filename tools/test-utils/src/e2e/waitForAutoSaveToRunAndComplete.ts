@@ -3,8 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
-import { POLL_TOPASS_TIMEOUT } from '../helpers.js'
-import { closeAllToasts } from './helpers.js'
+import { closeAllToasts, POLL_TOPASS_TIMEOUT } from './helpers.js'
 
 export async function waitForAutoSaveToRunAndComplete(
   page: Locator | Page,
