@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type { AdminUrlUtil } from '../adminUrlUtil.js'
+import type { AdminUrlUtil } from '../shared/adminUrlUtil.js'
 
 import { waitForFormReady } from './helpers.js'
 
