@@ -31,6 +31,8 @@
       }
     ],
     "paths": {
+      "@tools/test-utils": ["./tools/test-utils/src/index.ts"],
+      "@tools/test-utils/*": ["./tools/test-utils/src/*.ts"],
       "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
       "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],

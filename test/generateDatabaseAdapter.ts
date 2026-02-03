@@ -1,16 +1,15 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
 import type { DatabaseAdapterType } from '@tools/test-utils/database'
 
 import { generateDatabaseAdapter as generateDatabaseAdapterBase } from '@tools/test-utils/database'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export {
   allDatabaseAdapters,
-  DatabaseAdapterType,
   defaultPostgresUrl,
   getCurrentDatabaseAdapter,
 } from '@tools/test-utils/database'
+export type { DatabaseAdapterType } from '@tools/test-utils/database'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
