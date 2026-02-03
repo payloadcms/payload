@@ -305,6 +305,88 @@ Override specific block types:
 }
 ```
 
+### Block and Label Components
+
+For blocks and inline blocks, you can also use `Block` and `Label` to replace the entire block UI or just the label. These receive Lexical-level props and can use the `useBlockComponentContext()` hook for React UI components.
+
+#### Block
+
+The `Block` property replaces the entire block component, including the collapsible header. It receives Lexical-level props:
+
+```tsx
+import type { ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
+import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
+
+{
+  myView: {
+    nodes: {
+      blocks: {
+        myBlockType: {
+          // Block receives: formData, nodeKey, editor, config, node, isEditor, isJSXConverter
+          Block: ({ formData, nodeKey }: ViewMapBlockComponentProps) => {
+            // Use the hook to access React UI components
+            const {
+              BlockCollapsible,  // Pre-styled collapsible wrapper
+              BlockDrawer,       // Drawer for editing fields
+              EditButton,        // Button to open the drawer
+              RemoveButton,      // Button to remove the block
+              errorCount,        // Number of validation errors
+              formSchema,        // Block field definitions
+              initialState,      // Form state
+            } = useBlockComponentContext()
+
+            return (
+              <BlockCollapsible>
+                <div style={{ padding: '16px' }}>
+                  <p>Block: {nodeKey}</p>
+                  <p>Text field: {formData?.text}</p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <EditButton />
+                    <RemoveButton />
+                  </div>
+                </div>
+              </BlockCollapsible>
+            )
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+The `BlockCollapsible` component accepts these props:
+
+- `children`: Content inside the collapsible
+- `Actions`: Custom content for the header actions area (replaces EditButton/RemoveButton)
+- `Label`: Custom label content
+- `Pill`: Custom pill component
+- `className`: Additional CSS class
+- `editButton`: Show/hide edit button (default: true)
+- `removeButton`: Show/hide remove button (default: true)
+- `disableBlockName`: Hide the block name field
+
+#### Label
+
+The `Label` property replaces just the block label in the collapsible header:
+
+```tsx
+{
+  myView: {
+    nodes: {
+      blocks: {
+        myBlockType: {
+          Label: () => {
+            const { nodeKey } = useBlockComponentContext()
+            return <span style={{ color: 'blue' }}>Custom Label: {nodeKey}</span>
+          },
+        },
+      },
+    },
+  },
+}
+```
+
 ### Inline Blocks
 
 Override specific inline block types:
@@ -490,6 +572,7 @@ import type {
   LexicalEditorViewMap,
   LexicalEditorNodeMap,
   NodeMapValue,
+  ViewMapBlockComponentProps,
   LexicalFieldAdminClientProps,
 } from '@payloadcms/richtext-lexical'
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
@@ -529,4 +612,35 @@ type NodeMapValue<T = any> = {
   createDOM?: (args: WithinEditorArgs | JSXConverterArgs<T>) => HTMLElement
   html?: string | ((args: WithinEditorArgs | JSXConverterArgs<T>) => string)
 }
+
+// Props for Block components in view maps
+type ViewMapBlockComponentProps = {
+  config: EditorConfig // Lexical editor configuration
+  editor: LexicalEditor // Lexical editor instance
+  formData: Record<string, unknown> // Block field values
+  isEditor: true // Always true in editor
+  isJSXConverter: false // Always false in editor
+  node: DecoratorNode // Lexical block node
+  nodeKey: string // Unique node identifier
+}
+```
+
+### useBlockComponentContext Hook
+
+Use this hook inside `Block` or `Label` components to access React UI components:
+
+```ts
+import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
+
+const {
+  BlockCollapsible, // FC<BlockCollapsibleProps> - Styled collapsible wrapper
+  BlockDrawer, // FC - Drawer for editing block fields
+  EditButton, // FC - Opens the BlockDrawer
+  RemoveButton, // FC - Removes the block
+  errorCount, // number - Validation error count
+  formSchema, // ClientField[] - Block field definitions
+  initialState, // FormState - Current form state
+  nodeKey, // string - Block node key
+  baseClass, // string - CSS base class
+} = useBlockComponentContext()
 ```
