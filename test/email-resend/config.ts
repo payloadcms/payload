@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { resendAdapter } from '@payloadcms/email-resend'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 
 export default buildConfigWithDefaults({
   admin: {

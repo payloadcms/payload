@@ -2,7 +2,9 @@ import type { SuiteFactory, TestFunction } from 'vitest'
 
 import { describe as vitestDescribe, it as vitestIt } from 'vitest'
 
-import { type DatabaseAdapterType, getCurrentDatabaseAdapter } from '@tools/test-utils/database'
+import type { DatabaseAdapterType } from '../shared/database/index.js'
+
+import { getCurrentDatabaseAdapter } from '../shared/database/index.js'
 import { mongooseList } from './isMongoose.js'
 
 type ItOptions = {

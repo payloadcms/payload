@@ -8,8 +8,8 @@ import { fileURLToPath } from 'url'
 
 import type { Post, User } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 

@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Pages } from './collections/Pages.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'

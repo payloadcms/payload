@@ -3,10 +3,10 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { generateImportMap, type SanitizedConfig } from 'payload'
 
-import type { allDatabaseAdapters } from './generateDatabaseAdapter.js'
+import type { allDatabaseAdapters } from '@tools/test-utils/database'
 
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
-import { getNextRootDir } from './helpers/getNextRootDir.js'
+import { generateDatabaseAdapter } from '@tools/test-utils/database'
+import { getNextRootDir } from '@tools/test-utils/int'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

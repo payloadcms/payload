@@ -5,7 +5,7 @@ import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 import type { Config } from './payload-types.js'
 
 import {
@@ -15,21 +15,21 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { loginClientSide } from '../helpers/e2e/auth/login.js'
-import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
-import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { loginClientSide } from '@tools/test-utils/e2e'
+import { openRelationshipFieldDrawer } from '@tools/test-utils/e2e'
+import { goToListDoc } from '@tools/test-utils/e2e'
 import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
   selectInput,
-} from '../helpers/e2e/selectInput.js'
-import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '@tools/test-utils/e2e'
+import { closeNav, openNav } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { credentials } from './credentials.js'
+import { credentials } from '@tools/test-utils/shared'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)

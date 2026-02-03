@@ -2,7 +2,7 @@ import type { Config } from 'payload'
 
 import { v4 as uuid } from 'uuid'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { apiKeysSlug } from './shared.js'
 
 export const seed: Config['onInit'] = async (payload) => {

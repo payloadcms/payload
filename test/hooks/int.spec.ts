@@ -5,11 +5,11 @@ import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '@tools/test-utils/int'
 
-import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
+import { devUser, regularUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
+import { isMongoose } from '@tools/test-utils/int'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,

@@ -8,7 +8,7 @@ import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-le
 
 import type { User } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Auth } from './collections/Auth/index.js'
 import { BlocksFieldAccess } from './collections/BlocksFieldAccess/index.js'
 import { Disabled } from './collections/Disabled/index.js'

@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/nextjs'
 import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 

@@ -4,7 +4,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { seed } from './seed.js'
 import { CreateSimpleRetries0Task } from './tasks/CreateSimpleRetries0Task.js'
 import { CreateSimpleRetriesUndefinedTask } from './tasks/CreateSimpleRetriesUndefinedTask.js'

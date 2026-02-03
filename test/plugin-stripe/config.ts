@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Customers } from './collections/Customers.js'
 import { Products } from './collections/Products.js'
 import { Users } from './collections/Users.js'

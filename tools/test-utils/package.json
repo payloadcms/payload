@@ -15,17 +15,27 @@
     "./shared": "./src/shared/index.ts"
   },
   "peerDependencies": {
+    "@payloadcms/next": ">=3.0.0",
+    "@payloadcms/sdk": ">=0.0.1",
     "@playwright/test": ">=1.40.0",
     "payload": ">=3.0.0",
     "vitest": ">=2.0.0"
   },
   "dependencies": {
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "http-status": "^2.0.0",
+    "qs-esm": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2"
   },
   "peerDependenciesMeta": {
+    "@payloadcms/next": {
+      "optional": true
+    },
+    "@payloadcms/sdk": {
+      "optional": true
+    },
     "@playwright/test": {
       "optional": true
     },

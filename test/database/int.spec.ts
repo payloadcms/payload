@@ -35,10 +35,10 @@ import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
-import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
 import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
+import { describe, it } from '@tools/test-utils/int'
 import { seed } from './seed.js'
 import {
   defaultValuesSlug,

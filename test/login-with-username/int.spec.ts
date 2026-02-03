@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
 
 let payload: Payload
 

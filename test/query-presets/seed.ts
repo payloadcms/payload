@@ -1,7 +1,7 @@
 import type { Payload, QueryPreset } from 'payload'
 
-import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
+import { devUser as devCredentials, regularUser as regularCredentials } from '@tools/test-utils/shared'
+import { executePromises } from '@tools/test-utils/int'
 import { pagesSlug, postsSlug, usersSlug } from './slugs.js'
 
 type SeededQueryPreset = {

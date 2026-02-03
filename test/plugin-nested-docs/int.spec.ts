@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Page } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '@tools/test-utils/int'
 
 let payload: Payload
 

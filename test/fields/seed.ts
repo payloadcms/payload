@@ -4,8 +4,8 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
+import { devUser } from '@tools/test-utils/shared'
+import { seedDB } from '@tools/test-utils/int'
 // TODO: decouple blocks from both test suites
 import { richTextDocData } from '../lexical/collections/RichText/data.js'
 import { arrayDoc } from './collections/Array/shared.js'

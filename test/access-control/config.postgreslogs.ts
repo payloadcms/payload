@@ -1,6 +1,6 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 /* eslint-disable no-restricted-exports */
-import { defaultPostgresUrl } from '../generateDatabaseAdapter.js'
+import { defaultPostgresUrl } from '@tools/test-utils/database'
 import { getConfig } from './getConfig.js'
 
 const config = getConfig()

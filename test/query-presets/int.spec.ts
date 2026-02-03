@@ -4,8 +4,8 @@ import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser, regularUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
 

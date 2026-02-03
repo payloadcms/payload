@@ -10,14 +10,14 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { openListFilters } from '../helpers/e2e/filters/index.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { assertNetworkRequests } from '@tools/test-utils/e2e'
+import { openListFilters } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>

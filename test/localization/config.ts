@@ -7,7 +7,7 @@ import type { CollectionConfig } from 'payload'
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { AllFieldsLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
 import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'

@@ -6,7 +6,7 @@ const dirname = path.dirname(filename)
 import { commitTransaction, initTransaction, killTransaction } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 
 const resolveTransactionId = async (_obj, _args, context) => {
   try {

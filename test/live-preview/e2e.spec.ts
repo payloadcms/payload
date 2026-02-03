@@ -6,27 +6,27 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
 import {
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
   toggleLivePreview,
-} from '../helpers/e2e/live-preview/index.js'
-import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from '../helpers/e2e/preferences.js'
-import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '@tools/test-utils/e2e'
+import { navigateToDoc, navigateToTrashedDoc } from '@tools/test-utils/e2e'
+import { deletePreferences } from '@tools/test-utils/e2e'
+import { runAxeScan } from '@tools/test-utils/e2e'
+import { waitForAutoSaveToRunAndComplete } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,

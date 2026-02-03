@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 
 export const _seed = async (_payload: Payload) => {
   await _payload.create({

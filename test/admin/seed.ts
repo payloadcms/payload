@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
+import { devUser } from '@tools/test-utils/shared'
+import { executePromises } from '@tools/test-utils/int'
 import {
   collectionSlugs,
   customDocumentControlsSlug,

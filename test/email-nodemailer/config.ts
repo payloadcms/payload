@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 
 export default buildConfigWithDefaults({
   admin: {

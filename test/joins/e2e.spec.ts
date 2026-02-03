@@ -5,7 +5,7 @@ import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRu
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 import type { Config } from './payload-types.js'
 
 import {
@@ -16,12 +16,12 @@ import {
   saveDocAndAssert,
   // throttleTest,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { reorderColumns } from '../helpers/e2e/columns/index.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { RESTClient } from '../helpers/rest.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { reorderColumns } from '@tools/test-utils/e2e'
+import { navigateToDoc } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
+import { RESTClient } from '@tools/test-utils/int'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,

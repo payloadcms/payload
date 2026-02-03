@@ -5,8 +5,8 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
 

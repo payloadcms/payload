@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { EmailsCollection } from './collections/Emails.js'
 import { PostsCollection } from './collections/Posts.js'
 import { Users } from './collections/Users.js'

@@ -26,8 +26,8 @@ import {
 import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
-import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
+import { devUser } from '@tools/test-utils/shared'
+import { seedDB } from '@tools/test-utils/int'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'

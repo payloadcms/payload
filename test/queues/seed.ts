@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
+import { devUser } from '@tools/test-utils/shared'
+import { seedDB } from '@tools/test-utils/int'
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({

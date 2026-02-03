@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '@tools/test-utils/int'
 import removeFiles from '../helpers/removeFiles.js'
 import { mediaSlug } from './shared.js'
 

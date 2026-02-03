@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { docsBasePath } from './collections/Posts/shared.js'

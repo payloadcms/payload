@@ -4,7 +4,7 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import {
   animatedTypeMedia,

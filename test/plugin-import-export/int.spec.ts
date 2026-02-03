@@ -6,10 +6,10 @@ import { extractID } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '@tools/test-utils/int'
 
-import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser, regularUser } from '@tools/test-utils/shared'
+import { initPayloadInt } from '@tools/test-utils/int'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 

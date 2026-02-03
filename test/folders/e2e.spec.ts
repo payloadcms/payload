@@ -12,22 +12,22 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
 import {
   getSelectInputOptions,
   getSelectInputValue,
   openSelectMenu,
-} from '../helpers/e2e/selectInput.js'
-import { applyBrowseByFolderTypeFilter } from '../helpers/folders/applyBrowseByFolderTypeFilter.js'
-import { clickFolderCard } from '../helpers/folders/clickFolderCard.js'
-import { createFolder } from '../helpers/folders/createFolder.js'
-import { createFolderDoc } from '../helpers/folders/createFolderDoc.js'
-import { createFolderFromDoc } from '../helpers/folders/createFolderFromDoc.js'
-import { expectNoResultsAndCreateFolderButton } from '../helpers/folders/expectNoResultsAndCreateFolderButton.js'
-import { selectFolderAndConfirmMove } from '../helpers/folders/selectFolderAndConfirmMove.js'
-import { selectFolderAndConfirmMoveFromList } from '../helpers/folders/selectFolderAndConfirmMoveFromList.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '@tools/test-utils/e2e'
+import { applyBrowseByFolderTypeFilter } from '@tools/test-utils/e2e'
+import { clickFolderCard } from '@tools/test-utils/e2e'
+import { createFolder } from '@tools/test-utils/e2e'
+import { createFolderDoc } from '@tools/test-utils/e2e'
+import { createFolderFromDoc } from '@tools/test-utils/e2e'
+import { expectNoResultsAndCreateFolderButton } from '@tools/test-utils/e2e'
+import { selectFolderAndConfirmMove } from '@tools/test-utils/e2e'
+import { selectFolderAndConfirmMoveFromList } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 

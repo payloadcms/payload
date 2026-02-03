@@ -7,12 +7,12 @@ import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '@tools/test-utils/int'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { getFormDataSize } from '../helpers/getFormDataSize.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { getFormDataSize } from '@tools/test-utils/int'
+import { initPayloadInt } from '@tools/test-utils/int'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,

@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { TypedPayloadSDK } from '../helpers/getSDK.js'
 import type { Email, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '@tools/test-utils/int'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { emailsSlug } from './collections/Emails.js'
 

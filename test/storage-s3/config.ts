@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Media } from './collections/Media.js'
 import { MediaWithAlwaysInsertFields } from './collections/MediaWithAlwaysInsertFields.js'
 import { MediaWithDirectAccess } from './collections/MediaWithDirectAccess.js'

@@ -8,7 +8,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Posts } from './collections/posts.js'
 import { Users } from './collections/users.js'
 import deepMerge from './deepMerge.js'

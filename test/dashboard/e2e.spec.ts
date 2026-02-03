@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 

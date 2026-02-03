@@ -17,7 +17,7 @@ const dirname = path.dirname(filename)
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 
 const customTranslationsObject = {
   en: {

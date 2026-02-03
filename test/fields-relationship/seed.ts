@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import {
   collection1Slug,
   collection2Slug,

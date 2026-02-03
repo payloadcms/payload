@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto'
 import type { Config } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { Users } from './collections/Users.js'

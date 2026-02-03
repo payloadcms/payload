@@ -4,7 +4,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { CustomID } from './collections/CustomID/index.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { ForceSelect } from './collections/ForceSelect/index.js'

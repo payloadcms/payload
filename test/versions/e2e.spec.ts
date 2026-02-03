@@ -33,7 +33,7 @@ import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 import type { Config, Diff } from './payload-types.js'
 
 import {
@@ -47,13 +47,13 @@ import {
   waitForFormReady,
   // throttleTest,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
-import { openDocControls } from '../helpers/e2e/openDocControls.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { assertNetworkRequests } from '@tools/test-utils/e2e'
+import { navigateToDiffVersionView as _navigateToDiffVersionView } from '@tools/test-utils/e2e'
+import { openDocControls } from '@tools/test-utils/e2e'
+import { waitForAutoSaveToRunAndComplete } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'

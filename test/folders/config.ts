@@ -3,7 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Autosave } from './collections/Autosave/index.js'
 import { Drafts } from './collections/Drafts/index.js'
 import { Media } from './collections/Media/index.js'

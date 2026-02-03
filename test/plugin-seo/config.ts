@@ -11,7 +11,7 @@ import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { PagesWithImportedFields } from './collections/PagesWithImportedFields.js'

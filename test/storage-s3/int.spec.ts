@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '@tools/test-utils/int'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '@tools/test-utils/int'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,

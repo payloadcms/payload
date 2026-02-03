@@ -6,7 +6,7 @@ import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 import type { Config, Post } from './payload-types.js'
 
 import {
@@ -16,20 +16,20 @@ import {
   saveDocAndAssert,
   selectTableRow,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { sortColumn, toggleColumn } from '../helpers/e2e/columns/index.js'
-import { addListFilter } from '../helpers/e2e/filters/index.js'
-import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { sortColumn, toggleColumn } from '@tools/test-utils/e2e'
+import { addListFilter } from '@tools/test-utils/e2e'
+import { goToNextPage } from '@tools/test-utils/e2e'
 import {
   addGroupBy,
   clearGroupBy,
   closeGroupBy,
   openGroupBy,
-} from '../helpers/e2e/groupBy/index.js'
-import { deletePreferences } from '../helpers/e2e/preferences.js'
-import { openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '@tools/test-utils/e2e'
+import { deletePreferences } from '@tools/test-utils/e2e'
+import { openNav } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { reInitializeDB } from '@tools/test-utils/int'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 

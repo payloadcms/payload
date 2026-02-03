@@ -4,7 +4,7 @@ import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '@tools/test-utils/int'
 import { arraySlug } from './shared.js'
 
 let payload: Payload

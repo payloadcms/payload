@@ -10,7 +10,7 @@ import open from 'open'
 import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
-import { getNextRootDir } from './helpers/getNextRootDir.js'
+import { getNextRootDir } from '@tools/test-utils/int'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'

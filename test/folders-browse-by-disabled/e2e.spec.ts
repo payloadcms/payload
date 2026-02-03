@@ -7,7 +7,7 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, getRoutes, initPageConsoleErrorCatch } from '../helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

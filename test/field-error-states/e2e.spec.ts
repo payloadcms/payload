@@ -17,7 +17,7 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 

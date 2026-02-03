@@ -9,7 +9,7 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import type { EcommercePluginConfig } from '../../packages/plugin-ecommerce/src/types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'

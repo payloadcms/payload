@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { credentials } from '../credentials.js'
+import { credentials } from '@tools/test-utils/shared'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
 export const seed = async (payload: Payload) => {

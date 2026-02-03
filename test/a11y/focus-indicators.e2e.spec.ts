@@ -6,8 +6,8 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, getRoutes, initPageConsoleErrorCatch } from '../helpers.js'
-import { checkFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+import { checkFocusIndicators } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
 
 /**
  * This test suite validates the checkFocusIndicators utility against

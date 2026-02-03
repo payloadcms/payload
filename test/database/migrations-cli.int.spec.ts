@@ -12,7 +12,7 @@ import { fileURLToPath } from 'url'
 import { afterEach, beforeEach, expect } from 'vitest'
 
 import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
+import { describe, it } from '@tools/test-utils/int'
 import configPromise from './config.js'
 
 const filename = fileURLToPath(import.meta.url)

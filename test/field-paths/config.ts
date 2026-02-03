@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import type { SanitizedConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { FieldPaths } from './collections/FieldPaths/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({

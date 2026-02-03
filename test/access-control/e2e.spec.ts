@@ -6,25 +6,25 @@ import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '@tools/test-utils/int'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { login } from '../helpers/e2e/auth/login.js'
-import { openListFilters } from '../helpers/e2e/filters/index.js'
-import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
-import { openDocControls } from '../helpers/e2e/openDocControls.js'
-import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../helpers/rest.js'
+import { AdminUrlUtil } from '@tools/test-utils/e2e'
+import { assertNetworkRequests } from '@tools/test-utils/e2e'
+import { login } from '@tools/test-utils/e2e'
+import { openListFilters } from '@tools/test-utils/e2e'
+import { openGroupBy } from '@tools/test-utils/e2e'
+import { openDocControls } from '@tools/test-utils/e2e'
+import { closeNav, openNav } from '@tools/test-utils/e2e'
+import { initPayloadE2ENoConfig } from '@tools/test-utils/e2e'
+import { RESTClient } from '@tools/test-utils/int'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {

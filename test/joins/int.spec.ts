@@ -5,12 +5,12 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '@tools/test-utils/int'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { devUser } from '@tools/test-utils/shared'
+import { idToString } from '@tools/test-utils/int'
+import { initPayloadInt } from '@tools/test-utils/int'
 import {
   categoriesJoinRestrictedSlug,
   categoriesSlug,

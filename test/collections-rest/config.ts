@@ -5,7 +5,7 @@ const dirname = path.dirname(filename)
 import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { devUser } from '@tools/test-utils/shared'
 import { LargeDocuments } from './collections/LargeDocuments.js'
 
 export interface Relation {
