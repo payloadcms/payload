@@ -4,6 +4,7 @@ import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { defaultPaymentFields } from './fields/defaultPaymentFields.js'
 import { createCharge } from './hooks/createCharge.js'
+import { handleUploads } from './hooks/handleUploads.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
@@ -105,6 +106,7 @@ export const generateSubmissionCollection = (
         ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
       ],
       beforeChange: [
+        (data) => handleUploads(data, formConfig),
         (data) => createCharge(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],

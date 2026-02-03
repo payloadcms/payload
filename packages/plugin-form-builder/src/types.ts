@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   Field,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 export interface BlockConfig {
@@ -29,6 +30,8 @@ export type PaymentFieldConfig = {
 
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
+export type UploadFieldConfig = Partial<Field>
+
 export interface FieldsConfig {
   [key: string]: boolean | FieldConfig | undefined
   checkbox?: boolean | FieldConfig
@@ -42,6 +45,7 @@ export interface FieldsConfig {
   state?: boolean | FieldConfig
   text?: boolean | FieldConfig
   textarea?: boolean | FieldConfig
+  upload?: boolean | FieldConfig
 }
 
 type BeforeChangeParams<T extends TypeWithID = any> = Parameters<CollectionBeforeChangeHook<T>>[0]
@@ -64,6 +68,11 @@ export type FormBuilderPluginConfig = {
   formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
+  /**
+   * Upload-enabled collection slugs available for upload fields.
+   * Required when using upload fields.
+   */
+  uploadCollections?: UploadCollectionSlug[]
 }
 
 export interface TextField {
@@ -193,6 +202,27 @@ export interface MessageField {
   message: object
 }
 
+export interface UploadFieldMimeType {
+  mimeType: string
+}
+
+export interface UploadField {
+  blockName?: string
+  blockType: 'upload'
+  label?: string
+  /** Maximum file size in bytes */
+  maxFileSize?: number
+  /** Array of allowed MIME types (e.g., image/*, application/pdf) */
+  mimeTypes?: UploadFieldMimeType[]
+  /** Whether to allow multiple file uploads */
+  multiple?: boolean
+  name: string
+  required?: boolean
+  /** The upload collection slug to store files in */
+  uploadCollection: string
+  width?: number
+}
+
 export type FormFieldBlock =
   | CheckboxField
   | CountryField
@@ -205,6 +235,7 @@ export type FormFieldBlock =
   | StateField
   | TextAreaField
   | TextField
+  | UploadField
 
 export interface Email {
   bcc?: string
