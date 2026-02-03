@@ -14,5 +14,10 @@
     "isolatedModules": true,
     "tsBuildInfoFile": "./.tsbuildinfo"
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "exclude": [
+    "node_modules",
+    "../../packages",
+    "../../test"
+  ]
 }

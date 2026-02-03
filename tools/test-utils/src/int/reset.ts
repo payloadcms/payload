@@ -1,7 +1,12 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { Payload } from 'payload'
 
 import { isMongoose } from './isMongoose.js'
+
+type DrizzleDb = {
+  drizzle: { _: { schema: Record<string, { dbName: string }> | undefined } }
+  execute: (args: { drizzle: unknown; raw: string }) => Promise<unknown>
+  schemaName?: string
+}
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
   if (isMongoose(_payload) && 'collections' in _payload.db && collectionSlugs.length > 0) {
@@ -13,7 +18,8 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
 
     // Delete all documents from each collection instead of dropping the database.
     // This preserves indexes and is much faster for consecutive test runs.
-    const mongooseCollections = _payload.db.collections[firstCollectionSlug]?.db.collections
+    const mongooseCollections = (_payload.db as any).collections[firstCollectionSlug]?.db
+      .collections
     if (mongooseCollections) {
       await Promise.all(
         Object.values(mongooseCollections).map(async (collection: any) => {
@@ -22,7 +28,7 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
       )
     }
   } else if ('drizzle' in _payload.db) {
-    const db = _payload.db as unknown as DrizzleAdapter
+    const db = _payload.db as unknown as DrizzleDb
 
     // Alternative to: await db.drizzle.execute(sql`drop schema public cascade; create schema public;`)
 

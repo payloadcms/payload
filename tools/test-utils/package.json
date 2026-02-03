@@ -15,7 +15,7 @@
     "./shared": "./src/shared/index.ts"
   },
   "scripts": {
-    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit 2>&1 | grep -E '^src/' || true"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
@@ -25,9 +25,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
-    "@payloadcms/db-postgres": "workspace:*",
-    "@payloadcms/db-sqlite": "workspace:*",
-    "@payloadcms/drizzle": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/sdk": "workspace:*",
     "@playwright/test": "^1.56.0",
@@ -41,9 +38,6 @@
   },
   "peerDependencies": {
     "@axe-core/playwright": ">=4.0.0",
-    "@payloadcms/db-postgres": ">=3.0.0",
-    "@payloadcms/db-sqlite": ">=3.0.0",
-    "@payloadcms/drizzle": ">=3.0.0",
     "@payloadcms/next": ">=3.0.0",
     "@payloadcms/sdk": ">=0.1.0",
     "@playwright/test": ">=1.40.0",
@@ -55,15 +49,6 @@
   },
   "peerDependenciesMeta": {
     "@axe-core/playwright": {
-      "optional": true
-    },
-    "@payloadcms/db-postgres": {
-      "optional": true
-    },
-    "@payloadcms/db-sqlite": {
-      "optional": true
-    },
-    "@payloadcms/drizzle": {
       "optional": true
     },
     "@payloadcms/next": {

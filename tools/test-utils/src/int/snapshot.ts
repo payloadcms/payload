@@ -1,12 +1,19 @@
-import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { SQLiteAdapter } from '@payloadcms/db-sqlite/types'
-import type { PgTable } from 'drizzle-orm/pg-core'
-import type { SQLiteTable } from 'drizzle-orm/sqlite-core'
 import type { Payload } from 'payload'
 
 import { sql } from 'drizzle-orm'
 
 import { isMongoose } from './isMongoose.js'
+
+type DrizzleDb = {
+  drizzle: {
+    _: { schema: Record<string, unknown> | undefined }
+    insert: (table: unknown) => { values: (records: unknown[]) => { execute: () => Promise<void> } }
+    query: Record<string, { fullSchema: Record<string, unknown> }>
+    select: () => { from: (table: unknown) => { execute: () => Promise<unknown[]> } }
+  }
+  execute: (args: { drizzle: unknown; raw?: string; sql?: unknown }) => Promise<unknown>
+  name: 'postgres' | 'sqlite'
+}
 
 export const uploadsDirCache: {
   [key: string]: {
@@ -14,10 +21,10 @@ export const uploadsDirCache: {
     originalDir: string
   }[]
 } = {}
-export const dbSnapshot = {}
+export const dbSnapshot: Record<string, Record<string, unknown[]>> = {}
 
-async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
-  const snapshot = {}
+async function createMongooseSnapshot(collectionsObj: any, snapshotKey: string) {
+  const snapshot: Record<string, unknown[]> = {}
 
   // Assuming `collectionsObj` is an object where keys are names and values are collection references
   for (const collectionName of Object.keys(collectionsObj)) {
@@ -29,7 +36,7 @@ async function createMongooseSnapshot(collectionsObj, snapshotKey: string) {
   dbSnapshot[snapshotKey] = snapshot // Save the snapshot in memory
 }
 
-async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) {
+async function restoreFromMongooseSnapshot(collectionsObj: any, snapshotKey: string) {
   if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
@@ -44,16 +51,16 @@ async function restoreFromMongooseSnapshot(collectionsObj, snapshotKey: string) 
   }
 }
 
-async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapshotKey: string) {
-  const snapshot = {}
+async function createDrizzleSnapshot(db: DrizzleDb, snapshotKey: string) {
+  const snapshot: Record<string, unknown[]> = {}
 
-  const schema: Record<string, PgTable | SQLiteTable> = db.drizzle._.schema
+  const schema = db.drizzle._.schema
   if (!schema) {
     return
   }
 
   for (const tableName in schema) {
-    const table = db.drizzle.query[tableName]['fullSchema'][tableName] //db.drizzle._.schema[tableName]
+    const table = db.drizzle.query[tableName]['fullSchema'][tableName]
     const records = await db.drizzle.select().from(table).execute()
     snapshot[tableName] = records
   }
@@ -61,16 +68,13 @@ async function createDrizzleSnapshot(db: PostgresAdapter | SQLiteAdapter, snapsh
   dbSnapshot[snapshotKey] = snapshot
 }
 
-async function restoreFromDrizzleSnapshot(
-  adapter: PostgresAdapter | SQLiteAdapter,
-  snapshotKey: string,
-) {
+async function restoreFromDrizzleSnapshot(db: DrizzleDb, snapshotKey: string) {
   if (!dbSnapshot[snapshotKey]) {
     throw new Error('No snapshot found to restore from.')
   }
-  const db = adapter.name === 'postgres' ? (adapter as PostgresAdapter) : (adapter as SQLiteAdapter)
-  let disableFKConstraintChecksQuery
-  let enableFKConstraintChecksQuery
+
+  let disableFKConstraintChecksQuery: string | undefined
+  let enableFKConstraintChecksQuery: string | undefined
 
   if (db.name === 'sqlite') {
     disableFKConstraintChecksQuery = 'PRAGMA foreign_keys = off'
@@ -122,11 +126,12 @@ export async function createSnapshot(
       throw new Error('No collection slugs provided to reset the database.')
     }
 
-    const mongooseCollections = _payload.db.collections[firstCollectionSlug]?.db.collections
+    const mongooseCollections = (_payload.db as any).collections[firstCollectionSlug]?.db
+      .collections
 
     await createMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
-    const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
+    const db = _payload.db as unknown as DrizzleDb
     await createDrizzleSnapshot(db, snapshotKey)
   }
 }
@@ -141,10 +146,10 @@ export async function restoreFromSnapshot(
   collectionSlugs: string[],
 ) {
   if (isMongoose(_payload) && 'collections' in _payload.db) {
-    const mongooseCollections = _payload.db.collections[collectionSlugs[0]].db.collections
+    const mongooseCollections = (_payload.db as any).collections[collectionSlugs[0]].db.collections
     await restoreFromMongooseSnapshot(mongooseCollections, snapshotKey)
   } else {
-    const db: PostgresAdapter = _payload.db as unknown as PostgresAdapter
+    const db = _payload.db as unknown as DrizzleDb
     await restoreFromDrizzleSnapshot(db, snapshotKey)
   }
 }
