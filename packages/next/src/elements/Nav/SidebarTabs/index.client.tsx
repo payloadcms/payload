@@ -141,7 +141,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         })}
       </div>
       <div className={`${baseClass}__content`}>
-        {loadingTab === activeTabID ? <Spinner loadingText={null} /> : activeContent}
+        {loadingTab === activeTabID ? <Spinner /> : activeContent}
       </div>
     </div>
   )
