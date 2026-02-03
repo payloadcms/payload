@@ -1073,6 +1073,7 @@ export type {
   LexicalFieldAdminProps,
   LexicalRichTextAdapter,
   NodeMapValue,
+  SerializedNodeBase,
   ViewMapBlockComponentProps,
 } from './types.js'
 

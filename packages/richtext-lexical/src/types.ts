@@ -36,6 +36,13 @@ import type {
 } from './nodeTypes.js'
 import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
 
+/**
+ * Base constraint for serialized Lexical node types.
+ * Used as the generic constraint for node map types.
+ * Extends the base SerializedLexicalNode with optional type for flexibility.
+ */
+export type SerializedNodeBase = { [key: string]: unknown; type?: string }
+
 export type LexicalFieldAdminProps = {
   /**
    * Controls if the add block button should be hidden. @default false
@@ -107,9 +114,7 @@ type WithinEditorArgs = {
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type NodeMapValue<
-  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
-> = {
+export type NodeMapValue<TNode extends SerializedNodeBase = SerializedLexicalNode> = {
   /**
    * Provide a react component to render the node.
    *
@@ -214,9 +219,7 @@ export type ViewMapBlockComponentProps = {
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type NodeMapBlockValue<
-  TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
-> = {
+export type NodeMapBlockValue<TNode extends SerializedNodeBase = SerializedLexicalNode> = {
   /**
    * A React component that replaces the entire block, including the header/collapsible.
    * Receives Lexical-level props (editor, config, node, formData, nodeKey).
@@ -237,7 +240,7 @@ export type NodeMapBlockValue<
  * @internal
  */
 export type LexicalEditorNodeMap<
-  TNodes extends { [key: string]: any; type?: string } =
+  TNodes extends SerializedNodeBase =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
@@ -296,7 +299,7 @@ export type LexicalEditorNodeMap<
  * @internal
  */
 export type LexicalEditorViewMap<
-  TNodes extends { [key: string]: any; type?: string } =
+  TNodes extends SerializedNodeBase =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided

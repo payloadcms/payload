@@ -4,7 +4,7 @@ import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import React from 'react'
 
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
-import type { LexicalEditorNodeMap, NodeMapValue } from '../../../../types.js'
+import type { LexicalEditorNodeMap, NodeMapValue, SerializedNodeBase } from '../../../../types.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
@@ -41,7 +41,9 @@ function createConverterFromNodeMapValue(viewDef: NodeMapValue): JSXConverter {
 /**
  * Converts a LexicalEditorNodeMap into JSXConverters
  */
-function nodeMapToConverters(nodeMap: LexicalEditorNodeMap): JSXConverters {
+function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeBase>(
+  nodeMap: LexicalEditorNodeMap<TNodes>,
+): JSXConverters {
   const converters: JSXConverters = {}
 
   for (const [nodeType, value] of Object.entries(nodeMap)) {
@@ -83,7 +85,7 @@ function nodeMapToConverters(nodeMap: LexicalEditorNodeMap): JSXConverters {
   return converters
 }
 
-export type ConvertLexicalToJSXArgs = {
+export type ConvertLexicalToJSXArgs<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   converters: JSXConverters
   /**
    * Serialized editor state to render.
@@ -101,16 +103,16 @@ export type ConvertLexicalToJSXArgs = {
    * You can use the lexical editor node map or view map as converters. NodeMap converters will override converters passed
    * in the `converters` prop. If a LexicalEditorViewMap is provided, the `default` view will be used.
    */
-  nodeMap?: LexicalEditorNodeMap
+  nodeMap?: LexicalEditorNodeMap<TNodes>
 }
 
-export function convertLexicalToJSX({
+export function convertLexicalToJSX<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   converters,
   data,
   disableIndent,
   disableTextAlign,
   nodeMap,
-}: ConvertLexicalToJSXArgs): React.ReactNode {
+}: ConvertLexicalToJSXArgs<TNodes>): React.ReactNode {
   if (hasText(data)) {
     // Merge nodeMap converters with existing converters
     // NodeMap converters override existing converters

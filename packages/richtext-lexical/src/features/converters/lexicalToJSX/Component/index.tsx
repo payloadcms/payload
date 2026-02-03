@@ -5,19 +5,20 @@ import type {
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from '../../../../nodeTypes.js'
+import type { SerializedNodeBase } from '../../../../types.js'
 import type { JSXConverters } from '../converter/types.js'
 
 import { defaultJSXConverters } from '../converter/defaultConverters.js'
 import { convertLexicalToJSX, type ConvertLexicalToJSXArgs } from '../converter/index.js'
 
 export type JSXConvertersFunction<
-  T extends { [key: string]: any; type?: string } =
+  T extends SerializedNodeBase =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string }>
     | SerializedInlineBlockNode<{ blockName?: null | string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
-type RichTextProps = {
+type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
    * Override class names for the container.
    */
@@ -31,9 +32,9 @@ type RichTextProps = {
    * If true, removes the container div wrapper.
    */
   disableContainer?: boolean
-} & Pick<ConvertLexicalToJSXArgs, 'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'>
+} & Pick<ConvertLexicalToJSXArgs<TNodes>, 'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'>
 
-export const RichText: React.FC<RichTextProps> = ({
+export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   className,
   converters,
   data: editorState,
@@ -41,7 +42,7 @@ export const RichText: React.FC<RichTextProps> = ({
   disableIndent,
   disableTextAlign,
   nodeMap,
-}) => {
+}: RichTextProps<TNodes>): React.ReactNode {
   if (!editorState) {
     return null
   }
