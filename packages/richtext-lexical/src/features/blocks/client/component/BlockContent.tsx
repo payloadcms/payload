@@ -58,7 +58,14 @@ export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC
   Collapsible: React.FC<BlockCollapsibleWithErrorProps>
+  /**
+   * Custom block component as React.ReactNode.
+   * For view maps, the FC is rendered in nodes/index.ts with Lexical-level props.
+   * For form state (block.admin.components.Block), it's RSC-rendered.
+   * Both arrive here as ReactNode.
+   */
   CustomBlock: React.ReactNode
+  CustomLabel: React.ReactNode
   EditButton: React.FC
   errorCount: number
   formSchema: ClientField[]
@@ -70,13 +77,12 @@ export type BlockContentProps = {
 
 type BlockComponentContextType = {
   BlockCollapsible: React.FC<BlockCollapsibleProps>
-} & Omit<BlockContentProps, 'Collapsible'>
+} & Omit<BlockContentProps, 'Collapsible' | 'CustomBlock' | 'CustomLabel'>
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
   baseClass: 'LexicalEditorTheme__block',
   BlockCollapsible: () => null,
   BlockDrawer: () => null,
-  CustomBlock: null,
   EditButton: () => null,
   errorCount: 0,
   formSchema: [],
@@ -93,9 +99,9 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
  * not the whole document.
  */
 export const BlockContent: React.FC<BlockContentProps> = (props) => {
-  const { Collapsible, ...contextProps } = props
+  const { Collapsible, CustomBlock, CustomLabel, ...contextProps } = props
 
-  const { BlockDrawer, CustomBlock, errorCount, formSchema } = contextProps
+  const { BlockDrawer, errorCount, formSchema } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
@@ -103,8 +109,8 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const isEditable = useLexicalEditable()
 
   const CollapsibleWithErrorProps = useMemo(
-    () => (props: BlockCollapsibleProps) => {
-      const { children, ...rest } = props
+    () => (collapsibleProps: BlockCollapsibleProps) => {
+      const { children, ...rest } = collapsibleProps
       return (
         <Collapsible errorCount={errorCount} fieldHasErrors={fieldHasErrors} {...rest}>
           {children}
@@ -114,6 +120,8 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
     [Collapsible, fieldHasErrors, errorCount],
   )
 
+  // CustomBlock is always React.ReactNode (rendered in nodes/index.ts or RSC-rendered)
+  // Provide context for useBlockComponentContext() hook
   return CustomBlock ? (
     <BlockComponentContext
       value={{

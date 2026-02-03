@@ -170,6 +170,46 @@ export type NodeMapValue<
 }
 
 /**
+ * Props passed to custom Block components in view maps.
+ * Similar to Component props but for block-level customization.
+ *
+ * For React UI props (BlockCollapsible, EditButton, etc.), use the
+ * `useBlockComponentContext()` hook inside your component.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ */
+export type ViewMapBlockComponentProps = {
+  /**
+   * The Lexical editor configuration.
+   */
+  config: EditorConfig
+  /**
+   * The Lexical editor instance.
+   */
+  editor: LexicalEditor
+  /**
+   * The block's form data (field values).
+   */
+  formData: Record<string, unknown>
+  /**
+   * Always true when rendering in the editor.
+   */
+  isEditor: true
+  /**
+   * Always false when rendering in the editor (true only in JSX converter).
+   */
+  isJSXConverter: false
+  /**
+   * The Lexical block node instance.
+   */
+  node: DecoratorNode<React.ReactNode>
+  /**
+   * The unique key identifying this block node.
+   */
+  nodeKey: string
+}
+
+/**
  *
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
@@ -178,14 +218,18 @@ export type NodeMapBlockValue<
   TNode extends { [key: string]: any; type?: string } = SerializedLexicalNode,
 > = {
   /**
-   * This will replace the entire block component, including the block header / collapsible.
-   * This is identical to passing a field.admin.components.Block to the field config.
+   * A React component that replaces the entire block, including the header/collapsible.
+   * Receives Lexical-level props (editor, config, node, formData, nodeKey).
+   *
+   * For React UI props (BlockCollapsible, EditButton, RemoveButton, etc.),
+   * use the `useBlockComponentContext()` hook inside your component.
    */
-  Block?: React.ReactNode
+  Block?: React.FC<ViewMapBlockComponentProps>
   /**
-   * This is identical to passing a field.admin.components.Label to the field config.
+   * A React component that replaces the block label.
+   * Use `useBlockComponentContext()` hook to access block context.
    */
-  Label?: React.ReactNode
+  Label?: React.FC
 } & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
 
 /**
@@ -198,9 +242,12 @@ export type LexicalEditorNodeMap<
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
 > = {
+  // The index signature must include NodeMapBlockValue in the nested blockSlug mapping because
+  // 'blocks' and 'inlineBlocks' properties use NodeMapBlockValue (which adds Block/Label props).
+  // TypeScript requires that intersection properties be assignable to index signatures.
   [key: string]:
     | {
-        [blockSlug: string]: NodeMapValue<any>
+        [blockSlug: string]: NodeMapBlockValue<any> | NodeMapValue<any>
       }
     | NodeMapValue<any>
     | undefined

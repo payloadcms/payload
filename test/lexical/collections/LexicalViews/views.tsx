@@ -1,7 +1,11 @@
 'use client'
-import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
+import type { LexicalEditorViewMap, ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
 
-import { type BlockNode, defaultEditorLexicalConfig } from '@payloadcms/richtext-lexical/client'
+import {
+  type BlockNode,
+  defaultEditorLexicalConfig,
+  useBlockComponentContext,
+} from '@payloadcms/richtext-lexical/client'
 
 import type { LexicalViewsNodes } from './index.js'
 
@@ -55,8 +59,22 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsNodes> = {
     nodes: {
       blocks: {
         customAdminComponentBlock: {
-          Block: () => {
-            return <div>testtt</div>
+          // Block receives Lexical-level props (formData, nodeKey, editor, config, node)
+          // Use useBlockComponentContext() for React UI props (BlockCollapsible, EditButton, etc.)
+          Block: ({ formData, nodeKey }: ViewMapBlockComponentProps) => {
+            const { BlockCollapsible, EditButton, RemoveButton } = useBlockComponentContext()
+            return (
+              <BlockCollapsible>
+                <div style={{ padding: '16px' }}>
+                  <p>Custom Block for: {nodeKey}</p>
+                  <p>Form data: {JSON.stringify(formData)}</p>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <EditButton />
+                    <RemoveButton />
+                  </div>
+                </div>
+              </BlockCollapsible>
+            )
           },
         },
         viewsTestBlock: {

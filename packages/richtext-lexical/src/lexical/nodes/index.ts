@@ -163,12 +163,30 @@ function applyNodeOverride({
         if (nodeType === 'block' || nodeType === 'inlineBlock') {
           const blockViewDef: NodeMapBlockValue = viewDef as NodeMapBlockValue
           if (blockViewDef.Block || blockViewDef.Label) {
+            // Render Block and Label FCs with Lexical-level props
+            // Users can use useBlockComponentContext() for React UI props
+            const blockProps = {
+              config,
+              editor,
+              formData: this.getFields?.() ?? {},
+              isEditor: true as const,
+              isJSXConverter: false as const,
+              node: this,
+              nodeKey: this.getKey(),
+            }
+            const renderedBlock = blockViewDef.Block
+              ? React.createElement(blockViewDef.Block, blockProps)
+              : undefined
+            const renderedLabel = blockViewDef.Label
+              ? React.createElement(blockViewDef.Label)
+              : undefined
+
             return NodeClass.prototype._originalDecorate.call(
               this,
               editor,
               config,
-              blockViewDef.Block,
-              blockViewDef.Label,
+              renderedBlock,
+              renderedLabel,
             )
           }
         }

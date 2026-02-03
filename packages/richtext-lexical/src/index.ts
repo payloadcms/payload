@@ -1073,6 +1073,7 @@ export type {
   LexicalFieldAdminProps,
   LexicalRichTextAdapter,
   NodeMapValue,
+  ViewMapBlockComponentProps,
 } from './types.js'
 
 export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'

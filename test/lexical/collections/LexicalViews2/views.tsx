@@ -1,6 +1,8 @@
 'use client'
 import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
+import type { LexicalViewsNodes } from '../LexicalViews/index.js'
+
 // Do not change this - needs to only have one frontend view
 export const lexicalViews: LexicalEditorViewMap<LexicalViewsNodes> = {
   frontend: {

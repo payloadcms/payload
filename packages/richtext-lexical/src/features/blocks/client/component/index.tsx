@@ -53,13 +53,15 @@ type Props = {
   readonly cacheBuster: number
   readonly className: string
   /**
-   * Directly pass a custom block component to be rendered instead of the default one.
-   * This will have priority over the custom block component passed in the field's config.
+   * Custom block component as React.ReactNode.
+   * For view maps, the FC is pre-rendered in nodes/index.ts with Lexical-level props.
+   * For form state (block.admin.components.Block), it's RSC-rendered.
    */
   readonly CustomBlock?: React.ReactNode
   /**
-   * Directly pass a custom label component to be rendered instead of the default one.
-   * This will have priority over the custom label component passed in the field's config.
+   * Custom label component as React.ReactNode.
+   * For view maps, the FC is pre-rendered in nodes/index.ts.
+   * For form state, it's RSC-rendered.
    */
   readonly CustomLabel?: React.ReactNode
   readonly formData: BlockFields
@@ -158,6 +160,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
+  // CustomLabel and CustomBlock are always React.ReactNode
+  // - From view maps: FC is pre-rendered in nodes/index.ts
+  // - From form state: RSC-rendered on server
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     CustomLabelFromProps ??
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -628,6 +633,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           BlockDrawer={BlockDrawer}
           Collapsible={BlockCollapsible}
           CustomBlock={CustomBlock}
+          CustomLabel={CustomLabel}
           EditButton={EditButton}
           errorCount={errorCount}
           formSchema={clientBlock?.fields ?? []}
@@ -641,6 +647,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
+    CustomLabel,
     blockType,
     RemoveButton,
     EditButton,
