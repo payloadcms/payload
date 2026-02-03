@@ -1697,7 +1697,7 @@ export { updateOperation as updateOperationGlobal } from './globals/operations/u
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
-export { PREFERENCE_KEYS } from './preferences/keys.js'
+
 export type {
   CollapsedPreferences,
   CollectionPreferences,
