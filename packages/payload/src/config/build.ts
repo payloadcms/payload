@@ -8,13 +8,24 @@ import { sanitizeConfig } from './sanitize.js'
  * @returns Built and sanitized Payload Config
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
+  const _log = (m: string) => console.log(`[buildConfig] ${m}`)
+
+  _log('start')
+
   if (Array.isArray(config.plugins)) {
     let configAfterPlugins = config
+
     for (const plugin of config.plugins) {
       configAfterPlugins = await plugin(configAfterPlugins)
+      _log(`plugin "${(plugin as { name?: string }).name || 'anonymous'}" done`)
     }
-    return await sanitizeConfig(configAfterPlugins)
+
+    const result = await sanitizeConfig(configAfterPlugins)
+    _log('sanitizeConfig done')
+    return result
   }
 
-  return await sanitizeConfig(config)
+  const result = await sanitizeConfig(config)
+  _log('sanitizeConfig done')
+  return result
 }

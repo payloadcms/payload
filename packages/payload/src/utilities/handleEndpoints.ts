@@ -74,6 +74,8 @@ export const handleEndpoints = async ({
   payloadInstanceCacheKey?: string
   request: Request
 }): Promise<Response> => {
+  const _log = (m: string) => console.log(`[handleEndpoints] ${m}`)
+
   let handler!: PayloadHandler
   let req: PayloadRequest
   let collection!: Collection
@@ -133,12 +135,14 @@ export const handleEndpoints = async ({
   }
 
   try {
+    _log('createPayloadRequest start')
     req = await createPayloadRequest({
       canSetHeaders: true,
       config: incomingConfig,
       payloadInstanceCacheKey,
       request,
     })
+    _log('createPayloadRequest done')
 
     const { payload } = req
     const { config } = payload
@@ -262,9 +266,11 @@ export const handleEndpoints = async ({
       return notFoundResponse(req, pathname)
     }
 
+    _log(`handler start (${adjustedPathname})`)
     const response = await handler(req)
+    _log('handler done')
 
-    return new Response(response.body, {
+    const finalResponse = new Response(response.body, {
       headers: headersWithCors({
         headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
         req,
@@ -272,6 +278,9 @@ export const handleEndpoints = async ({
       status: response.status,
       statusText: response.statusText,
     })
+
+    _log('TOTAL')
+    return finalResponse
   } catch (_err) {
     const err = _err as APIError
     return routeError({

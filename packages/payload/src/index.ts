@@ -779,6 +779,10 @@ export class BasePayload {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
+    const _log = (m: string) => console.log(`[BasePayload.init] ${m}`)
+
+    _log('start')
+
     if (
       process.env.NODE_ENV !== 'production' &&
       process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
@@ -794,7 +798,10 @@ export class BasePayload {
       throw new Error('Error: the payload config is required to initialize payload.')
     }
 
+    _log('awaiting config')
     this.config = await options.config
+    _log('config resolved')
+
     this.logger = getLogger('payload', this.config.logger)
 
     if (!this.config.secret) {
@@ -807,6 +814,7 @@ export class BasePayload {
       config: this.config.globals,
     }
 
+    _log('processing collections')
     for (const collection of this.config.collections) {
       let customIDType: string | undefined = undefined
       const findCustomID: TraverseFieldsCallback = ({ field }) => {
@@ -839,6 +847,7 @@ export class BasePayload {
         customIDType,
       }
     }
+    _log('collections processed')
 
     this.blocks = this.config.blocks!.reduce(
       (blocks, block) => {
@@ -858,20 +867,29 @@ export class BasePayload {
       })
     }
 
+    _log('db.init start')
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this
+    _log('db.init done')
 
+    _log('kv.init start')
     this.kv = this.config.kv.init({ payload: this })
+    _log('kv.init done')
 
     if (this.db?.init) {
+      _log('db adapter init start')
       await this.db.init()
+      _log('db adapter init done')
     }
 
     if (!options.disableDBConnect && this.db.connect) {
+      _log('db.connect start')
       await this.db.connect()
+      _log('db.connect done')
     }
 
     // Load email adapter
+    _log('email adapter init')
     if (this.config.email instanceof Promise) {
       const awaitedAdapter = await this.config.email
       this.email = awaitedAdapter({ payload: this })
@@ -886,6 +904,7 @@ export class BasePayload {
 
       this.email = consoleEmailAdapter({ payload: this })
     }
+    _log('email adapter done')
 
     // Warn if image resizing is enabled but sharp is not installed
     if (
@@ -916,6 +935,7 @@ export class BasePayload {
     serverInitTelemetry(this)
 
     // 1. loop over collections, if collection has auth strategy, initialize and push to array
+    _log('setting up auth strategies')
     let jwtStrategyEnabled = false
     this.authStrategies = this.config.collections.reduce((authStrategies, collection) => {
       if (collection?.auth) {
@@ -947,14 +967,19 @@ export class BasePayload {
         authenticate: JWTAuthentication,
       })
     }
+    _log('auth strategies done')
 
     try {
       if (!options.disableOnInit) {
         if (typeof options.onInit === 'function') {
+          _log('options.onInit start')
           await options.onInit(this)
+          _log('options.onInit done')
         }
         if (typeof this.config.onInit === 'function') {
+          _log('config.onInit start')
           await this.config.onInit(this)
+          _log('config.onInit done')
         }
       }
     } catch (error) {
@@ -963,9 +988,12 @@ export class BasePayload {
     }
 
     if (options.cron) {
+      _log('initializing crons')
       await this._initializeCrons()
+      _log('crons initialized')
     }
 
+    _log('done')
     return this
   }
 
@@ -1102,6 +1130,10 @@ export const getPayload = async (
     key?: string
   } & InitOptions,
 ): Promise<Payload> => {
+  const _log = (m: string) => console.log(`[getPayload] ${m}`)
+
+  _log('start')
+
   if (!options?.config) {
     throw new Error('Error: the payload config is required for getPayload to work.')
   }
@@ -1110,6 +1142,7 @@ export const getPayload = async (
 
   let cached = _cached.get(options.key ?? 'default')
   if (!cached) {
+    _log('cache miss - creating new cache entry')
     cached = {
       initializedCrons: Boolean(options.cron),
       payload: null,
@@ -1120,6 +1153,7 @@ export const getPayload = async (
     _cached.set(options.key ?? 'default', cached)
   } else {
     alreadyCachedSameConfig = true
+    _log('cache hit')
   }
 
   if (alreadyCachedSameConfig) {
@@ -1129,20 +1163,26 @@ export const getPayload = async (
   }
 
   if (cached.payload) {
+    _log('returning cached payload')
     if (options.cron && !cached.initializedCrons) {
       // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
       cached.initializedCrons = true
+      _log('initializing crons')
       await cached.payload._initializeCrons()
+      _log('crons initialized')
     }
 
     if (cached.reload === true) {
+      _log('HMR reload triggered')
       let resolve!: () => void
 
       // getPayload is called multiple times, in parallel. However, we only want to run `await reload` once. By immediately setting cached.reload to a promise,
       // we can ensure that all subsequent calls will wait for the first reload to finish. So if we set it here, the 2nd call of getPayload
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
+      _log('awaiting config for reload')
       const config = await options.config
+      _log('config awaited for reload')
 
       // Reload the payload instance after a config change (triggered by HMR in development).
       // The second parameter (false) forces import map regeneration rather than deciding based on options.importMap.
@@ -1154,28 +1194,41 @@ export const getPayload = async (
       // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
       // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
       // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
+      _log('reload start')
       await reload(config, cached.payload, false, options)
+      _log('reload done')
 
       resolve()
       cached.reload = false
     }
 
     if (cached.reload instanceof Promise) {
+      _log('waiting for in-progress reload')
       await cached.reload
+      _log('in-progress reload done')
     }
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
+    _log('returning cached payload done')
     return cached.payload
   }
 
   try {
     if (!cached.promise) {
+      _log('initializing new BasePayload')
       // no need to await options.config here, as it's already awaited in the BasePayload.init
-      cached.promise = new BasePayload().init(options)
+      cached.promise = new BasePayload().init(options).then((p) => {
+        _log('BasePayload.init done')
+        return p
+      })
+    } else {
+      _log('awaiting existing init promise')
     }
 
+    _log('awaiting payload promise')
     cached.payload = await cached.promise
+    _log('payload promise resolved')
 
     if (
       !cached.ws &&
@@ -1183,6 +1236,7 @@ export const getPayload = async (
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
+      _log('setting up HMR websocket')
       try {
         const port = process.env.PORT || '3000'
         const hasHTTPS =
@@ -1222,6 +1276,7 @@ export const getPayload = async (
         cached.ws.onerror = (_) => {
           // swallow any websocket connection error
         }
+        _log('HMR websocket setup done')
       } catch (_) {
         // swallow e
       }
@@ -1237,6 +1292,7 @@ export const getPayload = async (
     cached.payload.importMap = options.importMap
   }
 
+  _log('done')
   return cached.payload
 }
 
@@ -1819,14 +1875,15 @@ export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
+export { logTiming } from './utilities/timing.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 export { versionDefaults } from './versions/defaults.js'
-export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 
+export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
@@ -1838,7 +1895,7 @@ export type {
   SqlLocalizeStatusArgs,
 } from './versions/migrations/localizeStatus/index.js'
 export { saveVersion } from './versions/saveVersion.js'
-export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
+export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { SchedulePublish, TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

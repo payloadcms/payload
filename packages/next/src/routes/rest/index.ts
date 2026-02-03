@@ -13,7 +13,11 @@ const handlerBuilder =
       params: Promise<{ slug?: string[] }>
     },
   ): Promise<Response> => {
+    const _log = (m: string) => console.log(`[next/rest] ${m}`)
+
+    _log('handler start')
     const awaitedConfig = await config
+    _log('config awaited')
 
     // Add this endpoint only when using Next.js, still can be overridden.
     if (
@@ -33,6 +37,7 @@ const handlerBuilder =
 
     const awaitedParams = await args.params
 
+    _log('calling handleEndpoints')
     const response = await handleEndpoints({
       config,
       path: formatAdminURL({
@@ -41,6 +46,7 @@ const handlerBuilder =
       }),
       request,
     })
+    _log('handleEndpoints done')
 
     return response
   }

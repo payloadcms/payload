@@ -30,12 +30,19 @@ export const createPayloadRequest = async ({
   payloadInstanceCacheKey,
   request,
 }: Args): Promise<PayloadRequest> => {
+  const _log = (m: string) => console.log(`[createPayloadRequest] ${m}`)
+
+  _log('start')
+
   const cookies = parseCookies(request.headers)
+
+  _log('getPayload start')
   const payload = await getPayload({
     config: configPromise,
     cron: true,
     key: payloadInstanceCacheKey,
   })
+  _log('getPayload done')
 
   const { config } = payload
   const localization = config.localization
@@ -57,11 +64,13 @@ export const createPayloadRequest = async ({
     headers: request.headers,
   })
 
+  _log('initI18n start')
   const i18n = await initI18n({
     config: config.i18n,
     context: 'api',
     language,
   })
+  _log('initI18n done')
 
   let locale = searchParams.get('locale')
 
@@ -121,12 +130,14 @@ export const createPayloadRequest = async ({
 
   req.payloadDataLoader = getDataLoader(req)
 
+  _log('executeAuthStrategies start')
   const { responseHeaders, user } = await executeAuthStrategies({
     canSetHeaders,
     headers: req.headers,
     isGraphQL,
     payload,
   })
+  _log('executeAuthStrategies done')
 
   req.user = user
 
@@ -134,5 +145,6 @@ export const createPayloadRequest = async ({
     req.responseHeaders = responseHeaders
   }
 
+  _log('done')
   return req
 }
