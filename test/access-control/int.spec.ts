@@ -1,4 +1,3 @@
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   CollectionPermission,
   CollectionSlug,
@@ -14,9 +13,10 @@ import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,
@@ -270,23 +270,22 @@ describe('Access Control', () => {
         const { id } = await createDoc({ restrictedField: 'restricted' })
 
         await expect(
-          async () =>
-            await payload.find({
-              collection: slug,
-              overrideAccess: false,
-              where: {
-                and: [
-                  {
-                    id: { equals: id },
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            where: {
+              and: [
+                {
+                  id: { equals: id },
+                },
+                {
+                  restrictedField: {
+                    equals: 'restricted',
                   },
-                  {
-                    restrictedField: {
-                      equals: 'restricted',
-                    },
-                  },
-                ],
-              },
-            }),
+                },
+              ],
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
@@ -294,16 +293,15 @@ describe('Access Control', () => {
         const post = await createDoc({})
         await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
         await expect(
-          async () =>
-            await payload.find({
-              collection: 'relation-restricted',
-              overrideAccess: false,
-              where: {
-                'post.restrictedField': {
-                  equals: 'restricted',
-                },
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            where: {
+              'post.restrictedField': {
+                equals: 'restricted',
               },
-            }),
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
