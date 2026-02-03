@@ -16,7 +16,6 @@ const handler: PayloadHandler = async (req) => {
 
   const query: {
     deleteOnly?: string
-    snapshotKey?: string
     uploadsDir?: string | string[]
   } = qs.parse(req.url.split('?')[1] ?? '', {
     depth: 10,
@@ -33,7 +32,6 @@ const handler: PayloadHandler = async (req) => {
       _payload: payload,
       collectionSlugs: payload.config.collections.map(({ slug }) => slug),
       seedFunction: payload.config.onInit,
-      snapshotKey: String(query.snapshotKey),
       // uploadsDir can be string or stringlist
       uploadsDir,
       // query value will be a string of 'true' or 'false'
