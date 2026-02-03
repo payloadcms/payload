@@ -60,7 +60,7 @@ import {
   sortColumn,
   toggleColumn,
   waitForColumnInURL,
-} from '../../__helpers/e2e/columns/index.js'
+} from '../../../__helpers/e2e/columns/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
