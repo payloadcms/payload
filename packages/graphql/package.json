@@ -55,14 +55,14 @@
   "dependencies": {
     "graphql-scalars": "1.22.2",
     "pluralize": "8.0.0",
-    "ts-essentials": "10.0.3",
     "tsx": "4.21.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pluralize": "^0.0.33",
     "graphql-http": "^1.22.0",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "ts-essentials": "10.0.3"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",

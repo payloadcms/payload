@@ -42,11 +42,11 @@
   },
   "dependencies": {
     "payload": "workspace:*",
-    "qs-esm": "7.0.2",
-    "ts-essentials": "10.0.3"
+    "qs-esm": "7.0.2"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*"
+    "@payloadcms/eslint-config": "workspace:*",
+    "ts-essentials": "10.0.3"
   },
   "publishConfig": {
     "exports": {
