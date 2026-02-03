@@ -1,7 +1,7 @@
 'use client'
 
 import { Spinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'

@@ -1,6 +1,6 @@
 import type { NavPreferences, PayloadRequest } from 'payload'
 
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import { cache } from 'react'
 
 export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPreferences> => {

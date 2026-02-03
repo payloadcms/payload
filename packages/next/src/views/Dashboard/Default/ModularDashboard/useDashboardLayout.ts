@@ -9,7 +9,7 @@ import {
   usePreferences,
   useServerFunctions,
 } from '@payloadcms/ui'
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'

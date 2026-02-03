@@ -148,5 +148,74 @@ query {
         .then((res) => res.json())
       expect(res_2.errors).toBeFalsy()
     })
+
+    it('should handle blocks with select: true', async () => {
+      const createdPost = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post with Blocks',
+          contentBlockField: [
+            {
+              blockType: 'content',
+              text: 'Hello World from Block',
+            },
+          ],
+        },
+      })
+
+      // Query without select: true
+      const queryWithoutSelect = `query {
+        Post(id: ${idToString(createdPost.id, payload)}) {
+          title
+          contentBlockField {
+            ... on Content {
+              text
+            }
+          }
+        }
+      }`
+
+      const responseWithoutSelect = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithoutSelect }) })
+        .then((res) => res.json())
+
+      expect(responseWithoutSelect.errors).toBeFalsy()
+      expect(responseWithoutSelect.data.Post.title).toBe('Test Post with Blocks')
+      expect(responseWithoutSelect.data.Post.contentBlockField).toHaveLength(1)
+      expect(responseWithoutSelect.data.Post.contentBlockField[0].text).toBe(
+        'Hello World from Block',
+      )
+
+      // Query with select: true
+      const queryWithSelect = `query {
+        Posts(select: true, where: { id: { equals: ${idToString(createdPost.id, payload)} } }) {
+          docs {
+            title
+            contentBlockField {
+              ... on Content {
+                text
+              }
+            }
+          }
+        }
+      }`
+
+      const responseWithSelect = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithSelect }) })
+        .then((res) => res.json())
+
+      expect(responseWithSelect.errors).toBeFalsy()
+      expect(responseWithSelect.data.Posts.docs).toHaveLength(1)
+      expect(responseWithSelect.data.Posts.docs[0].title).toBe('Test Post with Blocks')
+      expect(responseWithSelect.data.Posts.docs[0].contentBlockField).toHaveLength(1)
+      expect(responseWithSelect.data.Posts.docs[0].contentBlockField[0].text).toBe(
+        'Hello World from Block',
+      )
+
+      await payload.delete({
+        collection: 'posts',
+        id: createdPost.id,
+      })
+    })
   })
 })

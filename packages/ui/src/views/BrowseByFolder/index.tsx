@@ -6,7 +6,7 @@ import type { FolderListViewClientProps } from 'payload'
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { PREFERENCE_KEYS } from 'payload'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
