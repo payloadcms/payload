@@ -1906,6 +1906,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.5.3
+      tsx:
+        specifier: 4.21.0
+        version: 4.21.0
       typescript:
         specifier: 5.7.3
         version: 5.7.3
