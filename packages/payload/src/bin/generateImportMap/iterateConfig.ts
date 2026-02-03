@@ -64,9 +64,11 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.actions)
   addToImportMap(config.admin?.components?.afterDashboard)
   addToImportMap(config.admin?.components?.afterLogin)
+  addToImportMap(config.admin?.components?.afterNav)
   addToImportMap(config.admin?.components?.afterNavLinks)
   addToImportMap(config.admin?.components?.beforeDashboard)
   addToImportMap(config.admin?.components?.beforeLogin)
+  addToImportMap(config.admin?.components?.beforeNav)
   addToImportMap(config.admin?.components?.beforeNavLinks)
 
   addToImportMap(config.admin?.components?.providers)

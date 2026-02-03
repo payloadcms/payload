@@ -42,7 +42,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks, logout, settingsMenu },
+      components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, logout, settingsMenu },
     },
     collections,
     globals,
@@ -77,61 +77,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const navPreferences = await getNavPrefs(req)
 
-  // Render beforeNavLinks and afterNavLinks once
-  const renderedBeforeNavLinks = RenderServerComponent({
-    clientProps: {
-      documentSubViewType,
-      viewType,
-    },
-    Component: beforeNavLinks,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  const renderedAfterNavLinks = RenderServerComponent({
-    clientProps: {
-      documentSubViewType,
-      viewType,
-    },
-    Component: afterNavLinks,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
-  })
-
-  // Build the full tabs array, starting with the default nav tab
-  const allTabs = [
-    {
-      slug: 'nav',
-      component: (
-        <>
-          {renderedBeforeNavLinks}
-          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-          {renderedAfterNavLinks}
-        </>
-      ),
-      icon: <ListViewIcon />,
-      isDefaultActive: true,
-      label: i18n.t('general:collections'),
-    },
-    ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
-  ]
-
   const LogoutComponent = RenderServerComponent({
     clientProps: {
       documentSubViewType,
@@ -151,7 +96,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
   })
 
-  const renderedSettingsMenu =
+  const RenderedSettingsMenu =
     settingsMenu && Array.isArray(settingsMenu)
       ? settingsMenu.map((item, index) =>
           RenderServerComponent({
@@ -175,8 +120,99 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         )
       : []
 
+  const RenderedBeforeNav = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNav,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedBeforeNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedAfterNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedAfterNav = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNav,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  // Build the full tabs array, starting with the default nav tab
+  const allTabs = [
+    {
+      slug: 'nav',
+      component: (
+        <>
+          {RenderedBeforeNavLinks}
+          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+          {RenderedAfterNavLinks}
+        </>
+      ),
+      icon: <ListViewIcon />,
+      isDefaultActive: true,
+      label: i18n.t('general:collections'),
+    },
+    ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
+  ]
+
   return (
     <NavWrapper baseClass={baseClass}>
+      {RenderedBeforeNav}
       <nav className={`${baseClass}__wrap`}>
         <SidebarTabs
           documentSubViewType={documentSubViewType}
@@ -192,10 +228,11 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
           viewType={viewType}
         />
         <div className={`${baseClass}__controls`}>
-          <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
+          <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />
           {LogoutComponent}
         </div>
       </nav>
+      {RenderedAfterNav}
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>
           <NavHamburger baseClass={baseClass} />
