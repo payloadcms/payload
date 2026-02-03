@@ -7,8 +7,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "lib": ["ES2022"],
-    "types": ["node"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "incremental": true,
+    "isolatedModules": true,
+    "tsBuildInfoFile": "./.tsbuildinfo"
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"]
 }
