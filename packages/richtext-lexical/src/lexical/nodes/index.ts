@@ -12,8 +12,6 @@ import type { NodeWithHooks } from '../../features/typesServer.js'
 import type { LexicalEditorNodeMap, NodeMapBlockValue, NodeMapValue } from '../../types.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
-import { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
-
 // Store view definitions for each editor and node type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const editorNodeViews = new WeakMap<LexicalEditor, Map<string, NodeMapValue<any>>>()
@@ -165,19 +163,21 @@ function applyNodeOverride({
         if (nodeType === 'block' || nodeType === 'inlineBlock') {
           const blockViewDef: NodeMapBlockValue = viewDef as NodeMapBlockValue
           if (blockViewDef.Block || blockViewDef.Label) {
-            // Render Block FC with props including useBlockComponentContext hook
-            // The hook is passed so users can call it inside their component
-            const renderedBlock = blockViewDef.Block
-              ? React.createElement(blockViewDef.Block, {
-                  config,
-                  editor,
-                  formData: this.getFields?.() ?? {},
-                  isEditor: true as const,
-                  isJSXConverter: false as const,
-                  node: this,
-                  nodeKey: this.getKey(),
-                  useBlockComponentContext,
-                })
+            // Pass Block FC and props to BlockContent for rendering
+            // BlockContent will render with useBlockComponentContext hook (client-only)
+            const unrenderedBlock = blockViewDef.Block
+              ? {
+                  BlockFC: blockViewDef.Block,
+                  editorProps: {
+                    config,
+                    editor,
+                    formData: this.getFields?.() ?? {},
+                    isEditor: true as const,
+                    isJSXConverter: false as const,
+                    node: this,
+                    nodeKey: this.getKey(),
+                  },
+                }
               : undefined
 
             const renderedLabel = blockViewDef.Label
@@ -188,7 +188,7 @@ function applyNodeOverride({
               this,
               editor,
               config,
-              renderedBlock,
+              unrenderedBlock,
               renderedLabel,
             )
           }

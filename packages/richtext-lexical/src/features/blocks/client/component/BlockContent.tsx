@@ -54,17 +54,26 @@ export type BlockCollapsibleWithErrorProps = {
   fieldHasErrors?: boolean
 } & BlockCollapsibleProps
 
+import type { ViewMapBlockComponentProps, ViewMapBlockEditorProps } from '../../../../types.js'
+
+/**
+ * Unrendered custom block from view map.
+ * Contains the Block FC and its Lexical-level props.
+ * BlockContent will render it with useBlockComponentContext hook.
+ */
+export type UnrenderedCustomBlock = {
+  BlockFC: React.FC<ViewMapBlockComponentProps>
+  editorProps: Omit<ViewMapBlockEditorProps, 'useBlockComponentContext'>
+}
+
 export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC
   Collapsible: React.FC<BlockCollapsibleWithErrorProps>
   /**
-   * Custom block component as React.ReactNode.
-   * For view maps, the FC is rendered in nodes/index.ts with Lexical-level props.
-   * For form state (block.admin.components.Block), it's RSC-rendered.
-   * Both arrive here as ReactNode.
+   * Custom block component (pre-rendered ReactNode).
    */
-  CustomBlock: React.ReactNode
+  CustomBlock?: React.ReactNode
   CustomLabel: React.ReactNode
   EditButton: React.FC
   errorCount: number
@@ -120,15 +129,14 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
     [Collapsible, fieldHasErrors, errorCount],
   )
 
-  // CustomBlock is always React.ReactNode (rendered in nodes/index.ts or RSC-rendered)
+  const blockContextValue: BlockComponentContextType = {
+    ...contextProps,
+    BlockCollapsible: CollapsibleWithErrorProps,
+  }
+
   // Provide context for useBlockComponentContext() hook
   return CustomBlock ? (
-    <BlockComponentContext
-      value={{
-        ...contextProps,
-        BlockCollapsible: CollapsibleWithErrorProps,
-      }}
-    >
+    <BlockComponentContext value={blockContextValue}>
       {CustomBlock}
       <BlockDrawer />
     </BlockComponentContext>

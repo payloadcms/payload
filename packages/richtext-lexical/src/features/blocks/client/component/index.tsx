@@ -41,7 +41,12 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import './index.scss'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
-import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
+import {
+  type BlockCollapsibleWithErrorProps,
+  BlockContent,
+  type UnrenderedCustomBlock,
+  useBlockComponentContext,
+} from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
@@ -53,11 +58,10 @@ type Props = {
   readonly cacheBuster: number
   readonly className: string
   /**
-   * Custom block component as React.ReactNode.
-   * For view maps, the FC is pre-rendered in nodes/index.ts with Lexical-level props.
-   * For form state (block.admin.components.Block), it's RSC-rendered.
+   * Custom block component from view map (FC + props).
+   * Will be rendered with useBlockComponentContext hook.
    */
-  readonly CustomBlock?: React.ReactNode
+  readonly CustomBlock?: UnrenderedCustomBlock
   /**
    * Custom label component as React.ReactNode.
    * For view maps, the FC is pre-rendered in nodes/index.ts.
@@ -167,10 +171,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
       undefined,
   )
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      const { BlockFC, editorProps } = CustomBlockFromProps
+      return <BlockFC {...editorProps} useBlockComponentContext={useBlockComponentContext} />
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    CustomBlockFromProps ?? initialState?.['_components']?.customComponents?.Block ?? undefined,
-  )
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
 
   // Initial state for newly created blocks
   useEffect(() => {
