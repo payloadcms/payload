@@ -1,0 +1,30 @@
+{
+  "name": "@tools/test-utils",
+  "version": "0.0.1",
+  "description": "Shared test utilities for Payload CMS",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./int": "./src/int/index.ts",
+    "./e2e": "./src/e2e/index.ts",
+    "./setup/vitest": "./src/setup/vitest.ts",
+    "./setup/playwright": "./src/setup/playwright.ts",
+    "./database": "./src/shared/database/index.ts",
+    "./shared": "./src/shared/index.ts"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0",
+    "payload": ">=3.0.0",
+    "vitest": ">=2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  }
+}
