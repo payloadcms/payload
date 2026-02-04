@@ -27,7 +27,7 @@ const getDocumentTitle = (doc: Record<string, unknown>, useAsTitle: string | und
   return idStr
 }
 
-export const TreeNode = <T extends Record<string, unknown> = Record<string, unknown>>({
+export const TreeNode = ({
   cache,
   collectionSlug,
   depth = 0,
@@ -39,7 +39,7 @@ export const TreeNode = <T extends Record<string, unknown> = Record<string, unkn
   selected,
   selectedNodeId,
   useAsTitle,
-}: TreeNodeProps<T>) => {
+}: TreeNodeProps) => {
   const expanded = expandedNodes.has(node.id)
   const nodeRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -55,7 +55,7 @@ export const TreeNode = <T extends Record<string, unknown> = Record<string, unkn
     cache,
     collectionSlug,
     enabled: expanded,
-    limit: 2, // TODO: Change to 50 for production
+    limit: 50,
     parentFieldName,
     parentId: node.id,
   })
@@ -171,7 +171,7 @@ export const TreeNode = <T extends Record<string, unknown> = Record<string, unkn
               const childId = childData.id
               const childTitle = getDocumentTitle(child, useAsTitle)
               return (
-                <TreeNode<T>
+                <TreeNode
                   cache={cache}
                   collectionSlug={collectionSlug}
                   depth={depth + 1}

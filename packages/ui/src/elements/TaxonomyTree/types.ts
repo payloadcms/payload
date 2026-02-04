@@ -19,15 +19,15 @@ export type TaxonomyTreeProps = {
   selectedNodeId?: null | number | string
 }
 
-export type CachedChildren<T = Record<string, unknown>> = {
-  children: T[]
+export type CachedChildren = {
+  children: Record<string, unknown>[]
   hasMore: boolean
   page: number
   totalDocs: number
 }
 
-export type TreeNodeProps<T = Record<string, unknown>> = {
-  cache?: React.MutableRefObject<Map<string, CachedChildren<T>>>
+export type TreeNodeProps = {
+  cache?: React.MutableRefObject<Map<string, CachedChildren>>
   collectionSlug: string
   depth?: number
   expandedNodes: Set<number | string>

@@ -43,12 +43,11 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  // Get parent field name from taxonomy or hierarchy config
+  // Get parent field name from taxonomy config
   const parentFieldName =
-    collectionConfig?.admin?.custom?.isTaxonomy &&
-    (collectionConfig as Record<string, unknown>).taxonomy?.parentFieldName
-      ? (collectionConfig as Record<string, unknown>).taxonomy.parentFieldName
-      : (collectionConfig as Record<string, unknown>).hierarchy?.parentFieldName || 'parent'
+    (collectionConfig.taxonomy && typeof collectionConfig.taxonomy === 'object'
+      ? collectionConfig.taxonomy.parentFieldName
+      : null) || 'parent'
 
   const childrenCache = useRef(new Map())
   const treeRef = useRef<HTMLDivElement>(null)
@@ -60,11 +59,11 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     isLoading,
     loadMore: loadMoreFromHook,
     totalDocs,
-  } = useChildren<TaxonomyDocument>({
+  } = useChildren({
     cache: childrenCache,
     collectionSlug,
     enabled: true,
-    limit: 2, // TODO: Change to 50 for production
+    limit: 50,
     parentFieldName,
     parentId: 'null', // Special value to query for null parent
   })
@@ -115,7 +114,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
         const isSelected = nodeIdStr === String(selectedNodeId)
 
         return (
-          <TreeNode<TaxonomyDocument>
+          <TreeNode
             cache={childrenCache}
             collectionSlug={collectionSlug}
             depth={0}
