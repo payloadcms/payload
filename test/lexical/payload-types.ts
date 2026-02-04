@@ -95,6 +95,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlock;
     'lexical-access-control': LexicalAccessControl;
     'lexical-relationship-fields': LexicalRelationshipField;
+    hooks: Hook;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
@@ -122,6 +123,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
     'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
+    hooks: HooksSelect<false> | HooksSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -675,6 +677,31 @@ export interface LexicalRelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks".
+ */
+export interface Hook {
+  id: string;
+  title?: string | null;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
@@ -1094,6 +1121,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalRelationshipField;
       } | null)
     | ({
+        relationTo: 'hooks';
+        value: string | Hook;
+      } | null)
+    | ({
         relationTo: 'rich-text-fields';
         value: string | RichTextField;
       } | null)
@@ -1314,6 +1345,16 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks_select".
+ */
+export interface HooksSelect<T extends boolean = true> {
+  title?: T;
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
