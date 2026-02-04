@@ -162,11 +162,11 @@ export function UnpublishButton({
   const hasDraftsEnabled = typeof drafts === 'object' && drafts !== null
 
   const canUnpublish = React.useMemo(() => {
-    return hasPublishPermission && hasPublishedDoc && !isTrashed && hasDraftsEnabled
+    return hasDraftsEnabled && hasPublishPermission && hasPublishedDoc && !isTrashed
   }, [hasPublishPermission, hasPublishedDoc, isTrashed, hasDraftsEnabled])
 
   const canUnpublishCurrentLocale = React.useMemo(() => {
-    if (!canUnpublish || !hasLocalizedFields || !hasDraftsEnabled) {
+    if (!canUnpublish || !hasLocalizedFields) {
       return false
     }
 
@@ -174,7 +174,7 @@ export function UnpublishButton({
     const isExperimentalEnabled = config.experimental?.localizeStatus === true
 
     return isLocalizeStatusEnabled && isExperimentalEnabled
-  }, [canUnpublish, hasLocalizedFields, hasDraftsEnabled, drafts, config.experimental?.localizeStatus])
+  }, [canUnpublish, hasLocalizedFields, drafts, config.experimental?.localizeStatus])
 
   const label = getTranslation(localeLabel, i18n)
 
