@@ -12,7 +12,7 @@ import WebSocket from 'ws'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
-import type { Result as LoginResult } from './auth/operations/login.js'
+import type { LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
@@ -52,7 +52,7 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
-import { countLocal, type Options as CountOptions } from './collections/operations/local/count.js'
+import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
   type Options as CreateOptions,
@@ -136,7 +136,10 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import { countVersionsLocal } from './collections/operations/local/countVersions.js'
+import {
+  countVersionsLocal,
+  type CountVersionsOptions,
+} from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
@@ -165,6 +168,7 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
+export * from './auth/index.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -318,13 +322,17 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ *
+ * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
+ * auth-enabled collections.
+ *
  * @todo rename to `User` in 4.0
  */
 export type TypedUser = PayloadTypes['user']
 
 export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
+export type AuthCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['auth']>
 
 export type TypedJobs = PayloadTypes['jobs']
 
@@ -403,7 +411,7 @@ export class BasePayload {
    * @returns count of document versions satisfying query
    */
   countVersions = async <T extends CollectionSlug>(
-    options: CountOptions<T>,
+    options: CountVersionsOptions<T>,
   ): Promise<{ totalDocs: number }> => {
     return countVersionsLocal(this, options)
   }
@@ -592,7 +600,7 @@ export class BasePayload {
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
-  ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
+  ): Promise<LoginResult<TSlug>> => {
     return loginLocal<TSlug>(this, options)
   }
 
@@ -1241,11 +1249,11 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
+export type { LoginResult } from './auth/operations/login.js'
 export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
 export { logoutOperation } from './auth/operations/logout.js'

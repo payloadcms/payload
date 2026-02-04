@@ -55,6 +55,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -190,6 +191,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     })
 
     // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
+    // /////////////////////////////////////
     // Delete Preferences
     // /////////////////////////////////////
 
@@ -231,6 +240,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -261,6 +271,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
+      overrideAccess,
       result,
     })
 

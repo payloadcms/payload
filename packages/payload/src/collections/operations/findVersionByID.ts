@@ -61,6 +61,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       args,
       collection: collectionConfig,
       operation: 'findVersionByID',
+      overrideAccess,
     })
 
     // /////////////////////////////////////
@@ -141,6 +142,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
@@ -180,6 +182,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
@@ -194,6 +197,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       args,
       collection: collectionConfig,
       operation: 'findVersionByID',
+      overrideAccess,
       result,
     })
 

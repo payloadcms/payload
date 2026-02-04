@@ -852,6 +852,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -863,6 +867,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
@@ -1476,8 +1484,10 @@ export type Config = {
     >
 
     /**
-     * Enable strict type safety for draft mode queries.
-     * When enabled, find operations with draft: true will type required fields as optional.
+     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+     * on collections without drafts, and query results with `draft: true` type required fields as optional.
+     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+     *
      * @default false
      * @todo Remove in v4. Strict draft types will become the default behavior.
      */

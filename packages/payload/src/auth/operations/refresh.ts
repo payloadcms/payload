@@ -44,6 +44,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection.config,
       operation: 'refresh',
+      overrideAccess: false,
     })
 
     // /////////////////////////////////////
@@ -181,6 +182,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection?.config,
       operation: 'refresh',
+      overrideAccess: false,
       result,
     })
 

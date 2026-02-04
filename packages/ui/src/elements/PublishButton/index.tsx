@@ -21,7 +21,9 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
-export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
+export function PublishButton({
+  label: labelProp,
+}: { label?: string } & PublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,

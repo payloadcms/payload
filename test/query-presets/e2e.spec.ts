@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
+import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
+import { openNav } from '__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
 import {
@@ -15,19 +16,19 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
 import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
-import { pagesSlug } from './slugs.js'
+import { defaultColumnsSlug, pagesSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
@@ -62,14 +63,14 @@ describe('Query Presets', () => {
     const allDocs = (
       await payload.find({
         collection: 'payload-query-presets',
+        depth: 0,
+        limit: 3,
+        pagination: false,
         where: {
           title: {
             in: ['Everyone', 'Only Me', 'Specific Users'],
           },
         },
-        limit: 3,
-        depth: 0,
-        pagination: false,
       })
     ).docs
 
@@ -145,8 +146,8 @@ describe('Query Presets', () => {
     await selectPreset({ page, presetTitle: seededData.everyone.title })
 
     await assertURLParams({
-      page,
       columns: seededData.everyone.columns,
+      page,
       preset: seededData.everyone.id,
     })
   })
@@ -217,10 +218,10 @@ describe('Query Presets', () => {
     await page.goto(pagesUrl.list)
 
     await assertURLParams({
-      page,
       columns: seededData.everyone.columns,
-      where: seededData.everyone.where,
+      page,
       preset: seededData.everyone.id,
+      where: seededData.everyone.where,
     })
 
     // for good measure, also soft navigate away and back
@@ -229,10 +230,10 @@ describe('Query Presets', () => {
     await page.click(`a[href="/admin/collections/${pagesSlug}"]`)
 
     await assertURLParams({
-      page,
       columns: seededData.everyone.columns,
-      where: seededData.everyone.where,
+      page,
       preset: seededData.everyone.id,
+      where: seededData.everyone.where,
     })
   })
 
@@ -422,9 +423,9 @@ describe('Query Presets', () => {
     const testPost = posts.docs[0]
 
     await addListFilter({
-      page,
       fieldLabel: 'Posts Relationship',
       operatorLabel: 'is in',
+      page,
       value: testPost?.text ?? '',
     })
 
@@ -621,6 +622,7 @@ describe('Query Presets', () => {
 
     // Create a preset without groupBy
     await page.goto(postsUrl.list)
+    await wait(1000)
 
     await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
@@ -708,5 +710,70 @@ describe('Query Presets', () => {
 
     // Verify reset button is hidden again after reset
     await expect(page.locator('#reset-preset')).toBeHidden()
+  })
+
+  test('should apply preset from URL query param', async ({ page }) => {
+    // Navigate directly to the list view with a preset query param
+    await page.goto(`${pagesUrl.list}?preset=${seededData.everyone.id}`)
+
+    // Verify the where query is in the URL
+    await assertURLParams({
+      page,
+      columns: seededData.everyone.columns,
+      where: seededData.everyone.where,
+      preset: seededData.everyone.id,
+    })
+
+    // Verify the preset is selected in the preset selector
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText(seededData.everyone.title),
+      }),
+    ).toBeVisible()
+
+    // Verify the actual results are filtered correctly
+    // The seeded preset filters for text: { equals: 'example page' }
+    const tableRows = page.locator('.collection-list .table tbody tr')
+    await expect(tableRows).toHaveCount(1)
+    await expect(tableRows.first()).toContainText('example page')
+  })
+
+  test('should restore default columns after clearing a preset', async ({ page }) => {
+    const defaultColumnsUrl = new AdminUrlUtil(serverURL, defaultColumnsSlug)
+
+    // The DefaultColumns collection has defaultColumns: ['id', 'field1', 'field2', 'defaultColumnField']
+    const expectedDefaultColumns = ['ID', 'Field1', 'Field2', 'Default Column Field']
+
+    // Step 1: Go to list view and verify default columns are shown initially
+    await page.goto(defaultColumnsUrl.list)
+
+    const tableHeaders = page.locator('table > thead > tr > th')
+
+    // Verify default columns are visible (skipping first th which is checkbox)
+    for (let i = 0; i < expectedDefaultColumns.length; i++) {
+      await expect(tableHeaders.nth(i + 1)).toHaveText(expectedDefaultColumns[i]!)
+    }
+
+    // Step 2: Apply query preset (the "Default Columns" preset seeded for this collection)
+    await selectPreset({ page, presetTitle: 'Default Columns' })
+
+    // Step 3: Remove the query preset
+    await clearSelectedPreset({ page })
+
+    // Step 4: Verify default columns are STILL shown after clearing preset
+    // BUG: Currently shows columns in field order instead of defaultColumns order
+    for (let i = 0; i < expectedDefaultColumns.length; i++) {
+      await expect(tableHeaders.nth(i + 1)).toHaveText(expectedDefaultColumns[i]!)
+    }
+
+    // Step 5: Navigate away and back (fresh navigation without URL params)
+    await page.goto(defaultColumnsUrl.admin)
+    await page.goto(defaultColumnsUrl.list)
+
+    // Step 6: Verify default columns are STILL shown after fresh page load
+    // BUG: Currently shows columns in field order instead of defaultColumns order
+    for (let i = 0; i < expectedDefaultColumns.length; i++) {
+      await expect(tableHeaders.nth(i + 1)).toHaveText(expectedDefaultColumns[i]!)
+    }
   })
 })

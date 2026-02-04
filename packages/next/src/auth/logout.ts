@@ -1,6 +1,6 @@
 'use server'
 
-import type { SanitizedConfig } from 'payload'
+import type { MaybePromise, SanitizedConfig } from 'payload'
 
 import { cookies as getCookies, headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, logoutOperation } from 'payload'
@@ -12,7 +12,7 @@ export async function logout({
   config,
 }: {
   allSessions?: boolean
-  config: Promise<SanitizedConfig> | SanitizedConfig
+  config: MaybePromise<SanitizedConfig>
 }) {
   const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()

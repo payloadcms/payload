@@ -36,7 +36,7 @@ Payload is structured as a Monorepo, encompassing not only the core Payload plat
 
 If you're coming from a very outdated version of payload, it is recommended to perform a clean install, which nukes the node_modules folder and reinstalls all dependencies. You can easily do that using the `pnpm reinstall` command.
 
-It is also recommended to use at least Node v23.11.0 or higher. You can check your current node version by typing `node --version` in your terminal. The easiest way to switch between different node versions is to use [nvm](https://github.com/nvm-sh/nvm#intro).
+It is also recommended to use the exact Node.js and pnpm version defined in the .tool-versions file. You can check your current node version by typing `node --version` in your terminal. The Payload team uses [mise](https://mise.jdx.dev) to manage Node.js versions.
 
 ### Code
 
