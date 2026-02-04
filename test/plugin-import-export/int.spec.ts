@@ -5104,6 +5104,89 @@ describe('@payloadcms/plugin-import-export', () => {
 
         expect(updatedPage.title).toBe('Updated Title via Upsert')
       })
+
+      it('should update existing documents with custom IDs in update mode', async () => {
+        await payload.create({
+          collection: 'custom-id-pages' as CollectionSlug,
+          data: {
+            id: 'update-mode-custom-1',
+            title: 'Original Title for Update Mode',
+          },
+        })
+
+        createdCustomIdPages.push('update-mode-custom-1')
+
+        const testData = [{ id: 'update-mode-custom-1', title: 'Updated via Update Mode' }]
+
+        const jsonBuffer = Buffer.from(JSON.stringify(testData))
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            name: 'update-mode-custom-id.json',
+            data: jsonBuffer,
+            mimetype: 'application/json',
+            size: jsonBuffer.length,
+          },
+          user,
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+        })
+
+        expect(completedImport.status).toBe('completed')
+        expect(completedImport.summary?.updated).toBe(1)
+
+        const updatedPage = await payload.findByID({
+          id: 'update-mode-custom-1',
+          collection: 'custom-id-pages' as CollectionSlug,
+        })
+
+        expect(updatedPage.title).toBe('Updated via Update Mode')
+      })
+
+      it('should report issue for non-existing documents in update mode with custom IDs', async () => {
+        const testData = [{ id: 'non-existing-custom-id', title: 'This should fail' }]
+
+        const jsonBuffer = Buffer.from(JSON.stringify(testData))
+
+        const importDoc = await payload.create({
+          collection: 'imports',
+          data: {
+            collectionSlug: 'custom-id-pages',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            name: 'update-mode-fail-custom-id.json',
+            data: jsonBuffer,
+            mimetype: 'application/json',
+            size: jsonBuffer.length,
+          },
+          user,
+        })
+
+        await payload.jobs.run()
+
+        const completedImport = await payload.findByID({
+          id: importDoc.id,
+          collection: 'imports',
+        })
+
+        // When update mode can't find any document, status is 'failed' (100% failure)
+        expect(completedImport.status).toBe('failed')
+        expect(completedImport.summary?.updated).toBe(0)
+        expect(completedImport.summary?.issues).toBe(1)
+      })
     })
   })
 
