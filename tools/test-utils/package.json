@@ -15,7 +15,7 @@
     "./shared": "./src/shared/index.ts"
   },
   "scripts": {
-    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit 2>&1 | grep -E '^src/' || true"
+    "typecheck": "NODE_OPTIONS='--max-old-space-size=8192' tsc --noEmit 2>&1 | grep '^src/' || echo 'No errors in src/'"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
