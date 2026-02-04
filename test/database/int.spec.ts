@@ -28,7 +28,7 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
@@ -2171,6 +2171,183 @@ describe('database', () => {
       }
     })
 
+    describe('Bulk operation error handling', () => {
+      // Using 'as any' because types haven't been regenerated for the new test collection
+      const bulkErrorCollection = 'bulk-error-test' as 'posts'
+
+      afterEach(async () => {
+        // Clean up all docs in the test collection
+        await payload.db.deleteMany({
+          collection: bulkErrorCollection,
+          where: {},
+        })
+      })
+
+      it('should return all docs as failed when one update fails in shared transaction', async () => {
+        // Skip for MongoDB - this tests PostgreSQL transaction behavior
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        // Create 3 docs
+        const docs = await Promise.all([
+          payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+          payload.create({ collection: bulkErrorCollection, data: { title: 'doc2' } as any }),
+          payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+        ])
+
+        // Try to update all, but set shouldFailOnUpdate which will throw
+        const result = await payload.update({
+          collection: bulkErrorCollection,
+          data: { shouldFailOnUpdate: true } as any,
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+
+        // All docs should be reported as failed (honest result)
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(3)
+      })
+
+      it('should return all docs as failed when one delete fails in shared transaction', async () => {
+        // Skip for MongoDB - this tests PostgreSQL transaction behavior
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        // Create 3 docs, one marked to fail on delete
+        const docs = await Promise.all([
+          payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+          payload.create({
+            collection: bulkErrorCollection,
+            data: { shouldFailOnDelete: true, title: 'doc2' } as any,
+          }),
+          payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+        ])
+
+        // Try to delete all
+        const result = await payload.delete({
+          collection: bulkErrorCollection,
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+
+        // All docs should be reported as failed (honest result)
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(3)
+
+        // Verify no docs were actually deleted
+        const remaining = await payload.find({
+          collection: bulkErrorCollection,
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+        expect(remaining.docs).toHaveLength(3)
+      })
+
+      it('should return all docs as failed when one update fails with separate transactions', async () => {
+        // Skip for MongoDB - this tests PostgreSQL transaction behavior
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
+
+        try {
+          // Create 3 docs
+          const docs = await Promise.all([
+            payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+            payload.create({ collection: bulkErrorCollection, data: { title: 'doc2' } as any }),
+            payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+          ])
+
+          // Try to update all, but set shouldFailOnUpdate which will throw
+          const result = await payload.update({
+            collection: bulkErrorCollection,
+            data: { shouldFailOnUpdate: true } as any,
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          // All docs should be reported as failed (same behavior as shared transaction)
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(3)
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
+
+      it('should return all docs as failed when one delete fails with separate transactions', async () => {
+        // Skip for MongoDB - this tests PostgreSQL transaction behavior
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
+
+        try {
+          // Create 3 docs, one marked to fail on delete
+          const docs = await Promise.all([
+            payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+            payload.create({
+              collection: bulkErrorCollection,
+              data: { shouldFailOnDelete: true, title: 'doc2' } as any,
+            }),
+            payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+          ])
+
+          // Try to delete all
+          const result = await payload.delete({
+            collection: bulkErrorCollection,
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          // All docs should be reported as failed (same behavior as shared transaction)
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(3)
+
+          // Verify no docs were actually deleted
+          const remaining = await payload.find({
+            collection: bulkErrorCollection,
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+          expect(remaining.docs).toHaveLength(3)
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
+
+      it('should log errors when bulk operations fail', async () => {
+        // Skip for MongoDB - this tests PostgreSQL transaction behavior
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        // Create a doc that will fail on delete
+        const doc = await payload.create({
+          collection: bulkErrorCollection,
+          data: { shouldFailOnDelete: true, title: 'will-fail' } as any,
+        })
+
+        // Spy on the logger
+        const errorSpy = vitest.spyOn(payload.logger, 'error')
+
+        try {
+          await payload.delete({
+            collection: bulkErrorCollection,
+            where: { id: { equals: doc.id } },
+          })
+
+          // Should have logged the error
+          expect(errorSpy).toHaveBeenCalled()
+          const logCall = errorSpy.mock.calls.find((call) =>
+            (call[0] as { msg?: string })?.msg?.includes('Error deleting document'),
+          )
+          expect(logCall).toBeDefined()
+        } finally {
+          errorSpy.mockRestore()
+        }
+      })
+    })
+
     it('should CRUD point field', async () => {
       const result = await payload.create({
         collection: 'default-values',
@@ -3633,8 +3810,8 @@ describe('database', () => {
     const result = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-field',
         publishDate: testDate,
+        title: 'testing-date-field',
       },
     })
 
@@ -3644,8 +3821,8 @@ describe('database', () => {
 
     // Reading back should also return ISO string
     const retrieved = await payload.findByID({
-      collection: postsSlug,
       id: result.id,
+      collection: postsSlug,
     })
 
     expect(typeof retrieved.publishDate).toBe('string')
@@ -3660,8 +3837,8 @@ describe('database', () => {
     const result = await payload.db.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-coercion',
         publishDate: unixTimestamp,
+        title: 'testing-date-coercion',
       },
       req: {} as any,
     })
@@ -3767,9 +3944,9 @@ describe('database', () => {
     const updated = await payload.db.upsert({
       collection: defaultValuesSlug,
       data: {
-        title: 'upsert-test',
         defaultValue: 'custom value', // Explicitly set a different value
         select: 'option0', // Change from default
+        title: 'upsert-test',
       },
       req: {},
       where: {
@@ -4117,8 +4294,8 @@ describe('database', () => {
     // because it's a simple field update with an existing ID
     try {
       await payload.update({
-        collection: 'unique-fields',
         id: doc2.id,
+        collection: 'unique-fields',
         data: {
           slugField: 'optimized-unique-1', // Try to set to doc1's unique value
         },
@@ -5478,18 +5655,18 @@ describe('database', () => {
 
       const simple_1 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Роман' },
+        locale: 'uk',
       })
       const simple_2 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Віктор' },
+        locale: 'uk',
       })
       const simple_3 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Євген' },
+        locale: 'uk',
       })
 
       const results = await payload.find({
