@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as fs from 'fs'
+import * as os from 'os'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -232,21 +233,29 @@ test.describe('Import Export Plugin', () => {
 
         await saveDocAndAssert(page, '#action-save')
 
+        // Verify we're on the exports collection edit page
+        await expect(page).toHaveURL(/\/exports\//)
+
         await runJobsQueue({ serverURL })
 
-        await page.reload()
+        await expect(async () => {
+          await page.reload()
 
-        const exportFilename = page.locator('.file-details__main-detail')
-        await expect(exportFilename).toBeVisible()
-        await expect(exportFilename).toContainText('.csv')
+          const exportFilename = page.locator('.file-details__main-detail')
+          await expect(exportFilename).toBeVisible()
+          await expect(exportFilename).toContainText('.csv')
+        }).toPass()
 
         const downloadLink = page.locator('.file-details__main-detail a')
         await expect(downloadLink).toHaveAttribute('href', /.+/)
 
         const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
 
-        const downloadPath = await download.path()
-        const content = fs.readFileSync(downloadPath, 'utf8')
+        // Use saveAs for compatibility with both local and remote/debug modes
+        const tempPath = path.join(os.tmpdir(), `export-test-${uniqueId}.csv`)
+        await download.saveAs(tempPath)
+        const content = fs.readFileSync(tempPath, 'utf8')
+        fs.unlinkSync(tempPath)
 
         expect(content).toContain(`e2e-export-${uniqueId}-1`)
         expect(content).toContain(`e2e-export-${uniqueId}-2`)
