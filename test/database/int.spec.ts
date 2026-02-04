@@ -2172,33 +2172,24 @@ describe('database', () => {
     })
 
     describe('Bulk operation error handling', () => {
-      // Using 'as any' because types haven't been regenerated for the new test collection
-      const bulkErrorCollection = 'bulk-error-test' as 'posts'
-
       afterEach(async () => {
-        // Clean up all docs in the test collection
         await payload.db.deleteMany({
-          collection: bulkErrorCollection,
+          collection: 'bulk-error-test',
           where: {},
         })
       })
 
       it('should return all docs as failed when one update fails in shared transaction', async () => {
-        // Skip for MongoDB - this tests PostgreSQL transaction behavior
-        if (payload.db.name === 'mongoose') {
-          return
-        }
-
         // Create 3 docs
         const docs = await Promise.all([
-          payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
-          payload.create({ collection: bulkErrorCollection, data: { title: 'doc2' } as any }),
-          payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+          payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+          payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
+          payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
         ])
 
         // Try to update all, but set shouldFailOnUpdate which will throw
         const result = await payload.update({
-          collection: bulkErrorCollection,
+          collection: 'bulk-error-test',
           data: { shouldFailOnUpdate: true } as any,
           where: { id: { in: docs.map((d) => d.id) } },
         })
@@ -2209,24 +2200,19 @@ describe('database', () => {
       })
 
       it('should return all docs as failed when one delete fails in shared transaction', async () => {
-        // Skip for MongoDB - this tests PostgreSQL transaction behavior
-        if (payload.db.name === 'mongoose') {
-          return
-        }
-
         // Create 3 docs, one marked to fail on delete
         const docs = await Promise.all([
-          payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+          payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
           payload.create({
-            collection: bulkErrorCollection,
+            collection: 'bulk-error-test',
             data: { shouldFailOnDelete: true, title: 'doc2' } as any,
           }),
-          payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+          payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
         ])
 
         // Try to delete all
         const result = await payload.delete({
-          collection: bulkErrorCollection,
+          collection: 'bulk-error-test',
           where: { id: { in: docs.map((d) => d.id) } },
         })
 
@@ -2236,32 +2222,27 @@ describe('database', () => {
 
         // Verify no docs were actually deleted
         const remaining = await payload.find({
-          collection: bulkErrorCollection,
+          collection: 'bulk-error-test',
           where: { id: { in: docs.map((d) => d.id) } },
         })
         expect(remaining.docs).toHaveLength(3)
       })
 
       it('should return all docs as failed when one update fails with separate transactions', async () => {
-        // Skip for MongoDB - this tests PostgreSQL transaction behavior
-        if (payload.db.name === 'mongoose') {
-          return
-        }
-
         const originalValue = payload.db.bulkOperationsSingleTransaction
         payload.db.bulkOperationsSingleTransaction = true
 
         try {
           // Create 3 docs
           const docs = await Promise.all([
-            payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
-            payload.create({ collection: bulkErrorCollection, data: { title: 'doc2' } as any }),
-            payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
           ])
 
           // Try to update all, but set shouldFailOnUpdate which will throw
           const result = await payload.update({
-            collection: bulkErrorCollection,
+            collection: 'bulk-error-test',
             data: { shouldFailOnUpdate: true } as any,
             where: { id: { in: docs.map((d) => d.id) } },
           })
@@ -2275,28 +2256,23 @@ describe('database', () => {
       })
 
       it('should return all docs as failed when one delete fails with separate transactions', async () => {
-        // Skip for MongoDB - this tests PostgreSQL transaction behavior
-        if (payload.db.name === 'mongoose') {
-          return
-        }
-
         const originalValue = payload.db.bulkOperationsSingleTransaction
         payload.db.bulkOperationsSingleTransaction = true
 
         try {
           // Create 3 docs, one marked to fail on delete
           const docs = await Promise.all([
-            payload.create({ collection: bulkErrorCollection, data: { title: 'doc1' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
             payload.create({
-              collection: bulkErrorCollection,
+              collection: 'bulk-error-test',
               data: { shouldFailOnDelete: true, title: 'doc2' } as any,
             }),
-            payload.create({ collection: bulkErrorCollection, data: { title: 'doc3' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
           ])
 
           // Try to delete all
           const result = await payload.delete({
-            collection: bulkErrorCollection,
+            collection: 'bulk-error-test',
             where: { id: { in: docs.map((d) => d.id) } },
           })
 
@@ -2306,7 +2282,7 @@ describe('database', () => {
 
           // Verify no docs were actually deleted
           const remaining = await payload.find({
-            collection: bulkErrorCollection,
+            collection: 'bulk-error-test',
             where: { id: { in: docs.map((d) => d.id) } },
           })
           expect(remaining.docs).toHaveLength(3)
@@ -2316,14 +2292,9 @@ describe('database', () => {
       })
 
       it('should log errors when bulk operations fail', async () => {
-        // Skip for MongoDB - this tests PostgreSQL transaction behavior
-        if (payload.db.name === 'mongoose') {
-          return
-        }
-
         // Create a doc that will fail on delete
         const doc = await payload.create({
-          collection: bulkErrorCollection,
+          collection: 'bulk-error-test',
           data: { shouldFailOnDelete: true, title: 'will-fail' } as any,
         })
 
@@ -2332,7 +2303,7 @@ describe('database', () => {
 
         try {
           await payload.delete({
-            collection: bulkErrorCollection,
+            collection: 'bulk-error-test',
             where: { id: { equals: doc.id } },
           })
 
