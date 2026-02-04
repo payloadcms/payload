@@ -8,6 +8,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { SanitizedTaxonomyConfig } from '../../taxonomy/types.js'
 import type { Payload } from '../../types/index.js'
 import type { SanitizedUploadConfig } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
@@ -65,9 +66,10 @@ export type ClientCollectionConfig = {
     plural: StaticLabel
     singular: StaticLabel
   }
+  taxonomy?: SanitizedTaxonomyConfig | true
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'labels' | 'taxonomy' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [

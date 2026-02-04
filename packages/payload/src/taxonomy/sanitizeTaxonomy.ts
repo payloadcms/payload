@@ -12,7 +12,6 @@ import { findRelatedHandler } from './endpoints/findRelated.js'
  */
 export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Config): void => {
   if (!collectionConfig.taxonomy) {
-    collectionConfig.taxonomy = false
     return
   }
 
@@ -37,14 +36,6 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
   }
 
   // Flag this collection as a taxonomy for UI to detect
-  if (!collectionConfig.admin) {
-    collectionConfig.admin = {}
-  }
-  if (!collectionConfig.admin.custom) {
-    collectionConfig.admin.custom = {}
-  }
-  collectionConfig.admin.custom.isTaxonomy = true
-
   // Add endpoint to find related documents
   if (!collectionConfig.endpoints) {
     collectionConfig.endpoints = []

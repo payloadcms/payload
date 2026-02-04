@@ -6,9 +6,7 @@ import type { Config } from '../config/types.js'
  */
 export const addTaxonomySidebarTabs = (config: Config): void => {
   // Find all collections with taxonomy enabled
-  const taxonomyCollections = config.collections?.filter(
-    (collection) => collection.taxonomy && collection.taxonomy !== false,
-  )
+  const taxonomyCollections = config.collections?.filter((collection) => collection.taxonomy)
 
   if (!taxonomyCollections || taxonomyCollections.length === 0) {
     return

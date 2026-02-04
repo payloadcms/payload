@@ -855,7 +855,7 @@ export interface SanitizedCollectionConfig
 
   slug: CollectionSlug
 
-  taxonomy: false | SanitizedTaxonomyConfig
+  taxonomy?: SanitizedTaxonomyConfig | true
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }
