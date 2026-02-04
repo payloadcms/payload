@@ -1582,6 +1582,8 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
+    id?: string | null;
+    batchSize?: number | null;
     userID?: string | null;
     userCollection?: string | null;
     exportCollection?: string | null;

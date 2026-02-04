@@ -124,7 +124,8 @@ export const createExport = async (args: CreateExportArgs) => {
     and: [whereFromInput, draft ? {} : publishedWhere],
   }
 
-  const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
+  const baseName = nameArg ?? getFilename()
+  const name = `${baseName}-${collectionSlug}.${format}`
   const isCSV = format === 'csv'
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
