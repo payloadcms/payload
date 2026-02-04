@@ -184,7 +184,7 @@
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.44.7",
     "escape-html": "^1.0.3",
-    "eslint": "9.22.0",
+    "eslint": "9.39.2",
     "execa": "5.1.1",
     "form-data": "3.0.4",
     "fs-extra": "10.1.0",
