@@ -147,7 +147,7 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "eslint --cache --fix",
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
       "prettier --write"
     ],
     "templates/**/pnpm-lock.yaml": "pnpm runts scripts/remove-template-lock-files.ts",
