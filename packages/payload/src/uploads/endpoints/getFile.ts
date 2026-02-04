@@ -27,11 +27,11 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const accessResult = (await checkFileAccess({
+  const accessResult = await checkFileAccess({
     collection,
     filename,
     req,
-  }))!
+  })
 
   if (accessResult instanceof Response) {
     return accessResult
@@ -128,6 +128,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
   let headers = new Headers()
   headers.set('Content-Type', mimeType)
   headers.set('Accept-Ranges', 'bytes')
+
+  if (mimeType === 'image/svg+xml') {
+    headers.set('Content-Security-Policy', "script-src 'none'")
+  }
 
   let data: ReadableStream
   let status: number
