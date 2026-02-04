@@ -25,6 +25,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -74,6 +75,8 @@ export const updateOperation = async <
   if (args.collection.config.disableBulkEdit && !args.overrideAccess) {
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
   }
+
+  const useSeparateTransactions = args.req.payload.db.bulkOperationsSingleTransaction
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -227,16 +230,23 @@ export const updateOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
+    // Track all doc requests that have open transactions (for separate transaction mode)
+    const docReqsWithTransactions: PayloadRequest[] = []
+
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
 
-      try {
-        // Each document gets its own transaction when singleTransaction is enabled
-        let docShouldCommit = false
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          docShouldCommit = await initTransaction(req)
-        }
+      // When using separate transactions, isolate the transactionID so each doc gets its own
+      let docReq = req
 
+      if (useSeparateTransactions) {
+        docReq = isolateObjectProperty(req, 'transactionID')
+        delete docReq.transactionID
+        await initTransaction(docReq)
+        docReqsWithTransactions.push(docReq)
+      }
+
+      try {
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
           forceSelect: collectionConfig.forceSelect,
@@ -264,7 +274,7 @@ export const updateOperation = async <
           populate,
           publishAllLocales,
           publishSpecificLocale,
-          req,
+          req: docReq,
           select: select!,
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
@@ -278,17 +288,13 @@ export const updateOperation = async <
           updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
         }
 
-        if (docShouldCommit) {
-          await commitTransaction(req)
-        }
-
+        // Don't commit here - wait until all docs complete successfully
         return updatedDoc
       } catch (error) {
+        docReq.payload.logger.error({ err: error, msg: `Error updating document ${id}` })
+
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
-        }
         errors.push({
           id,
           isPublic,
@@ -304,16 +310,42 @@ export const updateOperation = async <
       req,
     })
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
+    const awaitedDocs = await Promise.all(promises)
+
+    // Handle errors - same behavior for both modes: if any error, abort everything
+    if (errors.length > 0) {
+      // Kill all transactions (separate mode: each docReq, shared mode: main req)
+      if (useSeparateTransactions) {
+        for (const docReq of docReqsWithTransactions) {
+          await killTransaction(docReq)
+        }
       }
-    } else {
-      awaitedDocs = await Promise.all(promises)
+      await killTransaction(req)
+
+      // All docs failed because all transactions were rolled back
+      const allErrors: BulkOperationResult<TSlug, TSelect>['errors'] = docs.map((doc) => {
+        const existingError = errors.find((e) => e.id === doc.id)
+        if (existingError) {
+          return existingError
+        }
+        return {
+          id: doc.id,
+          isPublic: false,
+          message: 'Transaction rolled back due to error in another document',
+        }
+      })
+
+      return {
+        docs: [],
+        errors: allErrors,
+      }
+    }
+
+    // All succeeded - commit all transactions
+    if (useSeparateTransactions) {
+      for (const docReq of docReqsWithTransactions) {
+        await commitTransaction(docReq)
+      }
     }
 
     let result = {

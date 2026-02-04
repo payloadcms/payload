@@ -90,9 +90,15 @@ export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
   /**
-   * When true, bulk operations will process documents one at a time
-   * in separate transactions instead of all at once in a single transaction.
+   * When true, bulk operations will process documents in separate transactions instead of in a single transaction.
    * Useful for avoiding transaction limitations with large datasets in DocumentDB and Cosmos DB.
+   *
+   * Drawbacks:
+   * - Delete and update operations can no longer be rolled back
+   * - Delete and update operations may no longer have access to isolated data that other documents
+   * may have committed in the same transaction. This can lead to errors if you try to delete or update documents that have not yet been committed.
+   *
+   * // TODO: Rename to bulkOperationsSeparateTransactions in 4.0
    *
    * @default false
    */
