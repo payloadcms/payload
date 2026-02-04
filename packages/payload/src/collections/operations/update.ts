@@ -312,9 +312,8 @@ export const updateOperation = async <
 
     const awaitedDocs = await Promise.all(promises)
 
-    // Handle errors - same behavior for both modes: if any error, abort everything
+    // Handle errors - same behavior regardless of useSeparateTransactions: if any error, abort everything
     if (errors.length > 0) {
-      // Kill all transactions (separate mode: each docReq, shared mode: main req)
       if (useSeparateTransactions) {
         for (const docReq of docReqsWithTransactions) {
           await killTransaction(docReq)
@@ -341,7 +340,6 @@ export const updateOperation = async <
       }
     }
 
-    // All succeeded - commit all transactions
     if (useSeparateTransactions) {
       for (const docReq of docReqsWithTransactions) {
         await commitTransaction(docReq)
