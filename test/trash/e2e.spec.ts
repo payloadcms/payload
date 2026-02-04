@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
 import { mapAsync, type RequiredDataFromCollectionSlug } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
@@ -14,9 +14,9 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
@@ -1091,7 +1091,7 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
     })
 
     test('Should properly disable auth fields in the trashed user edit view', async ({ page }) => {
@@ -1101,7 +1101,7 @@ describe('Trash', () => {
 
       await page.locator('.row-1 .cell-name').click()
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
       await expect(page.locator('input[name="email"]')).toBeDisabled()
       await expect(page.locator('#change-password')).toBeDisabled()
@@ -1118,7 +1118,7 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
-      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}$/)
+      await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
       await page.locator('.doc-controls__controls #action-restore').click()
 

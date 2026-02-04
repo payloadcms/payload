@@ -1,23 +1,23 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
+import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 

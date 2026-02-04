@@ -44,6 +44,7 @@
     "@payloadcms/email-resend": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
+    "@payloadcms/figma": "latest",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/kv-redis": "workspace:*",
     "@payloadcms/live-preview": "workspace:*",
