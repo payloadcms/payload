@@ -170,7 +170,7 @@ export function UnpublishButton({
       return false
     }
 
-    const isLocalizeStatusEnabled = drafts.localizeStatus === true
+    const isLocalizeStatusEnabled = drafts && drafts.localizeStatus === true
     const isExperimentalEnabled = config.experimental?.localizeStatus === true
 
     return isLocalizeStatusEnabled && isExperimentalEnabled
