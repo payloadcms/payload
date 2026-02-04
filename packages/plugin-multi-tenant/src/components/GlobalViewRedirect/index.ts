@@ -8,7 +8,6 @@ import type { MultiTenantPluginConfig } from '../../types.js'
 import { getGlobalViewRedirect } from '../../utilities/getGlobalViewRedirect.js'
 
 type Args = {
-  basePath?: string
   collectionSlug: CollectionSlug
   docID?: number | string
   globalSlugs: string[]
@@ -27,7 +26,6 @@ export const GlobalViewRedirect = async (args: Args) => {
     const headers = await getHeaders()
     const redirectRoute = await getGlobalViewRedirect({
       slug: collectionSlug,
-      basePath: args.basePath,
       docID: args.docID,
       headers,
       payload: args.payload,

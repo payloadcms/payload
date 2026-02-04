@@ -41,7 +41,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
 
   const {
     admin: {
-      components: { afterNavLinks, beforeNavLinks, logout, settingsMenu },
+      components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, logout, settingsMenu },
     },
     collections,
     globals,
@@ -93,7 +93,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
   })
 
-  const renderedSettingsMenu =
+  const RenderedSettingsMenu =
     settingsMenu && Array.isArray(settingsMenu)
       ? settingsMenu.map((item, index) =>
           RenderServerComponent({
@@ -117,49 +117,91 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
         )
       : []
 
+  const RenderedBeforeNav = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNav,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedBeforeNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: beforeNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedAfterNavLinks = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNavLinks,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
+  const RenderedAfterNav = RenderServerComponent({
+    clientProps: {
+      documentSubViewType,
+      viewType,
+    },
+    Component: afterNav,
+    importMap: payload.importMap,
+    serverProps: {
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    },
+  })
+
   return (
     <NavWrapper baseClass={baseClass}>
+      {RenderedBeforeNav}
       <nav className={`${baseClass}__wrap`}>
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: beforeNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
+        {RenderedBeforeNavLinks}
         <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        {RenderServerComponent({
-          clientProps: {
-            documentSubViewType,
-            viewType,
-          },
-          Component: afterNavLinks,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          },
-        })}
+        {RenderedAfterNavLinks}
         <div className={`${baseClass}__controls`}>
-          <SettingsMenuButton settingsMenu={renderedSettingsMenu} />
+          <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />
           {LogoutComponent}
         </div>
       </nav>
+      {RenderedAfterNav}
       <div className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-content`}>
           <NavHamburger baseClass={baseClass} />

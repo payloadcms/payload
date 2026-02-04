@@ -7,7 +7,7 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -307,14 +307,14 @@ export const promise = async ({
     case 'tab': {
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
-      let tabPreviousSiblingDoc = siblingDoc
+      let tabPreviousSiblingDoc = { ...previousDoc }
 
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
         tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
         tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
-        tabPreviousSiblingDoc = (previousDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousSiblingDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({

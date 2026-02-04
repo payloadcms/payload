@@ -1,5 +1,6 @@
 import { status as httpStatus } from 'http-status'
 
+import type { FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
@@ -25,10 +26,9 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
@@ -61,6 +61,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       args,
       collection: collectionConfig,
       operation: 'findVersionByID',
+      overrideAccess,
     })
 
     // /////////////////////////////////////
@@ -141,6 +142,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
@@ -180,6 +182,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
@@ -194,6 +197,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       args,
       collection: collectionConfig,
       operation: 'findVersionByID',
+      overrideAccess,
       result,
     })
 

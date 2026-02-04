@@ -194,6 +194,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         })
 
         if (Object.keys(objectType.getFields()).length) {
+          // Store block slug in extensions for use in select building
+          objectType.extensions = {
+            ...objectType.extensions,
+            blockSlug: block.slug,
+          }
           graphqlResult.types.blockTypes[block.slug] = objectType
         }
       }
@@ -442,6 +447,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
         if (Array.isArray(collection)) {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
+        }
+
+        if (count && limit === 0) {
+          return await req.payload.count({
+            collection,
+            overrideAccess: false,
+            req,
+            where: fullWhere,
+          })
         }
 
         const { docs, totalDocs } = await req.payload.find({

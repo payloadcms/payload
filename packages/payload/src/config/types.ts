@@ -699,7 +699,16 @@ export type FetchAPIFileUploadOptions = {
   useTempFiles?: boolean | undefined
 } & Partial<BusboyConfig>
 
-export type ErrorResult = { data?: any; errors: unknown[]; stack?: string }
+export type ErrorResult = {
+  data?: any
+  errors: {
+    data?: Record<string, unknown>
+    field?: string
+    message?: string
+    name?: string
+  }[]
+  stack?: string
+}
 
 export type AfterErrorResult = {
   graphqlResult?: GraphQLFormattedError
@@ -843,6 +852,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -854,6 +867,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
@@ -1141,6 +1158,22 @@ export type Config = {
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
   /**
+   * Experimental features may be unstable or change in future versions.
+   */
+  experimental?: {
+    /**
+     * Enable per-locale status for documents.
+     *
+     * Requires:
+     * - `localization` enabled
+     * - `versions.drafts` enabled
+     * - `versions.drafts.localizeStatus` set at collection or global level
+     *
+     * @experimental
+     */
+    localizeStatus?: boolean
+  }
+  /**
    * Options for folder view within the admin panel
    *
    * @experimental This feature may change in minor versions until it is fully stable
@@ -1297,18 +1330,69 @@ export type Config = {
    * @see https://payloadcms.com/docs/query-presets/overview
    */
   queryPresets?: {
+    /**
+     * Define collection-level access control that applies to all presets globally.
+     * This is separate from document-level access (constraints) which users can configure per-preset.
+     */
     access: {
       create?: Access<QueryPreset>
       delete?: Access<QueryPreset>
       read?: Access<QueryPreset>
       update?: Access<QueryPreset>
     }
+    /**
+     * Define custom document-level access control options for presets.
+     *
+     * Payload provides sensible defaults (Only Me, Everyone, Specific Users), but you can
+     * add custom constraints for more complex patterns like RBAC.
+     *
+     * @example
+     * ```ts
+     * constraints: {
+     *   read: [
+     *     {
+     *       label: 'Specific Roles',
+     *       value: 'specificRoles',
+     *       fields: [
+     *         {
+     *           name: 'roles',
+     *           type: 'select',
+     *           hasMany: true,
+     *           options: [
+     *             { label: 'Admin', value: 'admin' },
+     *             { label: 'User', value: 'user' },
+     *           ],
+     *         },
+     *       ],
+     *       access: ({ req: { user } }) => ({
+     *         'access.read.roles': { in: [user?.roles] },
+     *       }),
+     *     },
+     *   ],
+     * }
+     * ```
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#custom-access-control
+     */
     constraints: {
       create?: QueryPresetConstraints
       delete?: QueryPresetConstraints
       read?: QueryPresetConstraints
       update?: QueryPresetConstraints
     }
+    /**
+     * Used to dynamically filter which constraints are available based on the current user, document data,
+     * or other criteria.
+     *
+     * Some examples of this might include:
+     *
+     * - Ensuring that only "admins" are allowed to make a preset available to "everyone"
+     * - Preventing the "onlyMe" option from being selected based on a hypothetical "disablePrivatePresets" checkbox
+     *
+     * When a user lacks the permission to set a constraint, the option will either be hidden from them, or disabled if it is already saved to that preset.
+     *
+     * @see https://payloadcms.com/docs/query-presets/overview#constraint-access-control
+     */
     filterConstraints?: SelectField['filterOptions']
     labels?: CollectionConfig['labels']
   }
@@ -1398,6 +1482,16 @@ export type Config = {
         jsonSchema: JSONSchema4
       }) => JSONSchema4
     >
+
+    /**
+     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+     * on collections without drafts, and query results with `draft: true` type required fields as optional.
+     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+     *
+     * @default false
+     * @todo Remove in v4. Strict draft types will become the default behavior.
+     */
+    strictDraftTypes?: boolean
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

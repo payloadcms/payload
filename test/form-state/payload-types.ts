@@ -88,12 +88,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -162,6 +161,14 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  namedTab?: {
+    arrayInNamedTabInUnnamedTab?:
+      | {
+          textInArrayInNamedTabInUnnamedTab?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -217,6 +224,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -318,6 +326,16 @@ export interface PostsSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        arrayInNamedTabInUnnamedTab?:
+          | T
+          | {
+              textInArrayInNamedTabInUnnamedTab?: T;
+              id?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

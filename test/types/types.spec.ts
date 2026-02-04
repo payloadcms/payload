@@ -1,10 +1,16 @@
 import type {
   BulkOperationResult,
+  CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  GeneratedTypes,
   JoinQuery,
+  JsonObject,
   PaginatedDocs,
+  PayloadTypesShape,
   SelectType,
+  TypedCollectionSelect,
+  TypeWithID,
   TypeWithVersion,
   Where,
 } from 'payload'
@@ -19,10 +25,12 @@ import {
   type SerializedTextNode,
   type TypedEditorState,
 } from '@payloadcms/richtext-lexical'
+import { PayloadSDK } from '@payloadcms/sdk'
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
 import type {
+  Config as LocalConfig,
   Menu,
   MyRadioOptions,
   MySelectOptions,
@@ -61,7 +69,7 @@ describe('Types testing', () => {
   })
 
   test('payload.update many', () => {
-    expect(payload.update({ where: {}, collection: 'users', data: {} })).type.toBe<
+    expect(payload.update({ collection: 'users', data: {}, where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -71,7 +79,7 @@ describe('Types testing', () => {
   })
 
   test('payload.delete many', () => {
-    expect(payload.delete({ where: {}, collection: 'users' })).type.toBe<
+    expect(payload.delete({ collection: 'users', where: {} })).type.toBe<
       Promise<BulkOperationResult<'users', SelectType>>
     >()
   })
@@ -81,7 +89,7 @@ describe('Types testing', () => {
   })
 
   test('payload.updateGlobal', () => {
-    expect(payload.updateGlobal({ data: {}, slug: 'menu' })).type.toBe<Promise<Menu>>()
+    expect(payload.updateGlobal({ slug: 'menu', data: {} })).type.toBe<Promise<Menu>>()
   })
 
   test('payload.findVersions', () => {
@@ -110,20 +118,20 @@ describe('Types testing', () => {
 
   describe('select', () => {
     test('should include only ID if select is an empty object', () => {
-      expect(payload.findByID({ collection: 'posts', id: 'id', select: {} })).type.toBe<
+      expect(payload.findByID({ id: 'id', collection: 'posts', select: {} })).type.toBe<
         Promise<{ id: Post['id'] }>
       >()
     })
 
     test('should include only title and ID', () => {
       expect(
-        payload.findByID({ collection: 'posts', id: 'id', select: { title: true } }),
+        payload.findByID({ id: 'id', collection: 'posts', select: { title: true } }),
       ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
     })
 
     test('should exclude title', () => {
       expect(
-        payload.findByID({ collection: 'posts', id: 'id', select: { title: false } }),
+        payload.findByID({ id: 'id', collection: 'posts', select: { title: false } }),
       ).type.toBe<Promise<Omit<Post, 'title'>>>()
     })
   })
@@ -149,6 +157,32 @@ describe('Types testing', () => {
       expect<SupportedTimezones>().type.toBeAssignableTo<string>()
     })
 
+    test('auth collection has collection property in generated User type', () => {
+      // The collection property should be directly on the User interface, not an intersection
+      expect<User>().type.toHaveProperty('collection')
+      expect<User['collection']>().type.toBe<'users'>()
+    })
+
+    test('payload operations return users with collection property', async () => {
+      const user = await payload.findByID({ id: 'id', collection: 'users' })
+      expect<typeof user>().type.toHaveProperty('collection')
+      expect<(typeof user)['collection']>().type.toBe<'users'>()
+    })
+
+    test('collection property is not required in update data for auth collections', () => {
+      // The collection property should not be required when updating users
+      // It is auto-populated by the system
+      expect(
+        payload.update({
+          id: 'id',
+          collection: 'users',
+          data: {
+            email: 'test@example.com',
+          },
+        }),
+      ).type.not.toRaiseError()
+    })
+
     test('has global generated options interface based on select field', () => {
       expect(asType<Post['selectField']>()).type.toBe<MySelectOptions>()
     })
@@ -163,6 +197,23 @@ describe('Types testing', () => {
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalField')
       expect<NonNullable<Post['externalType']>>().type.toHaveProperty('externalNumber')
     })
+  })
+
+  test('ResolveFallback allows generic indexing', () => {
+    type Select<
+      T extends PayloadTypesShape,
+      S extends CollectionSlug<T>,
+    > = TypedCollectionSelect<T>[S]
+    expect<Select<GeneratedTypes, 'users'>>().type.not.toBeNever()
+  })
+
+  test('TypedCollectionSelect resolves correctly with concrete types', () => {
+    type SelectUsers = TypedCollectionSelect<GeneratedTypes>['users']
+    expect<SelectUsers>().type.not.toBeNever()
+
+    // Test with Config - should also work
+    type SelectPosts = TypedCollectionSelect<LocalConfig>['posts']
+    expect<SelectPosts>().type.not.toBeNever()
   })
 
   describe('fields', () => {
@@ -459,7 +510,6 @@ describe('Types testing', () => {
     test('accepts complete heading node as part of DefaultNodeTypes if heading node is explicitly typed', () => {
       const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -474,6 +524,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -494,7 +545,6 @@ describe('Types testing', () => {
     test('accepts complete heading node as part of nested children within DefaultNodeTypes if heading node is explicitly typed', () => {
       const headingNode: SerializedHeadingNode<RecursiveNodes<DefaultNodeTypes>> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -509,6 +559,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -522,8 +573,8 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
           ],
           direction: 'ltr',
@@ -542,7 +593,6 @@ describe('Types testing', () => {
 
       const headingNode: SerializedHeadingNode<DefaultChildren> = {
         type: 'heading',
-        tag: 'h1',
         children: [
           {
             type: 'text',
@@ -557,6 +607,7 @@ describe('Types testing', () => {
         direction: 'ltr',
         format: '',
         indent: 0,
+        tag: 'h1',
         version: 1,
       }
 
@@ -570,8 +621,8 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
             {
               type: 'paragraph',
@@ -580,22 +631,22 @@ describe('Types testing', () => {
                   type: 'link',
                   children: [headingNode],
                   direction: 'ltr',
-                  format: 'left',
-                  indent: 0,
-                  version: 0,
-                  textFormat: 0,
                   fields: {
                     linkType: 'custom',
                     newTab: false,
                     url: 'https://www.payloadcms.com',
                   },
+                  format: 'left',
+                  indent: 0,
+                  textFormat: 0,
+                  version: 0,
                 },
               ],
               direction: 'ltr',
               format: 'left',
               indent: 0,
-              version: 0,
               textFormat: 0,
+              version: 0,
             },
           ],
           direction: 'ltr',
@@ -693,7 +744,6 @@ describe('Types testing', () => {
         const result = buildEditorState<DefaultNodeTypes>({ text: 'hello' })
         result.root.children.push({
           type: 'heading',
-          tag: 'h1',
           children: [
             {
               type: 'text',
@@ -708,6 +758,7 @@ describe('Types testing', () => {
           direction: 'ltr',
           format: '',
           indent: 0,
+          tag: 'h1',
           version: 1,
         })
         expect(result).type.toBe<DefaultTypedEditorState>()
@@ -804,7 +855,6 @@ describe('Types testing', () => {
           nodes: [
             {
               type: 'heading',
-              tag: 'h1',
               children: [
                 {
                   type: 'text',
@@ -819,6 +869,7 @@ describe('Types testing', () => {
               direction: 'ltr',
               format: '',
               indent: 0,
+              tag: 'h1',
               version: 1,
             },
           ],
@@ -832,7 +883,6 @@ describe('Types testing', () => {
             nodes: [
               {
                 type: 'heading',
-                tag: 'h1',
                 children: [
                   {
                     type: 'text',
@@ -851,6 +901,7 @@ describe('Types testing', () => {
                 direction: 'ltr',
                 format: '',
                 indent: 0,
+                tag: 'h1',
                 version: 1,
               },
             ],
@@ -864,7 +915,6 @@ describe('Types testing', () => {
 
         const headingNode: SerializedHeadingNode<DefaultChildren> = {
           type: 'heading',
-          tag: 'h1',
           children: [
             {
               type: 'text',
@@ -879,6 +929,7 @@ describe('Types testing', () => {
           direction: 'ltr',
           format: '',
           indent: 0,
+          tag: 'h1',
           version: 1,
         }
         const result = buildEditorState<DefaultNodeTypes>({
@@ -887,5 +938,386 @@ describe('Types testing', () => {
         expect(result).type.toBe<TypedEditorState<DefaultNodeTypes>>()
       })
     })
+  })
+
+  describe('sdk', () => {
+    test('ensure generated types can be manually assigned to PayloadSDK generic', () => {
+      expect(new PayloadSDK<LocalConfig>({ baseURL: '' })).type.not.toRaiseError()
+    })
+
+    test('ensure SDK without generic automatically uses GeneratedTypes', () => {
+      const _sdk = new PayloadSDK({ baseURL: '' })
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct collection types', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      // ensure collection property of sdk.create has posts in the union type
+      expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
+        | 'draft-posts'
+        | 'pages'
+        | 'pages-categories'
+        | 'payload-kv'
+        | 'payload-locked-documents'
+        | 'payload-migrations'
+        | 'payload-preferences'
+        | 'posts'
+        | 'users'
+      >()
+    })
+
+    test('ensure SDK with explicit generic uses has correct data for collection in create', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.create({
+        collection: 'posts',
+        data: {
+          radioField: 'option-1',
+          richText: {
+            root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+          },
+          selectField: 'option-1',
+          title: 'Test Post',
+        },
+      })
+      expect(result).type.toBe<LocalConfig['collections']['posts']>()
+    })
+
+    test('SDK create data should be typed and reject invalid properties', () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      expect(
+        _sdk.create({
+          collection: 'posts',
+          data: {
+            invalidProperty: 'should error',
+            radioField: 'option-1',
+            richText: {
+              root: { type: '', children: [], direction: null, format: '', indent: 0, version: 0 },
+            },
+            selectField: 'option-1',
+            title: 'Test Post',
+          },
+        }),
+      ).type.toRaiseError()
+    })
+
+    test('SDK with select in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        id: 'id',
+        collection: 'posts',
+        select: { namedGroup: true, title: true },
+      })
+      expect(result).type.toBe<Pick<Post, 'id' | 'namedGroup' | 'title'>>()
+    })
+
+    test('SDK with empty select only returns id', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+
+      const result = await _sdk.findByID({
+        id: 'id',
+        collection: 'posts',
+        select: {},
+      })
+      expect(result).type.toBe<{ id: string }>()
+    })
+
+    test('SDK with select excluding field in findByID returns correct types', async () => {
+      const _sdk = new PayloadSDK<LocalConfig>({ baseURL: '' })
+      const result = await _sdk.findByID({
+        id: 'id',
+        collection: 'posts',
+        select: { richText: false },
+      })
+      expect(result).type.toBe<Omit<Post, 'richText'>>()
+    })
+  })
+
+  describe('strictDraftTypes flag', () => {
+    describe('query operations', () => {
+      test('draft find query returns optional required fields when flag is enabled', async () => {
+        const result = await payload.find({
+          collection: 'draft-posts',
+          draft: true,
+        })
+
+        const doc = result.docs[0]!
+
+        // With strictDraftTypes enabled, user-defined required fields should be optional in draft queries
+        expect(doc.description).type.toBe<string | undefined>()
+        expect(doc.title).type.toBe<string | undefined>()
+
+        // Only id is required in draft queries - other system fields are also optional
+        expect(doc.id).type.not.toBe<undefined>()
+        expect(doc.createdAt).type.toBe<string | undefined>()
+        expect(doc.updatedAt).type.toBe<string | undefined>()
+      })
+
+      test('non-draft find query returns required fields as required', async () => {
+        const result = await payload.find({
+          collection: 'draft-posts',
+        })
+
+        const doc = result.docs[0]!
+
+        // Without draft mode, required fields should remain required
+        expect(doc.description).type.toBe<string>()
+        expect(doc.title).type.toBe<string>()
+
+        // System fields should also be present and required (not undefined)
+        expect(doc.id).type.not.toBe<undefined>()
+        expect(doc.createdAt).type.toBe<string>()
+        expect(doc.updatedAt).type.toBe<string>()
+      })
+    })
+
+    describe('create operations', () => {
+      test('create with draft:true on draft-enabled collection allows partial data', () => {
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test', // Only one required field
+            },
+            draft: true,
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create with draft:false on draft-enabled collection requires all required fields', () => {
+        // Missing description - should error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
+
+        // All required fields present - should not error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+            },
+            draft: false,
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create without draft property on draft-enabled collection requires all required fields', () => {
+        // Missing description - should error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+            },
+          }),
+        ).type.toRaiseError()
+
+        // All required fields present - should not error
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create on non-draft collection forbids draft property', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+            draft: true,
+          }),
+        ).type.toRaiseError()
+
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
+
+        // Without draft property - should not error
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Test',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create with invalid property should error regardless of draft mode', () => {
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              description: 'Description',
+              invalidProperty: 'should error',
+            },
+            draft: false,
+          }),
+        ).type.toRaiseError()
+
+        expect(
+          payload.create({
+            collection: 'draft-posts',
+            data: {
+              title: 'Test',
+              invalidProperty: 'should error',
+            },
+            draft: true,
+          }),
+        ).type.toRaiseError()
+      })
+
+      test('create on pages (non-draft) collection with all fields should work', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Page Title',
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      test('create on pages (non-draft) with missing optional fields should work', () => {
+        expect(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: 'Page Title',
+              // category is optional relationship, can be omitted
+            },
+          }),
+        ).type.not.toRaiseError()
+      })
+
+      // Additional operations tests
+      test('find with draft:true on non-draft collection should error', () => {
+        expect(payload.find({ collection: 'pages', draft: true })).type.toRaiseError()
+      })
+
+      test('find with draft:false on non-draft collection should error', () => {
+        expect(payload.find({ collection: 'pages', draft: false })).type.toRaiseError()
+      })
+
+      test('find with draft:true on draft-enabled collection should work', () => {
+        expect(payload.find({ collection: 'draft-posts', draft: true })).type.not.toRaiseError()
+      })
+
+      test('find with draft:false on draft-enabled collection should work', () => {
+        expect(payload.find({ collection: 'draft-posts', draft: false })).type.not.toRaiseError()
+      })
+
+      test('findByID with draft:true on non-draft collection should error', () => {
+        expect(payload.findByID({ collection: 'pages', id: 1, draft: true })).type.toRaiseError()
+      })
+
+      test('findByID with draft:false on non-draft collection should error', () => {
+        expect(payload.findByID({ collection: 'pages', id: 1, draft: false })).type.toRaiseError()
+      })
+
+      test('findByID with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.findByID({ collection: 'draft-posts', id: 1, draft: true }),
+        ).type.not.toRaiseError()
+      })
+
+      test('update with draft:true on non-draft collection should error', () => {
+        expect(
+          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: true }),
+        ).type.toRaiseError()
+      })
+
+      test('update with draft:false on non-draft collection should error', () => {
+        expect(
+          payload.update({ collection: 'pages', id: 1, data: { title: 'Test' }, draft: false }),
+        ).type.toRaiseError()
+      })
+
+      test('update with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.update({ collection: 'draft-posts', id: 1, data: { title: 'Test' }, draft: true }),
+        ).type.not.toRaiseError()
+      })
+
+      test('duplicate with draft:true on non-draft collection should error', () => {
+        expect(
+          payload.duplicate({ collection: 'pages', id: 1, draft: true }),
+        ).type.toRaiseError()
+      })
+
+      test('duplicate with draft:false on non-draft collection should error', () => {
+        expect(
+          payload.duplicate({ collection: 'pages', id: 1, draft: false }),
+        ).type.toRaiseError()
+      })
+
+      test('duplicate with draft:true on draft-enabled collection should work', () => {
+        expect(
+          payload.duplicate({ collection: 'draft-posts', id: 1, draft: true }),
+        ).type.not.toRaiseError()
+      })
+
+      test('global findOne with draft:true on non-draft global should error', () => {
+        expect(payload.findGlobal({ slug: 'menu', draft: true })).type.toRaiseError()
+      })
+
+      test('global findOne with draft:false on non-draft global should error', () => {
+        expect(payload.findGlobal({ slug: 'menu', draft: false })).type.toRaiseError()
+      })
+
+      test('global findOne with draft:true on draft-enabled global should work', () => {
+        expect(payload.findGlobal({ slug: 'settings', draft: true })).type.not.toRaiseError()
+      })
+
+      test('global update with draft:true on non-draft global should error', () => {
+        expect(
+          payload.updateGlobal({ slug: 'menu', data: {}, draft: true }),
+        ).type.toRaiseError()
+      })
+
+      test('global update with draft:false on non-draft global should error', () => {
+        expect(
+          payload.updateGlobal({ slug: 'menu', data: {}, draft: false }),
+        ).type.toRaiseError()
+      })
+
+      test('global update with draft:true on draft-enabled global should work', () => {
+        expect(
+          payload.updateGlobal({ slug: 'settings', data: {}, draft: true }),
+        ).type.not.toRaiseError()
+      })
+    })
+
   })
 })

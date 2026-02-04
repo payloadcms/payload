@@ -1,19 +1,21 @@
+import type { AuthCollectionSlug, PayloadTypesShape } from 'payload'
+
 import type { PayloadSDK } from '../index.js'
-import type { AuthCollectionSlug, PayloadGeneratedTypes, TypedAuth } from '../types.js'
 
 export type ForgotPasswordOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends AuthCollectionSlug<T>,
 > = {
   collection: TSlug
   data: {
     disableEmail?: boolean
+    email: string
     expiration?: number
-  } & Omit<TypedAuth<T>[TSlug]['forgotPassword'], 'password'>
+  }
 }
 
 export async function forgotPassword<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends AuthCollectionSlug<T>,
 >(
   sdk: PayloadSDK<T>,
