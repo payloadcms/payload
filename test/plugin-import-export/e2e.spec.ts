@@ -176,9 +176,9 @@ test.describe('Import Export Plugin', () => {
         {
           data: {
             data: {
+              name: 'test-export',
               collectionSlug: 'posts-no-jobs-queue',
               format: 'json',
-              name: 'test-export',
               sort: '-createdAt',
             },
           },
@@ -254,6 +254,140 @@ test.describe('Import Export Plugin', () => {
         expect(content).toContain('E2E Export Custom Page 2')
       })
     })
+
+    test.describe('Collection Selector', () => {
+      test('should show only collections without custom export collections in base exports selector', async () => {
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.click()
+
+        const menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        // Should show collections that don't have custom export collections
+        // Use :text-is() for exact match to avoid matching partial text (e.g. "Custom Id Pages" contains "Pages")
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Posts Exports Only")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Media")')).toBeVisible()
+
+        // posts has custom export collection (posts-export), should NOT be in base exports
+        await expect(menu.locator('.rs__option:text-is("Posts")')).toBeHidden()
+
+        // posts-no-jobs-queue has custom export (posts-no-jobs-queue-export), should NOT be in base
+        await expect(menu.locator('.rs__option:text-is("Posts No Jobs Queue")')).toBeHidden()
+
+        // Should NOT show system collections
+        await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Users")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Exports")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Imports")')).toBeHidden()
+
+        // Should NOT show collections with export: false
+        await expect(menu.locator('.rs__option:text-is("Posts Imports Only")')).toBeHidden()
+      })
+
+      test('custom export collection should only show its target collection', async () => {
+        const postsExportURL = new AdminUrlUtil(serverURL, 'posts-export')
+        await page.goto(postsExportURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.click()
+
+        const menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        // Should only show posts - the collection this custom export is for
+        await expect(menu.locator('.rs__option')).toHaveCount(1)
+        await expect(menu.locator('.rs__option:text-is("Posts")')).toBeVisible()
+      })
+
+      test('should show correct collections after exporting via dropdown then navigating to create page', async () => {
+        // First, export via dropdown from custom-id-pages collection (uses base exports)
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        // Wait for drawer to open
+        await expect(page.locator('.drawer__content')).toBeVisible()
+
+        // Close the drawer without saving
+        await page.keyboard.press('Escape')
+        await expect(page.locator('.drawer__content')).toBeHidden()
+
+        // Now navigate directly to exports create page
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        // The collection selector should be visible (not hidden due to stale context)
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.click()
+
+        const menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        // Should show collections without custom export collections
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+
+        // Should NOT show system collections
+        await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
+      })
+
+      test('should show same collections after page refresh', async () => {
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.click()
+
+        let menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        // Count options before refresh - use poll to ensure stable count
+        let optionsBefore = 0
+        await expect(async () => {
+          optionsBefore = await menu.locator('.rs__option').count()
+          expect(optionsBefore).toBeGreaterThan(0)
+        }).toPass()
+
+        // Close menu and refresh
+        await page.keyboard.press('Escape')
+        await page.reload()
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        // Open selector again
+        await collectionField.click()
+        menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        // Should have same number of options
+        await expect(async () => {
+          const optionsAfter = await menu.locator('.rs__option').count()
+          expect(optionsAfter).toBe(optionsBefore)
+        }).toPass()
+
+        // Verify specific collections are still there
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+      })
+    })
   })
 
   test.describe('Import', () => {
@@ -281,8 +415,8 @@ test.describe('Import Export Plugin', () => {
 
       for (const id of createdPageIDs) {
         await payload.delete({
-          collection: 'pages',
           id,
+          collection: 'pages',
         })
       }
       createdPageIDs.length = 0
@@ -316,7 +450,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:text-is("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       if (await importModeField.isVisible()) {
@@ -344,8 +478,8 @@ test.describe('Import Export Plugin', () => {
 
     test('should import a JSON file successfully', async () => {
       const jsonContent = JSON.stringify([
-        { title: 'E2E JSON Import 1', excerpt: 'JSON excerpt 1' },
-        { title: 'E2E JSON Import 2', excerpt: 'JSON excerpt 2' },
+        { excerpt: 'JSON excerpt 1', title: 'E2E JSON Import 1' },
+        { excerpt: 'JSON excerpt 2', title: 'E2E JSON Import 2' },
       ])
       const jsonPath = path.join(__dirname, 'uploads', 'e2e-test-import.json')
 
@@ -362,7 +496,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:text-is("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       if (await importModeField.isVisible()) {
@@ -398,7 +532,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:text-is("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       await saveDocAndAssert(page)
 
@@ -435,8 +569,8 @@ test.describe('Import Export Plugin', () => {
       const existingDoc = await payload.create({
         collection: 'pages',
         data: {
-          title: 'E2E Update Test Original',
           excerpt: 'Original excerpt',
+          title: 'E2E Update Test Original',
         },
       })
 
@@ -455,7 +589,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:text-is("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await expect(importModeField).toBeVisible()
@@ -489,13 +623,13 @@ test.describe('Import Export Plugin', () => {
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.click()
         await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("custom-id-pages")').click()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
           name: 'custom-id-preview.csv',
-          mimeType: 'text/csv',
           buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
         })
 
         await expect(async () => {
@@ -518,13 +652,13 @@ test.describe('Import Export Plugin', () => {
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.click()
         await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("custom-id-pages")').click()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
           name: 'custom-id-import.csv',
-          mimeType: 'text/csv',
           buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
         })
 
         await expect(async () => {
@@ -534,6 +668,7 @@ test.describe('Import Export Plugin', () => {
         await saveDocAndAssert(page, '#action-save')
 
         const statusField = page.locator('[data-field-name="status"]')
+
         if (await statusField.isVisible()) {
           await expect(statusField).toContainText(/completed|partial/i)
         }
@@ -767,13 +902,13 @@ test.describe('Import Export Plugin', () => {
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
       await expect(page.locator('.rs__menu')).toBeVisible()
-      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+      await page.locator('.rs__option:has-text("Posts With Limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
         name: 'exceed-limit-test.csv',
-        mimeType: 'text/csv',
         buffer: Buffer.from(csvFile),
+        mimeType: 'text/csv',
       })
 
       await expect(async () => {
@@ -802,7 +937,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
+      await page.locator(`.rs__option:has-text("Posts with S3s")`).click()
 
       await saveDocAndAssert(page)
 
@@ -810,9 +945,9 @@ test.describe('Import Export Plugin', () => {
         await runJobsQueue({ serverURL })
         const { docs } = await payload.find({
           collection: postsWithS3ImportSlug as any,
-          where: {},
-          sort: '-createdAt',
           limit: 1,
+          sort: '-createdAt',
+          where: {},
         })
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })

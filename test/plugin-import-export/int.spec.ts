@@ -5107,6 +5107,83 @@ describe('@payloadcms/plugin-import-export', () => {
     })
   })
 
+  describe('collection configuration', () => {
+    it('should exclude collections with custom export collections from base exports', () => {
+      const exportsConfig = payload.collections['exports'].config
+      const validSlugs =
+        exportsConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
+
+      // posts has custom export collection (posts-export), should NOT be in base exports
+      expect(validSlugs).not.toContain('posts')
+
+      // posts-no-jobs-queue has custom export (posts-no-jobs-queue-export), should NOT be in base
+      expect(validSlugs).not.toContain('posts-no-jobs-queue')
+
+      // posts-with-limits has custom export (posts-with-limits-export), should NOT be in base
+      expect(validSlugs).not.toContain('posts-with-limits')
+
+      // posts-with-s3 has custom export (posts-with-s3-export), should NOT be in base
+      expect(validSlugs).not.toContain('posts-with-s3')
+
+      // pages overrideCollection doesn't change slug, so it should be in base exports
+      expect(validSlugs).toContain('pages')
+
+      // posts-exports-only has no custom export collection, should be in base
+      expect(validSlugs).toContain('posts-exports-only')
+
+      // media has no custom export collection, should be in base
+      expect(validSlugs).toContain('media')
+
+      // custom-id-pages has no custom export collection, should be in base
+      expect(validSlugs).toContain('custom-id-pages')
+    })
+
+    it('should exclude collections with custom import collections from base imports', () => {
+      const importsConfig = payload.collections['imports'].config
+      const validSlugs =
+        importsConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
+
+      // posts has custom import collection (posts-import), should NOT be in base imports
+      expect(validSlugs).not.toContain('posts')
+
+      // posts-with-limits has custom import (posts-with-limits-import), should NOT be in base
+      expect(validSlugs).not.toContain('posts-with-limits')
+
+      // posts-with-s3 has custom import (posts-with-s3-import), should NOT be in base
+      expect(validSlugs).not.toContain('posts-with-s3')
+
+      // pages overrideCollection doesn't change slug, so it should be in base imports
+      expect(validSlugs).toContain('pages')
+
+      // posts-imports-only has no custom import collection, should be in base
+      expect(validSlugs).toContain('posts-imports-only')
+
+      // media has no custom import collection, should be in base
+      expect(validSlugs).toContain('media')
+
+      // custom-id-pages has no custom import collection, should be in base
+      expect(validSlugs).toContain('custom-id-pages')
+    })
+
+    it('custom export collection should only have its target collection slug', () => {
+      const postsExportConfig = payload.collections['posts-export'].config
+      const validSlugs =
+        postsExportConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
+
+      expect(validSlugs).toHaveLength(1)
+      expect(validSlugs).toEqual(['posts'])
+    })
+
+    it('custom import collection should only have its target collection slug', () => {
+      const postsImportConfig = payload.collections['posts-import'].config
+      const validSlugs =
+        postsImportConfig.admin?.custom?.['plugin-import-export']?.collectionSlugs || []
+
+      expect(validSlugs).toHaveLength(1)
+      expect(validSlugs).toEqual(['posts'])
+    })
+  })
+
   describe('posts-exports-only and posts-imports-only collections', () => {
     describe('posts-exports-only', () => {
       it('should export from posts-exports-only collection (no jobs queue)', async () => {
