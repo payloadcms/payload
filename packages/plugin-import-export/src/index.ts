@@ -143,8 +143,7 @@ export const importExportPlugin =
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
 
-      // Store disabled field accessors and export format in the admin config for use in the UI
-      // Note: limits are stored in collection.custom (server-only) because they can be functions
+      // Store disabled field accessors and export format in admin.custom for UI
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
@@ -213,6 +212,16 @@ declare module 'payload' {
 
   export interface CollectionAdminCustom {
     'plugin-import-export'?: {
+      /**
+       * Array of collection slugs that this export/import collection can target.
+       * Used by CollectionField to populate the dropdown options.
+       */
+      collectionSlugs?: string[]
+      /**
+       * Default collection slug for custom export/import collections.
+       * Used by CollectionField to set a default value when creating exports/imports directly.
+       */
+      defaultCollectionSlug?: string
       /**
        * Array of field paths that are disabled for import/export.
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.

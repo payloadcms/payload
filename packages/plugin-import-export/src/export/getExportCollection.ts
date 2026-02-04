@@ -15,10 +15,15 @@ import { handleDownload } from './handleDownload.js'
 import { handlePreview } from './handlePreview.js'
 
 export const getExportCollection = ({
+  collectionSlugs,
   config,
   exportConfig,
   pluginConfig,
 }: {
+  /**
+   * Collection slugs that this export collection supports.
+   */
+  collectionSlugs: string[]
   config: Config
   exportConfig?: ExportConfig
   pluginConfig: ImportExportPluginConfig
@@ -48,6 +53,9 @@ export const getExportCollection = ({
         disableDownload,
         disableSave,
         format,
+        'plugin-import-export': {
+          collectionSlugs,
+        },
       },
       disableCopyToLocale: true,
       group: false,
@@ -66,7 +74,7 @@ export const getExportCollection = ({
         path: '/export-preview',
       },
     ],
-    fields: getFields(config, { format }),
+    fields: getFields({ collectionSlugs, config, format }),
     hooks: {
       afterChange,
       beforeOperation,
