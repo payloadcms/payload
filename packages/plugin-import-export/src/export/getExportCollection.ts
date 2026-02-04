@@ -136,12 +136,22 @@ export const getExportCollection = ({
       })
 
       const input: Export = {
-        ...doc,
+        id: doc.id,
+        name: doc.name,
         batchSize,
+        collectionSlug: doc.collectionSlug,
+        drafts: doc.drafts,
         exportCollection: collectionConfig.slug,
+        fields: doc.fields,
+        format: doc.format,
+        limit: doc.limit,
+        locale: doc.locale,
         maxLimit,
+        page: doc.page,
+        sort: doc.sort,
         userCollection: user?.collection || user?.user?.collection,
         userID: user?.id || user?.user?.id,
+        where: doc.where,
       }
 
       await req.payload.jobs.queue({

@@ -64,7 +64,7 @@ export const getImportCollection = ({
         path: '/preview-data',
       },
     ],
-    fields: getFields({ collectionSlugs, config }),
+    fields: getFields({ collectionSlugs }),
     hooks: {
       afterChange,
       beforeOperation,

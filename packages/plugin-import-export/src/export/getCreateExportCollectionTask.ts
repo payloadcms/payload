@@ -25,6 +25,14 @@ export const getCreateCollectionExportTask = (
   const allCollectionSlugs = config.collections?.map((c) => c.slug) || []
   const inputSchema = getFields({ collectionSlugs: allCollectionSlugs, config }).concat(
     {
+      name: 'id',
+      type: 'text',
+    },
+    {
+      name: 'batchSize',
+      type: 'number',
+    },
+    {
       name: 'userID',
       type: 'text',
     },

@@ -41,8 +41,7 @@ export type Export = {
   maxLimit?: number
   name: string
   page?: number
-  slug: string
-  sort: Sort
+  sort?: Sort
   userCollection: string
   userID: number | string
   where?: Where
