@@ -271,7 +271,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
 
         const menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
@@ -306,14 +306,14 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
-        await collectionField.click()
 
-        const menu = page.locator('.rs__menu')
-        await expect(menu).toBeVisible()
+        // Field should be disabled since there's only one collection option
+        const control = collectionField.locator('.rs__control')
+        await expect(control).toHaveAttribute('aria-disabled', 'true')
 
-        // Should only show posts - the collection this custom export is for
-        await expect(menu.locator('.rs__option')).toHaveCount(1)
-        await expect(menu.locator('.rs__option:text-is("Posts")')).toBeVisible()
+        // Should display "Posts" - the only collection this custom export is for
+        const singleValue = collectionField.locator('.rs__single-value')
+        await expect(singleValue).toContainText('Posts')
       })
 
       test('should show correct collections after exporting via dropdown then navigating to create page', async () => {
@@ -345,7 +345,7 @@ test.describe('Import Export Plugin', () => {
         // The collection selector should be visible (not hidden due to stale context)
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
 
         const menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
@@ -364,7 +364,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
 
         let menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
@@ -382,7 +382,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         // Open selector again
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
         menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
 
@@ -458,7 +458,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
+      await collectionField.locator('.rs__control').click()
       await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
@@ -504,7 +504,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
+      await collectionField.locator('.rs__control').click()
       await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
@@ -540,7 +540,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
+      await collectionField.locator('.rs__control').click()
       await page.locator('.rs__option:text-is("Pages")').click()
 
       await saveDocAndAssert(page)
@@ -597,7 +597,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
+      await collectionField.locator('.rs__control').click()
       await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
@@ -630,7 +630,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
         await expect(page.locator('.rs__menu')).toBeVisible()
         await page.locator('.rs__option:has-text("Custom Id Pages")').click()
 
@@ -659,7 +659,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
+        await collectionField.locator('.rs__control').click()
         await expect(page.locator('.rs__menu')).toBeVisible()
         await page.locator('.rs__option:has-text("Custom Id Pages")').click()
 
@@ -908,10 +908,10 @@ test.describe('Import Export Plugin', () => {
       await page.goto(postsWithLimitsImportURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
+      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
-      await expect(page.locator('.rs__menu')).toBeVisible()
-      await page.locator('.rs__option:has-text("Posts With Limits")').click()
+      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With Limits')
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
@@ -944,9 +944,10 @@ test.describe('Import Export Plugin', () => {
       await page.setInputFiles('input[type="file"]', csvPath)
       await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
 
+      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
-      await page.locator(`.rs__option:has-text("Posts with S3s")`).click()
+      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With S3s')
 
       await saveDocAndAssert(page)
 
