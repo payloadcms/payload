@@ -188,7 +188,7 @@ async function processImportBatch({
             })
           }
 
-          delete createData._status
+          delete createData._status // Remove _status from data - it's controlled via draft option
         }
 
         if (req.payload.config.debug && 'title' in createData) {
