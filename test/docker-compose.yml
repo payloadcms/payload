@@ -18,7 +18,7 @@ services:
     image: mcr.microsoft.com/azure-storage/azurite:latest
     platform: linux/amd64
     restart: always
-    command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0'
+    command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
     ports:
       - '10000:10000'
       - '10001:10001'

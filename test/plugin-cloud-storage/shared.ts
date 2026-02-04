@@ -1,3 +1,5 @@
 export const mediaSlug = 'media'
 export const mediaWithPrefixSlug = 'media-with-prefix'
+export const restrictedMediaSlug = 'restricted-media'
+export const testMetadataSlug = 'test-metadata'
 export const prefix = 'test-prefix'

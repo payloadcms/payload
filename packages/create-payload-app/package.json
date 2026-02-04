@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.69.0",
+  "version": "3.74.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -71,7 +71,7 @@
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
     "prettier": "^3.5.0",
-    "tar": "^7.4.3",
+    "tar": "^7.5.7",
     "terminal-link": "^2.1.1",
     "ts-morph": "^21.0.1"
   },

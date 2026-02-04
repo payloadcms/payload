@@ -301,3 +301,9 @@ await payload.jobs.cancel({
   },
 })
 ```
+
+From within a task or workflow handler, you can also cancel the current job by throwing a `JobCancelledError`:
+
+```ts
+throw new JobCancelledError('Job was cancelled')
+```

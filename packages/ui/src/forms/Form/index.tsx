@@ -313,6 +313,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
         contextRef.current.fields,
+        {
+          excludeFiles: true,
+        },
       )
 
       // Execute server side validations
@@ -383,12 +386,12 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const formData = await contextRef.current.createFormData(overrides, {
-        data,
-        mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
-      })
-
       try {
+        const formData = await contextRef.current.createFormData(overrides, {
+          data,
+          mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
+        })
+
         let res
 
         if (typeof actionArg === 'string') {
@@ -833,7 +836,9 @@ export const Form: React.FC<FormProps> = (props) => {
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
+            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
+              excludeFiles: true,
+            }),
             submitted,
           })
         }
@@ -876,6 +881,12 @@ export const Form: React.FC<FormProps> = (props) => {
     <El
       action={typeof action === 'function' ? void action : action}
       className={classes}
+      /**
+       * data-form-ready signals if the form is ready to be used. This is used by our e2e tests
+       * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
+       * slow network conditions.
+       */
+      data-form-ready={!processing && isMounted && !initializing}
       method={method}
       noValidate
       onSubmit={(e) => void contextRef.current.submit({}, e)}

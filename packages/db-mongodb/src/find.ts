@@ -133,6 +133,7 @@ export const find: Find = async function find(
     draftsEnabled,
     joins,
     locale,
+    projection: paginationOptions.projection,
     query,
   })
 

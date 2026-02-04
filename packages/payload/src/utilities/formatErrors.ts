@@ -18,9 +18,9 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
       return {
         errors: [
           {
-            name: incoming.name,
-            data: incoming.data,
-            message: incoming.message,
+            name: incoming.name as string,
+            data: incoming.data as Record<string, unknown>,
+            message: incoming.message as string,
           },
         ],
       }
@@ -52,7 +52,7 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
       return {
         errors: [
           {
-            message: incoming.message,
+            message: incoming.message as string,
           },
         ],
       }

@@ -66,8 +66,11 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
@@ -102,12 +105,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -126,39 +131,53 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
-  tests-int:
+  # Generate the integration test matrix from TypeScript config
+  int-matrix:
+    name: Setup Int Matrix
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
-    name: int-${{ matrix.database }}
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/int.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  tests-int:
+    runs-on: ubuntu-24.04
+    needs: int-matrix
+    name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - mongodb-atlas
-          - documentdb
-          - cosmosdb
-          - firestore
-          - postgres
-          - postgres-custom-schema
-          - postgres-uuid
-          - supabase
-          - sqlite
-          - sqlite-uuid
+      matrix: ${{ fromJson(needs.int-matrix.outputs.matrix) }}
 
     env:
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
@@ -182,12 +201,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -203,7 +224,7 @@ jobs:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int
+        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
@@ -211,88 +232,74 @@ jobs:
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
 
-  tests-e2e:
+  # Generate the E2E test matrix from TypeScript config
+  e2e-matrix:
+    name: Setup E2E Matrix
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
-    name: e2e-${{ matrix.suite }}
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/e2e.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Prepare prod test environment once, shared by all E2E shards
+  e2e-prep:
+    name: E2E Prep
+    runs-on: ubuntu-24.04
+    needs: [e2e-matrix]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Prepare prod test environment
+        run: pnpm prepare-run-test-against-prod:ci
+
+      - name: Cache prepared test environment
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
+
+  tests-e2e:
+    runs-on: ubuntu-24.04
+    needs: [e2e-matrix, e2e-prep]
+    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - a11y
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - dashboard
-          - joins
-          - field-error-states
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - fields__collections__UploadPoly
-          - fields__collections__UploadMultiPoly
-          - group-by
-          - folders
-          - hooks
-          - lexical__collections___LexicalFullyFeatured
-          - lexical__collections___LexicalFullyFeatured__db
-          - lexical__collections__LexicalHeadingFeature
-          - lexical__collections__LexicalJSXConverter
-          - lexical__collections__LexicalLinkFeature
-          - lexical__collections__OnDemandForm
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-multi-tenant
-          - plugin-nested-docs
-          - plugin-redirects
-          - plugin-seo
-          - queues
-          - sort
-          - server-url
-          - trash
-          - versions
-          - uploads
+      matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
@@ -303,12 +310,25 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Restore prepared test environment
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -343,15 +363,42 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }}
+        # E2E Test Execution Strategy:
+        #
+        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # - shards: Number of CI runners to split this suite across
+        # - parallel: Whether tests within the suite can run concurrently (default: false)
+        #
+        # Flags explained:
+        # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
+        #   not just files). There is an arbitrary limitation that disables sharding if fullyParallel
+        #   is not set.
+        # - --workers=1: Forces serial execution within each shard. Added when parallel=false.
+        #
+        # How it works:
+        # - Most suites: parallel=false → tests run serially (--workers=1) but are sharded across runners
+        # - Parallel suites (e.g. LexicalFullyFeatured): parallel=true → tests run concurrently within each shard
+        #
+        # Local vs CI behavior:
+        # - Locally: playwright.config.ts has workers=16. Without --fully-parallel, Playwright
+        #   runs tests serially by default (one test at a time per file). Suites with
+        #   test.describe.configure({ mode: 'parallel' }) opt into parallel execution.
+        # - CI: We must use --fully-parallel to enable test-level sharding across runners.
+        #   However, --fully-parallel would also run all tests in parallel within each shard.
+        #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
+        #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
+        #
+        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and caches the result.
+        # This job restores that cache, so we use test:e2e:prod:run which skips preparation.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -455,12 +502,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -555,12 +604,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
@@ -653,12 +704,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -714,12 +767,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
           key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
