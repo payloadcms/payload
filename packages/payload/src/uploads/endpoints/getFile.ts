@@ -27,11 +27,11 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const accessResult = await checkFileAccess({
+  const accessResult = (await checkFileAccess({
     collection,
     filename,
     req,
-  })
+  }))!
 
   if (accessResult instanceof Response) {
     return accessResult
