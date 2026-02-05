@@ -21,9 +21,7 @@ type Handler = (
 }
 
 export const tempFileHandler: Handler = (options, fieldname, filename) => {
-  const dir = path.normalize(options.tempFileDir!)
-  // Create a full path of the configured tempFilePAth and tempFileName. Decide on the absolute location later.
-  const tempFilePath = path.join(dir, getTempFilename())
+  const tempFilePath = path.resolve(options.tempFileDir!, getTempFilename())
   checkAndMakeDir({ createParentPath: true }, tempFilePath)
 
   debugLog(options, `Temporary file path is ${tempFilePath}`)

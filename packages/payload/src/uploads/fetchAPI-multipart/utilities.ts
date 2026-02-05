@@ -117,8 +117,8 @@ export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) =>
   if (!fileUploadOptions.createParentPath) {
     return false
   }
-  // Check whether folder for the file exists. The parentPath should be relative to the current workdir when filePath is not absolute.
-  const parentPath = path.dirname(path.isAbsolute(filePath)?filePath:path.join(process.pwd(), filePath))
+  // Check whether folder for the file exists.
+  const parentPath = path.dirname(path.resolve(filePath))
   // Create folder if it doesn't exist.
   if (!fs.existsSync(parentPath)) {
     fs.mkdirSync(parentPath, { recursive: true })
