@@ -1060,6 +1060,33 @@ export const getConfig: () => Partial<Config> = () => ({
         ],
       },
     },
+    // Collections for testing required relationship onDelete behavior
+    {
+      slug: 'required-rel-parent',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      slug: 'required-rel-child',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'parent',
+          type: 'relationship',
+          relationTo: 'required-rel-parent',
+          required: true, // This causes the bug: onDelete: 'set null' + NOT NULL constraint
+        },
+      ],
+    },
   ],
   globals: [
     {
