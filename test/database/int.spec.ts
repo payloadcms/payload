@@ -2244,12 +2244,12 @@ describe('database', () => {
       })
 
       it('should report honest results when one update fails', async () => {
-        // Create 3 docs
-        const docs = await Promise.all([
-          payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-          payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
-          payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-        ])
+        // Create 3 docs sequentially to avoid MongoDB transaction conflicts
+        const docs = [
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+        ]
 
         // Try to update all, but set shouldFailOnUpdate which will throw
         const result = await payload.update({
@@ -2270,15 +2270,15 @@ describe('database', () => {
       })
 
       it('should report honest results when one delete fails', async () => {
-        // Create 3 docs, one marked to fail on delete
-        const docs = await Promise.all([
-          payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-          payload.create({
+        // Create 3 docs sequentially, one marked to fail on delete
+        const docs = [
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+          await payload.create({
             collection: 'bulk-error-test',
             data: { shouldFailOnDelete: true, title: 'doc2' } as any,
           }),
-          payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-        ])
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+        ]
 
         // Try to delete all
         const result = await payload.delete({
@@ -2312,12 +2312,12 @@ describe('database', () => {
         payload.db.bulkOperationsSingleTransaction = true
 
         try {
-          // Create 3 docs
-          const docs = await Promise.all([
-            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-            payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
-            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-          ])
+          // Create 3 docs sequentially to avoid MongoDB transaction conflicts
+          const docs = [
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          ]
 
           // Try to update all, but set shouldFailOnUpdate which will throw
           const result = await payload.update({
@@ -2344,15 +2344,15 @@ describe('database', () => {
         payload.db.bulkOperationsSingleTransaction = true
 
         try {
-          // Create 3 docs, one marked to fail on delete
-          const docs = await Promise.all([
-            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-            payload.create({
+          // Create 3 docs sequentially, one marked to fail on delete
+          const docs = [
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            await payload.create({
               collection: 'bulk-error-test',
               data: { shouldFailOnDelete: true, title: 'doc2' } as any,
             }),
-            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-          ])
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          ]
 
           // Try to delete all
           const result = await payload.delete({
