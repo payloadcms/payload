@@ -39,10 +39,18 @@ import {
   tabHasName,
 } from 'payload/shared'
 
+export type MongooseIDType =
+  | typeof mongoose.Schema.Types.BigInt
+  | typeof mongoose.Schema.Types.ObjectId
+  | typeof mongoose.Schema.Types.UUID
+  | typeof Number
+  | typeof String
+
 export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
+  idType?: MongooseIDType
   indexSortableFields?: boolean
   options?: SchemaOptions
 }
@@ -158,7 +166,9 @@ export const buildSchema = (args: {
             ? payload.db.useBigIntForNumberIDs
               ? mongoose.Schema.Types.BigInt
               : Number
-            : String,
+            : buildSchemaOptions.idType
+              ? buildSchemaOptions.idType
+              : String,
       }
       schemaFields = schemaFields.filter(
         (field) => !(fieldAffectsData(field) && field.name === 'id'),
