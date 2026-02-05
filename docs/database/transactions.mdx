@@ -40,6 +40,16 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
 }
 ```
 
+## Bulk Operations
+
+Bulk `update` and `delete` operations (using `where` instead of `id`) use all-or-nothing semantics when transactions are enabled. If any document in the batch fails—whether due to a hook error or a database constraint violation—the entire transaction is rolled back and no changes are persisted.
+
+When this happens, the result will have an empty `docs` array and all documents will be reported in the `errors` array. Documents that would have succeeded are marked with a message indicating the transaction was rolled back due to an error in another document.
+
+This behavior ensures consistency: you won't end up with partial updates where some documents changed and others didn't. If you need partial success behavior, you can either disable transactions for the operation with `disableTransaction: true`, or process documents individually.
+
+When transactions are disabled, partial updates and deletions are possible, as we cannot roll back successful changes that have already been committed.
+
 ## Async Hooks with Transactions
 
 Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
