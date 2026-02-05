@@ -5,6 +5,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { windowInfoBreakpoints } from '../../providers/WindowInfo/index.js'
 
 type NavContextType = {
   hydrated: boolean
@@ -57,7 +58,14 @@ export const NavProvider: React.FC<{
   // this is because getting the preference is async
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
+  const [navOpen, setNavOpen] = React.useState(() => {
+    if (typeof window === 'undefined') {
+      return initialIsOpen
+    }
+
+    const shouldCloseForViewport = window.matchMedia(windowInfoBreakpoints.m).matches
+    return shouldCloseForViewport ? false : initialIsOpen
+  })
 
   const [shouldAnimate, setShouldAnimate] = React.useState(false)
   const [hydrated, setHydrated] = React.useState(false)
@@ -98,7 +106,7 @@ export const NavProvider: React.FC<{
   // close the nav when the user resizes down to mobile
   // the sidebar is a modal on mobile
   useEffect(() => {
-    if (largeBreak === true || midBreak === true || smallBreak === true) {
+    if (midBreak === true || smallBreak === true) {
       setNavOpen(false)
     }
     setHydrated(true)
