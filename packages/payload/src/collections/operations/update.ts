@@ -312,31 +312,49 @@ export const updateOperation = async <
 
     const awaitedDocs = await Promise.all(promises)
 
-    // Handle errors - same behavior regardless of useSeparateTransactions: if any error, abort everything
+    // Handle errors
     if (errors.length > 0) {
+      // Kill any active transactions and track if any were rolled back
+      let anyTransactionRolledBack = false
+
       if (useSeparateTransactions) {
         for (const docReq of docReqsWithTransactions) {
-          await killTransaction(docReq)
+          const rolledBack = await killTransaction(docReq)
+          if (rolledBack) {
+            anyTransactionRolledBack = true
+          }
         }
       }
-      await killTransaction(req)
 
-      // All docs failed because all transactions were rolled back
-      const allErrors: BulkOperationResult<TSlug, TSelect>['errors'] = docs.map((doc) => {
-        const existingError = errors.find((e) => e.id === doc.id)
-        if (existingError) {
-          return existingError
-        }
+      const mainRolledBack = await killTransaction(req)
+      if (mainRolledBack) {
+        anyTransactionRolledBack = true
+      }
+
+      if (anyTransactionRolledBack) {
+        // All-or-nothing: everything was rolled back, report all as failed
+        const allErrors: BulkOperationResult<TSlug, TSelect>['errors'] = docs.map((doc) => {
+          const existingError = errors.find((e) => e.id === doc.id)
+          if (existingError) {
+            return existingError
+          }
+          return {
+            id: doc.id,
+            isPublic: false,
+            message: 'Transaction rolled back due to error in another document',
+          }
+        })
+
         return {
-          id: doc.id,
-          isPublic: false,
-          message: 'Transaction rolled back due to error in another document',
+          docs: [],
+          errors: allErrors,
         }
-      })
-
-      return {
-        docs: [],
-        errors: allErrors,
+      } else {
+        // No transactions: return actual results (some may have succeeded)
+        return {
+          docs: awaitedDocs.filter(Boolean) as BulkOperationResult<TSlug, TSelect>['docs'],
+          errors,
+        }
       }
     }
 
