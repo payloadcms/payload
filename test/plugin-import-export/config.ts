@@ -5,13 +5,16 @@ const dirname = path.dirname(filename)
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+import { defaultTimezones } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
+import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
 
@@ -20,8 +23,20 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    timezones: {
+      supportedTimezones: [...defaultTimezones, { label: 'UTC', value: 'UTC' }],
+    },
   },
-  collections: [Users, Pages, Posts, PostsExportsOnly, PostsImportsOnly, PostsNoJobsQueue],
+  collections: [
+    Users,
+    Pages,
+    Posts,
+    PostsExportsOnly,
+    PostsImportsOnly,
+    PostsNoJobsQueue,
+    PostsWithLimits,
+    Media,
+  ],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -115,7 +130,46 @@ export default buildConfigWithDefaults({
           },
           export: {
             disableJobsQueue: true,
+            format: 'csv',
+            disableSave: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-no-jobs-queue-export'
+              if (collection.admin) {
+                collection.admin.group = 'Posts No Jobs Queue'
+              }
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
           },
+        },
+        {
+          slug: 'posts-with-limits',
+          export: {
+            disableJobsQueue: true,
+            limit: ({ req }) => {
+              if (req.user?.limit) {
+                return req.user.limit
+              }
+              return 5
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-limits-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            disableJobsQueue: true,
+            limit: 5,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-limits-import'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+        },
+        {
+          slug: 'media',
         },
       ],
     }),
