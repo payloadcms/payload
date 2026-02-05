@@ -57,6 +57,255 @@ export const seed = async (payload: Payload): Promise<void> => {
     } as any,
   })
 
+  const go = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Go',
+      description: 'Go programming language',
+      parent: programming.id,
+    } as any,
+  })
+
+  const rust = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Rust',
+      description: 'Rust systems programming',
+      parent: programming.id,
+    } as any,
+  })
+
+  const java = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Java',
+      description: 'Java programming',
+      parent: programming.id,
+    } as any,
+  })
+
+  const csharp = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'C#',
+      description: 'C# and .NET',
+      parent: programming.id,
+    } as any,
+  })
+
+  // Cloud Computing branch
+  const cloud = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Cloud Computing',
+      description: 'Cloud platforms and services',
+      parent: technology.id,
+    } as any,
+  })
+
+  const aws = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'AWS',
+      description: 'Amazon Web Services',
+      parent: cloud.id,
+    } as any,
+  })
+
+  const azure = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Azure',
+      description: 'Microsoft Azure',
+      parent: cloud.id,
+    } as any,
+  })
+
+  const gcp = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Google Cloud',
+      description: 'Google Cloud Platform',
+      parent: cloud.id,
+    } as any,
+  })
+
+  // Databases branch
+  const databases = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Databases',
+      description: 'Database systems',
+      parent: technology.id,
+    } as any,
+  })
+
+  const mongodb = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'MongoDB',
+      description: 'NoSQL document database',
+      parent: databases.id,
+    } as any,
+  })
+
+  const postgresql = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'PostgreSQL',
+      description: 'Relational database',
+      parent: databases.id,
+    } as any,
+  })
+
+  const redis = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Redis',
+      description: 'In-memory data store',
+      parent: databases.id,
+    } as any,
+  })
+
+  // DevOps branch
+  const devops = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'DevOps',
+      description: 'Development operations',
+      parent: technology.id,
+    } as any,
+  })
+
+  const docker = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Docker',
+      description: 'Container platform',
+      parent: devops.id,
+    } as any,
+  })
+
+  const kubernetes = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Kubernetes',
+      description: 'Container orchestration',
+      parent: devops.id,
+    } as any,
+  })
+
+  const cicd = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'CI/CD',
+      description: 'Continuous integration and deployment',
+      parent: devops.id,
+    } as any,
+  })
+
+  // Mobile Development branch
+  const mobile = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Mobile Development',
+      description: 'Mobile app development',
+      parent: technology.id,
+    } as any,
+  })
+
+  const ios = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'iOS',
+      description: 'iOS development',
+      parent: mobile.id,
+    } as any,
+  })
+
+  const android = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Android',
+      description: 'Android development',
+      parent: mobile.id,
+    } as any,
+  })
+
+  const reactNative = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'React Native',
+      description: 'Cross-platform mobile development',
+      parent: mobile.id,
+    } as any,
+  })
+
+  // Security branch
+  const security = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Security',
+      description: 'Cybersecurity and best practices',
+      parent: technology.id,
+    } as any,
+  })
+
+  const encryption = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Encryption',
+      description: 'Data encryption methods',
+      parent: security.id,
+    } as any,
+  })
+
+  const authentication = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'Authentication',
+      description: 'User authentication systems',
+      parent: security.id,
+    } as any,
+  })
+
+  // AI/ML branch
+  const aiml = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'AI & Machine Learning',
+      description: 'Artificial intelligence and ML',
+      parent: technology.id,
+    } as any,
+  })
+
+  const tensorflow = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'TensorFlow',
+      description: 'ML framework',
+      parent: aiml.id,
+    } as any,
+  })
+
+  const pytorch = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'PyTorch',
+      description: 'Deep learning framework',
+      parent: aiml.id,
+    } as any,
+  })
+
+  const nlp = await payload.create({
+    collection: tagsSlug as any,
+    data: {
+      name: 'NLP',
+      description: 'Natural Language Processing',
+      parent: aiml.id,
+    } as any,
+  })
+
   const design = await payload.create({
     collection: tagsSlug as any,
     data: {
@@ -194,10 +443,16 @@ export const seed = async (payload: Payload): Promise<void> => {
   // You can manually upload media and tag them through the UI
 
   payload.logger.info('Taxonomy seed data created successfully!')
-  payload.logger.info('Created taxonomy hierarchy:')
-  payload.logger.info('- Technology > Programming > JavaScript > React')
-  payload.logger.info('- Technology > Programming > TypeScript')
-  payload.logger.info('- Technology > Programming > Python')
+  payload.logger.info('Created taxonomy hierarchy with 30+ items under Technology:')
+  payload.logger.info(
+    '- Technology > Programming (JavaScript, TypeScript, Python, Go, Rust, Java, C#)',
+  )
+  payload.logger.info('- Technology > Cloud Computing (AWS, Azure, Google Cloud)')
+  payload.logger.info('- Technology > Databases (MongoDB, PostgreSQL, Redis)')
+  payload.logger.info('- Technology > DevOps (Docker, Kubernetes, CI/CD)')
+  payload.logger.info('- Technology > Mobile Development (iOS, Android, React Native)')
+  payload.logger.info('- Technology > Security (Encryption, Authentication)')
+  payload.logger.info('- Technology > AI & Machine Learning (TensorFlow, PyTorch, NLP)')
   payload.logger.info('- Design > UI/UX')
   payload.logger.info('- Design > Web Design')
   payload.logger.info('- Articles > Tutorials')

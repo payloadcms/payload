@@ -147,6 +147,7 @@ export const TreeNode = ({
         role="button"
         tabIndex={tabIndex}
       >
+        <div className={`${baseClass}__indicator`} />
         {hasChildren ? (
           <button
             aria-label={expanded ? 'Collapse' : 'Expand'}

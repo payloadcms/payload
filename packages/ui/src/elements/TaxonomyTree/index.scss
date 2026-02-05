@@ -5,6 +5,9 @@
   margin: 0;
   overflow-y: auto;
   height: 100%;
+  // pull width edge to edge of the nav-sidebar container
+  width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
+  margin-inline: calc(var(--nav-padding-inline-start) * -1);
 }
 
 .taxonomy-tree {
@@ -13,7 +16,6 @@
   --taxonomy-tree-chevron-width: 16px;
   --taxonomy-tree-chevron-spacing: 8px;
   --taxonomy-tree-node-padding-y: calc(var(--base) / 4); // 4px
-  --taxonomy-tree-node-padding-x: calc(var(--base) / 4); // 4px
   --taxonomy-tree-node-content-height: 24px;
   --taxonomy-tree-row-gap: 8px;
   --taxonomy-tree-font-size: 13px;
