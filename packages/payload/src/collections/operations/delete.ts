@@ -53,7 +53,8 @@ export const deleteOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
-  const useSeparateTransactions = args.req.payload.db.bulkOperationsSingleTransaction
+  const useSeparateTransactions =
+    args.req.payload.db.bulkOperationsSingleTransaction && !args.disableTransaction
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

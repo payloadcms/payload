@@ -76,7 +76,8 @@ export const updateOperation = async <
     throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk edit`, 403)
   }
 
-  const useSeparateTransactions = args.req.payload.db.bulkOperationsSingleTransaction
+  const useSeparateTransactions =
+    args.req.payload.db.bulkOperationsSingleTransaction && !args.disableTransaction
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

@@ -2080,6 +2080,73 @@ describe('database', () => {
 
           expect(result.hasTransaction).toBeFalsy()
         })
+
+        it('should respect disableTransaction with bulkOperationsSingleTransaction on update', async () => {
+          const originalValue = payload.db.bulkOperationsSingleTransaction
+
+          payload.db.bulkOperationsSingleTransaction = true
+
+          try {
+            const posts = await Promise.all([
+              payload.create({ collection, data: { title: 'disableTx1' } }),
+              payload.create({ collection, data: { title: 'disableTx2' } }),
+            ])
+
+            const result = await payload.update({
+              collection,
+              where: { id: { in: posts.map((p) => p.id) } },
+              data: { title: 'updated' },
+              disableTransaction: true,
+            })
+
+            expect(result.docs).toHaveLength(2)
+            // Each doc should NOT have a transaction
+            for (const doc of result.docs) {
+              expect(doc.hasTransaction).toBeFalsy()
+            }
+          } finally {
+            payload.db.bulkOperationsSingleTransaction = originalValue
+          }
+        })
+
+        it('should respect disableTransaction with bulkOperationsSingleTransaction on delete', async () => {
+          const originalValue = payload.db.bulkOperationsSingleTransaction
+
+          payload.db.bulkOperationsSingleTransaction = true
+
+          try {
+            // Create docs with disableTransaction so hasTransaction is false from creation
+            // (delete doesn't run beforeChange hooks, so hasTransaction reflects creation state)
+            const posts = await Promise.all([
+              payload.create({
+                collection,
+                data: { title: 'disableDelTx1' },
+                disableTransaction: true,
+              }),
+              payload.create({
+                collection,
+                data: { title: 'disableDelTx2' },
+                disableTransaction: true,
+              }),
+            ])
+
+            // Verify docs were created without transaction
+            expect(posts[0].hasTransaction).toBeFalsy()
+            expect(posts[1].hasTransaction).toBeFalsy()
+
+            const result = await payload.delete({
+              collection,
+              where: { id: { in: posts.map((p) => p.id) } },
+              disableTransaction: true,
+            })
+
+            // Verify delete succeeded (if transaction was incorrectly started and rolled back, this would fail)
+            expect(result.docs).toHaveLength(2)
+            expect(result.errors).toHaveLength(0)
+          } finally {
+            payload.db.bulkOperationsSingleTransaction = originalValue
+          }
+        })
       })
     })
   })
