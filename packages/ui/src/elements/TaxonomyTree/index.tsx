@@ -4,7 +4,7 @@ import React, { useRef } from 'react'
 
 import type { TaxonomyDocument, TaxonomyTreeProps } from './types.js'
 
-import { Spinner } from '../../elements/Spinner/index.js'
+import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
@@ -77,13 +77,11 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     }
   }
 
-  // Show loading state immediately
+  // Show loading state with delay to prevent flash
   if (isLoading && !rootNodes) {
     return (
       <div className={baseClass}>
-        <div className={`${baseClass}__loading`}>
-          <Spinner />
-        </div>
+        <DelayedSpinner baseClass={baseClass} isLoading={true} />
       </div>
     )
   }

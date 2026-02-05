@@ -1,6 +1,6 @@
 'use client'
 
-import { Spinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
+import { DelayedSpinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
 
@@ -20,10 +20,10 @@ export type SidebarTabsClientProps = {
   initialActiveTabID: string
   initialTabContents: Record<string, React.ReactNode>
   /**
-   * Minimum time (in ms) to show the loading overlay, prevents flashing on fast loads
-   * @default 500
+   * Delay before showing loading spinner (in ms), prevents flashing on fast loads
+   * @default 200
    */
-  minLoadingTime?: number
+  loadingDelay?: number
   tabs: TabMetadata[]
 }
 
@@ -31,7 +31,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   baseClass,
   initialActiveTabID,
   initialTabContents,
-  minLoadingTime = 500,
+  loadingDelay = 200,
   tabs,
 }) => {
   const { setPreference } = usePreferences()
@@ -43,7 +43,6 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const [hoveredTab, setHoveredTab] = useState<null | string>(null)
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
-  const loadingStartTimeRef = useRef<null | number>(null)
 
   const loadTabContent = useCallback(
     async (tabSlug: string) => {
@@ -52,9 +51,8 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         return
       }
 
-      // Mark as loading and record start time
+      // Mark as loading
       loadingTabsRef.current.add(tabSlug)
-      loadingStartTimeRef.current = Date.now()
       setLoadingTab(tabSlug)
 
       try {
@@ -90,17 +88,11 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         tabContentRef.current = newContent
         setTabContent(newContent)
       } finally {
-        // Ensure minimum loading time before hiding overlay
-        const elapsedTime = Date.now() - (loadingStartTimeRef.current || 0)
-        const remainingTime = Math.max(0, minLoadingTime - elapsedTime)
-        setTimeout(() => {
-          loadingTabsRef.current.delete(tabSlug)
-          setLoadingTab(null)
-          loadingStartTimeRef.current = null
-        }, remainingTime)
+        loadingTabsRef.current.delete(tabSlug)
+        setLoadingTab(null)
       }
     },
-    [minLoadingTime, serverFunction],
+    [serverFunction],
   )
 
   const handleTabChange = (slug: string) => {
@@ -141,13 +133,12 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         })}
       </div>
       <div className={`${baseClass}__content`}>
-        {loadingTab === activeTabID ? (
-          <div className={`${baseClass}__loading`}>
-            <Spinner />
-          </div>
-        ) : (
-          activeContent
-        )}
+        <DelayedSpinner
+          baseClass={baseClass}
+          delay={loadingDelay}
+          isLoading={loadingTab === activeTabID}
+        />
+        {loadingTab !== activeTabID && activeContent}
       </div>
     </div>
   )
