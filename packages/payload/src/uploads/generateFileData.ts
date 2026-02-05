@@ -402,8 +402,6 @@ export const generateFileData = async <T>({
       fileData.focalX = focalPoint?.x
       fileData.focalY = focalPoint?.y
       filesToSave.push(...sizesToSave)
-    } else if (Array.isArray(imageSizes) && imageSizes.length > 0) {
-      fileData.sizes = null as unknown as FileData['sizes']
     }
   } catch (err) {
     req.payload.logger.error(err)

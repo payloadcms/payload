@@ -118,6 +118,7 @@ export async function createImageSizes({
       })
 
       if (resizeAction === 'omit') {
+        sizes[imageResizeConfig.name] = createImageSize({})
         return
       }
 
