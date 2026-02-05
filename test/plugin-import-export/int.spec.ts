@@ -1378,6 +1378,25 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(customExportCollection.config.admin?.custom?.format).toBe('csv')
         expect(customExportCollection.config.admin?.custom?.disableSave).toBe(true)
       })
+
+      it('should reject download request with mismatched format when format is forced', async () => {
+        const response = await restClient.POST('/posts-no-jobs-queue-export/download', {
+          body: JSON.stringify({
+            data: {
+              collectionSlug: 'posts-no-jobs-queue',
+              format: 'json',
+            },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(400)
+
+        const data = await response.json()
+
+        expect(data.errors[0].message).toContain('not supported')
+        expect(data.errors[0].message).toContain('csv')
+      })
     })
 
     describe('json and richText fields CSV serialization', () => {
