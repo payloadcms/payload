@@ -1,0 +1,101 @@
+@import '../../../scss/styles.scss';
+
+.taxonomy-tree-node {
+  margin-left: var(--nav-padding-inline-start);
+  .taxonomy-tree-node {
+    margin-left: 0;
+  }
+  // Variables are inherited from parent .taxonomy-tree
+
+  &__content--selected > .taxonomy-tree-node__indicator {
+    background-color: var(--theme-text);
+  }
+
+  &__indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 16px;
+    background-color: transparent;
+    border-start-end-radius: 2px;
+    border-end-end-radius: 2px;
+    left: calc(var(--nav-padding-inline-start) * -1);
+    top: 50%;
+    bottom: 50%;
+    transform: translateY(-50%);
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    padding: var(--taxonomy-tree-node-padding-y) 0px;
+    padding-left: calc(var(--taxonomy-tree-depth, 0) * var(--taxonomy-tree-indent));
+    user-select: none;
+    transition: background-color 100ms ease;
+    font-size: var(--taxonomy-tree-font-size);
+    line-height: var(--taxonomy-tree-node-content-height);
+    height: var(--taxonomy-tree-node-content-height);
+    position: relative;
+    margin-bottom: var(--taxonomy-tree-row-gap);
+    border-radius: var(--style-radius-s);
+
+    &:hover > .taxonomy-tree-node__indicator {
+      background-color: var(--theme-text);
+    }
+
+    &--selected {
+      font-weight: 500;
+    }
+  }
+
+  &__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    margin-right: var(--taxonomy-tree-chevron-spacing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    color: var(--theme-elevation-600);
+    width: var(--taxonomy-tree-chevron-width);
+    height: var(--taxonomy-tree-chevron-width);
+    flex-shrink: 0;
+    border-radius: var(--style-radius-s);
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-500);
+    }
+  }
+
+  &__toggle-spacer {
+    width: calc(var(--taxonomy-tree-chevron-width) + var(--taxonomy-tree-chevron-spacing));
+    flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--taxonomy-tree-font-size);
+    color: var(--theme-elevation-800);
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__loading {
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__children {
+    /* Children are rendered with depth variable set */
+  }
+}

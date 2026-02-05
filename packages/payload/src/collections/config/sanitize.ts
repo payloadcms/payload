@@ -12,6 +12,7 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { sanitizeTaxonomy } from '../../taxonomy/sanitizeTaxonomy.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -237,6 +238,9 @@ export const sanitizeCollection = async (
   } else if (sanitized.folders) {
     sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
   }
+
+  // Taxonomy must be sanitized before hierarchy since it configures hierarchy
+  sanitizeTaxonomy(sanitized, config)
 
   sanitizeHierarchy(sanitized, config)
 

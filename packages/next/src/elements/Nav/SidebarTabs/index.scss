@@ -76,5 +76,12 @@
       flex-grow: 1;
       position: relative;
     }
+
+    &__loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+    }
   }
 }

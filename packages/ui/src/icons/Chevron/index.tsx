@@ -14,6 +14,8 @@ export const ChevronIcon: React.FC<{
       .filter(Boolean)
       .join(' ')}
     height="100%"
+    strokeLinecap="round"
+    strokeLinejoin="round"
     style={{
       transform:
         direction === 'left'
@@ -28,6 +30,12 @@ export const ChevronIcon: React.FC<{
     width="100%"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M14 8L10 12L6 8" strokeLinecap="square" />
+    <path
+      className="stroke"
+      d="M14 8L10 12L6 8"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 )

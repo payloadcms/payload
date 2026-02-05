@@ -1,0 +1,40 @@
+@import '../../scss/styles.scss';
+
+.taxonomy-sidebar-tab {
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  height: 100%;
+  // pull width edge to edge of the nav-sidebar container
+  width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
+  margin-inline: calc(var(--nav-padding-inline-start) * -1);
+}
+
+.taxonomy-tree {
+  // CSS variables for customization - defined once at the top level
+  --taxonomy-tree-indent: 20px;
+  --taxonomy-tree-chevron-width: 16px;
+  --taxonomy-tree-chevron-spacing: 8px;
+  --taxonomy-tree-node-padding-y: calc(var(--base) / 4); // 4px
+  --taxonomy-tree-node-content-height: 24px;
+  --taxonomy-tree-row-gap: 8px;
+  --taxonomy-tree-font-size: 13px;
+
+  padding: 0;
+  margin: 0;
+  margin-top: 2px; // account for accessibility outline
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--base);
+    min-height: 100px;
+  }
+
+  &__empty {
+    padding: 12px 16px;
+    color: var(--theme-elevation-500);
+    font-size: var(--taxonomy-tree-font-size);
+  }
+}
