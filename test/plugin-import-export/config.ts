@@ -200,6 +200,35 @@ export default buildConfigWithDefaults({
             },
           },
         },
+        {
+          slug: 'posts-with-limits',
+          export: {
+            disableJobsQueue: true,
+            limit: ({ req }) => {
+              if (req.user?.limit) {
+                return req.user.limit
+              }
+              return 5
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-limits-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            disableJobsQueue: true,
+            limit: 5,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-limits-import'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+        },
+        {
+          slug: 'media',
+        },
       ],
     }),
     s3Storage({

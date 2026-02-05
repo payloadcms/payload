@@ -18,11 +18,11 @@ const TEST_SUITES = [
   'collections-rest',
   'config',
   //   'create-payload-app', // Does not use DB adapter - tests CLI tool
-  'custom-graphql',
+  // 'custom-graphql', We don't support transactions
   'database',
   'dataloader',
   'endpoints', // Does not use DB adapter - only tests custom HTTP endpoints (but still useful for integration)
-  //   'fields', // Very slow, run separately
+  'field-paths',
   'fields-relationship',
   'folders',
   'folders-browse-by-disabled',
@@ -30,12 +30,12 @@ const TEST_SUITES = [
   'globals',
   'graphql',
   'hooks',
-  //   'joins', not supported yet in content api
+  'joins',
   'kv',
   // 'lexical-mdx', Does not use DB adapter - only tests MDX ↔ JSON conversions (but still useful)
   'live-preview',
   'loader',
-  //   'localization', We do not plan to support before EOY
+  'localization',
   'locked-documents',
   'login-with-username',
   // 'payload-cloud', Has no real tests (only it.todo) - shows 0/0
@@ -53,7 +53,7 @@ const TEST_SUITES = [
   'plugin-stripe',
   'plugins',
   'query-presets',
-  'queues',
+  // 'queues', Not supported yet in content api
   'relationships',
   'sdk',
   // 'select', // this suite is slow. Also see this: https://figma.slack.com/archives/C097Z32TW4V/p1767978110705459
@@ -63,6 +63,7 @@ const TEST_SUITES = [
   'trash',
   'uploads',
   'versions',
+  'fields', // slowest test suite
 ]
 
 interface SuiteResult {

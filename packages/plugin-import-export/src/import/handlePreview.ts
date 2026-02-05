@@ -46,7 +46,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     )
   }
 
-  // Resolve max limit from the collection config (stored in custom, not admin.custom, since it can be a function)
+  // Resolve max limit from the collection config
   const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
   const maxLimit = await resolveLimit({
     limit: pluginConfig?.importLimit,

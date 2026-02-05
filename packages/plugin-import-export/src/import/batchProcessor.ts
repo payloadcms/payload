@@ -414,7 +414,6 @@ async function processImportBatch({
                 user,
               })
 
-              // Debug: log what was returned
               if (req.payload.config.debug && savedDocument) {
                 req.payload.logger.info({
                   id: savedDocument.id,

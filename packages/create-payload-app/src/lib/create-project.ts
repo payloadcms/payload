@@ -170,12 +170,6 @@ export async function createProject(
     template: 'template' in args ? args.template : undefined,
   })
 
-  // Remove yarn.lock file. This is only desired in Payload Cloud.
-  const lockPath = path.resolve(projectDir, 'pnpm-lock.yaml')
-  if (fse.existsSync(lockPath)) {
-    await fse.remove(lockPath)
-  }
-
   if (!cliArgs['--no-deps']) {
     info(`Using ${packageManager}.\n`)
     spinner.message('Installing dependencies...')

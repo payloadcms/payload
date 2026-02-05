@@ -125,9 +125,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: {
       createCollectionExport: TaskCreateCollectionExport;
@@ -165,6 +163,7 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   name?: string | null;
+  limit?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -182,6 +181,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1044,6 +1044,7 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  limit?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
