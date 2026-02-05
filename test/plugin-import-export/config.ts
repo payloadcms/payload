@@ -146,7 +146,12 @@ export default buildConfigWithDefaults({
           slug: 'posts-with-limits',
           export: {
             disableJobsQueue: true,
-            limit: () => 5,
+            limit: ({ req }) => {
+              if (req.user?.limit) {
+                return req.user.limit
+              }
+              return 5
+            },
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-with-limits-export'
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
