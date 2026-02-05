@@ -95,11 +95,31 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
     [serverFunction],
   )
 
-  const handleTabChange = (slug: string) => {
-    setActiveTabID(slug)
-    void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
-    void loadTabContent(slug)
-  }
+  const handleTabChange = useCallback(
+    (slug: string) => {
+      setActiveTabID(slug)
+      void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
+      void loadTabContent(slug)
+    },
+    [setPreference, loadTabContent],
+  )
+
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        const direction = e.key === 'ArrowLeft' ? -1 : 1
+        const newIndex = (currentIndex + direction + tabs.length) % tabs.length
+        const newTab = tabs[newIndex]
+        handleTabChange(newTab.slug)
+        // Focus will be handled by the tabIndex change
+        setTimeout(() => {
+          document.querySelector<HTMLButtonElement>(`.${baseClass}__tab--active`)?.focus()
+        }, 0)
+      }
+    },
+    [baseClass, handleTabChange, tabs],
+  )
 
   const activeContent = tabContent[activeTabID]
 
@@ -110,20 +130,28 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__tabs`}>
-        {tabs.map((tab) => {
+      <div className={`${baseClass}__tabs`} role="tablist">
+        {tabs.map((tab, index) => {
           const isActive = tab.slug === activeTabID
 
           return (
             <button
+              aria-selected={isActive}
               className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
               key={tab.slug}
               onClick={() => handleTabChange(tab.slug)}
+              onKeyDown={(e) => handleTabKeyDown(e, index)}
               onMouseEnter={() => setHoveredTab(tab.slug)}
               onMouseLeave={() => setHoveredTab(null)}
+              role="tab"
+              tabIndex={isActive ? 0 : -1}
               type="button"
             >
-              <Tooltip className={`${baseClass}__tooltip`} show={hoveredTab === tab.slug}>
+              <Tooltip
+                className={`${baseClass}__tooltip`}
+                position="top"
+                show={hoveredTab === tab.slug}
+              >
                 {tab.label}
               </Tooltip>
               <span className={`${baseClass}__tab-icon`}>{tab.icon}</span>
@@ -132,7 +160,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           )
         })}
       </div>
-      <div className={`${baseClass}__content`}>
+      <div className={`${baseClass}__content`} role="tabpanel">
         <DelayedSpinner
           baseClass={baseClass}
           delay={loadingDelay}

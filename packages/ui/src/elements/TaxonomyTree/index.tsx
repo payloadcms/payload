@@ -106,7 +106,13 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   }
 
   return (
-    <div className={baseClass} onKeyDown={handleTreeKeyDown} ref={treeRef} role="tree" tabIndex={0}>
+    <div
+      className={baseClass}
+      onKeyDown={handleTreeKeyDown}
+      ref={treeRef}
+      role="tree"
+      tabIndex={-1}
+    >
       {rootNodes.map((node) => {
         const nodeId: number | string = node.id
         const nodeIdStr = typeof nodeId === 'number' ? String(nodeId) : nodeId
