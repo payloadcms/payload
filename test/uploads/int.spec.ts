@@ -10,12 +10,14 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   allowListMediaSlug,
@@ -217,6 +219,40 @@ describe('Collections - Uploads', () => {
         // Check api response
         expect(doc.sizes.tablet.filename).toBeNull()
         expect(doc.sizes.icon.filename).toBeDefined()
+      })
+
+      it('should not set url on image sizes that cannot be generated', async () => {
+        // Create image too small for size generation
+        const formData = new FormData()
+        const filePath = path.join(dirname, './small.png')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
+          file,
+        })
+        const { doc } = await response.json()
+
+        await handle.close()
+
+        expect(response.status).toBe(201)
+
+        // Check ungenerated sizes are empty, including the URL
+        expect(doc.sizes.tablet.filename).toBeNull()
+        expect(doc.sizes.tablet.width).toBeNull()
+        expect(doc.sizes.tablet.height).toBeNull()
+        expect(doc.sizes.tablet.mimeType).toBeNull()
+        expect(doc.sizes.tablet.filesize).toBeNull()
+        expect(doc.sizes.tablet.url).toBeNull()
+
+        // Also verify the database
+        const dbDoc = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(dbDoc.sizes.tablet.url).toBeNull()
       })
 
       it('creates images from a different format', async () => {
@@ -1598,13 +1634,136 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(1)
     })
   })
+
+  describe('External File Upload - Redirect Blocking', () => {
+    const validPNG = Buffer.from(
+      '89504e470d0a1a0a0000000d494844520000000100000001' +
+        '0806000000ifad8300000010494441541865000000018001' +
+        'ffa500051f37dbba0000000049454e44ae426082',
+      'hex',
+    )
+
+    const startServer = async (server: ReturnType<typeof createServer>): Promise<number> => {
+      return new Promise<number>((resolve) => {
+        server.listen(0, '0.0.0.0', () => {
+          resolve((server.address() as AddressInfo).port)
+        })
+      })
+    }
+
+    it('should block malicious redirect', async () => {
+      const internalServer = createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('SECRET_CREDENTIALS')
+      })
+
+      const internalServerPort = await startServer(internalServer)
+
+      const attackerServer = createServer((req, res) => {
+        res.writeHead(302, {
+          Location: `http://127.0.0.1:${internalServerPort}/secret`,
+        })
+        res.end()
+      })
+
+      const attackerServerPort = await startServer(attackerServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {
+              filename: 'malicious.jpg',
+              url: `http://127.0.0.1:${attackerServerPort}/image.jpg`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        attackerServer.close()
+        internalServer.close()
+      }
+    })
+
+    it('should allow legitimate redirects within allowlist', async () => {
+      const edgeServer = createServer((req, res) => {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': validPNG.length.toString(),
+        })
+        res.end(validPNG)
+      })
+
+      const edgeServerPort = await startServer(edgeServer)
+
+      const cdnServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${edgeServerPort}/image.png` })
+        res.end()
+      })
+
+      const cdnServerPort = await startServer(cdnServer)
+
+      try {
+        const doc = await payload.create({
+          collection: allowListMediaSlug,
+          data: {
+            filename: 'cdn-image.png',
+            url: `http://127.0.0.1:${cdnServerPort}/image.png`,
+          },
+        })
+
+        expect(doc.filename).toBe('cdn-image.png')
+        expect(doc.mimeType).toBe('image/png')
+      } finally {
+        cdnServer.close()
+        edgeServer.close()
+      }
+    })
+
+    it('should not allow infinite redirect loops', async () => {
+      let redirectServerPort: number
+
+      const redirectServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${redirectServerPort}/loop` })
+        res.end()
+      })
+
+      redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'loop.png',
+              url: `http://127.0.0.1:${redirectServerPort}/loop`,
+            },
+          }),
+        ).rejects.toThrow(/Too many redirects/)
+      } finally {
+        redirectServer.close()
+      }
+    })
+  })
+
+  describe('tempFileDir', () => {
+    it.each([
+      { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
+      { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
+    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
+      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+      const filePath = handler.getFilePath()
+
+      expect(filePath.startsWith(expectedPrefix)).toBe(true)
+      handler.cleanup()
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {
   try {
     await stat(fileName)
     return true
-  } catch (err) {
+  } catch (_err) {
     return false
   }
 }

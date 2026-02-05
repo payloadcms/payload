@@ -233,9 +233,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                       config,
                       filename:
                         data?.sizes?.[size.name]?.filename ||
-                        originalDoc?.sizes?.[size.name]?.filename ||
-                        data?.filename ||
-                        originalDoc?.filename,
+                        originalDoc?.sizes?.[size.name]?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,

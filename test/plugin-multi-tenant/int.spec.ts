@@ -4,12 +4,12 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relationship } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { tenantsSlug } from './shared.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { relationshipsSlug, tenantsSlug, usersSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -133,6 +133,59 @@ describe('@payloadcms/plugin-multi-tenant', () => {
           }),
         ).rejects.toThrow('The following field is invalid: Relationship')
       })
+    })
+  })
+
+  describe('access control with user object passed directly', () => {
+    it('should enforce tenant access when user object is fetched from database', async () => {
+      // Create two tenants
+      const tenantA = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Tenant A', domain: 'tenant-a.test' },
+      })
+      const tenantB = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Tenant B', domain: 'tenant-b.test' },
+      })
+
+      // Create a user assigned ONLY to Tenant A
+      const user = await payload.create({
+        collection: usersSlug,
+        data: {
+          email: 'user-tenant-a@test.com',
+          password: 'test',
+          tenants: [{ tenant: tenantA.id }],
+        },
+      })
+
+      // Create a document in Tenant B (user should NOT have access)
+      const doc = await payload.create({
+        collection: relationshipsSlug,
+        data: { tenant: tenantB.id, title: 'Tenant B Doc' },
+      })
+
+      // Fetch user from database - this returns a user WITHOUT .collection property
+      // Bug: when user.collection is undefined, tenant access check is bypassed
+      const fetchedUser = await payload.findByID({
+        id: user.id,
+        collection: usersSlug,
+      })
+
+      // User from Tenant A should NOT be able to access Tenant B's document
+      const result = await payload.find({
+        collection: relationshipsSlug,
+        overrideAccess: false,
+        user: fetchedUser,
+        where: { id: { equals: doc.id } },
+      })
+
+      expect(result.docs).toHaveLength(0)
+
+      // Cleanup
+      await payload.delete({ id: doc.id, collection: relationshipsSlug })
+      await payload.delete({ id: user.id, collection: usersSlug })
+      await payload.delete({ id: tenantA.id, collection: tenantsSlug })
+      await payload.delete({ id: tenantB.id, collection: tenantsSlug })
     })
   })
 })
