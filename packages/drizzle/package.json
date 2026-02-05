@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/drizzle",
-  "version": "3.63.0",
+  "version": "3.74.0",
   "description": "A library of shared functions used by different payload database adapters",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -49,18 +49,17 @@
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "console-table-printer": "2.12.1",
     "dequal": "2.0.3",
-    "drizzle-orm": "0.44.6",
+    "drizzle-orm": "0.44.7",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"

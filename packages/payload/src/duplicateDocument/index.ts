@@ -17,7 +17,6 @@ type GetDuplicateDocumentArgs = {
   collectionConfig: SanitizedCollectionConfig
   draftArg?: boolean
   id: number | string
-  isSavingDraft?: boolean
   overrideAccess?: boolean
   req: PayloadRequest
   selectedLocales?: string[]
@@ -26,7 +25,6 @@ export const getDuplicateDocumentData = async ({
   id,
   collectionConfig,
   draftArg,
-  isSavingDraft,
   overrideAccess,
   req,
   selectedLocales,
@@ -95,11 +93,6 @@ export const getDuplicateDocumentData = async ({
     overrideAccess: overrideAccess!,
     req,
   })
-
-  // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
-  if (isSavingDraft) {
-    duplicatedFromDocWithLocales._status = 'draft'
-  }
 
   const duplicatedFromDoc = await afterRead({
     collection: collectionConfig,

@@ -138,6 +138,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'he') | ('en' | 'es' | 'he')[];
   globals: {
     tabsWithRichText: TabsWithRichText;
   };
@@ -145,9 +146,7 @@ export interface Config {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
   locale: 'en' | 'es' | 'he';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -1037,6 +1036,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

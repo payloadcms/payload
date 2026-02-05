@@ -45,7 +45,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Github Releases To Discord
+
+      - name: Announce Release - Releases Channel
         uses: SethCohen/github-releases-to-discord@v1.19.0
         with:
           webhook_url: ${{ secrets.DISCORD_RELEASES_WEBHOOK_URL }}
@@ -53,16 +54,10 @@ jobs:
           username: 'Payload Releases'
           avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'
 
-  notify-website-repo:
-    name: Notify website repo
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Dispatch event
-        uses: peter-evans/repository-dispatch@v3
+      - name: Announce Release - General Channel
+        uses: SethCohen/github-releases-to-discord@v1.19.0
         with:
-          token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
-          repository: payloadcms/website
-          event-type: ${{ env.PAYLOAD_RELEASE_EVENT }}
-          client-payload: '{"event": {"message": "New Payload Release"}}'
+          webhook_url: ${{ secrets.DISCORD_GENERAL_WEBHOOK_URL }}
+          color: '16777215'
+          username: 'Payload Releases'
+          avatar_url: 'https://l4wlsi8vxy8hre4v.public.blob.vercel-storage.com/discord-bot-logo.png'

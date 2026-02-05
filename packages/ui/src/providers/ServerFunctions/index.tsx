@@ -7,12 +7,13 @@ import type {
   DocumentSlots,
   FormState,
   GetFolderResultsComponentAndDataArgs,
-  Locale,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
   ServerFunctionClient,
+  SlugifyServerFunctionArgs,
 } from 'payload'
+import type { Slugify } from 'payload/shared'
 
 import React, { createContext, useCallback } from 'react'
 
@@ -47,6 +48,12 @@ type GetTableStateClient = (
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableStateHandler>
 
+type SlugifyClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'>,
+) => ReturnType<Slugify>
+
 export type RenderDocumentResult = {
   data: any
   Document: React.ReactNode
@@ -60,7 +67,6 @@ type RenderDocumentBaseArgs = {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
-  locale?: Locale
   overrideEntityVisibility?: boolean
   paramsOverride?: AdminViewServerPropsOnly['params']
   redirectAfterCreate?: boolean
@@ -105,6 +111,7 @@ type GetFolderResultsComponentAndDataClient = (
 ) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
 
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
+
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
@@ -115,6 +122,7 @@ export type ServerFunctionsContextType = {
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
+  slugify: SlugifyClient
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -152,10 +160,10 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const result = (await serverFunction({
+          const result = await serverFunction({
             name: 'schedule-publish',
             args: { ...rest },
-          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })
 
           if (!remoteSignal?.aborted) {
             return result
@@ -300,6 +308,24 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const slugify = useCallback<SlugifyClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'slugify',
+          args: { ...rest },
+        })) as Awaited<ReturnType<Slugify>> // TODO: infer this type when `strictNullChecks` is enabled
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
@@ -312,6 +338,7 @@ export const ServerFunctionsProvider: React.FC<{
         renderDocument,
         schedulePublish,
         serverFunction,
+        slugify,
       }}
     >
       {children}

@@ -2,16 +2,17 @@ import type { JsonObject, Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { createLocalReq, ValidationError } from 'payload'
+import { createLocalReq, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   cleanupDocuments,
   cleanupGlobal,
@@ -24,6 +25,7 @@ import {
   autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   draftGlobalSlug,
+  draftUnlimitedGlobalSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   versionCollectionSlug,
@@ -428,6 +430,53 @@ describe('Versions', () => {
         })
         expect(await getVersionsCount()).toBe(2)
       })
+
+      it('should return null when saving a version with returning:false', async () => {
+        const collection = autosaveCollectionSlug
+        const collectionConfig = payload.collections[autosaveCollectionSlug].config
+
+        const post = await payload.create({
+          collection,
+          data: { description: 'description' },
+          draft: true,
+        })
+
+        const result = await saveVersion({
+          id: post.id,
+          collection: collectionConfig,
+          docWithLocales: post,
+          operation: 'create',
+          payload,
+          returning: false,
+        })
+
+        expect(result).toBeNull()
+      })
+    })
+
+    describe('Duplicate', () => {
+      it('should duplicate a versioned document as a draft', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'Original description',
+            title: 'Original Title',
+            _status: 'published',
+          },
+          draft: false,
+        })
+
+        const duplicatedDoc = await payload.create({
+          duplicateFromID: originalDoc.id,
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
+      })
     })
 
     describe('Query operations', () => {
@@ -528,6 +577,23 @@ describe('Versions', () => {
         expect(draftsAscending.docs[0]).toMatchObject(
           draftsDescending.docs[draftsDescending.docs.length - 1]!,
         )
+      })
+
+      it('should findVersions with limit: 0', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'a', title: 'test-doc' },
+        })
+
+        for (let i = 0; i < 100; i++) {
+          await payload.update({ collection: draftCollectionSlug, id: doc.id, data: {} })
+        }
+        const res = await payload.findVersions({
+          collection: draftCollectionSlug,
+          limit: 0,
+          where: { parent: { equals: doc.id } },
+        })
+        expect(res.docs).toHaveLength(101)
       })
     })
 
@@ -968,7 +1034,7 @@ describe('Versions', () => {
 
         expect(updateManyResult.docs).toHaveLength(0)
         expect(updateManyResult.errors).toStrictEqual([
-          { id: doc.id, message: 'The following field is invalid: Group > Title' },
+          { id: doc.id, message: 'The following field is invalid: Group > Title', isPublic: true },
         ])
       })
 
@@ -2203,6 +2269,20 @@ describe('Versions', () => {
 
         expect(version.id).toStrictEqual(globalVersionID)
       })
+
+      it('should findGlobalVersions with limit: 0', async () => {
+        await payload.db.deleteVersions({ globalSlug: draftUnlimitedGlobalSlug, where: {} })
+        for (let i = 0; i < 100; i++) {
+          await payload.updateGlobal({ slug: draftUnlimitedGlobalSlug, data: { title: 'global' } })
+        }
+
+        const res = await payload.findGlobalVersions({
+          slug: draftUnlimitedGlobalSlug,
+          limit: 0,
+        })
+
+        expect(res.docs).toHaveLength(100)
+      })
     })
 
     describe('Update', () => {
@@ -2527,6 +2607,7 @@ describe('Versions', () => {
       const retrieved = await payload.findByID({
         id: draft.id,
         collection: draftCollectionSlug,
+        draft: false,
       })
 
       expect(retrieved._status).toStrictEqual('published')
@@ -2591,7 +2672,6 @@ describe('Versions', () => {
           description: 'hello',
           title: 'my doc to publish in the future',
         },
-        draft: true,
       })
 
       expect(published._status).toStrictEqual('published')

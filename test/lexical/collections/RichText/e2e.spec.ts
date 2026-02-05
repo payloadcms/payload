@@ -9,10 +9,10 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -309,7 +309,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="render links"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com')
 
@@ -333,7 +333,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="link to relationships"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute(
         'href',
@@ -418,7 +418,7 @@ describe('Rich Text', () => {
       await wait(500)
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
-      const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
+      const removeButton = page.locator('.popup__content').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
       await wait(500)
       await removeButton.click()

@@ -39,9 +39,10 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
     const urlToUse =
-      req?.url || req.payload?.config?.serverURL
+      req?.url ||
+      (req.payload?.config?.serverURL
         ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
-        : fallbackURL
+        : fallbackURL)
 
     try {
       urlObject = new URL(urlToUse)
@@ -123,7 +124,6 @@ export const createLocalReq: CreateLocalReq = async (
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   if (!req.headers) {
-    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.headers = new Headers()
   }
 
@@ -133,6 +133,13 @@ export const createLocalReq: CreateLocalReq = async (
   req.i18n = i18n
   req.t = i18n.t
   req.user = user || req?.user || null
+
+  // Ensure user.collection is set for auth-related access control
+  // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing
+  if (req.user && !req.user.collection) {
+    req.user = { ...req.user, collection: payload.config.admin.user }
+  }
+
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}

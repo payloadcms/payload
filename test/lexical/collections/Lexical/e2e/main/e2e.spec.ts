@@ -11,20 +11,21 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   throttleTest,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+} from '../../../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
@@ -528,6 +529,9 @@ describe('lexicalMain', () => {
     )
     await wait(500)
     await createUploadDrawer.getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await expect(createUploadDrawer).toBeHidden()
     await expect(uploadListDrawer).toBeHidden()
     await wait(500)
@@ -873,6 +877,8 @@ describe('lexicalMain', () => {
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
     await expect(docDrawer).toBeHidden()
     await wait(1500) // Ensure doc is saved in the database
 
@@ -1442,9 +1448,9 @@ describe('lexicalMain', () => {
 
     // Move block 1 to the end
     await page.locator('#blocks-row-0 .array-actions__button').click()
-    await expect(page.locator('#blocks-row-0 .popup__content')).toBeVisible()
+    await expect(page.locator('.popup__content')).toBeVisible()
 
-    await page.locator('#blocks-row-0 .popup__content').getByText('Move Down').click()
+    await page.locator('.popup__content').getByText('Move Down').click()
 
     await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('2')
     await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('2') // block name

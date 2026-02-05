@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 // TODO: decouple blocks from both test suites
 import { richTextDocData } from '../lexical/collections/RichText/data.js'
 import { arrayDoc } from './collections/Array/shared.js'
@@ -25,6 +25,7 @@ import { selectsDoc } from './collections/Select/shared.js'
 import { slugFieldDoc } from './collections/SlugField/shared.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+import { anotherTextareaDoc, textareaDoc } from './collections/Textarea/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
@@ -48,6 +49,7 @@ import {
   selectFieldsSlug,
   slugFieldsSlug,
   tabsFieldsSlug,
+  textareaFieldsSlug,
   textFieldsSlug,
   uiSlug,
   uploadsMulti,
@@ -88,6 +90,20 @@ export const seed = async (_payload: Payload) => {
   const createdAnotherTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: anotherTextDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: textareaDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdAnotherTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: anotherTextareaDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -140,10 +156,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: uploadsMulti,
     data: {
-      media: [
-        { value: createdPNGDoc.id, relationTo: uploadsSlug },
-        { value: createdJPGDoc.id, relationTo: uploadsSlug },
-      ],
+      media: [createdPNGDoc.id],
     },
   })
 

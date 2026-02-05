@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/sdk",
-  "version": "3.63.0",
+  "version": "3.74.0",
   "description": "The official Payload REST API SDK",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -32,13 +32,13 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "payload": "workspace:*",

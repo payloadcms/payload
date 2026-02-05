@@ -12,10 +12,10 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   openColumnControls,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { customAdminRoutes } from '../../shared.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
@@ -27,6 +27,7 @@ import {
   virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -38,28 +39,28 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
+import path from 'path'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
+import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import {
   openListColumns,
   reorderColumns,
   sortColumn,
   toggleColumn,
   waitForColumnInURL,
-} from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
-import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
-import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
-import path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
-
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+} from '../../../__helpers/e2e/columns/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -256,9 +257,12 @@ describe('List View', () => {
       await kebabMenu.click()
 
       await expect(
-        page.locator('.popup-button-list').locator('div', {
-          hasText: 'listMenuItems',
-        }),
+        page
+          .locator('.popup-button-list')
+          .locator('div', {
+            hasText: 'listMenuItems',
+          })
+          .first(),
       ).toBeVisible()
     })
 
@@ -318,7 +322,7 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
       await page.waitForURL(url)
@@ -740,6 +744,33 @@ describe('List View', () => {
 
       // Check if the input still has the correct value
       await expect(valueInput).toHaveValue('Test')
+    })
+
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
     })
 
     test('should still show second filter if two filters exist and first filter is removed', async () => {
@@ -1498,8 +1529,7 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('.per-page .popup-button').click()
-      await page.locator('.per-page .popup-button').click()
-      const options = page.locator('.per-page button.per-page__button')
+      const options = page.locator('.popup__content button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
@@ -1540,7 +1570,7 @@ describe('List View', () => {
       await page.locator('.per-page .popup-button').click()
 
       await page
-        .locator('.per-page button.per-page__button', {
+        .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()
@@ -1567,9 +1597,58 @@ describe('List View', () => {
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
+      // Wait until only 1 row is visible
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])
+    })
+
+    test('should persist per-page limit in list drawer', async () => {
+      await payload.delete({
+        collection: listDrawerSlug,
+        where: {},
+      })
+
+      await mapAsync([...Array(20)], async (_, i) => {
+        await payload.create({
+          disableTransaction: true,
+          collection: listDrawerSlug,
+          data: {
+            title: `List Drawer Item ${i + 1}`,
+            description: `Description ${i + 1}`,
+            number: i + 1,
+          },
+        })
+      })
+
+      await page.goto(withListViewUrl.list)
+
+      // Open the list drawer via the "Select posts" button
+      await page.locator('button:has-text("Select posts")').click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
+
+      // Change per-page to 5
+      await page.locator('.list-drawer .per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
+
+      await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
+      await expect(listDrawer).toBeHidden()
+
+      // Reopen the drawer
+      await page.locator('button:has-text("Select posts")').click()
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
 
@@ -1589,12 +1668,12 @@ describe('List View', () => {
     test('should sort', async () => {
       await page.reload()
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1611,7 +1690,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'asc',
       })
 
@@ -1625,7 +1703,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'desc',
       })
 
@@ -1649,7 +1726,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'asc',
       })
 
@@ -1663,7 +1739,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'desc',
       })
 
@@ -1769,6 +1844,36 @@ describe('List View', () => {
       await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+    })
+
+    test('should not show sort chevrons for virtual: true fields', async () => {
+      const post = await createPost({ title: 'Test Post' })
+      await createVirtualDoc({ post: post.id, textField: 'test text' })
+
+      await page.goto(virtualsUrl.list)
+
+      await openListColumns(page, {})
+      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+
+      // Check that virtualText (virtual: true) does NOT have sort buttons
+      const virtualTextHeading = page.locator('#heading-virtualText')
+      await expect(virtualTextHeading).toBeVisible()
+      await expect(virtualTextHeading.locator('.sort-column__buttons')).toHaveCount(0)
+
+      // Check that textField (regular field) DOES have sort buttons as a control
+      const textFieldHeading = page.locator('#heading-textField')
+      await expect(textFieldHeading).toBeVisible()
+      await expect(textFieldHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__desc')).toBeVisible()
+
+      // Check that virtualTitleFromPost (virtual: 'post.title') DOES have sort buttons
+      const virtualTitleHeading = page.locator('#heading-virtualTitleFromPost')
+      await expect(virtualTitleHeading).toBeVisible()
+      await expect(virtualTitleHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__desc')).toBeVisible()
     })
   })
 
@@ -2041,6 +2146,7 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -2056,6 +2162,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -2066,6 +2173,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
+    disableTransaction: true,
     data: {
       title,
       ...overrides,
@@ -2075,6 +2183,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
@@ -2085,6 +2194,7 @@ async function createArray() {
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
+    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,

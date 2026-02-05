@@ -1,15 +1,16 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from 'helpers/sdk/types.js'
+import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { upsertPreferences } from '__helpers/e2e/preferences.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
@@ -18,11 +19,11 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
 import { textDoc } from './shared.js'
@@ -341,5 +342,21 @@ describe('Text', () => {
 
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  describe('A11y', () => {
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+        exclude: ['[id*="react-select-"]'], // ignore react-select elements here
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

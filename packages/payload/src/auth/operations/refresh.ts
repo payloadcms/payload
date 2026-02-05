@@ -1,9 +1,8 @@
-import url from 'url'
-
 import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -41,18 +40,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'refresh',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'refresh',
+      overrideAccess: false,
+    })
 
     // /////////////////////////////////////
     // Refresh
@@ -70,8 +63,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url!)
-    const isGraphQL = parsedURL.pathname === config.routes.graphQL
+    const pathname = new URL(args.req.url!).pathname
+
+    const isGraphQL = pathname === config.routes.graphQL
 
     let user = await req.payload.db.findOne<any>({
       collection: collectionConfig.slug,
@@ -188,6 +182,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection?.config,
       operation: 'refresh',
+      overrideAccess: false,
       result,
     })
 

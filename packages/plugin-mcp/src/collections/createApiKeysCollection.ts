@@ -1,120 +1,13 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 import type { PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
-
-const addEnabledCollectionTools = (collections: PluginMCPServerConfig['collections']) => {
-  const enabledCollectionSlugs = Object.keys(collections || {}).filter((collection) => {
-    const fullyEnabled =
-      typeof collections?.[collection]?.enabled === 'boolean' && collections?.[collection]?.enabled
-
-    if (fullyEnabled) {
-      return true
-    }
-
-    const partiallyEnabled =
-      typeof collections?.[collection]?.enabled !== 'boolean' &&
-      ((typeof collections?.[collection]?.enabled?.find === 'boolean' &&
-        collections?.[collection]?.enabled?.find === true) ||
-        (typeof collections?.[collection]?.enabled?.create === 'boolean' &&
-          collections?.[collection]?.enabled?.create === true) ||
-        (typeof collections?.[collection]?.enabled?.update === 'boolean' &&
-          collections?.[collection]?.enabled?.update === true) ||
-        (typeof collections?.[collection]?.enabled?.delete === 'boolean' &&
-          collections?.[collection]?.enabled?.delete === true))
-
-    if (partiallyEnabled) {
-      return true
-    }
-  })
-  return enabledCollectionSlugs.map((enabledCollectionSlug) => ({
-    type: 'collapsible' as const,
-    admin: {
-      position: 'sidebar' as const,
-    },
-    fields: [
-      {
-        name: `${toCamelCase(enabledCollectionSlug)}`,
-        type: 'group' as const,
-        fields: [
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.find === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.find === true)
-            ? [
-                {
-                  name: `find`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to find ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Find',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.create === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.create === true)
-            ? [
-                {
-                  name: `create`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to create ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Create',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.update === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.update === true)
-            ? [
-                {
-                  name: `update`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to update ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Update',
-                },
-              ]
-            : []),
-
-          ...(collections?.[enabledCollectionSlug]?.enabled === true ||
-          (typeof collections?.[enabledCollectionSlug]?.enabled !== 'boolean' &&
-            typeof collections?.[enabledCollectionSlug]?.enabled?.delete === 'boolean' &&
-            collections?.[enabledCollectionSlug]?.enabled?.delete === true)
-            ? [
-                {
-                  name: `delete`,
-                  type: 'checkbox' as const,
-                  admin: {
-                    description: `Allow clients to delete ${enabledCollectionSlug}.`,
-                  },
-                  defaultValue: false,
-                  label: 'Delete',
-                },
-              ]
-            : []),
-        ],
-        label: false as const,
-      },
-    ],
-    label: `${enabledCollectionSlug.charAt(0).toUpperCase() + toCamelCase(enabledCollectionSlug).slice(1)}`,
-  }))
-}
+import { createApiKeyFields } from '../utils/createApiKeyFields.js'
 
 export const createAPIKeysCollection = (
   collections: PluginMCPServerConfig['collections'],
+  globals: PluginMCPServerConfig['globals'],
   customTools: Array<{ description: string; name: string }> = [],
   experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] = {},
   pluginOptions: PluginMCPServerConfig,
@@ -161,14 +54,12 @@ export const createAPIKeysCollection = (
     }) || []
 
   const userCollection = pluginOptions.userCollection
-    ? typeof pluginOptions.userCollection === 'string'
-      ? pluginOptions.userCollection
-      : pluginOptions.userCollection.slug
-    : 'users'
 
   return {
     slug: 'payload-mcp-api-keys',
     admin: {
+      description:
+        'API keys control which collections, resources, tools, and prompts MCP clients can access',
       group: 'MCP',
       useAsTitle: 'label',
     },
@@ -183,7 +74,7 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo: userCollection,
+        relationTo: userCollection as CollectionSlug,
         required: true,
       },
       {
@@ -201,13 +92,22 @@ export const createAPIKeysCollection = (
         },
       },
 
-      ...addEnabledCollectionTools(collections),
+      ...createApiKeyFields({
+        config: collections,
+        configType: 'collection',
+      }),
+
+      ...createApiKeyFields({
+        config: globals,
+        configType: 'global',
+      }),
 
       ...(customTools.length > 0
         ? [
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to tools',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -228,6 +128,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to resources',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -248,6 +149,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to prompts',
                 position: 'sidebar' as const,
               },
               fields: [
@@ -273,6 +175,7 @@ export const createAPIKeysCollection = (
             {
               type: 'collapsible' as const,
               admin: {
+                description: 'Manage client access to experimental tools',
                 position: 'sidebar' as const,
               },
               fields: [

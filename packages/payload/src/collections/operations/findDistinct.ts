@@ -16,7 +16,8 @@ import { relationshipPopulationPromise } from '../../fields/hooks/afterRead/rela
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -44,18 +45,12 @@ export const findDistinctOperation = async (
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req!.context,
-            operation: 'readDistinct',
-            req: args.req!,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'readDistinct',
+      overrideAccess: args.overrideAccess!,
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -243,6 +238,7 @@ export const findDistinctOperation = async (
       args,
       collection: collectionConfig,
       operation: 'findDistinct',
+      overrideAccess,
       result,
     })
 

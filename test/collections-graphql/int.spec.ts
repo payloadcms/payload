@@ -4,12 +4,13 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
@@ -133,6 +134,25 @@ describe('collections-graphql', () => {
       const { docs } = data.Sorts
 
       expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
+    })
+
+    it('should not fail with sort as empty string', async () => {
+      const query = `query {
+        Sorts(sort: "") {
+          docs {
+            id
+            title
+            number
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Sorts
+
+      expect(docs).toBeTruthy()
     })
 
     it('should count', async () => {
