@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -5,6 +6,7 @@ import type {
   DataFromCollectionSlug,
   Payload,
   PayloadRequest,
+  TypedUser,
   TypeWithID,
   ValidationError,
 } from 'payload'
@@ -50,7 +52,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
-let user: Record<string, unknown> & TypeWithID
+let user: TypedUser
 let token: string
 let restClient: NextRESTClient
 const collection = postsSlug
@@ -78,8 +80,8 @@ describe('database', () => {
       },
     })
 
-    user = loginResult.user
-    token = loginResult.token
+    user = loginResult.user!
+    token = loginResult.token!
   })
 
   afterAll(async () => {
