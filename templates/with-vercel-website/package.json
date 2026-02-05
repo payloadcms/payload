@@ -7,7 +7,6 @@
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
-    "ci": "payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -20,21 +19,20 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "ci": "payload migrate && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/admin-bar": "3.73.0",
-    "@payloadcms/db-vercel-postgres": "3.73.0",
-    "@payloadcms/live-preview-react": "3.73.0",
-    "@payloadcms/next": "3.73.0",
-    "@payloadcms/plugin-form-builder": "3.73.0",
-    "@payloadcms/plugin-nested-docs": "3.73.0",
-    "@payloadcms/plugin-redirects": "3.73.0",
-    "@payloadcms/plugin-search": "3.73.0",
-    "@payloadcms/plugin-seo": "3.73.0",
-    "@payloadcms/richtext-lexical": "3.73.0",
-    "@payloadcms/storage-vercel-blob": "3.73.0",
-    "@payloadcms/ui": "3.73.0",
+    "@payloadcms/admin-bar": "3.75.0",
+    "@payloadcms/live-preview-react": "3.75.0",
+    "@payloadcms/next": "3.75.0",
+    "@payloadcms/plugin-form-builder": "3.75.0",
+    "@payloadcms/plugin-nested-docs": "3.75.0",
+    "@payloadcms/plugin-redirects": "3.75.0",
+    "@payloadcms/plugin-search": "3.75.0",
+    "@payloadcms/plugin-seo": "3.75.0",
+    "@payloadcms/richtext-lexical": "3.75.0",
+    "@payloadcms/ui": "3.75.0",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^2.0.0",
@@ -48,13 +46,15 @@
     "lucide-react": "^0.378.0",
     "next": "15.4.11",
     "next-sitemap": "^4.2.3",
-    "payload": "3.73.0",
+    "payload": "3.75.0",
     "prism-react-renderer": "^2.3.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "7.45.4",
     "sharp": "0.34.2",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "@payloadcms/db-vercel-postgres": "3.75.0",
+    "@payloadcms/storage-vercel-blob": "3.75.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -83,7 +83,6 @@
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.3"
   },
-  "packageManager": "pnpm@10.28.2",
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
   },
@@ -93,5 +92,6 @@
       "esbuild",
       "unrs-resolver"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.28.2"
 }
