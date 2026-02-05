@@ -123,6 +123,7 @@ export const Categories: CollectionConfig = {
   ],
   taxonomy: {
     parentFieldName: 'parentCategory',
+    icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
   },
 }
 

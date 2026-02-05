@@ -60,6 +60,7 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
     relatedCollections,
     slugPathFieldName: collectionConfig.taxonomy.slugPathFieldName,
     titlePathFieldName: collectionConfig.taxonomy.titlePathFieldName,
+    ...(collectionConfig.taxonomy.icon && { icon: collectionConfig.taxonomy.icon }),
     ...(collectionConfig.taxonomy.slugify && { slugify: collectionConfig.taxonomy.slugify }),
   } // Type will be correct after hierarchy sanitization
 }
