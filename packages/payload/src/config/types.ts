@@ -676,7 +676,7 @@ export type FetchAPIFileUploadOptions = {
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
    * in the current working directory.
    * You can use trailing slash, but it is not necessary.
-   * @default './tmp'
+   * @default 'tmp'
    */
   tempFileDir?: string | undefined
   /**

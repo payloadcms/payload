@@ -15,6 +15,8 @@ import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
@@ -1740,6 +1742,19 @@ describe('Collections - Uploads', () => {
       } finally {
         redirectServer.close()
       }
+    })
+  })
+
+  describe('tempFileDir', () => {
+    it.each([
+      { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
+      { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
+    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
+      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+      const filePath = handler.getFilePath()
+
+      expect(filePath.startsWith(expectedPrefix)).toBe(true)
+      handler.cleanup()
     })
   })
 })
