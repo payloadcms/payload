@@ -2009,8 +2009,8 @@ importers:
         specifier: 9.0.1
         version: 9.0.1
       lucide-react:
-        specifier: ^0.477.0
-        version: 0.477.0(react@19.2.4)
+        specifier: 0.563.0
+        version: 0.563.0(react@19.2.4)
       next:
         specifier: 15.4.11
         version: 15.4.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
@@ -2033,8 +2033,8 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: 7.54.1
-        version: 7.54.1(react@19.2.4)
+        specifier: 7.71.1
+        version: 7.71.1(react@19.2.4)
       sharp:
         specifier: 0.34.2
         version: 0.34.2
@@ -2205,8 +2205,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       lucide-react:
-        specifier: ^0.378.0
-        version: 0.378.0(react@19.2.4)
+        specifier: 0.563.0
+        version: 0.563.0(react@19.2.4)
       next:
         specifier: 15.4.11
         version: 15.4.11(@babel/core@7.28.6)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
@@ -2226,8 +2226,8 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: 7.45.4
-        version: 7.45.4(react@19.2.4)
+        specifier: 7.71.1
+        version: 7.71.1(react@19.2.4)
       sharp:
         specifier: 0.34.2
         version: 0.34.2
@@ -11255,13 +11255,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@0.378.0:
-    resolution: {integrity: sha512-u6EPU8juLUk9ytRcyapkWI18epAv3RU+6+TC23ivjR0e+glWKBobFeSgRwOIJihzktILQuy6E0E80P2jVTDR5g==}
-    peerDependencies:
-      react: 19.2.4
-
-  lucide-react@0.477.0:
-    resolution: {integrity: sha512-yCf7aYxerFZAbd8jHJxjwe1j7jEMPptjnaOqdYeirFnEy85cNR3/L+o0I875CYFYya+eEVzZSbNuRk8BZPDpVw==}
+  lucide-react@0.563.0:
+    resolution: {integrity: sha512-8dXPB2GI4dI8jV4MgUDGBeLdGk8ekfqVZ0BdLcrRzocGgG75ltNEmWS+gE7uokKF/0oSUuczNDT+g9hFJ23FkA==}
     peerDependencies:
       react: 19.2.4
 
@@ -12432,14 +12427,8 @@ packages:
     peerDependencies:
       react: 19.2.4
 
-  react-hook-form@7.45.4:
-    resolution: {integrity: sha512-HGDV1JOOBPZj10LB3+OZgfDBTn+IeEsNOKiq/cxbQAIbKaiJUe/KV8DBUzsx0Gx/7IG/orWqRRm736JwOfUSWQ==}
-    engines: {node: '>=12.22.0'}
-    peerDependencies:
-      react: 19.2.4
-
-  react-hook-form@7.54.1:
-    resolution: {integrity: sha512-PUNzFwQeQ5oHiiTUO7GO/EJXGEtuun2Y1A59rLnZBBj+vNEOWt/3ERTiG1/zt7dVeJEM+4vDX/7XQ/qanuvPMg==}
+  react-hook-form@7.71.1:
+    resolution: {integrity: sha512-9SUJKCGKo8HUSsCO+y0CtqkqI5nNuaDqTxyqPsZPqIwudpj4rCrAz/jZV+jn57bx5gtZKOh3neQu94DXMc+w5w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: 19.2.4
@@ -24707,11 +24696,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@0.378.0(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
-  lucide-react@0.477.0(react@19.2.4):
+  lucide-react@0.563.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -26074,11 +26059,7 @@ snapshots:
       '@babel/runtime': 7.28.6
       react: 19.2.4
 
-  react-hook-form@7.45.4(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
-  react-hook-form@7.54.1(react@19.2.4):
+  react-hook-form@7.71.1(react@19.2.4):
     dependencies:
       react: 19.2.4
 
