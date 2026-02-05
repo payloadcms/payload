@@ -15,7 +15,7 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "eslint --cache --fix",
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
       "prettier --write"
     ],
     "templates/website/**/*": "sh -c \"cd templates/website; pnpm install --ignore-workspace --frozen-lockfile; pnpm run lint --fix\"",
