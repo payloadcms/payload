@@ -7234,5 +7234,328 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
     })
+    describe('dynamic user-based export limits', () => {
+      const createdPostIds: (number | string)[] = []
+      let userWithDynamicLimit: any
+
+      beforeAll(async () => {
+        // Find the dev user and set their limit to 7
+        const devUserDocs = await payload.find({
+          collection: 'users',
+          where: { email: { equals: devUser.email } },
+        })
+
+        const devUserId = devUserDocs.docs[0]?.id
+
+        const updatedUserDoc = await payload.update({
+          id: devUserId,
+          collection: 'users',
+          data: { limit: 7 },
+        })
+
+        // Use the user document directly (not login result) so req.user.limit is accessible
+        userWithDynamicLimit = { ...updatedUserDoc, collection: 'users' }
+
+        // Create 10 test documents (more than both the dynamic export limit of 7 and static import limit of 5)
+        for (let i = 0; i < 10; i++) {
+          const doc = await payload.create({
+            collection: 'posts-with-limits',
+            data: { title: `Dynamic Limit Post ${i}` },
+          })
+
+          createdPostIds.push(doc.id)
+        }
+      })
+
+      afterAll(async () => {
+        // Reset the dev user's limit
+        const devUserDocs = await payload.find({
+          collection: 'users',
+          where: { email: { equals: devUser.email } },
+        })
+
+        const devUserId = devUserDocs.docs[0]?.id
+
+        await payload.update({
+          id: devUserId,
+          collection: 'users',
+          data: { limit: null as unknown as number },
+        })
+
+        // Restore the original user login state
+        user = await payload.login({
+          collection: 'users',
+          data: {
+            email: devUser.email,
+            password: devUser.password,
+          },
+        })
+
+        // Clean up test documents
+        for (const id of createdPostIds) {
+          try {
+            await payload.delete({
+              id,
+              collection: 'posts-with-limits',
+            })
+          } catch {
+            // Document may have already been deleted
+          }
+        }
+        createdPostIds.length = 0
+      })
+
+      describe('export with dynamic user limit of 7', () => {
+        it('should export up to 7 documents when user limit is set to 7', async () => {
+          const exportDoc = await payload.create({
+            collection: 'posts-with-limits-export',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(exportDoc.filename).toBeDefined()
+
+          const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+          const data = await readCSV(exportPath)
+
+          expect(data).toHaveLength(7)
+        })
+
+        it('should clamp request limit to dynamic maxLimit of 7', async () => {
+          const exportDoc = await payload.create({
+            collection: 'posts-with-limits-export',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+              limit: 100,
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(exportDoc.filename).toBeDefined()
+
+          const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+          const data = await readCSV(exportPath)
+
+          expect(data).toHaveLength(7)
+        })
+
+        it('should allow export with limit below dynamic maxLimit of 7', async () => {
+          const exportDoc = await payload.create({
+            collection: 'posts-with-limits-export',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+              limit: 4,
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(exportDoc.filename).toBeDefined()
+
+          const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+          const data = await readCSV(exportPath)
+
+          expect(data).toHaveLength(4)
+        })
+
+        it('should reflect dynamic maxLimit of 7 in export preview', async () => {
+          const response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+            body: JSON.stringify({
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.maxLimit).toBe(7)
+          expect(result.totalDocs).toBe(7)
+        })
+
+        it('should have preview match exactly what is exported with dynamic limit', async () => {
+          const previewResponse = await restClient.POST(
+            `/posts-with-limits-export/export-preview`,
+            {
+              body: JSON.stringify({
+                collectionSlug: 'posts-with-limits',
+                format: 'csv',
+                previewLimit: 10,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            },
+          )
+
+          const preview = await previewResponse.json()
+
+          expect(preview.maxLimit).toBe(7)
+          expect(preview.exportTotalDocs).toBe(7)
+
+          const exportDoc = await payload.create({
+            collection: 'posts-with-limits-export',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(exportDoc.filename).toBeDefined()
+
+          const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+          const exportedData = await readCSV(exportPath)
+
+          expect(exportedData).toHaveLength(preview.exportTotalDocs)
+          expect(exportedData).toHaveLength(7)
+        })
+
+        it('should have preview pagination respect dynamic maxLimit of 7', async () => {
+          const page1Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+            body: JSON.stringify({
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+              previewLimit: 4,
+              previewPage: 1,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const page1 = await page1Response.json()
+
+          expect(page1.docs).toHaveLength(4)
+          expect(page1.totalDocs).toBe(7)
+          expect(page1.totalPages).toBe(2)
+          expect(page1.hasNextPage).toBe(true)
+          expect(page1.hasPrevPage).toBe(false)
+
+          const page2Response = await restClient.POST(`/posts-with-limits-export/export-preview`, {
+            body: JSON.stringify({
+              collectionSlug: 'posts-with-limits',
+              format: 'csv',
+              previewLimit: 4,
+              previewPage: 2,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const page2 = await page2Response.json()
+
+          expect(page2.docs).toHaveLength(3)
+          expect(page2.totalDocs).toBe(7)
+          expect(page2.totalPages).toBe(2)
+          expect(page2.hasNextPage).toBe(false)
+          expect(page2.hasPrevPage).toBe(true)
+          expect(page1.docs.length + page2.docs.length).toBe(7)
+        })
+      })
+
+      describe('import limit remains static despite user limit change', () => {
+        it('should reject import with 7 documents when static import limit is 5', async () => {
+          const csvContent = Array.from(
+            { length: 7 },
+            (_, i) => `"Dynamic Import Exceed ${i}"`,
+          ).join('\n')
+          const csv = `title\n${csvContent}`
+          const csvBuffer = Buffer.from(csv)
+
+          const importDoc = await payload.create({
+            collection: 'posts-with-limits-import',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              importMode: 'create',
+            },
+            file: {
+              name: 'dynamic-exceed-import.csv',
+              data: csvBuffer,
+              mimetype: 'text/csv',
+              size: csvBuffer.length,
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(importDoc.status).toBe('failed')
+          expect(importDoc.summary?.imported).toBe(0)
+
+          await payload.delete({
+            collection: 'posts-with-limits',
+            where: {
+              title: { contains: 'Dynamic Import Exceed' },
+            },
+          })
+        })
+
+        it('should allow import within static limit of 5 even with user limit of 7', async () => {
+          const csvContent = Array.from(
+            { length: 5 },
+            (_, i) => `"Dynamic Import Within ${i}"`,
+          ).join('\n')
+          const csv = `title\n${csvContent}`
+          const csvBuffer = Buffer.from(csv)
+
+          const importDoc = await payload.create({
+            collection: 'posts-with-limits-import',
+            data: {
+              collectionSlug: 'posts-with-limits',
+              importMode: 'create',
+            },
+            file: {
+              name: 'dynamic-within-import.csv',
+              data: csvBuffer,
+              mimetype: 'text/csv',
+              size: csvBuffer.length,
+            },
+            user: userWithDynamicLimit,
+          })
+
+          expect(importDoc.status).toBe('completed')
+          expect(importDoc.summary?.imported).toBe(5)
+
+          await payload.delete({
+            collection: 'posts-with-limits',
+            where: {
+              title: { contains: 'Dynamic Import Within' },
+            },
+          })
+        })
+
+        it('should show static maxLimit of 5 in import preview despite user limit of 7', async () => {
+          const csvContent = Array.from(
+            { length: 10 },
+            (_, i) => `"Dynamic Preview Import ${i}"`,
+          ).join('\n')
+          const csv = `title\n${csvContent}`
+          const csvBuffer = Buffer.from(csv)
+
+          const response = await restClient.POST(`/posts-with-limits-import/preview-data`, {
+            body: JSON.stringify({
+              collectionSlug: 'posts-with-limits',
+              fileData: csvBuffer.toString('base64'),
+              format: 'csv',
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          const result = await response.json()
+
+          expect(result.maxLimit).toBe(5)
+          expect(result.limitExceeded).toBe(true)
+          expect(result.totalDocs).toBe(10)
+        })
+      })
+    })
   })
 })
