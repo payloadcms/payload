@@ -219,6 +219,40 @@ describe('Collections - Uploads', () => {
         expect(doc.sizes.icon.filename).toBeDefined()
       })
 
+      it('should not set url on image sizes that cannot be generated', async () => {
+        // Create image too small for size generation
+        const formData = new FormData()
+        const filePath = path.join(dirname, './small.png')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
+          file,
+        })
+        const { doc } = await response.json()
+
+        await handle.close()
+
+        expect(response.status).toBe(201)
+
+        // Check ungenerated sizes are empty, including the URL
+        expect(doc.sizes.tablet.filename).toBeNull()
+        expect(doc.sizes.tablet.width).toBeNull()
+        expect(doc.sizes.tablet.height).toBeNull()
+        expect(doc.sizes.tablet.mimeType).toBeNull()
+        expect(doc.sizes.tablet.filesize).toBeNull()
+        expect(doc.sizes.tablet.url).toBeNull()
+
+        // Also verify the database
+        const dbDoc = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(dbDoc.sizes.tablet.url).toBeNull()
+      })
+
       it('creates images from a different format', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.jpg')
