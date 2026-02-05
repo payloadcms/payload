@@ -2307,88 +2307,80 @@ describe('database', () => {
         }
       })
 
-      it(
-        'should report honest results when one update fails with separate transactions',
-        { db: 'drizzle' },
-        async () => {
-          const originalValue = payload.db.bulkOperationsSingleTransaction
-          payload.db.bulkOperationsSingleTransaction = true
+      it('should report honest results when one update fails with separate transactions', async () => {
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
 
-          try {
-            // Create 3 docs
-            const docs = await Promise.all([
-              payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-              payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
-              payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-            ])
+        try {
+          // Create 3 docs
+          const docs = await Promise.all([
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          ])
 
-            // Try to update all, but set shouldFailOnUpdate which will throw
-            const result = await payload.update({
-              collection: 'bulk-error-test',
-              data: { shouldFailOnUpdate: true } as any,
-              where: { id: { in: docs.map((d) => d.id) } },
-            })
+          // Try to update all, but set shouldFailOnUpdate which will throw
+          const result = await payload.update({
+            collection: 'bulk-error-test',
+            data: { shouldFailOnUpdate: true } as any,
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
 
-            if (hasTransactions) {
-              // With transactions: all fail because all transactions are rolled back
-              expect(result.docs).toHaveLength(0)
-              expect(result.errors).toHaveLength(3)
-            } else {
-              // Without transactions: all fail because all threw errors
-              expect(result.errors.length).toBeGreaterThan(0)
-            }
-          } finally {
-            payload.db.bulkOperationsSingleTransaction = originalValue
+          if (hasTransactions) {
+            // With transactions: all fail because all transactions are rolled back
+            expect(result.docs).toHaveLength(0)
+            expect(result.errors).toHaveLength(3)
+          } else {
+            // Without transactions: all fail because all threw errors
+            expect(result.errors.length).toBeGreaterThan(0)
           }
-        },
-      )
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
 
-      it(
-        'should report honest results when one delete fails with separate transactions',
-        { db: 'drizzle' },
-        async () => {
-          const originalValue = payload.db.bulkOperationsSingleTransaction
-          payload.db.bulkOperationsSingleTransaction = true
+      it('should report honest results when one delete fails with separate transactions', async () => {
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
 
-          try {
-            // Create 3 docs, one marked to fail on delete
-            const docs = await Promise.all([
-              payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-              payload.create({
-                collection: 'bulk-error-test',
-                data: { shouldFailOnDelete: true, title: 'doc2' } as any,
-              }),
-              payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
-            ])
-
-            // Try to delete all
-            const result = await payload.delete({
+        try {
+          // Create 3 docs, one marked to fail on delete
+          const docs = await Promise.all([
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            payload.create({
               collection: 'bulk-error-test',
-              where: { id: { in: docs.map((d) => d.id) } },
-            })
+              data: { shouldFailOnDelete: true, title: 'doc2' } as any,
+            }),
+            payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          ])
 
-            // Verify results honestly reflect what happened
-            const remaining = await payload.find({
-              collection: 'bulk-error-test',
-              where: { id: { in: docs.map((d) => d.id) } },
-            })
+          // Try to delete all
+          const result = await payload.delete({
+            collection: 'bulk-error-test',
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
 
-            if (hasTransactions) {
-              // With transactions: all fail, all docs remain
-              expect(result.docs).toHaveLength(0)
-              expect(result.errors).toHaveLength(3)
-              expect(remaining.docs).toHaveLength(3)
-            } else {
-              // Without transactions: some succeed, some fail
-              expect(result.docs).toHaveLength(2)
-              expect(result.errors).toHaveLength(1)
-              expect(remaining.docs).toHaveLength(1)
-            }
-          } finally {
-            payload.db.bulkOperationsSingleTransaction = originalValue
+          // Verify results honestly reflect what happened
+          const remaining = await payload.find({
+            collection: 'bulk-error-test',
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          if (hasTransactions) {
+            // With transactions: all fail, all docs remain
+            expect(result.docs).toHaveLength(0)
+            expect(result.errors).toHaveLength(3)
+            expect(remaining.docs).toHaveLength(3)
+          } else {
+            // Without transactions: some succeed, some fail
+            expect(result.docs).toHaveLength(2)
+            expect(result.errors).toHaveLength(1)
+            expect(remaining.docs).toHaveLength(1)
           }
-        },
-      )
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
 
       it('should log errors when bulk operations fail', async () => {
         // Create a doc that will fail on delete
