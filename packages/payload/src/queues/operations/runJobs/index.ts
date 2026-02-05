@@ -256,6 +256,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     } else if (typeof processingOrderConfig === 'string') {
       defaultProcessingOrder = processingOrderConfig
     }
+
+    console.log(`[${randomID}] 5.3.1 - using where query "and":`, and)
+
     const updatedDocs = await updateJobs({
       data: {
         processing: true,
@@ -269,6 +272,30 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       where: { and },
     })
     console.log(`[${randomID}] 5.4 - multiple jobs fetched`, { count: updatedDocs?.length ?? 0 })
+    if ((updatedDocs?.length ?? 0) > 0) {
+      console.log(`[${randomID}] 5.5 - jobs found! fetched:`, { jobs: updatedDocs })
+    }
+    // Fetch ALL jobs using  payload.db.find({})
+    const allJobs = await payload.db.find({
+      collection: jobsCollectionSlug,
+      limit: 0,
+      req,
+    })
+    console.log(`[${randomID}] 5.6 - all jobs fetched`, {
+      allJobs: allJobs?.docs,
+      count: allJobs?.totalDocs,
+    })
+
+    const anyRunnableJobs = allJobs?.docs?.some(
+      (job: any) =>
+        job?.processing === false &&
+        job?.hasError === false &&
+        !job?.completedAt &&
+        !job?.waitUntil,
+    )
+    if (anyRunnableJobs && updatedDocs?.length === 0) {
+      console.log(`[${randomID}] 5.6.1 - potential issue here.`)
+    }
 
     if (updatedDocs) {
       jobs = updatedDocs

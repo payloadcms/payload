@@ -228,6 +228,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
     if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
+      console.log('[Queue] creating new job with data (legacy)', data)
       return (await payload.create({
         collection: jobsCollectionSlug,
         data,
@@ -236,6 +237,8 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         req,
       })) as ReturnType
     } else {
+      console.log('[Queue] creating new job with data', data)
+
       return jobAfterRead({
         config: payload.config,
         doc: await payload.db.create({
