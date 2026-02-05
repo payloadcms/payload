@@ -71,7 +71,6 @@ export { PillSelector, type SelectablePill } from '../../elements/PillSelector/i
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
 export { TaxonomySidebarTab } from '../../elements/TaxonomyTree/TaxonomySidebarTab.js'
-export { TaxonomyTabIcon } from '../../elements/TaxonomyTree/TaxonomyTabIcon.js'
 export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
 export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
@@ -303,6 +302,7 @@ export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.j
 export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
 export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
 export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/Warning.js'
+export { TagIcon } from '../../icons/Tag/index.js'
 
 // providers
 export {

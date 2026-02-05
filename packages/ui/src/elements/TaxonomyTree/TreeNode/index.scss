@@ -72,8 +72,8 @@
 
   &__loading {
     margin-left: 8px;
-    color: var(--theme-elevation-400);
-    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
   }
 
   &__children {

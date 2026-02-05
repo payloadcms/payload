@@ -15,14 +15,21 @@
   --taxonomy-tree-node-padding-y: calc(var(--base) / 4); // 4px
   --taxonomy-tree-node-padding-x: calc(var(--base) / 4); // 4px
   --taxonomy-tree-node-content-height: 24px;
-  --taxonomy-tree-row-gap: calc(var(--base) / 2); // 8px
+  --taxonomy-tree-row-gap: 8px;
   --taxonomy-tree-font-size: 13px;
 
   padding: 0;
   margin: 0;
   margin-top: 2px; // account for accessibility outline
 
-  &__loading,
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--base);
+    min-height: 100px;
+  }
+
   &__empty {
     padding: 12px 16px;
     color: var(--theme-elevation-500);

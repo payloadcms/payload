@@ -20,7 +20,7 @@ export type TaxonomyTreeProps = {
 }
 
 export type CachedChildren = {
-  children: Record<string, unknown>[]
+  children: TaxonomyDocument[]
   hasMore: boolean
   page: number
   totalDocs: number

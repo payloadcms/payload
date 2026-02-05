@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { useConfig } from '../../providers/Config/index.js'
+import type { TaxonomyDocument } from './types.js'
 
-type DocumentData = Record<string, unknown>
+import { useConfig } from '../../providers/Config/index.js'
 
 type UseChildrenArgs = {
   cache?: React.MutableRefObject<Map<string, CachedChildren>>
@@ -14,17 +14,17 @@ type UseChildrenArgs = {
 }
 
 type CachedChildren = {
-  children: DocumentData[]
+  children: TaxonomyDocument[]
   hasMore: boolean
   page: number
   totalDocs: number
 }
 
 type UseChildrenReturn = {
-  children: DocumentData[] | null
+  children: null | TaxonomyDocument[]
   hasMore: boolean
   isLoading: boolean
-  loadMore: () => Promise<DocumentData[]>
+  loadMore: () => Promise<TaxonomyDocument[]>
   totalDocs: number
 }
 
@@ -39,8 +39,8 @@ export const useChildren = ({
   const cacheKey = `${collectionSlug}-${parentId}`
   const cachedData = cache?.current.get(cacheKey)
 
-  const [children, setChildren] = useState<DocumentData[] | null>(cachedData?.children || null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [children, setChildren] = useState<null | TaxonomyDocument[]>(cachedData?.children || null)
+  const [isLoading, setIsLoading] = useState(!cachedData && enabled)
   const [page, setPage] = useState(cachedData?.page || 1)
   const [totalDocs, setTotalDocs] = useState(cachedData?.totalDocs || 0)
   const [hasMore, setHasMore] = useState(cachedData?.hasMore || false)
@@ -54,8 +54,8 @@ export const useChildren = ({
   const fetchPage = useCallback(
     async (
       pageToFetch: number,
-      currentChildren: DocumentData[] | null,
-    ): Promise<DocumentData[]> => {
+      currentChildren: null | TaxonomyDocument[],
+    ): Promise<TaxonomyDocument[]> => {
       setIsLoading(true)
 
       try {
@@ -94,7 +94,7 @@ export const useChildren = ({
         return newDocs
       } catch {
         if (pageToFetch === 1) {
-          const emptyChildren: DocumentData[] = []
+          const emptyChildren: TaxonomyDocument[] = []
           setChildren(emptyChildren)
           setHasMore(false)
 
@@ -128,7 +128,7 @@ export const useChildren = ({
     void fetchPage(page, children)
   }, [enabled, page, cachedData, fetchPage, children])
 
-  const loadMore = useCallback(async (): Promise<DocumentData[]> => {
+  const loadMore = useCallback(async (): Promise<TaxonomyDocument[]> => {
     if (isLoading || !hasMore) {
       return []
     }

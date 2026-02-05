@@ -4,6 +4,7 @@ import React, { useCallback, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'
 
+import { Spinner } from '../../../elements/Spinner/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { LoadMore } from '../LoadMore/index.js'
 import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
@@ -160,7 +161,11 @@ export const TreeNode = ({
           <div className={`${baseClass}__toggle-spacer`} />
         )}
         <span className={`${baseClass}__title`}>{node.title}</span>
-        {isLoading && expanded && <span className={`${baseClass}__loading`}>...</span>}
+        {isLoading && expanded && (
+          <span className={`${baseClass}__loading`}>
+            <Spinner loadingText={null} size="small" />
+          </span>
+        )}
       </div>
 
       {expanded && children && children.length > 0 && (

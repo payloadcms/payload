@@ -4,6 +4,7 @@ import React, { useRef } from 'react'
 
 import type { TaxonomyDocument, TaxonomyTreeProps } from './types.js'
 
+import { Spinner } from '../../elements/Spinner/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
@@ -11,9 +12,6 @@ import { TreeNode } from './TreeNode/index.js'
 import { useChildren } from './useChildren.js'
 import { useTreeState } from './useTreeState.js'
 import './index.scss'
-
-export { TaxonomySidebarTab } from './TaxonomySidebarTab.js'
-export { TaxonomyTabIcon } from './TaxonomyTabIcon.js'
 
 const baseClass = 'taxonomy-tree'
 
@@ -79,14 +77,18 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     }
   }
 
+  // Show loading state immediately
   if (isLoading && !rootNodes) {
     return (
       <div className={baseClass}>
-        <div className={`${baseClass}__loading`}>Loading...</div>
+        <div className={`${baseClass}__loading`}>
+          <Spinner />
+        </div>
       </div>
     )
   }
 
+  // Show empty state after loading completes
   if (!rootNodes || rootNodes.length === 0) {
     return (
       <div className={baseClass}>
