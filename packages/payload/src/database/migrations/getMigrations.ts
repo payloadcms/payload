@@ -6,13 +6,15 @@ import type { MigrationData } from '../types.js'
  */
 export async function getMigrations({
   payload,
+  sort = ['-batch', '-name'],
 }: {
   payload: Payload
+  sort?: string[]
 }): Promise<{ existingMigrations: MigrationData[]; latestBatch: number }> {
   const migrationQuery = await payload.find({
     collection: 'payload-migrations',
     limit: 0,
-    sort: ['-batch', '-name'],
+    sort,
     where: {
       batch: {
         not_equals: -1,
