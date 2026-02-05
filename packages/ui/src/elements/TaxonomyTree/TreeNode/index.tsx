@@ -161,7 +161,9 @@ export const TreeNode = ({
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
         )}
-        <span className={`${baseClass}__title`}>{node.title}</span>
+        <span className={`${baseClass}__title`} title={node.title}>
+          {node.title}
+        </span>
         {isLoading && expanded && (
           <span className={`${baseClass}__loading`}>
             <Spinner loadingText={null} size="small" />

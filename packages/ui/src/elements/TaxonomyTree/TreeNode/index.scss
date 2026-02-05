@@ -2,14 +2,12 @@
 
 .taxonomy-tree-node {
   margin-left: var(--nav-padding-inline-start);
+  margin-right: var(--nav-padding-inline-start);
   .taxonomy-tree-node {
     margin-left: 0;
+    margin-right: 0;
   }
   // Variables are inherited from parent .taxonomy-tree
-
-  &__content--selected > .taxonomy-tree-node__indicator {
-    background-color: var(--theme-text);
-  }
 
   &__indicator {
     position: absolute;
@@ -26,6 +24,14 @@
     transform: translateY(-50%);
   }
 
+  &__content--active {
+    font-weight: 600;
+
+    & > .taxonomy-tree-node__indicator {
+      background-color: var(--theme-text);
+    }
+  }
+
   &__content {
     display: flex;
     align-items: center;
@@ -39,14 +45,6 @@
     position: relative;
     margin-bottom: var(--taxonomy-tree-row-gap);
     border-radius: var(--style-radius-s);
-
-    &:hover > .taxonomy-tree-node__indicator {
-      background-color: var(--theme-text);
-    }
-
-    &--selected {
-      font-weight: 500;
-    }
   }
 
   &__toggle {
@@ -59,14 +57,14 @@
     align-items: center;
     justify-content: center;
     cursor: default;
-    color: var(--theme-elevation-600);
+    color: var(--theme-elevation-400);
     width: var(--taxonomy-tree-chevron-width);
     height: var(--taxonomy-tree-chevron-width);
     flex-shrink: 0;
-    border-radius: var(--style-radius-s);
+    border-radius: var(--style-radius-m);
 
     &:hover {
-      border: 1px solid var(--theme-elevation-500);
+      border: 1px solid var(--theme-elevation-400);
     }
   }
 
