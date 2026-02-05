@@ -14,12 +14,24 @@ type ItOptions = {
    * - 'all': Run on all databases (default)
    * - 'drizzle': Run only on Drizzle (Postgres/SQLite)
    * - 'mongo': Run only on MongoDB
+   * - 'transactionsEnabled': Run only on databases with transactions enabled
+   * - 'transactionsDisabled': Run only on databases with transactions disabled
    * - function: Custom function that receives the current adapter type and returns a boolean indicating whether to run the test.
    */
-  db?: 'all' | 'drizzle' | 'mongo' | ((adapterType: DatabaseAdapterType) => boolean)
+  db?:
+    | 'all'
+    | 'drizzle'
+    | 'mongo'
+    | 'transactionsDisabled'
+    | 'transactionsEnabled'
+    | ((adapterType: DatabaseAdapterType) => boolean)
 }
 
 const isMongo = mongooseList.includes(process.env.PAYLOAD_DATABASE!)
+
+// Databases that have transactions disabled by default (no transactionOptions configured in test setup)
+const transactionsDisabledList = ['sqlite', 'sqlite-uuid', 'cosmosdb', 'firestore']
+const hasTransactions = !transactionsDisabledList.includes(process.env.PAYLOAD_DATABASE!)
 
 /**
  * Custom `it` wrapper that supports database-specific test execution.
@@ -57,6 +69,12 @@ const itWithOptions = (
     return vitestIt.skip(name, testFn)
   }
   if (db === 'mongo' && !isMongo) {
+    return vitestIt.skip(name, testFn)
+  }
+  if (db === 'transactionsEnabled' && !hasTransactions) {
+    return vitestIt.skip(name, testFn)
+  }
+  if (db === 'transactionsDisabled' && hasTransactions) {
     return vitestIt.skip(name, testFn)
   }
   return vitestIt(name, testFn)
@@ -105,6 +123,12 @@ const describeWithOptions = (
   if (db === 'mongo' && !isMongo) {
     return vitestDescribe.skip(name, suiteFn)
   }
+  if (db === 'transactionsEnabled' && !hasTransactions) {
+    return vitestDescribe.skip(name, suiteFn)
+  }
+  if (db === 'transactionsDisabled' && hasTransactions) {
+    return vitestDescribe.skip(name, suiteFn)
+  }
   return vitestDescribe(name, suiteFn)
 }
 
@@ -115,4 +139,4 @@ describeWithOptions.skip = vitestDescribe.skip
 export const describe = describeWithOptions
 
 // Re-export for convenience
-export { isMongo }
+export { hasTransactions, isMongo }
