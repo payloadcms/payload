@@ -11,6 +11,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
+import { hasTransactions } from '../__helpers/int/vitest.js'
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
@@ -312,7 +313,7 @@ describe('collections-rest', () => {
             text,
           },
         })
-        await payload.create({
+        const successDoc = await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorBeforeChange: false,
@@ -329,11 +330,21 @@ describe('collections-rest', () => {
         })
         const result = await response.json()
 
-        // With transactions enabled, when one doc fails the entire transaction is rolled back
-        // and all docs are reported as errors (consistent all-or-nothing behavior)
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(0)
-        expect(result.errors).toHaveLength(2)
+
+        if (hasTransactions) {
+          // With transactions enabled, when one doc fails the entire transaction is rolled back
+          // and all docs are reported as errors (consistent all-or-nothing behavior)
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(2)
+        } else {
+          // Without transactions, partial success is possible
+          expect(result.docs).toHaveLength(1)
+          expect(result.docs[0].id).toEqual(successDoc.id)
+          expect(result.errors).toHaveLength(1)
+          expect(result.errors[0].id).toEqual(errorDoc.id)
+        }
+
         // The doc that triggered the error should have the original error message
         const triggeringError = result.errors.find(
           (e: { id: number | string }) => e.id === errorDoc.id,
@@ -378,11 +389,19 @@ describe('collections-rest', () => {
         })
         const result = await response.json()
 
-        // With transactions enabled, when one doc fails the entire transaction is rolled back
-        // and all docs are reported as errors (consistent all-or-nothing behavior)
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(0)
-        expect(result.errors).toHaveLength(2)
+
+        if (hasTransactions) {
+          // With transactions enabled, when one doc fails the entire transaction is rolled back
+          // and all docs are reported as errors (consistent all-or-nothing behavior)
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(2)
+        } else {
+          // Without transactions, partial success is possible
+          expect(result.docs).toHaveLength(1)
+          expect(result.errors).toHaveLength(1)
+        }
+
         // The doc that triggered the error should have the original error message
         const triggeringError = result.errors.find(
           (e: { id: number | string }) => e.id === errorDoc.id,
