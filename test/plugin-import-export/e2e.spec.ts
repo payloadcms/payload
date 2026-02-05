@@ -654,7 +654,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
@@ -836,7 +836,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({

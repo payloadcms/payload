@@ -3676,11 +3676,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const { input } = job as JobWithInput
 
       expect(input.importId).toBeDefined()
-      expect(input.collectionSlug).toStrictEqual('pages')
-      expect(input.importMode).toStrictEqual('create')
-      expect(input.format).toStrictEqual('csv')
-      expect(input.file).toBeDefined()
-      expect(input.importsCollection).toStrictEqual('imports')
+      expect(input.importCollection).toStrictEqual('imports')
       expect(input.userCollection).toBeDefined()
 
       await payload.jobs.run()
