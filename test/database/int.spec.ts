@@ -2246,15 +2246,15 @@ describe('database', () => {
       it('should report honest results when one update fails', async () => {
         // Create 3 docs sequentially to avoid MongoDB transaction conflicts
         const docs = [
-          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
-          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
         ]
 
         // Try to update all, but set shouldFailOnUpdate which will throw
         const result = await payload.update({
           collection: 'bulk-error-test',
-          data: { shouldFailOnUpdate: true } as any,
+          data: { shouldFailOnUpdate: true },
           where: { id: { in: docs.map((d) => d.id) } },
         })
 
@@ -2272,12 +2272,12 @@ describe('database', () => {
       it('should report honest results when one delete fails', async () => {
         // Create 3 docs sequentially, one marked to fail on delete
         const docs = [
-          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
           await payload.create({
             collection: 'bulk-error-test',
-            data: { shouldFailOnDelete: true, title: 'doc2' } as any,
+            data: { shouldFailOnDelete: true, title: 'doc2' },
           }),
-          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
         ]
 
         // Try to delete all
@@ -2303,7 +2303,7 @@ describe('database', () => {
           expect(result.docs).toHaveLength(2)
           expect(result.errors).toHaveLength(1)
           expect(remaining.docs).toHaveLength(1)
-          expect(remaining.docs[0].title).toBe('doc2')
+          expect(remaining.docs[0]?.title).toBe('doc2')
         }
       })
 
@@ -2314,15 +2314,15 @@ describe('database', () => {
         try {
           // Create 3 docs sequentially to avoid MongoDB transaction conflicts
           const docs = [
-            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
-            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } as any }),
-            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
           ]
 
           // Try to update all, but set shouldFailOnUpdate which will throw
           const result = await payload.update({
             collection: 'bulk-error-test',
-            data: { shouldFailOnUpdate: true } as any,
+            data: { shouldFailOnUpdate: true },
             where: { id: { in: docs.map((d) => d.id) } },
           })
 
@@ -2346,12 +2346,12 @@ describe('database', () => {
         try {
           // Create 3 docs sequentially, one marked to fail on delete
           const docs = [
-            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } as any }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
             await payload.create({
               collection: 'bulk-error-test',
-              data: { shouldFailOnDelete: true, title: 'doc2' } as any,
+              data: { shouldFailOnDelete: true, title: 'doc2' },
             }),
-            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } as any }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
           ]
 
           // Try to delete all
@@ -2386,7 +2386,7 @@ describe('database', () => {
         // Create a doc that will fail on delete
         const doc = await payload.create({
           collection: 'bulk-error-test',
-          data: { shouldFailOnDelete: true, title: 'will-fail' } as any,
+          data: { shouldFailOnDelete: true, title: 'will-fail' },
         })
 
         // Spy on the logger

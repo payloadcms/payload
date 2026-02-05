@@ -312,7 +312,7 @@ describe('collections-rest', () => {
             text,
           },
         })
-        const successDoc = await payload.create({
+        await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorBeforeChange: false,
@@ -329,13 +329,16 @@ describe('collections-rest', () => {
         })
         const result = await response.json()
 
+        // With transactions enabled, when one doc fails the entire transaction is rolled back
+        // and all docs are reported as errors (consistent all-or-nothing behavior)
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(1)
-        expect(result.docs[0].id).toEqual(successDoc.id)
-        expect(result.errors).toHaveLength(1)
-        expect(result.errors[0].message).toBeDefined()
-        expect(result.errors[0].id).toEqual(errorDoc.id)
-        expect(result.docs[0].text).toEqual(update)
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(2)
+        // The doc that triggered the error should have the original error message
+        const triggeringError = result.errors.find(
+          (e: { id: number | string }) => e.id === errorDoc.id,
+        )
+        expect(triggeringError?.message).toBeDefined()
       })
 
       it('should bulk delete', async () => {
@@ -355,7 +358,7 @@ describe('collections-rest', () => {
       })
 
       it('should return formatted errors for bulk deletes', async () => {
-        await payload.create({
+        const errorDoc = await payload.create({
           collection: errorOnHookSlug,
           data: {
             errorAfterDelete: true,
@@ -375,11 +378,16 @@ describe('collections-rest', () => {
         })
         const result = await response.json()
 
+        // With transactions enabled, when one doc fails the entire transaction is rolled back
+        // and all docs are reported as errors (consistent all-or-nothing behavior)
         expect(response.status).toEqual(400)
-        expect(result.docs).toHaveLength(1)
-        expect(result.errors).toHaveLength(1)
-        expect(result.errors[0].message).toBeDefined()
-        expect(result.errors[0].id).toBeDefined()
+        expect(result.docs).toHaveLength(0)
+        expect(result.errors).toHaveLength(2)
+        // The doc that triggered the error should have the original error message
+        const triggeringError = result.errors.find(
+          (e: { id: number | string }) => e.id === errorDoc.id,
+        )
+        expect(triggeringError?.message).toBeDefined()
       })
     })
 
