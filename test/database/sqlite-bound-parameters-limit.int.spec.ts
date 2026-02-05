@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { describe } from '../helpers/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { describe } from '../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

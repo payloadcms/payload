@@ -1,6 +1,7 @@
 import type { FlattenedField, PayloadRequest, Where } from 'payload'
 
 import { addDataAndFileToRequest } from 'payload'
+import { getObjectDotNotation } from 'payload/shared'
 
 import type { ExportPreviewResponse } from '../types.js'
 
@@ -10,13 +11,14 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneCompanionFields.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
 import { getSchemaColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
-import { getValueAtPath } from '../utilities/getvalueAtPath.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { setNestedValue } from '../utilities/setNestedValue.js'
 
 export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
@@ -57,6 +59,12 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     )
   }
 
+  const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
+  const maxLimit = await resolveLimit({
+    limit: pluginConfig?.exportLimit,
+    req,
+  })
+
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
   const draft = draftFromReq === 'yes'
   const collectionHasVersions = Boolean(targetCollection.config.versions)
@@ -78,9 +86,20 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
   const totalMatchingDocs = countResult.totalDocs
 
-  // Calculate actual export count (respecting export limit)
-  const exportTotalDocs =
-    exportLimit && exportLimit > 0 ? Math.min(totalMatchingDocs, exportLimit) : totalMatchingDocs
+  // Calculate actual export count (respecting both export limit and max limit)
+  let effectiveLimit = totalMatchingDocs
+
+  // Apply user's export limit if provided
+  if (exportLimit && exportLimit > 0) {
+    effectiveLimit = Math.min(effectiveLimit, exportLimit)
+  }
+
+  // Apply max limit if configured
+  if (typeof maxLimit === 'number' && maxLimit > 0) {
+    effectiveLimit = Math.min(effectiveLimit, maxLimit)
+  }
+
+  const exportTotalDocs = effectiveLimit
 
   // Calculate preview pagination that respects export limit
   // Preview should only show docs that will actually be exported
@@ -101,6 +120,11 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   const disabledFields =
     targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
+  // Collect auto-generated timezone companion fields from schema
+  const timezoneCompanionFields = collectTimezoneCompanionFields(
+    targetCollection.config.flattenedFields,
+  )
+
   // Always compute columns for CSV (even if no docs) for consistent schema
   const columns = isCSV
     ? getSchemaColumns({
@@ -109,11 +133,12 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         fields,
         locale: locale ?? undefined,
         localeCodes,
+        timezoneCompanionFields,
       })
     : undefined
 
-  // If we're beyond the export limit, return empty docs with columns
-  if (exportLimit && exportLimit > 0 && previewStartIndex >= exportLimit) {
+  // If we're beyond the effective limit (considering both user limit and maxLimit), return empty docs
+  if (exportTotalDocs > 0 && previewStartIndex >= exportTotalDocs) {
     const response: ExportPreviewResponse = {
       columns,
       docs: [],
@@ -121,6 +146,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       hasNextPage: false,
       hasPrevPage: previewPage > 1,
       limit: previewLimit,
+      maxLimit,
       page: previewPage,
       totalDocs: exportTotalDocs,
       totalPages: previewTotalPages,
@@ -144,10 +170,10 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     where,
   })
 
-  // Trim docs to respect export limit boundary
+  // Trim docs to respect effective limit boundary (user limit clamped by maxLimit)
   let docs = result.docs
-  if (exportLimit && exportLimit > 0) {
-    const remainingInExport = exportLimit - previewStartIndex
+  if (exportTotalDocs > 0) {
+    const remainingInExport = exportTotalDocs - previewStartIndex
     if (remainingInExport < docs.length) {
       docs = docs.slice(0, remainingInExport)
     }
@@ -171,6 +197,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       const row = flattenObject({
         doc,
         fields,
+        timezoneCompanionFields,
         toCSVFunctions,
       })
 
@@ -194,7 +221,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         const trimmed: Record<string, unknown> = {}
 
         for (const key of fields) {
-          const value = getValueAtPath(output, key)
+          const value = getObjectDotNotation(output, key)
           setNestedValue(trimmed, key, value ?? null)
         }
 
@@ -215,6 +242,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     hasNextPage,
     hasPrevPage,
     limit: previewLimit,
+    maxLimit,
     page: previewPage,
     totalDocs: exportTotalDocs,
     totalPages: previewTotalPages,

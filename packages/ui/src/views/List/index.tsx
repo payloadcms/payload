@@ -164,17 +164,19 @@ export function DefaultListView(props: ListViewClientProps) {
               <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderCustomComponent
-                      CustomComponent={Description}
-                      Fallback={
-                        <ViewDescription
-                          collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
-                        />
-                      }
-                    />
-                  </div>
+                  Description || collectionConfig?.admin?.description ? (
+                    <div className={`${baseClass}__sub-header`}>
+                      <RenderCustomComponent
+                        CustomComponent={Description}
+                        Fallback={
+                          <ViewDescription
+                            collectionSlug={collectionSlug}
+                            description={collectionConfig?.admin?.description}
+                          />
+                        }
+                      />
+                    </div>
+                  ) : undefined
                 }
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}

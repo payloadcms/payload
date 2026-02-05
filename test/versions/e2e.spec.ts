@@ -26,14 +26,14 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { postsCollectionSlug } from 'admin/slugs.js'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Diff } from './payload-types.js'
 
 import {
@@ -46,14 +46,16 @@ import {
   saveDocAndAssert,
   waitForFormReady,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../helpers/e2e/navigateToDiffVersionView.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
 import {
   autosaveCollectionSlug,
@@ -76,6 +78,7 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
+  textCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -189,6 +192,8 @@ describe('Versions', () => {
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       const versionsTab = page.locator('.doc-tab:has-text("Versions")')
@@ -207,6 +212,8 @@ describe('Versions', () => {
 
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
@@ -226,6 +233,8 @@ describe('Versions', () => {
 
     test('collection — has versions route', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
       await page.goto(`${page.url()}/versions`)
@@ -257,6 +266,8 @@ describe('Versions', () => {
 
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-title a').first().click()
 
       // Wait for the document to load
@@ -271,6 +282,7 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
+      await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -723,6 +735,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
+      // Wait for hydration
+      await wait(1000)
       await page.locator('tbody tr .cell-id a').click()
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
@@ -782,6 +796,7 @@ describe('Versions', () => {
       await page.goto(disablePublishURL.edit(String(publishedDoc.id)))
 
       // Verify unpublish button is hidden when user doesn't have publish permission
+      await openDocControls(page)
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
     })
 
@@ -794,11 +809,33 @@ describe('Versions', () => {
         },
       })
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
+      await openDocControls(page)
       await page.locator('#action-unpublish').click()
       await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
+    })
+
+    test('collections — should render custom unpublish button', async () => {
+      const publishedDoc = await payload.create({
+        collection: draftWithCustomUnpublishSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Custom Unpublish',
+        },
+      })
+
+      const customUnpublishURL = new AdminUrlUtil(serverURL, draftWithCustomUnpublishSlug)
+      await page.goto(customUnpublishURL.edit(String(publishedDoc.id)))
+
+      await openDocControls(page)
+      await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
+
+      await payload.delete({
+        collection: draftWithCustomUnpublishSlug,
+        id: publishedDoc.id,
+      })
     })
 
     test('should show documents title in relationship even if draft document', async () => {
@@ -911,6 +948,8 @@ describe('Versions', () => {
     describe('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -929,6 +968,8 @@ describe('Versions', () => {
 
       test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -948,6 +989,8 @@ describe('Versions', () => {
 
       test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -970,6 +1013,8 @@ describe('Versions', () => {
 
       test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
+        // Wait for hydration
+        await wait(1000)
         await page.locator('tbody tr .cell-title a').first().click()
         await page.waitForSelector('.doc-header__title', { state: 'visible' })
         await page.goto(`${page.url()}/versions`)
@@ -997,7 +1042,7 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
 
@@ -1015,7 +1060,7 @@ describe('Versions', () => {
         await expect(page.locator('.doc-controls__status .status__value')).toContainText(
           'Published',
         )
-
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeVisible()
       })
 
@@ -1032,6 +1077,7 @@ describe('Versions', () => {
         await saveDocAndAssert(page, '#action-save-draft')
 
         await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
+        await openDocControls(page)
         await expect(page.locator('#action-unpublish')).toBeHidden()
       })
     })
@@ -2526,6 +2572,87 @@ describe('Versions', () => {
 
       await expect(blockDiff.locator('.html-diff__diff-old')).toHaveText('textInArray2')
       await expect(blockDiff.locator('.html-diff__diff-new')).toHaveText('textInArray2Modified')
+    })
+
+    test('should handle swapping blocks with polymorphic relationships (single vs hasMany)', async () => {
+      const textDoc = await payload.create({
+        collection: textCollectionSlug,
+        data: {
+          text: 'Test text document',
+        },
+      })
+
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      // Swap the order of the blocks
+      await payload.update({
+        collection: diffCollectionSlug,
+        data: {
+          blocks: [
+            {
+              blockType: 'ManyRelationshipBlock',
+              title: 'Many Block',
+              relatedItem: [
+                {
+                  relationTo: textCollectionSlug,
+                  value: textDoc.id,
+                },
+              ],
+            },
+            {
+              blockType: 'SingleRelationshipBlock',
+              title: 'Single Block',
+              relatedItem: {
+                relationTo: textCollectionSlug,
+                value: textDoc.id,
+              },
+            },
+          ],
+        },
+        id: diffID,
+      })
+
+      const latestVersionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: diffID },
+          },
+        })
+      ).docs[0] as Diff
+
+      // This should not throw "Cannot read properties of undefined (reading 'config')"
+      await navigateToDiffVersionView(latestVersionDiff.id)
+
+      const blocks = page.locator('[data-field-path="blocks"]')
+      await expect(blocks).toBeVisible()
     })
   })
 
