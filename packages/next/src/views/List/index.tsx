@@ -357,7 +357,7 @@ export const renderListView = async (
 
   const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
     collectionConfig,
-    data,
+    data: {}, // Use empty object for list-level permissions, not pagination result
     req,
   })
 
