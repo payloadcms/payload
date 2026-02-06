@@ -9,22 +9,22 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { login } from '../__helpers/e2e/auth/login.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { login } from '../__helpers/e2e/auth/login.js'
-import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
@@ -2212,6 +2212,8 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
+            await expect(page.locator('.list-selection')).toBeVisible()
+
             // Delete button should be visible in bulk actions
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2247,6 +2249,8 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
+            await expect(page.locator('.list-selection')).toBeVisible()
+
             // Delete button should be visible because user can trash (even if they can't permanently delete)
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2265,8 +2269,8 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
-            // Click delete button
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(deleteButton).toBeVisible()
             await deleteButton.click()
 
             // The delete permanently checkbox should be hidden for regular users
@@ -2307,6 +2311,8 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
+            await expect(page.locator('.list-selection')).toBeVisible()
+
             // Delete button should be visible for admin
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2341,6 +2347,8 @@ describe('Access Control', () => {
             // Select a row
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
+
+            await expect(page.locator('.list-selection')).toBeVisible()
 
             // Delete button should NOT be visible because user cannot trash or permanently delete
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
@@ -2395,6 +2403,8 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
+            await expect(page.locator('.list-selection')).toBeVisible()
+
             // Delete button should be visible for admin (they can permanently delete)
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2437,6 +2447,8 @@ describe('Access Control', () => {
             // Select a row
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
+
+            await expect(page.locator('.list-selection')).toBeVisible()
 
             // Delete button should NOT be visible in trash view because
             // regular users can only trash (soft delete), not permanently delete
