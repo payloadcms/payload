@@ -149,8 +149,11 @@ async function processImportBatch({
     successful: [],
   }
 
-  const collectionConfig = req.payload.collections[collectionSlug]?.config
+  const collectionEntry = req.payload.collections[collectionSlug]
+
+  const collectionConfig = collectionEntry?.config
   const collectionHasVersions = Boolean(collectionConfig?.versions)
+  const hasCustomIdField = Boolean(collectionEntry?.customIDType)
 
   const configuredLocales = req.payload.config.localization
     ? req.payload.config.localization.localeCodes
@@ -171,7 +174,9 @@ async function processImportBatch({
 
       if (importMode === 'create') {
         const createData = { ...document }
-        delete createData.id
+        if (!hasCustomIdField) {
+          delete createData.id
+        }
 
         let draftOption: boolean | undefined
         if (collectionHasVersions) {
@@ -444,7 +449,9 @@ async function processImportBatch({
           }
 
           const createData = { ...document }
-          delete createData.id
+          if (!hasCustomIdField) {
+            delete createData.id
+          }
 
           // Only handle _status for versioned collections
           let draftOption: boolean | undefined

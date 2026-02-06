@@ -214,6 +214,16 @@ declare module 'payload' {
   export interface CollectionAdminCustom {
     'plugin-import-export'?: {
       /**
+       * Array of collection slugs that this export/import collection can target.
+       * Used by CollectionField to populate the dropdown options.
+       */
+      collectionSlugs?: string[]
+      /**
+       * Default collection slug for custom export/import collections.
+       * Used by CollectionField to set a default value when creating exports/imports directly.
+       */
+      defaultCollectionSlug?: string
+      /**
        * Array of field paths that are disabled for import/export.
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.
        */

@@ -46,11 +46,29 @@ export const getPluginCollections = async ({
   config: Config
   pluginConfig: ImportExportPluginConfig
 }): Promise<PluginCollectionsResult> => {
+  // Calculate collection slugs for base export/import collections
+  // If pluginConfig.collections is provided, filter by export/import !== false
+  // Otherwise, use all config collections
+  let baseExportSlugs: string[]
+  let baseImportSlugs: string[]
+
+  if (pluginConfig.collections && pluginConfig.collections.length > 0) {
+    baseExportSlugs = pluginConfig.collections.filter((c) => c.export !== false).map((c) => c.slug)
+    baseImportSlugs = pluginConfig.collections.filter((c) => c.import !== false).map((c) => c.slug)
+  } else {
+    // Fall back to all collections
+    const allSlugs = config.collections?.map((c) => c.slug) || []
+    baseExportSlugs = allSlugs
+    baseImportSlugs = allSlugs
+  }
+
   let baseExportCollection = getExportCollection({
+    collectionSlugs: baseExportSlugs,
     config,
     pluginConfig,
   })
   let baseImportCollection = getImportCollection({
+    collectionSlugs: baseImportSlugs,
     config,
     pluginConfig,
   })
@@ -85,15 +103,16 @@ export const getPluginCollections = async ({
       const exportConfig =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
       if (exportConfig?.overrideCollection) {
-        // Generate a collection with this export config's settings (like disableJobsQueue)
-        const collectionWithSettings = getExportCollection({
+        // Test with a temporary collection to see if the slug changes
+        const testCollection = getExportCollection({
+          collectionSlugs: [collectionConfig.slug],
           config,
           exportConfig,
           pluginConfig,
         })
 
         const customExport = await exportConfig.overrideCollection({
-          collection: collectionWithSettings,
+          collection: testCollection,
         })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
@@ -103,28 +122,35 @@ export const getPluginCollections = async ({
             ...customExport.admin,
             custom: {
               ...customExport.admin?.custom,
-              defaultCollectionSlug: collectionConfig.slug,
+              'plugin-import-export': {
+                ...customExport.admin?.custom?.['plugin-import-export'],
+                defaultCollectionSlug: collectionConfig.slug,
+              },
             },
           }
           exportCollections.push(customExport)
           customExportSlugMap.set(collectionConfig.slug, customExport.slug)
         } else {
-          baseExportCollection = customExport
+          // Slug didn't change - apply override to base collection to preserve all slugs
+          baseExportCollection = await exportConfig.overrideCollection({
+            collection: baseExportCollection,
+          })
         }
       }
 
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
       if (importConf?.overrideCollection) {
-        // Generate a collection with this import config's settings (like disableJobsQueue)
-        const collectionWithSettings = getImportCollection({
+        // Test with a temporary collection to see if the slug changes
+        const testCollection = getImportCollection({
+          collectionSlugs: [collectionConfig.slug],
           config,
           importConfig: importConf,
           pluginConfig,
         })
 
         const customImport = await importConf.overrideCollection({
-          collection: collectionWithSettings,
+          collection: testCollection,
         })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
@@ -134,15 +160,20 @@ export const getPluginCollections = async ({
             ...customImport.admin,
             custom: {
               ...customImport.admin?.custom,
-              defaultCollectionSlug: collectionConfig.slug,
+              'plugin-import-export': {
+                ...customImport.admin?.custom?.['plugin-import-export'],
+                defaultCollectionSlug: collectionConfig.slug,
+              },
             },
           }
           importCollections.push(customImport)
           // Map this target collection to its custom import collection
           customImportSlugMap.set(collectionConfig.slug, customImport.slug)
         } else {
-          // Full override - replace the base
-          baseImportCollection = customImport
+          // Slug didn't change - apply override to base collection to preserve all slugs
+          baseImportCollection = await importConf.overrideCollection({
+            collection: baseImportCollection,
+          })
         }
       }
     }
@@ -192,6 +223,40 @@ export const getPluginCollections = async ({
         },
       }
     }
+  }
+
+  // Filter out slugs that have custom export/import collections from the base collections
+  // Collections with custom collections should ONLY be exportable/importable through those
+  const filteredExportSlugs = baseExportSlugs.filter((slug) => !customExportSlugMap.has(slug))
+  const filteredImportSlugs = baseImportSlugs.filter((slug) => !customImportSlugMap.has(slug))
+
+  // Update base collections with filtered slugs
+  baseExportCollection = {
+    ...baseExportCollection,
+    admin: {
+      ...baseExportCollection.admin,
+      custom: {
+        ...baseExportCollection.admin?.custom,
+        'plugin-import-export': {
+          ...baseExportCollection.admin?.custom?.['plugin-import-export'],
+          collectionSlugs: filteredExportSlugs,
+        },
+      },
+    },
+  }
+
+  baseImportCollection = {
+    ...baseImportCollection,
+    admin: {
+      ...baseImportCollection.admin,
+      custom: {
+        ...baseImportCollection.admin?.custom,
+        'plugin-import-export': {
+          ...baseImportCollection.admin?.custom?.['plugin-import-export'],
+          collectionSlugs: filteredImportSlugs,
+        },
+      },
+    },
   }
 
   exportCollections.unshift(baseExportCollection)

@@ -1,30 +1,37 @@
-import type { Config, Field } from 'payload'
+import type { Field, PayloadRequest } from 'payload'
 
 type GetFieldsOptions = {
-  collectionSlugs?: string[]
+  /**
+   * Collection slugs that this import collection supports.
+   * Used for schema/types and as the options in the select field.
+   */
+  collectionSlugs: string[]
 }
 
-export const getFields = (config: Config, options?: GetFieldsOptions): Field[] => {
-  const collectionOptions =
-    options?.collectionSlugs || config.collections?.map(({ slug }) => slug) || []
+export const getFields = (options: GetFieldsOptions): Field[] => {
+  const { collectionSlugs } = options
 
   return [
     {
       name: 'collectionSlug',
-      type: 'select',
-      options: collectionOptions,
-      required: true,
-
+      type: 'text',
       admin: {
         components: {
           Field: '@payloadcms/plugin-import-export/rsc#ImportCollectionField',
         },
       },
+      defaultValue: collectionSlugs[0],
       // @ts-expect-error - this is not correctly typed in plugins right now
       label: ({ t }) => t('plugin-import-export:field-collectionSlug-label'),
-      validate: (value: any) => {
+      required: true,
+      validate: (value: null | string | undefined, { req }: { req: PayloadRequest }) => {
         if (!value) {
           return 'Collection is required'
+        }
+        // Validate that the collection exists
+        const collectionExists = req?.payload?.collections?.[value]
+        if (!collectionExists) {
+          return `Collection "${value}" does not exist`
         }
         return true
       },
