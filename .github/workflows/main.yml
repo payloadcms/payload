@@ -332,7 +332,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: matrix.suite == 'plugin-cloud-storage'
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
 
       - name: Start database
         id: db
@@ -513,7 +513,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: matrix.suite == 'plugin-cloud-storage'
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
 
       - name: Store Playwright's Version
         run: |

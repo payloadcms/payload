@@ -31,7 +31,7 @@ export const getCreateCollectionExportTask = (
       type: 'text',
     },
     {
-      name: 'exportsCollection',
+      name: 'exportCollection',
       type: 'text',
     },
     {

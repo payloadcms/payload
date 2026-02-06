@@ -1,13 +1,14 @@
-import { fileURLToPath } from 'node:url'
-import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
 import { defaultTimezones } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { createTestBucket } from '../plugin-cloud-storage/utils.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -15,8 +16,18 @@ import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
+import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
+import { postsWithS3Slug } from './shared.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+// Load config to work with emulated services
+dotenv.config({
+  path: path.resolve(dirname, './.env.emulated'),
+})
 
 export default buildConfigWithDefaults({
   admin: {
@@ -35,6 +46,7 @@ export default buildConfigWithDefaults({
     PostsImportsOnly,
     PostsNoJobsQueue,
     PostsWithLimits,
+    PostsWithS3,
     Media,
   ],
   localization: {
@@ -60,6 +72,7 @@ export default buildConfigWithDefaults({
     },
   },
   onInit: async (payload) => {
+    await createTestBucket()
     await seed(payload)
   },
   plugins: [
@@ -143,6 +156,27 @@ export default buildConfigWithDefaults({
           },
         },
         {
+          slug: postsWithS3Slug,
+          export: {
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-s3-export'
+              if (collection.admin) {
+                collection.admin.group = 'S3 Tests'
+              }
+              return collection
+            },
+          },
+          import: {
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-s3-import'
+              if (collection.admin) {
+                collection.admin.group = 'S3 Tests'
+              }
+              return collection
+            },
+          },
+        },
+        {
           slug: 'posts-with-limits',
           export: {
             disableJobsQueue: true,
@@ -172,6 +206,22 @@ export default buildConfigWithDefaults({
           slug: 'media',
         },
       ],
+    }),
+    s3Storage({
+      collections: {
+        'posts-with-s3-import': true,
+        'posts-with-s3-export': true,
+      },
+      bucket: process.env.S3_BUCKET!,
+      config: {
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        },
+        endpoint: process.env.S3_ENDPOINT,
+        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+        region: 'us-east-1',
+      },
     }),
   ],
   typescript: {

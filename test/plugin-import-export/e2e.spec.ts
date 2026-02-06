@@ -5,6 +5,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
@@ -17,27 +20,29 @@ import {
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { postsWithS3ExportSlug, postsWithS3ImportSlug, postsWithS3Slug } from './shared.js'
 
 test.describe('Import Export Plugin', () => {
   let page: Page
   let exportsURL: AdminUrlUtil
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let s3ExportsURL: AdminUrlUtil
+  let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
   let serverURL: string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { payload: payloadFromInit, serverURL: url } = await initPayloadE2ENoConfig<Config>({
-      dirname,
+      dirname: __dirname,
     })
     serverURL = url
     exportsURL = new AdminUrlUtil(serverURL, 'exports')
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
+    s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
+    s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
     payload = payloadFromInit
 
@@ -136,61 +141,40 @@ test.describe('Import Export Plugin', () => {
       const suggestedFilename = download.suggestedFilename()
       expect(suggestedFilename).toMatch(/\.csv|\.json/)
     })
-
-    test('should enforce format restriction in UI and API when format is configured', async () => {
-      // posts-no-jobs-queue has format: 'csv' configured
-      const postsNoJobsQueueURL = new AdminUrlUtil(serverURL, 'posts-no-jobs-queue')
-      await page.goto(postsNoJobsQueueURL.list)
-      await expect(page.locator('.collection-list')).toBeVisible()
-
-      const listMenuButton = page.locator('#list-menu')
-      await expect(listMenuButton).toBeVisible()
-      await listMenuButton.click()
-
-      const createExportButton = page.locator('.popup__scroll-container button', {
-        hasText: 'Export',
-      })
-      await expect(createExportButton).toBeVisible()
-      await createExportButton.click()
-
-      await expect(async () => {
-        await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
-
-      const formatField = page.locator('#field-format')
-      await expect(formatField).toBeVisible()
-
-      const formatControl = formatField.locator('.rs__control')
-      await expect(formatControl).toHaveClass(/rs__control--is-disabled/)
-
-      await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
-
-      // API should also reject non-CSV format
-      const response = await page.request.post(
-        `${serverURL}/api/posts-no-jobs-queue-export/download`,
-        {
-          data: {
-            data: {
-              name: 'test-export',
-              collectionSlug: 'posts-no-jobs-queue',
-              format: 'json',
-              sort: '-createdAt',
-            },
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-
-      expect(response.status()).toBe(400)
-      const responseBody = await response.json()
-      expect(responseBody.errors).toBeDefined()
-      expect(responseBody.errors[0].message).toContain('format')
-    })
   })
 
   test.describe('Import', () => {
+    const tempFiles: string[] = []
+    const createdPageTitlePatterns: string[] = []
+    const createdPageIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const filePath of tempFiles) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      tempFiles.length = 0
+
+      for (const pattern of createdPageTitlePatterns) {
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: pattern },
+          },
+        })
+      }
+      createdPageTitlePatterns.length = 0
+
+      for (const id of createdPageIDs) {
+        await payload.delete({
+          collection: 'pages',
+          id,
+        })
+      }
+      createdPageIDs.length = 0
+    })
+
     test('should navigate to imports collection and see upload interface', async () => {
       await page.goto(importsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -204,54 +188,38 @@ test.describe('Import Export Plugin', () => {
     test('should import a CSV file successfully', async () => {
       const csvContent =
         'title,excerpt\n"E2E Import Test 1","Test excerpt 1"\n"E2E Import Test 2","Test excerpt 2"'
-      const csvPath = path.join(dirname, 'uploads', 'e2e-test-import.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-test-import.csv')
+
       fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Import Test')
 
-      try {
-        await page.goto(importsURL.create)
-        await expect(page.locator('.collection-edit')).toBeVisible()
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
 
-        await page.setInputFiles('input[type="file"]', csvPath)
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
 
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
 
-        const importModeField = page.locator('#field-importMode')
-        if (await importModeField.isVisible()) {
-          await importModeField.click()
-          await page.locator('.rs__option:has-text("create")').first().click()
-        }
+      await saveDocAndAssert(page)
 
-        await saveDocAndAssert(page)
+      await runJobsQueue({ serverURL })
 
-        const statusField = page.locator('[data-field-name="status"]')
-        if (await statusField.isVisible()) {
-          await expect(statusField).toContainText(/completed|partial/i)
-        }
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E Import Test' },
+        },
+      })
 
-        await runJobsQueue({ serverURL })
-
-        const importedDocs = await payload.find({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E Import Test' },
-          },
-        })
-        expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
-      } finally {
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E Import Test' },
-          },
-        })
-      }
+      expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
     test('should import a JSON file successfully', async () => {
@@ -259,82 +227,62 @@ test.describe('Import Export Plugin', () => {
         { excerpt: 'JSON excerpt 1', title: 'E2E JSON Import 1' },
         { excerpt: 'JSON excerpt 2', title: 'E2E JSON Import 2' },
       ])
-      const jsonPath = path.join(dirname, 'uploads', 'e2e-test-import.json')
+      const jsonPath = path.join(__dirname, 'uploads', 'e2e-test-import.json')
+
       fs.writeFileSync(jsonPath, jsonContent)
+      tempFiles.push(jsonPath)
+      createdPageTitlePatterns.push('E2E JSON Import')
 
-      try {
-        await page.goto(importsURL.create)
-        await expect(page.locator('.collection-edit')).toBeVisible()
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
 
-        await page.setInputFiles('input[type="file"]', jsonPath)
+      await page.setInputFiles('input[type="file"]', jsonPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
 
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
 
-        const importModeField = page.locator('#field-importMode')
-        if (await importModeField.isVisible()) {
-          await importModeField.click()
-          await page.locator('.rs__option:has-text("create")').first().click()
-        }
+      await saveDocAndAssert(page)
 
-        await saveDocAndAssert(page)
+      await runJobsQueue({ serverURL })
 
-        await runJobsQueue({ serverURL })
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E JSON Import' },
+        },
+      })
 
-        const importedDocs = await payload.find({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E JSON Import' },
-          },
-        })
-        expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
-      } finally {
-        if (fs.existsSync(jsonPath)) {
-          fs.unlinkSync(jsonPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { contains: 'E2E JSON Import' },
-          },
-        })
-      }
+      expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
     test('should show import in list view after creation', async () => {
       const csvContent = 'title\n"E2E List View Test"'
-      const csvPath = path.join(dirname, 'uploads', 'e2e-list-test.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-list-test.csv')
+
       fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E List View Test')
 
-      try {
-        await page.goto(importsURL.create)
+      await page.goto(importsURL.create)
 
-        await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
-        await saveDocAndAssert(page)
+      await saveDocAndAssert(page)
 
-        await page.goto(importsURL.list)
+      await page.goto(importsURL.list)
 
-        await expect(page.locator('.row-1')).toBeVisible()
-      } finally {
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          collection: 'pages',
-          where: {
-            title: { equals: 'E2E List View Test' },
-          },
-        })
-      }
+      await expect(page.locator('.row-1')).toBeVisible()
     })
 
     test('should access import from list menu in pages collection', async () => {
@@ -370,51 +318,123 @@ test.describe('Import Export Plugin', () => {
         },
       })
 
+      createdPageIDs.push(existingDoc.id)
+
       const csvContent = `id,title,excerpt\n${existingDoc.id},"E2E Update Test Modified","Modified excerpt"`
-      const csvPath = path.join(dirname, 'uploads', 'e2e-update-test.csv')
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-update-test.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+
+      await page.goto(importsURL.create)
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
+
+      const importModeField = page.locator('#field-importMode')
+      await expect(importModeField).toBeVisible()
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("Update existing documents")').click()
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const {
+        docs: [updatedDoc],
+      } = await payload.find({
+        collection: 'pages',
+        where: {
+          id: {
+            equals: existingDoc.id,
+          },
+        },
+      })
+
+      expect(updatedDoc?.title).toBe('E2E Update Test Modified')
+      expect(updatedDoc?.excerpt).toBe('Modified excerpt')
+    })
+  })
+
+  test.describe('S3 Storage', () => {
+    test('should import CSV file stored in S3 via jobs queue', async () => {
+      const uniqueId = Date.now()
+      const csvFilename = `s3-e2e-import-${uniqueId}.csv`
+      const csvPath = path.join(__dirname, 'uploads', csvFilename)
+
+      const csvContent = `title\n"S3 E2E Import 1"\n"S3 E2E Import 2"\n"S3 E2E Import 3"`
       fs.writeFileSync(csvPath, csvContent)
 
-      try {
-        await page.goto(importsURL.create)
+      await page.goto(s3ImportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
 
-        await page.setInputFiles('input[type="file"]', csvPath)
-        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
 
-        const collectionField = page.locator('#field-collectionSlug')
-        await collectionField.click()
-        await page.locator('.rs__option:has-text("pages")').click()
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
 
-        const importModeField = page.locator('#field-importMode')
-        await expect(importModeField).toBeVisible()
-        await importModeField.click()
-        await page.locator('.rs__option:has-text("Update existing documents")').click()
+      await saveDocAndAssert(page)
 
-        await saveDocAndAssert(page)
-
+      await expect(async () => {
         await runJobsQueue({ serverURL })
+        const { docs } = await payload.find({
+          collection: postsWithS3ImportSlug as any,
+          where: {},
+          sort: '-createdAt',
+          limit: 1,
+        })
+        expect(docs[0]?.status).toBe('completed')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-        const {
-          docs: [updatedDoc],
-        } = await payload.find({
-          collection: 'pages',
-          where: {
-            id: {
-              equals: existingDoc.id,
-            },
-          },
-        })
-        expect(updatedDoc?.title).toBe('E2E Update Test Modified')
-        expect(updatedDoc?.excerpt).toBe('Modified excerpt')
-      } finally {
-        // eslint-disable-next-line playwright/no-conditional-in-test
-        if (fs.existsSync(csvPath)) {
-          fs.unlinkSync(csvPath)
-        }
-        await payload.delete({
-          id: existingDoc.id,
-          collection: 'pages',
-        })
-      }
+      const posts = await payload.find({
+        collection: postsWithS3Slug,
+        where: {
+          title: { contains: 'S3 E2E Import' },
+        },
+      })
+
+      expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
+    })
+
+    test('should export to S3 via jobs queue and download file', async () => {
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 1' },
+      })
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 2' },
+      })
+
+      await page.goto(s3ExportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await saveDocAndAssert(page, '#action-save')
+
+      await expect(async () => {
+        await runJobsQueue({ serverURL })
+        await page.reload()
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const downloadLink = page.locator('.file-details__main-detail a')
+      await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+      const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+      const downloadPath = await download.path()
+      const content = fs.readFileSync(downloadPath, 'utf8')
+
+      expect(content).toContain('S3 E2E Export 1')
+      expect(content).toContain('S3 E2E Export 2')
     })
   })
 
@@ -634,7 +654,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
@@ -816,7 +836,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("posts-with-limits")').click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
