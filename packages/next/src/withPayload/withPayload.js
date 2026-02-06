@@ -35,14 +35,18 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   }
 
   const consoleWarn = console.warn
-  const sassWarningText =
-    'SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary'
+
+  const sassWarningTexts = [
+    // This warning is a lie - without silencing import deprecation warnings, sass will spam the console with deprecation warnings
+    'Future import deprecation is not yet active, so silencing it is unnecessary',
+    // Sometimes happens despite silenceDeprecations
+    'The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0',
+  ]
   console.warn = (...args) => {
     if (
-      (typeof args[1] === 'string' && args[1].includes(sassWarningText)) ||
-      (typeof args[0] === 'string' && args[0].includes(sassWarningText))
+      (typeof args[1] === 'string' && sassWarningTexts.some((text) => args[1].includes(text))) ||
+      (typeof args[0] === 'string' && sassWarningTexts.some((text) => args[0].includes(text)))
     ) {
-      // This warning is a lie - without silencing import deprecation warnings, sass will spam the console with deprecation warnings
       return
     }
 

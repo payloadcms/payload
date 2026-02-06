@@ -30,6 +30,10 @@ export const hrTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Sažetak uvoza',
     importDocumentLabel: 'Uvoz {{label}}',
     importResults: 'Rezultati uvoza',
+    limitCapped: 'Ograničenje postavljeno na maksimalno {{limit}}',
+    limitExceededExport: 'Izvoz je ograničen na {{limit}} dokumenata',
+    limitExceededImport:
+      'Datoteka za uvoz sadrži {{count}} dokumenata, ali je ograničenje {{limit}}',
     matchBy: 'Podudaranje po',
     mode: 'Način rada',
     noDataToPreview: 'Nema podataka za pregled',

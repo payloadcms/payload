@@ -315,6 +315,14 @@ export const createOperation = async <
     const resultWithLocales: Document = sanitizeInternalFields(doc)
 
     // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
+
+    // /////////////////////////////////////
     // Create version
     // /////////////////////////////////////
 

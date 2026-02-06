@@ -1,32 +1,35 @@
 'use server'
 
-import type { CollectionSlug } from 'payload'
+import type { AuthCollectionSlug, LoginResult, MaybePromise, SanitizedConfig } from 'payload'
 
 import { getPayload } from 'payload'
 
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
-type LoginWithEmail = {
-  collection: CollectionSlug
-  config: any
+type LoginWithEmail<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  config: MaybePromise<SanitizedConfig>
   email: string
   password: string
   username?: never
 }
 
-type LoginWithUsername = {
-  collection: CollectionSlug
-  config: any
+type LoginWithUsername<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  config: MaybePromise<SanitizedConfig>
   email?: never
   password: string
   username: string
 }
-type LoginArgs = LoginWithEmail | LoginWithUsername
+type LoginArgs<TSlug extends AuthCollectionSlug> = LoginWithEmail<TSlug> | LoginWithUsername<TSlug>
 
-export async function login({ collection, config, email, password, username }: LoginArgs): Promise<{
-  token?: string
-  user: any
-}> {
+export async function login<TSlug extends AuthCollectionSlug>({
+  collection,
+  config,
+  email,
+  password,
+  username,
+}: LoginArgs<TSlug>): Promise<LoginResult<TSlug>> {
   const payload = await getPayload({ config, cron: true })
 
   const authConfig = payload.collections[collection]?.config.auth

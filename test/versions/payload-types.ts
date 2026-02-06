@@ -454,6 +454,28 @@ export interface Diff {
   blocks?:
     | (
         | {
+            title?: string | null;
+            relatedItem?: {
+              relationTo: 'text';
+              value: string | Text;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'SingleRelationshipBlock';
+          }
+        | {
+            title?: string | null;
+            relatedItem?:
+              | {
+                  relationTo: 'text';
+                  value: string | Text;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'ManyRelationshipBlock';
+          }
+        | {
             textInBlock?: string | null;
             id?: string | null;
             blockName?: string | null;
@@ -1147,6 +1169,22 @@ export interface DiffSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
+        SingleRelationshipBlock?:
+          | T
+          | {
+              title?: T;
+              relatedItem?: T;
+              id?: T;
+              blockName?: T;
+            };
+        ManyRelationshipBlock?:
+          | T
+          | {
+              title?: T;
+              relatedItem?: T;
+              id?: T;
+              blockName?: T;
+            };
         TextBlock?:
           | T
           | {
