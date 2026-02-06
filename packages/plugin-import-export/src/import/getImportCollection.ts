@@ -5,6 +5,8 @@ import type {
   Config,
 } from 'payload'
 
+import { FileRetrievalError } from 'payload'
+
 import type { ImportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
@@ -89,7 +91,14 @@ export const getImportCollection = ({
 
         if (req.file?.data) {
           fileData = req.file.data
-          fileMimetype = req.file.mimetype || doc.mimeType || 'text/csv'
+          fileMimetype = req.file.mimetype || doc.mimeType
+
+          if (!fileMimetype) {
+            throw new FileRetrievalError(
+              req.t,
+              `Unable to determine mimetype for file: ${doc.filename}`,
+            )
+          }
         } else {
           const fileFromDoc = await getFileFromDoc({
             collectionConfig,

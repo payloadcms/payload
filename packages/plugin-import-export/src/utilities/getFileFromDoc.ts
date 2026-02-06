@@ -1,6 +1,6 @@
 import type { CollectionConfig, FileData, PayloadRequest, UploadConfig } from 'payload'
 
-import { getFileByPath } from 'payload'
+import { FileRetrievalError, getFileByPath } from 'payload'
 import { getExternalFile } from 'payload/internal'
 import { formatAdminURL } from 'payload/shared'
 
@@ -42,9 +42,15 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
       throw new Error(`File not found at path: ${filePath}`)
     }
 
+    const mimetype = file.mimetype || doc.mimeType
+
+    if (!mimetype) {
+      throw new FileRetrievalError(req.t, `Unable to determine mimetype for file: ${doc.filename}`)
+    }
+
     return {
       data: file.data,
-      mimetype: file.mimetype || doc.mimeType || 'application/octet-stream',
+      mimetype,
     }
   }
 
@@ -71,9 +77,15 @@ export const getFileFromDoc = async ({ collectionConfig, doc, req }: Args): Prom
       uploadConfig,
     })
 
+    const mimetype = file.mimetype || doc.mimeType
+
+    if (!mimetype) {
+      throw new FileRetrievalError(req.t, `Unable to determine mimetype for file: ${doc.filename}`)
+    }
+
     return {
       data: file.data,
-      mimetype: file.mimetype || doc.mimeType || 'application/octet-stream',
+      mimetype,
     }
   }
 
