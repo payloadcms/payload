@@ -15,7 +15,6 @@
     "@payloadcms/payload-cloud": "latest",
     "@payloadcms/richtext-lexical": "latest",
     "cross-env": "^7.0.3",
-    "express": "^4.21.1",
     "graphql": "^16.8.1",
     "next": "15.4.11",
     "payload": "latest",
@@ -23,7 +22,6 @@
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/node": "^18.11.5",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
