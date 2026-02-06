@@ -1750,11 +1750,14 @@ export {
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+// Taxonomy
+export { getInitialTreeData } from './taxonomy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './taxonomy/getInitialTreeData.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1824,9 +1827,9 @@ export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
+
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
-
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
@@ -1837,6 +1840,7 @@ export type {
   MongoLocalizeStatusArgs,
   SqlLocalizeStatusArgs,
 } from './versions/migrations/localizeStatus/index.js'
+
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
