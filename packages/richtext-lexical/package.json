@@ -393,7 +393,6 @@
     "micromark-extension-mdx-jsx": "3.0.1",
     "qs-esm": "7.0.2",
     "react-error-boundary": "4.1.2",
-    "ts-essentials": "10.0.3",
     "uuid": "10.0.0"
   },
   "devDependencies": {
@@ -414,7 +413,8 @@
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "8.3.0"
+    "swc-plugin-transform-remove-imports": "8.3.0",
+    "ts-essentials": "10.0.3"
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0",
