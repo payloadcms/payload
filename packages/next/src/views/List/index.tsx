@@ -153,7 +153,6 @@ export const renderListView = async (
         collection: 'payload-query-presets',
         depth: 0,
         overrideAccess: false,
-        select: {},
         user,
       })) as QueryPreset
 
@@ -358,7 +357,7 @@ export const renderListView = async (
 
   const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
     collectionConfig,
-    data: {},
+    data,
     req,
   })
 
