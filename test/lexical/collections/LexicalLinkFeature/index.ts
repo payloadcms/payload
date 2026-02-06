@@ -40,5 +40,26 @@ export const LexicalLinkFeature: CollectionConfig = {
         ],
       }),
     },
+    {
+      name: 'richTextNestedFields',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          TreeViewFeature(),
+          LinkFeature({
+            // Test that LinkFeature works when fields are wrapped in a row layout
+            fields: ({ defaultFields }) => [
+              {
+                type: 'row',
+                fields: defaultFields,
+              },
+              { type: 'text', name: 'customField' },
+            ],
+          }),
+          FixedToolbarFeature(),
+        ],
+      }),
+    },
   ],
 }

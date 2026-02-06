@@ -215,6 +215,21 @@ export interface LexicalLinkFeature {
     };
     [k: string]: unknown;
   } | null;
+  richTextNestedFields?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1182,6 +1197,7 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
  */
 export interface LexicalLinkFeatureSelect<T extends boolean = true> {
   richText?: T;
+  richTextNestedFields?: T;
   updatedAt?: T;
   createdAt?: T;
 }
