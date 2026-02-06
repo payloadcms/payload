@@ -45,6 +45,11 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       headers.append('Content-Type', String(metadata.contentType))
       headers.append('ETag', String(metadata.etag))
 
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (metadata.contentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
+
       if (
         collection.upload &&
         typeof collection.upload === 'object' &&
