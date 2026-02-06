@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useRef } from 'react'
+import { PREFERENCE_KEYS } from 'payload/shared'
+import React, { useEffect, useMemo, useRef } from 'react'
 
 import type { TaxonomyDocument, TaxonomyTreeProps } from './types.js'
 
 import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { usePreferences } from '../../providers/Preferences/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
@@ -32,10 +34,16 @@ const getDocumentTitle = (doc: TaxonomyDocument, useAsTitle: string | undefined)
 
 const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   collectionSlug,
+  initialData,
+  initialExpandedNodes = [],
   onNodeClick,
   selectedNodeId,
 }) => {
-  const { expandedNodes, toggleNode } = useTreeState()
+  // Convert initialExpandedNodes array to Set for useTreeState
+  const initialExpandedSet = useMemo(() => new Set(initialExpandedNodes), [initialExpandedNodes])
+
+  const { expandedNodes, toggleNode } = useTreeState(initialExpandedSet)
+  const { setPreference } = usePreferences()
   const { getEntityConfig } = useConfig()
   const { moveFocus } = useTreeFocus()
 
@@ -48,7 +56,55 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
       : null) || 'parent'
 
   const childrenCache = useRef(new Map())
+
+  // Pre-populate cache with initialData if provided
+  useEffect(() => {
+    if (initialData && initialData.docs.length > 0) {
+      // Group docs by parent to populate cache
+      const docsByParent = new Map<string, TaxonomyDocument[]>()
+
+      for (const doc of initialData.docs) {
+        const parentId = doc[parentFieldName] || 'null'
+        const parentKey = String(parentId)
+
+        if (!docsByParent.has(parentKey)) {
+          docsByParent.set(parentKey, [])
+        }
+        docsByParent.get(parentKey).push(doc)
+      }
+
+      // Populate cache with grouped docs
+      for (const [parentKey, docs] of docsByParent) {
+        const cacheKey = `${collectionSlug}-${parentKey}`
+        childrenCache.current.set(cacheKey, {
+          children: docs,
+          hasMore: false,
+          page: 1,
+          totalDocs: docs.length,
+        })
+      }
+    }
+  }, [initialData, parentFieldName, collectionSlug])
   const treeRef = useRef<HTMLDivElement>(null)
+
+  // Wrap toggleNode to also save preferences
+  const handleToggle = React.useCallback(
+    (nodeId: number | string) => {
+      toggleNode(nodeId)
+
+      // Save preference after state update
+      setTimeout(() => {
+        // Calculate new expanded nodes array
+        const currentExpanded = expandedNodes.has(nodeId)
+          ? Array.from(expandedNodes).filter((id) => id !== nodeId)
+          : [...Array.from(expandedNodes), nodeId]
+
+        const preferenceKey = `${PREFERENCE_KEYS.TAXONOMY_TREE}-${collectionSlug}`
+        void setPreference(preferenceKey, { expandedNodes: currentExpanded })
+      }, 0)
+    },
+    [toggleNode, expandedNodes, collectionSlug, setPreference],
+  )
 
   // Fetch root nodes (items with no parent)
   const {
@@ -61,7 +117,8 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     cache: childrenCache,
     collectionSlug,
     enabled: true,
-    limit: 50,
+    initialData,
+    limit: 2,
     parentFieldName,
     parentId: 'null', // Special value to query for null parent
   })
@@ -132,7 +189,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
               title: nodeTitle,
             }}
             onSelect={handleNodeClick}
-            onToggle={toggleNode}
+            onToggle={handleToggle}
             parentFieldName={parentFieldName}
             selected={isSelected}
             selectedNodeId={selectedNodeId}

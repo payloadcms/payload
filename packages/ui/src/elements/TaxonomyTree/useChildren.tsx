@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { TaxonomyDocument } from './types.js'
+import type { TaxonomyDocument, TaxonomyInitialData } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 
@@ -8,6 +8,7 @@ type UseChildrenArgs = {
   cache?: React.MutableRefObject<Map<string, CachedChildren>>
   collectionSlug: string
   enabled?: boolean
+  initialData?: null | TaxonomyInitialData
   limit?: number
   parentFieldName: string
   parentId: number | string
@@ -32,18 +33,27 @@ export const useChildren = ({
   cache,
   collectionSlug,
   enabled = true,
-  limit = 50,
+  initialData,
+  limit = 2,
   parentFieldName,
   parentId,
 }: UseChildrenArgs): UseChildrenReturn => {
   const cacheKey = `${collectionSlug}-${parentId}`
   const cachedData = cache?.current.get(cacheKey)
 
-  const [children, setChildren] = useState<null | TaxonomyDocument[]>(cachedData?.children || null)
-  const [isLoading, setIsLoading] = useState(!cachedData && enabled)
+  // Check if we have initial data (only for root nodes with parentId === 'null')
+  const hasInitialData = initialData && parentId === 'null'
+
+  const [children, setChildren] = useState<null | TaxonomyDocument[]>(
+    hasInitialData ? initialData.docs : cachedData?.children || null,
+  )
+  const [isLoading, setIsLoading] = useState(!hasInitialData && !cachedData && enabled)
   const [page, setPage] = useState(cachedData?.page || 1)
-  const [totalDocs, setTotalDocs] = useState(cachedData?.totalDocs || 0)
+  const [totalDocs, setTotalDocs] = useState(
+    hasInitialData ? initialData.docs.length : cachedData?.totalDocs || 0,
+  )
   const [hasMore, setHasMore] = useState(cachedData?.hasMore || false)
+  const initializedRef = useRef(!!hasInitialData)
   const {
     config: {
       routes: { api },
@@ -118,6 +128,12 @@ export const useChildren = ({
 
   useEffect(() => {
     if (!enabled) {
+      return
+    }
+
+    // Skip initial fetch if we have initialData
+    if (initializedRef.current && children !== null) {
+      initializedRef.current = false
       return
     }
 
