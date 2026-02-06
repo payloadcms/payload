@@ -22,10 +22,13 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
 
   let initialData = null
   let initialExpandedNodes: (number | string)[] = []
+  let selectedNodeId: null | string = null
+  let parentFieldName = 'parent'
+  let treeLimit: number | undefined
 
   try {
     // Get selected node from URL (?parent=<id>)
-    const selectedNodeId = searchParams?.parent ? String(searchParams.parent) : null
+    selectedNodeId = searchParams?.parent ? String(searchParams.parent) : null
 
     // STEP 1: Load user's expanded node preferences
     const preferenceKey = `${PREFERENCE_KEYS.TAXONOMY_TREE}-${collectionSlug}`
@@ -50,15 +53,18 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
       initialExpandedNodes = preferences.value.expandedNodes
     }
 
-    // STEP 2: If there's a selected node, ensure its ancestor chain is expanded
-    if (selectedNodeId) {
-      const collectionConfig = payload.collections[collectionSlug]?.config
-      const taxonomyConfig = collectionConfig?.taxonomy
-      const parentFieldName =
-        taxonomyConfig && typeof taxonomyConfig === 'object'
-          ? taxonomyConfig.parentFieldName || 'parent'
-          : 'parent'
+    // STEP 2: Get collection config
+    const collectionConfig = payload.collections[collectionSlug]?.config
+    const taxonomyConfig = collectionConfig?.taxonomy
+    parentFieldName =
+      taxonomyConfig && typeof taxonomyConfig === 'object'
+        ? taxonomyConfig.parentFieldName || 'parent'
+        : 'parent'
+    treeLimit =
+      taxonomyConfig && typeof taxonomyConfig === 'object' ? taxonomyConfig.treeLimit : undefined
 
+    // If there's a selected node, ensure its ancestor chain is expanded
+    if (selectedNodeId) {
       // Walk up the parent chain to root
       const ancestorIds: (number | string)[] = []
       let currentNodeId: null | number | string = selectedNodeId
@@ -93,12 +99,6 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
     }
 
     // STEP 3: Fetch tree data (root nodes + children of expanded nodes + selected node path)
-    const collectionConfig = payload.collections[collectionSlug]?.config
-    const treeLimit =
-      collectionConfig?.taxonomy && typeof collectionConfig.taxonomy === 'object'
-        ? collectionConfig.taxonomy.treeLimit
-        : undefined
-
     initialData = await getInitialTreeData({
       collectionSlug,
       expandedNodeIds: initialExpandedNodes,
@@ -121,6 +121,9 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
       collectionSlug={collectionSlug}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}
+      parentFieldName={parentFieldName}
+      selectedNodeId={selectedNodeId}
+      treeLimit={treeLimit}
     />
   )
 }

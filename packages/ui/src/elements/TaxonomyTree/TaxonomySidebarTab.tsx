@@ -8,6 +8,7 @@ import React, { useCallback } from 'react'
 
 import type { TaxonomyInitialData } from './types.js'
 
+import { HydrateTaxonomyProvider } from '../../elements/HydrateTaxonomyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { TaxonomyTree } from './index.js'
 
@@ -16,8 +17,18 @@ export const TaxonomySidebarTab: React.FC<
     collectionSlug: string
     initialData?: null | TaxonomyInitialData
     initialExpandedNodes?: (number | string)[]
+    parentFieldName?: string
+    selectedNodeId?: null | string
+    treeLimit?: number
   } & SidebarTabClientProps
-> = ({ collectionSlug, initialData, initialExpandedNodes }) => {
+> = ({
+  collectionSlug,
+  initialData,
+  initialExpandedNodes,
+  parentFieldName,
+  selectedNodeId: selectedNodeIdFromServer,
+  treeLimit,
+}) => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const {
@@ -41,15 +52,25 @@ export const TaxonomySidebarTab: React.FC<
   )
 
   return (
-    <div className="taxonomy-sidebar-tab">
-      <TaxonomyTree
+    <>
+      <HydrateTaxonomyProvider
         collectionSlug={collectionSlug}
-        initialData={initialData}
-        initialExpandedNodes={initialExpandedNodes}
-        key={collectionSlug}
-        onNodeClick={handleNodeClick}
-        selectedNodeId={selectedNodeId}
+        expandedNodes={initialExpandedNodes}
+        parentFieldName={parentFieldName}
+        selectedParentId={selectedNodeIdFromServer}
+        treeData={initialData}
+        treeLimit={treeLimit}
       />
-    </div>
+      <div className="taxonomy-sidebar-tab">
+        <TaxonomyTree
+          collectionSlug={collectionSlug}
+          initialData={initialData}
+          initialExpandedNodes={initialExpandedNodes}
+          key={collectionSlug}
+          onNodeClick={handleNodeClick}
+          selectedNodeId={selectedNodeId}
+        />
+      </div>
+    </>
   )
 }
