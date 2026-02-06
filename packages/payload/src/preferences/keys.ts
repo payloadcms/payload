@@ -23,4 +23,9 @@ export const PREFERENCE_KEYS = {
    * Stores active sidebar tab selection
    */
   NAV_SIDEBAR_ACTIVE_TAB: 'nav-sidebar-active-tab',
+
+  /**
+   * Stores taxonomy tree expand/collapse state per collection
+   */
+  TAXONOMY_TREE: 'taxonomy-tree',
 } as const
