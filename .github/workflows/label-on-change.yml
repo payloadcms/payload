@@ -20,7 +20,7 @@ jobs:
     if: github.event.action == 'labeled' && startsWith(github.event.label.name, 'status:')
     steps:
       - name: Ensure only one status label
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -55,7 +55,7 @@ jobs:
     if: github.event.action == 'closed'
     steps:
       - name: Remove all labels on issue close
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
