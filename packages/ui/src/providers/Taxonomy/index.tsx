@@ -59,7 +59,7 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
     })
   }
 
-  const hydrate = (data: HydrateData) => {
+  const hydrate = useCallback((data: HydrateData) => {
     const {
       collectionSlug: slug,
       expandedNodes: newExpandedNodes,
@@ -116,7 +116,7 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
         return newMap
       })
     }
-  }
+  }, [])
 
   const savePreferencesDebounced = useDebouncedCallback(
     async (slug: string, expanded: Set<number | string>) => {
