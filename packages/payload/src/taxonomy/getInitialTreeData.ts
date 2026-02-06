@@ -1,5 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
+import { DEFAULT_TAXONOMY_TREE_LIMIT } from './constants.js'
+
 export type GetInitialTreeDataArgs = {
   collectionSlug: string
   expandedNodeIds?: (number | string)[]
@@ -9,12 +11,14 @@ export type GetInitialTreeDataArgs = {
 
 export type InitialTreeData = {
   docs: any[]
+  // Metadata about what was loaded - keyed by parent ID ('null' for root)
+  loadedParents: Record<string, { hasMore: boolean; totalDocs: number }>
 }
 
 export const getInitialTreeData = async ({
   collectionSlug,
   expandedNodeIds = [],
-  limit = 100,
+  limit,
   req,
 }: GetInitialTreeDataArgs): Promise<InitialTreeData> => {
   const collectionConfig = req.payload.collections[collectionSlug]?.config
@@ -27,39 +31,63 @@ export const getInitialTreeData = async ({
   const parentFieldName =
     typeof taxonomyConfig === 'object' ? taxonomyConfig.parentFieldName || 'parent' : 'parent'
 
-  // Build query: root nodes OR children of expanded nodes
-  const whereClause: any =
-    expandedNodeIds.length > 0
-      ? {
-          or: [
-            {
-              [parentFieldName]: {
-                exists: false, // Root nodes
-              },
-            },
-            {
-              [parentFieldName]: {
-                in: expandedNodeIds, // Children of expanded nodes
-              },
-            },
-          ],
-        }
-      : {
-          [parentFieldName]: {
-            exists: false, // Only root nodes if nothing expanded
-          },
-        }
+  // Use limit from config if not provided, fallback to config's treeLimit
+  const effectiveLimit =
+    limit ??
+    (typeof taxonomyConfig === 'object' ? taxonomyConfig.treeLimit : undefined) ??
+    DEFAULT_TAXONOMY_TREE_LIMIT
 
-  const result = await req.payload.find({
+  const allDocs: any[] = []
+  const loadedParents: Record<string, { hasMore: boolean; totalDocs: number }> = {}
+
+  // Query 1: Fetch root nodes (up to limit)
+  const rootResult = await req.payload.find({
     collection: collectionSlug,
     depth: 0,
-    limit,
+    limit: effectiveLimit,
+    overrideAccess: false,
     page: 1,
     req,
-    where: whereClause,
+    user: req.user,
+    where: {
+      [parentFieldName]: {
+        exists: false,
+      },
+    },
   })
 
+  allDocs.push(...rootResult.docs)
+  loadedParents['null'] = {
+    hasMore: rootResult.hasNextPage,
+    totalDocs: rootResult.totalDocs,
+  }
+
+  // Query 2: For each expanded node, fetch its children (up to limit)
+  for (const parentId of expandedNodeIds) {
+    const childResult = await req.payload.find({
+      collection: collectionSlug,
+      depth: 0,
+      limit: effectiveLimit,
+      overrideAccess: false,
+      page: 1,
+      req,
+      user: req.user,
+      where: {
+        [parentFieldName]: {
+          equals: parentId,
+        },
+      },
+    })
+
+    allDocs.push(...childResult.docs)
+    loadedParents[String(parentId)] = {
+      hasMore: childResult.hasNextPage,
+      totalDocs: childResult.totalDocs,
+    }
+  }
+
   return {
-    docs: result.docs,
+    docs: allDocs,
+    loadedParents,
   }
 }

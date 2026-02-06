@@ -713,7 +713,10 @@ export type {
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
+  TaxonomyViewData,
 } from './views/list.js'
+
+export type { RelatedDocumentsGrouped } from './views/taxonomyList.js'
 
 type SchemaPath = {} & string
 export type FieldSchemaMap = Map<

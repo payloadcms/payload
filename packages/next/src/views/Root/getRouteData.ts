@@ -267,6 +267,7 @@ export const getRouteData = ({
           templateType = 'default'
           viewType = 'collection-folders'
         } else {
+          // Regular list view - handles taxonomy collections via handleTaxonomy when ?parent= is present
           ViewToRender = {
             Component: ListView,
           }

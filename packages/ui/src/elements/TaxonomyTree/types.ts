@@ -15,6 +15,8 @@ export type TaxonomyNode = {
 
 export type TaxonomyInitialData = {
   docs: TaxonomyDocument[]
+  // Metadata about what was loaded - keyed by parent ID ('null' for root)
+  loadedParents: Record<string, { hasMore: boolean; totalDocs: number }>
 }
 
 export type TaxonomyTreeProps = {
@@ -37,6 +39,7 @@ export type TreeNodeProps = {
   collectionSlug: string
   depth?: number
   expandedNodes: Set<number | string>
+  limit?: number
   node: TaxonomyNode
   onSelect: (id: number | string) => void
   onToggle: (id: number | string) => void

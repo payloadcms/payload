@@ -4,11 +4,28 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
+import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
+import type { RelatedDocumentsGrouped } from './taxonomyList.js'
+
+export type TaxonomyViewData = {
+  /** Breadcrumb trail to the current parent */
+  breadcrumbs: Array<{ id: number | string; title: string }>
+  /** Children of the current parent (same collection) */
+  childrenData: PaginatedDocs
+  /** The parent field name for building queries */
+  parentFieldName: string
+  /** The parent ID being viewed */
+  parentId: number | string
+  /** Related documents grouped by collection */
+  relatedDocuments: RelatedDocumentsGrouped
+  /** The selected parent item (for display) */
+  selectedItem: null | Record<string, unknown>
+}
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -59,6 +76,10 @@ export type ListViewClientProps = {
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  /**
+   * Taxonomy view data - present when viewing a taxonomy collection with a parent selected
+   */
+  taxonomyData?: TaxonomyViewData
   viewType: ViewTypes
 } & ListViewSlots
 

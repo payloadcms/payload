@@ -1,5 +1,6 @@
 'use client'
 
+import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
 import React, { useCallback, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'
@@ -33,6 +34,7 @@ export const TreeNode = ({
   collectionSlug,
   depth = 0,
   expandedNodes,
+  limit = DEFAULT_TAXONOMY_TREE_LIMIT,
   node,
   onSelect,
   onToggle,
@@ -56,7 +58,7 @@ export const TreeNode = ({
     cache,
     collectionSlug,
     enabled: expanded,
-    limit: 50,
+    limit,
     parentFieldName,
     parentId: node.id,
   })
@@ -67,9 +69,7 @@ export const TreeNode = ({
     if (newDocs && newDocs.length > 0) {
       const firstNewDoc = newDocs[0]
       const docId: number | string = (firstNewDoc as { id: number | string }).id
-      const docIdStr = typeof docId === 'number' ? String(docId) : docId
-      const firstNewDocId = `node-${docIdStr}`
-      setFocusedId(firstNewDocId)
+      setFocusedId(`node-${docId}`)
     }
   }, [loadMoreFromHook, setFocusedId])
 
@@ -185,6 +185,7 @@ export const TreeNode = ({
                   depth={depth + 1}
                   expandedNodes={expandedNodes}
                   key={String(childId)}
+                  limit={limit}
                   node={{
                     id: childId,
                     hasChildren: true,

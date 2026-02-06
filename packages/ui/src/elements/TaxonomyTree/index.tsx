@@ -1,7 +1,8 @@
 'use client'
 
+import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 
 import type { TaxonomyDocument, TaxonomyTreeProps } from './types.js'
 
@@ -40,7 +41,10 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   selectedNodeId,
 }) => {
   // Convert initialExpandedNodes array to Set for useTreeState
-  const initialExpandedSet = useMemo(() => new Set(initialExpandedNodes), [initialExpandedNodes])
+  const initialExpandedSet = useMemo(() => {
+    const set = new Set(initialExpandedNodes)
+    return set
+  }, [initialExpandedNodes])
 
   const { expandedNodes, toggleNode } = useTreeState(initialExpandedSet)
   const { setPreference } = usePreferences()
@@ -55,36 +59,63 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
       ? collectionConfig.taxonomy.parentFieldName
       : null) || 'parent'
 
-  const childrenCache = useRef(new Map())
+  // Get tree limit from taxonomy config, fallback to DEFAULT_TAXONOMY_TREE_LIMIT
+  const treeLimit =
+    (collectionConfig.taxonomy && typeof collectionConfig.taxonomy === 'object'
+      ? collectionConfig.taxonomy.treeLimit
+      : null) ?? DEFAULT_TAXONOMY_TREE_LIMIT
 
-  // Pre-populate cache with initialData if provided
-  useEffect(() => {
-    if (initialData && initialData.docs.length > 0) {
-      // Group docs by parent to populate cache
-      const docsByParent = new Map<string, TaxonomyDocument[]>()
+  // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
+  // This ensures expanded children find their data immediately without client-side fetch
+  const childrenCache = useRef(
+    useMemo(() => {
+      const cache = new Map()
 
-      for (const doc of initialData.docs) {
-        const parentId = doc[parentFieldName] || 'null'
-        const parentKey = String(parentId)
+      if (initialData && initialData.docs.length > 0) {
+        // Group docs by parent to populate cache
+        const docsByParent = new Map<string, TaxonomyDocument[]>()
 
-        if (!docsByParent.has(parentKey)) {
-          docsByParent.set(parentKey, [])
+        for (const doc of initialData.docs) {
+          const parentId = doc[parentFieldName] || 'null'
+          const parentKey = String(parentId)
+
+          if (!docsByParent.has(parentKey)) {
+            docsByParent.set(parentKey, [])
+          }
+          const parentDocs = docsByParent.get(parentKey)
+          if (parentDocs) {
+            parentDocs.push(doc)
+          }
         }
-        docsByParent.get(parentKey).push(doc)
+
+        // Populate cache with grouped docs and metadata from server
+        for (const [parentKey, docs] of docsByParent) {
+          const cacheKey = `${collectionSlug}-${parentKey}`
+          const parentMeta = initialData.loadedParents[parentKey]
+
+          if (parentMeta) {
+            // We have metadata from server about this parent
+            cache.set(cacheKey, {
+              children: docs,
+              hasMore: parentMeta.hasMore,
+              page: 1,
+              totalDocs: parentMeta.totalDocs,
+            })
+          } else {
+            // Shouldn't happen, but fallback to conservative estimate
+            cache.set(cacheKey, {
+              children: docs,
+              hasMore: false,
+              page: 1,
+              totalDocs: docs.length,
+            })
+          }
+        }
       }
 
-      // Populate cache with grouped docs
-      for (const [parentKey, docs] of docsByParent) {
-        const cacheKey = `${collectionSlug}-${parentKey}`
-        childrenCache.current.set(cacheKey, {
-          children: docs,
-          hasMore: false,
-          page: 1,
-          totalDocs: docs.length,
-        })
-      }
-    }
-  }, [initialData, parentFieldName, collectionSlug])
+      return cache
+    }, [initialData, parentFieldName, collectionSlug]),
+  )
   const treeRef = useRef<HTMLDivElement>(null)
 
   // Wrap toggleNode to also save preferences
@@ -118,7 +149,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     collectionSlug,
     enabled: true,
     initialData,
-    limit: 2,
+    limit: treeLimit,
     parentFieldName,
     parentId: 'null', // Special value to query for null parent
   })
@@ -183,6 +214,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
             depth={0}
             expandedNodes={expandedNodes}
             key={nodeIdStr}
+            limit={treeLimit}
             node={{
               id: nodeId,
               hasChildren: true,

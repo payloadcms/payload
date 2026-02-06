@@ -72,6 +72,7 @@ export interface Config {
     departments: Department;
     organizations: Organization;
     products: Product;
+    posts: Post;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,6 +86,7 @@ export interface Config {
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -98,9 +100,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -162,8 +162,8 @@ export interface Department {
   deptName: string;
   updatedAt: string;
   createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
+  _breadcrumbSlug?: string | null;
+  _breadcrumbTitle?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -188,6 +188,21 @@ export interface Product {
   parent?: (string | null) | Product;
   name: string;
   description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  parent?: (string | null) | Post;
+  title: string;
+  content?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -234,6 +249,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -261,6 +277,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: string | Product;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'users';
@@ -343,8 +363,8 @@ export interface DepartmentsSelect<T extends boolean = true> {
   deptName?: T;
   updatedAt?: T;
   createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
+  _breadcrumbSlug?: T;
+  _breadcrumbTitle?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -367,6 +387,20 @@ export interface ProductsSelect<T extends boolean = true> {
   parent?: T;
   name?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

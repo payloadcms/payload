@@ -1,49 +1,26 @@
-@import '../../../scss/styles.scss';
+// Tree-specific overrides for the shared LoadMoreRow component
 
-.taxonomy-tree {
-  &__load-more {
-    display: flex;
-    align-items: center;
-    padding: var(--taxonomy-tree-node-padding-y) var(--taxonomy-tree-node-padding-x);
-    padding-left: calc(var(--taxonomy-tree-depth, 0) * var(--taxonomy-tree-indent));
-    height: var(--taxonomy-tree-node-content-height);
-    position: relative;
-    margin-bottom: var(--taxonomy-tree-row-gap);
-    padding-top: 0px;
-  }
+.taxonomy-tree__load-more.load-more-row {
+  padding: var(--taxonomy-tree-node-padding-y) var(--taxonomy-tree-node-padding-x);
+  padding-left: calc(var(--taxonomy-tree-depth, 0) * var(--taxonomy-tree-indent));
+  height: var(--taxonomy-tree-node-content-height);
+  position: relative;
+  margin-bottom: var(--taxonomy-tree-row-gap);
+  padding-top: 0;
 
-  &__load-more-connector-container {
-    width: var(--taxonomy-tree-chevron-width);
-    height: 100%;
-    margin-right: 2px;
-    margin-left: 8px;
-    display: flex;
-    flex-shrink: 0;
-    align-items: self-start;
-    justify-content: center;
+  .load-more-row__connector {
+    margin-left: 2px;
   }
+}
 
-  &__load-more-connector {
-    flex-shrink: 0;
-    color: var(--theme-elevation-400);
-    margin-top: 3px;
-  }
-
-  &__load-more-text {
-    margin: 0;
-    color: var(--theme-elevation-400);
-    white-space: nowrap;
-    @extend %small;
-  }
-
-  &__load-more-button {
-    background: none;
-    border: none;
-    padding: 0;
-    color: var(--theme-text);
-    font-size: inherit;
-    font-family: inherit;
-    cursor: pointer;
-    text-decoration: underline;
-  }
+// Tree-specific button styling (uses native button for focus management)
+.taxonomy-tree__load-more-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--theme-text);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
 }

@@ -18,6 +18,12 @@ export type TaxonomyConfig = {
    * If not provided, all collections with relationships to this taxonomy will be auto-detected
    */
   relatedCollections?: string[]
+  /**
+   * Maximum number of children to load per parent node in the tree
+   * Controls initial load and pagination for tree views
+   * @default 100
+   */
+  treeLimit?: number
 } & Partial<HierarchyConfig>
 
 /**
@@ -32,4 +38,9 @@ export type SanitizedTaxonomyConfig = {
    * Array of collection slugs that can reference this taxonomy
    */
   relatedCollections: string[]
+  /**
+   * Maximum number of children to load per parent node in the tree
+   * If not set, consumers will use DEFAULT_TAXONOMY_TREE_LIMIT (100)
+   */
+  treeLimit?: number
 } & SanitizedHierarchyConfig

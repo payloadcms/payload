@@ -41,18 +41,26 @@ export const useChildren = ({
   const cacheKey = `${collectionSlug}-${parentId}`
   const cachedData = cache?.current.get(cacheKey)
 
-  // Check if we have initial data (only for root nodes with parentId === 'null')
-  const hasInitialData = initialData && parentId === 'null'
+  // Check if we have initial data for this specific parent
+  const parentKey = parentId === 'null' ? 'null' : String(parentId)
+  const parentMeta = initialData?.loadedParents?.[parentKey]
+  const hasInitialData = !!parentMeta
+
+  // Extract docs for this parent from initialData if available
+  const initialDocsForParent = hasInitialData
+    ? initialData.docs.filter((doc) => {
+        const docParent = doc[parentFieldName] || 'null'
+        return String(docParent) === parentKey
+      })
+    : null
 
   const [children, setChildren] = useState<null | TaxonomyDocument[]>(
-    hasInitialData ? initialData.docs : cachedData?.children || null,
+    initialDocsForParent || cachedData?.children || null,
   )
   const [isLoading, setIsLoading] = useState(!hasInitialData && !cachedData && enabled)
   const [page, setPage] = useState(cachedData?.page || 1)
-  const [totalDocs, setTotalDocs] = useState(
-    hasInitialData ? initialData.docs.length : cachedData?.totalDocs || 0,
-  )
-  const [hasMore, setHasMore] = useState(cachedData?.hasMore || false)
+  const [totalDocs, setTotalDocs] = useState(parentMeta?.totalDocs || cachedData?.totalDocs || 0)
+  const [hasMore, setHasMore] = useState(parentMeta?.hasMore || cachedData?.hasMore || false)
   const initializedRef = useRef(!!hasInitialData)
   const {
     config: {
@@ -149,8 +157,12 @@ export const useChildren = ({
       return []
     }
 
-    return fetchPage(page + 1, children)
-  }, [isLoading, hasMore, page, children, fetchPage])
+    // If we have fewer items than our limit, the cached data was fetched with a smaller limit
+    // We need to re-fetch page 1 with our limit to get the full first page
+    const shouldRefetchPage1 = children && children.length < limit
+
+    return fetchPage(shouldRefetchPage1 ? 1 : page + 1, children)
+  }, [isLoading, hasMore, page, children, fetchPage, limit])
 
   return { children, hasMore, isLoading, loadMore, totalDocs }
 }

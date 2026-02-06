@@ -1,0 +1,213 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .slot-table {
+    overflow: auto;
+    max-width: 100%;
+
+    table {
+      min-width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    thead {
+      color: var(--theme-elevation-400);
+    }
+
+    tbody {
+      color: var(--theme-elevation-600);
+    }
+
+    &__th {
+      font-weight: normal;
+      text-align: left;
+      vertical-align: middle;
+      padding: calc(var(--base) * 0.6);
+      min-width: 150px;
+      position: relative;
+
+      [dir='rtl'] & {
+        text-align: right;
+      }
+
+      &:first-child {
+        padding-inline-start: calc(var(--base) * 0.8);
+      }
+
+      &:last-child {
+        padding-inline-end: calc(var(--base) * 0.8);
+      }
+
+      &--drag {
+        width: calc(var(--base) * 2);
+        min-width: calc(var(--base) * 2);
+        padding: 0;
+      }
+
+      &--checkbox {
+        width: calc(var(--base) * 2);
+        min-width: calc(var(--base) * 2);
+        padding: calc(var(--base) * 0.6);
+        text-align: center;
+      }
+    }
+
+    &__tr {
+      position: relative;
+      line-height: 1;
+
+      // Zebra striping
+      &:nth-child(odd) {
+        background: var(--theme-elevation-50);
+
+        td:first-child {
+          border-top-left-radius: var(--style-radius-s);
+          border-bottom-left-radius: var(--style-radius-s);
+        }
+
+        td:last-child {
+          border-top-right-radius: var(--style-radius-s);
+          border-bottom-right-radius: var(--style-radius-s);
+        }
+      }
+
+      &--clickable {
+        cursor: pointer;
+
+        &:hover {
+          background: var(--theme-elevation-100);
+        }
+
+        &:focus {
+          outline: none;
+          background: var(--theme-elevation-100);
+        }
+      }
+
+      &--selected {
+        background: var(--theme-elevation-100) !important;
+      }
+    }
+
+    &__td {
+      vertical-align: middle;
+      padding: calc(var(--base) * 0.6);
+      min-width: 150px;
+      position: relative;
+
+      &:first-child {
+        padding-inline-start: calc(var(--base) * 0.8);
+      }
+
+      &:last-child {
+        padding-inline-end: calc(var(--base) * 0.8);
+      }
+
+      &--drag {
+        width: calc(var(--base) * 2);
+        min-width: calc(var(--base) * 2);
+        padding: 0;
+        text-align: center;
+      }
+
+      &--checkbox {
+        width: calc(var(--base) * 2);
+        min-width: calc(var(--base) * 2);
+        padding: calc(var(--base) * 0.6);
+        text-align: center;
+      }
+    }
+
+    &__drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      color: var(--theme-elevation-400);
+      padding: calc(var(--base) * 0.25);
+
+      &:hover {
+        color: var(--theme-elevation-600);
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &__drag-header {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+
+    &__checkbox {
+      // Uses CheckboxInput component - no additional styles needed
+    }
+
+    // Condensed appearance
+    &--appearance-condensed {
+      border-radius: var(--style-radius-s);
+
+      table {
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: var(--theme-elevation-50);
+
+        th:first-child {
+          border-top-left-radius: var(--style-radius-s);
+        }
+
+        th:last-child {
+          border-top-right-radius: var(--style-radius-s);
+        }
+      }
+
+      tbody tr {
+        &:nth-child(odd) {
+          background: transparent;
+
+          td:first-child,
+          td:last-child {
+            border-radius: 0;
+          }
+        }
+
+        &:last-child {
+          td:first-child {
+            border-bottom-left-radius: var(--style-radius-s);
+          }
+
+          td:last-child {
+            border-bottom-right-radius: var(--style-radius-s);
+          }
+        }
+      }
+
+      .slot-table__th,
+      .slot-table__td {
+        padding: calc(var(--base) * 0.3);
+        border: 0.5px solid var(--theme-elevation-100);
+
+        &:first-child {
+          padding-inline-start: calc(var(--base) * 0.6);
+        }
+
+        &:last-child {
+          padding-inline-end: calc(var(--base) * 0.6);
+        }
+      }
+    }
+
+    @include mid-break {
+      &__th,
+      &__td {
+        max-width: 70vw;
+      }
+    }
+  }
+}

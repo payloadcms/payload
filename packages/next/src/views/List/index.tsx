@@ -30,6 +30,7 @@ import React, { Fragment } from 'react'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
+import { handleTaxonomy } from './handleTaxonomy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
@@ -255,6 +256,26 @@ export const renderListView = async (
     select,
   })
 
+  // Check for taxonomy parent param
+  const taxonomyParentId =
+    collectionConfig.taxonomy && typeof searchParams?.parent === 'string'
+      ? payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
+        ? Number(searchParams.parent)
+        : searchParams.parent
+      : null
+
+  // Taxonomy data for client-side rendering
+  let taxonomyData:
+    | {
+        breadcrumbs: Array<{ id: number | string; title: string }>
+        childrenData: typeof data
+        parentFieldName: string
+        parentId: number | string
+        relatedDocuments: Record<string, { data: typeof data; label: string }>
+        selectedItem: null | Record<string, unknown>
+      }
+    | undefined
+
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
       ;({ columnState, data, Table } = await handleGroupBy({
@@ -334,6 +355,26 @@ export const renderListView = async (
       })
       throw err
     }
+  }
+
+  // Fetch taxonomy data if viewing a taxonomy with a parent selected
+  if (collectionConfig.taxonomy && taxonomyParentId) {
+    const taxData = await handleTaxonomy({
+      collectionConfig,
+      collectionSlug,
+      parentId: taxonomyParentId,
+      permissions,
+      req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+    })
+
+    taxonomyData = {
+      ...taxData,
+      parentId: taxonomyParentId,
+    }
+
+    // Use children data for the main list query provider
+    data = taxData.childrenData
   }
 
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -423,6 +464,7 @@ export const renderListView = async (
               renderedFilters,
               resolvedFilterOptions,
               Table,
+              taxonomyData,
               viewType,
             } satisfies ListViewClientProps,
             Component:

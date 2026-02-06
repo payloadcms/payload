@@ -1751,6 +1751,7 @@ export {
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
 // Taxonomy
+export { DEFAULT_TAXONOMY_TREE_LIMIT } from './taxonomy/constants.js'
 export { getInitialTreeData } from './taxonomy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './taxonomy/getInitialTreeData.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'

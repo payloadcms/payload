@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { TreeConnector } from '../TreeConnector.js'
+import { LoadMoreRow } from '../../LoadMoreRow/index.js'
 import { LoadMoreButton } from './LoadMoreButton.js'
 import './index.scss'
 
@@ -22,16 +22,13 @@ export const LoadMore: React.FC<LoadMoreProps> = ({
   totalDocs,
 }) => {
   return (
-    <div
+    <LoadMoreRow
       className="taxonomy-tree__load-more"
+      currentCount={currentCount}
+      hasMore={currentCount < totalDocs}
+      loadMoreButton={<LoadMoreButton id={id} onLoadMore={onLoadMore} />}
       style={{ '--taxonomy-tree-depth': depth } as React.CSSProperties}
-    >
-      <div className="taxonomy-tree__load-more-connector-container">
-        <TreeConnector className="taxonomy-tree__load-more-connector" />
-      </div>
-      <p className="taxonomy-tree__load-more-text">
-        Showing {currentCount} of {totalDocs} — <LoadMoreButton id={id} onLoadMore={onLoadMore} />
-      </p>
-    </div>
+      totalDocs={totalDocs}
+    />
   )
 }

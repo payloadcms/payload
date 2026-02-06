@@ -45,7 +45,7 @@ export const addTaxonomySidebarTabs = (config: Config): void => {
           clientProps: {
             collectionSlug: collection.slug,
           },
-          path: '@payloadcms/ui#TaxonomySidebarTabServer',
+          path: '@payloadcms/ui/rsc#TaxonomySidebarTabServer',
         },
         icon,
         label: collection.labels?.plural || collection.slug,

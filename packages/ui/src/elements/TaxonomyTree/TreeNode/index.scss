@@ -24,7 +24,7 @@
     transform: translateY(-50%);
   }
 
-  &__content--active {
+  &__content--selected {
     font-weight: 600;
 
     & > .taxonomy-tree-node__indicator {
@@ -80,7 +80,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: var(--taxonomy-tree-font-size);
-    color: var(--theme-elevation-800);
+    color: var(--theme-text);
     cursor: pointer;
     &:hover {
       text-decoration: underline;
