@@ -694,9 +694,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].customRelationship_id).toBeDefined()
       expect(data[0].customRelationship_email).toBeDefined()
       expect(data[0].customRelationship_createdAt).toBeUndefined()
-      expect(data[0].customRelationship === undefined || data[0].customRelationship === '').toBe(
-        true,
-      )
+      expect(data[0].customRelationship).toBeUndefined()
     })
 
     it('should create a JSON file for collection', async () => {
@@ -1173,7 +1171,7 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     describe('toCSV derived columns positioning', () => {
-      it('should position derived columns immediately after their base field', async () => {
+      it('should position derived columns at the base field position and remove the original column', async () => {
         const page = await payload.create({
           collection: 'pages',
           data: {
@@ -1203,15 +1201,120 @@ describe('@payloadcms/plugin-import-export', () => {
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
 
+        // The original customRelationship column should NOT exist since toCSV
+        // returned undefined and wrote derived columns instead
         const customRelIdx = columns.indexOf('customRelationship')
+        expect(customRelIdx).toBe(-1)
+
+        // Derived columns should occupy the position where customRelationship was
+        const titleIdx = columns.indexOf('title')
         const idIdx = columns.indexOf('customRelationship_id')
         const emailIdx = columns.indexOf('customRelationship_email')
         const excerptIdx = columns.indexOf('excerpt')
 
-        expect(customRelIdx).toBeGreaterThan(-1)
-        expect(idIdx).toBe(customRelIdx + 1)
-        expect(emailIdx).toBe(customRelIdx + 2)
+        expect(idIdx).toBe(titleIdx + 1)
+        expect(emailIdx).toBe(titleIdx + 2)
         expect(excerptIdx).toBeGreaterThan(emailIdx)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should remove original column when toCSV writes _name and _email (no _id)', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'NameEmail Derived Test',
+            customRelNameEmail: user.user.id,
+            excerpt: 'test excerpt',
+            _status: 'published',
+          },
+        })
+
+        const fields = ['id', 'title', 'customRelNameEmail', 'excerpt']
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const columns = Object.keys(data[0])
+
+        // Original column should be removed
+        expect(columns.indexOf('customRelNameEmail')).toBe(-1)
+
+        // Derived columns should exist at the correct position
+        const titleIdx = columns.indexOf('title')
+        const nameIdx = columns.indexOf('customRelNameEmail_name')
+        const emailIdx = columns.indexOf('customRelNameEmail_email')
+        const excerptIdx = columns.indexOf('excerpt')
+
+        expect(nameIdx).toBe(titleIdx + 1)
+        expect(emailIdx).toBe(titleIdx + 2)
+        expect(excerptIdx).toBeGreaterThan(emailIdx)
+
+        // Verify the values are correct
+        expect(data[0].customRelNameEmail_name).toBe('name value')
+        expect(data[0].customRelNameEmail_email).toBe(user.user.email)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should remove original column when toCSV writes _id and _locationName', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'IdLocationName Derived Test',
+            customRelIdName: user.user.id,
+            excerpt: 'test excerpt',
+            _status: 'published',
+          },
+        })
+
+        const fields = ['id', 'title', 'customRelIdName', 'excerpt']
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const columns = Object.keys(data[0])
+
+        // Original column should be removed
+        expect(columns.indexOf('customRelIdName')).toBe(-1)
+
+        // Derived columns should exist at the correct position
+        const titleIdx = columns.indexOf('title')
+        const idIdx = columns.indexOf('customRelIdName_id')
+        const locationNameIdx = columns.indexOf('customRelIdName_locationName')
+        const excerptIdx = columns.indexOf('excerpt')
+
+        expect(idIdx).toBe(titleIdx + 1)
+        expect(locationNameIdx).toBe(titleIdx + 2)
+        expect(excerptIdx).toBeGreaterThan(locationNameIdx)
+
+        // Verify the values are correct
+        expect(data[0].customRelIdName_id).toBe(String(user.user.id))
+        expect(data[0].customRelIdName_locationName).toBe('name value')
 
         await payload.delete({ collection: 'pages', id: page.id })
       })
@@ -5183,6 +5286,71 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.status).toBe(400)
       const data = await response.json()
       expect(data.error).toContain('not found')
+    })
+
+    it('should apply toCSV customizations in export preview and remove replaced columns', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Preview toCSV Test',
+          customRelationship: user.user.id,
+          customRelNameEmail: user.user.id,
+          customRelIdName: user.user.id,
+          excerpt: 'preview excerpt',
+          _status: 'published',
+        },
+      })
+
+      const response = await restClient
+        .POST('/exports/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            fields: [
+              'id',
+              'title',
+              'customRelationship',
+              'customRelNameEmail',
+              'customRelIdName',
+              'excerpt',
+            ],
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.docs).toHaveLength(1)
+      const doc = response.docs[0]
+
+      // Verify the columns array has derived columns and not originals
+      const responseColumns: string[] = response.columns
+      expect(responseColumns).toContain('customRelationship_id')
+      expect(responseColumns).toContain('customRelationship_email')
+      expect(responseColumns).not.toContain('customRelationship')
+      expect(responseColumns).toContain('customRelNameEmail_name')
+      expect(responseColumns).toContain('customRelNameEmail_email')
+      expect(responseColumns).not.toContain('customRelNameEmail')
+      expect(responseColumns).toContain('customRelIdName_id')
+      expect(responseColumns).toContain('customRelIdName_locationName')
+      expect(responseColumns).not.toContain('customRelIdName')
+
+      // Verify derived column values in the doc data
+      expect(doc.customRelationship_id).toBeDefined()
+      expect(doc.customRelationship_email).toBeDefined()
+
+      expect(doc.customRelNameEmail_name).toBe('name value')
+      expect(doc.customRelNameEmail_email).toBe(user.user.email)
+
+      expect(doc.customRelIdName_id).toBe(user.user.id)
+      expect(doc.customRelIdName_locationName).toBe('name value')
+
+      // excerpt should still be present
+      expect(doc.excerpt).toBe('preview excerpt')
+
+      await payload.delete({ collection: 'pages', id: page.id })
     })
 
     it('should handle invalid collection slug in import preview', async () => {
