@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
   SanitizedConfig,
 } from 'payload'
+import type ts from 'typescript'
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import path from 'path'
@@ -16,7 +17,6 @@ import {
 } from 'payload'
 import { findConfig } from 'payload/node'
 import { fieldShouldBeLocalized } from 'payload/shared'
-import * as ts from 'typescript'
 
 import type {
   BlocksToJsonBlockToMigrate,
@@ -639,6 +639,9 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     }
 
     const configFile = readFileSync(configPath, 'utf-8')
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    const ts = await dynamicImport<typeof import('typescript')>('typescript')
 
     const source = ts.createSourceFile(configPath, configFile, ts.ScriptTarget.ESNext)
 
