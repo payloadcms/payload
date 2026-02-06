@@ -212,7 +212,7 @@
     "tsx": "4.19.2",
     "turbo": "^2.5.4",
     "typescript": "5.7.3",
-    "vitest": "4.0.15",
+    "vitest": "4.0.18",
     "wrangler": "~4.42.0"
   },
   "packageManager": "pnpm@10.27.0",
