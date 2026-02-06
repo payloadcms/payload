@@ -195,6 +195,16 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
     }
   }
 
+  // Remove schema columns that were fully replaced by toCSV-derived columns (e.g. "user" → "user_id", "user_email")
+  for (const [schemaCol, derivedCols] of insertedDerived) {
+    if (!dataColumns.includes(schemaCol) && derivedCols.length > 0) {
+      const idx = result.indexOf(schemaCol)
+      if (idx !== -1) {
+        result.splice(idx, 1)
+      }
+    }
+  }
+
   return result
 }
 

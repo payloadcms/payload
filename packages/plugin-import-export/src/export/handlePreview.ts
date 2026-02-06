@@ -15,7 +15,7 @@ import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneComp
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
-import { getSchemaColumns } from '../utilities/getSchemaColumns.js'
+import { getSchemaColumns, mergeColumns } from '../utilities/getSchemaColumns.js'
 import { getSelect } from '../utilities/getSelect.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
@@ -125,8 +125,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     targetCollection.config.flattenedFields,
   )
 
-  // Always compute columns for CSV (even if no docs) for consistent schema
-  const columns = isCSV
+  // Compute schema-based columns for CSV (provides base ordering and handles empty exports)
+  const schemaColumns = isCSV
     ? getSchemaColumns({
         collectionConfig: targetCollection.config,
         disabledFields,
@@ -136,6 +136,9 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         timezoneCompanionFields,
       })
     : undefined
+
+  // columns will be finalized after data is available (merged with data-discovered columns)
+  let columns = schemaColumns
 
   // If we're beyond the effective limit (considering both user limit and maxLimit), return empty docs
   if (exportTotalDocs > 0 && previewStartIndex >= exportTotalDocs) {
@@ -201,14 +204,34 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         toCSVFunctions,
       })
 
-      for (const key of possibleKeys) {
-        if (!(key in row)) {
-          row[key] = null
+      // Pad missing schema keys with null so every row has the same columns.
+      // Skip when fields are selected — flattenObject already filters to the chosen fields.
+      if (!fields || fields.length === 0) {
+        for (const key of possibleKeys) {
+          if (!(key in row)) {
+            row[key] = null
+          }
         }
       }
 
       return row
     })
+
+    // Merge schema columns with data-discovered columns (e.g., derived columns from toCSV)
+    // This ensures the preview headers match what the actual export will produce
+    if (schemaColumns && transformed.length > 0) {
+      const dataColumns: string[] = []
+      const seenCols = new Set<string>()
+      for (const row of transformed) {
+        for (const key of Object.keys(row)) {
+          if (!seenCols.has(key)) {
+            seenCols.add(key)
+            dataColumns.push(key)
+          }
+        }
+      }
+      columns = mergeColumns(schemaColumns, dataColumns)
+    }
   } else {
     transformed = docs.map((doc) => {
       let output: Record<string, unknown> = { ...doc }

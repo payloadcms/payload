@@ -327,7 +327,12 @@ export const createExport = async (args: CreateExportArgs) => {
           // --- CSV Streaming ---
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
-              flattenObject({ doc, fields, timezoneCompanionFields, toCSVFunctions }),
+              flattenObject({
+                doc,
+                fields,
+                timezoneCompanionFields,
+                toCSVFunctions,
+              }),
             ),
           )
 
@@ -420,7 +425,14 @@ export const createExport = async (args: CreateExportArgs) => {
   // Transform function based on format
   const transformDoc = (doc: unknown) =>
     isCSV
-      ? filterDisabledCSV(flattenObject({ doc, fields, timezoneCompanionFields, toCSVFunctions }))
+      ? filterDisabledCSV(
+          flattenObject({
+            doc,
+            fields,
+            timezoneCompanionFields,
+            toCSVFunctions,
+          }),
+        )
       : filterDisabledJSON(doc)
 
   // Skip fetching if access was denied - we'll create an empty export
