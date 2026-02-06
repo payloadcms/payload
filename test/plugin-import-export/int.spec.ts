@@ -14,7 +14,7 @@ import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
-import { postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -2329,7 +2329,7 @@ describe('@payloadcms/plugin-import-export', () => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
-              collection: 'custom-id-pages' as CollectionSlug,
+              collection: customIdPagesSlug as CollectionSlug,
               id,
             })
           } catch {
@@ -2341,7 +2341,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       it('should export documents with custom text IDs to CSV', async () => {
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-custom-1',
             title: 'Export Custom Page 1',
@@ -2349,7 +2349,7 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-custom-2',
             title: 'Export Custom Page 2',
@@ -2362,7 +2362,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'exports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             format: 'csv',
             fields: ['id', 'title'],
             where: {
@@ -2395,7 +2395,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       it('should export documents with custom text IDs to JSON', async () => {
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-json-1',
             title: 'Export JSON Page 1',
@@ -2403,7 +2403,7 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'export-json-2',
             title: 'Export JSON Page 2',
@@ -2416,7 +2416,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'exports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             format: 'json',
             fields: ['id', 'title'],
             where: {
@@ -4925,7 +4925,7 @@ describe('@payloadcms/plugin-import-export', () => {
         for (const id of createdCustomIdPages) {
           try {
             await payload.delete({
-              collection: 'custom-id-pages' as CollectionSlug,
+              collection: customIdPagesSlug as CollectionSlug,
               id,
             })
           } catch {
@@ -4948,7 +4948,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'imports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'create',
           },
           file: {
@@ -4971,7 +4971,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(completedImport.summary?.issues).toBe(0)
 
         const importedPages = await payload.find({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           sort: 'id',
         })
 
@@ -4992,7 +4992,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'imports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'create',
           },
           file: {
@@ -5014,7 +5014,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(completedImport.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           where: {
             id: { in: ['custom-csv-1', 'custom-csv-2'] },
           },
@@ -5040,7 +5040,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'imports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'upsert',
             matchField: 'id',
           },
@@ -5063,7 +5063,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(completedImport.summary?.imported).toBe(2)
 
         const importedPages = await payload.find({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           where: {
             id: { in: ['upsert-custom-1', 'upsert-custom-2'] },
           },
@@ -5079,7 +5079,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       it('should update existing documents with custom IDs in upsert mode', async () => {
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug,
           data: {
             id: 'existing-custom-1',
             title: 'Original Title',
@@ -5096,7 +5096,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'imports',
           user,
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'upsert',
             matchField: 'id',
           },
@@ -5119,7 +5119,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(completedImport.summary?.updated).toBe(1)
 
         const updatedPage = await payload.findByID({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           id: 'existing-custom-1',
         })
 
@@ -5128,7 +5128,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       it('should update existing documents with custom IDs in update mode', async () => {
         await payload.create({
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
           data: {
             id: 'update-mode-custom-1',
             title: 'Original Title for Update Mode',
@@ -5144,7 +5144,7 @@ describe('@payloadcms/plugin-import-export', () => {
         const importDoc = await payload.create({
           collection: 'imports',
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'update',
             matchField: 'id',
           },
@@ -5169,7 +5169,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         const updatedPage = await payload.findByID({
           id: 'update-mode-custom-1',
-          collection: 'custom-id-pages' as CollectionSlug,
+          collection: customIdPagesSlug as CollectionSlug,
         })
 
         expect(updatedPage.title).toBe('Updated via Update Mode')
@@ -5183,7 +5183,7 @@ describe('@payloadcms/plugin-import-export', () => {
         const importDoc = await payload.create({
           collection: 'imports',
           data: {
-            collectionSlug: 'custom-id-pages',
+            collectionSlug: customIdPagesSlug,
             importMode: 'update',
             matchField: 'id',
           },
@@ -5223,7 +5223,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validSlugs).toContain('pages')
       expect(validSlugs).toContain('posts-exports-only')
       expect(validSlugs).toContain('media')
-      expect(validSlugs).toContain('custom-id-pages')
+      expect(validSlugs).toContain(customIdPagesSlug)
     })
 
     it('should exclude collections with custom import collections from base imports', () => {
@@ -5237,7 +5237,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(validSlugs).toContain('pages')
       expect(validSlugs).toContain('posts-imports-only')
       expect(validSlugs).toContain('media')
-      expect(validSlugs).toContain('custom-id-pages')
+      expect(validSlugs).toContain(customIdPagesSlug)
     })
 
     it('custom export collection should only have its target collection slug', () => {
