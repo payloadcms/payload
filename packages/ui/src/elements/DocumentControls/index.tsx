@@ -15,6 +15,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -125,6 +126,9 @@ export const DocumentControls: React.FC<{
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
+  const { hasDeletePermission: docHasDeletePermission, hasTrashPermission: docHasTrashPermission } =
+    useDocumentInfo()
+
   const {
     admin: { dateFormat },
     localization,
@@ -150,7 +154,11 @@ export const DocumentControls: React.FC<{
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
+  const collectionDeletePermission = permissions && 'delete' in permissions && permissions.delete
+
+  const hasDeletePermission = collectionConfig?.trash
+    ? docHasTrashPermission || docHasDeletePermission
+    : collectionDeletePermission
 
   const showDotMenu = Boolean(
     collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
@@ -295,7 +303,7 @@ export const DocumentControls: React.FC<{
                 )}
               </Fragment>
             )}
-            {hasDeletePermission && isTrashed && (
+            {docHasDeletePermission && isTrashed && (
               <PermanentlyDeleteButton
                 buttonId="action-permanently-delete"
                 collectionSlug={collectionConfig?.slug}

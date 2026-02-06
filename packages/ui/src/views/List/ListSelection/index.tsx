@@ -16,6 +16,8 @@ export type ListSelectionProps = {
   collectionConfig?: ClientCollectionConfig
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  hasDeletePermission?: boolean
+  hasTrashPermission?: boolean
   label: string
   modalPrefix?: string
   showSelectAllAcrossPages?: boolean
@@ -27,6 +29,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   collectionConfig,
   disableBulkDelete,
   disableBulkEdit,
+  hasDeletePermission,
+  hasTrashPermission,
   label,
   modalPrefix,
   showSelectAllAcrossPages = true,
@@ -99,6 +103,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         !disableBulkDelete && (
           <DeleteMany
             collection={collectionConfig}
+            hasDeletePermission={hasDeletePermission}
+            hasTrashPermission={hasTrashPermission}
             key="bulk-delete"
             modalPrefix={modalPrefix}
             viewType={viewType}

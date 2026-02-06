@@ -354,7 +354,12 @@ export const renderListView = async (
   })
 
   const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
-  const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
+
+  const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
+    collectionConfig,
+    data: {}, // Use empty object for list-level permissions, not pagination result
+    req,
+  })
 
   // Check if there's a notFound query parameter (document ID that wasn't found)
   const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -379,6 +384,7 @@ export const renderListView = async (
       collectionSlug,
       hasCreatePermission,
       hasDeletePermission,
+      hasTrashPermission,
       newDocumentURL,
     },
     collectionConfig,
@@ -416,6 +422,7 @@ export const renderListView = async (
               enableRowSelections,
               hasCreatePermission,
               hasDeletePermission,
+              hasTrashPermission,
               listPreferences: collectionPreferences,
               newDocumentURL,
               queryPreset,
