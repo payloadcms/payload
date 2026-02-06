@@ -12,7 +12,12 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HydrateAuthProvider,
+  HydrateTaxonomyProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
@@ -439,6 +444,23 @@ export const renderListView = async (
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
+        {Boolean(collectionConfig.taxonomy && taxonomyParentId) && (
+          <HydrateTaxonomyProvider
+            collectionSlug={collectionSlug}
+            parentFieldName={
+              typeof collectionConfig.taxonomy === 'object'
+                ? collectionConfig.taxonomy.parentFieldName
+                : undefined
+            }
+            selectedParentId={taxonomyParentId}
+            tableData={data}
+            treeLimit={
+              typeof collectionConfig.taxonomy === 'object'
+                ? collectionConfig.taxonomy.treeLimit
+                : undefined
+            }
+          />
+        )}
         <ListQueryProvider
           collectionSlug={collectionSlug}
           data={data}
