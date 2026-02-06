@@ -13,8 +13,14 @@ export type TaxonomyNode = {
   title: string
 }
 
+export type TaxonomyInitialData = {
+  docs: TaxonomyDocument[]
+}
+
 export type TaxonomyTreeProps = {
   collectionSlug: string
+  initialData?: null | TaxonomyInitialData
+  initialExpandedNodes?: (number | string)[]
   onNodeClick?: (id: number | string) => void
   selectedNodeId?: null | number | string
 }
