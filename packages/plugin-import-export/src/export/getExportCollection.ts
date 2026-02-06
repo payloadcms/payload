@@ -95,7 +95,7 @@ export const getExportCollection = ({
       const { user } = req
       const debug = pluginConfig.debug
 
-      // Get max limit from the target collection's config (stored in custom, not admin.custom)
+      // Get max limit from the target collection's config
       const exportData = args.data as Export
       const targetCollection = req.payload.collections[exportData.collectionSlug]
       const exportLimitConfig: Limit | undefined =
@@ -124,7 +124,7 @@ export const getExportCollection = ({
 
       const { user } = req
 
-      // Get max limit from the target collection's config (stored in custom, not admin.custom)
+      // Get max limit from the target collection's config
       // For job-based exports, we resolve the limit now since function limits
       // cannot be serialized. This means dynamic limits are resolved at queue time.
       const targetCollection = req.payload.collections[doc.collectionSlug]

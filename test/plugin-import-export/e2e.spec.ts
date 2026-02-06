@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -17,9 +17,9 @@ import {
   initPageConsoleErrorCatch,
   runJobsQueue,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsWithS3ExportSlug, postsWithS3ImportSlug, postsWithS3Slug } from './shared.js'
 
@@ -194,6 +194,7 @@ test.describe('Import Export Plugin', () => {
       expect(responseBody.errors).toBeDefined()
       expect(responseBody.errors[0].message).toContain('format')
     })
+
     test.describe('Custom ID Exports', () => {
       test('should export documents with custom IDs through UI', async () => {
         const uniqueId = Date.now()
@@ -233,7 +234,6 @@ test.describe('Import Export Plugin', () => {
 
         await saveDocAndAssert(page, '#action-save')
 
-        // Verify we're on the exports collection edit page
         await expect(page).toHaveURL(/\/exports\//)
 
         await runJobsQueue({ serverURL })
@@ -251,7 +251,6 @@ test.describe('Import Export Plugin', () => {
 
         const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
 
-        // Use saveAs for compatibility with both local and remote/debug modes
         const tempPath = path.join(os.tmpdir(), `export-test-${uniqueId}.csv`)
         await download.saveAs(tempPath)
         const content = fs.readFileSync(tempPath, 'utf8')
@@ -276,26 +275,19 @@ test.describe('Import Export Plugin', () => {
         const menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
 
-        // Should show collections that don't have custom export collections
-        // Use :text-is() for exact match to avoid matching partial text (e.g. "Custom Id Pages" contains "Pages")
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Posts Exports Only")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Media")')).toBeVisible()
 
-        // posts has custom export collection (posts-export), should NOT be in base exports
         await expect(menu.locator('.rs__option:text-is("Posts")')).toBeHidden()
-
-        // posts-no-jobs-queue has custom export (posts-no-jobs-queue-export), should NOT be in base
         await expect(menu.locator('.rs__option:text-is("Posts No Jobs Queue")')).toBeHidden()
 
-        // Should NOT show system collections
         await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
         await expect(menu.locator('.rs__option:text-is("Users")')).toBeHidden()
         await expect(menu.locator('.rs__option:text-is("Exports")')).toBeHidden()
         await expect(menu.locator('.rs__option:text-is("Imports")')).toBeHidden()
 
-        // Should NOT show collections with export: false
         await expect(menu.locator('.rs__option:text-is("Posts Imports Only")')).toBeHidden()
       })
 
@@ -307,17 +299,14 @@ test.describe('Import Export Plugin', () => {
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
 
-        // Field should be disabled since there's only one collection option
         const control = collectionField.locator('.rs__control')
         await expect(control).toHaveAttribute('aria-disabled', 'true')
 
-        // Should display "Posts" - the only collection this custom export is for
         const singleValue = collectionField.locator('.rs__single-value')
         await expect(singleValue).toContainText('Posts')
       })
 
       test('should show correct collections after exporting via dropdown then navigating to create page', async () => {
-        // First, export via dropdown from custom-id-pages collection (uses base exports)
         await page.goto(customIdPagesURL.list)
         await expect(page.locator('.collection-list')).toBeVisible()
 
@@ -331,18 +320,14 @@ test.describe('Import Export Plugin', () => {
         await expect(createExportButton).toBeVisible()
         await createExportButton.click()
 
-        // Wait for drawer to open
         await expect(page.locator('.drawer__content')).toBeVisible()
 
-        // Close the drawer without saving
         await page.keyboard.press('Escape')
         await expect(page.locator('.drawer__content')).toBeHidden()
 
-        // Now navigate directly to exports create page
         await page.goto(exportsURL.create)
         await expect(page.locator('.collection-edit')).toBeVisible()
 
-        // The collection selector should be visible (not hidden due to stale context)
         const collectionField = page.locator('#field-collectionSlug')
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
@@ -350,11 +335,9 @@ test.describe('Import Export Plugin', () => {
         const menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
 
-        // Should show collections without custom export collections
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
 
-        // Should NOT show system collections
         await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
       })
 
@@ -369,30 +352,25 @@ test.describe('Import Export Plugin', () => {
         let menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
 
-        // Count options before refresh - use poll to ensure stable count
         let optionsBefore = 0
         await expect(async () => {
           optionsBefore = await menu.locator('.rs__option').count()
           expect(optionsBefore).toBeGreaterThan(0)
         }).toPass()
 
-        // Close menu and refresh
         await page.keyboard.press('Escape')
         await page.reload()
         await expect(page.locator('.collection-edit')).toBeVisible()
 
-        // Open selector again
         await collectionField.locator('.rs__control').click()
         menu = page.locator('.rs__menu')
         await expect(menu).toBeVisible()
 
-        // Should have same number of options
         await expect(async () => {
           const optionsAfter = await menu.locator('.rs__option').count()
           expect(optionsAfter).toBe(optionsBefore)
         }).toPass()
 
-        // Verify specific collections are still there
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
       })
@@ -424,8 +402,8 @@ test.describe('Import Export Plugin', () => {
 
       for (const id of createdPageIDs) {
         await payload.delete({
-          id,
           collection: 'pages',
+          id,
         })
       }
       createdPageIDs.length = 0
@@ -454,25 +432,17 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.locator('.rs__control').click()
-      await page.locator('.rs__option:text-is("Pages")').click()
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
-      if (await importModeField.isVisible()) {
-        await importModeField.click()
-        await page.locator('.rs__option:has-text("create")').first().click()
-      }
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
 
       await saveDocAndAssert(page)
-
-      const statusField = page.locator('[data-field-name="status"]')
-      if (await statusField.isVisible()) {
-        await expect(statusField).toContainText(/completed|partial/i)
-      }
 
       await runJobsQueue({ serverURL })
 
@@ -482,6 +452,7 @@ test.describe('Import Export Plugin', () => {
           title: { contains: 'E2E Import Test' },
         },
       })
+
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -500,18 +471,15 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', jsonPath)
-
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-test-import.json')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.locator('.rs__control').click()
-      await page.locator('.rs__option:text-is("Pages")').click()
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
-      if (await importModeField.isVisible()) {
-        await importModeField.click()
-        await page.locator('.rs__option:has-text("create")').first().click()
-      }
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
 
       await saveDocAndAssert(page)
 
@@ -523,6 +491,7 @@ test.describe('Import Export Plugin', () => {
           title: { contains: 'E2E JSON Import' },
         },
       })
+
       expect(importedDocs.docs.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -540,8 +509,8 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.locator('.rs__control').click()
-      await page.locator('.rs__option:text-is("Pages")').click()
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
       await saveDocAndAssert(page)
 
@@ -597,8 +566,8 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.locator('.rs__control').click()
-      await page.locator('.rs__option:text-is("Pages")').click()
+      await collectionField.click()
+      await page.locator('.rs__option:has-text("pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await expect(importModeField).toBeVisible()
@@ -619,9 +588,11 @@ test.describe('Import Export Plugin', () => {
           },
         },
       })
+
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
     })
+
     test.describe('Custom ID Imports', () => {
       test('should show custom IDs in import preview', async () => {
         const csvContent = `id,title\ncustom-preview-1,Preview Custom Page 1\ncustom-preview-2,Preview Custom Page 2`
@@ -694,6 +665,84 @@ test.describe('Import Export Plugin', () => {
         expect(importedPages.totalDocs).toBe(2)
         expect(importedPages.docs[0]?.id).toContain(`e2e-custom-${uniqueId}`)
       })
+    })
+  })
+
+  test.describe('S3 Storage', () => {
+    test('should import CSV file stored in S3 via jobs queue', async () => {
+      const uniqueId = Date.now()
+      const csvFilename = `s3-e2e-import-${uniqueId}.csv`
+      const csvPath = path.join(__dirname, 'uploads', csvFilename)
+
+      const csvContent = `title\n"S3 E2E Import 1"\n"S3 E2E Import 2"\n"S3 E2E Import 3"`
+      fs.writeFileSync(csvPath, csvContent)
+
+      await page.goto(s3ImportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
+
+      await saveDocAndAssert(page)
+
+      await expect(async () => {
+        await runJobsQueue({ serverURL })
+        const { docs } = await payload.find({
+          collection: postsWithS3ImportSlug as any,
+          where: {},
+          sort: '-createdAt',
+          limit: 1,
+        })
+        expect(docs[0]?.status).toBe('completed')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const posts = await payload.find({
+        collection: postsWithS3Slug,
+        where: {
+          title: { contains: 'S3 E2E Import' },
+        },
+      })
+
+      expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
+    })
+
+    test('should export to S3 via jobs queue and download file', async () => {
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 1' },
+      })
+      await payload.create({
+        collection: postsWithS3Slug,
+        data: { title: 'S3 E2E Export 2' },
+      })
+
+      await page.goto(s3ExportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await saveDocAndAssert(page, '#action-save')
+
+      await expect(async () => {
+        await runJobsQueue({ serverURL })
+        await page.reload()
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const downloadLink = page.locator('.file-details__main-detail a')
+      await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+      const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+      const downloadPath = await download.path()
+      const content = fs.readFileSync(downloadPath, 'utf8')
+
+      expect(content).toContain('S3 E2E Export 1')
+      expect(content).toContain('S3 E2E Export 2')
     })
   })
 
@@ -783,6 +832,7 @@ test.describe('Import Export Plugin', () => {
       postsWithLimitsExportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-export')
       postsWithLimitsImportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-import')
 
+      // Create 10 test documents (more than the limit of 5)
       for (let i = 0; i < 10; i++) {
         await payload.create({
           collection: 'posts-with-limits',
@@ -792,6 +842,7 @@ test.describe('Import Export Plugin', () => {
     })
 
     test.afterAll(async () => {
+      // Clean up test documents
       await payload.delete({
         collection: 'posts-with-limits',
         where: {
@@ -822,6 +873,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
+      // The export count should show 5 (the maxLimit), not 10
       const exportCount = page.locator('.export-preview__export-count')
       await expect(exportCount).toContainText('5 documents to export')
     })
@@ -837,12 +889,12 @@ test.describe('Import Export Plugin', () => {
       const createExportButton = page.locator('.popup__scroll-container button', {
         hasText: 'Export Posts With Limits',
       })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
 
       await expect(async () => {
-        await expect(createExportButton).toBeVisible()
-        await createExportButton.click()
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      }).toPass()
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('10')
@@ -908,10 +960,9 @@ test.describe('Import Export Plugin', () => {
       await page.goto(postsWithLimitsImportURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
-      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
-      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With Limits')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
@@ -929,71 +980,108 @@ test.describe('Import Export Plugin', () => {
     })
   })
 
-  test.describe('S3 Storage', () => {
-    test('should import CSV file stored in S3 via jobs queue', async () => {
-      const uniqueId = Date.now()
-      const csvFilename = `s3-e2e-import-${uniqueId}.csv`
-      const csvPath = path.join(__dirname, 'uploads', csvFilename)
+  test.describe('Dynamic User-Based Limits', () => {
+    let postsWithLimitsURL: AdminUrlUtil
+    let postsWithLimitsImportURL: AdminUrlUtil
 
-      const csvContent = `title\n"S3 E2E Import 1"\n"S3 E2E Import 2"\n"S3 E2E Import 3"`
-      fs.writeFileSync(csvPath, csvContent)
+    test.beforeAll(async () => {
+      postsWithLimitsURL = new AdminUrlUtil(serverURL, 'posts-with-limits')
+      postsWithLimitsImportURL = new AdminUrlUtil(serverURL, 'posts-with-limits-import')
 
-      await page.goto(s3ImportsURL.create)
-      await expect(page.locator('.collection-edit')).toBeVisible()
-
-      await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
-
-      // Collection field is disabled since this custom import only targets one collection
-      const collectionField = page.locator('#field-collectionSlug')
-      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
-      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With S3s')
-
-      await saveDocAndAssert(page)
-
-      await expect(async () => {
-        await runJobsQueue({ serverURL })
-        const { docs } = await payload.find({
-          collection: postsWithS3ImportSlug as any,
-          limit: 1,
-          sort: '-createdAt',
-          where: {},
-        })
-        expect(docs[0]?.status).toBe('completed')
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-
-      const posts = await payload.find({
-        collection: postsWithS3Slug,
-        where: {
-          title: { contains: 'S3 E2E Import' },
-        },
+      // Update the dev user's limit to 7
+      const devUsers = await payload.find({
+        collection: 'users',
+        where: { email: { equals: 'dev@payloadcms.com' } },
       })
 
-      expect(posts.totalDocs).toBeGreaterThanOrEqual(3)
+      await payload.update({
+        id: devUsers.docs[0]!.id,
+        collection: 'users',
+        data: { limit: 7 },
+      })
+
+      // Create 10 test documents (more than both limits)
+      for (let i = 0; i < 10; i++) {
+        await payload.create({
+          collection: 'posts-with-limits',
+          data: { title: `E2E Dynamic Limit Post ${i}` },
+        })
+      }
     })
 
-    test('should export to S3 via jobs queue and download file', async () => {
-      await payload.create({
-        collection: postsWithS3Slug,
-        data: { title: 'S3 E2E Export 1' },
-      })
-      await payload.create({
-        collection: postsWithS3Slug,
-        data: { title: 'S3 E2E Export 2' },
+    test.afterAll(async () => {
+      // Reset the dev user's limit
+      const devUsers = await payload.find({
+        collection: 'users',
+        where: { email: { equals: 'dev@payloadcms.com' } },
       })
 
-      await page.goto(s3ExportsURL.create)
-      await expect(page.locator('.collection-edit')).toBeVisible()
+      await payload.update({
+        id: devUsers.docs[0]!.id,
+        collection: 'users',
+        data: { limit: null as unknown as number },
+      })
 
-      await saveDocAndAssert(page, '#action-save')
+      // Clean up test documents
+      await payload.delete({
+        collection: 'posts-with-limits',
+        where: {
+          title: { contains: 'E2E Dynamic Limit Post' },
+        },
+      })
+    })
+
+    test('should show dynamic maxLimit of 7 in export preview when user limit is 7', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
 
       await expect(async () => {
-        await runJobsQueue({ serverURL })
-        await page.reload()
-        const exportFilename = page.locator('.file-details__main-detail')
-        await expect(exportFilename).toBeVisible()
-        await expect(exportFilename).toContainText('.csv')
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // The export count should show 7 (the dynamic user limit), not 5
+      const exportCount = page.locator('.export-preview__export-count')
+      await expect(exportCount).toContainText('7 documents to export')
+    })
+
+    test('should export exactly 7 documents with dynamic user limit', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await saveDocAndAssert(page, '#action-save')
+      await page.reload()
+
+      const exportFilename = page.locator('.file-details__main-detail')
+      await expect(exportFilename).toBeVisible()
+      await expect(exportFilename).toContainText('.csv')
 
       const downloadLink = page.locator('.file-details__main-detail a')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -1002,9 +1090,75 @@ test.describe('Import Export Plugin', () => {
 
       const downloadPath = await download.path()
       const content = fs.readFileSync(downloadPath, 'utf8')
+      const lines = content.split('\n').filter((line) => line.trim())
 
-      expect(content).toContain('S3 E2E Export 1')
-      expect(content).toContain('S3 E2E Export 2')
+      // 7 data rows + 1 header row = 8 lines
+      expect(lines.length).toBe(8)
+    })
+
+    test('should show limit capped to 7 when user limit exceeds dynamic maxLimit', async () => {
+      await page.goto(postsWithLimitsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts With Limits',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      const limitField = page.locator('input[name="limit"]')
+      await limitField.fill('20')
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const exportCount = page.locator('.export-preview__export-count')
+      await expect(exportCount).toContainText('7 documents to export')
+
+      const limitCapped = page.locator('.export-preview__limit-capped')
+      await expect(limitCapped).toBeVisible()
+      await expect(limitCapped).toContainText('Limit capped to maximum of 7')
+
+      const tableRows = page.locator('.export-preview table tbody tr')
+      await expect(tableRows).toHaveCount(7)
+    })
+
+    test('should still show import limit of 5 despite user limit of 7', async () => {
+      const csvContent = Array.from(
+        { length: 10 },
+        (_, i) => `"E2E Dynamic Import Test ${i}"`,
+      ).join('\n')
+      const csvFile = `title\n${csvContent}`
+
+      await page.goto(postsWithLimitsImportURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("posts-with-limits")').click()
+
+      const fileInput = page.locator('input[type="file"]')
+      await fileInput.setInputFiles({
+        name: 'dynamic-limit-import-test.csv',
+        buffer: Buffer.from(csvFile),
+        mimeType: 'text/csv',
+      })
+
+      await expect(async () => {
+        await expect(page.locator('.import-preview__import-count')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const importCount = page.locator('.import-preview__import-count')
+      await expect(importCount).toContainText('10 documents to import')
     })
   })
 })

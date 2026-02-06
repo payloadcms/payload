@@ -164,7 +164,7 @@ export const flattenObject = ({
 
     // Track which timezone companion fields were explicitly selected
     // Convert dotted notation to underscore for matching against flattened keys
-    const explicitlySelectedTzFields = new Set(
+    const explicitlySelectedTimezoneFields = new Set(
       fields
         .filter((f) => {
           const underscored = f.replace(/\./g, '_')
@@ -185,7 +185,7 @@ export const flattenObject = ({
         }
 
         // Skip auto-generated timezone companion fields unless explicitly selected
-        if (timezoneCompanionFields?.has(key) && !explicitlySelectedTzFields.has(key)) {
+        if (timezoneCompanionFields?.has(key) && !explicitlySelectedTimezoneFields.has(key)) {
           continue
         }
 

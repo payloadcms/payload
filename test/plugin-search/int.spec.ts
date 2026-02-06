@@ -5,10 +5,10 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload

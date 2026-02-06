@@ -158,10 +158,36 @@ export default buildConfigWithDefaults({
           },
         },
         {
+          slug: postsWithS3Slug,
+          export: {
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-s3-export'
+              if (collection.admin) {
+                collection.admin.group = 'S3 Tests'
+              }
+              return collection
+            },
+          },
+          import: {
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-s3-import'
+              if (collection.admin) {
+                collection.admin.group = 'S3 Tests'
+              }
+              return collection
+            },
+          },
+        },
+        {
           slug: 'posts-with-limits',
           export: {
             disableJobsQueue: true,
-            limit: () => 5,
+            limit: ({ req }) => {
+              if (req.user?.limit) {
+                return req.user.limit
+              }
+              return 5
+            },
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-with-limits-export'
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
@@ -183,27 +209,6 @@ export default buildConfigWithDefaults({
         },
         {
           slug: customIdPagesSlug,
-        },
-        {
-          slug: postsWithS3Slug,
-          export: {
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-s3-export'
-              if (collection.admin) {
-                collection.admin.group = 'S3 Tests'
-              }
-              return collection
-            },
-          },
-          import: {
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-s3-import'
-              if (collection.admin) {
-                collection.admin.group = 'S3 Tests'
-              }
-              return collection
-            },
-          },
         },
       ],
     }),

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "3.73.0",
+  "version": "3.75.0",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",

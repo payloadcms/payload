@@ -143,7 +143,8 @@ export const importExportPlugin =
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
 
-      // Store disabled field accessors and export format in admin.custom for UI
+      // Store disabled field accessors and export format in the admin config for use in the UI
+      // Note: limits are stored in collection.custom (server-only) because they can be functions
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {

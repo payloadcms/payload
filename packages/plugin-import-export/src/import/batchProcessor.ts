@@ -193,6 +193,7 @@ async function processImportBatch({
             })
           }
 
+          // Remove _status from data - it's controlled via draft option
           delete createData._status
         }
 
@@ -419,7 +420,6 @@ async function processImportBatch({
                 user,
               })
 
-              // Debug: log what was returned
               if (req.payload.config.debug && savedDocument) {
                 req.payload.logger.info({
                   id: savedDocument.id,
@@ -460,7 +460,8 @@ async function processImportBatch({
             const statusValue = createData._status || options.defaultVersionStatus
             const isPublished = statusValue !== 'draft'
             draftOption = !isPublished
-            delete createData._status // Remove _status from data - it's controlled via draft option
+            // Remove _status from data - it's controlled via draft option
+            delete createData._status
           }
 
           // Check if we have multi-locale data and extract it

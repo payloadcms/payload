@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "3.73.0",
+  "version": "3.75.0",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -362,8 +362,8 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {

@@ -263,6 +263,7 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+!.vscode/mcp.json
 
 # Local History for Visual Studio Code
 .history/
@@ -353,3 +354,6 @@ licenses.csv
 
 # SQLite DB
 payload.db
+
+# Screenshots created by Playwright MCP
+.playwright-mcp
