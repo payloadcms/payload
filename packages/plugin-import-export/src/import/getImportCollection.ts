@@ -5,12 +5,12 @@ import type {
   Config,
 } from 'payload'
 
-import fs from 'fs'
-import path from 'path'
+import { FileRetrievalError } from 'payload'
 
 import type { ImportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
+import { getFileFromDoc } from '../utilities/getFileFromDoc.js'
 import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
@@ -84,27 +84,33 @@ export const getImportCollection = ({
 
       try {
         // Get file data from the uploaded document
+        // First try req.file which is available during the same request (especially important for cloud storage)
+        // Fall back to getFileFromDoc for cases where req.file isn't available
         let fileData: Buffer
         let fileMimetype: string
 
-        if (doc.url && doc.url.startsWith('http')) {
-          // File has been uploaded to external storage (S3, etc.) - fetch it
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
+        if (req.file?.data) {
+          fileData = req.file.data
+          fileMimetype = req.file.mimetype || doc.mimeType
+
+          if (!fileMimetype) {
+            throw new FileRetrievalError(
+              req.t,
+              `Unable to determine mimetype for file: ${doc.filename}`,
+            )
           }
-          fileData = Buffer.from(await response.arrayBuffer())
-          fileMimetype = doc.mimeType || 'text/csv'
         } else {
-          // File is stored locally - read from filesystem
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-          fileMimetype = doc.mimeType || 'text/csv'
+          const fileFromDoc = await getFileFromDoc({
+            collectionConfig,
+            doc: {
+              filename: doc.filename,
+              mimeType: doc.mimeType,
+              url: doc.url,
+            },
+            req,
+          })
+          fileData = fileFromDoc.data
+          fileMimetype = fileFromDoc.mimetype
         }
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
@@ -243,30 +249,14 @@ export const getImportCollection = ({
     })
   } else {
     // When jobs queue is enabled, queue the import as a job
+    // The job handler will fetch the file from storage using getFileFromDoc
     afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
       if (operation !== 'create') {
         return
       }
 
       try {
-        // Get file data for job - need to read from disk/URL since req.file is not available in afterChange
-        let fileData: Buffer
-        if (doc.url && doc.url.startsWith('http')) {
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
-          }
-          fileData = Buffer.from(await response.arrayBuffer())
-        } else {
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-        }
-
+        // Resolve maxLimit ahead of time since it may involve async config resolution
         const targetCollection = req.payload.collections[doc.collectionSlug]
         const importLimitConfig: Limit | undefined =
           targetCollection?.config.custom?.['plugin-import-export']?.importLimit
@@ -275,23 +265,13 @@ export const getImportCollection = ({
           req,
         })
 
+        // Only pass minimal data to the job - the handler will fetch the file from storage
         const input: ImportTaskInput = {
-          name: doc.filename,
           batchSize,
-          collectionSlug: doc.collectionSlug,
           debug: pluginConfig.debug,
           defaultVersionStatus,
-          file: {
-            name: doc.filename,
-            // Convert to base64 for job serialization - will be converted back to Buffer in task handler
-            data: fileData.toString('base64') as unknown as Buffer,
-            mimetype: doc.mimeType || 'text/csv',
-          },
-          format: doc.mimeType === 'text/csv' ? 'csv' : 'json',
+          importCollection: collectionConfig.slug,
           importId: doc.id,
-          importMode: doc.importMode || 'create',
-          importsCollection: collectionConfig.slug,
-          matchField: doc.matchField,
           maxLimit,
           userCollection: req.user?.collection || req?.user?.user?.collection,
           userID: req?.user?.id || req?.user?.user?.id,

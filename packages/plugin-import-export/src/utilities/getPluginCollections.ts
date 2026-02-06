@@ -98,6 +98,14 @@ export const getPluginCollections = async ({
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customExport.slug !== baseExportCollection.slug) {
+          // Store the source collection slug so CollectionField can use it as default
+          customExport.admin = {
+            ...customExport.admin,
+            custom: {
+              ...customExport.admin?.custom,
+              defaultCollectionSlug: collectionConfig.slug,
+            },
+          }
           exportCollections.push(customExport)
           customExportSlugMap.set(collectionConfig.slug, customExport.slug)
         } else {
@@ -121,6 +129,14 @@ export const getPluginCollections = async ({
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
         if (customImport.slug !== baseImportCollection.slug) {
+          // Store the source collection slug so CollectionField can use it as default
+          customImport.admin = {
+            ...customImport.admin,
+            custom: {
+              ...customImport.admin?.custom,
+              defaultCollectionSlug: collectionConfig.slug,
+            },
+          }
           importCollections.push(customImport)
           // Map this target collection to its custom import collection
           customImportSlugMap.set(collectionConfig.slug, customImport.slug)

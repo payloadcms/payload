@@ -27,7 +27,7 @@ export type Export = {
    */
   debug?: boolean
   drafts?: 'no' | 'yes'
-  exportsCollection: string
+  exportCollection: string
   fields?: string[]
   format: 'csv' | 'json'
   globals?: string[]
@@ -65,7 +65,7 @@ export const createExport = async (args: CreateExportArgs) => {
     debug = false,
     download,
     drafts: draftsFromInput,
-    exportsCollection,
+    exportCollection,
     fields,
     format,
     limit: incomingLimit,
@@ -513,7 +513,7 @@ export const createExport = async (args: CreateExportArgs) => {
     }
     await req.payload.update({
       id,
-      collection: exportsCollection,
+      collection: exportCollection,
       data: {},
       file: {
         name,
