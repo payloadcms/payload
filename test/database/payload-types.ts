@@ -89,6 +89,8 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'required-rel-parent': RequiredRelParent;
+    'required-rel-child': RequiredRelChild;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +121,8 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'required-rel-parent': RequiredRelParentSelect<false> | RequiredRelParentSelect<true>;
+    'required-rel-child': RequiredRelChildSelect<false> | RequiredRelChildSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -695,6 +699,27 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-rel-parent".
+ */
+export interface RequiredRelParent {
+  id: string;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-rel-child".
+ */
+export interface RequiredRelChild {
+  id: string;
+  title: string;
+  parent: string | RequiredRelParent;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -829,6 +854,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'unique-fields';
         value: string | UniqueField;
+      } | null)
+    | ({
+        relationTo: 'required-rel-parent';
+        value: string | RequiredRelParent;
+      } | null)
+    | ({
+        relationTo: 'required-rel-child';
+        value: string | RequiredRelChild;
       } | null)
     | ({
         relationTo: 'users';
@@ -1327,6 +1360,25 @@ export interface BlocksDocsSelect<T extends boolean = true> {
  */
 export interface UniqueFieldsSelect<T extends boolean = true> {
   slugField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-rel-parent_select".
+ */
+export interface RequiredRelParentSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-rel-child_select".
+ */
+export interface RequiredRelChildSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
   updatedAt?: T;
   createdAt?: T;
 }

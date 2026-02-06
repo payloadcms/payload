@@ -2171,6 +2171,34 @@ describe('database', () => {
       }
     })
 
+    describe('Required relationship onDelete behavior', () => {
+      it('should handle deleting a parent referenced by required relationship', async () => {
+        // Create a parent document
+        const parent = await payload.create({
+          collection: 'required-rel-parent',
+          data: { name: 'Test Parent' },
+        })
+
+        // Create a child that has a required relationship to parent
+        await payload.create({
+          collection: 'required-rel-child',
+          data: { title: 'Test Child', parent: parent.id },
+        })
+
+        // Try to delete the parent
+        // BUG: This fails with "null value in column 'parent_id' violates not-null constraint"
+        // because the schema uses onDelete: 'set null' but the column has NOT NULL constraint
+        // Expected: Should either cascade delete, restrict, or provide a clear error
+        const result = await payload.delete({
+          collection: 'required-rel-parent',
+          id: parent.id,
+        })
+
+        // If we get here, the delete succeeded (expected behavior after fix)
+        expect(result.id).toBe(parent.id)
+      })
+    })
+
     it('should CRUD point field', async () => {
       const result = await payload.create({
         collection: 'default-values',
