@@ -76,6 +76,13 @@ export function Dropzone({
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         addFiles(e.dataTransfer.files)
         setDragging(false)
+
+        try {
+          e.dataTransfer.clearData()
+        } catch {
+          // Firefox throws NoModificationAllowedError when calling clearData() on a protected DataTransfer during drop events
+          // https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/clearData#exceptions
+        }
       }
     },
     [addFiles],
