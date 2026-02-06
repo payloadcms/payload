@@ -1749,7 +1749,7 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.10
+        specifier: ^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.10 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0
         version: 15.4.10(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
       object-to-formdata:
         specifier: 4.5.1
@@ -1856,7 +1856,7 @@ importers:
         version: 16.8.1
       next:
         specifier: 15.4.10
-        version: 15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
+        version: 15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -2197,7 +2197,7 @@ importers:
         version: 16.4.7
       geist:
         specifier: ^1.3.0
-        version: 1.4.2(next@15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))
+        version: 1.4.2(next@15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -2206,10 +2206,10 @@ importers:
         version: 0.378.0(react@19.2.1)
       next:
         specifier: 15.4.10
-        version: 15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
+        version: 15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
       next-sitemap:
         specifier: ^4.2.3
-        version: 4.2.3(next@15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))
+        version: 4.2.3(next@15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4))
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -11934,7 +11934,6 @@ packages:
   next@15.4.10:
     resolution: {integrity: sha512-itVlc79QjpKMFMRhP+kbGKaSG/gZM6RCvwhEbwmCNF06CdDiNaoHcbeg0PqkEa2GOcn8KJ0nnc7+yL7EjoYLHQ==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
-    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -18414,7 +18413,7 @@ snapshots:
 
   '@img/sharp-wasm32@0.34.3':
     dependencies:
-      '@emnapi/runtime': 1.4.5
+      '@emnapi/runtime': 1.7.1
     optional: true
 
   '@img/sharp-win32-arm64@0.34.2':
@@ -24706,6 +24705,10 @@ snapshots:
       - encoding
       - supports-color
 
+  geist@1.4.2(next@15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)):
+    dependencies:
+      next: 15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
+
   geist@1.4.2(next@15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)):
     dependencies:
       next: 15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
@@ -26323,13 +26326,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next-sitemap@4.2.3(next@15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)):
+  next-sitemap@4.2.3(next@15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.11
       fast-glob: 3.3.2
       minimist: 1.2.8
-      next: 15.4.10(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
+      next: 15.4.10(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(sass@1.77.4)
 
   next-themes@0.4.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
