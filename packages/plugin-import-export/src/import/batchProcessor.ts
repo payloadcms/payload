@@ -149,11 +149,11 @@ async function processImportBatch({
     successful: [],
   }
 
-  const collectionConfig = req.payload.collections[collectionSlug]?.config
+  const collectionEntry = req.payload.collections[collectionSlug]
+
+  const collectionConfig = collectionEntry?.config
   const collectionHasVersions = Boolean(collectionConfig?.versions)
-  const hasCustomIdField = collectionConfig?.fields.some(
-    (field) => 'name' in field && field.name === 'id',
-  )
+  const hasCustomIdField = Boolean(collectionEntry?.customIDType)
 
   const configuredLocales = req.payload.config.localization
     ? req.payload.config.localization.localeCodes

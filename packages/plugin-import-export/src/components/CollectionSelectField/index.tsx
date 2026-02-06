@@ -4,6 +4,8 @@ import type { TextFieldClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
+  FieldDescription,
+  FieldError,
   FieldLabel,
   ReactSelect,
   useConfig,
@@ -31,7 +33,7 @@ export function CollectionSelectField({ textFieldProps }: CollectionSelectFieldP
 
   const { id: docId, docConfig, initialData } = useDocumentInfo()
   const { config } = useConfig()
-  const { setValue, value } = useField<string>({ path })
+  const { setValue, showError, value } = useField<string>({ path })
   const { collection: collectionFromContext } = useImportExport()
   const { i18n } = useTranslation()
 
@@ -125,18 +127,26 @@ export function CollectionSelectField({ textFieldProps }: CollectionSelectFieldP
   )
 
   return (
-    <div className="field-type select" id={fieldId}>
+    <div
+      className={['field-type', 'select', showError && 'error', isReadOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
+      id={fieldId}
+    >
       <FieldLabel label={label} path={path} required={required} />
       <div className="field-type__wrap">
+        <FieldError path={path} showError={showError} />
         <ReactSelect
           disabled={isReadOnly}
           isClearable={false}
           isSearchable={!isReadOnly && options.length > 5}
           onChange={handleChange}
           options={options}
+          showError={showError}
           value={selectedOption}
         />
       </div>
+      <FieldDescription description={field.admin?.description} path={path} />
     </div>
   )
 }
