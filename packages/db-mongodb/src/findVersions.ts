@@ -5,23 +5,32 @@ import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {}, select, skip, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    req = {},
+    select,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const Model = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const session = await getSession(this, req)
-  const options: QueryOptions = {
-    limit,
-    session,
-    skip,
-  }
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   let hasNearConstraint = false
 
@@ -33,6 +42,7 @@ export const findVersions: FindVersions = async function findVersions(
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
@@ -41,11 +51,23 @@ export const findVersions: FindVersions = async function findVersions(
     })
   }
 
-  const query = await Model.buildQuery({
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+
+  const query = await buildQuery({
+    adapter: this,
+    fields,
     locale,
-    payload: this.payload,
     where,
   })
+
+  const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -58,7 +80,7 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+      fields,
       select,
     }),
     sort,
@@ -91,7 +113,8 @@ export const findVersions: FindVersions = async function findVersions(
   if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
@@ -100,13 +123,13 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    operation: 'read',
+  })
+
+  return result
 }

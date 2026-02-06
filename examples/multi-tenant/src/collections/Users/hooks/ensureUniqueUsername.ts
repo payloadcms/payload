@@ -1,8 +1,11 @@
-import type { FieldHook } from 'payload'
+import type { FieldHook, Where } from 'payload'
 
 import { ValidationError } from 'payload'
 
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { getUserTenantIDs } from '../../../utilities/getUserTenantIDs'
+import { extractID } from '@/utilities/extractID'
+import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
+import { getCollectionIDType } from '@/utilities/getCollectionIDType'
 
 export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
@@ -10,36 +13,42 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     return value
   }
 
-  const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
-  const currentTenantID =
-    typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
-  const tenantIDToMatch = incomingTenantID || currentTenantID
+  const constraints: Where[] = [
+    {
+      username: {
+        equals: value,
+      },
+    },
+  ]
+
+  const selectedTenant = getTenantFromCookie(
+    req.headers,
+    getCollectionIDType({ payload: req.payload, collectionSlug: 'tenants' }),
+  )
+
+  if (selectedTenant) {
+    constraints.push({
+      'tenants.tenant': {
+        equals: selectedTenant,
+      },
+    })
+  }
 
   const findDuplicateUsers = await req.payload.find({
     collection: 'users',
     where: {
-      and: [
-        {
-          'tenants.tenant': {
-            equals: tenantIDToMatch,
-          },
-        },
-        {
-          username: {
-            equals: value,
-          },
-        },
-      ],
+      and: constraints,
     },
   })
 
   if (findDuplicateUsers.docs.length > 0 && req.user) {
-    const tenantIDs = getTenantAccessIDs(req.user)
+    const tenantIDs = getUserTenantIDs(req.user)
     // if the user is an admin or has access to more than 1 tenant
     // provide a more specific error message
     if (req.user.roles?.includes('super-admin') || tenantIDs.length > 1) {
       const attemptedTenantChange = await req.payload.findByID({
-        id: tenantIDToMatch,
+        // @ts-ignore - selectedTenant will match DB ID type
+        id: selectedTenant,
         collection: 'tenants',
       })
 

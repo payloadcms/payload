@@ -1,16 +1,16 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useSearchParams } from 'next/navigation.js'
+import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { useLocale } from '../../providers/Locale/index.js'
+import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
+import { LocalizerLabel } from './LocalizerLabel/index.js'
 
 const baseClass = 'localizer'
 
@@ -18,9 +18,14 @@ export const Localizer: React.FC<{
   className?: string
 }> = (props) => {
   const { className } = props
-  const { config } = useConfig()
-  const { localization } = config
-  const searchParams = useSearchParams()
+  const {
+    config: { localization },
+  } = useConfig()
+
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+
+  const { setLocaleIsLoading } = useLocaleLoading()
 
   const { i18n } = useTranslation()
   const locale = useLocale()
@@ -41,18 +46,47 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.Button
                     active={locale.code === localeOption.code}
-                    href={qs.stringify(
-                      {
-                        ...parseSearchParams(searchParams),
-                        locale: localeOption.code,
-                      },
-                      { addQueryPrefix: true },
-                    )}
+                    disabled={locale.code === localeOption.code}
                     key={localeOption.code}
-                    onClick={close}
+                    onClick={() => {
+                      setLocaleIsLoading(true)
+                      close()
+
+                      // can't use `useSearchParams` here because it is stale due to `window.history.pushState` in `ListQueryProvider`
+                      const searchParams = new URLSearchParams(window.location.search)
+
+                      const url = qs.stringify(
+                        {
+                          ...qs.parse(searchParams.toString(), {
+                            depth: 10,
+                            ignoreQueryPrefix: true,
+                          }),
+                          locale: localeOption.code,
+                        },
+                        { addQueryPrefix: true },
+                      )
+
+                      startRouteTransition(() => {
+                        router.push(url)
+                      })
+                    }}
                   >
-                    {localeOptionLabel}
-                    {localeOptionLabel !== localeOption.code && ` (${localeOption.code})`}
+                    {localeOptionLabel !== localeOption.code ? (
+                      <Fragment>
+                        {localeOptionLabel}
+                        &nbsp;
+                        <span
+                          className={`${baseClass}__locale-code`}
+                          data-locale={localeOption.code}
+                        >
+                          {`(${localeOption.code})`}
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <span className={`${baseClass}__locale-code`} data-locale={localeOption.code}>
+                        {localeOptionLabel}
+                      </span>
+                    )}
                   </PopupList.Button>
                 )
               })}

@@ -1,0 +1,39 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .preview-btn {
+    background: none;
+    border: none;
+    border: 1px solid;
+    border-color: var(--theme-elevation-100);
+    border-radius: var(--style-radius-s);
+    line-height: var(--btn-line-height);
+    font-size: var(--base-body-size);
+    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.4);
+    cursor: pointer;
+    transition-property: border, color, background;
+    transition-duration: 100ms;
+    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    height: calc(var(--base) * 1.6);
+    width: calc(var(--base) * 1.6);
+    position: relative;
+
+    .icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      .stroke {
+        transition-property: stroke;
+        transition-duration: 100ms;
+        transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+      }
+    }
+
+    &:hover {
+      border-color: var(--theme-elevation-300);
+      background-color: var(--theme-elevation-100);
+    }
+  }
+}

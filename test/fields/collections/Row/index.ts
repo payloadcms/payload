@@ -137,6 +137,78 @@ const RowFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'leftColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'leftTextBlock',
+              fields: [
+                {
+                  name: 'leftText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'rightColumn',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'rightTextBlock',
+              fields: [
+                {
+                  name: 'rightText',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'arrayLeftColumn',
+          type: 'array',
+          admin: {
+            width: '50%',
+          },
+          fields: [
+            {
+              name: 'leftArrayChild',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'arrayRightColumn',
+          type: 'array',
+          fields: [
+            {
+              name: 'rightArrayChild',
+              type: 'text',
+            },
+          ],
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
 }
 

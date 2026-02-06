@@ -2,8 +2,8 @@ import path from 'path'
 import { getPayload, type SanitizedConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 
@@ -13,7 +13,7 @@ const dirname = path.dirname(filename)
 const writeDBAdapter = process.env.WRITE_DB_ADAPTER !== 'false'
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE || 'true'
 
-if (process.env.PAYLOAD_DATABASE === 'mongodb') {
+if (process.env.PAYLOAD_DATABASE === 'mongodb' || process.env.PAYLOAD_DATABASE === 'firestore') {
   throw new Error('Not supported')
 }
 

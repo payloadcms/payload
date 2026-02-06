@@ -21,7 +21,7 @@ export const seedHandler: PayloadHandler = async (req): Promise<Response> => {
     return Response.json({ success: true })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    payload.logger.error(message)
+    payload.logger.error({ err: error, message: 'Error seeding data' })
     return Response.json({ error: message }, { status: 500 })
   }
 }

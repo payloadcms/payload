@@ -27,7 +27,7 @@ export async function initTransaction(
         req.transactionID = transactionID
       }
 
-      return transactionID
+      return transactionID!
     })
     return !!(await req.transactionID)
   }

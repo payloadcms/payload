@@ -1,17 +1,15 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-// TODO: abstract the `next/navigation` dependency out from this component
 import { useRouter } from 'next/navigation.js'
-import React from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React, { useCallback } from 'react'
 
-import { Button } from '../../elements/Button/index.js'
+import type { OnCancel } from '../ConfirmationModal/index.js'
+
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import './index.scss'
-
-const baseClass = 'stay-logged-in'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 export const stayLoggedInModalSlug = 'stay-logged-in'
 
@@ -28,43 +26,33 @@ export const StayLoggedInModal: React.FC = () => {
     routes: { admin: adminRoute },
   } = config
 
-  const { toggleModal } = useModal()
   const { t } = useTranslation()
+  const { startRouteTransition } = useRouteTransition()
+
+  const onConfirm = useCallback(() => {
+    return startRouteTransition(() =>
+      router.push(
+        formatAdminURL({
+          adminRoute,
+          path: logoutRoute,
+        }),
+      ),
+    )
+  }, [router, startRouteTransition, adminRoute, logoutRoute])
+
+  const onCancel: OnCancel = useCallback(() => {
+    refreshCookie()
+  }, [refreshCookie])
 
   return (
-    <Modal className={baseClass} slug={stayLoggedInModalSlug}>
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          <h1>{t('authentication:stayLoggedIn')}</h1>
-          <p>{t('authentication:youAreInactive')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button
-            buttonStyle="secondary"
-            onClick={() => {
-              toggleModal(stayLoggedInModalSlug)
-              router.push(
-                formatAdminURL({
-                  adminRoute,
-                  path: logoutRoute,
-                }),
-              )
-            }}
-            size="large"
-          >
-            {t('authentication:logOut')}
-          </Button>
-          <Button
-            onClick={() => {
-              refreshCookie()
-              toggleModal(stayLoggedInModalSlug)
-            }}
-            size="large"
-          >
-            {t('authentication:stayLoggedIn')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+    <ConfirmationModal
+      body={t('authentication:youAreInactive')}
+      cancelLabel={t('authentication:stayLoggedIn')}
+      confirmLabel={t('authentication:logOut')}
+      heading={t('authentication:stayLoggedIn')}
+      modalSlug={stayLoggedInModalSlug}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   )
 }

@@ -28,59 +28,61 @@ export const MyDateField: Field = {
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                 |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
-| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                             |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                       |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                          |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
-| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
-| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
-| **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                               |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
-| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
+| Option                 | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                         |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                                                                                 |
+| **`index`**            | Build an [index](../database/indexes) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.                                                                                                                                 |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More details](/docs/fields/overview#validation).                                                                                                                                                   |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                                         |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                                                   |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                                      |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                                        |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                                                                                                                           |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                                                                                                                         |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                                     |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                                           |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
+| **`timezone`** \*      | Set to `true` to enable timezone selection on this field. [More details](#timezones).                                                                                                                                                                                                                   |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Date Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Date Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
 
 export const MyDateField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Date Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Date Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Property                       | Description                                                                                                                            |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | **`placeholder`**              | Placeholder text for the field.                                                                                                        |
 | **`date`**                     | Pass options to customize date field appearance.                                                                                       |
 | **`date.displayFormat`**       | Format date to be shown in field **cell**.                                                                                             |
-| **`date.pickerAppearance`** * | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                            |
-| **`date.monthsToShow`** *     | Number of months to display max is 2. Defaults to 1.                                                                                   |
-| **`date.minDate`** *          | Min date value to allow.                                                                                                               |
-| **`date.maxDate`** *          | Max date value to allow.                                                                                                               |
-| **`date.minTime`** *          | Min time value to allow.                                                                                                               |
-| **`date.maxTime`** *          | Max date value to allow.                                                                                                               |
-| **`date.overrides`** *        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md) |
-| **`date.timeIntervals`** *    | Time intervals to display. Defaults to 30 minutes.                                                                                     |
-| **`date.timeFormat`** *       | Determines time format. Defaults to `'h:mm aa'`.                                                                                       |
+| **`date.pickerAppearance`** \* | Determines the appearance of the datepicker: `dayAndTime` `timeOnly` `dayOnly` `monthOnly`.                                            |
+| **`date.monthsToShow`** \*     | Number of months to display max is 2. Defaults to 1.                                                                                   |
+| **`date.minDate`** \*          | Min date value to allow.                                                                                                               |
+| **`date.maxDate`** \*          | Max date value to allow.                                                                                                               |
+| **`date.minTime`** \*          | Min time value to allow.                                                                                                               |
+| **`date.maxTime`** \*          | Max date value to allow.                                                                                                               |
+| **`date.overrides`** \*        | Pass any valid props directly to the [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md) |
+| **`date.timeIntervals`** \*    | Time intervals to display. Defaults to 30 minutes.                                                                                     |
+| **`date.timeFormat`** \*       | Determines time format. Defaults to `'h:mm aa'`.                                                                                       |
 
-_* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)._
+_\* This property is passed directly to [react-datepicker](https://github.com/Hacker0x01/react-datepicker/blob/master/docs/datepicker.md)._
 
 ### Display Format and Picker Appearance
 
@@ -93,8 +95,6 @@ These properties only affect how the date is displayed in the UI. The full date 
 When only `pickerAppearance` is set, an equivalent format will be rendered in the date field cell. To overwrite this format, set `displayFormat`.
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -135,3 +135,241 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { DateTimeField } from '@payloadcms/ui'
+import type { DateFieldServerComponent } from 'payload'
+
+export const CustomDateFieldServer: DateFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <DateTimeField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { DateTimeField } from '@payloadcms/ui'
+import type { DateFieldClientComponent } from 'payload'
+
+export const CustomDateFieldClient: DateFieldClientComponent = (props) => {
+  return <DateTimeField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { DateFieldLabelServerComponent } from 'payload'
+
+export const CustomDateFieldLabelServer: DateFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { DateFieldLabelClientComponent } from 'payload'
+
+export const CustomDateFieldLabelClient: DateFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
+
+## Timezones
+
+To enable timezone selection on a Date field, set the `timezone` property to `true`:
+
+```ts
+{
+  name: 'date',
+  type: 'date',
+  timezone: true,
+}
+```
+
+This will add a dropdown to the date picker that allows users to select a timezone. The selected timezone will be saved in the database along with the date in a new column named `date_tz`.
+
+You can customise the available list of timezones in the [global admin config](../admin/overview#timezones) or on the field config itself which accepts the following config as well:
+
+| Property             | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| `defaultTimezone`    | A value for the default timezone to be set.                                              |
+| `supportedTimezones` | An array of supported timezones with label and value object.                             |
+| `required`           | If true, the timezone selection will be required even if the date is not.                |
+| `override`           | A function to customize the generated timezone field. [More details](#timezone-override) |
+
+```ts
+{
+  name: 'date',
+  type: 'date',
+  timezone: {
+    defaultTimezone: 'America/New_York',
+    supportedTimezones: [
+      { label: 'New York', value: 'America/New_York' },
+      { label: 'Los Angeles', value: 'America/Los_Angeles' },
+      { label: 'London', value: 'Europe/London' },
+    ],
+  },
+}
+```
+
+<Banner type="info">
+  **Good to know:**
+  The date itself will be stored in UTC so it's up to you to handle the conversion to the user's timezone when displaying the date in your frontend.
+
+Dates without a specific time are normalised to 12:00 in the selected timezone.
+
+</Banner>
+
+### Timezone Override
+
+The `override` function allows you to customize the auto-generated timezone select field at a granular level. This is useful when you need to modify admin options like visibility, descriptions, or other field properties.
+
+```ts
+{
+  name: 'publishedAt',
+  type: 'date',
+  label: 'Published At',
+  timezone: {
+    override: ({ baseField }) => ({
+      ...baseField,
+      admin: {
+        ...baseField.admin,
+        disableListColumn: true, // Hide from list view columns
+      },
+    }),
+  },
+}
+```
+
+The `override` function receives an object with `baseField` (the default timezone select field) and must return a valid field configuration. The base field includes:
+
+- `name`: The timezone field name (e.g., `publishedAt_tz`)
+- `type`: Always `'select'`
+- `options`: The available timezone options
+- `defaultValue`: The default timezone value
+- `required`: Whether the timezone is required
+- `label`: Auto-generated from the parent field's label (e.g., "Published At Tz")
+- `admin.hidden`: `true` by default
+
+<Banner type="info">
+  We recommend changing the available options only via the supportedTimezones
+  config so that the right validations are run against your timezones.
+</Banner>
+
+### Custom UTC Offsets
+
+In addition to IANA timezone names (like `America/New_York`), you can also use fixed UTC offsets in the `±HH:mm` format:
+
+```ts
+{
+  name: 'eventTime',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'UTC+5:30 (India)', value: '+05:30' },
+      { label: 'UTC-8 (Pacific)', value: '-08:00' },
+      { label: 'UTC+0', value: '+00:00' },
+    ],
+  },
+}
+```
+
+You can also mix IANA timezones with custom UTC offsets:
+
+```ts
+{
+  name: 'scheduledAt',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'New York', value: 'America/New_York' },
+      { label: 'UTC+5:30', value: '+05:30' },
+      { label: 'UTC', value: 'UTC' },
+    ],
+  },
+}
+```
+
+<Banner type="info">
+  Custom UTC offsets are fixed and do not account for daylight saving time (DST)
+  adjustments. If you need automatic DST handling, use IANA timezone names
+  instead (e.g., `America/New_York` rather than `-05:00`).
+</Banner>
+
+#### GraphQL Enum Names
+
+When using offset timezones with GraphQL, the offset values are transformed to valid GraphQL enum names using the `_TZOFFSET_` prefix:
+
+| Offset Value | GraphQL Enum Name       |
+| ------------ | ----------------------- |
+| `+05:30`     | `_TZOFFSET_PLUS_05_30`  |
+| `-08:00`     | `_TZOFFSET_MINUS_08_00` |
+| `+00:00`     | `_TZOFFSET_PLUS_00_00`  |
+
+Similarly, IANA timezone names are also transformed (e.g., `America/New_York` becomes `America_New_York`).
+
+```graphql
+# Query returns the enum name
+query {
+  Event {
+    scheduledAt_tz # Returns "_TZOFFSET_PLUS_05_30"
+  }
+}
+
+# Mutations use the enum name
+mutation {
+  createEvent(data: { scheduledAt_tz: _TZOFFSET_PLUS_05_30 }) {
+    scheduledAt_tz
+  }
+}
+```
+
+The actual value (`+05:30`) is stored in the database and returned by the REST API.

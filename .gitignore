@@ -3,7 +3,15 @@ package-lock.json
 dist
 /.idea/*
 !/.idea/runConfigurations
+/.idea/runConfigurations/_template*
 !/.idea/payload.iml
+
+# Local AI Agent files
+AGENTS.local.md
+CLAUDE.local.md
+.claude/commands/*.local.md
+.claude/artifacts
+.worktrees/
 
 # Custom actions
 !.github/actions/**/dist
@@ -21,7 +29,15 @@ meta_server.json
 meta_index.json
 meta_shared.json
 
+packages/payload/esbuild
+packages/ui/esbuild
+packages/next/esbuild
+packages/richtext-lexical/esbuild
+
+audit_output.json
+
 .turbo
+.wrangler
 
 # Ignore test directory media folder/files
 /media
@@ -30,7 +46,9 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
+no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode
@@ -245,6 +263,7 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+!.vscode/mcp.json
 
 # Local History for Visual Studio Code
 .history/
@@ -306,14 +325,35 @@ $RECYCLE.BIN/
 /build
 .swc
 app/(payload)/admin/importMap.js
+test/admin-bar/app/(payload)/admin/importMap.js
+/test/admin-bar/app/(payload)/admin/importMap.js
 test/live-preview/app/(payload)/admin/importMap.js
 /test/live-preview/app/(payload)/admin/importMap.js
 test/admin-root/app/(payload)/admin/importMap.js
 /test/admin-root/app/(payload)/admin/importMap.js
 test/app/(payload)/admin/importMap.js
 /test/app/(payload)/admin/importMap.js
+test/plugin-ecommerce/app/(payload)/admin/importMap.js
+/test/plugin-ecommerce/app/(payload)/admin/importMap.js
 test/pnpm-lock.yaml
 test/databaseAdapter.js
 /filename-compound-index
 /media-with-relation-preview
 /media-without-relation-preview
+/media-without-cache-tags
+test/.localstack
+test/google-cloud-storage
+test/azurestoragedata/
+/media-without-delete-access
+/media-documents
+/media-with-always-insert-fields
+
+
+
+licenses.csv
+
+# SQLite DB
+payload.db
+
+# Screenshots created by Playwright MCP
+.playwright-mcp

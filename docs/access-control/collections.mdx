@@ -11,11 +11,12 @@ Collection Access Control is [Access Control](../access-control/overview) used t
 To add Access Control to a Collection, use the `access` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
 export const CollectionWithAccessControl: CollectionConfig = {
   // ...
-  access: { // highlight-line
+  access: {
+    // highlight-line
     // ...
   },
 }
@@ -52,24 +53,24 @@ export const CollectionWithAccessControl: CollectionConfig = {
 
 The following options are available:
 
-| Function                | Allows/Denies Access                         |
-| ----------------------- | -------------------------------------------- |
-| **`create`** | Used in the `create` operation. [More details](#create). |
-| **`read`**     | Used in the `find` and `findByID` operations. [More details](#read). |
-| **`update`** | Used in the `update` operation. [More details](#update). |
-| **`delete`** | Used in the `delete` operation. [More details](#delete). |
+| Function     | Allows/Denies Access                                                 |
+| ------------ | -------------------------------------------------------------------- |
+| **`create`** | Used in the `create` operation. [More details](#create).             |
+| **`read`**   | Used in the `find` and `findByID` operations. [More details](#read). |
+| **`update`** | Used in the `update` operation. [More details](#update).             |
+| **`delete`** | Used in the `delete` operation. [More details](#delete).             |
 
 If a Collection supports [`Authentication`](../authentication/overview), the following additional options are available:
 
-| Function                | Allows/Denies Access                                           |
-| ----------------------- | -------------------------------------------------------------- |
-| **`admin`**   | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin). |
+| Function     | Allows/Denies Access                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| **`admin`**  | Used to restrict access to the [Admin Panel](../admin/overview). [More details](#admin). |
 | **`unlock`** | Used to restrict which users can access the `unlock` operation. [More details](#unlock). |
 
 If a Collection supports [Versions](../versions/overview), the following additional options are available:
 
-| Function           | Allows/Denies Access                                                                                                   |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Function           | Allows/Denies Access                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **`readVersions`** | Used to control who can read versions, and who can't. Will automatically restrict the Admin UI version viewing access. [More details](#read-versions). |
 
 ### Create
@@ -95,10 +96,10 @@ export const CollectionWithCreateAccess: CollectionConfig = {
 
 The following arguments are provided to the `create` function:
 
-| Option     | Description                                                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
-| **`data`** | The data passed to create the document with.                                                                                 |
+| **`data`** | The data passed to create the document with.                                                                                  |
 
 ### Read
 
@@ -122,16 +123,18 @@ export const CollectionWithReadAccess: CollectionConfig = {
 ```
 
 <Banner type="success">
-  **Tip:**
-  Return a [Query](../queries/overview) to limit the Documents to only those that match the constraint. This can be helpful to restrict users' access to specific Documents. [More details](../queries/overview).
+  **Tip:** Return a [Query](../queries/overview) to limit the Documents to only
+  those that match the constraint. This can be helpful to restrict users' access
+  to specific Documents. [More details](../queries/overview).
 </Banner>
 
 As your application becomes more complex, you may want to define your function in a separate file and import them into your Collection Config:
 
 ```ts
 import type { Access } from 'payload'
+import type { Page } from '@/payload-types'
 
-export const canReadPage: Access = ({ req: { user } }) => {
+export const canReadPage: Access<Page> = ({ req: { user } }) => {
   // Allow authenticated users
   if (user) {
     return true
@@ -149,10 +152,10 @@ export const canReadPage: Access = ({ req: { user } }) => {
 
 The following arguments are provided to the `read` function:
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
-| **`id`**  | `id` of document requested, if within `findByID`.                           |
+| **`id`**  | `id` of document requested, if within `findByID`.                                                                             |
 
 ### Update
 
@@ -167,7 +170,7 @@ export const CollectionWithUpdateAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
-    update: ({ req: { user }}) => {
+    update: ({ req: { user } }) => {
       return Boolean(user)
     },
     // highlight-end
@@ -176,16 +179,18 @@ export const CollectionWithUpdateAccess: CollectionConfig = {
 ```
 
 <Banner type="success">
-  **Tip:**
-  Return a [Query](../queries/overview) to limit the Documents to only those that match the constraint. This can be helpful to restrict users' access to specific Documents. [More details](../queries/overview).
+  **Tip:** Return a [Query](../queries/overview) to limit the Documents to only
+  those that match the constraint. This can be helpful to restrict users' access
+  to specific Documents. [More details](../queries/overview).
 </Banner>
 
 As your application becomes more complex, you may want to define your function in a separate file and import them into your Collection Config:
 
 ```ts
 import type { Access } from 'payload'
+import type { User } from '@/payload-types'
 
-export const canUpdateUser: Access = ({ req: { user }, id }) => {
+export const canUpdateUser: Access<User> = ({ req: { user }, id }) => {
   // Allow users with a role of 'admin'
   if (user.roles && user.roles.some((role) => role === 'admin')) {
     return true
@@ -198,11 +203,11 @@ export const canUpdateUser: Access = ({ req: { user }, id }) => {
 
 The following arguments are provided to the `update` function:
 
-| Option     | Description                                                                |
-| ---------- | -------------------------------------------------------------------------- |
+| Option     | Description                                                                                                                   |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
-| **`id`**   | `id` of document requested to update.                                       |
-| **`data`** | The data passed to update the document with.                                |
+| **`id`**   | `id` of document requested to update.                                                                                         |
+| **`data`** | The data passed to update the document with.                                                                                  |
 
 ### Delete
 
@@ -217,7 +222,7 @@ export const CollectionWithDeleteAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
-    delete: ({ req: { user }}) => {
+    delete: ({ req: { user } }) => {
       return Boolean(user)
     },
     // highlight-end
@@ -229,8 +234,9 @@ As your application becomes more complex, you may want to define your function i
 
 ```ts
 import type { Access } from 'payload'
+import type { Customer } from '@/payload-types'
 
-export const canDeleteCustomer: Access = async ({ req, id }) => {
+export const canDeleteCustomer: Access<Customer> = async ({ req, id }) => {
   if (!id) {
     // allow the admin UI to show controls to delete since it is indeterminate without the `id`
     return true
@@ -261,7 +267,7 @@ The following arguments are provided to the `delete` function:
 
 If the Collection is used to access the [Admin Panel](../admin/overview#the-admin-user-collection), the `Admin` Access Control function determines whether or not the currently logged in user can access the admin UI.
 
-To add Admin Access Control to a Collection, use the `admin` property in the [Collection Config](../collections/overview):
+To add Admin Access Control to a Collection, use the `admin` property in the [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -270,7 +276,7 @@ export const CollectionWithAdminAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
-    admin: ({ req: { user }}) => {
+    admin: ({ req: { user } }) => {
       return Boolean(user)
     },
     // highlight-end
@@ -280,8 +286,8 @@ export const CollectionWithAdminAccess: CollectionConfig = {
 
 The following arguments are provided to the `admin` function:
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 
 ### Unlock
@@ -297,7 +303,7 @@ export const CollectionWithUnlockAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
-    unlock: ({ req: { user }}) => {
+    unlock: ({ req: { user } }) => {
       return Boolean(user)
     },
     // highlight-end
@@ -307,8 +313,8 @@ export const CollectionWithUnlockAccess: CollectionConfig = {
 
 The following arguments are provided to the `unlock` function:
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |
 
 ### Read Versions
@@ -324,7 +330,7 @@ export const CollectionWithVersionsAccess: CollectionConfig = {
   // ...
   access: {
     // highlight-start
-    readVersions: ({ req: { user }}) => {
+    readVersions: ({ req: { user } }) => {
       return Boolean(user)
     },
     // highlight-end
@@ -332,8 +338,14 @@ export const CollectionWithVersionsAccess: CollectionConfig = {
 }
 ```
 
+<Banner type="warning">
+  **Note:** Returning a [Query](../queries/overview) will apply the constraint
+  to the [`versions` collection](../versions/overview#database-impact), not the
+  original Collection.
+</Banner>
+
 The following arguments are provided to the `readVersions` function:
 
-| Option    | Description                                                                |
-| --------- | -------------------------------------------------------------------------- |
+| Option    | Description                                                                                                                   |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user`. |

@@ -1,29 +1,32 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError } from '../../errors/index.js'
-import { Forbidden } from '../../index.js'
+import { combineQueries, Forbidden } from '../../index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import executeAccess from '../executeAccess.js'
+import { executeAccess } from '../executeAccess.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
   overrideAccess?: boolean
   req: PayloadRequest
 }
 
-export const unlockOperation = async <TSlug extends CollectionSlug>(
+export const unlockOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<boolean> => {
   const {
@@ -56,44 +59,61 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
   }
 
   try {
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'unlock',
+      overrideAccess,
+    })
+
     const shouldCommit = await initTransaction(req)
+    let whereConstraint: Where = {}
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req }, collectionConfig.access.unlock)
+      const accessResult = await executeAccess({ req }, collectionConfig.access.unlock)
+
+      if (accessResult && typeof accessResult === 'object') {
+        whereConstraint = accessResult
+      }
     }
 
     // /////////////////////////////////////
     // Unlock
     // /////////////////////////////////////
 
-    let whereConstraint: Where = {}
-
     if (canLoginWithEmail && sanitizedEmail) {
-      whereConstraint = {
+      whereConstraint = combineQueries(whereConstraint, {
         email: {
           equals: sanitizedEmail,
         },
-      }
+      })
     } else if (canLoginWithUsername && sanitizedUsername) {
-      whereConstraint = {
+      whereConstraint = combineQueries(whereConstraint, {
         username: {
           equals: sanitizedUsername,
         },
-      }
+      })
     }
+
+    // Exclude trashed users unless `trash: true`
+    whereConstraint = appendNonTrashedFilter({
+      enableTrash: Boolean(collectionConfig.trash),
+      trash: false,
+      where: whereConstraint,
+    })
 
     const user = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale,
+      locale: locale!,
       req,
       where: whereConstraint,
     })
 
-    let result
+    let result: boolean | null = null
 
     if (user) {
       await resetLoginAttempts({
@@ -105,13 +125,22 @@ export const unlockOperation = async <TSlug extends CollectionSlug>(
       result = true
     } else {
       result = null
+      throw new Forbidden(req.t)
     }
 
     if (shouldCommit) {
       await commitTransaction(req)
     }
 
-    return result
+    result = await buildAfterOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'unlock',
+      overrideAccess,
+      result,
+    })
+
+    return Boolean(result)
   } catch (error: unknown) {
     await killTransaction(req)
     throw error

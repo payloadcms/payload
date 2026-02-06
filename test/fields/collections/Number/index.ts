@@ -95,7 +95,7 @@ const NumberFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithNumber',
           fields: [
             {
               name: 'numbers',

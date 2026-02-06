@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.15.1",
+  "version": "3.75.0",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -25,9 +26,9 @@
       "types": "./src/index.ts"
     },
     "./types": {
-      "import": "./src/types.ts",
-      "require": "./src/types.ts",
-      "types": "./src/types.ts"
+      "import": "./src/exports/types-deprecated.ts",
+      "require": "./src/exports/types-deprecated.ts",
+      "types": "./src/exports/types-deprecated.ts"
     },
     "./migration-utils": {
       "import": "./src/exports/migration-utils.ts",
@@ -56,27 +57,26 @@
     }
   },
   "main": "./src/index.ts",
-  "types": "./src/types.ts",
+  "types": "./src/index.ts",
   "files": [
     "dist",
     "mock.js"
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@libsql/client": "0.14.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.12.1",
-    "drizzle-kit": "0.28.0",
-    "drizzle-orm": "0.36.1",
+    "drizzle-kit": "0.31.7",
+    "drizzle-orm": "0.44.7",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "9.0.0"
@@ -85,6 +85,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
+    "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -98,9 +99,9 @@
         "types": "./dist/index.d.ts"
       },
       "./types": {
-        "import": "./dist/types.js",
-        "require": "./dist/types.js",
-        "types": "./dist/types.d.ts"
+        "import": "./dist/exports/types-deprecated.js",
+        "require": "./dist/exports/types-deprecated.js",
+        "types": "./dist/exports/types-deprecated.d.ts"
       },
       "./migration-utils": {
         "import": "./dist/exports/migration-utils.js",

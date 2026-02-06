@@ -6,6 +6,7 @@ import type {
   ElementNode as ElementNodeType,
   LexicalCommand,
   LexicalNode,
+  LexicalUpdateJSON,
   NodeKey,
   RangeSelection,
 } from 'lexical'
@@ -35,14 +36,12 @@ export class LinkNode extends ElementNode {
   constructor({
     id,
     fields = {
-      doc: null,
       linkType: 'custom',
       newTab: false,
-      url: '',
     },
     key,
   }: {
-    fields: LinkFields
+    fields?: LinkFields
     id: string
     key?: NodeKey
   }) {
@@ -51,19 +50,19 @@ export class LinkNode extends ElementNode {
     this.__id = id
   }
 
-  static clone(node: LinkNode): LinkNode {
-    return new LinkNode({
+  static override clone(node: LinkNode): LinkNode {
+    return new this({
       id: node.__id,
       fields: node.__fields,
       key: node.__key,
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'link'
   }
 
-  static importDOM(): DOMConversionMap | null {
+  static override importDOM(): DOMConversionMap | null {
     return {
       a: (node: Node) => ({
         conversion: $convertAnchorElement,
@@ -72,7 +71,12 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedLinkNode): LinkNode {
+  static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
+    const node = $createLinkNode({}).updateFromJSON(serializedNode)
+
+    /**
+     * @todo remove this in 4.0
+     */
     if (
       serializedNode.version === 1 &&
       typeof serializedNode.fields?.doc?.value === 'object' &&
@@ -86,30 +90,22 @@ export class LinkNode extends ElementNode {
       serializedNode.id = new ObjectID.default().toHexString()
       serializedNode.version = 3
     }
-
-    const node = $createLinkNode({
-      id: serializedNode.id,
-      fields: serializedNode.fields,
-    })
-    node.setFormat(serializedNode.format)
-    node.setIndent(serializedNode.indent)
-    node.setDirection(serializedNode.direction)
     return node
   }
 
-  canBeEmpty(): false {
+  override canBeEmpty(): false {
     return false
   }
 
-  canInsertTextAfter(): false {
+  override canInsertTextAfter(): false {
     return false
   }
 
-  canInsertTextBefore(): false {
+  override canInsertTextBefore(): false {
     return false
   }
 
-  createDOM(config: EditorConfig): HTMLAnchorElement {
+  override createDOM(config: EditorConfig): HTMLAnchorElement {
     const element = document.createElement('a')
     if (this.__fields?.linkType === 'custom') {
       element.href = this.sanitizeUrl(this.__fields.url ?? '')
@@ -126,11 +122,19 @@ export class LinkNode extends ElementNode {
     return element
   }
 
-  exportJSON(): SerializedLinkNode {
+  override exportJSON(): SerializedLinkNode {
+    const fields = this.getFields()
+
+    if (fields?.linkType === 'internal') {
+      delete fields.url
+    } else if (fields?.linkType === 'custom') {
+      delete fields.doc
+    }
+
     const returnObject: SerializedLinkNode = {
       ...super.exportJSON(),
       type: 'link',
-      fields: this.getFields(),
+      fields,
       version: 3,
     }
     const id = this.getID()
@@ -140,7 +144,7 @@ export class LinkNode extends ElementNode {
     return returnObject
   }
 
-  extractWithChild(
+  override extractWithChild(
     child: LexicalNode,
     selection: BaseSelection,
     destination: 'clone' | 'html',
@@ -167,7 +171,10 @@ export class LinkNode extends ElementNode {
     return this.getLatest().__id
   }
 
-  insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
+  override insertNewAfter(
+    selection: RangeSelection,
+    restoreSelection = true,
+  ): ElementNodeType | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
       const linkNode = $createLinkNode({ fields: this.__fields })
@@ -177,7 +184,7 @@ export class LinkNode extends ElementNode {
     return null
   }
 
-  isInline(): true {
+  override isInline(): true {
     return true
   }
 
@@ -194,12 +201,19 @@ export class LinkNode extends ElementNode {
     return url
   }
 
-  setFields(fields: LinkFields): void {
+  setFields(fields: LinkFields): this {
     const writable = this.getWritable()
     writable.__fields = fields
+    return writable
   }
 
-  updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
+  setID(id: string): this {
+    const writable = this.getWritable()
+    writable.__id = id
+    return writable
+  }
+
+  override updateDOM(prevNode: this, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
     if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
@@ -229,6 +243,13 @@ export class LinkNode extends ElementNode {
 
     return false
   }
+
+  override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedLinkNode>): this {
+    return super
+      .updateFromJSON(serializedNode)
+      .setFields(serializedNode.fields)
+      .setID(serializedNode.id as string)
+  }
 }
 
 function $convertAnchorElement(domNode: Node): DOMConversionOutput {
@@ -250,7 +271,7 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
   return { node }
 }
 
-export function $createLinkNode({ id, fields }: { fields: LinkFields; id?: string }): LinkNode {
+export function $createLinkNode({ id, fields }: { fields?: LinkFields; id?: string }): LinkNode {
   return $applyNodeReplacement(
     new LinkNode({
       id: id ?? new ObjectID.default().toHexString(),
@@ -266,13 +287,17 @@ export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkN
 export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
   createCommand('TOGGLE_LINK_COMMAND')
 
-export function $toggleLink(payload: LinkPayload): void {
+export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | null): void {
   const selection = $getSelection()
 
-  if (!$isRangeSelection(selection) && !payload.selectedNodes?.length) {
+  if (!$isRangeSelection(selection) && (payload === null || !payload.selectedNodes?.length)) {
     return
   }
-  const nodes = $isRangeSelection(selection) ? selection.extract() : payload.selectedNodes
+  const nodes = $isRangeSelection(selection)
+    ? selection.extract()
+    : payload === null
+      ? []
+      : payload.selectedNodes
 
   if (payload === null) {
     // Remove LinkNodes
@@ -282,99 +307,97 @@ export function $toggleLink(payload: LinkPayload): void {
       if ($isLinkNode(parent)) {
         const children = parent.getChildren()
 
-        for (let i = 0; i < children.length; i += 1) {
-          parent.insertBefore(children[i])
-        }
+        children.forEach((child) => {
+          parent.insertBefore(child)
+        })
 
         parent.remove()
       }
     })
-  } else {
-    // Add or merge LinkNodes
-    if (nodes?.length === 1) {
-      const firstNode = nodes[0]
-      // if the first node is a LinkNode or if its
-      // parent is a LinkNode, we update the URL, target and rel.
-      const linkNode: LinkNode | null = $isLinkNode(firstNode)
-        ? firstNode
-        : $getLinkAncestor(firstNode)
-      if (linkNode !== null) {
-        linkNode.setFields(payload.fields)
 
-        if (payload.text != null && payload.text !== linkNode.getTextContent()) {
-          // remove all children and add child with new textcontent:
-          linkNode.append($createTextNode(payload.text))
-          linkNode.getChildren().forEach((child) => {
-            if (child !== linkNode.getLastChild()) {
-              child.remove()
-            }
-          })
+    return
+  }
+  // Add or merge LinkNodes
+  if (nodes?.length === 1) {
+    const firstNode = nodes[0]!
+    // if the first node is a LinkNode or if its
+    // parent is a LinkNode, we update the URL, target and rel.
+    const linkNode: LinkNode | null = $isLinkNode(firstNode)
+      ? firstNode
+      : $getLinkAncestor(firstNode)
+    if (linkNode !== null) {
+      linkNode.setFields(payload.fields)
+
+      if (payload.text != null && payload.text !== linkNode.getTextContent()) {
+        // remove all children and add child with new textcontent:
+        linkNode.append($createTextNode(payload.text))
+        linkNode.getChildren().forEach((child) => {
+          if (child !== linkNode.getLastChild()) {
+            child.remove()
+          }
+        })
+      }
+      return
+    }
+  }
+
+  let prevParent: ElementNodeType | LinkNode | null = null
+  let linkNode: LinkNode | null = null
+
+  nodes?.forEach((node) => {
+    const parent = node.getParent()
+
+    if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
+      return
+    }
+
+    if ($isLinkNode(parent)) {
+      linkNode = parent
+      parent.setFields(payload.fields)
+      if (payload.text != null && payload.text !== parent.getTextContent()) {
+        // remove all children and add child with new textcontent:
+        parent.append($createTextNode(payload.text))
+        parent.getChildren().forEach((child) => {
+          if (child !== parent.getLastChild()) {
+            child.remove()
+          }
+        })
+      }
+      return
+    }
+
+    if (!parent.is(prevParent)) {
+      prevParent = parent
+      linkNode = $createLinkNode({ fields: payload.fields })
+
+      if ($isLinkNode(parent)) {
+        if (node.getPreviousSibling() === null) {
+          parent.insertBefore(linkNode)
+        } else {
+          parent.insertAfter(linkNode)
         }
-        return
+      } else {
+        node.insertBefore(linkNode)
       }
     }
 
-    let prevParent: ElementNodeType | LinkNode | null = null
-    let linkNode: LinkNode | null = null
-
-    nodes?.forEach((node) => {
-      const parent = node.getParent()
-
-      if (parent === linkNode || parent === null || ($isElementNode(node) && !node.isInline())) {
+    if ($isLinkNode(node)) {
+      if (node.is(linkNode)) {
         return
       }
-
-      if ($isLinkNode(parent)) {
-        linkNode = parent
-        parent.setFields(payload.fields)
-        if (payload.text != null && payload.text !== parent.getTextContent()) {
-          // remove all children and add child with new textcontent:
-          parent.append($createTextNode(payload.text))
-          parent.getChildren().forEach((child) => {
-            if (child !== parent.getLastChild()) {
-              child.remove()
-            }
-          })
-        }
-        return
-      }
-
-      if (!parent.is(prevParent)) {
-        prevParent = parent
-        linkNode = $createLinkNode({ fields: payload.fields })
-
-        if ($isLinkNode(parent)) {
-          if (node.getPreviousSibling() === null) {
-            parent.insertBefore(linkNode)
-          } else {
-            parent.insertAfter(linkNode)
-          }
-        } else {
-          node.insertBefore(linkNode)
-        }
-      }
-
-      if ($isLinkNode(node)) {
-        if (node.is(linkNode)) {
-          return
-        }
-        if (linkNode !== null) {
-          const children = node.getChildren()
-
-          for (let i = 0; i < children.length; i += 1) {
-            linkNode.append(children[i])
-          }
-        }
-
-        node.remove()
-        return
-      }
-
       if (linkNode !== null) {
-        linkNode.append(node)
+        const children = node.getChildren()
+        linkNode.append(...children)
       }
-    })
-  }
+
+      node.remove()
+      return
+    }
+
+    if (linkNode !== null) {
+      linkNode.append(node)
+    }
+  })
 }
 
 function $getLinkAncestor(node: LexicalNode): LinkNode | null {

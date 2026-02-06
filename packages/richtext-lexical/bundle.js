@@ -6,6 +6,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { sassPlugin } from 'esbuild-sass-plugin'
 
+const directoryArg = process.argv[2] || 'dist'
+
+const shouldSplit = process.argv.includes('--no-split') ? false : true
+
 const removeCSSImports = {
   name: 'remove-css-imports',
   setup(build) {
@@ -19,31 +23,34 @@ const removeCSSImports = {
 }
 
 async function build() {
+  //create empty directoryArg/exports/client_optimized dir
+  await fs.promises.mkdir(`${directoryArg}/exports/client_optimized`, { recursive: true })
+
   // Bundle only the .scss files into a single css file
   await esbuild.build({
-    entryPoints: ['src/exports/client/index.ts'],
+    entryPoints: ['src/exports/cssEntry.ts'],
     bundle: true,
     minify: true,
-    outdir: 'dist/bundled_scss',
+    outdir: `${directoryArg}/bundled_scss`,
     loader: { '.svg': 'dataurl' },
     packages: 'external',
     //external: ['*.svg'],
     plugins: [sassPlugin({ css: 'external' })],
   })
 
-  //create empty dist/exports/client_optimized dir
-  fs.mkdirSync('dist/exports/client_optimized')
-
   try {
-    fs.renameSync('dist/bundled_scss/index.css', 'dist/field/bundled.css')
-    fs.copyFileSync('dist/field/bundled.css', 'dist/exports/client_optimized/bundled.css')
-    fs.rmSync('dist/bundled_scss', { recursive: true })
+    await fs.promises.rename(`${directoryArg}/bundled_scss/cssEntry.css`, `dist/field/bundled.css`)
+    fs.copyFileSync(
+      `dist/field/bundled.css`,
+      `${directoryArg}/exports/client_optimized/bundled.css`,
+    )
+    fs.rmSync(`${directoryArg}/bundled_scss`, { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css: ${err}`)
     throw err
   }
 
-  console.log('dist/field/bundled.css bundled successfully')
+  console.log(`${directoryArg}/field/bundled.css bundled successfully`)
 
   // Bundle `client.ts`
   const resultClient = await esbuild.build({
@@ -51,10 +58,10 @@ async function build() {
     bundle: true,
     platform: 'browser',
     format: 'esm',
-    outdir: 'dist/exports/client_optimized',
+    outdir: `${directoryArg}/exports/client_optimized`,
     //outfile: 'index.js',
     // IMPORTANT: splitting the client bundle means that the `use client` directive will be lost for every chunk
-    splitting: true,
+    splitting: shouldSplit,
     external: [
       '*.scss',
       '*.css',
@@ -89,7 +96,8 @@ async function build() {
     minify: true,
     metafile: true,
     treeShaking: true,
-
+    // 18.20.2 is the lowest version of node supported by Payload
+    target: 'node18.20.2',
     tsconfig: path.resolve(dirname, './tsconfig.json'),
     plugins: [
       removeCSSImports,

@@ -15,8 +15,8 @@ Payload requires the following software:
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
-  **Important:**
-  Before proceeding any further, please ensure that you have the above requirements met.
+  **Important:** Before proceeding any further, please ensure that you have the
+  above requirements met.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -48,8 +48,8 @@ pnpm i payload @payloadcms/next @payloadcms/richtext-lexical sharp graphql
 ```
 
 <Banner type="warning">
-  **Note:**
-  Swap out `pnpm` for your package manager. If you are using npm, you might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
+  **Note:** Swap out `pnpm` for your package manager. If you are using npm, you
+  might need to install using legacy peer deps: `npm i --legacy-peer-deps`.
 </Banner>
 
 Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
@@ -57,23 +57,31 @@ Next, install a [Database Adapter](/docs/database/overview). Payload requires a 
 To install a Database Adapter, you can run **one** of the following commands:
 
 - To install the [MongoDB Adapter](../database/mongodb), run:
-    ```bash
-    pnpm i @payloadcms/db-mongodb
-    ```
+
+  ```bash
+  pnpm i @payloadcms/db-mongodb
+  ```
 
 - To install the [Postgres Adapter](../database/postgres), run:
-    ```bash
-    pnpm i @payloadcms/db-postgres
-    ```
+
+  ```bash
+  pnpm i @payloadcms/db-postgres
+  ```
+
+- To install the [SQLite Adapter](../database/sqlite), run:
+  ```bash
+  pnpm i @payloadcms/db-sqlite
+  ```
 
 <Banner type="success">
-  **Note:**
-  New [Database Adapters](/docs/database/overview) are becoming available every day. Check the docs for the most up-to-date list of what's available.
+  **Note:** New [Database Adapters](/docs/database/overview) are becoming
+  available every day. Check the docs for the most up-to-date list of what's
+  available.
 </Banner>
 
 #### 2. Copy Payload files into your Next.js app folder
 
-Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/(payload)) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
+Payload installs directly in your Next.js `/app` folder, and you'll need to place some files into that folder for Payload to run. You can copy these files from the [Blank Template](https://github.com/payloadcms/payload/tree/main/templates/blank/src/app/%28payload%29) on GitHub. Once you have the required Payload files in place in your `/app` folder, you should have something like this:
 
 ```plaintext
 app/
@@ -86,7 +94,10 @@ app/
 _For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
 
 <Banner type="warning">
-  You may need to copy all of your existing frontend files, including your existing root layout, into its own newly created [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups), i.e. `(my-app)`.
+  You may need to copy all of your existing frontend files, including your
+  existing root layout, into its own newly created [Route
+  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups),
+  i.e. `(my-app)`.
 </Banner>
 
 The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
@@ -106,8 +117,8 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   // Your Next.js config here
   experimental: {
-    reactCompiler: false
-  }
+    reactCompiler: false,
+  },
 }
 
 // Make sure you wrap your `nextConfig`
@@ -116,8 +127,8 @@ export default withPayload(nextConfig) // highlight-line
 ```
 
 <Banner type="warning">
-  **Important:**
-  Payload is a fully ESM project, and that means the `withPayload` function is an ECMAScript module.
+  **Important:** Payload is a fully ESM project, and that means the
+  `withPayload` function is an ECMAScript module.
 </Banner>
 
 To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.
@@ -153,7 +164,7 @@ export default buildConfig({
   // Whichever Database Adapter you're using should go here
   // Mongoose is shown as an example, but you can also use Postgres
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   }),
   // If you want to resize images, crop, set focal point, etc.
   // make sure to install it and pass it to the config.
@@ -171,11 +182,9 @@ Once you have a Payload Config, update your `tsconfig` to include a `path` that 
 {
   "compilerOptions": {
     "paths": {
-      "@payload-config": [
-        "./payload.config.ts"
-      ]
+      "@payload-config": ["./payload.config.ts"]
     }
-  },
+  }
 }
 ```
 

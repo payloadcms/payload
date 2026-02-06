@@ -6,7 +6,7 @@ desc: The Relationship field provides the ability to relate documents together. 
 keywords: relationship, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Relationship Field is one of the most powerful fields Payload features. It provides for the ability to easily relate documents together.
+The Relationship Field is one of the most powerful fields Payload features. It provides the ability to easily relate documents together.
 
 <LightDarkImage
   srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
@@ -37,62 +37,65 @@ export const MyRelationshipField: Field = {
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                           |
-| **`relationTo`** *    | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                    |
-| **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                 |
-| **`hasMany`**          | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                   |
-| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                           |
-| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                             |
-| **`maxDepth`**         | Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/queries/depth#max-depth)                        |
-| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                         |
-| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                    |
-| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                    |
-| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.     |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                 |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                           |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                              |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                |
-| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                            |
-| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                 |
-| **`required`**         | Require this field to have a value.                                                                                                                                             |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                   |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                       |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                     |
-| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                |
-| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                             |
+| Option                 | Description                                                                                                                                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                       |
+| **`relationTo`** \*    | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                         |
+| **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More details](#filtering-relationship-options).                                                                               |
+| **`hasMany`**          | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                         |
+| **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
+| **`maxRows`**          | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                   |
+| **`maxDepth`**         | Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/queries/depth#max-depth)                                              |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                               |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                          |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More details](/docs/fields/overview#validation).                                                 |
+| **`index`**            | Build an [index](../database/indexes) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.                               |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                       |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                 |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                    |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                      |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                         |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                       |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                   |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                         |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                             |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                           |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to link the field with a relationship. See [Virtual Field Configuration](/docs/fields/overview#virtual-field-configuration) |
+| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                                                   |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 <Banner type="success">
-  **Tip:**
-  The [Depth](../queries/depth) parameter can be used to automatically populate related documents that are returned by the API.
+  **Tip:** The [Depth](../queries/depth) parameter can be used to automatically
+  populate related documents that are returned by the API.
 </Banner>
 
 ## Admin Options
 
-The customize the appearance and behavior of the Relationship Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To the appearance and behavior of the Relationship Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
 
 export const MyRelationshipField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Relationship Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Relationship Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Property                       | Description                                                                                                                                 |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`isSortable`**               | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
-| **`allowCreate`**              | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
-| **`allowEdit`**                | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                                   |
-| **`sortOptions`**              | Define a default sorting order for the options within a Relationship field's dropdown. [More](#sort-options)                                |
+| Property          | Description                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`isSortable`**  | Set to `true` if you'd like this field to be sortable within the Admin UI using drag and drop (only works when `hasMany` is set to `true`). |
+| **`allowCreate`** | Set to `false` if you'd like to disable the ability to create new documents from within the relationship field.                             |
+| **`allowEdit`**   | Set to `false` if you'd like to disable the ability to edit documents from within the relationship field.                                   |
+| **`sortOptions`** | Define a default sorting order for the options within a Relationship field's dropdown. [More details](#sort-options)                        |
+| **`placeholder`** | Define a custom text or function to replace the generic default placeholder                                                                 |
+| **`appearance`**  | Set to `drawer` or `select` to change the behavior of the field. Defaults to `select`.                                                      |
 
 ### Sort Options
 
@@ -136,21 +139,19 @@ Note: If `sortOptions` is not defined, the default sorting behavior of the Relat
 
 ## Filtering relationship options
 
-Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
-for validating input and filtering available relationships in the UI.
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
-prevent all, or a `Where` query. When using a function, it will be
-called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to prevent all, or a `Where` query. When using a function, it will be called with an argument object with the following properties:
 
-| Property      | Description                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
-| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
-| `data`        | An object containing the full collection or global document currently being edited                    |
-| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
-| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
-| `user`        | An object containing the currently authenticated user                                                 |
-| `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.              |
+| Property      | Description                                                                                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blockData`   | The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.                                |
+| `data`        | An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.                    |
+| `id`          | The `id` of the current document being edited. Will be `undefined` during the `create` operation or when called on a `Filter` component within the list view.                            |
+| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property.                                                                                                  |
+| `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.                                                                                                 |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view. |
+| `user`        | An object containing the currently authenticated user.                                                                                                                                   |
 
 ## Example
 
@@ -188,10 +189,11 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   **Note:**
 
-  When a relationship field has both **filterOptions** and a custom{' '}
-  **validate** function, the api will not validate **filterOptions**{' '}
-  unless you call the default relationship field validation function imported from{' '}
-  **payload/shared** in your validate function.
+When a relationship field has both **filterOptions** and a custom
+**validate** function, the api will not validate **filterOptions**
+unless you call the default relationship field validation function imported from
+**payload/shared** in your validate function.
+
 </Banner>
 
 ## Bi-directional relationships
@@ -296,7 +298,7 @@ The `hasMany` tells Payload that there may be more than one collection saved to 
 }
 ```
 
-To save the to `hasMany` relationship field we need to send an array of IDs:
+To save to the `hasMany` relationship field we need to send an array of IDs:
 
 ```json
 {
@@ -370,6 +372,87 @@ Since we are referencing multiple collections, the field you are querying on may
 <Banner type="warning">
   **Note:**
 
-  You **cannot** query on a field within a polymorphic relationship as you would with a
-  non-polymorphic relationship.
+You **cannot** query on a field within a polymorphic relationship as you would with a
+non-polymorphic relationship.
+
 </Banner>
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { RelationshipField } from '@payloadcms/ui'
+import type { RelationshipFieldServerComponent } from 'payload'
+
+export const CustomRelationshipFieldServer: RelationshipFieldServerComponent =
+  ({ clientField, path, schemaPath, permissions }) => {
+    return (
+      <RelationshipField
+        field={clientField}
+        path={path}
+        schemaPath={schemaPath}
+        permissions={permissions}
+      />
+    )
+  }
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { RelationshipField } from '@payloadcms/ui'
+import type { RelationshipFieldClientComponent } from 'payload'
+
+export const CustomRelationshipFieldClient: RelationshipFieldClientComponent = (
+  props,
+) => {
+  return <RelationshipField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RelationshipFieldLabelServerComponent } from 'payload'
+
+export const CustomRelationshipFieldLabelServer: RelationshipFieldLabelServerComponent =
+  (clientField, path) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { RelationshipFieldLabelClientComponent } from 'payload'
+
+export const CustomRelationshipFieldLabelClient: RelationshipFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
+```

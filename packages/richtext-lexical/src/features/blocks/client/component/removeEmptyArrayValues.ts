@@ -10,7 +10,7 @@ import type { FormState } from 'payload'
 export function removeEmptyArrayValues({ fields }: { fields: FormState }): FormState {
   for (const key in fields) {
     const field = fields[key]
-    if (Array.isArray(field.rows) && 'value' in field) {
+    if (Array.isArray(field?.rows) && 'value' in field) {
       field.disableFormData = true
     }
   }

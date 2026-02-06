@@ -1,0 +1,102 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .blocks-drawer {
+    &__blocks-wrapper {
+      padding-top: base(1.5);
+    }
+
+    &__blocks {
+      position: relative;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: base(1);
+    }
+
+    &__default-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      overflow: hidden;
+
+      img,
+      svg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    &__block-groups {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: base(1.5);
+    }
+
+    &__block-group {
+      list-style: none;
+    }
+
+    &__block-group-label {
+      padding-bottom: base(0.5);
+    }
+
+    &__block-group-none {
+      order: 1;
+      padding-top: base(1.5);
+      border-top: 1px solid var(--theme-border-color);
+
+      &:only-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+    }
+
+    @include large-break {
+      &__blocks {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @include mid-break {
+      &__blocks-wrapper {
+        padding-top: base(1.75);
+      }
+
+      &__blocks {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      &__block-groups {
+        gap: base(1.75);
+      }
+
+      &__block-group-none {
+        padding-top: base(1.75);
+      }
+    }
+
+    @include small-break {
+      &__blocks-wrapper {
+        padding-top: base(0.75);
+      }
+
+      &__blocks {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      &__block-groups {
+        gap: base(0.75);
+      }
+
+      &__block-group-none {
+        padding-top: base(0.75);
+      }
+    }
+  }
+}

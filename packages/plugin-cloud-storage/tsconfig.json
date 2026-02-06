@@ -1,4 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../payload" }]
+  "references": [{ "path": "../payload" }, { "path": "../ui" }],
+  "compilerOptions": {
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
+  }
 }

@@ -1,28 +1,35 @@
 'use client'
-import type { User } from 'payload'
+import type { TypedUser } from 'payload'
 
-import { Button, LoadingOverlay, toast, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  ConfirmationModal,
+  toast,
+  useConfig,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback, useState } from 'react'
-
-import { ConfirmResetModal } from './ConfirmResetModal/index.js'
+import { Fragment, useCallback } from 'react'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
 export const ResetPreferences: React.FC<{
-  readonly apiRoute: string
-  readonly user?: User
-}> = ({ apiRoute, user }) => {
+  readonly user?: TypedUser
+}> = ({ user }) => {
   const { openModal } = useModal()
   const { t } = useTranslation()
-
-  const [loading, setLoading] = useState(false)
+  const {
+    config: {
+      routes: { api: apiRoute },
+    },
+  } = useConfig()
 
   const handleResetPreferences = useCallback(async () => {
-    if (!user || loading) {
+    if (!user) {
       return
     }
-    setLoading(true)
 
     const stringifiedQuery = qs.stringify(
       {
@@ -39,13 +46,19 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
-      const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await fetch(
+        formatAdminURL({
+          apiRoute,
+          path: `/payload-preferences${stringifiedQuery}`,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'DELETE',
         },
-        method: 'DELETE',
-      })
+      )
 
       const json = await res.json()
       const message = json.message
@@ -55,12 +68,10 @@ export const ResetPreferences: React.FC<{
       } else {
         toast.error(message)
       }
-    } catch (e) {
+    } catch (_err) {
       // swallow error
-    } finally {
-      setLoading(false)
     }
-  }, [apiRoute, loading, user])
+  }, [apiRoute, user])
 
   return (
     <Fragment>
@@ -69,8 +80,13 @@ export const ResetPreferences: React.FC<{
           {t('general:resetPreferences')}
         </Button>
       </div>
-      <ConfirmResetModal onConfirm={handleResetPreferences} slug={confirmResetModalSlug} />
-      {loading && <LoadingOverlay loadingText={t('general:resettingPreferences')} />}
+      <ConfirmationModal
+        body={t('general:resetPreferencesDescription')}
+        confirmingLabel={t('general:resettingPreferences')}
+        heading={t('general:resetPreferences')}
+        modalSlug={confirmResetModalSlug}
+        onConfirm={handleResetPreferences}
+      />
     </Fragment>
   )
 }

@@ -21,10 +21,10 @@ The Join field is useful in scenarios including:
 - Displaying where a document or upload is used in other documents
 
 <LightDarkImage
-srcLight="https://payloadcms.com/images/docs/fields/join.png"
-srcDark="https://payloadcms.com/images/docs/fields/join-dark.png"
-alt="Shows Join field in the Payload Admin Panel"
-caption="Admin Panel screenshot of Join field"
+  srcLight="https://payloadcms.com/images/docs/fields/join.png"
+  srcDark="https://payloadcms.com/images/docs/fields/join-dark.png"
+  alt="Shows Join field in the Payload Admin Panel"
+  caption="Admin Panel screenshot of Join field"
 />
 
 For the Join field to work, you must have an existing [relationship](./relationship) or [upload](./upload) field in the
@@ -59,7 +59,18 @@ are related to the Category are populated for you. This is extremely powerful an
 of relationship types in an easy manner.
 
 <Banner type="success">
-  The Join field is extremely performant and does not add additional query overhead to your API responses until you add depth of 1 or above. It works in all database adapters. In MongoDB, we use **aggregations** to automatically join in related documents, and in relational databases, we use joins.
+  The Join field is extremely performant and does not add additional query
+  overhead to your API responses until you add depth of 1 or above. It works in
+  all database adapters. In MongoDB, we use **aggregations** to automatically
+  join in related documents, and in relational databases, we use joins.
+</Banner>
+
+<Banner type="warning">
+  The Join Field is not supported in
+  [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos
+  DB](https://azure.microsoft.com/en-us/products/cosmos-db), as we internally
+  use MongoDB aggregations to query data for that field, which are limited
+  there. This can be changed in the future.
 </Banner>
 
 ### Schema advice
@@ -95,7 +106,8 @@ architecture. You might not want to have that `_rels` table, and would prefer to
 table design.
 
 <Banner type="success">
-  With the Join field, you can control your own junction table design, and avoid Payload's automatic _rels table creation.
+  With the Join field, you can control your own junction table design, and avoid
+  Payload's automatic _rels table creation.
 </Banner>
 
 The `join` field can be used in conjunction with _any_ collection - and if you wanted to define your own "junction"
@@ -121,35 +133,36 @@ powerful Admin UI.
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                                    |
-|------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *          | To be used as the property name when retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                    |
-| **`collection`** *    | The `slug`s having the relationship field.                                                                                                                                                     |
-| **`on`** *            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                         |
-| **`where`**            | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                            |
-| **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth). |
-| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                        |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                          |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                             |
-| **`defaultLimit`**     | The number of documents to return. Set to 0 to return all related documents.                                                                                                                   |
-| **`defaultSort`**      | The field name used to specify the order the joined documents are returned.                                                                                                                    |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-config-options).                                                                                                                           |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins).                                                                                                                                     |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema.                                                                                                                                   |
-| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                                            |
+| Option                 | Description                                                                                                                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when retrieved from the database. [More details](./overview#field-names).                                                                                                                              |
+| **`collection`** \*    | The `slug`s having the relationship field or an array of collection slugs.                                                                                                                                                             |
+| **`on`** \*            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'. If `collection` is an array, this field must exist for all specified collections |
+| **`orderable`**        | If true, enables custom ordering and joined documents can be reordered via drag and drop. Uses [fractional indexing](../configuration/collections#fractional-indexing) for efficient reordering.                                       |
+| **`where`**            | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                                                                    |
+| **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](../queries/depth#max-depth).                                                                   |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                  |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                     |
+| **`defaultLimit`**     | The number of documents to return. Set to 0 to return all related documents.                                                                                                                                                           |
+| **`defaultSort`**      | The field name used to specify the order the joined documents are returned.                                                                                                                                                            |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-config-options).                                                                                                                                                                   |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins).                                                                                                                                                                             |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema.                                                                                                                                                                           |
+| **`graphQL`**          | Custom graphQL configuration for the field. [More details](/docs/graphql/overview#field-complexity)                                                                                                                                    |
 
-_* An asterisk denotes that a property is required._
-
+_\* An asterisk denotes that a property is required._
 
 ## Admin Config Options
 
 You can control the user experience of the join field using the `admin` config properties. The following options are supported:
 
-| Option                 | Description                                                                                                               |
-|------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| **`defaultColumns`**   | Array of field names that correspond to which columns to show in the relationship table. Default is the collection config. |
-| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field.                                   |
-| **`components.Label`** | Override the default Label of the Field Component. [More details](../admin/fields#label)                                  |
+| Option                 | Description                                                                                                                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`defaultColumns`**   | Array of field names that correspond to which columns to show in the relationship table. Default is the collection config.                                                                |
+| **`allowCreate`**      | Set to `false` to remove the controls for making new related documents from this field.                                                                                                   |
+| **`components.Label`** | Override the default Label of the Field Component. [More details](./overview#label)                                                                                                       |
+| **`disableRowTypes`**  | Set to `false` to render row types, and `true` to hide them. Defaults to `false` for join fields with a singular `relationTo`, and `true` for join fields where `relationTo` is an array. |
 
 ## Join Field Data
 
@@ -158,6 +171,7 @@ object with:
 
 - `docs` an array of related documents or only IDs if the depth is reached
 - `hasNextPage` a boolean indicating if there are additional documents
+- `totalDocs` a total number of documents, exists only if `count: true` is passed to the join query
 
 ```json
 {
@@ -171,7 +185,39 @@ object with:
       }
       // { ... }
     ],
-    "hasNextPage": false
+    "hasNextPage": false,
+    "totalDocs": 10 // if count: true is passed
+  }
+  // other fields...
+}
+```
+
+## Join Field Data (polymorphic)
+
+When a document is returned that for a polymorphic Join field (with `collection` as an array) is populated with related documents. The structure returned is an
+object with:
+
+- `docs` an array of `relationTo` - the collection slug of the document and `value` - the document itself or the ID if the depth is reached
+- `hasNextPage` a boolean indicating if there are additional documents
+- `totalDocs` a total number of documents, exists only if `count: true` is passed to the join query
+
+```json
+{
+  "id": "66e3431a3f23e684075aae9c",
+  "relatedPosts": {
+    "docs": [
+      {
+        "relationTo": "posts",
+        "value": {
+          "id": "66e3431a3f23e684075aaeb9",
+          // other fields...
+          "category": "66e3431a3f23e684075aae9c"
+        }
+      }
+      // { ... }
+    ],
+    "hasNextPage": false,
+    "totalDocs": 10 // if count: true is passed
   }
   // other fields...
 }
@@ -186,41 +232,49 @@ returning. This is useful for performance reasons when you don't need the relate
 The following query options are supported:
 
 | Property    | Description                                                                                         |
-|-------------|-----------------------------------------------------------------------------------------------------|
+| ----------- | --------------------------------------------------------------------------------------------------- |
 | **`limit`** | The maximum related documents to be returned, default is 10.                                        |
 | **`where`** | An optional `Where` query to filter joined documents. Will be merged with the field `where` object. |
 | **`sort`**  | A string used to order related results                                                              |
+| **`count`** | Whether include the count of related documents or not. Not included by default                      |
 
-These can be applied to the local API, GraphQL, and REST API.
+These can be applied to the Local API, GraphQL, and REST API.
 
 ### Local API
 
-By adding `joins` to the local API you can customize the request for each join field by the `name` of the field.
+By adding `joins` to the Local API you can customize the request for each join field by the `name` of the field.
 
 ```js
-const result = await db.findOne('categories', {
+const result = await payload.find({
+  collection: 'categories',
   where: {
     title: {
-      equals: 'My Category'
-    }
+      equals: 'My Category',
+    },
   },
   joins: {
     relatedPosts: {
       limit: 5,
       where: {
         title: {
-          equals: 'My Post'
-        }
+          equals: 'My Post',
+        },
       },
-      sort: 'title'
-    }
-  }
+      sort: 'title',
+    },
+  },
 })
 ```
 
+<Banner type="warning">
+  Currently, `Where` query support on joined documents for join fields with an
+  array of `collection` is limited and not supported for fields inside arrays
+  and blocks.
+</Banner>
+
 ### Rest API
 
-The rest API supports the same query options as the local API. You can use the `joins` query parameter to customize the
+The REST API supports the same query options as the Local API. You can use the `joins` query parameter to customize the
 request for each join field by the `name` of the field. For example, an API call to get a document with the related
 posts limited to 5 and sorted by title:
 
@@ -242,16 +296,17 @@ query {
       relatedPosts(
         sort: "createdAt"
         limit: 5
-        where: {
-          author: {
-            equals: "66e3431a3f23e684075aaeb9"
-          }
-        }
+        where: { author: { equals: "66e3431a3f23e684075aaeb9" } }
+        """
+        Optionally pass count: true if you want to retrieve totalDocs
+        """
+        count: true -- s
       ) {
         docs {
           title
         }
         hasNextPage
+        totalDocs
       }
     }
   }

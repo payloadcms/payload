@@ -7,4 +7,37 @@ export const dateDoc: Partial<DateField> = {
   dayOnly: '2022-08-11T22:00:00.000+00:00',
   dayAndTime: '2022-08-12T10:00:00.052+00:00',
   monthOnly: '2022-07-31T22:00:00.000+00:00',
+  defaultWithTimezone: '2027-08-12T10:00:00.000+00:00',
+  defaultWithTimezone_tz: 'Europe/London',
+  dayAndTimeWithTimezone: '2027-08-12T01:00:00.000+00:00', // 10AM tokyo time — we will test for this in e2e
+  dayAndTimeWithTimezone_tz: 'Asia/Tokyo',
+  timezoneBlocks: [
+    {
+      blockType: 'dateBlock',
+      dayAndTime: '2025-01-31T09:00:00.000Z',
+      dayAndTime_tz: 'Europe/Berlin',
+    },
+  ],
+  timezoneArray: [
+    {
+      dayAndTime: '2025-01-31T09:00:00.549Z',
+      dayAndTime_tz: 'Europe/Berlin',
+    },
+  ],
+  timezoneGroup: {
+    dayAndTime: '2025-01-31T09:00:00.000Z',
+    dayAndTime_tz: 'Europe/Berlin',
+  },
+  dayAndTimeWithTimezoneReadOnly: '2027-08-12T01:00:00.000+00:00',
+  dayAndTimeWithTimezoneReadOnly_tz: 'Asia/Tokyo',
+  dayAndTimeWithTimezoneFixed: '2025-10-29T20:00:00.000+00:00',
+  // UTC offset timezone tests - 2027-08-12 10:00 AM in UTC+5:30 (India) = 04:30 UTC
+  dateWithOffsetTimezone: '2027-08-12T04:30:00.000+00:00',
+  dateWithOffsetTimezone_tz: '+05:30',
+  // Mixed IANA + offset timezones - 2027-08-12 10:00 AM in America/New_York (UTC-4 in summer) = 14:00 UTC
+  dateWithMixedTimezones: '2027-08-12T14:00:00.000+00:00',
+  dateWithMixedTimezones_tz: 'America/New_York',
+  // Date with timezone where timezone column is hidden via override
+  dateWithTimezoneWithDisabledColumns: '2027-08-12T14:00:00.000+00:00',
+  dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
 }

@@ -4,6 +4,8 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
+import { FolderPoly1 } from './collections/FolderPoly1.js'
+import { FolderPoly2 } from './collections/FolderPoly2.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
@@ -29,8 +31,21 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'posts',
+        },
+      ],
+    },
     Posts,
     Categories,
     HiddenPosts,
@@ -207,9 +222,130 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'multiple-collections-parents',
+      access: { read: () => true },
+      fields: [
+        {
+          type: 'join',
+          name: 'children',
+          collection: ['multiple-collections-1', 'multiple-collections-2'],
+          on: 'parent',
+          admin: {
+            defaultColumns: ['title', 'name', 'description'],
+          },
+        },
+      ],
+    },
+    {
+      slug: 'multiple-collections-1',
+      access: { read: () => true },
+      admin: { useAsTitle: 'title' },
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'multiple-collections-parents',
+          name: 'parent',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'multiple-collections-2',
+      access: { read: () => true },
+      admin: { useAsTitle: 'title' },
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'multiple-collections-parents',
+          name: 'parent',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'folders',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'folders',
+          name: 'folder',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          type: 'join',
+          name: 'children',
+          collection: ['folders', 'example-pages', 'example-posts'],
+          on: 'folder',
+          admin: {
+            defaultColumns: ['title', 'name', 'description'],
+          },
+        },
+      ],
+    },
+    {
+      slug: 'example-pages',
+      admin: { useAsTitle: 'title' },
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'folders',
+          name: 'folder',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'example-posts',
+      admin: { useAsTitle: 'title' },
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'folders',
+          name: 'folder',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
+      ],
+    },
+    FolderPoly1,
+    FolderPoly2,
   ],
   localization: {
-    locales: ['en', 'es'],
+    locales: [
+      { label: '(en)', code: 'en' },
+      { label: '(es)', code: 'es' },
+    ],
     defaultLocale: 'en',
   },
   onInit: async (payload) => {

@@ -1,33 +1,33 @@
 'use client'
 
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useState } from 'react'
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
+import * as qs from 'qs-esm'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-import './index.scss'
-
-const baseClass = 'duplicate'
+import { SelectLocalesDrawer } from './SelectLocalesDrawer/index.js'
 
 export type Props = {
-  readonly id: string
+  readonly id: number | string
   readonly onDuplicate?: DocumentDrawerContextType['onDuplicate']
   readonly redirectAfterDuplicate?: boolean
+  readonly selectLocales?: boolean
   readonly singularLabel: SanitizedCollectionConfig['labels']['singular']
   readonly slug: string
 }
@@ -37,143 +37,170 @@ export const DuplicateDocument: React.FC<Props> = ({
   slug,
   onDuplicate,
   redirectAfterDuplicate = true,
+  selectLocales,
   singularLabel,
 }) => {
   const router = useRouter()
   const modified = useFormModified()
-  const { toggleModal } = useModal()
-  const locale = useLocale()
+  const { openModal } = useModal()
+  const { code: localeCode } = useLocale()
   const { setModified } = useForm()
+  const { startRouteTransition } = useRouteTransition()
 
   const {
     config: {
+      localization,
       routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
-  const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
+  const drawerSlug = `duplicate-locales-${id}`
 
-  const editDepth = useEditDepth()
+  const isDuplicateByLocaleEnabled = useMemo(() => {
+    if (selectLocales && collectionConfig) {
+      return traverseForLocalizedFields(collectionConfig.fields)
+    }
+    return false
+  }, [collectionConfig, selectLocales])
 
-  const handleClick = useCallback(
-    async (override = false) => {
-      setHasClicked(true)
+  const handleDuplicate = useCallback(
+    async (args?: { selectedLocales?: string[] }) => {
+      const { selectedLocales } = args || {}
+      const hasSelectedLocales = selectedLocales && selectedLocales.length > 0
 
-      if (modified && !override) {
-        toggleModal(modalSlug)
-        return
+      const queryParams: Record<string, string | string[]> = {}
+      if (localeCode) {
+        queryParams.locale = localeCode
       }
-      await requests
-        .post(
-          `${serverURL}${apiRoute}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
+      if (hasSelectedLocales) {
+        queryParams.selectedLocales = selectedLocales
+      }
+
+      const headers = {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+        credentials: 'include',
+      }
+
+      try {
+        const res = await requests.post(
+          formatAdminURL({
+            apiRoute,
+            path: `/${slug}/${id}/duplicate${qs.stringify(queryParams, {
+              addQueryPrefix: true,
+            })}`,
+          }),
           {
-            body: JSON.stringify({}),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-              credentials: 'include',
-            },
+            body: JSON.stringify(hasDraftsEnabled(collectionConfig) ? { _status: 'draft' } : {}),
+            headers,
           },
         )
-        .then(async (res) => {
-          const { doc, errors, message } = await res.json()
-          if (res.status < 400) {
-            toast.success(
-              message ||
-                t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-            )
 
-            setModified(false)
+        const { doc, errors, message } = await res.json()
 
-            if (redirectAfterDuplicate) {
+        if (res.status < 400) {
+          toast.success(
+            message ||
+              t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
+          )
+
+          setModified(false)
+
+          if (redirectAfterDuplicate) {
+            return startRouteTransition(() =>
               router.push(
                 formatAdminURL({
                   adminRoute,
-                  path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+                  path: `/collections/${slug}/${doc.id}${localeCode ? `?locale=${localeCode}` : ''}`,
                 }),
-              )
-            }
-
-            if (typeof onDuplicate === 'function') {
-              void onDuplicate({ collectionConfig, doc })
-            }
-          } else {
-            toast.error(
-              errors?.[0].message ||
-                message ||
-                t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+              ),
             )
           }
-        })
+
+          if (typeof onDuplicate === 'function') {
+            void onDuplicate({ collectionConfig, doc })
+          }
+        } else {
+          toast.error(
+            errors?.[0].message ||
+              message ||
+              t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+          )
+        }
+      } catch (_error) {
+        toast.error(t('error:unspecific', { label: getTranslation(singularLabel, i18n) }))
+      }
     },
     [
-      locale,
-      modified,
-      serverURL,
+      adminRoute,
       apiRoute,
-      slug,
-      id,
+      collectionConfig,
       i18n,
-      toggleModal,
-      modalSlug,
-      t,
-      singularLabel,
+      id,
+      localeCode,
       onDuplicate,
       redirectAfterDuplicate,
-      setModified,
       router,
-      adminRoute,
-      collectionConfig,
+      setModified,
+      singularLabel,
+      slug,
+      startRouteTransition,
+      t,
     ],
   )
 
-  const confirm = useCallback(async () => {
-    setHasClicked(false)
-    await handleClick(true)
-  }, [handleClick])
+  const handleConfirmWithoutSaving = useCallback(async () => {
+    if (selectLocales) {
+      openModal(drawerSlug)
+    } else {
+      await handleDuplicate()
+    }
+  }, [handleDuplicate, drawerSlug, selectLocales, openModal])
 
-  return (
-    <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
-        {t('general:duplicate')}
-      </PopupList.Button>
-      {modified && hasClicked && (
-        <Modal
-          className={`${baseClass}__modal`}
-          slug={modalSlug}
-          style={{
-            zIndex: drawerZBase + editDepth,
+  const buttonLabel = selectLocales
+    ? `${t('general:duplicate')} ${t('localization:selectedLocales')}`
+    : t('general:duplicate')
+
+  if (!selectLocales || isDuplicateByLocaleEnabled) {
+    return (
+      <React.Fragment>
+        <PopupList.Button
+          id={`action-duplicate${isDuplicateByLocaleEnabled ? `-locales` : ''}`}
+          onClick={() => {
+            if (modified) {
+              openModal(modalSlug)
+            } else if (selectLocales) {
+              openModal(drawerSlug)
+            } else {
+              void handleDuplicate()
+            }
           }}
         >
-          <div className={`${baseClass}__wrapper`}>
-            <div className={`${baseClass}__content`}>
-              <h1>{t('general:confirmDuplication')}</h1>
-              <p>{t('general:unsavedChangesDuplicate')}</p>
-            </div>
-            <div className={`${baseClass}__controls`}>
-              <Button
-                buttonStyle="secondary"
-                id="confirm-cancel"
-                onClick={() => toggleModal(modalSlug)}
-                size="large"
-                type="button"
-              >
-                {t('general:cancel')}
-              </Button>
-              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
-                {t('general:duplicateWithoutSaving')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-    </React.Fragment>
-  )
+          {buttonLabel}
+        </PopupList.Button>
+        <ConfirmationModal
+          body={t('general:unsavedChangesDuplicate')}
+          confirmLabel={t('general:duplicateWithoutSaving')}
+          heading={t('general:unsavedChanges')}
+          modalSlug={modalSlug}
+          onConfirm={handleConfirmWithoutSaving}
+        />
+        {selectLocales && localization && (
+          <SelectLocalesDrawer
+            localization={localization}
+            onConfirm={handleDuplicate}
+            slug={drawerSlug}
+          />
+        )}
+      </React.Fragment>
+    )
+  }
+
+  return null
 }

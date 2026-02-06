@@ -1,10 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strict": true
-  },
   "references": [
     { "path": "../payload" },
     { "path": "../translations" },

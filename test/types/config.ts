@@ -18,6 +18,123 @@ export default buildConfigWithDefaults({
           type: 'text',
           name: 'text',
         },
+        {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          name: 'selectField',
+          type: 'select',
+          required: true,
+          interfaceName: 'MySelectOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          label: 'Unnamed Group',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideUnnamedGroup',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'namedGroup',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideNamedGroup',
+            },
+          ],
+        },
+        {
+          name: 'radioField',
+          type: 'radio',
+          required: true,
+          interfaceName: 'MyRadioOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+        {
+          name: 'externalType',
+          type: 'text',
+          typescriptSchema: [
+            () => ({
+              $ref: './test/types/schemas/custom-type.json',
+            }),
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'pages-categories',
+          name: 'category',
+        },
+      ],
+    },
+    {
+      slug: 'pages-categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'join',
+          name: 'relatedPages',
+          collection: 'pages',
+          on: 'category',
+        },
+      ],
+    },
+    {
+      slug: 'draft-posts',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          required: true,
+        },
+        {
+          type: 'text',
+          name: 'description',
+          required: true,
+        },
       ],
     },
   ],
@@ -38,8 +155,21 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'settings',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'siteName',
+        },
+      ],
+    },
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    strictDraftTypes: true,
   },
 })

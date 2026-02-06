@@ -51,7 +51,10 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
           Object.entries(rowData).forEach(([locale, localeRows]) => {
             if (Array.isArray(localeRows)) {
               localeRows.forEach((row, i) => {
-                const matchedBlock = field.blocks.find((block) => block.slug === row.blockType)
+                // Can ignore string blocks, as those were added in v3 and don't need to be migrated
+                const matchedBlock = field.blocks.find(
+                  (block) => typeof block !== 'string' && block.slug === row.blockType,
+                )
 
                 if (matchedBlock) {
                   return traverseFields({
@@ -69,7 +72,10 @@ export const traverseFields = ({ doc, fields, locale, path, rows }: Args) => {
 
         if (Array.isArray(rowData)) {
           rowData.forEach((row, i) => {
-            const matchedBlock = field.blocks.find((block) => block.slug === row.blockType)
+            // Can ignore string blocks, as those were added in v3 and don't need to be migrated
+            const matchedBlock = field.blocks.find(
+              (block) => typeof block !== 'string' && block.slug === row.blockType,
+            )
 
             if (matchedBlock) {
               return traverseFields({

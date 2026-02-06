@@ -31,35 +31,36 @@ const query: Where = {
 _The exact query syntax will depend on the API you are using, but the concepts are the same across all APIs. [More details](#writing-queries)._
 
 <Banner>
-  **Tip:**
-  You can also use queries within [Access Control](../access-control/overview) functions.
+  **Tip:** You can also use queries within [Access
+  Control](../access-control/overview) functions.
 </Banner>
 
 ## Operators
 
 The following operators are available for use in queries:
 
-| Operator             | Description                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equals`             | The value must be exactly equal.                                                                                                                                                    |
-| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                   |
-| `greater_than`       | For numeric or date-based fields.                                                                                                                                                   |
-| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                   |
-| `less_than`          | For numeric or date-based fields.                                                                                                                                                   |
-| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                   |
-| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                               |
-| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                   |
-| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                         |
-| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                           |
-| `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                             |
-| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                           |
-| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.      |
-| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)         |
-| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area  defined in GeoJSON. [Example](../fields/point#querying-intersects)   |
+| Operator             | Description                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equals`             | The value must be exactly equal.                                                                                                                                                 |
+| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                |
+| `greater_than`       | For numeric or date-based fields.                                                                                                                                                |
+| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                |
+| `less_than`          | For numeric or date-based fields.                                                                                                                                                |
+| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                |
+| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                            |
+| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                |
+| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                      |
+| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                        |
+| `all`                | The value must contain all values provided in the comma-delimited list. Note: currently this operator is supported only with the MongoDB adapter.                                |
+| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                        |
+| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.   |
+| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)      |
+| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area defined in GeoJSON. [Example](../fields/point#querying-intersects) |
 
 <Banner type="success">
-  **Tip:**
-  If you know your users will be querying on certain fields a lot, add `index: true` to the Field Config. This will speed up searches using that field immensely.
+  **Tip:** If you know your users will be querying on certain fields a lot, add
+  `index: true` to the Field Config. This will speed up searches using that
+  field immensely. [More details](../database/indexes).
 </Banner>
 
 ### And / Or Logic
@@ -72,14 +73,16 @@ To join queries, use the `and` or `or` keys in your query object:
 import type { Where } from 'payload'
 
 const query: Where = {
-  or: [ // highlight-line
+  or: [
+    // highlight-line
     {
       color: {
         equals: 'mint',
       },
     },
     {
-      and: [ // highlight-line
+      and: [
+        // highlight-line
         {
           color: {
             equals: 'white',
@@ -100,7 +103,7 @@ Written in plain English, if the above query were passed to a `find` operation, 
 
 ### Nested properties
 
-When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has a `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
+When working with nested properties, which can happen when using relational fields, it is possible to use the dot notation to access the nested property. For example, when working with a `Song` collection that has an `artists` field which is related to an `Artists` collection using the `name: 'artists'`. You can access a property within the collection `Artists` like so:
 
 ```js
 import type { Where } from 'payload'
@@ -183,7 +186,136 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```
+
+## Performance
+
+There are several ways to optimize your queries. Many of these options directly impact overall database overhead, response sizes, and/or computational load and can significantly improve performance.
+
+When building queries, combine as many of these strategies together as possible to ensure your queries are as performant as they can be.
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
+
+### Indexes
+
+Build [Indexes](../database/indexes) for fields that are often queried or sorted by.
+
+When your query runs, the database will not search the entire document to find that one field, but will instead use the index to quickly locate the data.
+
+This is done by adding `index: true` to the Field Config for that field:
+
+```ts
+// In your collection configuration
+{
+  name: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      // highlight-start
+      index: true, // Add an index to the title field
+      // highlight-end
+    },
+    // Other fields...
+  ],
+}
+```
+
+To learn more, see the [Indexes documentation](../database/indexes).
+
+### Depth
+
+Set the [Depth](./depth) to only the level that you need to avoid populating unnecessary related documents.
+
+Relationships will only populate down to the specified depth, and any relationships beyond that depth will only return the ID of the related document.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: { ... },
+  // highlight-start
+  depth: 0, // Only return the IDs of related documents
+  // highlight-end
+})
+```
+
+To learn more, see the [Depth documentation](./depth).
+
+### Limit
+
+Set the [Limit](./pagination#limit) if you can reliably predict the number of matched documents, such as when querying on a unique field.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: {
+    slug: {
+      equals: 'unique-post-slug',
+    },
+  },
+  // highlight-start
+  limit: 1, // Only expect one document to be returned
+  // highlight-end
+})
+```
+
+<Banner type="success">
+  **Tip:** Use in combination with `pagination: false` for best performance when
+  querying by unique fields.
+</Banner>
+
+To learn more, see the [Limit documentation](./pagination#limit).
+
+### Select
+
+Use the [Select API](./select) to only process and return the fields you need.
+
+This will reduce the amount of data returned from the request, and also skip processing of any fields that are not selected, such as running their field hooks.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: { ... },
+  // highlight-start
+  select: [{
+    title: true,
+  }],
+  // highlight-end
+```
+
+This is a basic example, but there are many ways to use the Select API, including selecting specific fields, excluding fields, etc.
+
+To learn more, see the [Select documentation](./select).
+
+### Pagination
+
+[Disable Pagination](./pagination#disabling-pagination) if you can reliably predict the number of matched documents, such as when querying on a unique field.
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  where: {
+    slug: {
+      equals: 'unique-post-slug',
+    },
+  },
+  // highlight-start
+  pagination: false, // Return all matched documents without pagination
+  // highlight-end
+})
+```
+
+<Banner type="success">
+  **Tip:** Use in combination with `limit: 1` for best performance when querying
+  by unique fields.
+</Banner>
+
+To learn more, see the [Pagination documentation](./pagination).

@@ -1,15 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
-import { isSuperAdmin } from '../../access/isSuperAdmin'
-import { canMutateTenant, filterByTenantRead } from './access/byTenant'
+import { isSuperAdminAccess } from '@/access/isSuperAdmin'
+import { updateAndDeleteAccess } from './access/updateAndDelete'
 
 export const Tenants: CollectionConfig = {
   slug: 'tenants',
   access: {
-    create: isSuperAdmin,
-    delete: canMutateTenant,
-    read: filterByTenantRead,
-    update: canMutateTenant,
+    create: isSuperAdminAccess,
+    delete: updateAndDeleteAccess,
+    read: ({ req }) => Boolean(req.user),
+    update: updateAndDeleteAccess,
   },
   admin: {
     useAsTitle: 'name',
@@ -20,23 +20,13 @@ export const Tenants: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    // The domains field allows you to associate one or more domains with a tenant.
-    // This is used to determine which tenant is associated with a specific domain,
-    // for example, 'abc.localhost.com' would match to 'Tenant 1'.
-
-    // Uncomment this field if you want to enable domain-based tenant handling.
-    // {
-    //   name: 'domains',
-    //   type: 'array',
-    //   fields: [
-    //     {
-    //       name: 'domain',
-    //       type: 'text',
-    //       required: true,
-    //     },
-    //   ],
-    //   index: true,
-    // },
+    {
+      name: 'domain',
+      type: 'text',
+      admin: {
+        description: 'Used for domain-based tenant handling',
+      },
+    },
     {
       name: 'slug',
       type: 'text',
@@ -47,10 +37,11 @@ export const Tenants: CollectionConfig = {
       required: true,
     },
     {
-      name: 'public',
+      name: 'allowPublicRead',
       type: 'checkbox',
       admin: {
-        description: 'If checked, logging in is not required.',
+        description:
+          'If checked, logging in is not required to read. Useful for building public pages.',
         position: 'sidebar',
       },
       defaultValue: false,

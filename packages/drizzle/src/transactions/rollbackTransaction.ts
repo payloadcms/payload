@@ -11,9 +11,12 @@ export const rollbackTransaction: RollbackTransaction = async function rollbackT
     return
   }
 
-  // end the session promise in failure by calling reject
-  await this.sessions[transactionID].reject()
+  const session = this.sessions[transactionID]
 
-  // delete the session causing any other operations with the same transaction to fail
+  // Delete from registry FIRST to prevent race conditions
+  // This ensures other operations can't retrieve this session while we're ending it
   delete this.sessions[transactionID]
+
+  // end the session promise in failure by calling reject
+  await session.reject()
 }

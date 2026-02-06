@@ -5,6 +5,7 @@ import type {
   CheckboxFieldValidation,
 } from 'payload'
 
+import { rtlLanguages } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
 import type { CheckboxInputProps } from './Input.js'
@@ -16,11 +17,12 @@ import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
 import { CheckboxInput } from './Input.js'
+import './index.scss'
 
 const baseClass = 'checkbox'
 
@@ -39,7 +41,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     } = {} as CheckboxFieldClientProps['field'],
     onChange: onChangeFromProps,
     partialChecked,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -47,6 +49,11 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
   const { uuid } = useForm()
 
   const editDepth = useEditDepth()
+
+  const {
+    i18n: { language },
+  } = useTranslation()
+  const isRTL = (rtlLanguages as readonly string[]).includes(language)
 
   const memoizedValidate: CheckboxFieldValidation = useCallback(
     (value, options) => {
@@ -59,12 +66,14 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
     disableFormData,
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -91,7 +100,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         showError && 'error',
         className,
         value && `${baseClass}--checked`,
-        readOnly && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -99,7 +108,9 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
+        Fallback={
+          <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
+        }
       />
       <CheckboxInput
         AfterInput={AfterInput}
@@ -112,7 +123,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
         name={path}
         onToggle={onToggle}
         partialChecked={partialChecked}
-        readOnly={readOnly}
+        readOnly={readOnly || disabled}
         required={required}
       />
       <RenderCustomComponent

@@ -1,0 +1,54 @@
+name: publish-prerelease
+
+on:
+  schedule:
+    # Run nightly at 10pm EST
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      debug_build:
+        description: 'Enable debug build (uses internal-debug tag and pnpm build:debug)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+jobs:
+  release:
+    name: publish-prerelease-${{ github.ref_name }}-${{ github.sha }}
+    permissions:
+      id-token: write
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Load npm token
+        run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Determine release type and debug flag
+        id: determine_release_type
+        # Use 'internal-debug' if debug mode, 'canary' for main branch, 'internal' for others
+        run: |
+          if [[ "${{ inputs.debug_build }}" == "true" ]]; then
+            echo "release_type=internal-debug" >> $GITHUB_OUTPUT
+            echo "debug_flag=--debug" >> $GITHUB_OUTPUT
+          elif [[ ${{ github.ref_name }} == "main" ]]; then
+            echo "release_type=canary" >> $GITHUB_OUTPUT
+            echo "debug_flag=" >> $GITHUB_OUTPUT
+          else
+            echo "release_type=internal" >> $GITHUB_OUTPUT
+            echo "debug_flag=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Release
+        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }} ${{ steps.determine_release_type.outputs.debug_flag }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

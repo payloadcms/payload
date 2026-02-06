@@ -1,6 +1,13 @@
 packages:
-  # all packages in direct subdirs of packages/
   - 'packages/*'
+  - 'tools/*'
   - 'test'
-  # exclude packages that are inside test directories
-  # - '!**/test/**'
+  - 'templates/blank'
+  - 'templates/website'
+  - 'templates/ecommerce'
+
+updateNotifier: false
+symlink: true
+nodeLinker: isolated
+hoistWorkspacePackages: false # the default in pnpm v9 is true, but that can break our runtime dependency checks
+savePrefix: ''

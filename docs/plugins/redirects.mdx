@@ -1,12 +1,12 @@
 ---
 title: Redirects Plugin
 label: Redirects
-order: 40
+order: 70
 desc: Automatically create redirects for your Payload application
 keywords: plugins, redirects, redirect, plugin, payload, cms, seo, indexing, search, search engine
 ---
 
-[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)](https://www.npmjs.com/package/@payloadcms/plugin-redirects)
+![https://www.npmjs.com/package/@payloadcms/plugin-redirects](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)
 
 This plugin allows you to easily manage redirects for your application from within your [Admin Panel](../admin/overview). It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
 
@@ -14,9 +14,10 @@ For example, if you have a page at `/about` and you want to change it to `/about
 
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-redirects). If you need
-  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-redirects).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%redirects&template=bug_report.md&title=plugin-redirects%3A)
   with as much detail as possible.
 </Banner>
@@ -62,12 +63,12 @@ export default config
 
 ### Options
 
-| Option        | Type       | Description                                                                                     |
-| ------------- | ---------- | ----------------------------------------------------------------------------------------------- |
-| `collections` | `string[]` | An array of collection slugs to populate in the `to` field of each redirect.                    |
-| `overrides`   | `object`   | A partial collection config that allows you to override anything on the `redirects` collection. |
-| `redirectTypes`   | `string[]`   | Provide an array of redirects if you want to provide options for the type of redirects to be supported. |
-| `redirectTypeFieldOverride`   | `Field`   | A partial Field config that allows you to override the Redirect Type field if enabled above. |
+| Option                      | Type       | Description                                                                                             |
+| --------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
+| `collections`               | `string[]` | An array of collection slugs to populate in the `to` field of each redirect.                            |
+| `overrides`                 | `object`   | A partial collection config that allows you to override anything on the `redirects` collection.         |
+| `redirectTypes`             | `string[]` | Provide an array of redirects if you want to provide options for the type of redirects to be supported. |
+| `redirectTypeFieldOverride` | `Field`    | A partial Field config that allows you to override the Redirect Type field if enabled above.            |
 
 Note that the fields in overrides take a function that receives the default fields and returns an array of fields. This allows you to add fields to the collection.
 
@@ -91,6 +92,14 @@ redirectsPlugin({
   },
 })
 ```
+
+## Frontend Integration
+
+It's important to note that this plugin only manages the redirects within the Payload Admin Panel and database. It does not handle the redirect itself.
+
+You will need to implement the actual redirect logic in your front-end application (e.g., Next.js, Express, etc.) by querying the `redirects` collection and handling the redirects based on your application's routing logic.
+
+A good example of how to implement this can be found in the [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website).
 
 ## TypeScript
 

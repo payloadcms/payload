@@ -2,6 +2,8 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { isURLAllowed } from '../utilities/isURLAllowed.js'
+import { safeFetch } from './safeFetch.js'
 
 type Args = {
   data: FileData
@@ -11,25 +13,79 @@ type Args = {
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 
+  let trimAuthCookies = true
   if (typeof url === 'string') {
     let fileURL = url
     if (!url.startsWith('http')) {
+      // URL points to the same server - we can send any cookies safely to our server.
+      trimAuthCookies = false
       const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
       fileURL = `${baseUrl}${url}`
     }
 
+    let cookies = (req.headers.get('cookie') ?? '').split(';')
+
+    if (trimAuthCookies) {
+      cookies = cookies.filter(
+        (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
+      )
+    }
+
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
-      : { cookie: req.headers?.get('cookie') }
+      : {
+          cookie: cookies.join(';'),
+        }
 
-    const res = await fetch(fileURL, {
-      credentials: 'include',
-      headers,
-      method: 'GET',
-    })
+    let res
+    let redirectCount = 0
+    const maxRedirects = 3
 
-    if (!res.ok) {
-      throw new APIError(`Failed to fetch file from ${fileURL}`, res.status)
+    while (redirectCount <= maxRedirects) {
+      const skipSafeFetch: boolean =
+        uploadConfig.skipSafeFetch === true
+          ? uploadConfig.skipSafeFetch
+          : Array.isArray(uploadConfig.skipSafeFetch) &&
+            isURLAllowed(fileURL, uploadConfig.skipSafeFetch)
+
+      const isAllowedPasteUrl: boolean | undefined =
+        uploadConfig.pasteURL &&
+        uploadConfig.pasteURL.allowList &&
+        isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
+
+      if (skipSafeFetch || isAllowedPasteUrl) {
+        res = await fetch(fileURL, {
+          credentials: 'include',
+          headers,
+          method: 'GET',
+          redirect: 'manual',
+        })
+      } else {
+        // Default
+        res = await safeFetch(fileURL, {
+          credentials: 'include',
+          headers,
+          method: 'GET',
+        })
+      }
+
+      if (res.status >= 300 && res.status < 400) {
+        redirectCount++
+        if (redirectCount > maxRedirects) {
+          throw new APIError(`Too many redirects (max ${maxRedirects})`, 403)
+        }
+        const location = res.headers.get('location')
+        if (location) {
+          fileURL = new URL(location, fileURL).toString()
+          continue
+        }
+      }
+
+      break
+    }
+
+    if (!res || !res.ok) {
+      throw new APIError(`Failed to fetch file from ${fileURL}`, res?.status)
     }
 
     const data = await res.arrayBuffer()
@@ -37,7 +93,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     return {
       name: filename,
       data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined,
+      mimetype: res.headers.get('content-type') || undefined!,
       size: Number(res.headers.get('content-length')) || 0,
     }
   }

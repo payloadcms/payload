@@ -25,6 +25,6 @@ export const MetaDescriptionField: FieldFunction = ({ hasGenerateFn = false, ove
       },
     },
     localized: true,
-    ...((overrides as unknown as TextareaField) ?? {}),
+    ...(overrides ?? {}),
   }
 }

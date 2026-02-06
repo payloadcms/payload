@@ -1,28 +1,36 @@
-import type { Operator, Option, SelectFieldClient, TextFieldClient } from 'payload'
+import type {
+  Operator,
+  Option,
+  ResolvedFilterOptions,
+  SelectFieldClient,
+  TextFieldClient,
+} from 'payload'
 
 import React from 'react'
 
-import type { FieldCondition } from '../../types.js'
+import type { ReducedField, Value } from '../../types.js'
 
-import { DateField } from '../Date/index.js'
-import { NumberField } from '../Number/index.js'
-import { RelationshipField } from '../Relationship/index.js'
+import { DateFilter } from '../Date/index.js'
+import { NumberFilter } from '../Number/index.js'
+import { RelationshipFilter } from '../Relationship/index.js'
 import { Select } from '../Select/index.js'
 import { Text } from '../Text/index.js'
 
 type Props = {
   booleanSelect: boolean
   disabled: boolean
-  internalField: FieldCondition
+  filterOptions: ResolvedFilterOptions
+  internalField: ReducedField
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
   options: Option[]
-  value: string
+  value: Value
 }
 
 export const DefaultFilter: React.FC<Props> = ({
   booleanSelect,
   disabled,
+  filterOptions,
   internalField,
   onChange,
   operator,
@@ -34,10 +42,11 @@ export const DefaultFilter: React.FC<Props> = ({
       <Select
         disabled={disabled}
         field={internalField.field as SelectFieldClient}
+        isClearable={!booleanSelect}
         onChange={onChange}
         operator={operator}
         options={options}
-        value={value}
+        value={value as string}
       />
     )
   }
@@ -45,21 +54,34 @@ export const DefaultFilter: React.FC<Props> = ({
   switch (internalField?.field?.type) {
     case 'date': {
       return (
-        <DateField
+        <DateFilter
           disabled={disabled}
           field={internalField.field}
           onChange={onChange}
           operator={operator}
-          value={value}
+          value={value as Date | string}
         />
       )
     }
 
     case 'number': {
       return (
-        <NumberField
+        <NumberFilter
           disabled={disabled}
           field={internalField.field}
+          onChange={onChange}
+          operator={operator}
+          value={value as number | number[]}
+        />
+      )
+    }
+
+    case 'relationship': {
+      return (
+        <RelationshipFilter
+          disabled={disabled}
+          field={internalField.field}
+          filterOptions={filterOptions}
           onChange={onChange}
           operator={operator}
           value={value}
@@ -67,11 +89,12 @@ export const DefaultFilter: React.FC<Props> = ({
       )
     }
 
-    case 'relationship': {
+    case 'upload': {
       return (
-        <RelationshipField
+        <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
+          filterOptions={filterOptions}
           onChange={onChange}
           operator={operator}
           value={value}
@@ -86,7 +109,7 @@ export const DefaultFilter: React.FC<Props> = ({
           field={internalField?.field as TextFieldClient}
           onChange={onChange}
           operator={operator}
-          value={value}
+          value={value as string | string[]}
         />
       )
     }

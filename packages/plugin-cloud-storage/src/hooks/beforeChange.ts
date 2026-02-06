@@ -1,60 +1,41 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, FileData, TypeWithID } from 'payload'
+import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
 import type { GeneratedAdapter } from '../types.js'
-
-import { getIncomingFiles } from '../utilities/getIncomingFiles.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
+  disablePayloadAccessControl?: boolean
+  size?: ImageSize
 }
 
 export const getBeforeChangeHook =
-  ({ adapter, collection }: Args): CollectionBeforeChangeHook<FileData & TypeWithID> =>
-  async ({ data, originalDoc, req }) => {
-    try {
-      const files = getIncomingFiles({ data, req })
-
-      if (files.length > 0) {
-        // If there is an original doc,
-        // And we have new files,
-        // We need to delete the old files before uploading new
-        if (originalDoc) {
-          let filesToDelete: string[] = []
-
-          if (typeof originalDoc?.filename === 'string') {
-            filesToDelete.push(originalDoc.filename)
-          }
-
-          if (typeof originalDoc.sizes === 'object') {
-            filesToDelete = filesToDelete.concat(
-              Object.values(originalDoc?.sizes || []).map(
-                (resizedFileData) => resizedFileData?.filename,
-              ),
-            )
-          }
-
-          const deletionPromises = filesToDelete.map(async (filename) => {
-            if (filename) {
-              await adapter.handleDelete({ collection, doc: originalDoc, filename, req })
-            }
-          })
-
-          await Promise.all(deletionPromises)
-        }
-
-        const promises = files.map(async (file) => {
-          await adapter.handleUpload({ collection, data, file, req })
-        })
-
-        await Promise.all(promises)
-      }
-    } catch (err: unknown) {
-      req.payload.logger.error(
-        `There was an error while uploading files corresponding to the collection ${collection.slug} with filename ${data.filename}:`,
-      )
-      req.payload.logger.error({ err })
-      throw err
+  ({ adapter, collection, disablePayloadAccessControl, size }: Args): FieldHook =>
+  async ({ data, originalDoc, value }) => {
+    // Only handle the disablePayloadAccessControl: true case here
+    // When false, let the core beforeChange hook from getBaseFields handle it
+    if (!disablePayloadAccessControl) {
+      return value
     }
-    return data
+
+    const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
+
+    if (!filename) {
+      return value
+    }
+
+    const prefix = data?.prefix
+
+    // Store the full URL in the database so files can be accessed directly
+    // from the storage provider without going through Payload's API
+    if (adapter.generateURL) {
+      return await adapter.generateURL({
+        collection,
+        data: data || originalDoc,
+        filename,
+        prefix,
+      })
+    }
+
+    return value
   }

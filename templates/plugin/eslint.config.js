@@ -10,7 +10,7 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
-  '**/jest.config.js',
+  '**/vitest.config.js',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
@@ -24,6 +24,11 @@ export const defaultESLintIgnores = [
 
 export default [
   ...payloadEsLintConfig,
+  {
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  },
   {
     languageOptions: {
       parserOptions: {

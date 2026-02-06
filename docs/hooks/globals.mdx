@@ -11,19 +11,20 @@ Global Hooks are [Hooks](./overview) that run on [Global](../configuration/globa
 To add Hooks to a Global, use the `hooks` property in your [Global Config](../configuration/globals):
 
 ```ts
-import type { GlobalConfig } from 'payload';
+import type { GlobalConfig } from 'payload'
 
 export const GlobalWithHooks: GlobalConfig = {
   // ...
-  hooks: { // highlight-line
+  hooks: {
+    // highlight-line
     // ...
   },
 }
 ```
 
 <Banner type="info">
-  **Tip:**
-  You can also set hooks on the field-level to isolate hook logic to specific fields. [More details](./fields).
+  **Tip:** You can also set hooks on the field-level to isolate hook logic to
+  specific fields. [More details](./fields).
 </Banner>
 
 ## Config Options
@@ -37,6 +38,7 @@ const GlobalWithHooks: GlobalConfig = {
   // ...
   // highlight-start
   hooks: {
+    beforeOperation: [(args) => {...}],
     beforeValidate: [(args) => {...}],
     beforeChange: [(args) => {...}],
     beforeRead: [(args) => {...}],
@@ -47,17 +49,49 @@ const GlobalWithHooks: GlobalConfig = {
 }
 ```
 
+### beforeOperation
+
+The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
+
+```ts
+import type { GlobalBeforeOperationHook } from 'payload'
+
+const beforeOperationHook: GlobalBeforeOperationHook = async ({
+  args,
+  operation,
+  req,
+}) => {
+  return args // return modified operation arguments as necessary
+}
+```
+
+The following arguments are provided to the `beforeOperation` hook:
+
+| Option          | Description                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**    | The [Global](../configuration/globals) in which this Hook is running against. Available operation include: `countVersions`, `read`, `restoreVersion`, and `update`. |
+| **`context`**   | Custom context passed between Hooks. [More details](./context).                                                                                                     |
+| **`operation`** | The name of the operation that this hook is running within.                                                                                                         |
+| **`req`**       | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.               |
+
 ### beforeValidate
 
-Runs before the `update` operation. This hook allows you to add or format data before the incoming data is validated.
+Runs during the `update` operation. This hook allows you to add or format data before the incoming data is validated server-side.
+
+Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
+
+1. `validate` runs on the client
+2. if successful, `beforeValidate` runs on the server
+3. `validate` runs on the server
 
 ```ts
 import type { GlobalBeforeValidateHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const beforeValidateHook: GlobalBeforeValidateHook = async ({
-  data,
+const beforeValidateHook: GlobalBeforeValidateHook<SiteSettings> = async ({
+  data, // Typed as Partial<SiteSettings>
   req,
-  originalDoc,
+  originalDoc, // Typed as SiteSettings
 }) => {
   return data
 }
@@ -65,13 +99,20 @@ const beforeValidateHook: GlobalBeforeValidateHook = async ({
 
 The following arguments are provided to the `beforeValidate` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
-| **`data`**               | The incoming data passed through the operation.                                                                                 |
-| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
+| **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
@@ -79,11 +120,12 @@ Immediately following validation, `beforeChange` hooks will run within the `upda
 
 ```ts
 import type { GlobalBeforeChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const beforeChangeHook: GlobalBeforeChangeHook = async ({
-  data,
+const beforeChangeHook: GlobalBeforeChangeHook<SiteSettings> = async ({
+  data, // Typed as Partial<SiteSettings>
   req,
-  originalDoc,
+  originalDoc, // Typed as SiteSettings
 }) => {
   return data
 }
@@ -91,13 +133,20 @@ const beforeChangeHook: GlobalBeforeChangeHook = async ({
 
 The following arguments are provided to the `beforeChange` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`data`**               | The incoming data passed through the operation.                                                                                 |
-| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
+| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 
@@ -105,25 +154,27 @@ After a global is updated, the `afterChange` hook runs. Use this hook to purge c
 
 ```ts
 import type { GlobalAfterChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const afterChangeHook: GlobalAfterChangeHook = async ({
-  doc,
-  previousDoc,
+const afterChangeHook: GlobalAfterChangeHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
+  previousDoc, // Typed as SiteSettings
   req,
 }) => {
-  return data
+  return doc
 }
 ```
 
 The following arguments are provided to the `afterChange` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`previousDoc`**        | The Document before changes were applied. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
+| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`doc`**         | The resulting Document after changes are applied.                                                                                                     |
+| **`previousDoc`** | The Document before changes were applied.                                                                                                             |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeRead
 
@@ -140,12 +191,12 @@ const beforeReadHook: GlobalBeforeReadHook = async ({
 
 The following arguments are provided to the `beforeRead` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`global`**         | The [Global](../configuration/globals) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option        | Description                                                                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`global`**  | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
+| **`context`** | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`doc`**     | The resulting Document after changes are applied.                                                                                                     |
+| **`req`**     | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### afterRead
 
@@ -153,15 +204,18 @@ Runs as the last step before a global is returned. Flattens locales, hides prote
 
 ```ts
 import type { GlobalAfterReadHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const afterReadHook: GlobalAfterReadHook = async ({
-  doc,
+const afterReadHook: GlobalAfterReadHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
   req,
   findMany,
-}) => {...}
+}) => {
+  return doc
+}
 ```
 
-The following arguments are provided to the `beforeRead` hook:
+The following arguments are provided to the `afterRead` hook:
 
 | Option         | Description                                                                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -184,4 +238,18 @@ import type {
   GlobalBeforeReadHook,
   GlobalAfterReadHook,
 } from 'payload'
+```
+
+You can also pass a generic type to each hook for strongly-typed `doc`, `previousDoc`, and `data` properties:
+
+```ts
+import type { GlobalAfterChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
+
+const afterChangeHook: GlobalAfterChangeHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
+  previousDoc, // Typed as SiteSettings
+}) => {
+  return doc
+}
 ```

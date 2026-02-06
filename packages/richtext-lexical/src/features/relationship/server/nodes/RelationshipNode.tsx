@@ -1,19 +1,22 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMConversionOutput,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-  Spread,
-} from 'lexical'
 import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
@@ -22,10 +25,8 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'relationship'
-} & Spread<RelationshipData, SerializedDecoratorBlockNode>
+export type SerializedRelationshipNode = RelationshipData &
+  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'relationship'>
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
@@ -57,7 +58,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     this.__data = data
   }
 
-  static clone(node: RelationshipServerNode): RelationshipServerNode {
+  static override clone(node: RelationshipServerNode): RelationshipServerNode {
     return new this({
       data: node.__data,
       format: node.__format,
@@ -65,11 +66,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'relationship'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {
       div: (domNode: HTMLDivElement) => {
         if (
@@ -86,7 +87,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
+  static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipServerNode {
     if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
@@ -104,11 +105,17 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element | null {
-    return null
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.relationship)
+    return element
   }
 
-  exportDOM(): DOMExportOutput {
+  override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
+    return null as unknown as JSX.Element
+  }
+
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
     element.setAttribute(
       'data-lexical-relationship-id',
@@ -121,7 +128,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return { element }
   }
 
-  exportJSON(): SerializedRelationshipNode {
+  override exportJSON(): SerializedRelationshipNode {
     return {
       ...super.exportJSON(),
       ...this.getData(),
@@ -134,7 +141,7 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return this.getLatest().__data
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `${this.__data?.relationTo} relation to ${typeof this.__data?.value === 'object' ? this.__data?.value?.id : this.__data?.value}`
   }
 
@@ -145,9 +152,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
 }
 
 export function $createServerRelationshipNode(data: RelationshipData): RelationshipServerNode {
-  return new RelationshipServerNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new RelationshipServerNode({
+      data,
+    }),
+  )
 }
 
 export function $isServerRelationshipNode(

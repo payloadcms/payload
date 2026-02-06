@@ -14,15 +14,11 @@ export const formatAuthors = (
   authors: NonNullable<NonNullable<Post['populatedAuthors']>[number]>[],
 ) => {
   // Ensure we don't have any authors without a name
-  const filteredAuthors = authors.filter((author) => Boolean(author.name))
+  const authorNames = authors.map((author) => author.name).filter(Boolean)
 
-  if (filteredAuthors.length === 0) return ''
-  if (filteredAuthors.length === 1) return filteredAuthors[0].name
-  if (filteredAuthors.length === 2)
-    return `${filteredAuthors[0].name} and ${filteredAuthors[1].name}`
+  if (authorNames.length === 0) return ''
+  if (authorNames.length === 1) return authorNames[0]
+  if (authorNames.length === 2) return `${authorNames[0]} and ${authorNames[1]}`
 
-  return `${filteredAuthors
-    .slice(0, -1)
-    .map((author) => author?.name)
-    .join(', ')} and ${filteredAuthors[authors.length - 1].name}`
+  return `${authorNames.slice(0, -1).join(', ')} and ${authorNames[authorNames.length - 1]}`
 }

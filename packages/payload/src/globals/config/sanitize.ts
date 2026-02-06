@@ -1,15 +1,16 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
-import defaultAccess from '../../auth/defaultAccess.js'
+import { defaultAccess } from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-
+import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = async (
   config: Config,
   global: GlobalConfig,
@@ -18,8 +19,13 @@ export const sanitizeGlobal = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
-  const { collections } = config
+  if (global._sanitized) {
+    return global as SanitizedGlobalConfig
+  }
+
+  global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
 
@@ -28,12 +34,15 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
 
   global.endpoints = global.endpoints ?? []
+
   if (!global.hooks) {
     global.hooks = {}
   }
+
   if (!global.access) {
     global.access = {}
   }
+
   if (!global.admin) {
     global.admin = {}
   }
@@ -41,6 +50,7 @@ export const sanitizeGlobal = async (
   if (!global.access.read) {
     global.access.read = defaultAccess
   }
+
   if (!global.access.update) {
     global.access.update = defaultAccess
   }
@@ -48,32 +58,51 @@ export const sanitizeGlobal = async (
   if (!global.hooks.beforeValidate) {
     global.hooks.beforeValidate = []
   }
+
   if (!global.hooks.beforeChange) {
     global.hooks.beforeChange = []
   }
+
   if (!global.hooks.afterChange) {
     global.hooks.afterChange = []
   }
+
   if (!global.hooks.beforeRead) {
     global.hooks.beforeRead = []
   }
+
   if (!global.hooks.afterRead) {
     global.hooks.afterRead = []
   }
 
   // Sanitize fields
-  const validRelationships = collections.map((c) => c.slug) || []
+  const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
+
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,
+    globalConfig: global,
     parentIsLocalized: false,
     richTextSanitizationPromises,
     validRelationships,
   })
 
+  if (global.endpoints !== false) {
+    if (!global.endpoints) {
+      global.endpoints = []
+    }
+
+    for (const endpoint of defaultGlobalEndpoints) {
+      global.endpoints.push(endpoint)
+    }
+  }
+
   if (global.versions) {
     if (global.versions === true) {
-      global.versions = { drafts: false, max: 100 }
+      global.versions = {
+        drafts: false,
+        max: 100,
+      }
     }
 
     global.versions.max = typeof global.versions.max === 'number' ? global.versions.max : 100
@@ -86,6 +115,18 @@ export const sanitizeGlobal = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(global.fields)
+
+      if (config.localization && hasLocalizedFields) {
+        if (global.versions.drafts.localizeStatus === undefined) {
+          global.versions.drafts.localizeStatus = false
+        }
+      }
+
+      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
+        ? global.versions.drafts.localizeStatus
+        : false
+
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -96,7 +137,12 @@ export const sanitizeGlobal = async (
         global.versions.drafts.validate = false
       }
 
-      global.fields = mergeBaseFields(global.fields, baseVersionFields)
+      global.fields = mergeBaseFields(
+        global.fields,
+        baseVersionFields({
+          localized: global.versions.drafts.localizeStatus ?? false,
+        }),
+      )
     }
   }
 
@@ -107,8 +153,8 @@ export const sanitizeGlobal = async (
   // /////////////////////////////////
   // Sanitize fields
   // /////////////////////////////////
-  let hasUpdatedAt = null
-  let hasCreatedAt = null
+  let hasUpdatedAt: boolean | null = null
+  let hasCreatedAt: boolean | null = null
   global.fields.some((field) => {
     if (fieldAffectsData(field)) {
       if (field.name === 'updatedAt') {

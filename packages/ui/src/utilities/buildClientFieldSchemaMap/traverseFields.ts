@@ -1,20 +1,21 @@
 import type { I18n } from '@payloadcms/translations'
-
-import {
-  type ClientConfig,
-  type ClientField,
-  type ClientFieldSchemaMap,
-  createClientFields,
-  type Field,
-  type FieldSchemaMap,
-  type Payload,
+import type {
+  ClientConfig,
+  ClientField,
+  ClientFieldSchemaMap,
+  Field,
+  FieldSchemaMap,
+  Payload,
+  TabAsFieldClient,
 } from 'payload'
-import { getFieldPaths, tabHasName } from 'payload/shared'
+
+import { createClientFields } from 'payload'
+import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
   config: ClientConfig
-  fields: ClientField[]
+  fields: (ClientField | TabAsFieldClient)[]
   i18n: I18n<any, any>
   parentIndexPath: string
   parentSchemaPath: string
@@ -36,16 +37,14 @@ export const traverseFields = ({
     const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
-      parentPath: '',
+      parentIndexPath,
       parentSchemaPath,
     })
 
     clientSchemaMap.set(schemaPath, field)
 
     switch (field.type) {
-      case 'array':
-      case 'group':
+      case 'array': {
         traverseFields({
           clientSchemaMap,
           config,
@@ -58,9 +57,17 @@ export const traverseFields = ({
         })
 
         break
+      }
 
       case 'blocks':
-        field.blocks.map((block) => {
+        ;(field.blockReferences ?? field.blocks).map((_block) => {
+          const block =
+            typeof _block === 'string'
+              ? config.blocksMap
+                ? config.blocksMap[_block]
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
+              : _block
+
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           clientSchemaMap.set(blockSchemaPath, block)
@@ -70,26 +77,55 @@ export const traverseFields = ({
             fields: block.fields,
             i18n,
             parentIndexPath: '',
-            parentSchemaPath: blockSchemaPath,
+            parentSchemaPath: schemaPath + '.' + block.slug,
             payload,
             schemaMap,
           })
         })
 
         break
+
       case 'collapsible':
-      case 'row':
+      case 'row': {
         traverseFields({
           clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
-          parentSchemaPath,
+          parentSchemaPath: schemaPath,
           payload,
           schemaMap,
         })
         break
+      }
+
+      case 'group': {
+        if (fieldAffectsData(field)) {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: '',
+            parentSchemaPath: schemaPath,
+            payload,
+            schemaMap,
+          })
+        } else {
+          traverseFields({
+            clientSchemaMap,
+            config,
+            fields: field.fields,
+            i18n,
+            parentIndexPath: indexPath,
+            parentSchemaPath: schemaPath,
+            payload,
+            schemaMap,
+          })
+        }
+        break
+      }
 
       case 'richText': {
         // richText sub-fields are not part of the ClientConfig or the Config.
@@ -131,34 +167,38 @@ export const traverseFields = ({
         }
         break
       }
-      case 'tabs':
-        field.tabs.map((tab, tabIndex) => {
-          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath: '',
-            parentSchemaPath,
-          })
 
-          clientSchemaMap.set(tabSchemaPath, tab)
+      case 'tab': {
+        const isNamedTab = tabHasName(field)
 
-          traverseFields({
-            clientSchemaMap,
-            config,
-            fields: tab.fields,
-            i18n,
-            parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
-            parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
-            payload,
-            schemaMap,
-          })
+        traverseFields({
+          clientSchemaMap,
+          config,
+          fields: field.fields,
+          i18n,
+          parentIndexPath: isNamedTab ? '' : indexPath,
+          parentSchemaPath: schemaPath,
+          payload,
+          schemaMap,
         })
 
         break
+      }
+
+      case 'tabs': {
+        traverseFields({
+          clientSchemaMap,
+          config,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
+          payload,
+          schemaMap,
+        })
+
+        break
+      }
     }
   }
 }

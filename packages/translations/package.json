@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.15.1",
+  "version": "3.75.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -46,25 +47,23 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "translateNewKeys": "node --no-deprecation --import @swc-node/register/esm-register scripts/translateNewKeys/run.ts"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc/core": "1.9.3",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
-    "dotenv": "16.4.5",
-    "prettier": "3.3.3",
-    "typescript": "5.7.2"
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
+    "dotenv": "16.4.7",
+    "prettier": "3.5.3",
+    "typescript": "5.7.3"
   },
   "publishConfig": {
     "exports": {

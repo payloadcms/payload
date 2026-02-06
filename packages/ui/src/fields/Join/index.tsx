@@ -1,6 +1,7 @@
 'use client'
 
 import type {
+  ClientConfig,
   ClientField,
   JoinFieldClient,
   JoinFieldClientComponent,
@@ -9,7 +10,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
@@ -19,27 +20,31 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Recursively builds the default data for joined collection
  */
 const getInitialDrawerData = ({
   collectionSlug,
+  config,
   docID,
   fields,
   segments,
 }: {
   collectionSlug: string
+  config: ClientConfig
   docID: number | string
   fields: ClientField[]
   segments: string[]
 }) => {
-  const flattenedFields = flattenTopLevelFields(fields)
+  const flattenedFields = flattenTopLevelFields(fields, {
+    keepPresentationalFields: true,
+  })
 
   const path = segments[0]
 
@@ -64,10 +69,11 @@ const getInitialDrawerData = ({
 
   const nextSegments = segments.slice(1, segments.length)
 
-  if (field.type === 'tab' || field.type === 'group') {
+  if (field.type === 'tab' || (field.type === 'group' && fieldAffectsData(field))) {
     return {
       [field.name]: getInitialDrawerData({
         collectionSlug,
+        config,
         docID,
         fields: field.fields,
         segments: nextSegments,
@@ -78,6 +84,7 @@ const getInitialDrawerData = ({
   if (field.type === 'array') {
     const initialData = getInitialDrawerData({
       collectionSlug,
+      config,
       docID,
       fields: field.fields,
       segments: nextSegments,
@@ -91,9 +98,12 @@ const getInitialDrawerData = ({
   }
 
   if (field.type === 'blocks') {
-    for (const block of field.blocks) {
+    for (const _block of field.blockReferences ?? field.blocks) {
+      const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+
       const blockInitialData = getInitialDrawerData({
         collectionSlug,
+        config,
         docID,
         fields: block.fields,
         segments: nextSegments,
@@ -122,19 +132,21 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       on,
       required,
     },
-    path,
+    path: pathFromProps,
   } = props
 
   const { id: docID, docConfig } = useDocumentInfo()
 
-  const {
-    config: { collections },
-  } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, value } =
-    useField<PaginatedDocs>({
-      path,
-    })
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    path,
+    showError,
+    value,
+  } = useField<PaginatedDocs>({
+    potentiallyStalePath: pathFromProps,
+  })
 
   const filterOptions: null | Where = useMemo(() => {
     if (!docID) {
@@ -150,11 +162,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       }
     }
 
-    const where = {
-      [on]: {
-        equals: value,
-      },
-    }
+    const where = Array.isArray(collection)
+      ? {}
+      : {
+          [on]: {
+            equals: value,
+          },
+        }
 
     if (field.where) {
       return {
@@ -163,30 +177,42 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     }
 
     return where
-  }, [docID, field.targetField.relationTo, field.where, on, docConfig.slug])
+  }, [docID, collection, field.targetField.relationTo, field.where, on, docConfig?.slug])
 
   const initialDrawerData = useMemo(() => {
-    const relatedCollection = collections.find((collection) => collection.slug === field.collection)
+    const relatedCollection = getEntityConfig({
+      collectionSlug: Array.isArray(field.collection) ? field.collection[0] : field.collection,
+    })
 
     return getInitialDrawerData({
-      collectionSlug: docConfig.slug,
+      collectionSlug: docConfig?.slug,
+      config,
       docID,
-      fields: relatedCollection.fields,
+      fields: relatedCollection?.fields,
       segments: field.on.split('.'),
     })
-  }, [collections, field.on, field.collection, docConfig.slug, docID])
+  }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])
+
+  if (!docConfig) {
+    return null
+  }
 
   return (
     <div
-      className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}
+      className={[fieldBaseClass, showError && 'error', 'join'].filter(Boolean).join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       <RelationshipTable
         AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}
         BeforeInput={BeforeInput}
         disableTable={filterOptions === null}
         field={field as JoinFieldClient}
+        fieldPath={path}
         filterOptions={filterOptions}
         initialData={docID && value ? value : ({ docs: [] } as PaginatedDocs)}
         initialDrawerData={initialDrawerData}
@@ -196,6 +222,15 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
               <FieldLabel label={label} localized={localized} path={path} required={required} />
             )}
           </h4>
+        }
+        parent={
+          Array.isArray(collection)
+            ? {
+                id: docID,
+                collectionSlug: docConfig.slug,
+                joinPath: path,
+              }
+            : undefined
         }
         relationTo={collection}
       />

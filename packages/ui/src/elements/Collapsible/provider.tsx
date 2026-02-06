@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 type ContextType = {
   isCollapsed: boolean
@@ -32,7 +32,7 @@ export const CollapsibleProvider: React.FC<{
     }
   }, [isCollapsed, isWithinCollapsible, toggle, parentIsCollapsed, isVisible])
 
-  return <Context.Provider value={contextValue}>{children}</Context.Provider>
+  return <Context value={contextValue}>{children}</Context>
 }
 
-export const useCollapsible = (): ContextType => useContext(Context)
+export const useCollapsible = (): ContextType => use(Context)

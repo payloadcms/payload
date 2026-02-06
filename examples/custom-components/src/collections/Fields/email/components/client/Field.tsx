@@ -5,5 +5,5 @@ import { EmailField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomEmailFieldClient: EmailFieldClientComponent = (props) => {
-  return <EmailField field={props?.field} path={props?.path} />
+  return <EmailField {...props} />
 }

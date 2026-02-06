@@ -2,14 +2,15 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
-import eslintConfigPrettier from 'eslint-config-prettier'
+import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
-import jestExtends from './configs/jest/index.mjs'
 import globals from 'globals'
 import importX from 'eslint-plugin-import-x'
 import typescriptParser from '@typescript-eslint/parser'
 import { deepMerge } from './deepMerge.js'
+import reactCompiler from 'eslint-plugin-react-compiler'
+import vitest from '@vitest/eslint-plugin'
 
 const baseRules = {
   // This rule makes no sense when overriding class methods. This is used a lot in richtext-lexical.
@@ -125,6 +126,53 @@ export const rootEslintConfig = [
         ecmaFeatures: {
           jsx: true,
         },
+        projectService: {
+          // This is necessary because `tsconfig.base.json` defines `"rootDir": "${configDir}/src"`,
+          // And the following files aren't in src because they aren't transpiled.
+          // This is typescript-eslint's way of adding files that aren't included in tsconfig.
+          // See: https://typescript-eslint.io/troubleshooting/typed-linting/#i-get-errors-telling-me--was-not-found-by-the-project-service-consider-either-including-it-in-the-tsconfigjson-or-including-it-in-allowdefaultproject
+          // The best practice is to have a tsconfig.json that covers ALL files and is used for
+          // typechecking (with noEmit), and a `tsconfig.build.json` that is used for the build
+          // (or alternatively, swc, tsup or tsdown). That's what we should ideally do, in which case
+          // this hardcoded list wouldn't be necessary. Note that these files don't currently go
+          // through ts, only through eslint.
+          allowDefaultProject: [
+            '../payload/bin.js',
+            '../payload/bundle.js',
+            '../next/babel.config.cjs',
+            '../next/bundleScss.js',
+            '../ui/babel.config.cjs',
+            '../ui/bundle.js',
+            '../graphql/bin.js',
+            '../richtext-lexical/babel.config.cjs',
+            '../richtext-lexical/bundle.js',
+            '../richtext-lexical/scripts/translateNewKeys.ts',
+            '../db-postgres/bundle.js',
+            '../db-postgres/relationships-v2-v3.mjs',
+            '../db-postgres/scripts/renamePredefinedMigrations.ts',
+            '../db-sqlite/bundle.js',
+            '../db-d1-sqlite/bundle.js',
+            '../db-vercel-postgres/relationships-v2-v3.mjs',
+            '../db-vercel-postgres/scripts/renamePredefinedMigrations.ts',
+            '../plugin-cloud-storage/azure.d.ts',
+            '../plugin-cloud-storage/azure.js',
+            '../plugin-cloud-storage/gcs.d.ts',
+            '../plugin-cloud-storage/gcs.js',
+            '../plugin-cloud-storage/s3.d.ts',
+            '../plugin-cloud-storage/s3.js',
+            '../plugin-redirects/types.d.ts',
+            '../plugin-redirects/types.js',
+            '../translations/scripts/translateNewKeys/applyEslintFixes.ts',
+            '../translations/scripts/translateNewKeys/findMissingKeys.ts',
+            '../translations/scripts/translateNewKeys/generateTsObjectLiteral.ts',
+            '../translations/scripts/translateNewKeys/index.ts',
+            '../translations/scripts/translateNewKeys/run.ts',
+            '../translations/scripts/translateNewKeys/sortKeys.ts',
+            '../translations/scripts/translateNewKeys/translateText.ts',
+            '../create-payload-app/bin/cli.js',
+          ],
+        },
+        tsconfigRootDir: import.meta.dirname,
       },
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -132,6 +180,9 @@ export const rootEslintConfig = [
         ...globals.node,
       },
       parser: typescriptParser,
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
     },
     plugins: {
       'import-x': importX,
@@ -181,18 +232,15 @@ export const rootEslintConfig = [
     files: ['**/*.tsx'],
   },
   {
-    name: 'Unit Tests',
-    ...deepMerge(jestExtends, {
-      plugins: {
-        payload: payloadPlugin,
-      },
-      rules: {
-        ...baseRules,
-        ...typescriptRules,
-        '@typescript-eslint/unbound-method': 'off',
-      },
-    }),
+    name: 'Unit and Integration Tests',
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+    },
     files: ['**/*.spec.ts'],
+    ignores: ['**/*.e2e.spec.ts'],
   },
   {
     name: 'Payload Config',
@@ -200,11 +248,14 @@ export const rootEslintConfig = [
       payload: payloadPlugin,
     },
     rules: {
-      ...baseRules,
-      ...typescriptRules,
       'no-restricted-exports': 'off',
     },
     files: ['*.config.ts', 'config.ts'],
+  },
+  {
+    name: 'React Compiler',
+    ...reactCompiler.configs.recommended,
+    files: ['**/*.tsx'],
   },
 ]
 

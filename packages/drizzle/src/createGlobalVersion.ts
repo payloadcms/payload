@@ -1,7 +1,8 @@
-import type { CreateGlobalVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
+import type { CreateGlobalVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionGlobalFields } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -9,7 +10,7 @@ import type { DrizzleAdapter } from './types.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function createGlobalVersion<T extends TypeWithID>(
+export async function createGlobalVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     autosave,
@@ -17,16 +18,18 @@ export async function createGlobalVersion<T extends TypeWithID>(
     globalSlug,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
   }: CreateGlobalVersionArgs,
-) {
-  const db = await getTransaction(this, req)
+): Promise<TypeWithVersion<T>> {
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
 
   const tableName = this.tableNameMap.get(`_${toSnakeCase(global.slug)}${this.versionsSuffix}`)
+
+  const db = await getTransaction(this, req)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -41,6 +44,8 @@ export async function createGlobalVersion<T extends TypeWithID>(
     },
     db,
     fields: buildVersionGlobalFields(this.payload.config, global, true),
+    globalSlug,
+    ignoreResult: returning === false ? 'idOnly' : false,
     operation: 'create',
     req,
     select,
@@ -48,7 +53,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
   })
 
   const table = this.tables[tableName]
-  if (global.versions.drafts) {
+  if (hasDraftsEnabled(global)) {
     await this.execute({
       db,
       sql: sql`
@@ -57,6 +62,10 @@ export async function createGlobalVersion<T extends TypeWithID>(
           WHERE ${table.id} != ${result.id};
         `,
     })
+  }
+
+  if (returning === false) {
+    return null
   }
 
   return result

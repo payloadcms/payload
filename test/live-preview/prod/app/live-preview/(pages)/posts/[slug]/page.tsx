@@ -38,7 +38,9 @@ export async function generateStaticParams() {
   process.env.PAYLOAD_DROP_DATABASE = 'false'
   try {
     const ssrPosts = await getDocs<Post>(postsSlug)
-    return ssrPosts?.map(({ slug }) => slug)
+    return ssrPosts?.map((page) => {
+      return { slug: page.slug }
+    })
   } catch (error) {
     return []
   }

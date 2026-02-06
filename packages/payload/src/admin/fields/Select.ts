@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -23,7 +25,7 @@ type SelectFieldBaseClientProps = {
   readonly onChange?: (e: string | string[]) => void
   readonly path: string
   readonly validate?: SelectFieldValidation
-  readonly value?: string
+  readonly value?: string | string[]
 }
 
 type SelectFieldBaseServerProps = Pick<FieldPaths, 'path'>
@@ -68,3 +70,10 @@ export type SelectFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type SelectFieldErrorClientComponent =
   FieldErrorClientComponent<SelectFieldClientWithoutType>
+
+export type SelectFieldDiffServerComponent = FieldDiffServerComponent<
+  SelectField,
+  SelectFieldClient
+>
+
+export type SelectFieldDiffClientComponent = FieldDiffClientComponent<SelectFieldClient>

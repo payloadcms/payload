@@ -29,12 +29,12 @@ export function findUpSync({
           break
         }
       }
-      if (!found) {
+      if (!found && dir !== root) {
         dir = path.dirname(dir) // Move up one directory level.
         continue
       }
     }
-    const result = condition(dir)
+    const result = condition?.(dir)
     if (result === true) {
       return dir
     }
@@ -76,12 +76,12 @@ export async function findUp({
           break
         }
       }
-      if (!found) {
+      if (!found && dir !== root) {
         dir = path.dirname(dir) // Move up one directory level.
         continue
       }
     }
-    const result = await condition(dir)
+    const result = await condition?.(dir)
     if (result === true) {
       return dir
     }

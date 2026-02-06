@@ -4,6 +4,7 @@ import type { CollectionConfig } from 'payload'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import path from 'path'
+import { getRangeRequestInfo } from 'payload/internal'
 
 type StaticHandlerArgs = {
   baseUrl: string
@@ -15,55 +16,74 @@ export const getStaticHandler = (
   { baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, filename, req })
+      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const fileKey = path.posix.join(prefix, encodeURIComponent(filename))
-
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-
       const blobMetadata = await head(fileUrl, { token })
-      const uploadedAtString = blobMetadata.uploadedAt.toISOString()
+      const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
+      const uploadedAtString = uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`
 
-      const { contentDisposition, contentType, size } = blobMetadata
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize: size, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
+      let headers = new Headers(incomingHeaders)
+
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
+      }
+
+      headers.append('Cache-Control', `public, max-age=${cacheControlMaxAge}`)
+      headers.append('Content-Disposition', contentDisposition)
+      headers.append('Content-Type', contentType)
+      headers.append('ETag', ETag)
+
+      if (
+        collection.upload &&
+        typeof collection.upload === 'object' &&
+        typeof collection.upload.modifyResponseHeaders === 'function'
+      ) {
+        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+      }
 
       if (etagFromHeaders && etagFromHeaders === ETag) {
         return new Response(null, {
-          headers: new Headers({
-            'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
-            'Content-Disposition': contentDisposition,
-            'Content-Length': String(size),
-            'Content-Type': contentType,
-            ETag,
-          }),
+          headers,
           status: 304,
         })
       }
 
       const response = await fetch(`${fileUrl}?${uploadedAtString}`, {
-        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          Pragma: 'no-cache',
+          ...(rangeResult.type === 'partial' && {
+            Range: `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`,
+          }),
+        },
       })
 
-      const blob = await response.blob()
-
-      if (!blob) {
+      if (!response.ok || !response.body) {
         return new Response(null, { status: 204, statusText: 'No Content' })
       }
 
-      const bodyBuffer = await blob.arrayBuffer()
+      headers.append('Last-Modified', uploadedAtString)
 
-      return new Response(bodyBuffer, {
-        headers: new Headers({
-          'Cache-Control': `public, max-age=${cacheControlMaxAge}`,
-          'Content-Disposition': contentDisposition,
-          'Content-Length': String(size),
-          'Content-Type': contentType,
-          ETag,
-          'Last-Modified': blobMetadata.uploadedAt.toUTCString(),
-        }),
-        status: 200,
+      return new Response(response.body, {
+        headers,
+        status: rangeResult.status,
       })
     } catch (err: unknown) {
       if (err instanceof BlobNotFoundError) {

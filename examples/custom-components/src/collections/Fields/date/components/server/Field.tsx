@@ -3,7 +3,18 @@ import type React from 'react'
 
 import { DateTimeField } from '@payloadcms/ui'
 
-export const CustomDateFieldServer: DateFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <DateTimeField field={props?.clientField} path={path} />
+export const CustomDateFieldServer: DateFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <DateTimeField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
 }

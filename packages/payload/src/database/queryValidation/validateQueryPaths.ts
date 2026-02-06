@@ -5,13 +5,15 @@ import type { Operator, PayloadRequest, Where, WhereField } from '../../types/in
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
-import { validOperators } from '../../types/constants.js'
+import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
+  // TODO: Rename to permissions or entityPermissions in 4.0
   policies?: EntityPolicies
+  polymorphicJoin?: boolean
   req: PayloadRequest
   versionFields?: FlattenedField[]
   where: Where
@@ -26,19 +28,6 @@ type Args = {
     }
 )
 
-const flattenWhere = (query: Where): WhereField[] =>
-  Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
-    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      const subWhereConstraints: Where[] = val.reduce((acc, subVal) => {
-        const subWhere = flattenWhere(subVal)
-        return [...acc, ...subWhere]
-      }, [])
-      return [...flattenedConstraints, ...subWhereConstraints]
-    }
-
-    return [...flattenedConstraints, { [key]: val }]
-  }, [])
-
 export async function validateQueryPaths({
   collectionConfig,
   errors = [],
@@ -48,6 +37,7 @@ export async function validateQueryPaths({
     collections: {},
     globals: {},
   },
+  polymorphicJoin,
   req,
   versionFields,
   where,
@@ -55,16 +45,49 @@ export async function validateQueryPaths({
   const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
 
   if (typeof where === 'object') {
-    const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
-    const promises = []
-    void whereFields.map((constraint) => {
-      void Object.keys(constraint).map((path) => {
-        void Object.entries(constraint[path]).map(([operator, val]) => {
-          if (validOperators.includes(operator as Operator)) {
+    const promises: Promise<void>[] = []
+    for (const path in where) {
+      const constraint = where[path]
+
+      if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
+        for (const item of constraint) {
+          if (collectionConfig) {
+            promises.push(
+              validateQueryPaths({
+                collectionConfig,
+                errors,
+                overrideAccess,
+                policies,
+                polymorphicJoin,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          } else {
+            promises.push(
+              validateQueryPaths({
+                errors,
+                globalConfig,
+                overrideAccess,
+                policies,
+                polymorphicJoin,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          }
+        }
+      } else if (!Array.isArray(constraint)) {
+        for (const operator in constraint) {
+          const val = constraint[operator as keyof typeof constraint]
+          if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
                 collectionConfig,
+                constraint: where as WhereField,
                 errors,
                 fields,
                 globalConfig,
@@ -72,15 +95,17 @@ export async function validateQueryPaths({
                 overrideAccess,
                 path,
                 policies,
+                polymorphicJoin,
                 req,
                 val,
                 versionFields,
               }),
             )
           }
-        })
-      })
-    })
+        }
+      }
+    }
+
     await Promise.all(promises)
     if (errors.length > 0) {
       throw new QueryError(errors)

@@ -1,6 +1,7 @@
-import type { I18n } from '@payloadcms/translations'
 import type {
-  Payload,
+  DocumentTabClientProps,
+  DocumentTabServerPropsOnly,
+  PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   SanitizedPermissions,
@@ -9,106 +10,73 @@ import type {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
-import { getCustomViews } from './getCustomViews.js'
-import { getViewConfig } from './getViewConfig.js'
-import './index.scss'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
-import { DocumentTab } from './Tab/index.js'
-import { tabs as defaultTabs } from './tabs/index.js'
+import { DefaultDocumentTab } from './Tab/index.js'
+import { getTabs } from './tabs/index.js'
+import './index.scss'
 
 const baseClass = 'doc-tabs'
 
 export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
   globalConfig: SanitizedGlobalConfig
-  i18n: I18n
-  payload: Payload
   permissions: SanitizedPermissions
-}> = (props) => {
-  const { collectionConfig, globalConfig, i18n, payload, permissions } = props
-  const { config } = payload
+  req: PayloadRequest
+}> = ({ collectionConfig, globalConfig, permissions, req }) => {
+  const { config } = req.payload
 
-  const customViews = getCustomViews({ collectionConfig, globalConfig })
+  const tabs = getTabs({
+    collectionConfig,
+    globalConfig,
+  })
 
   return (
     <ShouldRenderTabs>
       <div className={baseClass}>
         <div className={`${baseClass}__tabs-container`}>
           <ul className={`${baseClass}__tabs`}>
-            {Object.entries(defaultTabs)
-              // sort `defaultViews` based on `order` property from smallest to largest
-              // if no `order`, append the view to the end
-              // TODO: open `order` to the config and merge `defaultViews` with `customViews`
-              ?.sort(([, a], [, b]) => {
-                if (a.order === undefined && b.order === undefined) {
-                  return 0
-                } else if (a.order === undefined) {
-                  return 1
-                } else if (b.order === undefined) {
-                  return -1
-                }
-                return a.order - b.order
-              })
-              ?.map(([name, tab], index) => {
-                const viewConfig = getViewConfig({ name, collectionConfig, globalConfig })
-                const tabFromConfig = viewConfig && 'tab' in viewConfig ? viewConfig.tab : undefined
+            {tabs?.map(({ tab: tabConfig, viewPath }, index) => {
+              const { condition } = tabConfig || {}
 
-                const { condition } = tabFromConfig || {}
+              const meetsCondition =
+                !condition ||
+                condition({ collectionConfig, config, globalConfig, permissions, req })
 
-                const meetsCondition =
-                  !condition ||
-                  (condition &&
-                    Boolean(condition({ collectionConfig, config, globalConfig, permissions })))
-
-                if (meetsCondition) {
-                  return (
-                    <DocumentTab
-                      key={`tab-${index}`}
-                      {...{
-                        ...props,
-                        ...(tab || {}),
-                        ...(tabFromConfig || {}),
-                      }}
-                    />
-                  )
-                }
-
+              if (!meetsCondition) {
                 return null
-              })}
-            {customViews?.map((CustomView, index) => {
-              if ('tab' in CustomView) {
-                const { path, tab } = CustomView
-
-                if (tab.Component) {
-                  return RenderServerComponent({
-                    clientProps: {
-                      path,
-                    },
-                    Component: tab.Component,
-                    importMap: payload.importMap,
-                    key: `tab-custom-${index}`,
-                    serverProps: {
-                      collectionConfig,
-                      globalConfig,
-                      i18n,
-                      payload,
-                      permissions,
-                    },
-                  })
-                }
-
-                return (
-                  <DocumentTab
-                    key={`tab-custom-${index}`}
-                    {...{
-                      ...props,
-                      ...tab,
-                    }}
-                  />
-                )
               }
 
-              return null
+              if (tabConfig?.Component) {
+                return RenderServerComponent({
+                  clientProps: {
+                    path: viewPath,
+                  } satisfies DocumentTabClientProps,
+                  Component: tabConfig.Component,
+                  importMap: req.payload.importMap,
+                  key: `tab-${index}`,
+                  serverProps: {
+                    collectionConfig,
+                    globalConfig,
+                    i18n: req.i18n,
+                    payload: req.payload,
+                    permissions,
+                    req,
+                    user: req.user,
+                  } satisfies DocumentTabServerPropsOnly,
+                })
+              }
+
+              return (
+                <DefaultDocumentTab
+                  collectionConfig={collectionConfig}
+                  globalConfig={globalConfig}
+                  key={`tab-${index}`}
+                  path={viewPath}
+                  permissions={permissions}
+                  req={req}
+                  tabConfig={tabConfig}
+                />
+              )
             })}
           </ul>
         </div>

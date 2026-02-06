@@ -28,58 +28,57 @@ export const MyNumberField: Field = {
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                 |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
-| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
-| **`min`**              | Minimum value accepted. Used in the default `validation` function.                                                                                                          |
-| **`max`**              | Maximum value accepted. Used in the default `validation` function.                                                                                                          |
-| **`hasMany`**          | Makes this field an ordered array of numbers instead of just a single number.                                                                                               |
-| **`minRows`**          | Minimum number of numbers in the numbers array, if `hasMany` is set to true.                                                                                                |
-| **`maxRows`**          | Maximum number of numbers in the numbers array, if `hasMany` is set to true.                                                                                                |
-| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
-| **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
-| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                             |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                       |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                          |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                            |
-| **`defaultValue`**     | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                        |
-| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
-| **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                               |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
-| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
+| Option                 | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                         |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                                                                                 |
+| **`min`**              | Minimum value accepted. Used in the default `validation` function.                                                                                                                                                                                                                                      |
+| **`max`**              | Maximum value accepted. Used in the default `validation` function.                                                                                                                                                                                                                                      |
+| **`hasMany`**          | Makes this field an ordered array of numbers instead of just a single number.                                                                                                                                                                                                                           |
+| **`minRows`**          | Minimum number of numbers in the numbers array, if `hasMany` is set to true.                                                                                                                                                                                                                            |
+| **`maxRows`**          | Maximum number of numbers in the numbers array, if `hasMany` is set to true.                                                                                                                                                                                                                            |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                                            |
+| **`index`**            | Build an [index](../database/indexes) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often.                                                                                                                                 |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More details](/docs/fields/overview#validation).                                                                                                                                                   |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                                         |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                                                   |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                                      |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                                        |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                                                                                                                           |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                                                                                                                         |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                                     |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                                           |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Number Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Number Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
 
 export const MyNumberField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Number Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Number Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Property                       | Description                                                                                                                            |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`step`**                     | Set a value for the number field to increment / decrement using browser controls.                                                      |
-| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                       |
-| **`autoComplete`**             | Set this property to a string that will be used for browser autocomplete.                                                             |
+| Property           | Description                                                                       |
+| ------------------ | --------------------------------------------------------------------------------- |
+| **`step`**         | Set a value for the number field to increment / decrement using browser controls. |
+| **`placeholder`**  | Set this property to define a placeholder string for the field.                   |
+| **`autoComplete`** | Set this property to a string that will be used for browser autocomplete.         |
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -96,5 +95,91 @@ export const ExampleCollection: CollectionConfig = {
       },
     },
   ],
+}
+```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { NumberField } from '@payloadcms/ui'
+import type { NumberFieldServerComponent } from 'payload'
+
+export const CustomNumberFieldServer: NumberFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <NumberField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { NumberField } from '@payloadcms/ui'
+import type { NumberFieldClientComponent } from 'payload'
+
+export const CustomNumberFieldClient: NumberFieldClientComponent = (props) => {
+  return <NumberField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { NumberFieldLabelServerComponent } from 'payload'
+
+export const CustomNumberFieldLabelServer: NumberFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { NumberFieldLabelClientComponent } from 'payload'
+
+export const CustomNumberFieldLabelClient: NumberFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
 }
 ```

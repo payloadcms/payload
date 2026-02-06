@@ -1,17 +1,24 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  // throttleTest,
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { conditionalLogicSlug } from '../../slugs.js'
 
@@ -26,6 +33,7 @@ let client: RESTClient
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
+let context: BrowserContext
 
 const toggleConditionAndCheckField = async (toggleLocator: string, fieldLocator: string) => {
   const toggle = page.locator(toggleLocator)
@@ -45,14 +53,14 @@ describe('Conditional Logic', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
 
     url = new AdminUrlUtil(serverURL, conditionalLogicSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -60,15 +68,23 @@ describe('Conditional Logic', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
+
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -82,6 +98,53 @@ describe('Conditional Logic', () => {
     )
 
     expect(true).toBe(true)
+  })
+
+  test('ensure conditions receive document ID during form state request', async () => {
+    await page.goto(url.create)
+
+    const fieldOnlyVisibleIfNoID = page.locator('#field-fieldWithDocIDCondition')
+
+    await expect(fieldOnlyVisibleIfNoID).toBeVisible()
+
+    const textField = page.locator('#field-text')
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('some text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await assertNetworkRequests(
+      page,
+      '/api/conditional-logic',
+      async () => {
+        await saveDocAndAssert(page)
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
+
+    // Fill text and wait for form state request to come back
+    await assertNetworkRequests(
+      page,
+      '/admin/collections/conditional-logic',
+      async () => {
+        await textField.fill('updated text')
+      },
+      {
+        minimumNumberOfRequests: 1,
+      },
+    )
+
+    await expect(fieldOnlyVisibleIfNoID).toBeHidden()
   })
 
   test('should conditionally render custom field that renders a Payload field', async () => {
@@ -161,20 +224,67 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    const addRowButton = page.locator('.array-field__add-row')
-    const fieldWithConditionSelector = 'input#field-arrayWithConditionalField__0__textWithCondition'
-    await addRowButton.click()
+    await addArrayRow(page, { fieldName: 'arrayWithConditionalField' })
+    const shimmer = '#field-arrayWithConditionalField .collapsible__content > .shimmer-effect'
 
+    await expect(page.locator(shimmer)).toBeVisible()
+
+    await expect(page.locator(shimmer)).toBeHidden()
+
+    // Do not use `waitForSelector` here, as it will wait for the selector to appear, not disappear
+    // eslint-disable-next-line playwright/no-wait-for-selector
     const wasFieldAttached = await page
-      .waitForSelector(fieldWithConditionSelector, {
+      .waitForSelector('input#field-arrayWithConditionalField__0__textWithCondition', {
         state: 'attached',
         timeout: 100, // A small timeout to catch any transient rendering
       })
       .catch(() => false) // If it doesn't appear, this resolves to `false`
 
     expect(wasFieldAttached).toBeFalsy()
+
     const fieldToToggle = page.locator('input#field-enableConditionalFields')
     await fieldToToggle.click()
-    await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
+
+    await expect(
+      page.locator('input#field-arrayWithConditionalField__0__textWithCondition'),
+    ).toBeVisible()
+  })
+
+  test('should render field based on path argument', async () => {
+    await page.goto(url.create)
+
+    await addArrayRow(page, { fieldName: 'arrayOne' })
+
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo' })
+
+    await addArrayRow(page, { fieldName: 'arrayOne__0__arrayTwo__0__arrayThree' })
+
+    const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
+
+    await expect(numberField).toBeHidden()
+
+    const selectField = page.locator('#field-arrayOne__0__arrayTwo__0__selectOptions')
+
+    await selectField.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+
+    await options.locator('text=Option Two').click()
+
+    await expect(numberField).toBeVisible()
+  })
+
+  test('should render field based on operation argument', async () => {
+    await page.goto(url.create)
+
+    const textField = page.locator('#field-text')
+    const fieldWithOperationCondition = page.locator('#field-fieldWithOperationCondition')
+
+    await textField.fill('some text')
+
+    await expect(fieldWithOperationCondition).toBeVisible()
+
+    await saveDocAndAssert(page)
+
+    await expect(fieldWithOperationCondition).toBeHidden()
   })
 })

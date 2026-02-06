@@ -3,13 +3,16 @@ import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { getNextRootDir } from './helpers/getNextRootDir.js'
+import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 
 const { readFile, writeFile, rm } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const createTestHooks = async (testSuiteName = '_community') => {
+export const createTestHooks = async (
+  testSuiteName = '_community',
+  testSuiteConfig = 'config.ts',
+) => {
   const rootDir = getNextRootDir().rootDir
   const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
   const tsConfigPath = existsSync(tsConfigBasePath)
@@ -35,12 +38,12 @@ export const createTestHooks = async (testSuiteName = '_community') => {
       // @ts-expect-error
       tsConfig.compilerOptions.paths['@payload-config'] = [
         process.env.PAYLOAD_TEST_PROD === 'true'
-          ? `./${testSuiteName}/config.ts`
-          : `./test/${testSuiteName}/config.ts`,
+          ? `./${testSuiteName}/${testSuiteConfig}`
+          : `./test/${testSuiteName}/${testSuiteConfig}`,
       ]
       await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
 
-      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, 'config.ts')
+      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, testSuiteConfig)
     },
   }
 }

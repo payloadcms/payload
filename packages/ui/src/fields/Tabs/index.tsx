@@ -1,6 +1,6 @@
 'use client'
 import type {
-  ClientField,
+  ClientComponentProps,
   ClientTab,
   DocumentPreferences,
   SanitizedFieldPermissions,
@@ -9,11 +9,12 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { tabHasName, toKebabCase } from 'payload/shared'
+import { getFieldPaths, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useFormFields } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -22,27 +23,13 @@ import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
+import './index.scss'
 
 const baseClass = 'tabs-field'
 
 export { TabsProvider }
-
-function generateTabPath({ activeTabConfig, path }: { activeTabConfig: ClientTab; path: string }) {
-  let tabPath = path
-
-  if (tabHasName(activeTabConfig) && activeTabConfig.name) {
-    if (path) {
-      tabPath = `${path}.${activeTabConfig.name}`
-    } else {
-      tabPath = activeTabConfig.name
-    }
-  }
-
-  return tabPath
-}
 
 const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const {
@@ -54,57 +41,46 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     path = '',
     permissions,
     readOnly,
+    schemaPath = '',
   } = props
 
   const { getPreference, setPreference } = usePreferences()
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
-  const tabsPrefKey = `tabs-${indexPath}`
-  const [activeTabPath, setActiveTabPath] = useState<string>(() =>
-    generateTabPath({ activeTabConfig: tabs[activeTabIndex], path: parentPath }),
-  )
 
-  const activePathChildrenPath = tabHasName(tabs[activeTabIndex]) ? activeTabPath : parentPath
+  const tabStates = useFormFields(([fields]) => {
+    return tabs.map((tab, index) => {
+      const id = tab?.id
 
-  const [activeTabSchemaPath, setActiveTabSchemaPath] = useState<string>(() =>
-    generateTabPath({ activeTabConfig: tabs[0], path: parentSchemaPath }),
-  )
-
-  const activePathSchemaChildrenPath = tabHasName(tabs[activeTabIndex])
-    ? activeTabSchemaPath
-    : parentSchemaPath
-
-  useEffect(() => {
-    if (preferencesKey) {
-      const getInitialPref = async () => {
-        const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
-        const initialIndex = path
-          ? existingPreferences?.fields?.[path]?.tabIndex
-          : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
-
-        const newIndex = initialIndex || 0
-        setActiveTabIndex(newIndex)
-
-        setActiveTabPath(generateTabPath({ activeTabConfig: tabs[newIndex], path: parentPath }))
-        setActiveTabSchemaPath(
-          generateTabPath({ activeTabConfig: tabs[newIndex], path: parentSchemaPath }),
-        )
+      return {
+        index,
+        passesCondition: fields?.[id]?.passesCondition ?? true,
+        tab,
       }
-      void getInitialPref()
-    }
-  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
+    })
+  })
+
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(
+    () => tabStates.filter(({ passesCondition }) => passesCondition)?.[0]?.index ?? 0,
+  )
+
+  const tabsPrefKey = `tabs-${indexPath}`
+
+  const activeTabInfo = tabStates[activeTabIndex]
+  const activeTabConfig = activeTabInfo?.tab
+  const activeTabDescription = activeTabConfig.admin?.description ?? activeTabConfig.description
+
+  const activeTabStaticDescription =
+    typeof activeTabDescription === 'function'
+      ? activeTabDescription({ i18n, t: i18n.t })
+      : activeTabDescription
+
+  const hasVisibleTabs = tabStates.some(({ passesCondition }) => passesCondition)
 
   const handleTabChange = useCallback(
     async (incomingTabIndex: number): Promise<void> => {
       setActiveTabIndex(incomingTabIndex)
-      setActiveTabPath(
-        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: parentPath }),
-      )
-      setActiveTabSchemaPath(
-        generateTabPath({ activeTabConfig: tabs[incomingTabIndex], path: parentSchemaPath }),
-      )
 
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
@@ -133,26 +109,32 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         })
       }
     },
-    [
-      tabs,
-      parentPath,
-      parentSchemaPath,
-      getPreference,
-      preferencesKey,
-      setPreference,
-      path,
-      tabsPrefKey,
-    ],
+    [getPreference, preferencesKey, setPreference, path, tabsPrefKey],
   )
 
-  const activeTabConfig = tabs[activeTabIndex]
+  useEffect(() => {
+    if (preferencesKey) {
+      const getInitialPref = async () => {
+        const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
+        const initialIndex = path
+          ? existingPreferences?.fields?.[path]?.tabIndex
+          : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
 
-  const activeTabDescription = activeTabConfig.description
+        const newIndex = initialIndex || 0
+        setActiveTabIndex(newIndex)
+      }
+      void getInitialPref()
+    }
+  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
 
-  const activeTabStaticDescription =
-    typeof activeTabDescription === 'function'
-      ? activeTabDescription({ t: i18n.t })
-      : activeTabDescription
+  useEffect(() => {
+    if (activeTabInfo?.passesCondition === false) {
+      const nextTab = tabStates.find(({ passesCondition }) => passesCondition)
+      if (nextTab) {
+        void handleTabChange(nextTab.index)
+      }
+    }
+  }, [activeTabInfo, tabStates, handleTabChange])
 
   return (
     <div
@@ -161,6 +143,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
         className,
         baseClass,
         isWithinCollapsible && `${baseClass}--within-collapsible`,
+        !hasVisibleTabs && `${baseClass}--hidden`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -168,41 +151,42 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
       <TabsProvider>
         <div className={`${baseClass}__tabs-wrap`}>
           <div className={`${baseClass}__tabs`}>
-            {tabs.map((tab, tabIndex) => {
-              return (
-                <TabComponent
-                  isActive={activeTabIndex === tabIndex}
-                  key={tabIndex}
-                  parentPath={path}
-                  setIsActive={() => {
-                    void handleTabChange(tabIndex)
-                  }}
-                  tab={tab}
-                />
-              )
-            })}
+            {tabStates.map(({ index, passesCondition, tab }) => (
+              <TabComponent
+                hidden={!passesCondition}
+                isActive={activeTabIndex === index}
+                key={index}
+                parentPath={path}
+                setIsActive={() => {
+                  void handleTabChange(index)
+                }}
+                tab={tab}
+              />
+            ))}
           </div>
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
-            <ActiveTabContent
+            <TabContent
               description={activeTabStaticDescription}
-              fields={activeTabConfig.fields}
+              field={activeTabConfig}
               forceRender={forceRender}
-              parentIndexPath={
-                tabHasName(activeTabConfig)
-                  ? ''
-                  : `${indexPath ? indexPath + '-' : ''}` + String(activeTabIndex)
-              }
-              parentPath={activePathChildrenPath}
-              parentSchemaPath={activePathSchemaChildrenPath}
-              path={activeTabPath}
+              hidden={false}
+              parentIndexPath={indexPath}
+              parentPath={path}
+              parentSchemaPath={schemaPath}
+              path={path}
               permissions={
-                'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
-                  ? permissions[activeTabConfig.name].fields
+                permissions && typeof permissions === 'object' && 'name' in activeTabConfig
+                  ? permissions[activeTabConfig.name] &&
+                    typeof permissions[activeTabConfig.name] === 'object' &&
+                    'fields' in permissions[activeTabConfig.name]
+                    ? permissions[activeTabConfig.name].fields
+                    : permissions[activeTabConfig.name]
                   : permissions
               }
               readOnly={readOnly}
+              tabIndex={activeTabIndex}
             />
           )}
         </div>
@@ -214,41 +198,52 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 export const TabsField = withCondition(TabsFieldComponent)
 
 type ActiveTabProps = {
-  description: StaticDescription
-  fields: ClientField[]
-  forceRender?: boolean
-  label?: string
-  parentIndexPath: string
-  parentPath: string
-  parentSchemaPath: string
-  path: string
-  permissions: SanitizedFieldPermissions
-  readOnly: boolean
-}
-function ActiveTabContent({
+  readonly description: StaticDescription
+  readonly field: ClientTab
+  readonly hidden: boolean
+  readonly label?: string
+  readonly parentIndexPath: string
+  readonly parentPath: string
+  readonly parentSchemaPath: string
+  readonly path: string
+  readonly permissions: SanitizedFieldPermissions
+  readonly readOnly: boolean
+  readonly tabIndex: number
+} & Pick<ClientComponentProps, 'forceRender'>
+
+function TabContent({
   description,
-  fields,
+  field,
   forceRender,
+  hidden,
   label,
   parentIndexPath,
   parentPath,
   parentSchemaPath,
-  path,
   permissions,
   readOnly,
+  tabIndex,
 }: ActiveTabProps) {
   const { i18n } = useTranslation()
-  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField({
-    path,
-  })
+
+  const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField()
 
   if (Field) {
     return Field
   }
 
+  const { indexPath, path, schemaPath } = getFieldPaths({
+    field,
+    index: tabIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   return (
     <div
       className={[
+        hidden && `${baseClass}__tab--hidden`,
         `${baseClass}__tab`,
         label && `${baseClass}__tabConfigLabel-${toKebabCase(getTranslation(label, i18n))}`,
       ]
@@ -257,15 +252,17 @@ function ActiveTabContent({
     >
       <RenderCustomComponent
         CustomComponent={Description}
-        Fallback={<FieldDescription description={description} path={path} />}
+        Fallback={
+          <FieldDescription description={description} marginPlacement="bottom" path={parentPath} />
+        }
       />
       {BeforeInput}
       <RenderFields
-        fields={fields}
+        fields={field.fields}
         forceRender={forceRender}
-        parentIndexPath={parentIndexPath}
-        parentPath={parentPath}
-        parentSchemaPath={parentSchemaPath}
+        parentIndexPath={indexPath}
+        parentPath={path}
+        parentSchemaPath={schemaPath}
         permissions={permissions}
         readOnly={readOnly}
       />

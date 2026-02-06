@@ -1,19 +1,28 @@
-import type { FlattenedBlock, FlattenedField, Payload, RelationshipField } from 'payload'
+import type {
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  Operator,
+  Payload,
+  RelationshipField,
+} from 'payload'
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
   locale?: string
-  operator: string
+  operator: Operator
+  parentIsLocalized: boolean
   path: string
   payload: Payload
   val: any
 }
 
-const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
+const buildExistsQuery = (formattedValue: unknown, path: string, treatEmptyString = true) => {
   if (formattedValue) {
     return {
       rawQuery: {
@@ -40,16 +49,23 @@ const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
 // returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
 const getFieldFromSegments = ({
   field,
+  payload,
   segments,
 }: {
   field: FlattenedBlock | FlattenedField
+  payload: Payload
   segments: string[]
-}) => {
-  if ('blocks' in field) {
-    for (const block of field.blocks) {
-      const field = getFieldFromSegments({ field: block, segments })
-      if (field) {
-        return field
+}): FlattenedField | undefined => {
+  if ('blocks' in field || 'blockReferences' in field) {
+    const _field: FlattenedBlocksField = field as FlattenedBlocksField
+    for (const _block of _field.blockReferences ?? _field.blocks) {
+      const block: FlattenedBlock | undefined =
+        typeof _block === 'string' ? payload.blocks[_block] : _block
+      if (block) {
+        const field = getFieldFromSegments({ field: block, payload, segments })
+        if (field) {
+          return field
+        }
       }
     }
   }
@@ -67,7 +83,7 @@ const getFieldFromSegments = ({
       }
 
       segments.shift()
-      return getFieldFromSegments({ field: foundField, segments })
+      return getFieldFromSegments({ field: foundField, payload, segments })
     }
   }
 }
@@ -77,21 +93,24 @@ export const sanitizeQueryValue = ({
   hasCustomID,
   locale,
   operator,
+  parentIsLocalized,
   path,
   payload,
   val,
-}: SanitizeQueryValueArgs): {
-  operator?: string
-  rawQuery?: unknown
-  val?: unknown
-} => {
+}: SanitizeQueryValueArgs):
+  | {
+      operator?: string
+      rawQuery?: unknown
+      val?: unknown
+    }
+  | undefined => {
   let formattedValue = val
   let formattedOperator = operator
 
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
-    const foundField = getFieldFromSegments({ field, segments })
+    const foundField = getFieldFromSegments({ field, payload, segments })
 
     if (foundField) {
       field = foundField
@@ -129,24 +148,28 @@ export const sanitizeQueryValue = ({
         formattedValue = createArrayFromCommaDelineated(val)
       }
 
-      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        if (!hasCustomID) {
-          if (Types.ObjectId.isValid(inVal)) {
-            formattedValues.push(new Types.ObjectId(inVal))
-          }
-        }
+      if (Array.isArray(formattedValue)) {
+        formattedValue = formattedValue.reduce<unknown[]>((formattedValues, inVal) => {
+          if (!hasCustomID) {
+            if (Types.ObjectId.isValid(inVal)) {
+              formattedValues.push(new Types.ObjectId(inVal))
 
-        if (field.type === 'number') {
-          const parsedNumber = parseFloat(inVal)
-          if (!Number.isNaN(parsedNumber)) {
-            formattedValues.push(parsedNumber)
+              return formattedValues
+            }
           }
-        } else {
-          formattedValues.push(inVal)
-        }
 
-        return formattedValues
-      }, [])
+          if (field.type === 'number') {
+            const parsedNumber = parseFloat(inVal)
+            if (!Number.isNaN(parsedNumber)) {
+              formattedValues.push(parsedNumber)
+            }
+          } else {
+            formattedValues.push(inVal)
+          }
+
+          return formattedValues
+        }, [])
+      }
     }
   }
 
@@ -163,7 +186,7 @@ export const sanitizeQueryValue = ({
   if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue)
 
-    if (field.type === 'number') {
+    if (field.type === 'number' && Array.isArray(formattedValue)) {
       formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
     }
   }
@@ -175,7 +198,6 @@ export const sanitizeQueryValue = ({
 
     if (operator === 'exists') {
       formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
-
       return buildExistsQuery(formattedValue, path)
     }
   }
@@ -209,7 +231,11 @@ export const sanitizeQueryValue = ({
 
       let localizedPath = path
 
-      if (field.localized && payload.config.localization && locale) {
+      if (
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        payload.config.localization &&
+        locale
+      ) {
         localizedPath = `${path}.${locale}`
       }
 
@@ -248,7 +274,7 @@ export const sanitizeQueryValue = ({
           return formattedValues
         }
 
-        if (typeof relationTo === 'string' && payload.collections[relationTo].customIDType) {
+        if (typeof relationTo === 'string' && payload.collections[relationTo]?.customIDType) {
           if (payload.collections[relationTo].customIDType === 'number') {
             const parsedNumber = parseFloat(inVal)
             if (!Number.isNaN(parsedNumber)) {
@@ -263,7 +289,7 @@ export const sanitizeQueryValue = ({
 
         if (
           Array.isArray(relationTo) &&
-          relationTo.some((relationTo) => !!payload.collections[relationTo].customIDType)
+          relationTo.some((relationTo) => !!payload.collections[relationTo]?.customIDType)
         ) {
           if (Types.ObjectId.isValid(inVal.toString())) {
             formattedValues.push(new Types.ObjectId(inVal))
@@ -281,12 +307,56 @@ export const sanitizeQueryValue = ({
       }, [])
     }
 
+    // Handle hasMany relationships with equals operator and array values
+    // For array equality checking
     if (
+      ['equals', 'not_equals'].includes(operator) &&
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany
+    ) {
+      if (typeof relationTo === 'string') {
+        const customIDType = payload.collections[relationTo]?.customIDType
+
+        // Convert array values to proper types (ObjectId or custom ID type)
+        formattedValue = formattedValue.map((v) => {
+          if (customIDType === 'number') {
+            const parsed = parseFloat(v)
+            return Number.isNaN(parsed) ? v : parsed
+          }
+          if (!Types.ObjectId.isValid(v)) {
+            return v
+          }
+          return new Types.ObjectId(v)
+        })
+      } else {
+        // Polymorphic hasMany - convert array of {relationTo, value} objects
+        formattedValue = formattedValue.map((item) => {
+          if (typeof item === 'object' && 'value' in item) {
+            const relTo = item.relationTo
+            const customIDType = payload.collections[relTo]?.customIDType
+            if (customIDType === 'number') {
+              const parsed = parseFloat(item.value)
+              return { relationTo: relTo, value: Number.isNaN(parsed) ? item.value : parsed }
+            }
+            if (Types.ObjectId.isValid(item.value)) {
+              return { relationTo: relTo, value: new Types.ObjectId(item.value) }
+            }
+            return item
+          }
+          // Non-polymorphic format - just IDs
+          if (Types.ObjectId.isValid(item)) {
+            return new Types.ObjectId(item)
+          }
+          return item
+        })
+      }
+    } else if (
       ['contains', 'equals', 'like', 'not_equals'].includes(operator) &&
       (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
     ) {
       if (typeof relationTo === 'string') {
-        const customIDType = payload.collections[relationTo].customIDType
+        const customIDType = payload.collections[relationTo]?.customIDType
 
         if (customIDType) {
           if (customIDType === 'number') {
@@ -304,7 +374,7 @@ export const sanitizeQueryValue = ({
         }
       } else {
         const hasCustomIDType = relationTo.some(
-          (relationTo) => !!payload.collections[relationTo].customIDType,
+          (relationTo) => !!payload.collections[relationTo]?.customIDType,
         )
 
         if (hasCustomIDType) {
@@ -323,6 +393,19 @@ export const sanitizeQueryValue = ({
           formattedValue = new Types.ObjectId(formattedValue)
         }
       }
+    }
+
+    if (
+      operator === 'all' &&
+      Array.isArray(relationTo) &&
+      path.endsWith('.value') &&
+      Array.isArray(formattedValue)
+    ) {
+      formattedValue.forEach((v, i) => {
+        if (Types.ObjectId.isValid(v)) {
+          formattedValue[i] = new Types.ObjectId(v)
+        }
+      })
     }
   }
 
@@ -349,10 +432,11 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) {
+      if (maxDistance && !Number.isNaN(Number(maxDistance))) {
         formattedValue.$maxDistance = parseFloat(maxDistance)
       }
-      if (minDistance) {
+
+      if (minDistance && !Number.isNaN(Number(minDistance))) {
         formattedValue.$minDistance = parseFloat(minDistance)
       }
     }
@@ -375,12 +459,20 @@ export const sanitizeQueryValue = ({
     if (operator === 'exists') {
       formattedValue = formattedValue === 'true' || formattedValue === true
 
-      // _id can't be empty string, will error Cast to ObjectId failed for value ""
-      return buildExistsQuery(
-        formattedValue,
-        path,
-        !['relationship', 'upload'].includes(field.type),
+      let treatEmptyString = !['array', 'blocks', 'checkbox', 'relationship', 'upload'].includes(
+        field.type,
       )
+
+      if (field.type === 'text' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'number' && field.hasMany) {
+        treatEmptyString = false
+      } else if (field.type === 'select' && field.hasMany) {
+        treatEmptyString = false
+      }
+
+      // _id can't be empty string, will error Cast to ObjectId failed for value ""
+      return buildExistsQuery(formattedValue, path, treatEmptyString)
     }
   }
 

@@ -1,5 +1,8 @@
 'use client'
 
+import type { SaveDraftButtonClientProps } from 'payload'
+
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -14,13 +17,13 @@ import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'save-draft'
 
-export const SaveDraftButton: React.FC = () => {
+export function SaveDraftButton(props: SaveDraftButtonClientProps) {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
+
   const { id, collectionSlug, globalSlug, setUnpublishedVersionCount, uploadStatus } =
     useDocumentInfo()
 
@@ -44,14 +47,20 @@ export const SaveDraftButton: React.FC = () => {
     let method = 'POST'
 
     if (collectionSlug) {
-      action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${id ? `/${id}` : ''}${search}`,
+      })
       if (id) {
         method = 'PATCH'
       }
     }
 
     if (globalSlug) {
-      action = `${serverURL}${api}/globals/${globalSlug}${search}`
+      action = formatAdminURL({
+        apiRoute: api,
+        path: `/globals/${globalSlug}${search}`,
+      })
     }
 
     await submit({
@@ -64,17 +73,7 @@ export const SaveDraftButton: React.FC = () => {
     })
 
     setUnpublishedVersionCount((count) => count + 1)
-  }, [
-    submit,
-    collectionSlug,
-    globalSlug,
-    serverURL,
-    api,
-    locale,
-    id,
-    disabled,
-    setUnpublishedVersionCount,
-  ])
+  }, [submit, collectionSlug, globalSlug, api, locale, id, disabled, setUnpublishedVersionCount])
 
   useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     if (disabled) {

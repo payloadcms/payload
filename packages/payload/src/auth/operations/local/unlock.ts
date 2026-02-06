@@ -1,6 +1,6 @@
 import type {
+  AuthCollectionSlug,
   AuthOperationsFromCollectionSlug,
-  CollectionSlug,
   Payload,
   RequestContext,
 } from '../../../index.js'
@@ -10,7 +10,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { unlockOperation } from '../unlock.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['unlock']
@@ -18,7 +18,7 @@ export type Options<TSlug extends CollectionSlug> = {
   req?: Partial<PayloadRequest>
 }
 
-async function localUnlock<TSlug extends CollectionSlug>(
+export async function unlockLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<boolean> {
@@ -39,5 +39,3 @@ async function localUnlock<TSlug extends CollectionSlug>(
     req: await createLocalReq(options, payload),
   })
 }
-
-export const unlock = localUnlock

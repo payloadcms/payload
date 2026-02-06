@@ -12,6 +12,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -61,3 +63,10 @@ export type CollapsibleFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type CollapsibleFieldErrorClientComponent =
   FieldErrorClientComponent<CollapsibleFieldClientWithoutType>
+
+export type CollapsibleFieldDiffServerComponent = FieldDiffServerComponent<
+  CollapsibleField,
+  CollapsibleFieldClient
+>
+
+export type CollapsibleFieldDiffClientComponent = FieldDiffClientComponent<CollapsibleFieldClient>

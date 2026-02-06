@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type { AccessResult } from '../../config/types.js'
 import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js'
@@ -7,8 +8,8 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
-import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
 
@@ -22,7 +23,7 @@ type Arguments<T> = {
   select?: SelectType
 }
 
-const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   accessResult,
   doc,
   entity,
@@ -30,9 +31,9 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   req,
   select,
 }: Arguments<T>): Promise<T> => {
-  const { locale } = req
+  const { locale, payload } = req
 
-  const queryToBuild: Where = {
+  let queryToBuild: Where = {
     and: [
       {
         'version._status': {
@@ -42,8 +43,37 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     ],
   }
 
+  if (hasLocalizeStatusEnabled(entity)) {
+    if (locale === 'all') {
+      queryToBuild = {
+        and: [
+          {
+            or: (
+              (payload.config.localization && payload.config.localization.localeCodes) ||
+              []
+            ).map((localeCode) => ({
+              [`version._status.${localeCode}`]: {
+                equals: 'draft',
+              },
+            })),
+          },
+        ],
+      }
+    } else if (locale) {
+      queryToBuild = {
+        and: [
+          {
+            [`version._status.${locale}`]: {
+              equals: 'draft',
+            },
+          },
+        ],
+      }
+    }
+  }
+
   if (entityType === 'collection') {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       parent: {
         equals: doc.id,
       },
@@ -51,7 +81,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
   if (docHasTimestamps(doc)) {
-    queryToBuild.and.push({
+    queryToBuild.and!.push({
       or: [
         {
           updatedAt: {
@@ -67,7 +97,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     })
   }
 
-  let versionAccessResult
+  let versionAccessResult: undefined | Where
 
   if (hasWhereAccessResult(accessResult)) {
     versionAccessResult = appendVersionToQueryKey(accessResult)
@@ -77,12 +107,12 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    locale,
+    locale: locale!,
     pagination: false,
     req,
     select: getQueryDraftsSelect({ select }),
     sort: '-updatedAt',
-    where: combineQueries(queryToBuild, versionAccessResult),
+    where: combineQueries(queryToBuild, versionAccessResult!),
   }
 
   let versionDocs
@@ -98,17 +128,17 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     return doc
   }
 
-  draft = deepCopyObjectSimple(draft)
   draft = sanitizeInternalFields(draft)
 
   // Patch globalType onto version doc
   if (entityType === 'global' && 'globalType' in doc) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     draft.version.globalType = doc.globalType
   }
 
   // handle when .version wasn't selected due to projection
   if (!draft.version) {
-    draft.version = {}
+    draft.version = {} as T
   }
 
   // Disregard all other draft content at this point,
@@ -119,5 +149,3 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
   return draft.version
 }
-
-export default replaceWithDraftIfAvailable

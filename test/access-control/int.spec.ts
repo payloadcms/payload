@@ -1,5 +1,5 @@
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
+  CollectionPermission,
   CollectionSlug,
   DataFromCollectionSlug,
   Payload,
@@ -8,19 +8,24 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { Forbidden } from 'payload'
+import { createLocalReq, Forbidden } from 'payload'
+import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { requestHeaders } from './config.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { requestHeaders } from './getConfig.js'
 import {
+  asyncParentSlug,
   firstArrayText,
   fullyRestrictedSlug,
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  hooksSlug,
   relyOnRequestHeadersSlug,
   restrictedVersionsSlug,
   secondArrayText,
@@ -53,120 +58,204 @@ describe('Access Control', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
-  it('should not affect hidden fields when patching data', async () => {
-    const doc = await payload.create({
-      collection: hiddenFieldsSlug,
-      data: {
-        partiallyHiddenArray: [
-          {
+  describe('Fields', () => {
+    it('should not affect hidden fields when patching data', async () => {
+      const doc = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          partiallyHiddenArray: [
+            {
+              name: 'public_name',
+              value: 'private_value',
+            },
+          ],
+          partiallyHiddenGroup: {
             name: 'public_name',
             value: 'private_value',
           },
-        ],
-        partiallyHiddenGroup: {
-          name: 'public_name',
-          value: 'private_value',
         },
-      },
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Doc Title',
+        },
+      })
+
+      const updatedDoc = await payload.findByID({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        showHiddenFields: true,
+      })
+
+      expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
+      expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    await payload.update({
-      id: doc.id,
-      collection: hiddenFieldsSlug,
-      data: {
-        title: 'Doc Title',
-      },
-    })
-
-    const updatedDoc = await payload.findByID({
-      id: doc.id,
-      collection: hiddenFieldsSlug,
-      showHiddenFields: true,
-    })
-
-    expect(updatedDoc.partiallyHiddenGroup.value).toStrictEqual('private_value')
-    expect(updatedDoc.partiallyHiddenArray[0].value).toStrictEqual('private_value')
-  })
-
-  it('should not affect hidden fields when patching data - update many', async () => {
-    const docsMany = await payload.create({
-      collection: hiddenFieldsSlug,
-      data: {
-        partiallyHiddenArray: [
-          {
+    it('should not affect hidden fields when patching data - update many', async () => {
+      const docsMany = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          partiallyHiddenArray: [
+            {
+              name: 'public_name',
+              value: 'private_value',
+            },
+          ],
+          partiallyHiddenGroup: {
             name: 'public_name',
             value: 'private_value',
           },
-        ],
-        partiallyHiddenGroup: {
-          name: 'public_name',
-          value: 'private_value',
         },
-      },
+      })
+
+      await payload.update({
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Doc Title',
+        },
+        where: {
+          id: { equals: docsMany.id },
+        },
+      })
+
+      const updatedMany = await payload.findByID({
+        id: docsMany.id,
+        collection: hiddenFieldsSlug,
+        showHiddenFields: true,
+      })
+
+      expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
+      expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
     })
 
-    await payload.update({
-      collection: hiddenFieldsSlug,
-      data: {
-        title: 'Doc Title',
-      },
-      where: {
-        id: { equals: docsMany.id },
-      },
+    it('should be able to restrict access based upon siblingData', async () => {
+      const { id } = await payload.create({
+        collection: siblingDataSlug,
+        data: {
+          array: [
+            {
+              allowPublicReadability: true,
+              text: firstArrayText,
+            },
+            {
+              allowPublicReadability: false,
+              text: secondArrayText,
+            },
+          ],
+        },
+      })
+
+      const doc = await payload.findByID({
+        id,
+        collection: siblingDataSlug,
+        overrideAccess: false,
+      })
+
+      expect(doc.array?.[0].text).toBe(firstArrayText)
+      // Should respect PublicReadabilityAccess function and not be sent
+      expect(doc.array?.[1].text).toBeUndefined()
+
+      // Retrieve with default of overriding access
+      const docOverride = await payload.findByID({
+        id,
+        collection: siblingDataSlug,
+      })
+
+      expect(docOverride.array?.[0].text).toBe(firstArrayText)
+      expect(docOverride.array?.[1].text).toBe(secondArrayText)
     })
 
-    const updatedMany = await payload.findByID({
-      id: docsMany.id,
-      collection: hiddenFieldsSlug,
-      showHiddenFields: true,
+    it('should use fallback value when trying to update a field without permission', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'original',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          cannotMutateRequired: 'new',
+          canMutate: 'canMutate',
+        },
+      })
+
+      expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    expect(updatedMany.partiallyHiddenGroup.value).toStrictEqual('private_value')
-    expect(updatedMany.partiallyHiddenArray[0].value).toStrictEqual('private_value')
+    it('should use fallback value when required data is missing', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'original',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          canMutate: 'canMutate',
+        },
+      })
+
+      // should fallback to original data and not throw validation error
+      expect(updatedDoc.cannotMutateRequired).toBe('original')
+    })
+
+    it('should pass fallback value through to beforeChange hook when access returns false', async () => {
+      const doc = await payload.create({
+        collection: hooksSlug,
+        data: {
+          cannotMutateRequired: 'cannotMutateRequired',
+          cannotMutateNotRequired: 'cannotMutateNotRequired',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          cannotMutateNotRequired: 'updated',
+        },
+      })
+
+      // should fallback to original data and not throw validation error
+      expect(updatedDoc.cannotMutateRequired).toBe('cannotMutateRequired')
+      expect(updatedDoc.cannotMutateNotRequired).toBe('cannotMutateNotRequired')
+    })
+
+    it('should not return default values for hidden fields with values', async () => {
+      const doc = await payload.create({
+        collection: hiddenFieldsSlug,
+        data: {
+          title: 'Test Title',
+        },
+        showHiddenFields: true,
+      })
+
+      expect(doc.hiddenWithDefault).toBe('default value')
+
+      const findDoc2 = await payload.findByID({
+        id: doc.id,
+        collection: hiddenFieldsSlug,
+        overrideAccess: false,
+      })
+
+      expect(findDoc2.hiddenWithDefault).toBeUndefined()
+    })
   })
-
-  it('should be able to restrict access based upon siblingData', async () => {
-    const { id } = await payload.create({
-      collection: siblingDataSlug,
-      data: {
-        array: [
-          {
-            allowPublicReadability: true,
-            text: firstArrayText,
-          },
-          {
-            allowPublicReadability: false,
-            text: secondArrayText,
-          },
-        ],
-      },
-    })
-
-    const doc = await payload.findByID({
-      id,
-      collection: siblingDataSlug,
-      overrideAccess: false,
-    })
-
-    expect(doc.array?.[0].text).toBe(firstArrayText)
-    // Should respect PublicReadabilityAccess function and not be sent
-    expect(doc.array?.[1].text).toBeUndefined()
-
-    // Retrieve with default of overriding access
-    const docOverride = await payload.findByID({
-      id,
-      collection: siblingDataSlug,
-    })
-
-    expect(docOverride.array?.[0].text).toBe(firstArrayText)
-    expect(docOverride.array?.[1].text).toBe(secondArrayText)
-  })
-
   describe('Collections', () => {
     describe('restricted collection', () => {
       it('field without read access should not show', async () => {
@@ -181,23 +270,22 @@ describe('Access Control', () => {
         const { id } = await createDoc({ restrictedField: 'restricted' })
 
         await expect(
-          async () =>
-            await payload.find({
-              collection: slug,
-              overrideAccess: false,
-              where: {
-                and: [
-                  {
-                    id: { equals: id },
+          payload.find({
+            collection: slug,
+            overrideAccess: false,
+            where: {
+              and: [
+                {
+                  id: { equals: id },
+                },
+                {
+                  restrictedField: {
+                    equals: 'restricted',
                   },
-                  {
-                    restrictedField: {
-                      equals: 'restricted',
-                    },
-                  },
-                ],
-              },
-            }),
+                },
+              ],
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
@@ -205,16 +293,15 @@ describe('Access Control', () => {
         const post = await createDoc({})
         await createDoc({ post: post.id, name: 'test' }, 'relation-restricted')
         await expect(
-          async () =>
-            await payload.find({
-              collection: 'relation-restricted',
-              overrideAccess: false,
-              where: {
-                'post.restrictedField': {
-                  equals: 'restricted',
-                },
+          payload.find({
+            collection: 'relation-restricted',
+            overrideAccess: false,
+            where: {
+              'post.restrictedField': {
+                equals: 'restricted',
               },
-            }),
+            },
+          }),
         ).rejects.toThrow('The following path cannot be queried: restrictedField')
       })
 
@@ -610,7 +697,7 @@ describe('Access Control', () => {
     it('should not allow reset password if forgotPassword expiration token is expired', async () => {
       // Mock Date.now() to simulate the forgotPassword call happening 1 hour ago (default is 1 hour)
       const originalDateNow = Date.now
-      const mockDateNow = jest.spyOn(Date, 'now').mockImplementation(() => {
+      const mockDateNow = vitest.spyOn(Date, 'now').mockImplementation(() => {
         // Move the current time back by 1 hour
         return originalDateNow() - 60 * 60 * 1000
       })
@@ -640,6 +727,140 @@ describe('Access Control', () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('async parent permission inheritance', () => {
+    it('should inherit async parent field permissions to nested children', async () => {
+      const doc = await payload.create({
+        collection: asyncParentSlug,
+        data: {
+          title: 'Test Document',
+        },
+      })
+
+      const req = await createLocalReq(
+        {
+          user: {
+            id: 123 as any,
+            collection: 'users',
+            roles: ['admin'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            email: 'test@test.com',
+          },
+        },
+        payload,
+      )
+
+      // Get permissions with admin user (should have access)
+      const permissions = await getEntityPermissions({
+        id: doc.id,
+        blockReferencesPermissions: {} as any,
+        entity: payload.collections[asyncParentSlug].config,
+        entityType: 'collection',
+        operations: ['read', 'update'],
+        fetchData: true,
+        req,
+      })
+
+      expect(permissions).toEqual({
+        fields: {
+          title: { read: { permission: true }, update: { permission: true } },
+          parentField: {
+            read: { permission: true },
+            update: { permission: true },
+            fields: {
+              childField1: { read: { permission: true }, update: { permission: true } },
+              childField2: { read: { permission: true }, update: { permission: true } },
+              nestedGroup: {
+                read: { permission: true },
+                update: { permission: true },
+                fields: {
+                  deepChild1: {
+                    read: { permission: true },
+                    update: { permission: true },
+                  },
+                  deepChild2: {
+                    read: { permission: true },
+                    update: { permission: true },
+                  },
+                },
+              },
+            },
+          },
+          updatedAt: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
+        },
+        read: { permission: true },
+        update: { permission: true },
+      } satisfies CollectionPermission)
+    })
+
+    it('should correctly deny access when async parent denies (non-admin user)', async () => {
+      const doc = await payload.create({
+        collection: asyncParentSlug,
+        data: {
+          title: 'Test Document 2',
+        },
+      })
+
+      // Create non-admin user request
+      const nonAdminReq = await createLocalReq(
+        {
+          user: {
+            id: 456 as any,
+            collection: 'users',
+            roles: ['user'], // Not admin
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            email: 'user@test.com',
+          },
+        },
+        payload,
+      )
+
+      const permissions = await getEntityPermissions({
+        id: doc.id,
+        blockReferencesPermissions: {} as any,
+        entity: payload.collections[asyncParentSlug].config,
+        entityType: 'collection',
+        operations: ['read', 'update'],
+        fetchData: true,
+        req: nonAdminReq,
+      })
+
+      expect(permissions).toEqual({
+        fields: {
+          title: { read: { permission: true }, update: { permission: true } },
+          parentField: {
+            read: { permission: false },
+            update: { permission: false },
+            fields: {
+              childField1: { read: { permission: false }, update: { permission: false } },
+              childField2: { read: { permission: false }, update: { permission: false } },
+              nestedGroup: {
+                read: { permission: false },
+                update: { permission: false },
+                fields: {
+                  deepChild1: {
+                    read: { permission: false },
+                    update: { permission: false },
+                  },
+                  deepChild2: {
+                    read: { permission: false },
+                    update: { permission: false },
+                  },
+                },
+              },
+            },
+          },
+          updatedAt: { read: { permission: true }, update: { permission: true } },
+          createdAt: { read: { permission: true }, update: { permission: true } },
+        },
+        read: { permission: true },
+        update: { permission: true },
+      } satisfies CollectionPermission)
     })
   })
 })

@@ -49,11 +49,10 @@ export function createMarkdownExport(
     })
 
   return (node) => {
-    const output = []
+    const output: string[] = []
     const children = (node || $getRoot()).getChildren()
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]
+    children.forEach((child, i) => {
       const result = exportTopLevelElements(
         child,
         elementTransformers,
@@ -67,12 +66,12 @@ export function createMarkdownExport(
           isNewlineDelimited &&
             i > 0 &&
             !isEmptyParagraph(child) &&
-            !isEmptyParagraph(children[i - 1])
+            !isEmptyParagraph(children[i - 1]!)
             ? '\n'.concat(result)
             : result,
         )
       }
-    }
+    })
     // Ensure consecutive groups of texts are at least \n\n apart while each empty paragraph render as a newline.
     // Eg. ["hello", "", "", "hi", "\nworld"] -> "hello\n\n\nhi\n\nworld"
     return output.join('\n')
@@ -206,6 +205,12 @@ function exportTextFormat(
   // bring the whitespace back. So our returned string looks like this: "   **foo**   "
   const frozenString = textContent.trim()
   let output = frozenString
+
+  if (!node.hasFormat('code')) {
+    // Escape any markdown characters in the text content
+    output = output.replace(/([*_`~\\])/g, '\\$1')
+  }
+
   // the opening tags to be added to the result
   let openingTags = ''
   // the closing tags to be added to the result
@@ -218,7 +223,7 @@ function exportTextFormat(
   const applied = new Set()
 
   for (const transformer of textTransformers) {
-    const format = transformer.format[0]
+    const format = transformer.format[0]!
     const tag = transformer.tag
 
     // dedup applied formats
@@ -237,8 +242,9 @@ function exportTextFormat(
 
   // close any tags in the same order they were applied, if necessary
   for (let i = 0; i < unclosedTags.length; i++) {
-    const nodeHasFormat = hasFormat(node, unclosedTags[i].format)
-    const nextNodeHasFormat = hasFormat(nextNode, unclosedTags[i].format)
+    const unclosedTag = unclosedTags[i]!
+    const nodeHasFormat = hasFormat(node, unclosedTag.format)
+    const nextNodeHasFormat = hasFormat(nextNode, unclosedTag.format)
 
     // prevent adding closing tag if next sibling will do it
     if (nodeHasFormat && nextNodeHasFormat) {
