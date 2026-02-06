@@ -1,7 +1,8 @@
 'use client'
 
-import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { createContext, use, useCallback, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation.js'
+import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
+import React, { createContext, use, useCallback, useState } from 'react'
 
 import type {
   HydrateData,
@@ -12,22 +13,30 @@ import type {
 } from './types.js'
 
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useConfig } from '../Config/index.js'
 import { usePreferences } from '../Preferences/index.js'
 
 const TaxonomyContext = createContext<TaxonomyContextValue | undefined>(undefined)
 
 export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) => {
   const { setPreference } = usePreferences()
+  const router = useRouter()
+  const {
+    config: {
+      routes: { admin: adminRoute, api },
+      serverURL,
+    },
+  } = useConfig()
 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
   const [selectedParentId, setSelectedParentId] = useState<null | number | string>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('parent')
   const [treeLimit, setTreeLimit] = useState<number>(100)
 
-  const [treeCache, setTreeCache] = useState<Map<string, TreeCacheEntry>>(new Map())
+  const [treeCache, setTreeCache] = useState<Map<string, TreeCacheEntry>>(() => new Map())
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
     Map<string, Set<number | string>>
-  >(new Map())
+  >(() => new Map())
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
   const [loadingNodeId, setLoadingNodeId] = useState<null | number | string>(null)
 
@@ -41,13 +50,12 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
       return []
     }
 
-    const parentKey = parentId === null ? 'root' : String(parentId)
     return cache.docs.filter((doc) => {
       const docParentId = doc[parentFieldName]
       if (parentId === null) {
         return docParentId === null || docParentId === undefined
       }
-      return String(docParentId) === String(parentId)
+      return docParentId !== null && String(docParentId) === String(parentId)
     })
   }
 
@@ -143,17 +151,114 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
     [collectionSlug, savePreferencesDebounced],
   )
 
-  const selectParent = (id: null | number | string) => {
-    // Placeholder - will implement later
-  }
+  const selectParent = useCallback(
+    (id: null | number | string) => {
+      if (!collectionSlug) {
+        return
+      }
 
-  const loadMoreChildren = async (parentId: null | number | string): Promise<void> => {
-    // Placeholder - will implement later
-  }
+      setSelectedParentId(id)
 
-  const reset = () => {
-    // Placeholder - will implement later
-  }
+      const url = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}${id !== null ? `?parent=${id}` : ''}`,
+      })
+      router.push(url)
+      router.refresh()
+    },
+    [adminRoute, collectionSlug, router],
+  )
+
+  const loadMoreChildren = useCallback(
+    async (parentId: null | number | string): Promise<void> => {
+      if (!collectionSlug || isLoadingMore) {
+        return
+      }
+
+      const cache = treeCache.get(collectionSlug)
+      if (!cache) {
+        return
+      }
+
+      const parentKey = parentId === null ? 'root' : String(parentId)
+      const parentMeta = cache.loadedParents[parentKey]
+      if (!parentMeta || !parentMeta.hasMore) {
+        return
+      }
+
+      setIsLoadingMore(true)
+      setLoadingNodeId(parentId)
+
+      try {
+        const currentChildren = cache.docs.filter((doc) => {
+          const docParentId = doc[parentFieldName]
+          if (parentId === null) {
+            return docParentId === null || docParentId === undefined
+          }
+          return docParentId !== null && String(docParentId) === String(parentId)
+        })
+
+        const nextPage = Math.floor(currentChildren.length / treeLimit) + 1
+
+        const whereClause =
+          parentId === null
+            ? `where[${parentFieldName}][exists]=false`
+            : `where[${parentFieldName}][equals]=${parentId}`
+
+        const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${treeLimit}&page=${nextPage}`
+        const response = await fetch(url, {
+          credentials: 'include',
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch more children')
+        }
+
+        const data = await response.json()
+        const newDocs = data.docs || []
+
+        setTreeCache((prev) => {
+          const newCache = new Map(prev)
+          const existingEntry = newCache.get(collectionSlug)
+
+          if (existingEntry) {
+            const existingDocIds = new Set(existingEntry.docs.map((doc) => doc.id))
+            const uniqueNewDocs = newDocs.filter((doc) => !existingDocIds.has(doc.id))
+
+            newCache.set(collectionSlug, {
+              docs: [...existingEntry.docs, ...uniqueNewDocs],
+              loadedParents: {
+                ...existingEntry.loadedParents,
+                [parentKey]: {
+                  hasMore: data.hasNextPage || false,
+                  totalDocs: data.totalDocs || 0,
+                },
+              },
+            })
+          }
+
+          return newCache
+        })
+      } catch {
+        // Failed to load more children - silently fail
+      } finally {
+        setIsLoadingMore(false)
+        setLoadingNodeId(null)
+      }
+    },
+    [api, collectionSlug, isLoadingMore, parentFieldName, serverURL, treeCache, treeLimit],
+  )
+
+  const reset = useCallback(() => {
+    setCollectionSlug(null)
+    setSelectedParentId(null)
+    setParentFieldName('parent')
+    setTreeLimit(100)
+    setTreeCache(new Map())
+    setExpandedNodesByCollection(new Map())
+    setIsLoadingMore(false)
+    setLoadingNodeId(null)
+  }, [])
 
   const expandedNodes =
     collectionSlug && expandedNodesByCollection.has(collectionSlug)
