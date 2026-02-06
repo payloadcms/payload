@@ -1749,7 +1749,7 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
       next:
-        specifier: ^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0
+        specifier: ^15.2.9 || ^15.3.9 || ^15.4.11 || ^15.5.10 || >=16.1.1-canary.35 <16.2.0 || ^16.2.0
         version: 15.4.11(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.56.1)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
       object-to-formdata:
         specifier: 4.5.1
