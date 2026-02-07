@@ -62,18 +62,20 @@ export const connect: Connect = async function connect(
     this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
     if (this.readReplicaOptions) {
-      const readReplicas = this.readReplicaOptions.map((connectionString) => {
-        const options = {
-          ...this.poolOptions,
-          connectionString,
-        }
-        const pool = new this.pg.Pool(options)
-        void connectWithReconnect({
-          adapter: this,
-          pool,
-        })
-        return drizzle({ client: pool, logger, schema: this.schema })
-      })
+      const readReplicas = await Promise.all(
+        this.readReplicaOptions.map(async (connectionString) => {
+          const options = {
+            ...this.poolOptions,
+            connectionString,
+          }
+          const pool = new this.pg.Pool(options)
+          await connectWithReconnect({
+            adapter: this,
+            pool,
+          })
+          return drizzle({ client: pool, logger, schema: this.schema })
+        }),
+      )
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas
     }
