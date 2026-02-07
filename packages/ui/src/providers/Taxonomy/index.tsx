@@ -209,7 +209,11 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
             ? `where[${parentFieldName}][exists]=false`
             : `where[${parentFieldName}][equals]=${parentId}`
 
-        const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${treeLimit}&page=${nextPage}`
+        const url = formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}?${whereClause}&limit=${treeLimit}&page=${nextPage}`,
+          serverURL,
+        })
         const response = await fetch(url, {
           credentials: 'include',
         })
