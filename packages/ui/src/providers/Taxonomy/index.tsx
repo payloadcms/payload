@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation.js'
+import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React, { createContext, use, useCallback, useState } from 'react'
 
@@ -31,7 +32,7 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
   const [selectedParentId, setSelectedParentId] = useState<null | number | string>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('parent')
-  const [treeLimit, setTreeLimit] = useState<number>(100)
+  const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_TAXONOMY_TREE_LIMIT)
 
   const [treeCache, setTreeCache] = useState<Map<string, TreeCacheEntry>>(() => new Map())
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
@@ -256,7 +257,7 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
     setCollectionSlug(null)
     setSelectedParentId(null)
     setParentFieldName('parent')
-    setTreeLimit(100)
+    setTreeLimit(DEFAULT_TAXONOMY_TREE_LIMIT)
     setTreeCache(new Map())
     setExpandedNodesByCollection(new Map())
     setIsLoadingMore(false)
