@@ -1,5 +1,3 @@
-import type { SerializedEditorState } from 'lexical'
-
 import React from 'react'
 
 import type {
@@ -7,19 +5,20 @@ import type {
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from '../../../../nodeTypes.js'
+import type { SerializedNodeBase } from '../../../../types.js'
 import type { JSXConverters } from '../converter/types.js'
 
 import { defaultJSXConverters } from '../converter/defaultConverters.js'
-import { convertLexicalToJSX } from '../converter/index.js'
+import { convertLexicalToJSX, type ConvertLexicalToJSXArgs } from '../converter/index.js'
 
 export type JSXConvertersFunction<
-  T extends { [key: string]: any; type?: string } =
+  T extends SerializedNodeBase =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string }>
     | SerializedInlineBlockNode<{ blockName?: null | string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
-type RichTextProps = {
+type RichTextProps<TNodes extends SerializedNodeBase = SerializedNodeBase> = {
   /**
    * Override class names for the container.
    */
@@ -28,32 +27,22 @@ type RichTextProps = {
    * Custom converters to transform your nodes to JSX. Can be an object or a function that receives the default converters.
    */
   converters?: JSXConverters | JSXConvertersFunction
-  /**
-   * Serialized editor state to render.
-   */
-  data: SerializedEditorState
+
   /**
    * If true, removes the container div wrapper.
    */
   disableContainer?: boolean
-  /**
-   * If true, disables indentation globally. If an array, disables for specific node `type` values.
-   */
-  disableIndent?: boolean | string[]
-  /**
-   * If true, disables text alignment globally. If an array, disables for specific node `type` values.
-   */
-  disableTextAlign?: boolean | string[]
-}
+} & Pick<ConvertLexicalToJSXArgs<TNodes>, 'data' | 'disableIndent' | 'disableTextAlign' | 'nodeMap'>
 
-export const RichText: React.FC<RichTextProps> = ({
+export function RichText<TNodes extends SerializedNodeBase = SerializedNodeBase>({
   className,
   converters,
   data: editorState,
   disableContainer,
   disableIndent,
   disableTextAlign,
-}) => {
+  nodeMap,
+}: RichTextProps<TNodes>): React.ReactNode {
   if (!editorState) {
     return null
   }
@@ -79,6 +68,7 @@ export const RichText: React.FC<RichTextProps> = ({
       data: editorState,
       disableIndent,
       disableTextAlign,
+      nodeMap,
     })
 
   if (disableContainer) {

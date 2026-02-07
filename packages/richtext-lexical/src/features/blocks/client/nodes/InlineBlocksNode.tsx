@@ -35,11 +35,18 @@ export class InlineBlockNode extends ServerInlineBlockNode {
     return node
   }
 
-  override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(
+    _editor: LexicalEditor,
+    config: EditorConfig,
+    CustomBlock?: React.ReactNode,
+    CustomLabel?: React.ReactNode,
+  ): JSX.Element {
     return (
       <InlineBlockComponent
         cacheBuster={this.getCacheBuster()}
         className={config.theme.inlineBlock ?? 'LexicalEditorTheme__inlineBlock'}
+        CustomBlock={CustomBlock}
+        CustomLabel={CustomLabel}
         formData={this.getFields()}
         nodeKey={this.getKey()}
       />

@@ -41,7 +41,12 @@ import { useEditorConfigContext } from '../../../../lexical/config/client/Editor
 import './index.scss'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
-import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
+import {
+  type BlockCollapsibleWithErrorProps,
+  BlockContent,
+  type UnrenderedCustomBlock,
+  useBlockComponentContext,
+} from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
@@ -52,12 +57,30 @@ type Props = {
    */
   readonly cacheBuster: number
   readonly className: string
+  /**
+   * Custom block component from view map (FC + props).
+   * Will be rendered with useBlockComponentContext hook.
+   */
+  readonly CustomBlock?: UnrenderedCustomBlock
+  /**
+   * Custom label component as React.ReactNode.
+   * For view maps, the FC is pre-rendered in nodes/index.ts.
+   * For form state, it's RSC-rendered.
+   */
+  readonly CustomLabel?: React.ReactNode
   readonly formData: BlockFields
   readonly nodeKey: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -142,14 +165,20 @@ export const BlockComponent: React.FC<Props> = (props) => {
   }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel ?? undefined,
+    CustomLabelFromProps ??
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+      initialState?.['_components']?.customComponents?.BlockLabel ??
+      undefined,
   )
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      const { BlockFC, editorProps } = CustomBlockFromProps
+      return <BlockFC {...editorProps} useBlockComponentContext={useBlockComponentContext} />
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block ?? undefined,
-  )
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
 
   // Initial state for newly created blocks
   useEffect(() => {
@@ -204,8 +233,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         })
 
         setInitialState(state)
-        setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
-        setCustomBlock(state._components?.customComponents?.Block ?? undefined)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state._components?.customComponents?.Block ?? undefined)
+        }
       }
     }
 
@@ -221,6 +254,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     isEditable,
     id,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     formData,
     editor,
     nodeKey,
@@ -603,6 +638,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           BlockDrawer={BlockDrawer}
           Collapsible={BlockCollapsible}
           CustomBlock={CustomBlock}
+          CustomLabel={CustomLabel}
           EditButton={EditButton}
           errorCount={errorCount}
           formSchema={clientBlock?.fields ?? []}
@@ -616,6 +652,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
+    CustomLabel,
     blockType,
     RemoveButton,
     EditButton,

@@ -89,6 +89,9 @@ export interface Config {
     'lexical-heading-feature': LexicalHeadingFeature;
     'lexical-jsx-converter': LexicalJsxConverter;
     'lexical-fields': LexicalField;
+    'lexical-views': LexicalView;
+    'lexical-views-2': LexicalViews2;
+    'lexical-views-frontend': LexicalViewsFrontend;
     'lexical-migrate-fields': LexicalMigrateField;
     'lexical-localized-fields': LexicalLocalizedField;
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
@@ -116,6 +119,9 @@ export interface Config {
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
     'lexical-fields': LexicalFieldsSelect<false> | LexicalFieldsSelect<true>;
+    'lexical-views': LexicalViewsSelect<false> | LexicalViewsSelect<true>;
+    'lexical-views-2': LexicalViews2Select<false> | LexicalViews2Select<true>;
+    'lexical-views-frontend': LexicalViewsFrontendSelect<false> | LexicalViewsFrontendSelect<true>;
     'lexical-migrate-fields': LexicalMigrateFieldsSelect<false> | LexicalMigrateFieldsSelect<true>;
     'lexical-localized-fields': LexicalLocalizedFieldsSelect<false> | LexicalLocalizedFieldsSelect<true>;
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
@@ -349,6 +355,95 @@ export interface LexicalField {
     [k: string]: unknown;
   };
   lexicalWithBlocks_markdown?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views".
+ */
+export interface LexicalView {
+  id: string;
+  customDefaultView?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  vanillaView?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This collection only has a single field with a single custom view. This is to test an issue where views were not updated when there is only one field and one view.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-2".
+ */
+export interface LexicalViews2 {
+  id: string;
+  customView?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend".
+ */
+export interface LexicalViewsFrontend {
+  id: string;
+  customFrontendViews?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1070,6 +1165,18 @@ export interface PayloadLockedDocument {
         value: string | LexicalField;
       } | null)
     | ({
+        relationTo: 'lexical-views';
+        value: string | LexicalView;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-2';
+        value: string | LexicalViews2;
+      } | null)
+    | ({
+        relationTo: 'lexical-views-frontend';
+        value: string | LexicalViewsFrontend;
+      } | null)
+    | ({
         relationTo: 'lexical-migrate-fields';
         value: string | LexicalMigrateField;
       } | null)
@@ -1222,6 +1329,34 @@ export interface LexicalFieldsSelect<T extends boolean = true> {
   lexicalSimple?: T;
   lexicalWithBlocks?: T;
   lexicalWithBlocks_markdown?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views_select".
+ */
+export interface LexicalViewsSelect<T extends boolean = true> {
+  customDefaultView?: T;
+  vanillaView?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-2_select".
+ */
+export interface LexicalViews2Select<T extends boolean = true> {
+  customView?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-views-frontend_select".
+ */
+export interface LexicalViewsFrontendSelect<T extends boolean = true> {
+  customFrontendViews?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1710,6 +1845,42 @@ export interface AvatarGroupBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'AvatarGroup';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ViewsTestBlock".
+ */
+export interface ViewsTestBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'viewsTestBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BannerBlock".
+ */
+export interface BannerBlock {
+  type: 'normal' | 'important';
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'banner';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
