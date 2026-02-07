@@ -40,24 +40,27 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
   const [loadingNodeId, setLoadingNodeId] = useState<null | number | string>(null)
 
-  const getNodeChildren = (parentId: null | number | string): TaxonomyDocument[] => {
-    if (!collectionSlug) {
-      return []
-    }
-
-    const cache = treeCache.get(collectionSlug)
-    if (!cache) {
-      return []
-    }
-
-    return cache.docs.filter((doc) => {
-      const docParentId = doc[parentFieldName]
-      if (parentId === null) {
-        return docParentId === null || docParentId === undefined
+  const getNodeChildren = useCallback(
+    (parentId: null | number | string): TaxonomyDocument[] => {
+      if (!collectionSlug) {
+        return []
       }
-      return docParentId !== null && String(docParentId) === String(parentId)
-    })
-  }
+
+      const cache = treeCache.get(collectionSlug)
+      if (!cache) {
+        return []
+      }
+
+      return cache.docs.filter((doc) => {
+        const docParentId = doc[parentFieldName]
+        if (parentId === null) {
+          return docParentId === null || docParentId === undefined
+        }
+        return docParentId !== null && String(docParentId) === String(parentId)
+      })
+    },
+    [collectionSlug, parentFieldName, treeCache],
+  )
 
   const hydrate = useCallback((data: HydrateData) => {
     const {
