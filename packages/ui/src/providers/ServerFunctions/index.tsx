@@ -256,17 +256,18 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
-      try {
-        const result = (await serverFunction({
-          name: 'copy-data-from-locale',
-          args: rest,
-        })) as { data: Data }
+      const result = (await serverFunction({
+        name: 'copy-data-from-locale',
+        args: rest,
+      })) as { data?: Data; error?: string }
 
-        if (!remoteSignal?.aborted) {
-          return result
+      if (!remoteSignal?.aborted) {
+        // Check if server returned an error
+        if (result?.error) {
+          throw new Error(result.error)
         }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
+
+        return { data: result?.data }
       }
     },
     [serverFunction],
