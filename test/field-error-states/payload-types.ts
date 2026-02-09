@@ -106,7 +106,9 @@ export interface Config {
     'global-validate-drafts-on': GlobalValidateDraftsOnSelect<false> | GlobalValidateDraftsOnSelect<true>;
   };
   locale: null;
-  user: User;
+  user: User & {
+    collection: 'users';
+  };
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -251,6 +253,16 @@ export interface ErrorField {
         id?: string | null;
       }[]
     | null;
+  tabWithRequiredArray: {
+    requiredArray: {
+      arrayText: string;
+      id?: string | null;
+    }[];
+  };
+  unnamedRequiredArray: {
+    arrayText: string;
+    id?: string | null;
+  }[];
   layout?:
     | {
         tabText: string;
@@ -339,7 +351,6 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -626,6 +637,22 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
         upload?: T;
         text?: T;
         textarea?: T;
+        id?: T;
+      };
+  tabWithRequiredArray?:
+    | T
+    | {
+        requiredArray?:
+          | T
+          | {
+              arrayText?: T;
+              id?: T;
+            };
+      };
+  unnamedRequiredArray?:
+    | T
+    | {
+        arrayText?: T;
         id?: T;
       };
   layout?:
