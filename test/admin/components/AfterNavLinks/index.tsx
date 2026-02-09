@@ -2,11 +2,11 @@
 
 import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
-import LinkImport from 'next/link.js'
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
 import { useConfig } from '@payloadcms/ui'
+import LinkImport from 'next/link.js'
 import React from 'react'
+
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const baseClass = 'after-nav-links'
 
@@ -22,26 +22,47 @@ export const AfterNavLinks: PayloadClientReactComponent<
   return (
     <div
       className={baseClass}
+      id="after-nav-links-component"
       style={{
+        backgroundColor: 'var(--theme-success-100)',
+        borderRadius: 'var(--style-radius-m)',
+        color: 'var(--theme-success-750)',
         display: 'flex',
         flexDirection: 'column',
-        gap: 'calc(var(--base) / 4)',
+        marginTop: 'var(--base)',
+        padding: 'var(--base)',
+        width: '100%',
       }}
     >
-      <h4 className="nav__label" style={{ color: 'var(--theme-elevation-400)', margin: 0 }}>
-        Custom Routes
-      </h4>
-      <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`${adminRoute}/custom-default-view`} style={{ textDecoration: 'none' }}>
-          Default Template
-        </Link>
-      </h4>
-      <h4 className="nav__link" style={{ margin: 0 }}>
-        <Link href={`${adminRoute}/custom-minimal-view`} style={{ textDecoration: 'none' }}>
-          Minimal Template
-        </Link>
-      </h4>
-      <div id="custom-css" />
+      <p style={{ marginBottom: '16px', marginTop: 0 }}>afterNavLinks</p>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+        }}
+      >
+        <p className="nav__label" style={{ color: '#1565c0', margin: 0 }}>
+          Custom Routes
+        </p>
+        <p className="nav__link" style={{ margin: 0 }}>
+          <Link
+            href={`${adminRoute}/custom-default-view`}
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            Default Template
+          </Link>
+        </p>
+        <p className="nav__link" style={{ margin: 0 }}>
+          <Link
+            href={`${adminRoute}/custom-minimal-view`}
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            Minimal Template
+          </Link>
+        </p>
+        <div id="custom-css" />
+      </div>
     </div>
   )
 }

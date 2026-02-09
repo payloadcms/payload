@@ -30,7 +30,7 @@ import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
 import type { LexicalViewsFrontendNodes } from './collections/LexicalViewsFrontend/index.js'
 
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'

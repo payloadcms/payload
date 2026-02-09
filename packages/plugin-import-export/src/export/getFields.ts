@@ -55,23 +55,29 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               name: 'format',
               type: 'select',
               admin: {
-                // Hide if a forced format is set via config
-                condition: () => !format,
+                readOnly: Boolean(format),
                 width: '33.3333%',
               },
               defaultValue: format ?? 'csv',
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-format-label'),
-              options: [
-                {
-                  label: 'CSV',
-                  value: 'csv',
-                },
-                {
-                  label: 'JSON',
-                  value: 'json',
-                },
-              ],
+              options: format
+                ? [
+                    {
+                      label: format.toUpperCase(),
+                      value: format,
+                    },
+                  ]
+                : [
+                    {
+                      label: 'CSV',
+                      value: 'csv',
+                    },
+                    {
+                      label: 'JSON',
+                      value: 'json',
+                    },
+                  ],
               required: true,
             },
             {

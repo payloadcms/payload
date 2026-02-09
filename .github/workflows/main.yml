@@ -149,8 +149,6 @@ jobs:
   int-matrix:
     name: Setup Int Matrix
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -172,7 +170,8 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-24.04
-    needs: int-matrix
+    needs: [changes, build, int-matrix]
+    if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
@@ -236,8 +235,6 @@ jobs:
   e2e-matrix:
     name: Setup E2E Matrix
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
     outputs:
       matrix: ${{ steps.generate.outputs.matrix }}
     steps:
@@ -261,7 +258,8 @@ jobs:
   e2e-prep:
     name: E2E Prep
     runs-on: ubuntu-24.04
-    needs: [e2e-matrix]
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -332,7 +330,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: matrix.suite == 'plugin-cloud-storage'
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
 
       - name: Start database
         id: db
@@ -513,7 +511,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: matrix.suite == 'plugin-cloud-storage'
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
 
       - name: Store Playwright's Version
         run: |
@@ -616,7 +614,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -785,4 +783,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
+          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
