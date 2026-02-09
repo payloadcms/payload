@@ -76,21 +76,24 @@ export function DashboardBreadcrumbDropdown(props: {
 }) {
   const { isEditing, onCancel, onEditClick, onResetLayout, onSaveChanges, widgetsDrawerSlug } =
     props
+  const { t } = useTranslation()
   if (isEditing) {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
-        <span>Editing Dashboard</span>
+        <span>
+          {t('general:editing')} {t('general:dashboard')}
+        </span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
             <Button buttonStyle="pill" el="span" size="small">
-              Add +
+              {t('dashboard:addWidget')}
             </Button>
           </DrawerToggler>
           <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
-            Save Changes
+            {t('fields:saveChanges')}
           </Button>
           <Button buttonStyle="pill" onClick={onCancel} size="small">
-            Cancel
+            {t('general:cancel')}
           </Button>
         </div>
       </div>
@@ -98,8 +101,8 @@ export function DashboardBreadcrumbDropdown(props: {
   }
 
   const options = [
-    { label: 'Edit Dashboard', value: 'edit' },
-    { label: 'Reset Layout', value: 'reset' },
+    { label: `${t('general:edit')} ${t('general:dashboard')}`, value: 'edit' },
+    { label: `${t('general:reset')} ${t('general:dashboard')}`, value: 'reset' },
   ]
 
   const handleChange = (selectedOption: Option | Option[]) => {
@@ -121,8 +124,8 @@ export function DashboardBreadcrumbDropdown(props: {
       menuIsOpen={undefined} // Let ReactSelect handle open/close
       onChange={handleChange}
       options={options}
-      placeholder="Dashboard"
-      value={{ label: 'Dashboard', value: 'dashboard' }}
+      placeholder={t('general:dashboard')}
+      value={{ label: t('general:dashboard'), value: 'dashboard' }}
     />
   )
 }
