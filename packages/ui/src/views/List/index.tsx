@@ -127,6 +127,7 @@ export function DefaultListView(props: ListViewClientProps) {
     if (!isInDrawer) {
       const baseLabel = {
         label: collectionLabel,
+        replace: taxonomyData ? true : undefined,
         url:
           isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({

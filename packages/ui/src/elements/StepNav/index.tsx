@@ -60,7 +60,7 @@ const StepNav: React.FC<{
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <Link href={item.url} prefetch={false} replace={true}>
+                  <Link href={item.url} prefetch={false} replace={item.replace}>
                     <span key={i}>{StepLabel}</span>
                   </Link>
                 ) : (
