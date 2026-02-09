@@ -126,8 +126,8 @@ export function DefaultListView(props: ListViewClientProps) {
   useEffect(() => {
     if (!isInDrawer) {
       const baseLabel = {
+        forceReload: taxonomyData ? true : undefined,
         label: collectionLabel,
-        replace: taxonomyData ? true : undefined,
         url:
           isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({
