@@ -371,6 +371,7 @@ export const renderListView = async (
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      user,
     })
 
     taxonomyData = {

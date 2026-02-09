@@ -8,9 +8,6 @@ import type { ListQuery, Where } from 'payload'
 export const sanitizeQuery = (toSanitize: ListQuery): ListQuery => {
   const sanitized = { ...toSanitize }
 
-  // Remove parent param - it's for taxonomy navigation, not list queries
-  delete sanitized['parent']
-
   Object.entries(sanitized).forEach(([key, value]) => {
     if (
       key === 'columns' &&

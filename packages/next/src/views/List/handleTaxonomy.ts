@@ -39,13 +39,15 @@ export const handleTaxonomy = async ({
   permissions,
   req,
   search,
+  user,
 }: {
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
-  parentId: number | string
+  parentId: null | number | string
   permissions?: SanitizedPermissions
   req: PayloadRequest
   search?: string
+  user: PayloadRequest['user']
 }): Promise<TaxonomyViewData> => {
   const taxonomyConfig = collectionConfig.taxonomy
   if (!taxonomyConfig) {
@@ -57,65 +59,77 @@ export const handleTaxonomy = async ({
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
-  // Fetch the selected parent item
+  // Fetch the selected parent item (skip for root level)
   let selectedItem: null | Record<string, unknown> = null
   let breadcrumbs: Array<{ id: number | string; title: string }> = []
 
-  try {
-    selectedItem = await req.payload.findByID({
-      id: parentId,
-      collection: collectionSlug,
-      depth: 0,
-      req,
-    })
+  if (parentId !== null) {
+    try {
+      selectedItem = await req.payload.findByID({
+        id: parentId,
+        collection: collectionSlug,
+        depth: 0,
+        overrideAccess: false,
+        req,
+        user,
+      })
 
-    // Build breadcrumbs from the taxonomy path if available
-    if (selectedItem) {
-      const titlePathField =
-        typeof taxonomyConfig === 'object' ? taxonomyConfig.titlePathFieldName : undefined
+      // Build breadcrumbs from the taxonomy path if available
+      if (selectedItem) {
+        const titlePathField =
+          typeof taxonomyConfig === 'object' ? taxonomyConfig.titlePathFieldName : undefined
 
-      if (titlePathField && Array.isArray(selectedItem[titlePathField])) {
-        breadcrumbs = (selectedItem[titlePathField] as Array<{ doc: string; label: string }>).map(
-          (item) => ({
-            id: item.doc,
-            title: item.label,
-          }),
-        )
-      } else {
-        // Fallback: just show the current item
-        const rawTitle = selectedItem[useAsTitle] || selectedItem.id || parentId
-        let title: string
-        if (rawTitle && typeof rawTitle === 'object') {
-          title = JSON.stringify(rawTitle)
-        } else if (typeof rawTitle === 'string') {
-          title = rawTitle
-        } else if (typeof rawTitle === 'number') {
-          title = String(rawTitle)
+        if (titlePathField && Array.isArray(selectedItem[titlePathField])) {
+          breadcrumbs = (selectedItem[titlePathField] as Array<{ doc: string; label: string }>).map(
+            (item) => ({
+              id: item.doc,
+              title: item.label,
+            }),
+          )
         } else {
-          title = String(parentId)
+          // Fallback: just show the current item
+          const rawTitle = selectedItem[useAsTitle] || selectedItem.id || parentId
+          let title: string
+
+          if (rawTitle && typeof rawTitle === 'object') {
+            title = JSON.stringify(rawTitle)
+          } else if (typeof rawTitle === 'string') {
+            title = rawTitle
+          } else if (typeof rawTitle === 'number') {
+            title = String(rawTitle)
+          } else {
+            title = String(parentId)
+          }
+          breadcrumbs = [
+            {
+              id: parentId,
+              title,
+            },
+          ]
         }
-        breadcrumbs = [
-          {
-            id: parentId,
-            title,
-          },
-        ]
       }
+    } catch (_error) {
+      req.payload.logger.warn({
+        msg: `Taxonomy item not found: ${parentId}`,
+      })
     }
-  } catch (_error) {
-    req.payload.logger.warn({
-      msg: `Taxonomy item not found: ${parentId}`,
-    })
   }
 
   // Build children where clause
+  // For root level (parentId is null), find items without a parent
+  // For nested level, find items with this specific parent
+  const parentCondition =
+    parentId === null
+      ? { [parentFieldName]: { exists: false } }
+      : { [parentFieldName]: { equals: parentId } }
+
   const childrenWhere = search
     ? {
-        and: [{ [parentFieldName]: { equals: parentId } }, { [useAsTitle]: { like: search } }],
+        and: [parentCondition, { [useAsTitle]: { like: search } }],
       }
-    : { [parentFieldName]: { equals: parentId } }
+    : parentCondition
 
-  // Fetch children (taxonomy items with this parent)
+  // Fetch children (taxonomy items with this parent, or root items if parentId is null)
   const childrenData = await req.payload.find({
     collection: collectionSlug,
     depth: 0,
@@ -127,13 +141,14 @@ export const handleTaxonomy = async ({
     overrideAccess: false,
     page: 1,
     req,
+    user,
     where: childrenWhere,
   })
 
-  // Fetch related documents from other collections
+  // Fetch related documents from other collections (only when viewing a specific taxonomy item)
   const relatedDocuments: RelatedDocumentsGrouped = {}
 
-  if (selectedItem) {
+  if (parentId !== null && selectedItem) {
     const relatedCollections =
       typeof taxonomyConfig === 'object' ? taxonomyConfig.relatedCollections || [] : []
 
@@ -190,6 +205,7 @@ export const handleTaxonomy = async ({
           overrideAccess: false,
           page: 1,
           req,
+          user,
           where,
         })
 
