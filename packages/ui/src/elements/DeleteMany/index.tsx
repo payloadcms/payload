@@ -149,13 +149,11 @@ type DeleteMany_v4Props = {
   /**
    * Whether the user has permission to permanently delete documents.
    * When false, the "delete permanently" checkbox will be hidden.
-   * Defaults to true (checkbox shown when trash is enabled).
    */
   hasDeletePermission?: boolean
   /**
    * Whether the user has permission to trash (soft delete) documents.
    * When false and hasDeletePermission is true, only permanent delete is available.
-   * Defaults to true.
    */
   hasTrashPermission?: boolean
   /**
@@ -216,7 +214,6 @@ export function DeleteMany_v4({
     config: {
       collections,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -384,7 +381,6 @@ export function DeleteMany_v4({
     hasTrashPermission,
     locale,
     search,
-    serverURL,
     api,
     i18n,
     viewType,
