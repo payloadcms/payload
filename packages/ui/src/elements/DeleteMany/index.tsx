@@ -199,8 +199,8 @@ type DeleteMany_v4Props = {
  */
 export function DeleteMany_v4({
   afterDelete,
-  hasDeletePermission = true,
-  hasTrashPermission = true,
+  hasDeletePermission = false,
+  hasTrashPermission = false,
   modalPrefix,
   search,
   selections,
