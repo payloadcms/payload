@@ -75,13 +75,16 @@ export interface Config {
     'posts-imports-only': PostsImportsOnly;
     'posts-no-jobs-queue': PostsNoJobsQueue;
     'posts-with-limits': PostsWithLimit;
+    'posts-with-s3': PostsWithS3;
     media: Media;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
+    'posts-with-s3-export': PostsWithS3Export;
     'posts-with-limits-export': PostsWithLimitsExport;
     imports: Import;
     'posts-import': PostsImport;
+    'posts-with-s3-import': PostsWithS3Import;
     'posts-with-limits-import': PostsWithLimitsImport;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -98,13 +101,16 @@ export interface Config {
     'posts-imports-only': PostsImportsOnlySelect<false> | PostsImportsOnlySelect<true>;
     'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
     'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
+    'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
+    'posts-with-s3-export': PostsWithS3ExportSelect<false> | PostsWithS3ExportSelect<true>;
     'posts-with-limits-export': PostsWithLimitsExportSelect<false> | PostsWithLimitsExportSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
     'posts-import': PostsImportSelect<false> | PostsImportSelect<true>;
+    'posts-with-s3-import': PostsWithS3ImportSelect<false> | PostsWithS3ImportSelect<true>;
     'posts-with-limits-import': PostsWithLimitsImportSelect<false> | PostsWithLimitsImportSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -119,7 +125,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
-  user: User;
+  user: User & {
+    collection: 'users';
+  };
   jobs: {
     tasks: {
       createCollectionExport: TaskCreateCollectionExport;
@@ -175,7 +183,6 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -459,6 +466,17 @@ export interface PostsWithLimit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3".
+ */
+export interface PostsWithS3 {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -573,6 +591,44 @@ export interface PostsNoJobsQueueExport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-export".
+ */
+export interface PostsWithS3Export {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts-with-limits-export".
  */
 export interface PostsWithLimitsExport {
@@ -621,6 +677,7 @@ export interface Import {
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
+    | 'posts-with-s3'
     | 'posts-with-limits'
     | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
@@ -665,6 +722,52 @@ export interface PostsImport {
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
+    | 'posts-with-s3'
+    | 'posts-with-limits'
+    | 'media';
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-import".
+ */
+export interface PostsWithS3Import {
+  id: string;
+  collectionSlug:
+    | 'pages'
+    | 'posts'
+    | 'posts-exports-only'
+    | 'posts-imports-only'
+    | 'posts-no-jobs-queue'
+    | 'posts-with-s3'
     | 'posts-with-limits'
     | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
@@ -709,6 +812,7 @@ export interface PostsWithLimitsImport {
     | 'posts-exports-only'
     | 'posts-imports-only'
     | 'posts-no-jobs-queue'
+    | 'posts-with-s3'
     | 'posts-with-limits'
     | 'media';
   importMode?: ('create' | 'update' | 'upsert') | null;
@@ -884,6 +988,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts-with-limits';
         value: string | PostsWithLimit;
+      } | null)
+    | ({
+        relationTo: 'posts-with-s3';
+        value: string | PostsWithS3;
       } | null)
     | ({
         relationTo: 'media';
@@ -1094,6 +1202,16 @@ export interface PostsWithLimitsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3_select".
+ */
+export interface PostsWithS3Select<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1199,6 +1317,35 @@ export interface PostsNoJobsQueueExportSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-export_select".
+ */
+export interface PostsWithS3ExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts-with-limits-export_select".
  */
 export interface PostsWithLimitsExportSelect<T extends boolean = true> {
@@ -1261,6 +1408,36 @@ export interface ImportsSelect<T extends boolean = true> {
  * via the `definition` "posts-import_select".
  */
 export interface PostsImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-import_select".
+ */
+export interface PostsWithS3ImportSelect<T extends boolean = true> {
   collectionSlug?: T;
   importMode?: T;
   matchField?: T;
@@ -1415,7 +1592,7 @@ export interface TaskCreateCollectionExport {
       | null;
     userID?: string | null;
     userCollection?: string | null;
-    exportsCollection?: string | null;
+    exportCollection?: string | null;
     maxLimit?: number | null;
   };
   output?: unknown;
@@ -1426,50 +1603,13 @@ export interface TaskCreateCollectionExport {
  */
 export interface TaskCreateCollectionImport {
   input: {
-    collectionSlug:
-      | 'users'
-      | 'pages'
-      | 'posts'
-      | 'posts-exports-only'
-      | 'posts-imports-only'
-      | 'posts-no-jobs-queue'
-      | 'posts-with-limits'
-      | 'media'
-      | 'exports'
-      | 'posts-export'
-      | 'posts-no-jobs-queue-export'
-      | 'posts-with-limits-export'
-      | 'imports'
-      | 'posts-import'
-      | 'posts-with-limits-import';
-    importMode?: ('create' | 'update' | 'upsert') | null;
-    matchField?: string | null;
-    status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
-    summary?: {
-      imported?: number | null;
-      updated?: number | null;
-      total?: number | null;
-      issues?: number | null;
-      issueDetails?:
-        | {
-            [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    };
-    user?: string | null;
+    importId: string;
+    importCollection: string;
+    userID?: string | null;
     userCollection?: string | null;
-    importsCollection?: string | null;
-    file?: {
-      data?: string | null;
-      mimetype?: string | null;
-      name?: string | null;
-    };
-    format?: ('csv' | 'json') | null;
+    batchSize?: number | null;
     debug?: boolean | null;
+    defaultVersionStatus?: ('draft' | 'published') | null;
     maxLimit?: number | null;
   };
   output?: unknown;
