@@ -26,6 +26,7 @@ export const lexicalViewsFrontendBlocks: Block[] = [
         type: 'richText',
         editor: lexicalEditor({
           features: ({ defaultFeatures }) => [...defaultFeatures],
+          views: './collections/LexicalViewsFrontend/views.js#lexicalFrontendViews',
         }),
       },
     ],
