@@ -358,6 +358,15 @@ export {
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
 export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
+export {
+  DocumentSelectionProvider,
+  useDocumentSelection,
+} from '../../providers/DocumentSelection/index.js'
+export type {
+  CollectionData,
+  DocumentSelectionContextValue,
+  SelectableDocument,
+} from '../../providers/DocumentSelection/types.js'
 export { TaxonomyProvider, useTaxonomy } from '../../providers/Taxonomy/index.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
