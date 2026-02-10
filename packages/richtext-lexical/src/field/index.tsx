@@ -21,7 +21,7 @@ const RichTextEditor = lazy(() =>
 
 export const RichTextField: React.FC<LexicalRichTextFieldProps> = (props) => {
   return (
-    <RichTextViewProvider views={props.views}>
+    <RichTextViewProvider inheritable={true} views={props.views}>
       <RichTextFieldImpl {...props} />
     </RichTextViewProvider>
   )

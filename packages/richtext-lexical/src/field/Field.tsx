@@ -27,6 +27,7 @@ import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
+import { useRichTextView } from './RichTextViewProvider.js'
 import { ViewSelector } from './ViewSelector.js'
 
 const baseClass = 'rich-text-lexical'
@@ -53,6 +54,7 @@ const RichTextComponent: React.FC<
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const editDepth = useEditDepth()
+  const { hasInheritedView } = useRichTextView()
 
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
@@ -188,7 +190,7 @@ const RichTextComponent: React.FC<
         {Label || (
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         )}
-        <ViewSelector />
+        {!hasInheritedView && <ViewSelector />}
       </div>
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>

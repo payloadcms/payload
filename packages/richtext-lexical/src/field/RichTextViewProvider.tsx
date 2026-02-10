@@ -17,6 +17,7 @@ type RichTextViewContextType = {
    * This is the resolved view from the views map based on currentView.
    */
   currentViewMap?: LexicalEditorNodeMap
+  hasInheritedView?: boolean
   /**
    * If true, the current view will be inherited by nested richtext editors.
    */
@@ -81,11 +82,12 @@ export const RichTextViewProvider: React.FC<{
     return {
       currentView,
       currentViewMap,
+      hasInheritedView: parentContext.inheritable,
       inheritable,
       setCurrentView,
       views,
     }
-  }, [currentView, inheritable, setCurrentView, views])
+  }, [currentView, inheritable, parentContext.inheritable, setCurrentView, views])
 
   return <RichTextViewContext value={value}>{children}</RichTextViewContext>
 }
