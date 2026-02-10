@@ -17,12 +17,33 @@ export function setFloatingElemPositionForLinkEditor(
     return
   }
 
-  const floatingElemRect = floatingElem.getBoundingClientRect()
   const anchorElementRect = anchorElem.getBoundingClientRect()
   const editorScrollerRect = scrollerElem.getBoundingClientRect()
 
   let top = targetRect.top - verticalGap
   let left = targetRect.left - horizontalOffset
+
+  // Calculate available space on both sides to determine tooltip width
+  const availableRight = editorScrollerRect.right - left
+  const availableLeft = left - editorScrollerRect.left
+
+  // Choose the side with more space to maximize visible URL length
+  let tooltipWidth: number
+  if (availableRight >= availableLeft) {
+    tooltipWidth = availableRight
+  } else {
+    tooltipWidth = availableLeft + targetRect.width
+    left = targetRect.right - tooltipWidth
+  }
+
+  // Set explicit width to force tooltip expansion
+  floatingElem.style.width = `${tooltipWidth}px`
+  floatingElem.style.maxWidth = `${tooltipWidth}px`
+
+  // Force layout recalculation so getBoundingClientRect returns accurate dimensions
+  void floatingElem.offsetHeight
+
+  const floatingElemRect = floatingElem.getBoundingClientRect()
 
   if (top < editorScrollerRect.top) {
     top += floatingElemRect.height + targetRect.height + verticalGap * 2
