@@ -22,12 +22,14 @@ import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
+import { DocumentListSelection } from '../TaxonomyList/DocumentListSelection/index.js'
 import { TaxonomyTable } from '../TaxonomyList/TaxonomyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.scss'
@@ -235,22 +237,38 @@ export function DefaultListView(props: ListViewClientProps) {
               />
               {BeforeListTable}
               {taxonomyData ? (
-                <TaxonomyTable
-                  childrenData={taxonomyData.childrenData}
-                  collectionSlug={collectionSlug}
-                  key={taxonomyData.parentId}
-                  parentId={taxonomyData.parentId}
-                  relatedGroups={Object.entries(taxonomyData.relatedDocuments).map(
-                    ([slug, related]) => ({
-                      collectionSlug: slug,
-                      data: related.data,
-                      fieldInfo: related.fieldInfo,
-                      label: related.label,
-                    }),
-                  )}
-                  taxonomyLabel={collectionLabel}
-                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-                />
+                <DocumentSelectionProvider
+                  collectionData={{
+                    [collectionSlug]: { docs: taxonomyData.childrenData.docs },
+                    ...Object.fromEntries(
+                      Object.entries(taxonomyData.relatedDocuments).map(([slug, related]) => [
+                        slug,
+                        { docs: related.data.docs },
+                      ]),
+                    ),
+                  }}
+                >
+                  <TaxonomyTable
+                    childrenData={taxonomyData.childrenData}
+                    collectionSlug={collectionSlug}
+                    key={taxonomyData.parentId}
+                    parentId={taxonomyData.parentId}
+                    relatedGroups={Object.entries(taxonomyData.relatedDocuments).map(
+                      ([slug, related]) => ({
+                        collectionSlug: slug,
+                        data: related.data,
+                        fieldInfo: related.fieldInfo,
+                        label: related.label,
+                      }),
+                    )}
+                    taxonomyLabel={collectionLabel}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  />
+                  <DocumentListSelection
+                    disableBulkDelete={disableBulkDelete}
+                    disableBulkEdit={disableBulkEdit}
+                  />
+                </DocumentSelectionProvider>
               ) : docs?.length > 0 ? (
                 <div className={`${baseClass}__tables`}>
                   <RelationshipProvider>{Table}</RelationshipProvider>
