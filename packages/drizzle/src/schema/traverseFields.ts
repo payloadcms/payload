@@ -957,12 +957,14 @@ export const traverseFields = ({
           }
 
           // make the foreign key column for relationship using the correct id column type
+          // Use 'cascade' for required relationships since 'set null' is incompatible with NOT NULL
+          const onDelete = field.required && !field.admin?.condition ? 'cascade' : 'set null'
           targetTable[fieldName] = {
             name: `${columnName}_id`,
             type: colType,
             reference: {
               name: 'id',
-              onDelete: 'set null',
+              onDelete,
               table: tableName,
             },
           }
