@@ -1,5 +1,4 @@
 import type {
-  Field,
   PaginatedDocs,
   PayloadRequest,
   SanitizedCollectionConfig,
@@ -11,6 +10,7 @@ import { getTranslation } from '@payloadcms/translations'
 export type RelatedDocumentsGrouped = {
   [collectionSlug: string]: {
     data: PaginatedDocs
+    fieldInfo: { fieldName: string; hasMany: boolean }
     label: string
   }
 }
@@ -191,15 +191,10 @@ export const handleTaxonomy = async ({
   // At nested level: show documents assigned to the selected taxonomy item
   const relatedDocuments: RelatedDocumentsGrouped = {}
 
-  const relatedCollections = taxonomyConfig.relatedCollections || {}
+  // Use pre-computed relatedCollections from sanitized taxonomy config
+  const relatedCollectionsConfig = taxonomyConfig.relatedCollections || {}
 
-  // Auto-detect related collections if not specified
-  const collectionsToQuery =
-    relatedCollections.length > 0
-      ? relatedCollections
-      : findCollectionsWithRelationTo(req.payload.config.collections, collectionSlug)
-
-  for (const relatedSlug of collectionsToQuery) {
+  for (const [relatedSlug, fieldInfo] of Object.entries(relatedCollectionsConfig)) {
     if (relatedSlug === collectionSlug) {
       continue
     }
@@ -214,34 +209,27 @@ export const handleTaxonomy = async ({
       continue
     }
 
-    // Find relationship fields that point to this taxonomy
-    const relationshipFields = findRelationshipFieldsTo(relatedCollectionConfig, collectionSlug)
-    if (relationshipFields.length === 0) {
-      continue
-    }
+    const { fieldName, hasMany } = fieldInfo
 
     // Build where clause based on whether we're at root or nested level
     let relationshipWhere: Record<string, unknown>
 
     if (parentId === null) {
-      // Root level: find documents where taxonomy field doesn't exist, is null, or is empty array (unassigned)
-      const whereConditions = relationshipFields.map(({ fieldName, hasMany }) => {
-        const conditions = [{ [fieldName]: { exists: false } }, { [fieldName]: { equals: null } }]
-        if (hasMany) {
-          // hasMany fields store cleared values as empty arrays
-          conditions.push({ [fieldName]: { equals: [] } })
-        }
-        return { or: conditions }
-      })
-      relationshipWhere =
-        whereConditions.length === 1 ? whereConditions[0] : { and: whereConditions }
+      // Root level: find documents where taxonomy field doesn't exist, is null, or is empty array
+      const conditions: Record<string, unknown>[] = [
+        { [fieldName]: { exists: false } },
+        { [fieldName]: { equals: null } },
+      ]
+      if (hasMany) {
+        // hasMany fields store cleared values as empty arrays
+        conditions.push({ [fieldName]: { equals: [] } })
+      }
+      relationshipWhere = { or: conditions }
     } else {
       // Nested level: find documents assigned to this taxonomy item
-      const whereConditions = relationshipFields.map(({ fieldName, hasMany }) => ({
+      relationshipWhere = {
         [fieldName]: hasMany ? { contains: parentId } : { equals: parentId },
-      }))
-      relationshipWhere =
-        whereConditions.length === 1 ? whereConditions[0] : { or: whereConditions }
+      }
     }
 
     // Add search filter if provided
@@ -269,6 +257,7 @@ export const handleTaxonomy = async ({
       if (data.totalDocs > 0) {
         relatedDocuments[relatedSlug] = {
           data,
+          fieldInfo: { fieldName, hasMany },
           label: getTranslation(relatedCollectionConfig.labels?.plural, req.i18n),
         }
       }
@@ -287,74 +276,4 @@ export const handleTaxonomy = async ({
     relatedDocuments,
     selectedItem,
   }
-}
-
-/**
- * Find all collections that have relationship fields pointing to the target collection
- */
-function findCollectionsWithRelationTo(
-  collections: Array<{ fields: Field[]; slug: string }>,
-  targetSlug: string,
-): string[] {
-  return collections
-    .filter((collection) => {
-      if (collection.slug === targetSlug) {
-        return false
-      }
-      return findRelationshipFieldsTo(collection, targetSlug).length > 0
-    })
-    .map((c) => c.slug)
-}
-
-type RelationshipFieldInfo = {
-  fieldName: string
-  hasMany: boolean
-}
-
-/**
- * Find all relationship fields in a collection that point to the target collection
- */
-function findRelationshipFieldsTo(
-  collection: { fields: Field[] },
-  targetSlug: string,
-): RelationshipFieldInfo[] {
-  const fields: RelationshipFieldInfo[] = []
-
-  function traverse(fieldList: Field[]): void {
-    for (const field of fieldList) {
-      if (!field || typeof field !== 'object' || !('name' in field)) {
-        continue
-      }
-
-      const f = field
-
-      if (f.type === 'relationship') {
-        const relationTo = Array.isArray(f.relationTo) ? f.relationTo : [f.relationTo]
-        if (relationTo.includes(targetSlug)) {
-          fields.push({
-            fieldName: f.name,
-            hasMany: f.hasMany === true,
-          })
-        }
-      } else if (f.type === 'group' && Array.isArray(f.fields)) {
-        traverse(f.fields)
-      } else if (f.type === 'array' && Array.isArray(f.fields)) {
-        traverse(f.fields)
-      } else if (f.type === 'blocks' && Array.isArray(f.blocks)) {
-        for (const block of f.blocks) {
-          if (
-            block &&
-            typeof block === 'object' &&
-            'fields' in block &&
-            Array.isArray(block.fields)
-          ) {
-            traverse(block.fields)
-          }
-        }
-      }
-    }
-  }
-
-  traverse(collection.fields)
-  return fields
 }
