@@ -1,10 +1,15 @@
 import type { Config } from '../config/types.js'
 
+import { injectTaxonomyFields } from './injectTaxonomyFields.js'
+
 /**
  * Add a sidebar tab for each taxonomy collection
  * Each tab shows the tree for that specific taxonomy
  */
 export const addTaxonomySidebarTabs = (config: Config): void => {
+  // Inject taxonomy relationship fields into related collections first
+  injectTaxonomyFields(config)
+
   // Find all collections with taxonomy enabled
   const taxonomyCollections = config.collections?.filter((collection) => collection.taxonomy)
 
