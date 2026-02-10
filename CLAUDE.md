@@ -269,3 +269,25 @@ const where = parentId
 const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
 const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
 ```
+
+**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+
+Incorrect:
+
+```typescript
+// INSECURE - runs with full access, bypassing all access control
+const docs = await payload.find({
+  collection: 'posts',
+})
+```
+
+Correct:
+
+```typescript
+// SECURE - respects access control for the current user
+const docs = await payload.find({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+})
+```
