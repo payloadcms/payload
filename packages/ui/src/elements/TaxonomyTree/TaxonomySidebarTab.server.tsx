@@ -56,12 +56,8 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
     // STEP 2: Get collection config
     const collectionConfig = payload.collections[collectionSlug]?.config
     const taxonomyConfig = collectionConfig?.taxonomy
-    parentFieldName =
-      taxonomyConfig && typeof taxonomyConfig === 'object'
-        ? taxonomyConfig.parentFieldName || 'parent'
-        : 'parent'
-    treeLimit =
-      taxonomyConfig && typeof taxonomyConfig === 'object' ? taxonomyConfig.treeLimit : undefined
+    parentFieldName = taxonomyConfig?.parentFieldName || 'parent'
+    treeLimit = taxonomyConfig?.treeLimit
 
     // If there's a selected node, ensure its ancestor chain is expanded
     if (selectedNodeId) {

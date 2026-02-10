@@ -28,14 +28,10 @@ export const getInitialTreeData = async ({
   }
 
   const taxonomyConfig = collectionConfig.taxonomy
-  const parentFieldName =
-    typeof taxonomyConfig === 'object' ? taxonomyConfig.parentFieldName || 'parent' : 'parent'
+  const parentFieldName = taxonomyConfig.parentFieldName || 'parent'
 
   // Use limit from config if not provided, fallback to config's treeLimit
-  const effectiveLimit =
-    limit ??
-    (typeof taxonomyConfig === 'object' ? taxonomyConfig.treeLimit : undefined) ??
-    DEFAULT_TAXONOMY_TREE_LIMIT
+  const effectiveLimit = limit ?? taxonomyConfig.treeLimit ?? DEFAULT_TAXONOMY_TREE_LIMIT
 
   const allDocs: any[] = []
   const loadedParents: Record<string, { hasMore: boolean; totalDocs: number }> = {}

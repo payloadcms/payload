@@ -54,8 +54,7 @@ export const handleTaxonomy = async ({
     throw new Error('Collection is not a taxonomy')
   }
 
-  const parentFieldName =
-    typeof taxonomyConfig === 'object' ? taxonomyConfig.parentFieldName || 'parent' : 'parent'
+  const parentFieldName = taxonomyConfig.parentFieldName || 'parent'
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
@@ -76,8 +75,7 @@ export const handleTaxonomy = async ({
 
       // Build breadcrumbs from the taxonomy path if available
       if (selectedItem) {
-        const titlePathField =
-          typeof taxonomyConfig === 'object' ? taxonomyConfig.titlePathFieldName : undefined
+        const titlePathField = taxonomyConfig.titlePathFieldName
 
         if (titlePathField && Array.isArray(selectedItem[titlePathField])) {
           breadcrumbs = (selectedItem[titlePathField] as Array<{ doc: string; label: string }>).map(
@@ -193,8 +191,7 @@ export const handleTaxonomy = async ({
   // At nested level: show documents assigned to the selected taxonomy item
   const relatedDocuments: RelatedDocumentsGrouped = {}
 
-  const relatedCollections =
-    typeof taxonomyConfig === 'object' ? taxonomyConfig.relatedCollections || [] : []
+  const relatedCollections = taxonomyConfig.relatedCollections || {}
 
   // Auto-detect related collections if not specified
   const collectionsToQuery =

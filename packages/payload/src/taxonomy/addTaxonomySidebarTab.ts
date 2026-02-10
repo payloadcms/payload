@@ -39,10 +39,7 @@ export const addTaxonomySidebarTabs = (config: Config): void => {
     const hasTab = config.admin.components.sidebar.tabs.some((tab) => tab.slug === tabSlug)
 
     if (!hasTab) {
-      const icon =
-        typeof collection.taxonomy === 'object' && collection.taxonomy.icon
-          ? collection.taxonomy.icon
-          : '@payloadcms/ui#TagIcon'
+      const icon = collection.taxonomy?.icon || '@payloadcms/ui#TagIcon'
 
       config.admin.components.sidebar.tabs.push({
         slug: tabSlug,

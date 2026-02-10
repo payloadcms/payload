@@ -148,10 +148,7 @@ export function TaxonomyTable({
   } = useConfig()
 
   const taxonomyConfig = getEntityConfig({ collectionSlug })
-  const parentFieldName =
-    typeof taxonomyConfig?.taxonomy === 'object'
-      ? taxonomyConfig.taxonomy.parentFieldName || 'parent'
-      : 'parent'
+  const parentFieldName = taxonomyConfig?.taxonomy?.parentFieldName || 'parent'
 
   // Children pagination state
   const [childDocs, setChildDocs] = useState(childrenData.docs)

@@ -484,18 +484,10 @@ export const renderListView = async (
             <HydrateTaxonomyProvider
               collectionSlug={collectionSlug}
               expandedNodes={taxonomyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
-              parentFieldName={
-                typeof collectionConfig.taxonomy === 'object'
-                  ? collectionConfig.taxonomy.parentFieldName
-                  : undefined
-              }
+              parentFieldName={collectionConfig.taxonomy?.parentFieldName}
               selectedParentId={taxonomyParentId}
               tableData={data}
-              treeLimit={
-                typeof collectionConfig.taxonomy === 'object'
-                  ? collectionConfig.taxonomy.treeLimit
-                  : undefined
-              }
+              treeLimit={collectionConfig.taxonomy?.treeLimit}
             />
             {listContent}
           </Fragment>

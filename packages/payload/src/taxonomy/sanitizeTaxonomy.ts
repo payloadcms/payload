@@ -15,17 +15,9 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
     return
   }
 
-  // Normalize boolean to object
-  if (collectionConfig.taxonomy === true) {
-    collectionConfig.taxonomy = {
-      parentFieldName: TAXONOMY_PARENT_FIELD,
-      relatedCollections: [],
-    }
-  }
-
   // Apply defaults for optional fields
   const parentFieldName = collectionConfig.taxonomy.parentFieldName || TAXONOMY_PARENT_FIELD
-  const relatedCollections = collectionConfig.taxonomy.relatedCollections || []
+  const relatedCollections = collectionConfig.taxonomy.relatedCollections || {}
 
   // Apply hierarchy configuration (which will add parent field and hooks)
   collectionConfig.hierarchy = {

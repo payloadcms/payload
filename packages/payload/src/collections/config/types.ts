@@ -748,7 +748,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    *
    * @experimental This is a beta feature and its behavior may be refined in future releases.
    */
-  taxonomy?: boolean | TaxonomyConfig
+  taxonomy?: TaxonomyConfig
   /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
@@ -855,7 +855,7 @@ export interface SanitizedCollectionConfig
 
   slug: CollectionSlug
 
-  taxonomy?: SanitizedTaxonomyConfig | true
+  taxonomy?: SanitizedTaxonomyConfig
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

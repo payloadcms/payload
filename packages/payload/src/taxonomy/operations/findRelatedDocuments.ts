@@ -40,19 +40,21 @@ export async function findRelatedDocuments({
 
   // Get the parent field name from taxonomy/hierarchy config
   const parentFieldName =
-    collection.taxonomy && typeof collection.taxonomy === 'object'
-      ? collection.taxonomy.parentFieldName || 'parent'
-      : collection.hierarchy && typeof collection.hierarchy === 'object'
-        ? collection.hierarchy.parentFieldName || 'parent'
-        : 'parent'
+    collection.taxonomy?.parentFieldName ||
+    (collection.hierarchy && typeof collection.hierarchy === 'object'
+      ? collection.hierarchy.parentFieldName
+      : undefined) ||
+    'parent'
 
   // 1. Query child taxonomy items (same collection)
   results[collection.slug] = await payload.find({
     collection: collection.slug,
     depth,
     limit,
+    overrideAccess: false,
     page,
     req,
+    user: req.user,
     where: {
       [parentFieldName]: {
         equals: id,

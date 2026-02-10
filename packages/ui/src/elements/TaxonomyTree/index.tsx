@@ -44,16 +44,10 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   // Get parent field name from taxonomy config
-  const parentFieldName =
-    (collectionConfig.taxonomy && typeof collectionConfig.taxonomy === 'object'
-      ? collectionConfig.taxonomy.parentFieldName
-      : null) || 'parent'
+  const parentFieldName = collectionConfig.taxonomy?.parentFieldName || 'parent'
 
   // Get tree limit from taxonomy config, fallback to DEFAULT_TAXONOMY_TREE_LIMIT
-  const treeLimit =
-    (collectionConfig.taxonomy && typeof collectionConfig.taxonomy === 'object'
-      ? collectionConfig.taxonomy.treeLimit
-      : null) ?? DEFAULT_TAXONOMY_TREE_LIMIT
+  const treeLimit = collectionConfig.taxonomy?.treeLimit ?? DEFAULT_TAXONOMY_TREE_LIMIT
 
   // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
   // This ensures expanded children find their data immediately without client-side fetch

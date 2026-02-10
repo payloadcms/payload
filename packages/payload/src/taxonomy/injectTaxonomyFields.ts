@@ -14,14 +14,11 @@ export const injectTaxonomyFields = (config: Config): void => {
   for (const taxonomyCollection of taxonomyCollections) {
     const taxonomy = taxonomyCollection.taxonomy
 
-    if (typeof taxonomy !== 'object' || !taxonomy.relatedCollections) {
+    if (!taxonomy?.relatedCollections) {
       continue
     }
 
-    const relatedCollectionsConfig = taxonomy.relatedCollections as Record<
-      string,
-      { hasMany?: boolean }
-    >
+    const relatedCollectionsConfig = taxonomy.relatedCollections
 
     // Build sanitized relatedCollections with field info
     const sanitizedRelatedCollections: Record<string, { fieldName: string; hasMany: boolean }> = {}
