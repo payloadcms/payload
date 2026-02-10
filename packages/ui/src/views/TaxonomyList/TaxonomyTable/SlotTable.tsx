@@ -69,6 +69,11 @@ export type SlotTableProps<TRow = Record<string, unknown>> = {
    */
   getRowId?: (row: TRow, index: number) => number | string
   /**
+   * Merge checkbox header with first column header using colspan (default: false)
+   * The first column header will span both checkbox and content cells
+   */
+  mergeCheckboxHeader?: boolean
+  /**
    * Callback when checkbox is toggled
    */
   onCheckboxChange?: (row: TRow, checked: boolean, index: number) => void
@@ -101,6 +106,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
   enableHeader = true,
   enableSelectAll = true,
   getRowId = (row, index) => (row.id as number | string) ?? index,
+  mergeCheckboxHeader = false,
   onCheckboxChange,
   onRowClick,
   onSelectAllChange,
@@ -145,7 +151,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                   <span className={`${baseClass}__drag-header`} />
                 </th>
               )}
-              {enableCheckbox && (
+              {enableCheckbox && !mergeCheckboxHeader && (
                 <th className={`${baseClass}__th ${baseClass}__th--checkbox`}>
                   {enableSelectAll && (
                     <CheckboxInput
@@ -157,9 +163,10 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                   )}
                 </th>
               )}
-              {columns.map((col) => (
+              {columns.map((col, colIndex) => (
                 <th
                   className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
+                  colSpan={colIndex === 0 && enableCheckbox && mergeCheckboxHeader ? 2 : undefined}
                   key={col.accessor}
                 >
                   {col.heading}

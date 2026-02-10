@@ -6,6 +6,8 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
+import type { StepNavItem } from '../../elements/StepNav/index.js'
+
 import { Button } from '../../elements/Button/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -72,12 +74,10 @@ export function TaxonomyListView(props: ListViewClientProps) {
     if (!isInDrawer) {
       // Breadcrumbs exclude the last item (current item) since it's shown in the header
       const ancestorBreadcrumbs = taxonomyData?.breadcrumbs?.slice(0, -1) || []
-      const hasBreadcrumbs = ancestorBreadcrumbs.length > 0 || currentItemTitle
 
-      const baseLabel = {
+      const baseLabel: StepNavItem = {
         label: collectionLabel,
-        replace: true,
-        url: hasBreadcrumbs
+        url: selectedParentId
           ? formatAdminURL({
               adminRoute,
               path: `/collections/${collectionSlug}`,
@@ -88,9 +88,8 @@ export function TaxonomyListView(props: ListViewClientProps) {
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
-        const taxonomyBreadcrumbs = ancestorBreadcrumbs.map((crumb) => ({
+        const taxonomyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
-          replace: true,
           url: formatAdminURL({
             adminRoute,
             path: `/collections/${collectionSlug}?parent=${crumb.id}`,
@@ -109,6 +108,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
     taxonomyData,
     collectionLabel,
     currentItemTitle,
+    selectedParentId,
   ])
 
   const isRootLevel = selectedParentId === null
@@ -161,6 +161,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
                 ([slug, related]) => ({
                   collectionSlug: slug,
                   data: related.data,
+                  fieldInfo: related.fieldInfo,
                   label: related.label,
                 }),
               )}

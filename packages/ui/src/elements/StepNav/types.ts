@@ -4,7 +4,6 @@ import type React from 'react'
 export type StepNavItem = {
   forceReload?: boolean
   label: LabelFunction | React.JSX.Element | StaticLabel
-  replace?: boolean
   url?: string
 }
 
