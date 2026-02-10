@@ -20,6 +20,7 @@ import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-mul
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
   enlargeSlug,
@@ -562,6 +563,33 @@ describe('Collections - Uploads', () => {
         })
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
+      it('should not crash when adminThumbnail size is not generated', async () => {
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+
+        // SVGs cannot be resized, so sizes.small should have null fields
+        const doc = await payload.create({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'test-thumbnail.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(doc.id).toBeDefined()
+        expect(doc.filename).toBeDefined()
+        expect(doc.thumbnailURL).toBeNull()
+
+        // Clean up
+        await payload.delete({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
     })
 
