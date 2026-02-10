@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import escapeHTML from 'escape-html'
-import { sanitizeFields } from 'payload'
+import { flattenTopLevelFields, sanitizeFields } from 'payload'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
@@ -23,6 +23,30 @@ import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { transformExtraFields } from './transformExtraFields.js'
 import { linkValidation } from './validate.js'
+
+/**
+ * Recursively filters out a field by name while preserving the field structure.
+ * This is needed because fields like 'text' may be nested inside layout fields (row, collapsible, tabs).
+ */
+const filterFieldByName = (fields: Field[], name: string): Field[] => {
+  return fields
+    .filter((field) => !('name' in field) || field.name !== name)
+    .map((field) => {
+      if (field.type === 'row' || field.type === 'collapsible') {
+        return { ...field, fields: filterFieldByName(field.fields, name) } as typeof field
+      }
+      if (field.type === 'tabs') {
+        return {
+          ...field,
+          tabs: field.tabs.map((tab) => ({
+            ...tab,
+            fields: filterFieldByName(tab.fields, name),
+          })),
+        } as typeof field
+      }
+      return field
+    })
+}
 
 export type ExclusiveLinkCollectionsProps =
   | {
@@ -107,22 +131,15 @@ export const LinkFeature = createServerFeature<
     // the text field is not included in the node data.
     // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
     // Otherwise, it will cause a validation error (field is required).
-    const sanitizedFieldsWithoutText = sanitizedFields.filter(
-      (field) => !('name' in field) || field.name !== 'text',
+    // We use filterFieldByName to recursively filter out the text field, in case it's nested inside layout fields.
+    const sanitizedFieldsWithoutText = filterFieldByName(sanitizedFields, 'text')
+
+    // Use flattenTopLevelFields to find linkType and url fields, which may be nested inside layout fields (row, collapsible, etc.)
+    const flattenedFields = flattenTopLevelFields(sanitizedFields)
+    const linkTypeField = flattenedFields.find(
+      (field) => 'name' in field && field.name === 'linkType',
     )
-
-    let linkTypeField: Field | null = null
-    let linkURLField: Field | null = null
-
-    for (const field of sanitizedFields) {
-      if ('name' in field && field.name === 'linkType') {
-        linkTypeField = field
-      }
-
-      if ('name' in field && field.name === 'url') {
-        linkURLField = field
-      }
-    }
+    const linkURLField = flattenedFields.find((field) => 'name' in field && field.name === 'url')
 
     const defaultLinkType = linkTypeField
       ? 'defaultValue' in linkTypeField && typeof linkTypeField.defaultValue === 'string'
