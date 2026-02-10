@@ -253,7 +253,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   )
 
   const addFiles = React.useCallback(
-    async (files: FileList) => {
+    async (files: File[] | FileList) => {
       if (forms.length) {
         // save the state of the current form before adding new files
         dispatch({

@@ -13,7 +13,7 @@ const baseClass = 'bulk-upload--add-files'
 type Props = {
   readonly acceptMimeTypes?: string
   readonly onCancel: () => void
-  readonly onDrop: (acceptedFiles: FileList) => void
+  readonly onDrop: (acceptedFiles: File[] | FileList) => void
 }
 export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
   const { t } = useTranslation()

@@ -31,21 +31,22 @@ function DrawerContent() {
   const uploadMimeTypes = uploadConfig?.mimeTypes
 
   const onDrop = React.useCallback(
-    (acceptedFiles: FileList) => {
-      const fileTransfer = new DataTransfer()
-      for (const candidateFile of acceptedFiles) {
+    (acceptedFiles: File[] | FileList) => {
+      const filesToAdd: File[] = []
+      const acceptedFilesArray = Array.from(acceptedFiles)
+      for (const candidateFile of acceptedFilesArray) {
         if (
           uploadMimeTypes === undefined ||
           uploadMimeTypes.length === 0 ||
           validateMimeType(candidateFile.type, uploadMimeTypes)
         ) {
-          fileTransfer.items.add(candidateFile)
+          filesToAdd.push(candidateFile)
         }
       }
-      if (fileTransfer.files.length === 0) {
+      if (filesToAdd.length === 0) {
         toast.error(t('error:invalidFileType'))
       } else {
-        void addFiles(fileTransfer.files)
+        void addFiles(filesToAdd)
       }
     },
     [addFiles, t, uploadMimeTypes],

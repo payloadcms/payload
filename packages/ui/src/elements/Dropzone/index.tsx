@@ -16,7 +16,7 @@ export type Props = {
   readonly disabled?: boolean
   readonly dropzoneStyle?: 'default' | 'none'
   readonly multipleFiles?: boolean
-  readonly onChange: (e: FileList) => void
+  readonly onChange: (e: File[] | FileList) => void
 }
 
 export function Dropzone({
@@ -33,9 +33,7 @@ export function Dropzone({
   const addFiles = React.useCallback(
     (files: FileList) => {
       if (!multipleFiles && files.length > 1) {
-        const dataTransfer = new DataTransfer()
-        dataTransfer.items.add(files[0])
-        onChange(dataTransfer.files)
+        onChange([files[0]])
       } else {
         onChange(files)
       }
