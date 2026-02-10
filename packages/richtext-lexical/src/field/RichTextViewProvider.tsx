@@ -63,12 +63,14 @@ export const RichTextViewProvider: React.FC<{
 }> = (args) => {
   const parentContext = useRichTextView()
 
+  const hasInheritedView = parentContext.inheritable && Boolean(parentContext.views)
+
   const {
     children,
     currentView: currentViewFromProps,
     inheritable,
     views,
-  } = parentContext.inheritable
+  } = hasInheritedView
     ? {
         ...parentContext,
         ...args,
@@ -82,12 +84,12 @@ export const RichTextViewProvider: React.FC<{
     return {
       currentView,
       currentViewMap,
-      hasInheritedView: parentContext.inheritable,
+      hasInheritedView,
       inheritable,
       setCurrentView,
       views,
     }
-  }, [currentView, inheritable, parentContext.inheritable, setCurrentView, views])
+  }, [currentView, inheritable, hasInheritedView, setCurrentView, views])
 
   return <RichTextViewContext value={value}>{children}</RichTextViewContext>
 }
