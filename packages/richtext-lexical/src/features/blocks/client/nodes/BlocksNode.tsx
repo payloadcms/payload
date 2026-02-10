@@ -8,10 +8,18 @@ import {
 } from 'lexical'
 import React, { type JSX } from 'react'
 
+import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 import { BlockComponent } from '../component/index.js'
+
+export type BlockDecorateFunction = (
+  editor: LexicalEditor,
+  config: EditorConfig,
+  CustomBlock?: React.FC<ViewMapBlockComponentProps>,
+  CustomLabel?: React.FC<ViewMapBlockComponentProps>,
+) => JSX.Element
 
 export class BlockNode extends ServerBlockNode {
   static override clone(node: ServerBlockNode): ServerBlockNode {
@@ -39,11 +47,8 @@ export class BlockNode extends ServerBlockNode {
   }
 
   override decorate(
-    _editor: LexicalEditor,
-    config: EditorConfig,
-    CustomBlock?: React.ReactNode,
-    CustomLabel?: React.ReactNode,
-  ): JSX.Element {
+    ...[_editor, config, CustomBlock, CustomLabel]: Parameters<BlockDecorateFunction>
+  ): ReturnType<BlockDecorateFunction> {
     return (
       <BlockComponent
         cacheBuster={this.getCacheBuster()}

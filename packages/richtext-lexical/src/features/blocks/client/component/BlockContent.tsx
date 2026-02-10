@@ -54,18 +54,6 @@ export type BlockCollapsibleWithErrorProps = {
   fieldHasErrors?: boolean
 } & BlockCollapsibleProps
 
-import type { ViewMapBlockComponentProps, ViewMapBlockEditorProps } from '../../../../types.js'
-
-/**
- * Unrendered custom block from view map.
- * Contains the Block FC and its Lexical-level props.
- * BlockContent will render it with useBlockComponentContext hook.
- */
-export type UnrenderedCustomBlock = {
-  BlockFC: React.FC<ViewMapBlockComponentProps>
-  editorProps: Omit<ViewMapBlockEditorProps, 'useBlockComponentContext'>
-}
-
 export type BlockContentProps = {
   baseClass: string
   BlockDrawer: React.FC

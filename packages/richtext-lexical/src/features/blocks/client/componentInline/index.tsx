@@ -30,36 +30,22 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
+import type { ViewMapInlineBlockComponentProps } from '../../../../types.js'
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { type UnrenderedCustomBlock } from '../component/BlockContent.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
-type Props = {
-  /**
-   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
-   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
-   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
-   */
-  readonly cacheBuster: number
-  readonly className: string
-  /**
-   * Custom block component from view map (FC + props).
-   * Will be rendered with useInlineBlockComponentContext hook.
-   */
-  readonly CustomBlock?: UnrenderedCustomBlock
-  /**
-   * Directly pass a custom label component to be rendered instead of the default one.
-   * This will have priority over the custom label component passed in the field's config.
-   */
-  readonly CustomLabel?: React.ReactNode
-  readonly formData: InlineBlockFields
-  readonly nodeKey: string
-}
+export type InlineBlockComponentProps<
+  TFormData extends Record<string, unknown> = InlineBlockFields,
+> = {
+  readonly CustomBlock?: React.FC<ViewMapInlineBlockComponentProps>
+  readonly CustomLabel?: React.FC<ViewMapInlineBlockComponentProps>
+} & Pick<BlockComponentProps<TFormData>, 'cacheBuster' | 'className' | 'formData' | 'nodeKey'>
 
-type InlineBlockComponentContextType = {
+export type InlineBlockComponentContextType = {
   EditButton?: React.FC
   initialState: false | FormState | undefined
   InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
@@ -74,7 +60,9 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 
 export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
-export const InlineBlockComponent: React.FC<Props> = (props) => {
+export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBlockFields>> = (
+  props,
+) => {
   const {
     cacheBuster,
     className: baseClass,
@@ -135,19 +123,36 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    CustomLabelFromProps ??
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      initialState?.['_components']?.customComponents?.BlockLabel ??
-      undefined,
-  )
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
 
   const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
     if (CustomBlockFromProps) {
-      const { BlockFC, editorProps } = CustomBlockFromProps
       // Pass useInlineBlockComponentContext as useBlockComponentContext for inline blocks
-      // @ts-expect-error - inline blocks use same view map type but different context
-      return <BlockFC {...editorProps} useBlockComponentContext={useInlineBlockComponentContext} />
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
     }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return initialState?.['_components']?.customComponents?.Block ?? undefined

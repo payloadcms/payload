@@ -1,10 +1,8 @@
 'use client'
-import type { LexicalEditorViewMap, ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
-import type { BlockNode } from '@payloadcms/richtext-lexical/client'
+import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
 import { RichText } from '@payloadcms/richtext-lexical/react'
 
-import type { BannerBlock } from '../../payload-types.js'
 import type { LexicalViewsFrontendNodes } from './index.js'
 
 export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNodes> = {
@@ -24,8 +22,8 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
     nodes: {
       blocks: {
         banner: {
-          Block: (props: ViewMapBlockComponentProps) => {
-            const formData = props.formData as unknown as BannerBlock
+          Block: (props) => {
+            const formData = props.formData
 
             if (props.isEditor) {
               // Editor mode - render a simple placeholder
@@ -117,37 +115,6 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
                   ) : (
                     <p style={{ color: '#9ca3af', fontStyle: 'italic' }}>No content</p>
                   )}
-                </div>
-              </div>
-            )
-          },
-        },
-        viewsTestBlock: {
-          Component: (args) => {
-            const nodeFields: any = args?.isEditor
-              ? (args.node as BlockNode).__fields
-              : args.node.fields
-            const text = nodeFields?.text || 'No text provided'
-            return (
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  color: 'white',
-                  margin: '16px 0',
-                  padding: '24px',
-                }}
-              >
-                <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>
-                  <span aria-label="artist palette" role="img">
-                    🎨
-                  </span>{' '}
-                  Custom Frontend View
-                </div>
-                <div style={{ fontSize: '14px', opacity: 0.9 }}>{text}</div>
-                <div style={{ fontSize: '12px', marginTop: '12px', opacity: 0.7 }}>
-                  This block looks completely different in the frontend view!
                 </div>
               </div>
             )

@@ -20,10 +20,11 @@ import type {
   ServerFieldBase,
   StaticLabel,
 } from 'payload'
-import type { JSX } from 'react'
 
 import type { BlockComponentContextType } from './features/blocks/client/component/BlockContent.js'
 export type { BlockComponentContextType }
+import type { BlockComponentProps } from './features/blocks/client/component/index.js'
+import type { InlineBlockComponentContextType } from './features/blocks/client/componentInline/index.js'
 import type {
   JSXConverterArgs,
   JSXConverters,
@@ -180,48 +181,42 @@ export type NodeMapValue<TNode extends SerializedNodeBase = SerializedLexicalNod
   ) => string
 }
 
+type SharedViewMapBlockEditorProps<TNode extends SerializedBlockNode | SerializedInlineBlockNode> =
+  {
+    /**
+     * True when rendering in the admin editor.
+     */
+    isEditor: true
+    /**
+     * False when rendering in the admin editor.
+     */
+    isJSXConverter: false
+  } & Pick<BlockComponentProps<TNode['fields']>, 'className' | 'formData' | 'nodeKey'>
+
 /**
  * Props passed to a custom Block component in editor mode.
  * Use `isEditor` to discriminate between editor and JSX converter modes.
  *
  * @experimental - This API is experimental and may change in a minor release.
  */
-export type ViewMapBlockEditorProps = {
-  /**
-   * The Lexical editor configuration.
-   */
-  config: EditorConfig
-  /**
-   * The Lexical editor instance.
-   */
-  editor: LexicalEditor
-  /**
-   * The block's form data (field values).
-   */
-  formData: Record<string, unknown>
-  /**
-   * True when rendering in the admin editor.
-   */
-  isEditor: true
-  /**
-   * False when rendering in the admin editor.
-   */
-  isJSXConverter: false
-  /**
-   * The Lexical block node instance.
-   */
-  node: DecoratorNode<React.ReactNode>
-  /**
-   * The unique key identifying this block node.
-   */
-  nodeKey: string
+export type ViewMapBlockEditorProps<TNode extends SerializedBlockNode> = {
   /**
    * Hook to access block UI components (BlockCollapsible, EditButton, etc.).
    * Call this inside your component to get the context values.
    * Passed as a prop so you don't need to import from @payloadcms/richtext-lexical/client.
    */
   useBlockComponentContext: () => BlockComponentContextType
-}
+} & SharedViewMapBlockEditorProps<TNode>
+
+/**
+ * Props passed to a custom Block component in editor mode.
+ * Use `isEditor` to discriminate between editor and JSX converter modes.
+ *
+ * @experimental - This API is experimental and may change in a minor release.
+ */
+export type ViewMapInlineBlockEditorProps<TNode extends SerializedInlineBlockNode> = {
+  useInlineBlockComponentContext: () => InlineBlockComponentContextType
+} & SharedViewMapBlockEditorProps<TNode>
 
 /**
  * Props passed to a custom Block component in JSX converter mode (frontend).
@@ -229,47 +224,50 @@ export type ViewMapBlockEditorProps = {
  *
  * @experimental - This API is experimental and may change in a minor release.
  */
-export type ViewMapBlockJSXConverterProps<TNode extends SerializedBlockNode = SerializedBlockNode> =
-  {
-    /**
-     * Index of this node among its siblings.
-     */
-    childIndex: number
-    /**
-     * Available JSX converters for nested content.
-     */
-    converters: JSXConverters
-    /**
-     * The block's form data (field values).
-     */
-    formData: Record<string, unknown>
-    /**
-     * False when rendering via JSX converter (frontend).
-     */
-    isEditor: false
-    /**
-     * True when rendering via JSX converter (frontend).
-     */
-    isJSXConverter: true
-    /**
-     * The serialized block node.
-     */
-    node: TNode
-    /**
-     * Function to convert child nodes to JSX.
-     */
-    nodesToJSX: (args: {
-      converters?: JSXConverters
-      disableIndent?: boolean | string[]
-      disableTextAlign?: boolean | string[]
-      nodes: SerializedLexicalNode[]
-      parent?: SerializedLexicalNodeWithParent
-    }) => React.ReactNode[]
-    /**
-     * The parent node in the tree.
-     */
-    parent: SerializedLexicalNodeWithParent
-  }
+export type ViewMapBlockJSXConverterProps<
+  TNode extends SerializedBlockNode | SerializedInlineBlockNode =
+    | SerializedBlockNode
+    | SerializedInlineBlockNode,
+> = {
+  /**
+   * Index of this node among its siblings.
+   */
+  childIndex: number
+  /**
+   * Available JSX converters for nested content.
+   */
+  converters: JSXConverters
+  /**
+   * The block's form data (field values).
+   */
+  formData: TNode['fields']
+  /**
+   * False when rendering via JSX converter (frontend).
+   */
+  isEditor: false
+  /**
+   * True when rendering via JSX converter (frontend).
+   */
+  isJSXConverter: true
+  /**
+   * The serialized block node.
+   */
+  node: TNode
+  /**
+   * Function to convert child nodes to JSX.
+   */
+  nodesToJSX: (args: {
+    converters?: JSXConverters
+    disableIndent?: boolean | string[]
+    disableTextAlign?: boolean | string[]
+    nodes: SerializedLexicalNode[]
+    parent?: SerializedLexicalNodeWithParent
+  }) => React.ReactNode[]
+  /**
+   * The parent node in the tree.
+   */
+  parent: SerializedLexicalNodeWithParent
+}
 
 /**
  * Props passed to a custom Block component in a view map.
@@ -294,15 +292,19 @@ export type ViewMapBlockJSXConverterProps<TNode extends SerializedBlockNode = Se
  * @experimental - This API is experimental and may change in a minor release.
  */
 export type ViewMapBlockComponentProps<TNode extends SerializedBlockNode = SerializedBlockNode> =
-  | ViewMapBlockEditorProps
+  | ViewMapBlockEditorProps<TNode>
   | ViewMapBlockJSXConverterProps<TNode>
+
+export type ViewMapInlineBlockComponentProps<
+  TNode extends SerializedInlineBlockNode = SerializedInlineBlockNode,
+> = ViewMapBlockJSXConverterProps<TNode> | ViewMapInlineBlockEditorProps<TNode>
 
 /**
  *
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
-export type NodeMapBlockValue<TNode extends SerializedNodeBase = SerializedLexicalNode> = {
+export type NodeMapBlockValue<TNode extends SerializedBlockNode = SerializedBlockNode> = {
   /**
    * A React component that replaces the entire block, including the header/collapsible.
    * Works for both admin editor and frontend JSX conversion.
@@ -322,12 +324,42 @@ export type NodeMapBlockValue<TNode extends SerializedNodeBase = SerializedLexic
    * }
    * ```
    */
-  Block?: React.FC<ViewMapBlockComponentProps>
+  Block?: React.FC<ViewMapBlockComponentProps<TNode>>
   /**
    * A React component that replaces the block label.
    * Use `useBlockComponentContext()` hook to access block context.
    */
-  Label?: React.FC
+  Label?: React.FC<ViewMapBlockComponentProps<TNode>>
+} & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
+
+export type NodeMapInlineBlockValue<
+  TNode extends SerializedInlineBlockNode = SerializedInlineBlockNode,
+> = {
+  /**
+   * A React component that replaces the entire block, including the header/collapsible.
+   * Works for both admin editor and frontend JSX conversion.
+   *
+   * Use `isEditor` to discriminate between modes:
+   * - Editor mode: `blockContext` is available with UI components (BlockCollapsible, EditButton, etc.)
+   * - JSX converter mode: `nodesToJSX` is available for rendering nested content
+   *
+   * @example
+   * ```tsx
+   * InlineBlock: (props) => {
+   *   if (props.isEditor) {
+   *     const { BlockCollapsible } = props.blockContext
+   *     return <BlockCollapsible>{props.formData.title}</BlockCollapsible>
+   *   }
+   *   return <div>{props.formData.title}</div>
+   * }
+   * ```
+   */
+  Block?: React.FC<ViewMapInlineBlockComponentProps<TNode>>
+  /**
+   * A React component that replaces the block label.
+   * Use `useBlockComponentContext()` hook to access block context.
+   */
+  Label?: React.FC<ViewMapInlineBlockComponentProps<TNode>>
 } & Pick<NodeMapValue<TNode>, 'Component' | 'createDOM' | 'html'>
 
 /**
@@ -345,7 +377,7 @@ export type LexicalEditorNodeMap<
   // TypeScript requires that intersection properties be assignable to index signatures.
   [key: string]:
     | {
-        [blockSlug: string]: NodeMapBlockValue<any> | NodeMapValue<any>
+        [blockSlug: string]: NodeMapBlockValue<any> | NodeMapInlineBlockValue<any>
       }
     | NodeMapValue<any>
     | undefined
@@ -376,7 +408,7 @@ export type LexicalEditorNodeMap<
           : never
         : never,
       string
-    >]?: NodeMapBlockValue<
+    >]?: NodeMapInlineBlockValue<
       Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
         ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
         : SerializedInlineBlockNode

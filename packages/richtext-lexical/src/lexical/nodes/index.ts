@@ -8,8 +8,15 @@ import type {
 
 import React from 'react'
 
+import type { BlockDecorateFunction } from '../../features/blocks/client/nodes/BlocksNode.js'
+import type { InlineBlockDecorateFunction } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 import type { NodeWithHooks } from '../../features/typesServer.js'
-import type { LexicalEditorNodeMap, NodeMapBlockValue, NodeMapValue } from '../../types.js'
+import type {
+  LexicalEditorNodeMap,
+  NodeMapBlockValue,
+  NodeMapInlineBlockValue,
+  NodeMapValue,
+} from '../../types.js'
 import type { SanitizedClientEditorConfig, SanitizedServerEditorConfig } from '../config/types.js'
 
 // Store view definitions for each editor and node type
@@ -160,43 +167,45 @@ function applyNodeOverride({
           return React.createElement(React.Fragment)
         }
 
-        if (nodeType === 'block' || nodeType === 'inlineBlock') {
+        if (nodeType === 'block') {
           const blockViewDef: NodeMapBlockValue = viewDef as NodeMapBlockValue
           if (blockViewDef.Block || blockViewDef.Label) {
-            // Pass Block FC and props to BlockContent for rendering
+            const originalDecorate: BlockDecorateFunction = NodeClass.prototype._originalDecorate
+
+            // Pass Block FC to BlockContent for rendering
             // BlockContent will render with useBlockComponentContext hook (client-only)
-            const unrenderedBlock = blockViewDef.Block
-              ? {
-                  BlockFC: blockViewDef.Block,
-                  editorProps: {
-                    config,
-                    editor,
-                    formData: this.getFields?.() ?? {},
-                    isEditor: true as const,
-                    isJSXConverter: false as const,
-                    node: this,
-                    nodeKey: this.getKey(),
-                  },
-                }
-              : undefined
-
-            const renderedLabel = blockViewDef.Label
-              ? React.createElement(blockViewDef.Label)
-              : undefined
-
-            return NodeClass.prototype._originalDecorate.call(
+            return originalDecorate.call(
               this,
               editor,
               config,
-              unrenderedBlock,
-              renderedLabel,
+              blockViewDef.Block,
+              blockViewDef.Label,
+            )
+          }
+        } else if (nodeType === 'inlineBlock') {
+          const blockViewDef: NodeMapInlineBlockValue = viewDef as NodeMapInlineBlockValue
+          if (blockViewDef.Block || blockViewDef.Label) {
+            const originalDecorate: InlineBlockDecorateFunction =
+              NodeClass.prototype._originalDecorate
+
+            // Pass Block FC to BlockContent for rendering
+            // BlockContent will render with useBlockComponentContext hook (client-only)
+            return originalDecorate.call(
+              this,
+              editor,
+              config,
+              blockViewDef.Block,
+              blockViewDef.Label,
             )
           }
         }
       }
 
+      const originalDecorate: BlockDecorateFunction | InlineBlockDecorateFunction =
+        NodeClass.prototype._originalDecorate
+
       // Otherwise use original
-      return NodeClass.prototype._originalDecorate.call(this, editor, config)
+      return originalDecorate.call(this, editor, config)
     }
   }
 

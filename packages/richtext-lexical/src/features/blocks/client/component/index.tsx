@@ -35,21 +35,21 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
+import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import './index.scss'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
   type BlockCollapsibleWithErrorProps,
   BlockContent,
-  type UnrenderedCustomBlock,
   useBlockComponentContext,
 } from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
-type Props = {
+export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
    * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
    * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
@@ -58,21 +58,26 @@ type Props = {
   readonly cacheBuster: number
   readonly className: string
   /**
-   * Custom block component from view map (FC + props).
+   * Custom block component from view map
    * Will be rendered with useBlockComponentContext hook.
    */
-  readonly CustomBlock?: UnrenderedCustomBlock
+  readonly CustomBlock?: React.FC<ViewMapBlockComponentProps>
   /**
-   * Custom label component as React.ReactNode.
-   * For view maps, the FC is pre-rendered in nodes/index.ts.
-   * For form state, it's RSC-rendered.
+   * Custom block label from view map
+   * Will be rendered with useBlockComponentContext hook.
    */
-  readonly CustomLabel?: React.ReactNode
-  readonly formData: BlockFields
+  readonly CustomLabel?: React.FC<ViewMapBlockComponentProps>
+  /**
+   * The block's form data (field values).
+   */
+  readonly formData: TFormData
+  /**
+   * The unique key identifying this block node in the current editor instance.
+   */
   readonly nodeKey: string
 }
 
-export const BlockComponent: React.FC<Props> = (props) => {
+export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   const {
     cacheBuster,
     className: baseClass,
@@ -81,6 +86,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     formData,
     nodeKey,
   } = props
+
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -164,17 +170,35 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    CustomLabelFromProps ??
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      initialState?.['_components']?.customComponents?.BlockLabel ??
-      undefined,
-  )
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
 
   const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
     if (CustomBlockFromProps) {
-      const { BlockFC, editorProps } = CustomBlockFromProps
-      return <BlockFC {...editorProps} useBlockComponentContext={useBlockComponentContext} />
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
     }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return initialState?.['_components']?.customComponents?.Block ?? undefined

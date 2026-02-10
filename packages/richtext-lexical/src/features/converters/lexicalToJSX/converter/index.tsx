@@ -48,7 +48,7 @@ function createConverterFromNodeMapValue(viewDef: NodeMapValue): JSXConverter {
  * Creates a JSX converter from a NodeMapBlockValue (for blocks/inlineBlocks)
  * This also checks for Block FC as a fallback when Component is not defined.
  */
-function createConverterFromBlockValue(viewDef: NodeMapBlockValue): JSXConverter {
+function createConverterFromBlockValue(viewDef: NodeMapBlockValue<any>): JSXConverter {
   return (args) => {
     // Priority: Component > Block > html
     if (viewDef.Component) {
@@ -63,7 +63,7 @@ function createConverterFromBlockValue(viewDef: NodeMapBlockValue): JSXConverter
     // Use Block FC with JSX converter props
     if (viewDef.Block) {
       const blockNode = args.node as SerializedBlockNode
-      const blockProps: ViewMapBlockJSXConverterProps = {
+      const blockProps: ViewMapBlockJSXConverterProps<any> = {
         childIndex: args.childIndex,
         converters: args.converters,
         formData: blockNode.fields ?? {},
@@ -109,7 +109,7 @@ function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeB
     if (nodeType === 'blocks') {
       converters.blocks = {}
       for (const [blockType, _viewDef] of Object.entries(value)) {
-        const viewDef = _viewDef as NodeMapBlockValue
+        const viewDef = _viewDef as NodeMapBlockValue<any>
         // Check for Component, Block, or html
         if (viewDef.Component || viewDef.Block || viewDef.html) {
           converters.blocks[blockType] = createConverterFromBlockValue(viewDef)
@@ -121,7 +121,7 @@ function nodeMapToConverters<TNodes extends SerializedNodeBase = SerializedNodeB
     if (nodeType === 'inlineBlocks') {
       converters.inlineBlocks = {}
       for (const [blockType, _viewDef] of Object.entries(value)) {
-        const viewDef = _viewDef as NodeMapBlockValue
+        const viewDef = _viewDef as NodeMapBlockValue<any>
         // Check for Component, Block, or html
         if (viewDef.Component || viewDef.Block || viewDef.html) {
           converters.inlineBlocks[blockType] = createConverterFromBlockValue(viewDef)
