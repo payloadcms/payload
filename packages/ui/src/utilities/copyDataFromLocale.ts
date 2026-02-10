@@ -214,17 +214,15 @@ export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> =
   const { req } = args
 
   try {
-    const result = await copyDataFromLocale(args)
-    return { data: result }
+    return await copyDataFromLocale(args)
   } catch (err) {
     req.payload.logger.error({
       err,
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
     })
 
-    return {
-      error: err instanceof Error ? err.message : String(err),
-    }
+    // Re-throw the error so it can be caught by the client
+    throw err
   }
 }
 
