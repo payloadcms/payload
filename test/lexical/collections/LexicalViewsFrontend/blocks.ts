@@ -1,16 +1,8 @@
 import type { Block } from 'payload'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
 export const lexicalViewsFrontendBlocks: Block[] = [
-  {
-    slug: 'viewsTestBlock',
-    fields: [
-      {
-        name: 'text',
-        type: 'text',
-      },
-    ],
-    interfaceName: 'ViewsTestBlock',
-  },
   {
     slug: 'banner',
     fields: [
@@ -32,6 +24,9 @@ export const lexicalViewsFrontendBlocks: Block[] = [
       {
         name: 'content',
         type: 'richText',
+        editor: lexicalEditor({
+          features: ({ defaultFeatures }) => [...defaultFeatures],
+        }),
       },
     ],
     interfaceName: 'BannerBlock',

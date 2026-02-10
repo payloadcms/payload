@@ -29,8 +29,8 @@ import { getFileByPath } from 'payload'
 import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
 import type { LexicalViewsFrontendNodes } from './collections/LexicalViewsFrontend/index.js'
 
-import { devUser } from '../credentials.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { devUser } from '../credentials.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
@@ -390,17 +390,6 @@ export const seed = async (_payload: Payload) => {
         version: 2,
       },
       {
-        type: 'block',
-        fields: {
-          id: '68f6d92d965ad2082111b96c',
-          blockName: '',
-          blockType: 'viewsTestBlock',
-          text: 'This is a test block with custom styling',
-        },
-        format: '',
-        version: 2,
-      },
-      {
         type: 'heading',
         children: [
           {
@@ -477,7 +466,7 @@ export const seed = async (_payload: Payload) => {
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
-        (lexicalLocalizedDoc1.lexicalBlocksSubLocalized.root.children[1].fields as any).id,
+        (lexicalLocalizedDoc1?.lexicalBlocksSubLocalized?.root?.children[1]?.fields as any).id,
       ) as any,
       title: 'Localized Lexical es',
     },
