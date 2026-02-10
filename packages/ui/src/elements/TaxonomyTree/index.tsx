@@ -1,19 +1,17 @@
 'use client'
 
 import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
-import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useMemo, useRef } from 'react'
 
 import type { TaxonomyDocument, TaxonomyTreeProps } from './types.js'
 
 import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { usePreferences } from '../../providers/Preferences/index.js'
+import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
 import { useChildren } from './useChildren.js'
-import { useTreeState } from './useTreeState.js'
 import './index.scss'
 
 const baseClass = 'taxonomy-tree'
@@ -36,18 +34,10 @@ const getDocumentTitle = (doc: TaxonomyDocument, useAsTitle: string | undefined)
 const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   collectionSlug,
   initialData,
-  initialExpandedNodes = [],
   onNodeClick,
   selectedNodeId,
 }) => {
-  // Convert initialExpandedNodes array to Set for useTreeState
-  const initialExpandedSet = useMemo(() => {
-    const set = new Set(initialExpandedNodes)
-    return set
-  }, [initialExpandedNodes])
-
-  const { expandedNodes, toggleNode } = useTreeState(initialExpandedSet)
-  const { setPreference } = usePreferences()
+  const { expandedNodes, toggleNode } = useTaxonomy()
   const { getEntityConfig } = useConfig()
   const { moveFocus } = useTreeFocus()
 
@@ -117,25 +107,6 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
     }, [initialData, parentFieldName, collectionSlug]),
   )
   const treeRef = useRef<HTMLDivElement>(null)
-
-  // Wrap toggleNode to also save preferences
-  const handleToggle = React.useCallback(
-    (nodeId: number | string) => {
-      toggleNode(nodeId)
-
-      // Save preference after state update
-      setTimeout(() => {
-        // Calculate new expanded nodes array
-        const currentExpanded = expandedNodes.has(nodeId)
-          ? Array.from(expandedNodes).filter((id) => id !== nodeId)
-          : [...Array.from(expandedNodes), nodeId]
-
-        const preferenceKey = `${PREFERENCE_KEYS.TAXONOMY_TREE}-${collectionSlug}`
-        void setPreference(preferenceKey, { expandedNodes: currentExpanded })
-      }, 0)
-    },
-    [toggleNode, expandedNodes, collectionSlug, setPreference],
-  )
 
   // Fetch root nodes (items with no parent)
   const {
@@ -221,7 +192,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
               title: nodeTitle,
             }}
             onSelect={handleNodeClick}
-            onToggle={handleToggle}
+            onToggle={toggleNode}
             parentFieldName={parentFieldName}
             selected={isSelected}
             selectedNodeId={selectedNodeId}

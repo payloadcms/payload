@@ -233,3 +233,39 @@ Examples:
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
 - pnpm version: ^10.27.0
+
+## Admin Panel
+
+The admin panel is made up of both client and server react components.
+
+### Patterns
+
+ALWAYS use `formatAdminURL` when formatting api and admin routes.
+
+**Building API URLs with query parameters:** Use `qs-esm` to build query strings with proper object syntax instead of manual string concatenation.
+
+Incorrect:
+
+```typescript
+const whereClause = parentId
+  ? `where[${parentFieldName}][equals]=${parentId}`
+  : `where[or][0][${parentFieldName}][exists]=false&where[or][1][${parentFieldName}][equals]=`
+
+const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${page}`
+```
+
+Correct:
+
+```typescript
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+
+const where = parentId
+  ? { [parentFieldName]: { equals: parentId } }
+  : {
+      or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+    }
+
+const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
+const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
+```

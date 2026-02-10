@@ -483,6 +483,7 @@ export const renderListView = async (
           <Fragment>
             <HydrateTaxonomyProvider
               collectionSlug={collectionSlug}
+              expandedNodes={taxonomyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
               parentFieldName={
                 typeof collectionConfig.taxonomy === 'object'
                   ? collectionConfig.taxonomy.parentFieldName

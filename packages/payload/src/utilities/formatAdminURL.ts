@@ -1,11 +1,22 @@
 import type { Config } from '../config/types.js'
 
 /**
- * This function builds correct URLs for admin panel routing.
+ * Builds correct URLs for admin panel and API routing.
+ * Use this for both admin routes (`adminRoute`) and API routes (`apiRoute`).
+ *
  * Its primary responsibilities are:
- * 1. Read from your `routes.admin` config and appropriately handle `"/"` admin paths
+ * 1. Read from your `routes.admin` or `routes.api` config and appropriately handle `"/"` paths
  * 2. Prepend the `basePath` from your Next.js config, if specified
  * 3. Return relative or absolute URLs, as needed
+ *
+ * @example
+ * // Admin route
+ * formatAdminURL({ adminRoute, path: `/collections/${slug}` })
+ *
+ * @example
+ * // API route with query params
+ * const queryString = qs.stringify({ where, limit, page }, { addQueryPrefix: true })
+ * formatAdminURL({ apiRoute: api, path: `/${slug}${queryString}`, serverURL })
  */
 type BaseFormatURLArgs = {
   /**

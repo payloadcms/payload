@@ -4,6 +4,7 @@ import type { PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
 import type { TaxonomyDocument } from '../../../elements/TaxonomyTree/types.js'
@@ -16,6 +17,7 @@ import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useTaxonomy } from '../../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { SlotTable } from './SlotTable.js'
 import './index.scss'
@@ -52,24 +54,20 @@ type TableRow = {
 // Cell component for children (taxonomy items)
 const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
   const { getEntityConfig } = useConfig()
-  const {
-    config: {
-      routes: { admin: adminRoute },
-    },
-  } = useConfig()
+  const { selectParent } = useTaxonomy()
 
   const config = getEntityConfig({ collectionSlug: row._collectionSlug })
   const titleField = config?.admin?.useAsTitle || 'id'
   const rawTitle = row[titleField] || row.id
   const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
 
-  const childUrl = formatAdminURL({
-    adminRoute,
-    path: `/collections/${row._collectionSlug}?parent=${row.id}`,
-  })
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    selectParent(row.id)
+  }
 
   return (
-    <Link className={`${baseClass}__name-link`} href={childUrl}>
+    <button className={`${baseClass}__name-link`} onClick={handleClick} type="button">
       <TagIcon />
       <span className={`${baseClass}__name-text`}>{title}</span>
       {row._hasChildren && (
@@ -77,7 +75,7 @@ const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
           <ChevronIcon direction="right" />
         </span>
       )}
-    </Link>
+    </button>
   )
 }
 
@@ -218,17 +216,21 @@ export function TaxonomyTable({
     setChildLoading(true)
 
     try {
-      const whereClause = parentId
-        ? `where[${parentFieldName}][equals]=${parentId}`
-        : `where[${parentFieldName}][exists]=false`
+      const parentCondition = parentId
+        ? { [parentFieldName]: { equals: parentId } }
+        : {
+            or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+          }
 
-      const searchClause = search ? `&where[${useAsTitle}][like]=${encodeURIComponent(search)}` : ''
+      const where = search
+        ? { and: [parentCondition, { [useAsTitle]: { like: search } }] }
+        : parentCondition
 
-      const url = formatAdminURL({
-        apiRoute,
-        path: `/${collectionSlug}?${whereClause}${searchClause}&page=${childPage + 1}&limit=10`,
-        serverURL,
-      })
+      const queryString = qs.stringify(
+        { limit: 10, page: childPage + 1, where },
+        { addQueryPrefix: true },
+      )
+      const url = formatAdminURL({ apiRoute, path: `/${collectionSlug}${queryString}`, serverURL })
 
       const response = await fetch(url, { credentials: 'include' })
 

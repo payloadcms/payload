@@ -65,7 +65,6 @@ export const TaxonomySidebarTab: React.FC<
         <TaxonomyTree
           collectionSlug={collectionSlug}
           initialData={initialData}
-          initialExpandedNodes={initialExpandedNodes}
           key={collectionSlug}
           onNodeClick={handleNodeClick}
           selectedNodeId={selectedNodeId}

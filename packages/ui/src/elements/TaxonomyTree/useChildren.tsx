@@ -1,3 +1,5 @@
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { TaxonomyDocument, TaxonomyInitialData } from './types.js'
@@ -77,12 +79,25 @@ export const useChildren = ({
       setIsLoading(true)
 
       try {
-        const whereClause =
+        const where =
           parentId === 'null' || parentId === null
-            ? `where[${parentFieldName}][exists]=false`
-            : `where[${parentFieldName}][equals]=${parentId}`
+            ? {
+                or: [
+                  { [parentFieldName]: { exists: false } },
+                  { [parentFieldName]: { equals: null } },
+                ],
+              }
+            : { [parentFieldName]: { equals: parentId } }
 
-        const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${pageToFetch}`
+        const queryString = qs.stringify(
+          { limit, page: pageToFetch, where },
+          { addQueryPrefix: true },
+        )
+        const url = formatAdminURL({
+          apiRoute: api,
+          path: `/${collectionSlug}${queryString}`,
+          serverURL,
+        })
         const response = await fetch(url, {
           credentials: 'include',
         })

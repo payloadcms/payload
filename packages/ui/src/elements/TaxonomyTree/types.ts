@@ -22,7 +22,6 @@ export type TaxonomyInitialData = {
 export type TaxonomyTreeProps = {
   collectionSlug: string
   initialData?: null | TaxonomyInitialData
-  initialExpandedNodes?: (number | string)[]
   onNodeClick?: (id: number | string) => void
   selectedNodeId?: null | number | string
 }

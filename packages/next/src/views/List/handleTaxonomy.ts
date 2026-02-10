@@ -87,25 +87,66 @@ export const handleTaxonomy = async ({
             }),
           )
         } else {
-          // Fallback: just show the current item
-          const rawTitle = selectedItem[useAsTitle] || selectedItem.id || parentId
-          let title: string
+          // Fallback: walk up the parent chain to build full breadcrumb path
+          const buildBreadcrumbs = async (
+            item: Record<string, unknown>,
+            itemId: number | string,
+          ): Promise<Array<{ id: number | string; title: string }>> => {
+            const crumbs: Array<{ id: number | string; title: string }> = []
+            let currentItem: null | Record<string, unknown> = item
+            let currentId: null | number | string = itemId
 
-          if (rawTitle && typeof rawTitle === 'object') {
-            title = JSON.stringify(rawTitle)
-          } else if (typeof rawTitle === 'string') {
-            title = rawTitle
-          } else if (typeof rawTitle === 'number') {
-            title = String(rawTitle)
-          } else {
-            title = String(parentId)
+            while (currentItem && currentId !== null) {
+              const rawTitle = currentItem[useAsTitle] || currentItem.id || currentId
+              let title: string
+
+              if (rawTitle && typeof rawTitle === 'object') {
+                title = JSON.stringify(rawTitle)
+              } else if (typeof rawTitle === 'string') {
+                title = rawTitle
+              } else if (typeof rawTitle === 'number') {
+                title = String(rawTitle)
+              } else {
+                title = String(currentId)
+              }
+
+              crumbs.unshift({ id: currentId, title })
+
+              // Get parent ID
+              const parentValue = currentItem[parentFieldName]
+              if (!parentValue) {
+                break
+              }
+
+              const nextParentId =
+                typeof parentValue === 'object' && parentValue !== null && 'id' in parentValue
+                  ? (parentValue as { id: number | string }).id
+                  : (parentValue as number | string)
+
+              if (!nextParentId) {
+                break
+              }
+
+              // Fetch parent
+              try {
+                currentItem = await req.payload.findByID({
+                  id: nextParentId,
+                  collection: collectionSlug,
+                  depth: 0,
+                  overrideAccess: false,
+                  req,
+                  user,
+                })
+                currentId = nextParentId
+              } catch {
+                break
+              }
+            }
+
+            return crumbs
           }
-          breadcrumbs = [
-            {
-              id: parentId,
-              title,
-            },
-          ]
+
+          breadcrumbs = await buildBreadcrumbs(selectedItem, parentId)
         }
       }
     } catch (_error) {
@@ -120,7 +161,9 @@ export const handleTaxonomy = async ({
   // For nested level, find items with this specific parent
   const parentCondition =
     parentId === null
-      ? { [parentFieldName]: { exists: false } }
+      ? {
+          or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+        }
       : { [parentFieldName]: { equals: parentId } }
 
   const childrenWhere = search
@@ -145,82 +188,98 @@ export const handleTaxonomy = async ({
     where: childrenWhere,
   })
 
-  // Fetch related documents from other collections (only when viewing a specific taxonomy item)
+  // Fetch related documents from other collections
+  // At root level: show unassigned documents (where taxonomy field doesn't exist)
+  // At nested level: show documents assigned to the selected taxonomy item
   const relatedDocuments: RelatedDocumentsGrouped = {}
 
-  if (parentId !== null && selectedItem) {
-    const relatedCollections =
-      typeof taxonomyConfig === 'object' ? taxonomyConfig.relatedCollections || [] : []
+  const relatedCollections =
+    typeof taxonomyConfig === 'object' ? taxonomyConfig.relatedCollections || [] : []
 
-    // Auto-detect related collections if not specified
-    const collectionsToQuery =
-      relatedCollections.length > 0
-        ? relatedCollections
-        : findCollectionsWithRelationTo(req.payload.config.collections, collectionSlug)
+  // Auto-detect related collections if not specified
+  const collectionsToQuery =
+    relatedCollections.length > 0
+      ? relatedCollections
+      : findCollectionsWithRelationTo(req.payload.config.collections, collectionSlug)
 
-    for (const relatedSlug of collectionsToQuery) {
-      if (relatedSlug === collectionSlug) {
-        continue
-      }
+  for (const relatedSlug of collectionsToQuery) {
+    if (relatedSlug === collectionSlug) {
+      continue
+    }
 
-      const relatedCollectionConfig = req.payload.collections[relatedSlug]?.config
-      if (!relatedCollectionConfig) {
-        continue
-      }
+    const relatedCollectionConfig = req.payload.collections[relatedSlug]?.config
+    if (!relatedCollectionConfig) {
+      continue
+    }
 
-      // Check if user has read permission for this collection
-      if (!permissions?.collections?.[relatedSlug]?.read) {
-        continue
-      }
+    // Check if user has read permission for this collection
+    if (!permissions?.collections?.[relatedSlug]?.read) {
+      continue
+    }
 
-      // Find relationship fields that point to this taxonomy
-      const relationshipFields = findRelationshipFieldsTo(relatedCollectionConfig, collectionSlug)
-      if (relationshipFields.length === 0) {
-        continue
-      }
+    // Find relationship fields that point to this taxonomy
+    const relationshipFields = findRelationshipFieldsTo(relatedCollectionConfig, collectionSlug)
+    if (relationshipFields.length === 0) {
+      continue
+    }
 
-      // Build where clause
+    // Build where clause based on whether we're at root or nested level
+    let relationshipWhere: Record<string, unknown>
+
+    if (parentId === null) {
+      // Root level: find documents where taxonomy field doesn't exist, is null, or is empty array (unassigned)
+      const whereConditions = relationshipFields.map(({ fieldName, hasMany }) => {
+        const conditions = [{ [fieldName]: { exists: false } }, { [fieldName]: { equals: null } }]
+        if (hasMany) {
+          // hasMany fields store cleared values as empty arrays
+          conditions.push({ [fieldName]: { equals: [] } })
+        }
+        return { or: conditions }
+      })
+      relationshipWhere =
+        whereConditions.length === 1 ? whereConditions[0] : { and: whereConditions }
+    } else {
+      // Nested level: find documents assigned to this taxonomy item
       const whereConditions = relationshipFields.map(({ fieldName, hasMany }) => ({
         [fieldName]: hasMany ? { contains: parentId } : { equals: parentId },
       }))
-
-      const relationshipWhere =
+      relationshipWhere =
         whereConditions.length === 1 ? whereConditions[0] : { or: whereConditions }
+    }
 
-      // Add search filter if provided
-      const relatedUseAsTitle = relatedCollectionConfig.admin?.useAsTitle || 'id'
-      const where = search
-        ? { and: [relationshipWhere, { [relatedUseAsTitle]: { like: search } }] }
-        : relationshipWhere
+    // Add search filter if provided
+    const relatedUseAsTitle = relatedCollectionConfig.admin?.useAsTitle || 'id'
+    const where = search
+      ? { and: [relationshipWhere, { [relatedUseAsTitle]: { like: search } }] }
+      : relationshipWhere
 
-      try {
-        const data = await req.payload.find({
-          collection: relatedSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: false,
-          includeLockStatus: true,
-          limit: 10,
-          locale: req.locale,
-          overrideAccess: false,
-          page: 1,
-          req,
-          user,
-          where,
-        })
+    try {
+      const data = await req.payload.find({
+        collection: relatedSlug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: 10,
+        locale: req.locale,
+        overrideAccess: false,
+        page: 1,
+        req,
+        user,
+        where,
+      })
 
-        if (data.totalDocs > 0) {
-          relatedDocuments[relatedSlug] = {
-            data,
-            label: getTranslation(relatedCollectionConfig.labels?.plural, req.i18n),
-          }
+      if (data.totalDocs > 0) {
+        relatedDocuments[relatedSlug] = {
+          data,
+          label: getTranslation(relatedCollectionConfig.labels?.plural, req.i18n),
         }
-      } catch (error) {
-        req.payload.logger.warn({
-          err: error,
-          msg: `Failed to query related collection ${relatedSlug}`,
-        })
       }
+    } catch (error) {
+      req.payload.logger.warn({
+        err: error,
+        msg: `Failed to query related collection ${relatedSlug}`,
+      })
     }
   }
 

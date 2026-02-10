@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation.js'
 import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useState } from 'react'
 
 import type {
@@ -204,14 +205,23 @@ export const TaxonomyProvider: React.FC<TaxonomyProviderProps> = ({ children }) 
 
         const nextPage = Math.floor(currentChildren.length / treeLimit) + 1
 
-        const whereClause =
+        const where =
           parentId === null
-            ? `where[${parentFieldName}][exists]=false`
-            : `where[${parentFieldName}][equals]=${parentId}`
+            ? {
+                or: [
+                  { [parentFieldName]: { exists: false } },
+                  { [parentFieldName]: { equals: null } },
+                ],
+              }
+            : { [parentFieldName]: { equals: parentId } }
 
+        const queryString = qs.stringify(
+          { limit: treeLimit, page: nextPage, where },
+          { addQueryPrefix: true },
+        )
         const url = formatAdminURL({
           apiRoute: api,
-          path: `/${collectionSlug}?${whereClause}&limit=${treeLimit}&page=${nextPage}`,
+          path: `/${collectionSlug}${queryString}`,
           serverURL,
         })
         const response = await fetch(url, {

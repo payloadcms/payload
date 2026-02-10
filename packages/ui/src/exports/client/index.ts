@@ -377,6 +377,7 @@ export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
+export { TaxonomyListView } from '../../views/TaxonomyList/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
 export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
 

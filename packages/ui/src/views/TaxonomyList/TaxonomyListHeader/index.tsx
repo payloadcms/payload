@@ -15,6 +15,8 @@ const baseClass = 'taxonomy-list-header'
 
 export type TaxonomyListHeaderProps = {
   collectionConfig: ClientCollectionConfig
+  /** Title to display - defaults to collection label if not provided */
+  currentItemTitle?: string
   Description?: React.ReactNode
   hasCreatePermission: boolean
   i18n: I18nClient
@@ -24,6 +26,7 @@ export type TaxonomyListHeaderProps = {
 
 export function TaxonomyListHeader({
   collectionConfig,
+  currentItemTitle,
   Description,
   hasCreatePermission,
   i18n,
@@ -31,6 +34,7 @@ export function TaxonomyListHeader({
   newDocumentURL,
 }: TaxonomyListHeaderProps) {
   const { labels } = collectionConfig
+  const title = currentItemTitle || getTranslation(labels?.plural, i18n)
 
   return (
     <ListHeader
@@ -45,7 +49,7 @@ export function TaxonomyListHeader({
       }
       AfterListHeaderContent={Description}
       className={baseClass}
-      title={getTranslation(labels?.plural, i18n)}
+      title={title}
       TitleActions={
         hasCreatePermission && newDocumentURL
           ? [

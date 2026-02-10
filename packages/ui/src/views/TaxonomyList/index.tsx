@@ -62,9 +62,18 @@ export function TaxonomyListView(props: ListViewClientProps) {
     setSearch(value)
   }, [])
 
+  // Get current item title from breadcrumbs (last item is the current one)
+  const currentItemTitle =
+    taxonomyData?.breadcrumbs && taxonomyData.breadcrumbs.length > 0
+      ? taxonomyData.breadcrumbs[taxonomyData.breadcrumbs.length - 1].title
+      : undefined
+
   useEffect(() => {
     if (!isInDrawer) {
-      const hasBreadcrumbs = taxonomyData?.breadcrumbs && taxonomyData.breadcrumbs.length > 0
+      // Breadcrumbs exclude the last item (current item) since it's shown in the header
+      const ancestorBreadcrumbs = taxonomyData?.breadcrumbs?.slice(0, -1) || []
+      const hasBreadcrumbs = ancestorBreadcrumbs.length > 0 || currentItemTitle
+
       const baseLabel = {
         label: collectionLabel,
         replace: true,
@@ -78,26 +87,29 @@ export function TaxonomyListView(props: ListViewClientProps) {
 
       let navItems = [baseLabel]
 
-      if (taxonomyData?.breadcrumbs) {
-        const taxonomyBreadcrumbs = taxonomyData.breadcrumbs.map((crumb, index) => {
-          const isLast = index === taxonomyData.breadcrumbs.length - 1
-          return {
-            label: crumb.title,
-            replace: true,
-            url: isLast
-              ? undefined
-              : formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
-                }),
-          }
-        })
+      if (ancestorBreadcrumbs.length > 0) {
+        const taxonomyBreadcrumbs = ancestorBreadcrumbs.map((crumb) => ({
+          label: crumb.title,
+          replace: true,
+          url: formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+          }),
+        }))
         navItems = [...navItems, ...taxonomyBreadcrumbs]
       }
 
       setStepNav(navItems)
     }
-  }, [adminRoute, setStepNav, isInDrawer, collectionSlug, taxonomyData, collectionLabel])
+  }, [
+    adminRoute,
+    setStepNav,
+    isInDrawer,
+    collectionSlug,
+    taxonomyData,
+    collectionLabel,
+    currentItemTitle,
+  ])
 
   const isRootLevel = selectedParentId === null
 
@@ -110,6 +122,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
         <Gutter className={`${baseClass}__wrap`}>
           <TaxonomyListHeader
             collectionConfig={collectionConfig}
+            currentItemTitle={currentItemTitle}
             Description={
               <div className={`${baseClass}__sub-header`}>
                 <RenderCustomComponent
@@ -142,6 +155,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
             <TaxonomyTable
               childrenData={filteredChildrenData}
               collectionSlug={collectionSlug}
+              key={`${collectionSlug}-${taxonomyData.parentId}`}
               parentId={taxonomyData.parentId}
               relatedGroups={Object.entries(taxonomyData.relatedDocuments || {}).map(
                 ([slug, related]) => ({
