@@ -40,6 +40,7 @@ function formatDate(dateString: string, locale: string): string {
 type RelatedGroup = {
   collectionSlug: string
   data: PaginatedDocs
+  fieldInfo: { fieldName: string; hasMany: boolean }
   label: string
 }
 
@@ -267,30 +268,39 @@ export function TaxonomyTable({
         return
       }
 
+      // Find the group to get field info
+      const group = relatedGroups.find((g) => g.collectionSlug === relatedSlug)
+      if (!group) {
+        return
+      }
+
       setRelatedState((prev) => ({
         ...prev,
         [relatedSlug]: { ...prev[relatedSlug], isLoading: true },
       }))
 
       try {
+        const { fieldName, hasMany } = group.fieldInfo
+
+        // Build where clause using known field info
+        const whereClause = hasMany
+          ? { [fieldName]: { contains: parentId } }
+          : { [fieldName]: { equals: parentId } }
+
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
-        const relationshipFields = findRelationshipFieldsTo(
-          relatedConfig?.fields || [],
-          collectionSlug,
-        )
-
-        const whereConditions = relationshipFields
-          .map((fieldName) => `where[${fieldName}][in]=${parentId}`)
-          .join('&')
-
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
-        const searchClause = search
-          ? `&where[${relatedUseAsTitle}][like]=${encodeURIComponent(search)}`
-          : ''
 
+        const where = search
+          ? { and: [whereClause, { [relatedUseAsTitle]: { like: search } }] }
+          : whereClause
+
+        const queryString = qs.stringify(
+          { limit: 10, page: state.page + 1, where },
+          { addQueryPrefix: true },
+        )
         const url = formatAdminURL({
           apiRoute,
-          path: `/${relatedSlug}?${whereConditions}${searchClause}&page=${state.page + 1}&limit=10`,
+          path: `/${relatedSlug}${queryString}`,
           serverURL,
         })
 
@@ -319,7 +329,7 @@ export function TaxonomyTable({
         }))
       }
     },
-    [apiRoute, collectionSlug, getEntityConfig, parentId, relatedState, search, serverURL],
+    [apiRoute, getEntityConfig, parentId, relatedGroups, relatedState, search, serverURL],
   )
 
   // Build children data for table
@@ -479,42 +489,4 @@ export function TaxonomyTable({
       })}
     </div>
   )
-}
-
-function findRelationshipFieldsTo(fields: unknown[], targetSlug: string): string[] {
-  const fieldNames: string[] = []
-
-  function traverse(fieldList: unknown[]): void {
-    for (const field of fieldList) {
-      if (!field || typeof field !== 'object') {
-        continue
-      }
-
-      const f = field as Record<string, unknown>
-
-      if (!('name' in f)) {
-        continue
-      }
-
-      if (f.type === 'relationship') {
-        const relationTo = Array.isArray(f.relationTo) ? f.relationTo : [f.relationTo]
-        if (relationTo.includes(targetSlug)) {
-          fieldNames.push(f.name as string)
-        }
-      } else if (f.type === 'group' && f.fields) {
-        traverse(f.fields as unknown[])
-      } else if (f.type === 'array' && f.fields) {
-        traverse(f.fields as unknown[])
-      } else if (f.type === 'blocks' && f.blocks) {
-        for (const block of f.blocks as unknown[]) {
-          if (block && typeof block === 'object' && 'fields' in block) {
-            traverse((block as Record<string, unknown>).fields as unknown[])
-          }
-        }
-      }
-    }
-  }
-
-  traverse(fields)
-  return fieldNames
 }
