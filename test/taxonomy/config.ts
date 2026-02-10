@@ -33,10 +33,16 @@ export const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
-  taxonomy: true,
+  taxonomy: {
+    relatedCollections: {
+      [postsSlug]: { hasMany: true },
+      [pagesSlug]: { hasMany: true },
+      [mediaSlug]: { hasMany: true },
+    },
+  },
 }
 
-// Posts collection that references tags
+// Posts collection that references tags (taxonomy field is auto-injected)
 export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -52,16 +58,10 @@ export const Posts: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    {
-      name: 'tags',
-      type: 'relationship',
-      hasMany: true,
-      relationTo: tagsSlug,
-    },
   ],
 }
 
-// Pages collection that references tags
+// Pages collection that references tags (taxonomy field is auto-injected)
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
   admin: {
@@ -77,16 +77,10 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    {
-      name: 'tags',
-      type: 'relationship',
-      hasMany: true,
-      relationTo: tagsSlug,
-    },
   ],
 }
 
-// Media collection that references tags
+// Media collection that references tags (taxonomy field is auto-injected)
 export const Media: CollectionConfig = {
   slug: mediaSlug,
   admin: {
@@ -97,12 +91,6 @@ export const Media: CollectionConfig = {
       name: 'filename',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'tags',
-      type: 'relationship',
-      hasMany: true,
-      relationTo: tagsSlug,
     },
   ],
   upload: true,

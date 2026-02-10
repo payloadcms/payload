@@ -32,8 +32,8 @@ describe('Taxonomy', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
 
       expect(tagsCollection).toBeDefined()
-      expect((tagsCollection as any)?.taxonomy).not.toBe(false)
-      expect(tagsCollection?.admin?.custom?.isTaxonomy).toBe(true)
+      expect((tagsCollection as any)?.taxonomy).toBeDefined()
+      expect((tagsCollection as any)?.taxonomy).toBeTypeOf('object')
     })
 
     it('should enable hierarchy when taxonomy is enabled', () => {
@@ -94,7 +94,7 @@ describe('Taxonomy', () => {
       createdIDs.push(tag.id)
 
       expect(tag).toHaveProperty('name', 'Technology')
-      expect((tag as any).parent).toBeUndefined()
+      expect(tag.parent).toBeUndefined()
     })
 
     it('should create a child taxonomy item', async () => {
@@ -118,7 +118,10 @@ describe('Taxonomy', () => {
       createdIDs.push(child.id)
 
       expect(child).toHaveProperty('name', 'JavaScript')
-      expect((child as any).parent).toBe(parent.id)
+      // Parent is populated at depth > 0, so check the ID within the object
+      const parentValue = child.parent
+      const parentId = typeof parentValue === 'object' ? parentValue?.id : parentValue
+      expect(parentId).toBe(parent.id)
     })
 
     it('should prevent circular references', async () => {
@@ -202,15 +205,18 @@ describe('Taxonomy', () => {
       const post = await payload.create({
         collection: postsSlug as any,
         data: {
-          tags: [tag.id],
+          _t_tags: [tag.id],
           title: 'Getting Started with TypeScript',
         } as any,
       })
 
       createdPostIDs.push(post.id)
 
-      expect((post as any).tags).toHaveLength(1)
-      expect((post as any).tags[0]).toBe(tag.id)
+      expect(post._t_tags).toHaveLength(1)
+      // Tags are populated at depth > 0, so check the ID within the object
+      const tagValue = post._t_tags[0]
+      const tagId = typeof tagValue === 'object' ? tagValue?.id : tagValue
+      expect(tagId).toBe(tag.id)
     })
 
     it('should query documents by taxonomy', async () => {
@@ -226,7 +232,7 @@ describe('Taxonomy', () => {
       const post1 = await payload.create({
         collection: postsSlug as any,
         data: {
-          tags: [tag.id],
+          _t_tags: [tag.id],
           title: 'React Hooks',
         } as any,
       })
@@ -236,7 +242,7 @@ describe('Taxonomy', () => {
       const post2 = await payload.create({
         collection: postsSlug as any,
         data: {
-          tags: [tag.id],
+          _t_tags: [tag.id],
           title: 'React Components',
         } as any,
       })
@@ -246,7 +252,7 @@ describe('Taxonomy', () => {
       const results = await payload.find({
         collection: postsSlug as any,
         where: {
-          tags: {
+          _t_tags: {
             equals: tag.id,
           },
         },

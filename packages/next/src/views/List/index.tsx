@@ -284,7 +284,10 @@ export const renderListView = async (
         childrenData: typeof data
         parentFieldName: string
         parentId: number | string
-        relatedDocuments: Record<string, { data: typeof data; label: string }>
+        relatedDocuments: Record<
+          string,
+          { data: typeof data; fieldInfo: { fieldName: string; hasMany: boolean }; label: string }
+        >
         selectedItem: null | Record<string, unknown>
       }
     | undefined

@@ -361,7 +361,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Learn the basics of React development',
-      tags: [react.id, javascript.id, programming.id],
+      _t_tags: [react.id, javascript.id, programming.id],
       title: 'Getting Started with React',
     } as any,
   })
@@ -370,7 +370,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Best practices for TypeScript development',
-      tags: [typescript.id, programming.id],
+      _t_tags: [typescript.id, programming.id],
       title: 'TypeScript Best Practices',
     } as any,
   })
@@ -379,7 +379,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Understanding React hooks',
-      tags: [react.id, javascript.id],
+      _t_tags: [react.id, javascript.id],
       title: 'React Hooks Deep Dive',
     } as any,
   })
@@ -388,7 +388,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Using Python for data analysis',
-      tags: [python.id, programming.id],
+      _t_tags: [python.id, programming.id],
       title: 'Python for Data Science',
     } as any,
   })
@@ -397,7 +397,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Key principles of modern web design',
-      tags: [webdesign.id, design.id],
+      _t_tags: [webdesign.id, design.id],
       title: 'Modern Web Design Principles',
     } as any,
   })
@@ -407,7 +407,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Comprehensive React documentation and guides',
-      tags: [react.id, javascript.id],
+      _t_tags: [react.id, javascript.id],
       title: 'React Documentation',
     } as any,
   })
@@ -416,7 +416,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Curated list of UI/UX resources',
-      tags: [uiux.id, design.id],
+      _t_tags: [uiux.id, design.id],
       title: 'UI/UX Resources',
     } as any,
   })
@@ -425,7 +425,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Complete TypeScript reference',
-      tags: [typescript.id],
+      _t_tags: [typescript.id],
       title: 'TypeScript Handbook',
     } as any,
   })
@@ -434,7 +434,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Core JavaScript concepts',
-      tags: [javascript.id, programming.id],
+      _t_tags: [javascript.id, programming.id],
       title: 'JavaScript Fundamentals',
     } as any,
   })

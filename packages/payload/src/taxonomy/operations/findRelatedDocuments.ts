@@ -76,7 +76,7 @@ export async function findRelatedDocuments({
 
     // Build where clause using pre-computed field info
     const where: Where = {
-      [fieldName]: hasMany ? { contains: id } : { equals: id },
+      [fieldName]: hasMany ? { in: [id] } : { equals: id },
     }
 
     try {

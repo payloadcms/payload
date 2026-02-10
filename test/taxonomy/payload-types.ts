@@ -144,7 +144,7 @@ export interface Post {
   id: string;
   title: string;
   content?: string | null;
-  tags?: (string | Tag)[] | null;
+  _t_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -156,7 +156,7 @@ export interface Page {
   id: string;
   title: string;
   content?: string | null;
-  tags?: (string | Tag)[] | null;
+  _t_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -166,7 +166,7 @@ export interface Page {
  */
 export interface Media {
   id: string;
-  tags?: (string | Tag)[] | null;
+  _t_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -327,7 +327,7 @@ export interface TagsSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
-  tags?: T;
+  _t_tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -338,7 +338,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   content?: T;
-  tags?: T;
+  _t_tags?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -347,7 +347,7 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  tags?: T;
+  _t_tags?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

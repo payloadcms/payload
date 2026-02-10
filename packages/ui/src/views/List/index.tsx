@@ -244,6 +244,7 @@ export function DefaultListView(props: ListViewClientProps) {
                     ([slug, related]) => ({
                       collectionSlug: slug,
                       data: related.data,
+                      fieldInfo: related.fieldInfo,
                       label: related.label,
                     }),
                   )}

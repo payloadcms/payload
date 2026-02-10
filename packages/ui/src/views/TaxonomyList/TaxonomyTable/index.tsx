@@ -423,6 +423,7 @@ export function TaxonomyTable({
               enableCheckbox={true}
               enableDragHandle={false}
               enableSelectAll={false}
+              mergeCheckboxHeader={true}
               onCheckboxChange={handleChildCheckboxChange}
               parentId={parentId}
               selectedIds={selectedChildIds}
@@ -469,6 +470,7 @@ export function TaxonomyTable({
               enableCheckbox={true}
               enableDragHandle={false}
               enableSelectAll={false}
+              mergeCheckboxHeader={true}
               onCheckboxChange={(row, checked) =>
                 handleRelatedCheckboxChange(group.collectionSlug, row, checked)
               }

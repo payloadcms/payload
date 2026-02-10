@@ -66,7 +66,7 @@ export type ClientCollectionConfig = {
     plural: StaticLabel
     singular: StaticLabel
   }
-  taxonomy?: SanitizedTaxonomyConfig | true
+  taxonomy?: SanitizedTaxonomyConfig
 } & Omit<
   SanitizedCollectionConfig,
   'admin' | 'auth' | 'fields' | 'labels' | 'taxonomy' | ServerOnlyCollectionProperties

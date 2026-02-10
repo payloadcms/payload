@@ -1,3 +1,9 @@
-export { DEFAULT_TAXONOMY_TREE_LIMIT } from './constants.js'
+export { buildTaxonomyRelationshipField } from './buildTaxonomyRelationshipField.js'
+export { DEFAULT_TAXONOMY_TREE_LIMIT, getTaxonomyFieldName } from './constants.js'
+export { injectTaxonomyFields } from './injectTaxonomyFields.js'
 export { findRelatedDocuments } from './operations/index.js'
-export type { SanitizedTaxonomyConfig, TaxonomyConfig } from './types.js'
+export type {
+  SanitizedRelatedCollection,
+  SanitizedTaxonomyConfig,
+  TaxonomyConfig,
+} from './types.js'
