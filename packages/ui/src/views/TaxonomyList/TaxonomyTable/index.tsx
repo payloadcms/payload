@@ -1,6 +1,6 @@
 'use client'
 
-import type { PaginatedDocs } from 'payload'
+import type { ClientUser, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
@@ -13,10 +13,12 @@ import type { SlotColumn } from './SlotTable.js'
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { Link } from '../../../elements/Link/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
+import { Locked } from '../../../elements/Locked/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useTaxonomy } from '../../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { SlotTable } from './SlotTable.js'
@@ -49,18 +51,32 @@ type TableRow = {
   [key: string]: unknown
   _collectionSlug: string
   _hasChildren?: boolean
+  _isLocked?: boolean
+  _userEditing?: ClientUser
   id: number | string
 }
 
 // Cell component for children (taxonomy items)
 const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
   const { getEntityConfig } = useConfig()
+  const { isLocked } = useDocumentSelection()
   const { selectParent } = useTaxonomy()
 
   const config = getEntityConfig({ collectionSlug: row._collectionSlug })
   const titleField = config?.admin?.useAsTitle || 'id'
   const rawTitle = row[titleField] || row.id
   const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
+
+  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+
+  if (locked && row._userEditing) {
+    return (
+      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
+        <Locked user={row._userEditing} />
+        <span className={`${baseClass}__name-text`}>{title}</span>
+      </span>
+    )
+  }
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -88,6 +104,7 @@ const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
       routes: { admin: adminRoute },
     },
   } = useConfig()
+  const { isLocked } = useDocumentSelection()
 
   const config = getEntityConfig({ collectionSlug: row._collectionSlug })
   const titleField = config?.admin?.useAsTitle || 'id'
@@ -96,6 +113,17 @@ const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
       ? row[titleField]
       : row.id
   const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
+
+  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+
+  if (locked && row._userEditing) {
+    return (
+      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
+        <Locked user={row._userEditing} />
+        <span className={`${baseClass}__name-text`}>{title}</span>
+      </span>
+    )
+  }
 
   const editUrl = formatAdminURL({
     adminRoute,
@@ -193,17 +221,8 @@ export function TaxonomyTable({
     return initial
   })
 
-  // Selected rows (per table)
-  const [selectedChildIds, setSelectedChildIds] = useState<Set<number | string>>(new Set())
-  const [selectedRelatedIds, setSelectedRelatedIds] = useState<
-    Record<string, Set<number | string>>
-  >(() => {
-    const initial: Record<string, Set<number | string>> = {}
-    for (const group of relatedGroups) {
-      initial[group.collectionSlug] = new Set()
-    }
-    return initial
-  })
+  // Get selection functions from context
+  const { isSelected, toggleSelection } = useDocumentSelection()
 
   // Load more children
   const handleLoadMoreChildren = useCallback(async () => {
@@ -343,30 +362,14 @@ export function TaxonomyTable({
   const hasChildren = childTotal > 0
   const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
 
-  // Child selection handlers
-  const handleChildCheckboxChange = (row: TableRow, checked: boolean) => {
-    setSelectedChildIds((prev) => {
-      const next = new Set(prev)
-      if (checked) {
-        next.add(row.id)
-      } else {
-        next.delete(row.id)
-      }
-      return next
-    })
+  // Child selection handler
+  const handleChildCheckboxChange = (row: TableRow) => {
+    toggleSelection({ id: row.id, collectionSlug })
   }
 
-  // Related selection handlers
-  const handleRelatedCheckboxChange = (slug: string, row: TableRow, checked: boolean) => {
-    setSelectedRelatedIds((prev) => {
-      const next = new Set(prev[slug])
-      if (checked) {
-        next.add(row.id)
-      } else {
-        next.delete(row.id)
-      }
-      return { ...prev, [slug]: next }
-    })
+  // Related selection handler
+  const handleRelatedCheckboxChange = (slug: string, row: TableRow) => {
+    toggleSelection({ id: row.id, collectionSlug: slug })
   }
 
   // Column definitions for children
@@ -426,7 +429,13 @@ export function TaxonomyTable({
               mergeCheckboxHeader={true}
               onCheckboxChange={handleChildCheckboxChange}
               parentId={parentId}
-              selectedIds={selectedChildIds}
+              selectedIds={
+                new Set(
+                  childTableData
+                    .filter((row) => isSelected({ id: row.id, collectionSlug }))
+                    .map((row) => row.id),
+                )
+              }
             />
 
             <div className={`${baseClass}__load-more-wrap`}>
@@ -471,10 +480,16 @@ export function TaxonomyTable({
               enableDragHandle={false}
               enableSelectAll={false}
               mergeCheckboxHeader={true}
-              onCheckboxChange={(row, checked) =>
-                handleRelatedCheckboxChange(group.collectionSlug, row, checked)
+              onCheckboxChange={(row) => handleRelatedCheckboxChange(group.collectionSlug, row)}
+              selectedIds={
+                new Set(
+                  relatedTableData
+                    .filter((row) =>
+                      isSelected({ id: row.id, collectionSlug: group.collectionSlug }),
+                    )
+                    .map((row) => row.id),
+                )
               }
-              selectedIds={selectedRelatedIds[group.collectionSlug]}
             />
 
             <div className={`${baseClass}__load-more-wrap`}>
