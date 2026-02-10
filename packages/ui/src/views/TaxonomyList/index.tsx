@@ -16,6 +16,7 @@ import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { TaxonomyListHeader } from './TaxonomyListHeader/index.js'
@@ -115,73 +116,87 @@ export function TaxonomyListView(props: ListViewClientProps) {
 
   const filteredChildrenData = taxonomyData?.childrenData
 
+  const collectionData = taxonomyData
+    ? {
+        [collectionSlug]: { docs: taxonomyData.childrenData.docs },
+        ...Object.fromEntries(
+          Object.entries(taxonomyData.relatedDocuments || {}).map(([slug, related]) => [
+            slug,
+            { docs: related.data.docs },
+          ]),
+        ),
+      }
+    : {}
+
   return (
     <Fragment>
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
-        <Gutter className={`${baseClass}__wrap`}>
-          <TaxonomyListHeader
-            collectionConfig={collectionConfig}
-            currentItemTitle={currentItemTitle}
-            Description={
-              <div className={`${baseClass}__sub-header`}>
-                <RenderCustomComponent
-                  CustomComponent={Description}
-                  Fallback={
-                    <ViewDescription
-                      collectionSlug={collectionSlug}
-                      description={collectionConfig?.admin?.description}
-                    />
-                  }
-                />
-              </div>
-            }
-            hasCreatePermission={hasCreatePermission}
-            i18n={i18n}
-            isRootLevel={isRootLevel}
-            newDocumentURL={newDocumentURL}
-          />
-
-          <div className={`${baseClass}__controls`}>
-            <SearchBar
-              label={t('general:searchBy', {
-                label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
-              })}
-              onSearchChange={handleSearchChange}
+        <DocumentSelectionProvider collectionData={collectionData}>
+          <Gutter className={`${baseClass}__wrap`}>
+            <TaxonomyListHeader
+              collectionConfig={collectionConfig}
+              currentItemTitle={currentItemTitle}
+              Description={
+                <div className={`${baseClass}__sub-header`}>
+                  <RenderCustomComponent
+                    CustomComponent={Description}
+                    Fallback={
+                      <ViewDescription
+                        collectionSlug={collectionSlug}
+                        description={collectionConfig?.admin?.description}
+                      />
+                    }
+                  />
+                </div>
+              }
+              hasCreatePermission={hasCreatePermission}
+              i18n={i18n}
+              isRootLevel={isRootLevel}
+              newDocumentURL={newDocumentURL}
             />
-          </div>
 
-          {taxonomyData ? (
-            <TaxonomyTable
-              childrenData={filteredChildrenData}
-              collectionSlug={collectionSlug}
-              key={`${collectionSlug}-${taxonomyData.parentId}`}
-              parentId={taxonomyData.parentId}
-              relatedGroups={Object.entries(taxonomyData.relatedDocuments || {}).map(
-                ([slug, related]) => ({
-                  collectionSlug: slug,
-                  data: related.data,
-                  fieldInfo: related.fieldInfo,
-                  label: related.label,
-                }),
-              )}
-              search={search}
-              taxonomyLabel={collectionLabel}
-              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-            />
-          ) : (
-            <div className={`${baseClass}__no-results`}>
-              <p>{t('general:noResults', { label: collectionLabel })}</p>
-              {hasCreatePermission && newDocumentURL && (
-                <Button el="link" to={newDocumentURL}>
-                  {t('general:createNewLabel', {
-                    label: getTranslation(labels?.singular, i18n),
-                  })}
-                </Button>
-              )}
+            <div className={`${baseClass}__controls`}>
+              <SearchBar
+                label={t('general:searchBy', {
+                  label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
+                })}
+                onSearchChange={handleSearchChange}
+              />
             </div>
-          )}
-        </Gutter>
+
+            {taxonomyData ? (
+              <TaxonomyTable
+                childrenData={filteredChildrenData}
+                collectionSlug={collectionSlug}
+                key={`${collectionSlug}-${taxonomyData.parentId}`}
+                parentId={taxonomyData.parentId}
+                relatedGroups={Object.entries(taxonomyData.relatedDocuments || {}).map(
+                  ([slug, related]) => ({
+                    collectionSlug: slug,
+                    data: related.data,
+                    fieldInfo: related.fieldInfo,
+                    label: related.label,
+                  }),
+                )}
+                search={search}
+                taxonomyLabel={collectionLabel}
+                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+              />
+            ) : (
+              <div className={`${baseClass}__no-results`}>
+                <p>{t('general:noResults', { label: collectionLabel })}</p>
+                {hasCreatePermission && newDocumentURL && (
+                  <Button el="link" to={newDocumentURL}>
+                    {t('general:createNewLabel', {
+                      label: getTranslation(labels?.singular, i18n),
+                    })}
+                  </Button>
+                )}
+              </div>
+            )}
+          </Gutter>
+        </DocumentSelectionProvider>
         {AfterList}
       </div>
     </Fragment>

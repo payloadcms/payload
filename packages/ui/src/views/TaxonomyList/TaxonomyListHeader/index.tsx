@@ -8,7 +8,7 @@ import React from 'react'
 
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import { ListCreateNewButton } from '../../../elements/ListHeader/TitleActions/index.js'
-import { Pill } from '../../../elements/Pill/index.js'
+import { DocumentListSelection } from '../DocumentListSelection/index.js'
 import './index.scss'
 
 const baseClass = 'taxonomy-list-header'
@@ -18,6 +18,8 @@ export type TaxonomyListHeaderProps = {
   /** Title to display - defaults to collection label if not provided */
   currentItemTitle?: string
   Description?: React.ReactNode
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
   hasCreatePermission: boolean
   i18n: I18nClient
   isRootLevel: boolean
@@ -28,6 +30,8 @@ export function TaxonomyListHeader({
   collectionConfig,
   currentItemTitle,
   Description,
+  disableBulkDelete,
+  disableBulkEdit,
   hasCreatePermission,
   i18n,
   isRootLevel,
@@ -38,15 +42,13 @@ export function TaxonomyListHeader({
 
   return (
     <ListHeader
-      Actions={
-        isRootLevel
-          ? [
-              <Pill className={`${baseClass}__root-pill`} key="root-pill" pillStyle="light-gray">
-                Root
-              </Pill>,
-            ]
-          : undefined
-      }
+      Actions={[
+        <DocumentListSelection
+          disableBulkDelete={disableBulkDelete}
+          disableBulkEdit={disableBulkEdit}
+          key="document-list-selection"
+        />,
+      ]}
       AfterListHeaderContent={Description}
       className={baseClass}
       title={title}
