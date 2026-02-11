@@ -3,7 +3,9 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { StepNavItem } from '../../elements/StepNav/index.js'
@@ -15,8 +17,10 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { TaxonomyListHeader } from './TaxonomyListHeader/index.js'
@@ -35,6 +39,10 @@ export function TaxonomyListView(props: ListViewClientProps) {
     newDocumentURL,
     taxonomyData,
   } = props
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { startRouteTransition } = useRouteTransition()
 
   const { allowCreate, isInDrawer } = useListDrawerContext()
 
@@ -59,11 +67,34 @@ export function TaxonomyListView(props: ListViewClientProps) {
   const { setStepNav } = useStepNav()
   const { selectedParentId } = useTaxonomy()
 
-  const [search, setSearch] = useState('')
+  // Get search from URL params
+  const searchFromURL = searchParams.get('search') || ''
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearch(value)
-  }, [])
+  // Update URL when search changes (debouncing is handled by SearchFilter)
+  // This triggers a server refetch via Next.js router
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      // Build new URL with updated search param
+      const currentParams: Record<string, string> = {}
+      searchParams.forEach((v, k) => {
+        currentParams[k] = v
+      })
+
+      if (value) {
+        currentParams.search = value
+      } else {
+        delete currentParams.search
+      }
+
+      const queryString = qs.stringify(currentParams, { addQueryPrefix: true })
+      const newUrl = `${window.location.pathname}${queryString}`
+
+      if (window.location.search !== queryString) {
+        startRouteTransition(() => router.replace(newUrl))
+      }
+    },
+    [router, searchParams, startRouteTransition],
+  )
 
   // Get current item title from breadcrumbs (last item is the current one)
   const currentItemTitle =
@@ -77,7 +108,11 @@ export function TaxonomyListView(props: ListViewClientProps) {
       const ancestorBreadcrumbs = taxonomyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
-        label: collectionLabel,
+        label: (
+          <span>
+            <TagIcon /> {collectionLabel}
+          </span>
+        ),
         url: selectedParentId
           ? formatAdminURL({
               adminRoute,
@@ -162,6 +197,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
                   label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
                 })}
                 onSearchChange={handleSearchChange}
+                searchQueryParam={searchFromURL}
               />
             </div>
 
@@ -179,7 +215,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
                     label: related.label,
                   }),
                 )}
-                search={search}
+                search={searchFromURL}
                 taxonomyLabel={collectionLabel}
                 useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
               />
