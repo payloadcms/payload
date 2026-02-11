@@ -65,11 +65,13 @@ test.describe('Import Export Plugin', () => {
 
       await runJobsQueue({ serverURL })
 
-      await page.reload()
+      await expect(async () => {
+        await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should navigate to exports collection and create a JSON export', async () => {
@@ -85,11 +87,13 @@ test.describe('Import Export Plugin', () => {
 
       await runJobsQueue({ serverURL })
 
-      await page.reload()
+      await expect(async () => {
+        await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.json')
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.json')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should show export in list view after creation', async () => {
@@ -123,7 +127,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should download directly in the browser', async () => {
@@ -162,7 +166,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const formatField = page.locator('#field-format')
       await expect(formatField).toBeVisible()
@@ -244,7 +248,7 @@ test.describe('Import Export Plugin', () => {
           const exportFilename = page.locator('.file-details__main-detail')
           await expect(exportFilename).toBeVisible()
           await expect(exportFilename).toContainText('.csv')
-        }).toPass()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         const downloadLink = page.locator('.file-details__main-detail a')
         await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -356,7 +360,7 @@ test.describe('Import Export Plugin', () => {
         await expect(async () => {
           optionsBefore = await menu.locator('.rs__option').count()
           expect(optionsBefore).toBeGreaterThan(0)
-        }).toPass()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         await page.keyboard.press('Escape')
         await page.reload()
@@ -369,7 +373,7 @@ test.describe('Import Export Plugin', () => {
         await expect(async () => {
           const optionsAfter = await menu.locator('.rs__option').count()
           expect(optionsAfter).toBe(optionsBefore)
-        }).toPass()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
         await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
@@ -540,7 +544,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.import-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should handle import with update mode', async () => {
@@ -647,13 +651,14 @@ test.describe('Import Export Plugin', () => {
 
         await saveDocAndAssert(page, '#action-save')
 
-        const statusField = page.locator('[data-field-name="status"]')
-
-        if (await statusField.isVisible()) {
-          await expect(statusField).toContainText(/completed|partial/i)
-        }
-
         await runJobsQueue({ serverURL })
+
+        await expect(async () => {
+          await page.reload()
+          const statusField = page.locator('#field-status')
+          await expect(statusField).toBeVisible()
+          await expect(statusField).toContainText(/completed|partial/i)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         const importedPages = await payload.find({
           collection: 'custom-id-pages' as any,
@@ -764,7 +769,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadButton = page.locator('.doc-controls__controls button', {
         hasText: 'Download',
@@ -803,7 +808,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -868,7 +873,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -895,7 +900,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('10')
@@ -934,11 +939,14 @@ test.describe('Import Export Plugin', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await saveDocAndAssert(page, '#action-save')
-      await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+      await expect(async () => {
+        await page.reload()
+
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadLink = page.locator('.file-details__main-detail a')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -1049,7 +1057,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -1079,11 +1087,14 @@ test.describe('Import Export Plugin', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await saveDocAndAssert(page, '#action-save')
-      await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+      await expect(async () => {
+        await page.reload()
+
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadLink = page.locator('.file-details__main-detail a')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -1114,7 +1125,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('20')

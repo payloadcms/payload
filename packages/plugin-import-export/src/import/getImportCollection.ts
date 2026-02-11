@@ -2,7 +2,6 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
-  Config,
 } from 'payload'
 
 import { FileRetrievalError } from 'payload'
@@ -18,7 +17,6 @@ import { handlePreview } from './handlePreview.js'
 
 export const getImportCollection = ({
   collectionSlugs,
-  config,
   importConfig,
   pluginConfig,
 }: {
@@ -26,7 +24,6 @@ export const getImportCollection = ({
    * Collection slugs that this import collection supports.
    */
   collectionSlugs: string[]
-  config: Config
   importConfig?: ImportConfig
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {

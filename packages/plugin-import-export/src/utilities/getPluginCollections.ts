@@ -69,7 +69,6 @@ export const getPluginCollections = async ({
   })
   let baseImportCollection = getImportCollection({
     collectionSlugs: baseImportSlugs,
-    config,
     pluginConfig,
   })
 
@@ -102,78 +101,87 @@ export const getPluginCollections = async ({
     for (const collectionConfig of pluginConfig.collections) {
       const exportConfig =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
+
       if (exportConfig?.overrideCollection) {
-        // Test with a temporary collection to see if the slug changes
-        const testCollection = getExportCollection({
+        // Create collection specific to this target collection
+        const collection = getExportCollection({
           collectionSlugs: [collectionConfig.slug],
           config,
           exportConfig,
           pluginConfig,
         })
 
-        const customExport = await exportConfig.overrideCollection({
-          collection: testCollection,
-        })
+        // Call override once to determine user intent
+        const overridden = await exportConfig.overrideCollection({ collection })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
-        if (customExport.slug !== baseExportCollection.slug) {
-          // Store the source collection slug so CollectionField can use it as default
-          customExport.admin = {
-            ...customExport.admin,
-            custom: {
-              ...customExport.admin?.custom,
-              'plugin-import-export': {
-                ...customExport.admin?.custom?.['plugin-import-export'],
-                defaultCollectionSlug: collectionConfig.slug,
+        if (overridden.slug !== baseExportCollection.slug) {
+          exportCollections.push(overridden)
+          customExportSlugMap.set(collectionConfig.slug, overridden.slug)
+        } else {
+          // Slug didn't change - merge settings into base collection while preserving all slugs
+          baseExportCollection = {
+            ...baseExportCollection,
+            ...overridden,
+            admin: {
+              ...baseExportCollection.admin,
+              ...overridden.admin,
+              custom: {
+                ...baseExportCollection.admin?.custom,
+                ...overridden.admin?.custom,
+                'plugin-import-export': {
+                  ...overridden.admin?.custom?.['plugin-import-export'],
+                  ...baseExportCollection.admin?.custom?.['plugin-import-export'],
+                  // Ensure base collection's slug list is preserved
+                  collectionSlugs:
+                    baseExportCollection.admin?.custom?.['plugin-import-export']?.collectionSlugs,
+                },
               },
             },
           }
-          exportCollections.push(customExport)
-          customExportSlugMap.set(collectionConfig.slug, customExport.slug)
-        } else {
-          // Slug didn't change - apply override to base collection to preserve all slugs
-          baseExportCollection = await exportConfig.overrideCollection({
-            collection: baseExportCollection,
-          })
         }
       }
 
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
+
       if (importConf?.overrideCollection) {
-        // Test with a temporary collection to see if the slug changes
-        const testCollection = getImportCollection({
+        // Create collection specific to this target collection
+        const collection = getImportCollection({
           collectionSlugs: [collectionConfig.slug],
-          config,
           importConfig: importConf,
           pluginConfig,
         })
 
-        const customImport = await importConf.overrideCollection({
-          collection: testCollection,
-        })
+        // Call override once to determine user intent
+        const overridden = await importConf.overrideCollection({ collection })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
-        if (customImport.slug !== baseImportCollection.slug) {
-          // Store the source collection slug so CollectionField can use it as default
-          customImport.admin = {
-            ...customImport.admin,
-            custom: {
-              ...customImport.admin?.custom,
-              'plugin-import-export': {
-                ...customImport.admin?.custom?.['plugin-import-export'],
-                defaultCollectionSlug: collectionConfig.slug,
+        if (overridden.slug !== baseImportCollection.slug) {
+          importCollections.push(overridden)
+          // Map this target collection to its custom import collection
+          customImportSlugMap.set(collectionConfig.slug, overridden.slug)
+        } else {
+          // Slug didn't change - merge settings into base collection while preserving all slugs
+          baseImportCollection = {
+            ...baseImportCollection,
+            ...overridden,
+            admin: {
+              ...baseImportCollection.admin,
+              ...overridden.admin,
+              custom: {
+                ...baseImportCollection.admin?.custom,
+                ...overridden.admin?.custom,
+                'plugin-import-export': {
+                  ...overridden.admin?.custom?.['plugin-import-export'],
+                  ...baseImportCollection.admin?.custom?.['plugin-import-export'],
+                  // Ensure base collection's slug list is preserved
+                  collectionSlugs:
+                    baseImportCollection.admin?.custom?.['plugin-import-export']?.collectionSlugs,
+                },
               },
             },
           }
-          importCollections.push(customImport)
-          // Map this target collection to its custom import collection
-          customImportSlugMap.set(collectionConfig.slug, customImport.slug)
-        } else {
-          // Slug didn't change - apply override to base collection to preserve all slugs
-          baseImportCollection = await importConf.overrideCollection({
-            collection: baseImportCollection,
-          })
         }
       }
     }

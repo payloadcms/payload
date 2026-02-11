@@ -17,7 +17,7 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
       type: 'text',
       admin: {
         components: {
-          Field: '@payloadcms/plugin-import-export/rsc#ImportCollectionField',
+          Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
         },
       },
       defaultValue: collectionSlugs[0],
