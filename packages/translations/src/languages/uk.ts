@@ -336,6 +336,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     items: 'предмети',
     language: 'Мова',
     lastModified: 'Востаннє змінено',
+    layout: 'Макет',
     leaveAnyway: 'Все одно вийти',
     leaveWithoutSaving: 'Вийти без збереження',
     light: 'Світла',

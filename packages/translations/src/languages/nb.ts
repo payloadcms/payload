@@ -337,6 +337,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Språk',
     lastModified: 'Sist endret',
+    layout: 'Utforming',
     leaveAnyway: 'Forlat likevel',
     leaveWithoutSaving: 'Forlat uten å lagre',
     light: 'Lys',

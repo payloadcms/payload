@@ -336,6 +336,7 @@ export const slTranslations: DefaultTranslationsObject = {
     items: 'predmeti',
     language: 'Jezik',
     lastModified: 'Zadnja sprememba',
+    layout: 'Postavitev',
     leaveAnyway: 'Vseeno zapusti',
     leaveWithoutSaving: 'Zapusti brez shranjevanja',
     light: 'Svetlo',

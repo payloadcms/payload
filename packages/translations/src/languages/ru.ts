@@ -339,6 +339,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     items: 'предметы',
     language: 'Язык',
     lastModified: 'Последнее изменение',
+    layout: 'Макет',
     leaveAnyway: 'Все равно уйти',
     leaveWithoutSaving: 'Выход без сохранения',
     light: 'Светлая',

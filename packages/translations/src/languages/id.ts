@@ -338,6 +338,7 @@ export const idTranslations: DefaultTranslationsObject = {
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',
+    layout: 'Tata Letak',
     leaveAnyway: 'Tetap pergi',
     leaveWithoutSaving: 'Pergi tanpa menyimpan',
     light: 'Terang',

@@ -347,6 +347,7 @@ export const frTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
+    layout: 'Disposition',
     leaveAnyway: 'Quitter quand même',
     leaveWithoutSaving: 'Quitter sans sauvegarder',
     light: 'Clair',

@@ -337,6 +337,7 @@ export const svTranslations: DefaultTranslationsObject = {
     items: 'artiklar',
     language: 'Språk',
     lastModified: 'Senast ändrad',
+    layout: 'Layout',
     leaveAnyway: 'Lämna ändå',
     leaveWithoutSaving: 'Lämna utan att spara',
     light: 'Ljust',

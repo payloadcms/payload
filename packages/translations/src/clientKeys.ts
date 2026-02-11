@@ -262,6 +262,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:items',
   'general:language',
   'general:lastModified',
+  'general:layout',
   'general:leaveAnyway',
   'general:leaveWithoutSaving',
   'general:light',

@@ -335,6 +335,7 @@ export const isTranslations: DefaultTranslationsObject = {
     items: 'hlutir',
     language: 'Tungumál',
     lastModified: 'Síðast breytt',
+    layout: 'Útlag',
     leaveAnyway: 'Fara samt',
     leaveWithoutSaving: 'Fara án þess að vista',
     light: 'Ljóst',

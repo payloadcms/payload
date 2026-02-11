@@ -344,6 +344,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
+    layout: 'Indeling',
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',

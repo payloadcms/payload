@@ -338,6 +338,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     items: 'itens',
     language: 'Idioma',
     lastModified: 'Última modificação',
+    layout: 'Layout',
     leaveAnyway: 'Sair mesmo assim',
     leaveWithoutSaving: 'Sair sem salvar',
     light: 'Claro',

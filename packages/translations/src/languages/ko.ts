@@ -334,6 +334,7 @@ export const koTranslations: DefaultTranslationsObject = {
     items: '항목들',
     language: '언어',
     lastModified: '마지막 수정 일시',
+    layout: '레이아웃',
     leaveAnyway: '그래도 나가시겠습니까?',
     leaveWithoutSaving: '저장하지 않고 나가기',
     light: '라이트',

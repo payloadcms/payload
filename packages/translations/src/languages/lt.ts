@@ -340,6 +340,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     items: 'elementai',
     language: 'Kalba',
     lastModified: 'Paskutinį kartą modifikuota',
+    layout: 'Išdėstymas',
     leaveAnyway: 'Vis tiek išeikite',
     leaveWithoutSaving: 'Išeikite neišsaugoję',
     light: 'Šviesa',

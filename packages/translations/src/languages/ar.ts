@@ -327,6 +327,7 @@ export const arTranslations: DefaultTranslationsObject = {
     items: 'عناصر',
     language: 'اللغة',
     lastModified: 'آخر تعديل',
+    layout: 'تخطيط',
     leaveAnyway: 'المغادرة على أي حال',
     leaveWithoutSaving: 'المغادرة بدون حفظ',
     light: 'فاتح',

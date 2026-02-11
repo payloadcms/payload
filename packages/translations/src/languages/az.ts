@@ -339,6 +339,7 @@ export const azTranslations: DefaultTranslationsObject = {
     items: 'maddələr',
     language: 'Dil',
     lastModified: 'Son dəyişdirildi',
+    layout: 'Dizayn',
     leaveAnyway: 'Heç olmasa çıx',
     leaveWithoutSaving: 'Saxlamadan çıx',
     light: 'Açıq',

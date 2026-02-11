@@ -338,6 +338,7 @@ export const caTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Idioma',
     lastModified: 'Última modificació',
+    layout: 'Disseny',
     leaveAnyway: 'Deixa-ho de totes maneres',
     leaveWithoutSaving: 'Deixa sense desar',
     light: 'Clar',

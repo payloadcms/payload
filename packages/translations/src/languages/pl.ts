@@ -336,6 +336,7 @@ export const plTranslations: DefaultTranslationsObject = {
     items: 'przedmioty',
     language: 'Język',
     lastModified: 'Ostatnio zmodyfikowany',
+    layout: 'Układ',
     leaveAnyway: 'Wyjdź mimo to',
     leaveWithoutSaving: 'Wyjdź bez zapisywania',
     light: 'Jasny',

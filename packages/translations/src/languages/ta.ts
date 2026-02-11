@@ -335,6 +335,7 @@ export const taTranslations: DefaultTranslationsObject = {
     items: 'உருப்படிகள்',
     language: 'மொழி',
     lastModified: 'கடைசியாக மாற்றப்பட்டது',
+    layout: 'தளவமைப்பு',
     leaveAnyway: 'எப்படியும் விட்டு செல்',
     leaveWithoutSaving: 'சேமிக்காமல் விட்டு செல்',
     light: 'ஒளி',

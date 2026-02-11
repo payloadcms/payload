@@ -338,6 +338,7 @@ export const enTranslations = {
     items: 'items',
     language: 'Language',
     lastModified: 'Last Modified',
+    layout: 'Layout',
     leaveAnyway: 'Leave anyway',
     leaveWithoutSaving: 'Leave without saving',
     light: 'Light',

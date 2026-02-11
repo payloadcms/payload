@@ -86,10 +86,9 @@ export function DashboardBreadcrumbDropdown(props: {
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
             <Button buttonStyle="pill" el="span" size="small">
-              <>
-                {t('dashboard:addWidget')}{' '}
-                <span aria-hidden="true">+</span>
-              </>
+              {t('fields:addLabel', {
+                label: '+',
+              })}
             </Button>
           </DrawerToggler>
           <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
@@ -105,7 +104,7 @@ export function DashboardBreadcrumbDropdown(props: {
 
   const options = [
     { label: `${t('general:edit')} ${t('general:dashboard')}`, value: 'edit' },
-    { label: `${t('general:reset')} ${t('general:dashboard')}`, value: 'reset' },
+    { label: `${t('general:reset')} ${t('general:layout')}`, value: 'reset' },
   ]
 
   const handleChange = (selectedOption: Option | Option[]) => {

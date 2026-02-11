@@ -337,6 +337,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promjena',
+    layout: 'Izgled',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez spremanja',
     light: 'Svijetlo',

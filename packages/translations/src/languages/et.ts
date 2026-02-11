@@ -334,6 +334,7 @@ export const etTranslations: DefaultTranslationsObject = {
     items: 'esemed',
     language: 'Keel',
     lastModified: 'Viimati muudetud',
+    layout: 'Paigutus',
     leaveAnyway: 'Lahku ikkagi',
     leaveWithoutSaving: 'Lahku ilma salvestamata',
     light: 'Hele',

@@ -336,6 +336,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     items: 'артикули',
     language: 'Език',
     lastModified: 'Последно променено',
+    layout: 'Оформление',
     leaveAnyway: 'Напусни въпреки това',
     leaveWithoutSaving: 'Напусни без да запазиш',
     light: 'Светла',

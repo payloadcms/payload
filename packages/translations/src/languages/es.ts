@@ -342,6 +342,7 @@ export const esTranslations: DefaultTranslationsObject = {
     items: 'artículos',
     language: 'Idioma',
     lastModified: 'Última modificación',
+    layout: 'Diseño',
     leaveAnyway: 'Salir de todos modos',
     leaveWithoutSaving: 'Salir sin guardar',
     light: 'Claro',

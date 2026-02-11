@@ -330,6 +330,7 @@ export const faTranslations: DefaultTranslationsObject = {
     items: 'موارد',
     language: 'زبان',
     lastModified: 'آخرین تغییر',
+    layout: 'چیدمان',
     leaveAnyway: 'بله، خارج شو',
     leaveWithoutSaving: 'خروج بدون ذخیره',
     light: 'روشن',

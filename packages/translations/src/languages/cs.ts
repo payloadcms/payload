@@ -335,6 +335,7 @@ export const csTranslations: DefaultTranslationsObject = {
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy změněno',
+    layout: 'Rozložení',
     leaveAnyway: 'Přesto odejít',
     leaveWithoutSaving: 'Odejít bez uložení',
     light: 'Světlé',

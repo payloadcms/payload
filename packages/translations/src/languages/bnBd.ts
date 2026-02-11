@@ -341,6 +341,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     items: 'আইটেমগুলি',
     language: 'ভাষা',
     lastModified: 'সর্বশেষ পরিবর্তিত',
+    layout: 'লেআউট',
     leaveAnyway: 'যাই হোক ছেড়ে দিন',
     leaveWithoutSaving: 'সংরক্ষণ না করে ছেড়ে দিন',
     light: 'লাইট',

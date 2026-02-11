@@ -321,6 +321,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     items: '条目',
     language: '语言',
     lastModified: '最后修改时间',
+    layout: '布局',
     leaveAnyway: '无论如何都要离开',
     leaveWithoutSaving: '离开而不保存',
     light: '浅色',

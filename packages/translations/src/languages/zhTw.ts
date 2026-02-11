@@ -320,6 +320,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     items: '項目',
     language: '語言',
     lastModified: '最後修改時間',
+    layout: '版面配置',
     leaveAnyway: '仍要離開',
     leaveWithoutSaving: '離開且不儲存',
     light: '淺色',

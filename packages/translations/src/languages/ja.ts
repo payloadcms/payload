@@ -339,6 +339,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     items: 'アイテム',
     language: '言語',
     lastModified: '最終更新',
+    layout: 'レイアウト',
     leaveAnyway: 'すぐに画面を離れる',
     leaveWithoutSaving: '内容が保存されていません',
     light: 'ライトモード',

@@ -327,6 +327,7 @@ export const heTranslations: DefaultTranslationsObject = {
     items: 'פריטים',
     language: 'שפה',
     lastModified: 'נערך לאחרונה',
+    layout: 'פריסה',
     leaveAnyway: 'צא בכל זאת',
     leaveWithoutSaving: 'צא מבלי לשמור',
     light: 'בהיר',

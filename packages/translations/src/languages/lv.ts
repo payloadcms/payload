@@ -338,6 +338,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
+    layout: 'Izkārtojums',
     leaveAnyway: 'Pamest tāpat',
     leaveWithoutSaving: 'Pamest nesaglabājot',
     light: 'Gaišs',

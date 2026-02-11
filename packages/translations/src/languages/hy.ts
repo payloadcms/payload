@@ -338,6 +338,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     items: 'տեսականի',
     language: 'Լեզու',
     lastModified: 'Վերջին փոփոխություն',
+    layout: 'Տեսք',
     leaveAnyway: 'Այնուամենայնիվ հեռանալ',
     leaveWithoutSaving: 'Հեռանալ առանց պահպանելու',
     light: 'Լուսավոր',

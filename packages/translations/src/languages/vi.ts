@@ -336,6 +336,7 @@ export const viTranslations: DefaultTranslationsObject = {
     items: 'mục',
     language: 'Ngôn ngữ',
     lastModified: 'Chỉnh sửa lần cuối vào lúc',
+    layout: 'Bố cục',
     leaveAnyway: 'Tiếp tục thoát',
     leaveWithoutSaving: 'Thay đổi chưa được lưu',
     light: 'Nền sáng',

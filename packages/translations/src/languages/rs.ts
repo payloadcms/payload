@@ -338,6 +338,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     items: 'artikli',
     language: 'Језик',
     lastModified: 'Задња промена',
+    layout: 'Raspored',
     leaveAnyway: 'Свеједно напусти',
     leaveWithoutSaving: 'Напусти без чувања',
     light: 'Светло',

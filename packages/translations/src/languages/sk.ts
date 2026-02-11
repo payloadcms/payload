@@ -338,6 +338,7 @@ export const skTranslations: DefaultTranslationsObject = {
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy zmenené',
+    layout: 'Rozloženie',
     leaveAnyway: 'Presto odísť',
     leaveWithoutSaving: 'Odísť bez uloženia',
     light: 'Svetlý',

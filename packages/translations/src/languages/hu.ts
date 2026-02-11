@@ -341,6 +341,7 @@ export const huTranslations: DefaultTranslationsObject = {
     items: 'tételek',
     language: 'Nyelv',
     lastModified: 'Utoljára módosítva',
+    layout: 'Elrendezés',
     leaveAnyway: 'Távozás mindenképp',
     leaveWithoutSaving: 'Távozás mentés nélkül',
     light: 'Világos',

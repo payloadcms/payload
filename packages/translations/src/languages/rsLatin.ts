@@ -338,6 +338,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promena',
+    layout: 'Raspored',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez čuvanja',
     light: 'Svetlo',

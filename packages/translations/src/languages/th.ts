@@ -330,6 +330,7 @@ export const thTranslations: DefaultTranslationsObject = {
     items: 'รายการ',
     language: 'ภาษา',
     lastModified: 'แก้ไขล่าสุดเมื่อ',
+    layout: 'รูปแบบ',
     leaveAnyway: 'ออกจากหน้านี้',
     leaveWithoutSaving: 'ออกโดยไม่บันทึก',
     light: 'สว่าง',

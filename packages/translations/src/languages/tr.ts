@@ -340,6 +340,7 @@ export const trTranslations: DefaultTranslationsObject = {
     items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
+    layout: 'Düzen',
     leaveAnyway: 'Yine de ayrıl',
     leaveWithoutSaving: 'Kaydetmeden ayrıl',
     light: 'Aydınlık',

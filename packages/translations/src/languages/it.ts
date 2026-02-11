@@ -340,6 +340,7 @@ export const itTranslations: DefaultTranslationsObject = {
     items: 'articoli',
     language: 'Lingua',
     lastModified: 'Ultima modifica',
+    layout: 'Layout',
     leaveAnyway: 'Esci comunque',
     leaveWithoutSaving: 'Esci senza salvare',
     light: 'Chiaro',

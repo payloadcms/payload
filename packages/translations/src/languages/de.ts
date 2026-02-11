@@ -346,6 +346,7 @@ export const deTranslations: DefaultTranslationsObject = {
     items: 'Artikel',
     language: 'Sprache',
     lastModified: 'Zuletzt geändert',
+    layout: 'Layout',
     leaveAnyway: 'Trotzdem verlassen',
     leaveWithoutSaving: 'Ohne speichern verlassen',
     light: 'Hell',

@@ -335,6 +335,7 @@ export const daTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Sprog',
     lastModified: 'Sidst ændret',
+    layout: 'Layout',
     leaveAnyway: 'Forlad alligevel',
     leaveWithoutSaving: 'Forlad uden at gemme',
     light: 'Lys',

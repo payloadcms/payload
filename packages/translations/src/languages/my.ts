@@ -339,6 +339,7 @@ export const myTranslations: DefaultTranslationsObject = {
     items: 'barang-barang',
     language: 'ဘာသာစကား',
     lastModified: 'နောက်ဆုံးပြင်ဆင်ထားသည်။',
+    layout: 'စည်းမျဉ်းခြင်း',
     leaveAnyway: 'ဘာဖြစ်ဖြစ် ထွက်မည်။',
     leaveWithoutSaving: 'မသိမ်းဘဲ ထွက်မည်။',
     light: 'အလင်း',

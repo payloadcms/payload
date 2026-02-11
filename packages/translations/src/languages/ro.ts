@@ -342,6 +342,7 @@ export const roTranslations: DefaultTranslationsObject = {
     items: 'articole',
     language: 'Limba',
     lastModified: 'Ultima modificare',
+    layout: 'Aspect',
     leaveAnyway: 'Pleacă oricum',
     leaveWithoutSaving: 'Plecare fără a salva',
     light: 'Light',
