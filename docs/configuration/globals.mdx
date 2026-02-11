@@ -195,20 +195,6 @@ The following elements can be customized within `admin.components.elements`:
 | `PreviewButton`          | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
 | `Status`                 | Replace the default Status component with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#status).                                         |
 
-<Banner type="warning">
-  **Important:** For globals, all edit view components must be configured under
-  `admin.components.elements`, not directly under `admin.components`.
-
-For example, use `admin.components.elements.Status`, not `admin.components.Status`.
-
-</Banner>
-
-<Banner type="info">
-  **Note:** Globals use `admin.components.elements` for edit view components,
-  while Collections use `admin.components.edit`. This is an important
-  distinction to remember when configuring custom components.
-</Banner>
-
 <Banner type="success">
   **Note:** For details on how to build Custom Components, see [Building Custom
   Components](../custom-components/overview#building-custom-components).
