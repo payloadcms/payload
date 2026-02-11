@@ -80,6 +80,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:logoutFailed',
   'error:noMatchedField',
   'error:notAllowedToAccessPage',
+  'error:notAllowedToPerformAction',
   'error:previewing',
   'error:unableToCopy',
   'error:unableToDeleteCount',
