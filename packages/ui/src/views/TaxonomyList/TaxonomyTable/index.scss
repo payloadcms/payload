@@ -58,6 +58,14 @@
       }
     }
 
+    &__thumbnail {
+      display: inline-block;
+      max-width: var(--base);
+      height: var(--base);
+      border-radius: var(--style-radius-s);
+      flex-shrink: 0;
+    }
+
     &__name-text {
       overflow: hidden;
       text-overflow: ellipsis;

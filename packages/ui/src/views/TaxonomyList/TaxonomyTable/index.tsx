@@ -3,7 +3,7 @@
 import type { ClientUser, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, getBestFitFromSizes, isImage } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
@@ -17,6 +17,7 @@ import { Link } from '../../../elements/Link/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
 import { Locked } from '../../../elements/Locked/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
+import { Thumbnail } from '../../../elements/Thumbnail/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
@@ -120,10 +121,52 @@ const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
 
   const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
 
+  // Check if this is an upload-enabled collection
+  const isUploadCollection = Boolean(config?.upload)
+  const previewAllowed = config?.upload?.displayPreview ?? true
+
+  // Calculate thumbnail source for upload collections
+  let thumbnailSrc: string | undefined
+  if (isUploadCollection && previewAllowed) {
+    const mimeType = row.mimeType as string | undefined
+    const isFileImage = mimeType ? isImage(mimeType) : false
+    thumbnailSrc = isFileImage
+      ? (row.thumbnailURL as string) || (row.url as string)
+      : (row.thumbnailURL as string)
+
+    if (isFileImage) {
+      thumbnailSrc = getBestFitFromSizes({
+        sizes: row.sizes as Record<string, { url?: string; width?: number }>,
+        thumbnailURL: row.thumbnailURL as string,
+        url: row.url as string,
+        width: row.width as number,
+      })
+    }
+  }
+
+  // Render icon or thumbnail
+  const renderIcon = () => {
+    if (isUploadCollection && previewAllowed) {
+      return (
+        <Thumbnail
+          className={`${baseClass}__thumbnail`}
+          collectionSlug={config?.slug}
+          doc={row}
+          fileSrc={thumbnailSrc}
+          imageCacheTag={config?.upload?.cacheTags ? (row.updatedAt as string) : undefined}
+          size="small"
+          uploadConfig={config?.upload}
+        />
+      )
+    }
+    return <DocumentIcon />
+  }
+
   if (locked && row._userEditing) {
     return (
       <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
         <Locked user={row._userEditing} />
+        {renderIcon()}
         <span className={`${baseClass}__name-text`}>{title}</span>
       </span>
     )
@@ -136,7 +179,7 @@ const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
 
   return (
     <Link className={`${baseClass}__name-link`} href={editUrl}>
-      <DocumentIcon />
+      {renderIcon()}
       <span className={`${baseClass}__name-text`}>{title}</span>
     </Link>
   )

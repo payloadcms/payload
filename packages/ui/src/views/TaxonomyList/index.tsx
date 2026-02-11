@@ -226,7 +226,11 @@ export function TaxonomyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
-              key={`${collectionSlug}-${parentId}-${searchFromURL}-${filteredChildrenData?.totalDocs}`}
+              key={`${collectionSlug}-${parentId}-${searchFromURL}-${filteredChildrenData?.totalDocs}-${Object.entries(
+                taxonomyData?.relatedDocumentsByCollection || {},
+              )
+                .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
+                .join(',')}`}
               parentFieldName={parentFieldName}
               parentId={parentId}
               relatedGroups={Object.entries(taxonomyData?.relatedDocumentsByCollection || {}).map(
