@@ -220,7 +220,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         })
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
-      } catch (_err) {
+      } catch {
         // swallow error
       }
     },
@@ -315,6 +315,133 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [],
   )
 
+  const uploadForm = React.useCallback(
+    async ({
+      form,
+      index,
+      overrides,
+      totalForms,
+    }: {
+      form: (typeof forms)[number]
+      index: number
+      overrides?: Record<string, unknown>
+      totalForms: number
+    }) => {
+      const fileValue = form.formState?.file?.value
+
+      setLoadingText(t('general:uploadingBulk', { current: index + 1, total: totalForms }))
+
+      const actionURLWithParams = `${actionURL}${qs.stringify(
+        {
+          locale: code,
+          uploadEdits: form?.uploadEdits || undefined,
+        },
+        {
+          addQueryPrefix: true,
+        },
+      )}`
+
+      const req = await fetch(actionURLWithParams, {
+        body: await createFormData(
+          form.formState,
+          overrides,
+          collectionSlug,
+          getUploadHandler({ collectionSlug }),
+        ),
+        credentials: 'include',
+        method: 'POST',
+      })
+
+      const json = await req.json()
+
+      let newDoc = null
+
+      if (req.status === 201 && json?.doc) {
+        newDoc = {
+          collectionSlug,
+          doc: json.doc,
+          formID: form.formID,
+        }
+      }
+
+      // should expose some sort of helper for this
+      const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
+        ([fieldErrs, nonFieldErrs], err) => {
+          const newFieldErrs: any[] = []
+          const newNonFieldErrs: any[] = []
+
+          if (err?.message) {
+            newNonFieldErrs.push(err)
+          }
+
+          if (Array.isArray(err?.data?.errors)) {
+            err.data?.errors.forEach((dataError) => {
+              if (dataError?.path) {
+                newFieldErrs.push(dataError)
+              } else {
+                newNonFieldErrs.push(dataError)
+              }
+            })
+          }
+
+          return [
+            [...fieldErrs, ...newFieldErrs],
+            [...nonFieldErrs, ...newNonFieldErrs],
+          ]
+        },
+        [[], []],
+      )
+
+      const missingFile = !fileValue && req.status === 400
+      const exceedsLimit = fileValue && req.status === 413
+      const missingFilename =
+        fileValue &&
+        typeof fileValue === 'object' &&
+        'name' in fileValue &&
+        (!fileValue.name || fileValue.name === '')
+
+      let updatedForm = form
+
+      if (missingFile || exceedsLimit || missingFilename) {
+        updatedForm.formState.file.valid = false
+
+        // neeed to get the field state to extract count since field errors
+        // are not returned when file is missing or exceeds limit
+        const { state: newState } = await getFormState({
+          collectionSlug,
+          docPermissions,
+          docPreferences: null,
+          formState: updatedForm.formState,
+          operation: 'update',
+          schemaPath: collectionSlug,
+        })
+
+        updatedForm = {
+          errorCount: Object.values(newState).reduce(
+            (acc, value) => (value?.valid === false ? acc + 1 : acc),
+            0,
+          ),
+          formID: updatedForm.formID,
+          formState: newState,
+        }
+
+        toast.error(nonFieldErrors[0]?.message)
+      } else {
+        updatedForm = {
+          errorCount: fieldErrors.length,
+          formID: updatedForm.formID,
+          formState: fieldReducer(updatedForm.formState, {
+            type: 'ADD_SERVER_ERRORS',
+            errors: fieldErrors,
+          }),
+        }
+      }
+
+      return { newDoc, updatedForm }
+    },
+    [actionURL, code, collectionSlug, docPermissions, getFormState, getUploadHandler, t],
+  )
+
   const saveAllDocs: FormsManagerContext['saveAllDocs'] = React.useCallback(
     async ({ overrides } = {}) => {
       const currentFormsData = getFormDataRef.current()
@@ -339,113 +466,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       for (let i = 0; i < currentForms.length; i++) {
         try {
-          const form = currentForms[i]
-          const fileValue = form.formState?.file?.value
-
-          setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
-
-          const actionURLWithParams = `${actionURL}${qs.stringify(
-            {
-              locale: code,
-              uploadEdits: form?.uploadEdits || undefined,
-            },
-            {
-              addQueryPrefix: true,
-            },
-          )}`
-
-          const req = await fetch(actionURLWithParams, {
-            body: await createFormData(
-              form.formState,
-              overrides,
-              collectionSlug,
-              getUploadHandler({ collectionSlug }),
-            ),
-            credentials: 'include',
-            method: 'POST',
+          const { newDoc, updatedForm } = await uploadForm({
+            form: currentForms[i],
+            index: i,
+            overrides,
+            totalForms: currentForms.length,
           })
 
-          const json = await req.json()
-
-          if (req.status === 201 && json?.doc) {
-            newDocs.push({
-              collectionSlug,
-              doc: json.doc,
-              formID: form.formID,
-            })
+          if (newDoc) {
+            newDocs.push(newDoc)
           }
-
-          // should expose some sort of helper for this
-          const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
-            ([fieldErrs, nonFieldErrs], err) => {
-              const newFieldErrs: any[] = []
-              const newNonFieldErrs: any[] = []
-
-              if (err?.message) {
-                newNonFieldErrs.push(err)
-              }
-
-              if (Array.isArray(err?.data?.errors)) {
-                err.data?.errors.forEach((dataError) => {
-                  if (dataError?.path) {
-                    newFieldErrs.push(dataError)
-                  } else {
-                    newNonFieldErrs.push(dataError)
-                  }
-                })
-              }
-
-              return [
-                [...fieldErrs, ...newFieldErrs],
-                [...nonFieldErrs, ...newNonFieldErrs],
-              ]
-            },
-            [[], []],
-          )
-
-          const missingFile = !fileValue && req.status === 400
-          const exceedsLimit = fileValue && req.status === 413
-          const missingFilename =
-            fileValue &&
-            typeof fileValue === 'object' &&
-            'name' in fileValue &&
-            (!fileValue.name || fileValue.name === '')
-
-          if (missingFile || exceedsLimit || missingFilename) {
-            currentForms[i].formState.file.valid = false
-
-            // neeed to get the field state to extract count since field errors
-            // are not returned when file is missing or exceeds limit
-            const { state: newState } = await getFormState({
-              collectionSlug,
-              docPermissions,
-              docPreferences: null,
-              formState: currentForms[i].formState,
-              operation: 'update',
-              schemaPath: collectionSlug,
-            })
-
-            currentForms[i] = {
-              errorCount: Object.values(newState).reduce(
-                (acc, value) => (value?.valid === false ? acc + 1 : acc),
-                0,
-              ),
-              formID: currentForms[i].formID,
-              formState: newState,
-            }
-
-            toast.error(nonFieldErrors[0]?.message)
-          } else {
-            currentForms[i] = {
-              errorCount: fieldErrors.length,
-              formID: currentForms[i].formID,
-              formState: fieldReducer(currentForms[i].formState, {
-                type: 'ADD_SERVER_ERRORS',
-                errors: fieldErrors,
-              }),
-            }
-          }
-        } catch (_) {
+          currentForms[i] = updatedForm
+        } catch {
           // swallow
         }
       }
@@ -502,19 +534,13 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [
       forms,
       activeIndex,
-      t,
-      actionURL,
-      code,
-      collectionSlug,
-      getUploadHandler,
-      getFormState,
-      docPermissions,
       setSuccessfullyUploaded,
       onSuccess,
       closeModal,
       drawerSlug,
       setInitialFiles,
       setInitialForms,
+      uploadForm,
     ],
   )
 
@@ -623,7 +649,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
       hasInitializedWithFiles.current = true
     }
-    return
   }, [
     initialFiles,
     initializeSharedFormState,
@@ -634,30 +659,53 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     initialForms,
   ])
 
+  const contextValue = React.useMemo(
+    () => ({
+      activeIndex: state.activeIndex,
+      addFiles,
+      bulkUpdateForm,
+      collectionSlug,
+      docPermissions,
+      documentSlots,
+      forms,
+      getFormDataRef,
+      hasPublishPermission,
+      hasSavePermission,
+      hasSubmitted,
+      isInitializing,
+      removeFile,
+      resetUploadEdits,
+      saveAllDocs,
+      setActiveIndex,
+      setFormTotalErrorCount,
+      totalErrorCount,
+      updateUploadEdits,
+    }),
+    [
+      state.activeIndex,
+      addFiles,
+      bulkUpdateForm,
+      collectionSlug,
+      docPermissions,
+      documentSlots,
+      forms,
+      getFormDataRef,
+      hasPublishPermission,
+      hasSavePermission,
+      hasSubmitted,
+      isInitializing,
+      removeFile,
+      resetUploadEdits,
+      saveAllDocs,
+      setActiveIndex,
+      setFormTotalErrorCount,
+      totalErrorCount,
+      updateUploadEdits,
+    ],
+  )
+
   return (
-    <Context
-      value={{
-        activeIndex: state.activeIndex,
-        addFiles,
-        bulkUpdateForm,
-        collectionSlug,
-        docPermissions,
-        documentSlots,
-        forms,
-        getFormDataRef,
-        hasPublishPermission,
-        hasSavePermission,
-        hasSubmitted,
-        isInitializing,
-        removeFile,
-        resetUploadEdits,
-        saveAllDocs,
-        setActiveIndex,
-        setFormTotalErrorCount,
-        totalErrorCount,
-        updateUploadEdits,
-      }}
-    >
+    <Context value={contextValue}>
       {isUploading && (
         <LoadingOverlay
           animationDuration="250ms"
