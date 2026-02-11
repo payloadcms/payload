@@ -2,8 +2,8 @@ import type { PaginatedDocs } from '../../database/types.js'
 
 export type RelatedDocumentsGrouped = {
   [collectionSlug: string]: {
-    data: PaginatedDocs
-    fieldInfo: { fieldName: string; hasMany: boolean }
+    hasMany: boolean
     label: string
+    result: PaginatedDocs
   }
 }

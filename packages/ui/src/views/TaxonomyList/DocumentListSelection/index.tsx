@@ -3,6 +3,7 @@
 import React, { Fragment } from 'react'
 
 import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
@@ -15,11 +16,13 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 export type DocumentListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  taxonomySlug?: string
 }
 
 export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
+  taxonomySlug,
 }) => {
   const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
   const { clearRouteCache } = useRouteCache()
@@ -28,15 +31,6 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
 
   const count = getTotalCount()
   const groupedSelections = getSelectionsForActions()
-
-  if (count === 0) {
-    return null
-  }
-
-  const handleActionSuccess = () => {
-    clearRouteCache()
-    clearAll()
-  }
 
   const collectionSlugs = Object.keys(groupedSelections)
   const singleCollectionSelected = collectionSlugs.length === 1
@@ -48,6 +42,25 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
 
   const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
 
+  // Check if single taxonomy item is selected (for direct edit)
+  // Only available when taxonomySlug is provided
+  const singleTaxonomySelected =
+    taxonomySlug && singleCollectionSlug === taxonomySlug && ids.length === 1 ? ids[0] : null
+
+  const [TaxonomyDocDrawer, , { openDrawer }] = useDocumentDrawer({
+    id: singleTaxonomySelected ?? undefined,
+    collectionSlug: taxonomySlug || singleCollectionSlug || '',
+  })
+
+  if (count === 0) {
+    return null
+  }
+
+  const handleActionSuccess = () => {
+    clearRouteCache() // This already calls router.refresh()
+    clearAll()
+  }
+
   return (
     <ListSelection_v4
       count={count}
@@ -57,34 +70,46 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
         </ListSelectionButton>,
       ]}
       SelectionActions={[
-        !disableBulkEdit && singleCollectionSelected && collectionConfig && ids.length > 0 && (
-          <Fragment key="bulk-actions">
-            <EditMany_v4
-              collection={collectionConfig}
-              count={ids.length}
-              ids={ids}
-              modalPrefix="taxonomy-list"
-              onSuccess={handleActionSuccess}
-              selectAll={false}
-            />
-            <PublishMany_v4
-              collection={collectionConfig}
-              count={ids.length}
-              ids={ids}
-              modalPrefix="taxonomy-list"
-              onSuccess={handleActionSuccess}
-              selectAll={false}
-            />
-            <UnpublishMany_v4
-              collection={collectionConfig}
-              count={ids.length}
-              ids={ids}
-              modalPrefix="taxonomy-list"
-              onSuccess={handleActionSuccess}
-              selectAll={false}
-            />
+        // Single taxonomy item selected - show direct edit button
+        singleTaxonomySelected && (
+          <Fragment key="single-edit">
+            <ListSelectionButton onClick={openDrawer}>{t('general:edit')}</ListSelectionButton>
+            <TaxonomyDocDrawer onSave={handleActionSuccess} />
           </Fragment>
         ),
+        // Multiple items or non-taxonomy items - show bulk actions
+        !disableBulkEdit &&
+          !singleTaxonomySelected &&
+          singleCollectionSelected &&
+          collectionConfig &&
+          ids.length > 0 && (
+            <Fragment key="bulk-actions">
+              <EditMany_v4
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="taxonomy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+              <PublishMany_v4
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="taxonomy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+              <UnpublishMany_v4
+                collection={collectionConfig}
+                count={ids.length}
+                ids={ids}
+                modalPrefix="taxonomy-list"
+                onSuccess={handleActionSuccess}
+                selectAll={false}
+              />
+            </Fragment>
+          ),
         !disableBulkDelete && (
           <DeleteMany_v4
             afterDelete={handleActionSuccess}

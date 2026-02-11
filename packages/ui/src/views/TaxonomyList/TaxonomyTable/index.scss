@@ -3,11 +3,6 @@
 @layer payload-default {
   .taxonomy-table {
     margin-top: calc(var(--base) * 1.5);
-    &__empty {
-      padding: calc(var(--base) * 2);
-      text-align: center;
-      color: var(--theme-elevation-400);
-    }
 
     // Name cell with icon
     &__name-cell {

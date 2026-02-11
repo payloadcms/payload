@@ -10,6 +10,7 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
+  TaxonomyViewData,
 } from 'payload'
 
 import {
@@ -278,19 +279,7 @@ export const renderListView = async (
   }
 
   // Taxonomy data for client-side rendering
-  let taxonomyData:
-    | {
-        breadcrumbs: Array<{ id: number | string; title: string }>
-        childrenData: typeof data
-        parentFieldName: string
-        parentId: number | string
-        relatedDocuments: Record<
-          string,
-          { data: typeof data; fieldInfo: { fieldName: string; hasMany: boolean }; label: string }
-        >
-        selectedItem: null | Record<string, unknown>
-      }
-    | undefined
+  let taxonomyData: TaxonomyViewData | undefined
 
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
@@ -375,7 +364,7 @@ export const renderListView = async (
 
   // Fetch taxonomy data for taxonomy collections
   if (isTaxonomyCollection) {
-    const taxData = await handleTaxonomy({
+    taxonomyData = await handleTaxonomy({
       collectionConfig,
       collectionSlug,
       parentId: taxonomyParentId,
@@ -385,12 +374,7 @@ export const renderListView = async (
       user,
     })
 
-    taxonomyData = {
-      ...taxData,
-      parentId: taxonomyParentId,
-    }
-
-    data = taxData.childrenData
+    data = taxonomyData.childrenData
   }
 
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)

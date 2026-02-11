@@ -36,6 +36,7 @@ export function createTaxonomyField(options: CreateTaxonomyFieldOptions): Relati
     },
     hasMany: false,
     index: true,
+    label: taxonomySlug,
     relationTo: taxonomySlug,
     ...restOptions,
   } as RelationshipField

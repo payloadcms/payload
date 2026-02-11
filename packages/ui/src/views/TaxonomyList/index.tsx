@@ -6,11 +6,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect } from 'react'
 
+import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
-import { Button } from '../../elements/Button/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
@@ -36,7 +36,6 @@ export function TaxonomyListView(props: ListViewClientProps) {
     collectionSlug,
     Description,
     hasCreatePermission: hasCreatePermissionFromProps,
-    newDocumentURL,
     taxonomyData,
   } = props
 
@@ -148,7 +147,28 @@ export function TaxonomyListView(props: ListViewClientProps) {
     selectedParentId,
   ])
 
-  const isRootLevel = selectedParentId === null
+  const parentFieldName = collectionConfig?.taxonomy?.parentFieldName || 'parent'
+  const parentId = taxonomyData?.parentId ?? null
+
+  // Build collections array for create button
+  const collections: CollectionOption[] = []
+
+  // Add taxonomy collection (for creating child taxonomy items)
+  collections.push({
+    collectionSlug,
+    initialData: parentId !== null ? { [parentFieldName]: parentId } : {},
+  })
+
+  // Add related collections (for creating documents that reference this taxonomy)
+  // Use taxonomyConfig.relatedCollections to show ALL related collections, not just ones with documents
+  const taxonomyFieldName = `_t_${collectionSlug}`
+  for (const slug of Object.keys(collectionConfig.taxonomy?.relatedCollections || {})) {
+    collections.push({
+      collectionSlug: slug,
+      // Always use array - Payload normalizes for single relationship fields
+      initialData: parentId !== null ? { [taxonomyFieldName]: [parentId] } : {},
+    })
+  }
 
   const filteredChildrenData = taxonomyData?.childrenData
 
@@ -156,9 +176,9 @@ export function TaxonomyListView(props: ListViewClientProps) {
     ? {
         [collectionSlug]: { docs: taxonomyData.childrenData.docs },
         ...Object.fromEntries(
-          Object.entries(taxonomyData.relatedDocuments || {}).map(([slug, related]) => [
+          Object.entries(taxonomyData.relatedDocumentsByCollection || {}).map(([slug, related]) => [
             slug,
-            { docs: related.data.docs },
+            { docs: related.result.docs },
           ]),
         ),
       }
@@ -172,6 +192,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
           <Gutter className={`${baseClass}__wrap`}>
             <TaxonomyListHeader
               collectionConfig={collectionConfig}
+              collections={collections}
               currentItemTitle={currentItemTitle}
               Description={
                 <div className={`${baseClass}__sub-header`}>
@@ -188,8 +209,6 @@ export function TaxonomyListView(props: ListViewClientProps) {
               }
               hasCreatePermission={hasCreatePermission}
               i18n={i18n}
-              isRootLevel={isRootLevel}
-              newDocumentURL={newDocumentURL}
             />
 
             <div className={`${baseClass}__controls`}>
@@ -202,36 +221,26 @@ export function TaxonomyListView(props: ListViewClientProps) {
               />
             </div>
 
-            {taxonomyData ? (
-              <TaxonomyTable
-                childrenData={filteredChildrenData}
-                collectionSlug={collectionSlug}
-                key={`${collectionSlug}-${taxonomyData.parentId}`}
-                parentId={taxonomyData.parentId}
-                relatedGroups={Object.entries(taxonomyData.relatedDocuments || {}).map(
-                  ([slug, related]) => ({
-                    collectionSlug: slug,
-                    data: related.data,
-                    fieldInfo: related.fieldInfo,
-                    label: related.label,
-                  }),
-                )}
-                search={searchFromURL}
-                taxonomyLabel={collectionLabel}
-                useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
-              />
-            ) : (
-              <div className={`${baseClass}__no-results`}>
-                <p>{t('general:noResults', { label: collectionLabel })}</p>
-                {hasCreatePermission && newDocumentURL && (
-                  <Button el="link" to={newDocumentURL}>
-                    {t('general:createNewLabel', {
-                      label: getTranslation(labels?.singular, i18n),
-                    })}
-                  </Button>
-                )}
-              </div>
-            )}
+            <TaxonomyTable
+              childrenData={filteredChildrenData}
+              collections={collections}
+              collectionSlug={collectionSlug}
+              hasCreatePermission={hasCreatePermission}
+              key={`${collectionSlug}-${parentId}-${searchFromURL}-${filteredChildrenData?.totalDocs}`}
+              parentFieldName={parentFieldName}
+              parentId={parentId}
+              relatedGroups={Object.entries(taxonomyData?.relatedDocumentsByCollection || {}).map(
+                ([slug, related]) => ({
+                  collectionSlug: slug,
+                  data: related.result,
+                  hasMany: related.hasMany,
+                  label: related.label,
+                }),
+              )}
+              search={searchFromURL}
+              taxonomyLabel={collectionLabel}
+              useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+            />
           </Gutter>
         </DocumentSelectionProvider>
         {AfterList}

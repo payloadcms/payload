@@ -89,10 +89,16 @@ export const validateTaxonomyFields = (config: Config): void => {
         )
       }
 
+      // Override field hasMany based on taxonomy allowHasMany setting
+      const allowHasMany = taxonomy.allowHasMany ?? true
+      if (!allowHasMany) {
+        taxonomyField.hasMany = false
+      }
+
       // Store sanitized config
       sanitizedRelatedCollections[relatedSlug] = {
         fieldName: expectedFieldName,
-        hasMany: taxonomyField.hasMany ?? false,
+        hasMany: allowHasMany ? (taxonomyField.hasMany ?? false) : false,
       }
     }
 

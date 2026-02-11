@@ -7,18 +7,22 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
+import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { TaxonomyDocument } from '../../../elements/TaxonomyTree/types.js'
 import type { SlotColumn } from './SlotTable.js'
 
 import { Collapsible } from '../../../elements/Collapsible/index.js'
+import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { Link } from '../../../elements/Link/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
 import { Locked } from '../../../elements/Locked/index.js'
+import { NoListResults } from '../../../elements/NoListResults/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTaxonomy } from '../../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { SlotTable } from './SlotTable.js'
@@ -42,7 +46,7 @@ function formatDate(dateString: string, locale: string): string {
 type RelatedGroup = {
   collectionSlug: string
   data: PaginatedDocs
-  fieldInfo: { fieldName: string; hasMany: boolean }
+  hasMany: boolean
   label: string
 }
 
@@ -149,8 +153,12 @@ const DateCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
 }
 
 export type TaxonomyTableProps = {
-  childrenData: PaginatedDocs<TaxonomyDocument>
+  childrenData?: PaginatedDocs<TaxonomyDocument>
+  /** Collections available for creation (for empty state) */
+  collections?: CollectionOption[]
   collectionSlug: string
+  hasCreatePermission?: boolean
+  parentFieldName?: string
   parentId: null | number | string
   relatedGroups: RelatedGroup[]
   search?: string
@@ -160,7 +168,10 @@ export type TaxonomyTableProps = {
 
 export function TaxonomyTable({
   childrenData,
+  collections,
   collectionSlug,
+  hasCreatePermission,
+  parentFieldName,
   parentId,
   relatedGroups,
   search,
@@ -168,6 +179,7 @@ export function TaxonomyTable({
   useAsTitle,
 }: TaxonomyTableProps) {
   const { i18n, t } = useTranslation()
+  const { clearRouteCache } = useRouteCache()
   const {
     config: {
       routes: { api: apiRoute },
@@ -176,14 +188,11 @@ export function TaxonomyTable({
     getEntityConfig,
   } = useConfig()
 
-  const taxonomyConfig = getEntityConfig({ collectionSlug })
-  const parentFieldName = taxonomyConfig?.taxonomy?.parentFieldName || 'parent'
-
   // Children pagination state
-  const [childDocs, setChildDocs] = useState(childrenData.docs)
-  const [childHasNext, setChildHasNext] = useState(childrenData.hasNextPage)
-  const [childPage, setChildPage] = useState(childrenData.page || 1)
-  const [childTotal, setChildTotal] = useState(childrenData.totalDocs)
+  const [childDocs, setChildDocs] = useState(childrenData?.docs || [])
+  const [childHasNext, setChildHasNext] = useState(childrenData?.hasNextPage || false)
+  const [childPage, setChildPage] = useState(childrenData?.page || 1)
+  const [childTotal, setChildTotal] = useState(childrenData?.totalDocs || 0)
   const [childLoading, setChildLoading] = useState(false)
 
   // Related groups pagination state (per collection)
@@ -299,12 +308,11 @@ export function TaxonomyTable({
       }))
 
       try {
-        const { fieldName, hasMany } = group.fieldInfo
+        // Field name is always _t_{taxonomySlug} by convention
+        const fieldName = `_t_${collectionSlug}`
 
-        // Build where clause using known field info
-        const whereClause = hasMany
-          ? { [fieldName]: { contains: parentId } }
-          : { [fieldName]: { equals: parentId } }
+        // "in" operator works for both hasMany and single relationship fields
+        const whereClause = { [fieldName]: { in: [parentId] } }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
@@ -348,7 +356,16 @@ export function TaxonomyTable({
         }))
       }
     },
-    [apiRoute, getEntityConfig, parentId, relatedGroups, relatedState, search, serverURL],
+    [
+      apiRoute,
+      getEntityConfig,
+      parentId,
+      relatedGroups,
+      relatedState,
+      search,
+      serverURL,
+      collectionSlug,
+    ],
   )
 
   // Build children data for table
@@ -405,8 +422,25 @@ export function TaxonomyTable({
   ]
 
   if (!hasChildren && !hasRelated) {
-    // empty state
-    return null
+    const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
+
+    return (
+      <NoListResults
+        Actions={
+          canShowCreateButton
+            ? [
+                <CreateDocumentButton
+                  collections={collections}
+                  drawerSlug={`taxonomy-create-empty-${collectionSlug}`}
+                  key="create"
+                  onSave={clearRouteCache}
+                />,
+              ]
+            : undefined
+        }
+        Message={<p>{t('general:noResults', { label: taxonomyLabel })}</p>}
+      />
+    )
   }
 
   return (

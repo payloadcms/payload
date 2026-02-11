@@ -6,8 +6,11 @@ import type { ClientCollectionConfig } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
+
+import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
-import { ListCreateNewButton } from '../../../elements/ListHeader/TitleActions/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { DocumentListSelection } from '../DocumentListSelection/index.js'
 import './index.scss'
 
@@ -15,6 +18,8 @@ const baseClass = 'taxonomy-list-header'
 
 export type TaxonomyListHeaderProps = {
   collectionConfig: ClientCollectionConfig
+  /** Collections available for creation with their initial data */
+  collections: CollectionOption[]
   /** Title to display - defaults to collection label if not provided */
   currentItemTitle?: string
   Description?: React.ReactNode
@@ -22,23 +27,21 @@ export type TaxonomyListHeaderProps = {
   disableBulkEdit?: boolean
   hasCreatePermission: boolean
   i18n: I18nClient
-  isRootLevel: boolean
-  newDocumentURL: string
 }
 
 export function TaxonomyListHeader({
   collectionConfig,
+  collections,
   currentItemTitle,
   Description,
   disableBulkDelete,
   disableBulkEdit,
   hasCreatePermission,
   i18n,
-  isRootLevel,
-  newDocumentURL,
 }: TaxonomyListHeaderProps) {
   const { labels } = collectionConfig
   const title = currentItemTitle || getTranslation(labels?.plural, i18n)
+  const { clearRouteCache } = useRouteCache()
 
   return (
     <ListHeader
@@ -47,19 +50,20 @@ export function TaxonomyListHeader({
           disableBulkDelete={disableBulkDelete}
           disableBulkEdit={disableBulkEdit}
           key="document-list-selection"
+          taxonomySlug={collectionConfig.slug}
         />,
       ]}
       AfterListHeaderContent={Description}
       className={baseClass}
       title={title}
       TitleActions={
-        hasCreatePermission && newDocumentURL
+        hasCreatePermission && collections.length > 0
           ? [
-              <ListCreateNewButton
-                collectionConfig={collectionConfig}
-                hasCreatePermission={hasCreatePermission}
-                key="list-header-create-new-doc"
-                newDocumentURL={newDocumentURL}
+              <CreateDocumentButton
+                collections={collections}
+                drawerSlug={`taxonomy-create-${collectionConfig.slug}`}
+                key="taxonomy-create-button"
+                onSave={clearRouteCache}
               />,
             ]
           : undefined

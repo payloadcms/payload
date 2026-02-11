@@ -21,6 +21,14 @@ export type CreateTaxonomyFieldOptions = {
  */
 export type TaxonomyConfig = {
   /**
+   * Whether related collections can reference multiple terms from this taxonomy.
+   * When true (default), documents can belong to multiple terms (tags behavior).
+   * When false, documents can only belong to one term (folder behavior).
+   * This setting overrides the hasMany option in createTaxonomyField().
+   * @default true
+   */
+  allowHasMany?: boolean
+  /**
    * Custom icon to display in the sidebar tab for this taxonomy
    * Provide a path to a React component (e.g., '@payloadcms/ui#FolderIcon')
    * If not provided, defaults to '@payloadcms/ui#TagIcon'
@@ -66,6 +74,11 @@ export type SanitizedRelatedCollection = {
  * Sanitized taxonomy configuration with all defaults applied
  */
 export type SanitizedTaxonomyConfig = {
+  /**
+   * Whether related collections can reference multiple terms from this taxonomy.
+   * @default true
+   */
+  allowHasMany: boolean
   /**
    * Custom icon to display in the sidebar tab for this taxonomy
    */

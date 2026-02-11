@@ -1,32 +1,12 @@
 import type {
-  PaginatedDocs,
   PayloadRequest,
+  RelatedDocumentsGrouped,
   SanitizedCollectionConfig,
   SanitizedPermissions,
+  TaxonomyViewData,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-
-export type RelatedDocumentsGrouped = {
-  [collectionSlug: string]: {
-    data: PaginatedDocs
-    fieldInfo: { fieldName: string; hasMany: boolean }
-    label: string
-  }
-}
-
-export type TaxonomyViewData = {
-  /** Breadcrumb trail to the current parent */
-  breadcrumbs: Array<{ id: number | string; title: string }>
-  /** Children of the current parent (same collection) */
-  childrenData: PaginatedDocs
-  /** The parent field name for building queries */
-  parentFieldName: string
-  /** Related documents grouped by collection */
-  relatedDocuments: RelatedDocumentsGrouped
-  /** The selected parent item (for display) */
-  selectedItem: null | Record<string, unknown>
-}
 
 /**
  * Fetches taxonomy data for a collection with a selected parent.
@@ -189,7 +169,7 @@ export const handleTaxonomy = async ({
   // Fetch related documents from other collections
   // At root level: show unassigned documents (where taxonomy field doesn't exist)
   // At nested level: show documents assigned to the selected taxonomy item
-  const relatedDocuments: RelatedDocumentsGrouped = {}
+  const relatedDocumentsByCollection: RelatedDocumentsGrouped = {}
 
   // Use pre-computed relatedCollections from sanitized taxonomy config
   const relatedCollectionsConfig = taxonomyConfig.relatedCollections || {}
@@ -209,7 +189,9 @@ export const handleTaxonomy = async ({
       continue
     }
 
-    const { fieldName, hasMany } = fieldInfo
+    const { hasMany } = fieldInfo
+    // Field name is always _t_{taxonomySlug} by convention
+    const fieldName = `_t_${collectionSlug}`
 
     // Build where clause based on whether we're at root or nested level
     let relationshipWhere: Record<string, unknown>
@@ -227,8 +209,9 @@ export const handleTaxonomy = async ({
       relationshipWhere = { or: conditions }
     } else {
       // Nested level: find documents assigned to this taxonomy item
+      // "in" operator works for both hasMany and single relationship fields
       relationshipWhere = {
-        [fieldName]: hasMany ? { contains: parentId } : { equals: parentId },
+        [fieldName]: { in: [parentId] },
       }
     }
 
@@ -255,10 +238,10 @@ export const handleTaxonomy = async ({
       })
 
       if (data.totalDocs > 0) {
-        relatedDocuments[relatedSlug] = {
-          data,
-          fieldInfo: { fieldName, hasMany },
+        relatedDocumentsByCollection[relatedSlug] = {
+          hasMany,
           label: getTranslation(relatedCollectionConfig.labels?.plural, req.i18n),
+          result: data,
         }
       }
     } catch (error) {
@@ -273,7 +256,8 @@ export const handleTaxonomy = async ({
     breadcrumbs,
     childrenData,
     parentFieldName,
-    relatedDocuments,
+    parentId,
+    relatedDocumentsByCollection,
     selectedItem,
   }
 }

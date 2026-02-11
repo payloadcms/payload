@@ -48,6 +48,7 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
 
   // Set sanitized taxonomy config (will be further sanitized when hierarchy is applied)
   collectionConfig.taxonomy = {
+    allowHasMany: collectionConfig.taxonomy.allowHasMany ?? true,
     parentFieldName,
     relatedCollections,
     slugPathFieldName: collectionConfig.taxonomy.slugPathFieldName,

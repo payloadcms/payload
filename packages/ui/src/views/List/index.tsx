@@ -241,10 +241,9 @@ export function DefaultListView(props: ListViewClientProps) {
                   collectionData={{
                     [collectionSlug]: { docs: taxonomyData.childrenData.docs },
                     ...Object.fromEntries(
-                      Object.entries(taxonomyData.relatedDocuments).map(([slug, related]) => [
-                        slug,
-                        { docs: related.data.docs },
-                      ]),
+                      Object.entries(taxonomyData.relatedDocumentsByCollection).map(
+                        ([slug, related]) => [slug, { docs: related.result.docs }],
+                      ),
                     ),
                   }}
                 >
@@ -253,11 +252,11 @@ export function DefaultListView(props: ListViewClientProps) {
                     collectionSlug={collectionSlug}
                     key={taxonomyData.parentId}
                     parentId={taxonomyData.parentId}
-                    relatedGroups={Object.entries(taxonomyData.relatedDocuments).map(
+                    relatedGroups={Object.entries(taxonomyData.relatedDocumentsByCollection).map(
                       ([slug, related]) => ({
                         collectionSlug: slug,
-                        data: related.data,
-                        fieldInfo: related.fieldInfo,
+                        data: related.result,
+                        hasMany: related.hasMany,
                         label: related.label,
                       }),
                     )}

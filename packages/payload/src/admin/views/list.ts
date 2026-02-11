@@ -20,9 +20,9 @@ export type TaxonomyViewData = {
   /** The parent field name for building queries */
   parentFieldName: string
   /** The parent ID being viewed */
-  parentId: number | string
+  parentId: null | number | string
   /** Related documents grouped by collection */
-  relatedDocuments: RelatedDocumentsGrouped
+  relatedDocumentsByCollection: RelatedDocumentsGrouped
   /** The selected parent item (for display) */
   selectedItem: null | Record<string, unknown>
 }
