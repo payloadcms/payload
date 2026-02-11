@@ -1,6 +1,14 @@
 @layer payload-default {
-  .icon--folder {
+  .icon--tag {
     height: var(--base);
     width: var(--base);
+
+    &--muted {
+      color: var(--theme-elevation-300);
+    }
+
+    &--dark {
+      color: var(--theme-elevation-800);
+    }
   }
 }

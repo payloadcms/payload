@@ -109,9 +109,10 @@ export function TaxonomyListView(props: ListViewClientProps) {
 
       const baseLabel: StepNavItem = {
         label: (
-          <span>
-            <TagIcon /> {collectionLabel}
-          </span>
+          <div className={`${baseClass}__step-nav-icon-label`}>
+            <TagIcon color="muted" />
+            {collectionLabel}
+          </div>
         ),
         url: selectedParentId
           ? formatAdminURL({

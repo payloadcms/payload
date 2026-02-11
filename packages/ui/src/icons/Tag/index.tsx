@@ -2,10 +2,17 @@ import React from 'react'
 
 import './index.scss'
 
-export function TagIcon({ className }: { className?: string }) {
+export type TagIconProps = {
+  className?: string
+  color?: 'dark' | 'default' | 'muted'
+}
+
+export function TagIcon({ className, color }: TagIconProps) {
+  const colorClass = color ? `icon--tag--${color}` : ''
+
   return (
     <svg
-      className={[className, 'icon icon--tag'].filter(Boolean).join(' ')}
+      className={[className, 'icon icon--tag', colorClass].filter(Boolean).join(' ')}
       fill="none"
       height="16"
       viewBox="0 0 16 16"
