@@ -2,32 +2,16 @@ import type { SingleRelationshipField } from '../fields/config/types.js'
 import type { HierarchyConfig, SanitizedHierarchyConfig } from '../hierarchy/types.js'
 
 /**
- * Field overrides for taxonomy relationship fields.
- * Allows customizing the injected relationship field except for name, type, and relationTo
+ * Options for creating a taxonomy relationship field.
+ * All SingleRelationshipField properties are available except name, type, and relationTo
  * which are managed by the taxonomy system.
  */
-export type TaxonomyRelationshipFieldOverrides = Omit<
-  Partial<SingleRelationshipField>,
-  'name' | 'relationTo' | 'type'
->
-
-/**
- * Configuration for a related collection in taxonomy
- */
-export type TaxonomyRelatedCollectionConfig = {
+export type CreateTaxonomyFieldOptions = {
   /**
-   * Overrides for the injected relationship field.
-   * Allows customizing hasMany, label, admin, filterOptions, etc.
-   *
-   * @example
-   * fieldOverrides: {
-   *   hasMany: true,
-   *   label: 'Categories',
-   *   admin: { position: 'sidebar' },
-   * }
+   * The slug of the taxonomy collection this field references
    */
-  fieldOverrides?: TaxonomyRelationshipFieldOverrides
-}
+  taxonomySlug: string
+} & Omit<Partial<SingleRelationshipField>, 'name' | 'relationTo' | 'type'>
 
 /**
  * Configuration options for taxonomy feature
@@ -43,23 +27,23 @@ export type TaxonomyConfig = {
    */
   icon?: string
   /**
-   * Collections that can reference this taxonomy.
-   * Each entry specifies the collection slug and relationship configuration.
-   * Payload will automatically inject a relationship field into each collection.
+   * Collection slugs that reference this taxonomy.
+   * Each collection must include a taxonomy field created with `createTaxonomyField()`.
+   *
+   * After sanitization, this becomes a Record with field info.
    *
    * @example
-   * relatedCollections: {
-   *   posts: {
-   *     fieldOverrides: { hasMany: true }  // Posts can have multiple tags
-   *   },
-   *   pages: {
-   *     fieldOverrides: { hasMany: false } // Pages have one category
-   *   },
+   * // In taxonomy collection config:
+   * taxonomy: {
+   *   relatedCollections: ['posts', 'pages'],
    * }
+   *
+   * // In related collection config:
+   * fields: [
+   *   createTaxonomyField({ taxonomySlug: 'tags', hasMany: true }),
+   * ]
    */
-  relatedCollections?: {
-    [collectionSlug: string]: TaxonomyRelatedCollectionConfig
-  }
+  relatedCollections?: Record<string, SanitizedRelatedCollection> | string[]
   /**
    * Maximum number of children to load per parent node in the tree
    * Controls initial load and pagination for tree views
@@ -70,14 +54,11 @@ export type TaxonomyConfig = {
 
 /**
  * Sanitized related collection info with computed field name.
- * Extends the user config with computed values.
  */
 export type SanitizedRelatedCollection = {
-  /** Name of the injected relationship field */
+  /** Name of the taxonomy relationship field */
   fieldName: string
-  /** Original field overrides from user config */
-  fieldOverrides?: TaxonomyRelationshipFieldOverrides
-  /** Whether the field allows multiple values (computed from fieldOverrides.hasMany) */
+  /** Whether the field allows multiple values */
   hasMany: boolean
 }
 
@@ -91,7 +72,7 @@ export type SanitizedTaxonomyConfig = {
   icon?: string
   /**
    * Related collections with their sanitized configuration.
-   * Key is collection slug, value contains the injected field info.
+   * Key is collection slug, value contains the field info.
    */
   relatedCollections: {
     [collectionSlug: string]: SanitizedRelatedCollection

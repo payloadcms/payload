@@ -6,6 +6,8 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
+import { createTaxonomyField } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
@@ -34,15 +36,11 @@ export const Tags: CollectionConfig = {
     },
   ],
   taxonomy: {
-    relatedCollections: {
-      [postsSlug]: { fieldOverrides: { hasMany: true } },
-      [pagesSlug]: { fieldOverrides: { hasMany: true } },
-      [mediaSlug]: { fieldOverrides: { hasMany: true } },
-    },
+    relatedCollections: [postsSlug, pagesSlug, mediaSlug],
   },
 }
 
-// Posts collection that references tags (taxonomy field is auto-injected)
+// Posts collection that references tags
 export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -58,10 +56,11 @@ export const Posts: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
+    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
   ],
 }
 
-// Pages collection that references tags (taxonomy field is auto-injected)
+// Pages collection that references tags
 export const Pages: CollectionConfig = {
   slug: pagesSlug,
   admin: {
@@ -77,10 +76,11 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
+    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
   ],
 }
 
-// Media collection that references tags (taxonomy field is auto-injected)
+// Media collection that references tags
 export const Media: CollectionConfig = {
   slug: mediaSlug,
   admin: {
@@ -92,6 +92,7 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
   ],
   upload: true,
 }
@@ -110,8 +111,8 @@ export const Categories: CollectionConfig = {
     },
   ],
   taxonomy: {
-    parentFieldName: 'parentCategory',
     icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+    parentFieldName: 'parentCategory',
   },
 }
 

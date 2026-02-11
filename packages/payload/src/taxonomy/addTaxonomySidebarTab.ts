@@ -1,11 +1,11 @@
 import type { Config } from '../config/types.js'
 
 /**
- * Add a sidebar tab for each taxonomy collection
- * Each tab shows the tree for that specific taxonomy
+ * Add a sidebar tab for each taxonomy collection.
+ * Each tab shows the tree for that specific taxonomy.
  *
- * Note: Taxonomy relationship fields are injected earlier in config sanitization
- * (see injectTaxonomyFields called from config/sanitize.ts)
+ * Note: Taxonomy relationship fields are validated earlier in config sanitization
+ * (see validateTaxonomyFields called from config/sanitize.ts)
  */
 export const addTaxonomySidebarTabs = (config: Config): void => {
   // Find all collections with taxonomy enabled

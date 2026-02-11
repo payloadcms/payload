@@ -33,7 +33,7 @@ import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-pres
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { addTaxonomySidebarTabs } from '../taxonomy/addTaxonomySidebarTab.js'
-import { injectTaxonomyFields } from '../taxonomy/injectTaxonomyFields.js'
+import { validateTaxonomyFields } from '../taxonomy/validateTaxonomyFields.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -247,10 +247,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const folderEnabledCollections: SanitizedCollectionConfig[] = []
 
-  // Inject taxonomy relationship fields before collection sanitization
-  // so that the injected fields get properly sanitized
-  injectTaxonomyFields(config as unknown as Config)
-
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -307,6 +303,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       )
     }
   }
+
+  // Validate taxonomy fields exist in related collections and build sanitized config
+  validateTaxonomyFields(config as unknown as Config)
 
   // Add sidebar tabs for taxonomy collections
   addTaxonomySidebarTabs(config as unknown as Config)
