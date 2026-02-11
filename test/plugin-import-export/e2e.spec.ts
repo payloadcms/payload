@@ -565,17 +565,19 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      // Get all column headers from the preview table
-      const headerCells = page.locator('.export-preview table thead th')
-      const headerTexts = await headerCells.allTextContents()
+      await expect(async () => {
+        const headerCells = page.locator('.export-preview table thead th')
+        const headerTexts = await headerCells.allTextContents()
 
-      // Derived columns from toCSV should be present in the preview headers
-      expect(headerTexts).toContain('customRelationship_id')
-      expect(headerTexts).toContain('customRelationship_email')
-      expect(headerTexts).toContain('customRelNameEmail_name')
-      expect(headerTexts).toContain('customRelNameEmail_email')
-      expect(headerTexts).toContain('customRelIdName_id')
-      expect(headerTexts).toContain('customRelIdName_locationName')
+        // Derived columns from toCSV should be present in the preview headers
+        expect(headerTexts).not.toContain('customRelationship_id')
+        expect(headerTexts).toContain('customRelationship_id')
+        expect(headerTexts).toContain('customRelationship_email')
+        expect(headerTexts).toContain('customRelNameEmail_name')
+        expect(headerTexts).toContain('customRelNameEmail_email')
+        expect(headerTexts).toContain('customRelIdName_id')
+        expect(headerTexts).toContain('customRelIdName_locationName')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 
