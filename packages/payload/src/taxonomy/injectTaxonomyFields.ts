@@ -1,12 +1,16 @@
 import type { Config } from '../config/types.js'
+import type { RelationshipField } from '../fields/config/types.js'
+import type { SanitizedRelatedCollection, TaxonomyRelatedCollectionConfig } from './types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
-import { buildTaxonomyRelationshipField } from './buildTaxonomyRelationshipField.js'
 import { getTaxonomyFieldName } from './constants.js'
 
 /**
  * Inject taxonomy relationship fields into related collections.
  * Must be called after all collections are sanitized.
+ *
+ * This function mutates the config, transforming TaxonomyConfig.relatedCollections
+ * from user config format to SanitizedRelatedCollection format.
  */
 export const injectTaxonomyFields = (config: Config): void => {
   const taxonomyCollections = config.collections?.filter((c) => c.taxonomy) || []
@@ -18,10 +22,13 @@ export const injectTaxonomyFields = (config: Config): void => {
       continue
     }
 
-    const relatedCollectionsConfig = taxonomy.relatedCollections
+    const relatedCollectionsConfig = taxonomy.relatedCollections as Record<
+      string,
+      TaxonomyRelatedCollectionConfig
+    >
 
     // Build sanitized relatedCollections with field info
-    const sanitizedRelatedCollections: Record<string, { fieldName: string; hasMany: boolean }> = {}
+    const sanitizedRelatedCollections: Record<string, SanitizedRelatedCollection> = {}
 
     for (const [relatedSlug, relationConfig] of Object.entries(relatedCollectionsConfig)) {
       const relatedCollection = config.collections?.find((c) => c.slug === relatedSlug)
@@ -34,7 +41,8 @@ export const injectTaxonomyFields = (config: Config): void => {
       }
 
       const fieldName = getTaxonomyFieldName(taxonomyCollection.slug)
-      const hasMany = relationConfig.hasMany ?? false
+      const { admin: adminOverrides, ...restOverrides } = relationConfig.fieldOverrides || {}
+      const hasMany = restOverrides.hasMany ?? false
 
       // Check if field already exists
       const existingField = relatedCollection.fields.find(
@@ -42,25 +50,41 @@ export const injectTaxonomyFields = (config: Config): void => {
       )
 
       if (!existingField) {
-        // Inject the relationship field
-        const taxonomyField = buildTaxonomyRelationshipField({
-          fieldName,
+        // Build and inject the relationship field
+        // Type assertion needed because we're building the field dynamically with spread
+        const taxonomyField = {
+          name: fieldName,
+          type: 'relationship',
+          admin: {
+            position: 'sidebar',
+            ...adminOverrides,
+          },
           hasMany,
-          label: String(taxonomyCollection.labels?.singular || taxonomyCollection.slug),
-          taxonomySlug: taxonomyCollection.slug,
-        })
+          index: true,
+          label: String(
+            typeof taxonomyCollection.labels?.singular === 'string'
+              ? taxonomyCollection.labels.singular
+              : taxonomyCollection.slug,
+          ),
+          relationTo: taxonomyCollection.slug,
+          ...restOverrides,
+        } as RelationshipField
 
         relatedCollection.fields.push(taxonomyField)
       }
 
-      // Store sanitized config
+      // Store sanitized config (preserving fieldOverrides for compatibility)
       sanitizedRelatedCollections[relatedSlug] = {
         fieldName,
+        fieldOverrides: relationConfig.fieldOverrides,
         hasMany,
       }
     }
 
     // Update taxonomy config with sanitized relatedCollections
-    taxonomy.relatedCollections = sanitizedRelatedCollections
+    // Type assertion needed: we're mutating from TaxonomyConfig to SanitizedTaxonomyConfig
+    ;(
+      taxonomy as { relatedCollections: Record<string, SanitizedRelatedCollection> }
+    ).relatedCollections = sanitizedRelatedCollections
   }
 }

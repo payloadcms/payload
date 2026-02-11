@@ -35,9 +35,9 @@ export const Tags: CollectionConfig = {
   ],
   taxonomy: {
     relatedCollections: {
-      [postsSlug]: { hasMany: true },
-      [pagesSlug]: { hasMany: true },
-      [mediaSlug]: { hasMany: true },
+      [postsSlug]: { fieldOverrides: { hasMany: true } },
+      [pagesSlug]: { fieldOverrides: { hasMany: true } },
+      [mediaSlug]: { fieldOverrides: { hasMany: true } },
     },
   },
 }

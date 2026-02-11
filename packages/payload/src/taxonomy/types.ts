@@ -1,4 +1,33 @@
+import type { SingleRelationshipField } from '../fields/config/types.js'
 import type { HierarchyConfig, SanitizedHierarchyConfig } from '../hierarchy/types.js'
+
+/**
+ * Field overrides for taxonomy relationship fields.
+ * Allows customizing the injected relationship field except for name, type, and relationTo
+ * which are managed by the taxonomy system.
+ */
+export type TaxonomyRelationshipFieldOverrides = Omit<
+  Partial<SingleRelationshipField>,
+  'name' | 'relationTo' | 'type'
+>
+
+/**
+ * Configuration for a related collection in taxonomy
+ */
+export type TaxonomyRelatedCollectionConfig = {
+  /**
+   * Overrides for the injected relationship field.
+   * Allows customizing hasMany, label, admin, filterOptions, etc.
+   *
+   * @example
+   * fieldOverrides: {
+   *   hasMany: true,
+   *   label: 'Categories',
+   *   admin: { position: 'sidebar' },
+   * }
+   */
+  fieldOverrides?: TaxonomyRelationshipFieldOverrides
+}
 
 /**
  * Configuration options for taxonomy feature
@@ -20,15 +49,16 @@ export type TaxonomyConfig = {
    *
    * @example
    * relatedCollections: {
-   *   posts: { hasMany: true },   // Posts can have multiple tags
-   *   pages: { hasMany: false },  // Pages have one category
+   *   posts: {
+   *     fieldOverrides: { hasMany: true }  // Posts can have multiple tags
+   *   },
+   *   pages: {
+   *     fieldOverrides: { hasMany: false } // Pages have one category
+   *   },
    * }
    */
   relatedCollections?: {
-    [collectionSlug: string]: {
-      /** Whether documents can reference multiple taxonomy items. Default: false */
-      hasMany?: boolean
-    }
+    [collectionSlug: string]: TaxonomyRelatedCollectionConfig
   }
   /**
    * Maximum number of children to load per parent node in the tree
@@ -39,12 +69,15 @@ export type TaxonomyConfig = {
 } & Partial<HierarchyConfig>
 
 /**
- * Sanitized related collection info with computed field name
+ * Sanitized related collection info with computed field name.
+ * Extends the user config with computed values.
  */
 export type SanitizedRelatedCollection = {
   /** Name of the injected relationship field */
   fieldName: string
-  /** Whether the field allows multiple values */
+  /** Original field overrides from user config */
+  fieldOverrides?: TaxonomyRelationshipFieldOverrides
+  /** Whether the field allows multiple values (computed from fieldOverrides.hasMany) */
   hasMany: boolean
 }
 
