@@ -9,6 +9,7 @@ import React, { useMemo } from 'react'
 import type { AddCondition, RemoveCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
@@ -22,14 +23,36 @@ const baseClass = 'where-builder'
 export { WhereBuilderProps }
 
 /**
- * The WhereBuilder component is used to render the filter controls for a collection's list view.
- * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
+ * The WhereBuilder component is used to render the filter controls for a collection's list view
+ * or in a form (e.g. Query Presets). When `value` and `onChange` are provided, it is controlled
+ * by the form; otherwise it uses list query state from {@link useListQuery}.
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
-  const { collectionPluralLabel, collectionSlug, fields, renderedFilters, resolvedFilterOptions } =
-    props
+  const {
+    collectionPluralLabel: collectionPluralLabelProp,
+    collectionSlug,
+    fields: fieldsProp,
+    onChange,
+    renderedFilters = undefined,
+    resolvedFilterOptions = undefined,
+    value: valueProp,
+  } = props
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
+  const { getEntityConfig } = useConfig()
+  const listQuery = useListQuery()
+
+  const isFormMode = typeof onChange === 'function'
+
+  const collectionConfig = useMemo(
+    () => (isFormMode ? getEntityConfig({ collectionSlug }) : null),
+    [isFormMode, collectionSlug, getEntityConfig],
+  )
+  const collectionPluralLabel = isFormMode
+    ? (collectionConfig?.labels?.plural ?? collectionSlug)
+    : collectionPluralLabelProp
+  const fields = isFormMode ? collectionConfig?.fields : fieldsProp
+  const fieldsSafe = fields ?? []
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
@@ -37,34 +60,38 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     () =>
       reduceFieldsToOptions({
         fieldPermissions,
-        fields,
+        fields: fieldsSafe,
         i18n,
       }),
-    [fieldPermissions, fields, i18n],
+    [fieldPermissions, fieldsSafe, i18n],
   )
 
-  const { handleWhereChange, query } = useListQuery()
-
   const conditions = useMemo(() => {
-    const whereFromSearch = query.where
+    const whereFromSearch = isFormMode ? valueProp : listQuery.query?.where
 
     if (whereFromSearch) {
       if (validateWhereQuery(whereFromSearch)) {
-        return whereFromSearch.or
+        return whereFromSearch.or ?? []
       }
 
-      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
       const transformedWhere = transformWhereQuery(whereFromSearch)
-
       if (validateWhereQuery(transformedWhere)) {
-        return transformedWhere.or
+        return transformedWhere.or ?? []
       }
 
-      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
+      if (!isFormMode) {
+        console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
+      }
     }
 
     return []
-  }, [query.where])
+  }, [isFormMode, valueProp, listQuery.query?.where])
+
+  const handleWhereChange = isFormMode
+    ? (where: { or: typeof conditions }) => {
+        onChange?.(where)
+      }
+    : listQuery.handleWhereChange
 
   const addCondition: AddCondition = React.useCallback(
     async ({ andIndex, field, orIndex, relation }) => {
