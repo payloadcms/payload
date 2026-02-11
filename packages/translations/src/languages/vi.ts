@@ -401,6 +401,7 @@ export const viTranslations: DefaultTranslationsObject = {
     row: 'Hàng',
     rows: 'Hàng',
     save: 'Lưu',
+    saveChanges: 'Lưu Thay Đổi',
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
     searchBy: 'Tìm với {{label}}',

@@ -405,6 +405,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',
+    saveChanges: 'Պահպանել փոփոխությունները',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',

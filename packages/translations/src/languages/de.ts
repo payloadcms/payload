@@ -412,6 +412,7 @@ export const deTranslations: DefaultTranslationsObject = {
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',
+    saveChanges: 'Änderungen speichern',
     saving: 'Speichern...',
     schedulePublishFor: 'Plane die Veröffentlichung für {{title}}',
     searchBy: 'Suche nach {{label}}',

@@ -403,6 +403,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     row: 'Rinda',
     rows: 'Rindas',
     save: 'Saglabāt',
+    saveChanges: 'Saglabāt Izmaiņas',
     saving: 'Saglabā...',
     schedulePublishFor: 'Ieplānot publicēšanu priekš {{title}}',
     searchBy: 'Meklēt pēc {{label}}',

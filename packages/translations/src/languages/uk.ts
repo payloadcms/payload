@@ -401,6 +401,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     row: 'Рядок',
     rows: 'Рядки',
     save: 'Зберегти',
+    saveChanges: 'Зберегти зміни',
     saving: 'Збереження...',
     schedulePublishFor: 'Запланувати публікацію для {{title}}',
     searchBy: 'Шукати по {{label}}',

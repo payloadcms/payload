@@ -404,6 +404,7 @@ export const svTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
+    saveChanges: 'Spara Ändringar',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',

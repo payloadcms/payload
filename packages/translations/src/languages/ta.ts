@@ -401,6 +401,7 @@ export const taTranslations: DefaultTranslationsObject = {
     row: 'வரிசை',
     rows: 'வரிசைகள்',
     save: 'சேமி',
+    saveChanges: 'மாற்றங்களை சேமி',
     saving: 'சேமிக்கிறது...',
     schedulePublishFor: '{{title}} வெளியீட்டை திட்டமிடு',
     searchBy: '{{label}} மூலம் தேடு',

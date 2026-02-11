@@ -405,6 +405,7 @@ export const azTranslations: DefaultTranslationsObject = {
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
+    saveChanges: 'Dəyişiklikləri Saxla',
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',

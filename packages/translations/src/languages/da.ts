@@ -402,6 +402,7 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
+    saveChanges: 'Gem ændringer',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',

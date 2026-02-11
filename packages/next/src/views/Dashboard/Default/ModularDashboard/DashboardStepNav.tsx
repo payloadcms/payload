@@ -92,7 +92,7 @@ export function DashboardBreadcrumbDropdown(props: {
             </Button>
           </DrawerToggler>
           <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
-            {t('fields:saveChanges')}
+            {t('general:saveChanges')}
           </Button>
           <Button buttonStyle="pill" onClick={onCancel} size="small">
             {t('general:cancel')}

@@ -404,6 +404,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     row: 'Строка',
     rows: 'Строки',
     save: 'Сохранить',
+    saveChanges: 'Сохранить изменения',
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
     searchBy: 'Искать по',

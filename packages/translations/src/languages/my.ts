@@ -407,6 +407,7 @@ export const myTranslations: DefaultTranslationsObject = {
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',
+    saveChanges: 'Simpan Perubahan',
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: 'Jadualkan penerbitan untuk {{title}}',
     searchBy: 'ရှာဖွေပါ။',

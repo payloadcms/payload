@@ -411,6 +411,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',

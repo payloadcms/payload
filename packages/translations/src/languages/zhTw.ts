@@ -383,6 +383,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     row: '列',
     rows: '列',
     save: '儲存',
+    saveChanges: '保存更改',
     saving: '儲存中…',
     schedulePublishFor: '排程發佈 {{title}}',
     searchBy: '依 {{label}} 搜尋',

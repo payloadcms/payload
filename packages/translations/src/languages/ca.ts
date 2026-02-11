@@ -405,6 +405,7 @@ export const caTranslations: DefaultTranslationsObject = {
     row: 'Fila',
     rows: 'Files',
     save: 'Desa',
+    saveChanges: 'Desa els canvis',
     saving: 'Desant...',
     schedulePublishFor: 'Programa la publicacio {{title}}',
     searchBy: 'Cerca per {{label}}',

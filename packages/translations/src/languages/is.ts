@@ -400,6 +400,7 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveChanges: 'Vista breytingar',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',

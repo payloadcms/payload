@@ -403,6 +403,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',
+    saveChanges: 'Spremi promjene',
     saving: 'Spremanje...',
     schedulePublishFor: 'Zakazano objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',

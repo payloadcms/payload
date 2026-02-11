@@ -402,6 +402,7 @@ export const skTranslations: DefaultTranslationsObject = {
     row: 'Riadok',
     rows: 'Riadky',
     save: 'Uložiť',
+    saveChanges: 'Uložiť zmeny',
     saving: 'Ukladanie...',
     schedulePublishFor: 'Naplánovať publikovanie pre {{title}}',
     searchBy: 'Vyhľadať podľa {{label}}',

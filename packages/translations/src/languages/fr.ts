@@ -413,6 +413,7 @@ export const frTranslations: DefaultTranslationsObject = {
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',
+    saveChanges: 'Enregistrer les modifications',
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',

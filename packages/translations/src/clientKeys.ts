@@ -325,6 +325,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:row',
   'general:rows',
   'general:save',
+  'general:saveChanges',
   'general:schedulePublishFor',
   'general:saving',
   'general:searchBy',

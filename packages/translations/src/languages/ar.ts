@@ -393,6 +393,7 @@ export const arTranslations: DefaultTranslationsObject = {
     row: 'سطر',
     rows: 'أسطُر',
     save: 'حفظ',
+    saveChanges: 'احفظ التغييرات',
     saving: 'جاري الحفظ...',
     schedulePublishFor: 'جدولة النشر لـ {{العنوان}}',
     searchBy: 'البحث عن طريق {{label}}',
