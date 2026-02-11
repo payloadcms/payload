@@ -1,4 +1,8 @@
 export { DEFAULT_TAXONOMY_TREE_LIMIT, getTaxonomyFieldName } from './constants.js'
+export {
+  createTaxonomyCollection,
+  type CreateTaxonomyCollectionOptions,
+} from './createTaxonomyCollection.js'
 export { createTaxonomyField } from './createTaxonomyField.js'
 export { findRelatedDocuments } from './operations/index.js'
 export type {

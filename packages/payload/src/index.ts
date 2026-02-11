@@ -1752,6 +1752,8 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 // Taxonomy
 export { DEFAULT_TAXONOMY_TREE_LIMIT } from './taxonomy/constants.js'
+export { createTaxonomyCollection } from './taxonomy/createTaxonomyCollection.js'
+export type { CreateTaxonomyCollectionOptions } from './taxonomy/createTaxonomyCollection.js'
 export { createTaxonomyField } from './taxonomy/createTaxonomyField.js'
 export { getInitialTreeData } from './taxonomy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './taxonomy/getInitialTreeData.js'

@@ -3,6 +3,7 @@ import type { RelationshipField } from '../fields/config/types.js'
 import type { SanitizedRelatedCollection } from './types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
+import { miniChalk as chalk } from '../utilities/miniChalk.js'
 import { getTaxonomyFieldName } from './constants.js'
 
 /**
@@ -17,7 +18,7 @@ import { getTaxonomyFieldName } from './constants.js'
  * Throws an error if a related collection is missing the required taxonomy field.
  */
 export const validateTaxonomyFields = (config: Config): void => {
-  const taxonomyCollections = config.collections?.filter((c) => c.taxonomy) || []
+  const taxonomyCollections = config.collections?.filter((col) => col.taxonomy) || []
 
   for (const taxonomyCollection of taxonomyCollections) {
     const taxonomy = taxonomyCollection.taxonomy
@@ -40,9 +41,13 @@ export const validateTaxonomyFields = (config: Config): void => {
       const relatedCollection = config.collections?.find((c) => c.slug === relatedSlug)
 
       if (!relatedCollection) {
+        console.error(
+          `\n${chalk.redBold('Taxonomy Configuration Error')}\n\n` +
+            `Taxonomy ${chalk.cyan(`"${taxonomyCollection.slug}"`)} references unknown collection ${chalk.yellow(`"${relatedSlug}"`)} in relatedCollections.\n` +
+            `${chalk.dim('Make sure the collection exists.')}\n`,
+        )
         throw new Error(
-          `Taxonomy "${taxonomyCollection.slug}" references unknown collection "${relatedSlug}" in relatedCollections. ` +
-            `Make sure the collection exists.`,
+          `Taxonomy "${taxonomyCollection.slug}" references unknown collection "${relatedSlug}"`,
         )
       }
 
@@ -54,19 +59,33 @@ export const validateTaxonomyFields = (config: Config): void => {
       ) as RelationshipField | undefined
 
       if (!taxonomyField) {
+        console.error(
+          `\n${chalk.redBold('Taxonomy Configuration Error')}\n\n` +
+            `Collection ${chalk.cyan(`"${relatedSlug}"`)} is listed in taxonomy ${chalk.cyan(`"${taxonomyCollection.slug}"`)} relatedCollections\n` +
+            `but is missing the required field ${chalk.yellow(`"${expectedFieldName}"`)}.\n\n` +
+            `${chalk.dim(`Add the field to your "${relatedSlug}" collection:`)}\n\n` +
+            `  ${chalk.cyan('import')} { createTaxonomyField } ${chalk.cyan('from')} ${chalk.yellow("'payload'")}\n\n` +
+            `  fields: [\n` +
+            `    ${chalk.dim('// ...other fields')}\n` +
+            `    createTaxonomyField({ taxonomySlug: ${chalk.yellow(`'${taxonomyCollection.slug}'`)} }),\n` +
+            `  ]\n`,
+        )
         throw new Error(
-          `Collection "${relatedSlug}" is listed in taxonomy "${taxonomyCollection.slug}" relatedCollections ` +
-            `but does not have the required taxonomy field "${expectedFieldName}". ` +
-            `Add the field using: createTaxonomyField({ taxonomySlug: '${taxonomyCollection.slug}' })`,
+          `Collection "${relatedSlug}" is missing required taxonomy field "${expectedFieldName}"`,
         )
       }
 
       // Validate the field points to the correct taxonomy
       if (taxonomyField.relationTo !== taxonomyCollection.slug) {
+        console.error(
+          `\n${chalk.redBold('Taxonomy Configuration Error')}\n\n` +
+            `Collection ${chalk.cyan(`"${relatedSlug}"`)} has a field named ${chalk.yellow(`"${expectedFieldName}"`)}\n` +
+            `but it points to ${chalk.red(`"${taxonomyField.relationTo}"`)} instead of ${chalk.cyan(`"${taxonomyCollection.slug}"`)}.\n\n` +
+            `${chalk.dim('Update the field to use the correct taxonomy:')}\n\n` +
+            `  createTaxonomyField({ taxonomySlug: ${chalk.yellow(`'${taxonomyCollection.slug}'`)} })\n`,
+        )
         throw new Error(
-          `Collection "${relatedSlug}" has a field named "${expectedFieldName}" but it points to ` +
-            `"${taxonomyField.relationTo}" instead of "${taxonomyCollection.slug}". ` +
-            `Use createTaxonomyField({ taxonomySlug: '${taxonomyCollection.slug}' }) to create the correct field.`,
+          `Collection "${relatedSlug}" field "${expectedFieldName}" points to wrong taxonomy`,
         )
       }
 

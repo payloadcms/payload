@@ -11,7 +11,7 @@ export type CreateTaxonomyFieldOptions = {
    * The slug of the taxonomy collection this field references
    */
   taxonomySlug: string
-} & Omit<Partial<SingleRelationshipField>, 'name' | 'relationTo' | 'type'>
+} & Pick<Partial<SingleRelationshipField>, 'admin' | 'hasMany' | 'label' | 'required'>
 
 /**
  * Configuration options for taxonomy feature
@@ -27,7 +27,7 @@ export type TaxonomyConfig = {
    */
   icon?: string
   /**
-   * Collection slugs that reference this taxonomy.
+   * Collection slugs that reference this taxonomy (required).
    * Each collection must include a taxonomy field created with `createTaxonomyField()`.
    *
    * After sanitization, this becomes a Record with field info.
@@ -43,7 +43,7 @@ export type TaxonomyConfig = {
    *   createTaxonomyField({ taxonomySlug: 'tags', hasMany: true }),
    * ]
    */
-  relatedCollections?: Record<string, SanitizedRelatedCollection> | string[]
+  relatedCollections: Record<string, SanitizedRelatedCollection> | string[]
   /**
    * Maximum number of children to load per parent node in the tree
    * Controls initial load and pagination for tree views

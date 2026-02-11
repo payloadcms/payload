@@ -6,7 +6,7 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import { createTaxonomyField } from 'payload'
+import { createTaxonomyCollection, createTaxonomyField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -18,8 +18,28 @@ export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
 export const categoriesSlug = 'categories'
 
+// Categories taxonomy with custom configuration
+export const Categories = createTaxonomyCollection({
+  slug: categoriesSlug,
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  taxonomy: {
+    icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+    parentFieldName: 'parentCategory',
+    relatedCollections: [postsSlug],
+  },
+})
+
 // Tags taxonomy collection
-export const Tags: CollectionConfig = {
+export const Tags = createTaxonomyCollection({
   slug: tagsSlug,
   admin: {
     useAsTitle: 'name',
@@ -38,9 +58,9 @@ export const Tags: CollectionConfig = {
   taxonomy: {
     relatedCollections: [postsSlug, pagesSlug, mediaSlug],
   },
-}
+})
 
-// Posts collection that references tags
+// Posts collection that references tags and categories
 export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -57,6 +77,7 @@ export const Posts: CollectionConfig = {
       type: 'textarea',
     },
     createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
+    createTaxonomyField({ taxonomySlug: categoriesSlug }),
   ],
 }
 
@@ -97,32 +118,13 @@ export const Media: CollectionConfig = {
   upload: true,
 }
 
-// Categories taxonomy with custom configuration
-export const Categories: CollectionConfig = {
-  slug: 'categories',
-  admin: {
-    useAsTitle: 'name',
-  },
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-  taxonomy: {
-    icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
-    parentFieldName: 'parentCategory',
-  },
-}
-
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Tags, Posts, Pages, Media, Categories],
+  collections: [Posts, Pages, Media, Categories, Tags],
   debug: true,
   onInit: async (payload) => {
     await payload.create({
