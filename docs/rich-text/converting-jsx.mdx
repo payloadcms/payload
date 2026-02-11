@@ -81,97 +81,31 @@ export const MyComponent: React.FC<{
 }
 ```
 
-### Custom Link Component
+### Custom Components
 
-By default, the link converter renders standard `<a>` elements. If you want to use a framework-specific link component (e.g. Next.js `Link`), you can pass a `LinkComponent` to `LinkJSXConverter`:
+Both `LinkJSXConverter` and `UploadJSXConverter` accept optional component props, so you can use framework-specific components (e.g. `next/link`, `next/image`) without overriding the full converter logic:
 
 ```tsx
-import type {
-  DefaultNodeTypes,
-  SerializedLinkNode,
-} from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
 import {
   type JSXConvertersFunction,
   LinkJSXConverter,
-  RichText,
+  UploadJSXConverter,
 } from '@payloadcms/richtext-lexical/react'
+import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
 
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { relationTo, value } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-
-  switch (relationTo) {
-    case 'posts':
-      return `/posts/${slug}`
-    case 'pages':
-      return `/${slug}`
-    default:
-      return `/${relationTo}/${slug}`
-  }
-}
-
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
-  defaultConverters,
-}) => ({
+const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   ...defaultConverters,
   ...LinkJSXConverter({
-    internalDocToHref,
+    internalDocToHref: ({ linkNode }) => `/${linkNode.fields.doc?.value?.slug}`,
     LinkComponent: ({ href, children, ...rest }) => (
       <Link href={href} {...rest}>
         {children}
       </Link>
     ),
   }),
-})
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
-}
-```
-
-The `LinkComponent` receives `href`, `rel`, `target`, and `children` as props and is used for both autolink and link nodes.
-
-### Custom Upload Components
-
-The `UploadJSXConverter` accepts optional parameters for customizing how uploads are rendered:
-
-- **`ImageComponent`** – Custom component for rendering `<img>` elements. Used for images without sizes, and as the fallback inside `<picture>` for images with sizes.
-- **`LinkComponent`** – Custom component for rendering non-image file links.
-- **`buildFullUrl`** – Function that transforms upload paths into absolute URLs (e.g. for cloud storage / CDN).
-
-```tsx
-import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import {
-  type JSXConvertersFunction,
-  RichText,
-  UploadJSXConverter,
-} from '@payloadcms/richtext-lexical/react'
-import Image from 'next/image'
-import Link from 'next/link'
-import React from 'react'
-
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
-  defaultConverters,
-}) => ({
-  ...defaultConverters,
   ...UploadJSXConverter({
     buildFullUrl: (path) => `https://cdn.example.com${path}`,
-    LinkComponent: ({ href, children, ...rest }) => (
-      <Link href={href} {...rest}>
-        {children}
-      </Link>
-    ),
     ImageComponent: ({ alt, height, src, width }) => (
       <Image
         alt={alt ?? ''}
@@ -180,24 +114,26 @@ const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
         width={width ?? 0}
       />
     ),
+    LinkComponent: ({ href, children, ...rest }) => (
+      <Link href={href} {...rest}>
+        {children}
+      </Link>
+    ),
   }),
 })
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
-}
 ```
 
-<Banner type="info">
-  For images **with sizes**, the converter uses `{'<picture>'}` with `
-  {'<source>'}` tags. `ImageComponent` replaces the fallback `{'<img>'}` inside
-  `{'<picture>'}` and is also used for images without sizes. `next/image` does
-  not support `{'<picture>'}` natively, so this is the standard approach.
-</Banner>
+**`LinkJSXConverter` options:**
 
-All parameters are optional — calling `UploadJSXConverter()` with no arguments produces the same default behavior as before.
+- **`LinkComponent`** – Replaces `<a>` for both autolink and link nodes. Receives `href`, `rel`, `target`, and `children`.
+
+**`UploadJSXConverter` options:**
+
+- **`ImageComponent`** – Replaces `<img>` for images. For images with sizes, it replaces the fallback `<img>` inside `<picture>`.
+- **`LinkComponent`** – Replaces `<a>` for non-image file uploads.
+- **`buildFullUrl`** – Transforms upload paths into absolute URLs (e.g. for CDN). Applied to the main URL and all size URLs.
+
+All parameters are optional — calling `UploadJSXConverter()` with no arguments or `LinkJSXConverter({})` produces the same defaults as before.
 
 ### Lexical Blocks
 
@@ -255,7 +191,7 @@ export const MyComponent: React.FC<{
 
 You can override any of the default JSX converters by passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
 
-For common customizations like using `next/image` or `next/link`, use the built-in component props on `UploadJSXConverter` and `LinkJSXConverter` as shown in the [Custom Upload Components](#custom-upload-components) and [Custom Link Component](#custom-link-component) sections above.
+For common customizations like using `next/image` or `next/link`, use the built-in component props on `UploadJSXConverter` and `LinkJSXConverter` as shown in the [Custom Components](#custom-components) section above.
 
 For fully custom rendering logic, you can override a converter entirely by providing your own function keyed to the node type:
 
