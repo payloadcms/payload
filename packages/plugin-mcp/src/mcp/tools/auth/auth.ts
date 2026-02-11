@@ -39,7 +39,7 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
         content: [
           {
             type: 'text' as const,
-            text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }

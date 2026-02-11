@@ -166,7 +166,7 @@ export const updateResourceTool = (
               text: `Document updated successfully in collection "${collectionSlug}"!
 Updated document:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
             },
           ],
@@ -224,14 +224,14 @@ Errors: ${errors.length}
         if (docs.length > 0) {
           responseText += `\n\nUpdated documents:
 \`\`\`json
-${JSON.stringify(docs, null, 2)}
+${JSON.stringify(docs)}
 \`\`\``
         }
 
         if (errors.length > 0) {
           responseText += `\n\nErrors:
 \`\`\`json
-${JSON.stringify(errors, null, 2)}
+${JSON.stringify(errors)}
 \`\`\``
         }
 
