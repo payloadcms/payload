@@ -570,7 +570,7 @@ test.describe('Import Export Plugin', () => {
         const headerTexts = await headerCells.allTextContents()
 
         // Derived columns from toCSV should be present in the preview headers
-        expect(headerTexts).not.toContain('customRelationship_id')
+        expect(headerTexts).not.toContain('customRelationship')
         expect(headerTexts).toContain('customRelationship_id')
         expect(headerTexts).toContain('customRelationship_email')
         expect(headerTexts).toContain('customRelNameEmail_name')
