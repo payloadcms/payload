@@ -189,25 +189,16 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       { localeCodes },
     )
 
-    transformed = docs.map((doc) => {
-      const row = flattenObject({
+    // Flatten docs first without padding so dataColumns reflects what toCSV actually produced.
+    // Fields intentionally removed by toCSV (returning undefined) must stay absent here
+    // so mergeColumns can detect and remove the replaced original columns.
+    transformed = docs.map((doc) =>
+      flattenObject({
         doc,
         fields,
         toCSVFunctions,
-      })
-
-      // Pad missing schema keys with null so every row has the same columns.
-      // Skip when fields are selected — flattenObject already filters to the chosen fields.
-      if (!fields || fields.length === 0) {
-        for (const key of possibleKeys) {
-          if (!(key in row)) {
-            row[key] = null
-          }
-        }
-      }
-
-      return row
-    })
+      }),
+    )
 
     // Merge schema columns with data-discovered columns (e.g., derived columns from toCSV)
     // This ensures the preview headers match what the actual export will produce
@@ -223,6 +214,19 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         }
       }
       columns = mergeColumns(schemaColumns, dataColumns)
+    }
+
+    // Now pad rows so every row has a key for every final column.
+    // Use the computed columns list (not raw schema keys) so replaced originals stay removed.
+    if (!fields || fields.length === 0) {
+      const paddingKeys = columns ?? possibleKeys
+      for (const row of transformed) {
+        for (const key of paddingKeys) {
+          if (!(key in row)) {
+            row[key] = null
+          }
+        }
+      }
     }
   } else {
     transformed = docs.map((doc) => {

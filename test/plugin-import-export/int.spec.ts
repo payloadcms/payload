@@ -1318,6 +1318,132 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({ collection: 'pages', id: page.id })
       })
+
+      it('should keep derived columns before trailing fields and match preview column order', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Derived Position With Preview Test',
+            customRelationship: user.user.id,
+            excerpt: 'trailing field value',
+            _status: 'published',
+          },
+        })
+
+        const fields = ['id', 'title', 'customRelationship', 'excerpt']
+
+        // Export
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const exportColumns = Object.keys(data[0])
+
+        // Derived columns should appear before excerpt, not appended to the end
+        const idIdx = exportColumns.indexOf('customRelationship_id')
+        const emailIdx = exportColumns.indexOf('customRelationship_email')
+        const excerptIdx = exportColumns.indexOf('excerpt')
+
+        expect(idIdx).not.toBe(-1)
+        expect(emailIdx).not.toBe(-1)
+        expect(excerptIdx).toBeGreaterThan(emailIdx)
+        expect(excerptIdx).toBe(exportColumns.length - 1)
+
+        // Preview should produce the same column order
+        const previewResponse = await restClient
+          .POST('/exports/export-preview', {
+            body: JSON.stringify({
+              collectionSlug: 'pages',
+              fields,
+              format: 'csv',
+              where: { id: { equals: page.id } },
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((res) => res.json())
+
+        expect(previewResponse.columns).toStrictEqual(exportColumns)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should respect custom field order with toCSV field first and match preview column order', async () => {
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'Custom Order toCSV First Test',
+            customRelationship: user.user.id,
+            excerpt: 'some excerpt',
+            _status: 'published',
+          },
+        })
+
+        // Put the toCSV relationship field first
+        const fields = ['customRelationship', 'id', 'title', 'excerpt']
+
+        // Export
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields,
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const data = await readCSV(csvPath)
+        const exportColumns = Object.keys(data[0])
+
+        // Derived columns should be first since customRelationship was first in selection
+        expect(exportColumns[0]).toBe('customRelationship_id')
+        expect(exportColumns[1]).toBe('customRelationship_email')
+        expect(exportColumns[2]).toBe('id')
+        expect(exportColumns[3]).toBe('title')
+        expect(exportColumns[4]).toBe('excerpt')
+
+        // Verify data is present
+        expect(data[0].customRelationship_id).toBeDefined()
+        expect(data[0].customRelationship_email).toBeDefined()
+
+        // Preview should produce the same column order
+        const previewResponse = await restClient
+          .POST('/exports/export-preview', {
+            body: JSON.stringify({
+              collectionSlug: 'pages',
+              fields,
+              format: 'csv',
+              where: { id: { equals: page.id } },
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((res) => res.json())
+
+        expect(previewResponse.columns).toStrictEqual(exportColumns)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
     })
 
     describe('date field export', () => {
@@ -5349,6 +5475,58 @@ describe('@payloadcms/plugin-import-export', () => {
 
       // excerpt should still be present
       expect(doc.excerpt).toBe('preview excerpt')
+
+      await payload.delete({ collection: 'pages', id: page.id })
+    })
+
+    it('should remove replaced columns from preview when no fields are selected', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Preview No Fields toCSV Test',
+          customRelationship: user.user.id,
+          customRelNameEmail: user.user.id,
+          customRelIdName: user.user.id,
+          _status: 'published',
+        },
+      })
+
+      const response = await restClient
+        .POST('/exports/export-preview', {
+          body: JSON.stringify({
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: { id: { equals: page.id } },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then((res) => res.json())
+
+      expect(response.docs).toHaveLength(1)
+
+      // Original columns replaced by toCSV should not appear in columns or doc data
+      const responseColumns: string[] = response.columns
+      const doc = response.docs[0]
+
+      // customRelationship → replaced by _id and _email
+      expect(responseColumns).toContain('customRelationship_id')
+      expect(responseColumns).toContain('customRelationship_email')
+      expect(responseColumns).not.toContain('customRelationship')
+      expect(doc).not.toHaveProperty('customRelationship')
+
+      // customRelNameEmail → replaced by _name and _email
+      expect(responseColumns).toContain('customRelNameEmail_name')
+      expect(responseColumns).toContain('customRelNameEmail_email')
+      expect(responseColumns).not.toContain('customRelNameEmail')
+      expect(doc).not.toHaveProperty('customRelNameEmail')
+
+      // customRelIdName → replaced by _id and _locationName
+      expect(responseColumns).toContain('customRelIdName_id')
+      expect(responseColumns).toContain('customRelIdName_locationName')
+      expect(responseColumns).not.toContain('customRelIdName')
+      expect(doc).not.toHaveProperty('customRelIdName')
 
       await payload.delete({ collection: 'pages', id: page.id })
     })
