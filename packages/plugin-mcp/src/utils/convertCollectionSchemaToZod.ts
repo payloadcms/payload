@@ -1,6 +1,8 @@
 import type { JSONSchema4 } from 'json-schema'
+import type { Field } from 'payload'
 
 import { jsonSchemaToZod } from 'json-schema-to-zod'
+import { fieldIsVirtual, flattenAllFields } from 'payload/shared'
 import * as ts from 'typescript'
 import { z } from 'zod'
 
@@ -50,7 +52,7 @@ function simplifyRelationshipFields(schema: JSONSchema4): JSONSchema4 {
   return processed
 }
 
-export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
+export const convertCollectionSchemaToZod = (schema: JSONSchema4, fields?: Field[]) => {
   // Clone to avoid mutating the original schema (used elsewhere for tool listing)
   const schemaClone = JSON.parse(JSON.stringify(schema)) as JSONSchema4
 
@@ -58,8 +60,23 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
   delete schemaClone?.properties?.id
   delete schemaClone?.properties?.createdAt
   delete schemaClone?.properties?.updatedAt
+
+  // Remove virtual fields (join fields and fields with virtual: true)
+  const virtualFieldNames = new Set<string>()
+  if (fields) {
+    const flatFields = flattenAllFields({ fields })
+    for (const field of flatFields) {
+      if ('name' in field && (fieldIsVirtual(field) || field.type === 'join')) {
+        virtualFieldNames.add(field.name)
+        delete schemaClone?.properties?.[field.name]
+      }
+    }
+  }
+
   if (Array.isArray(schemaClone.required)) {
-    schemaClone.required = schemaClone.required.filter((field) => field !== 'id')
+    schemaClone.required = schemaClone.required.filter(
+      (field) => field !== 'id' && !virtualFieldNames.has(field),
+    )
     if (schemaClone.required.length === 0) {
       delete schemaClone.required
     }

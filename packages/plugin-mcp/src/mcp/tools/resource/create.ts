@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { Field, PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
@@ -17,6 +17,7 @@ export const createResourceTool = (
   collectionSlug: string,
   collections: PluginMCPServerConfig['collections'],
   schema: JSONSchema4,
+  fields?: Field[],
 ) => {
   const tool = async (
     data: string,
@@ -140,7 +141,7 @@ ${JSON.stringify(result, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    const convertedFields = convertCollectionSchemaToZod(schema)
+    const convertedFields = convertCollectionSchemaToZod(schema, fields)
 
     // Create a new schema that combines the converted fields with create-specific parameters
     const createResourceSchema = z.object({

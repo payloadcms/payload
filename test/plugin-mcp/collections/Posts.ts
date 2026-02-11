@@ -32,6 +32,17 @@ export const Posts: CollectionConfig = {
         description: 'The author of the post',
       },
     },
+    {
+      name: 'relatedProducts',
+      type: 'join',
+      collection: 'products',
+      on: 'relatedPost',
+    },
+    {
+      name: 'computedLabel',
+      type: 'text',
+      virtual: true,
+    },
   ],
   hooks: {
     beforeRead: [
