@@ -15,7 +15,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   access: getAccess(config),
   admin: {
     defaultColumns: ['title', 'isShared', 'access', 'where', 'columns', 'groupBy'],
-    hidden: true,
+    // hidden: true,
     useAsTitle: 'title',
   },
   fields: [
@@ -109,7 +109,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       name: 'relatedCollection',
       type: 'select',
       admin: {
-        hidden: true,
+        // hidden: true,
       },
       options: config.collections
         ? config.collections.reduce((acc, collection) => {
