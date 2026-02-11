@@ -23,12 +23,6 @@ export type GetSchemaColumnsArgs = {
    * Available locale codes from config. Required when locale='all'.
    */
   localeCodes?: string[]
-  /**
-   * Set of auto-generated timezone companion field names (from collectTimezoneCompanionFields).
-   * These fields are excluded unless explicitly selected.
-   * If not provided, no timezone filtering is applied.
-   */
-  timezoneCompanionFields?: Set<string>
 }
 
 /**
@@ -49,7 +43,6 @@ export const getSchemaColumns = ({
   fields: selectedFields,
   locale,
   localeCodes,
-  timezoneCompanionFields,
 }: GetSchemaColumnsArgs): string[] => {
   const hasVersions = Boolean(collectionConfig.versions)
 
@@ -69,7 +62,7 @@ export const getSchemaColumns = ({
 
   // Filter to user-selected fields if specified
   if (selectedFields && selectedFields.length > 0) {
-    schemaColumns = filterToSelectedFields(schemaColumns, selectedFields, timezoneCompanionFields)
+    schemaColumns = filterToSelectedFields(schemaColumns, selectedFields)
   }
 
   // Remove disabled fields
@@ -211,13 +204,14 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
 /**
  * Filters schema columns to only include those matching user-selected fields.
  * Preserves the order specified by the user in selectedFields.
- * Handles nested field selection (e.g., 'group.value' includes 'group_value' and 'group_value_*')
+ *
+ * For container fields (groups, arrays, blocks) that don't produce their own column,
+ * prefix expansion finds their children (e.g., 'group' → 'group_name', 'group_age').
+ * For leaf fields (date, text, select, etc.) that produce their own exact column,
+ * only the exact match is included — preventing sibling fields with similar prefixes
+ * from being pulled in (e.g., 'dateWithTimezone' won't include 'dateWithTimezone_tz').
  */
-function filterToSelectedFields(
-  columns: string[],
-  selectedFields: string[],
-  timezoneCompanionFields?: Set<string>,
-): string[] {
+export function filterToSelectedFields(columns: string[], selectedFields: string[]): string[] {
   const result: string[] = []
   const columnsSet = new Set(columns)
 
@@ -231,33 +225,25 @@ function filterToSelectedFields(
     }
   })
 
-  // Track which timezone companion fields were explicitly selected
-  const explicitlySelectedTzFields = new Set(
-    selectedFields
-      .filter((f) => {
-        const underscored = f.replace(/\./g, '_')
-        return timezoneCompanionFields?.has(underscored)
-      })
-      .map((f) => f.replace(/\./g, '_')),
-  )
-
   // Iterate through user-specified fields in order to preserve their ordering
   for (const pattern of patterns) {
-    // First add the exact match if it exists and not already added
-    // (it may have been added as a nested field of a previous pattern)
-    if (columnsSet.has(pattern.exact) && !result.includes(pattern.exact)) {
+    const hasExactColumn = columnsSet.has(pattern.exact)
+
+    if (hasExactColumn && !result.includes(pattern.exact)) {
       result.push(pattern.exact)
     }
 
-    // Then add any columns with the prefix (nested fields)
-    for (const column of columns) {
-      if (column !== pattern.exact && column.startsWith(pattern.prefix)) {
-        // Skip auto-generated timezone companion fields unless explicitly selected
-        if (timezoneCompanionFields?.has(column) && !explicitlySelectedTzFields.has(column)) {
-          continue
-        }
-        if (!result.includes(column)) {
-          result.push(column)
+    // Only prefix-expand if the field doesn't exist as its own column.
+    // Container fields (groups, arrays, blocks) don't produce their own column —
+    // only their children do — so prefix expansion is needed to find them.
+    // Leaf fields (date, text, select, etc.) produce an exact column,
+    // so prefix expansion would incorrectly include unrelated sibling fields.
+    if (!hasExactColumn) {
+      for (const column of columns) {
+        if (column.startsWith(pattern.prefix)) {
+          if (!result.includes(column)) {
+            result.push(column)
+          }
         }
       }
     }

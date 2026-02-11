@@ -6,7 +6,6 @@ import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
-import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneCompanionFields.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFilename } from '../utilities/getFilename.js'
@@ -201,9 +200,6 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
-  // Collect auto-generated timezone companion fields from schema
-  const timezoneCompanionFields = collectTimezoneCompanionFields(collectionConfig.flattenedFields)
-
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
@@ -266,7 +262,6 @@ export const createExport = async (args: CreateExportArgs) => {
         fields,
         locale,
         localeCodes,
-        timezoneCompanionFields,
       })
 
       if (debug) {
@@ -330,7 +325,6 @@ export const createExport = async (args: CreateExportArgs) => {
               flattenObject({
                 doc,
                 fields,
-                timezoneCompanionFields,
                 toCSVFunctions,
               }),
             ),
@@ -429,7 +423,6 @@ export const createExport = async (args: CreateExportArgs) => {
           flattenObject({
             doc,
             fields,
-            timezoneCompanionFields,
             toCSVFunctions,
           }),
         )
@@ -472,7 +465,6 @@ export const createExport = async (args: CreateExportArgs) => {
       fields,
       locale,
       localeCodes,
-      timezoneCompanionFields,
     })
 
     // Merge schema columns with data-discovered columns

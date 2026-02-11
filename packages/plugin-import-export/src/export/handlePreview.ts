@@ -11,7 +11,6 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
-import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneCompanionFields.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
@@ -120,11 +119,6 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   const disabledFields =
     targetCollection.config.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
-  // Collect auto-generated timezone companion fields from schema
-  const timezoneCompanionFields = collectTimezoneCompanionFields(
-    targetCollection.config.flattenedFields,
-  )
-
   // Compute schema-based columns for CSV (provides base ordering and handles empty exports)
   const schemaColumns = isCSV
     ? getSchemaColumns({
@@ -133,7 +127,6 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
         fields,
         locale: locale ?? undefined,
         localeCodes,
-        timezoneCompanionFields,
       })
     : undefined
 
@@ -200,7 +193,6 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       const row = flattenObject({
         doc,
         fields,
-        timezoneCompanionFields,
         toCSVFunctions,
       })
 
