@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "3.69.0",
+  "version": "3.76.1",
   "description": "Stripe plugin for Payload",
   "keywords": [
     "payload",
@@ -72,8 +72,8 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@types/lodash.get": "^4.4.7",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },

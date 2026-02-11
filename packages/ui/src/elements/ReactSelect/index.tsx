@@ -144,6 +144,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     if (filterOption && !filterOption(null, inputValue)) {
       return
     }
+    if (event.nativeEvent.isComposing) {
+      return
+    }
     switch (event.key) {
       case 'Enter':
       case 'Tab':

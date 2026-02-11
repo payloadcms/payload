@@ -1,6 +1,6 @@
 import { TEMPLATES_DIR } from '@tools/constants'
 import chalk from 'chalk'
-import { execSync } from 'child_process'
+import { execSync, spawn } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 
@@ -10,12 +10,16 @@ main().catch((error) => {
 })
 
 async function main() {
-  const templateName = process.argv[2]
+  const args = process.argv.slice(2)
+  const allowWarnings = args.includes('--allow-warnings')
+  const positionalArgs = args.filter((arg) => !arg.startsWith('--'))
+
+  const templateName = positionalArgs[0]
   if (!templateName) {
     throw new Error('Please provide a template name')
   }
   const templatePath = path.join(TEMPLATES_DIR, templateName)
-  const databaseConnection = process.argv[3] || 'mongodb://127.0.0.1/your-database-name'
+  const databaseConnection = positionalArgs[1] || 'mongodb://127.0.0.1/your-database-name'
 
   console.log({
     templatePath,
@@ -94,13 +98,67 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
     execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
   }
 
-  execSync('pnpm --ignore-workspace run build', execOpts)
+  await runBuildWithWarningsCheck({ cwd: templatePath, allowWarnings })
 
   header(`\n🎉 Done!`)
 }
 
 function header(message: string, opts?: { enable?: boolean }) {
   console.log(chalk.bold.green(`${message}\n`))
+}
+
+/**
+ *
+ * Runs the build command and checks for warnings. If there are any warnings, and the user
+ * has not allowed them, the build will fail.
+ *
+ * This ensures that if any new code introduces warnings in the template build process, it will fail our CI.
+ * Without this, the warnings will be ignored and the build will pass, even if
+ * the new code introduces warnings.
+ */
+async function runBuildWithWarningsCheck(args: {
+  allowWarnings: boolean
+  cwd: string
+}): Promise<void> {
+  const { allowWarnings, cwd } = args
+
+  return new Promise((resolve, reject) => {
+    const buildProcess = spawn('pnpm', ['--ignore-workspace', 'run', 'build'], {
+      cwd,
+      shell: true,
+    })
+
+    let output = ''
+
+    buildProcess.stdout.on('data', (data: Buffer) => {
+      process.stdout.write(data)
+      output += data.toString()
+    })
+
+    buildProcess.stderr.on('data', (data: Buffer) => {
+      process.stderr.write(data)
+      output += data.toString()
+    })
+
+    buildProcess.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`Build failed with exit code ${code}`))
+        return
+      }
+
+      if (!allowWarnings && output.includes('Compiled with warnings')) {
+        console.error(
+          chalk.red(
+            '\n❌ Build compiled with warnings. Use --allow-warnings to bypass this check.',
+          ),
+        )
+        reject(new Error('Build compiled with warnings'))
+        return
+      }
+
+      resolve()
+    })
+  })
 }
 
 /**

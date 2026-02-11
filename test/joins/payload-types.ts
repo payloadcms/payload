@@ -93,6 +93,7 @@ export interface Config {
     'example-posts': ExamplePost;
     folderPoly1: FolderPoly1;
     folderPoly2: FolderPoly2;
+    'payload-kv': PayloadKv;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -104,6 +105,7 @@ export interface Config {
     };
     categories: {
       relatedPosts: 'posts';
+      noRowTypes: 'posts';
       hasManyPosts: 'posts';
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
@@ -121,6 +123,8 @@ export interface Config {
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
+      polymorphicJoin: 'posts' | 'versions';
+      polymorphicJoinNoRowTypes: 'posts' | 'versions';
     };
     uploads: {
       relatedPosts: 'posts';
@@ -184,6 +188,7 @@ export interface Config {
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
     folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
     folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -192,12 +197,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -249,6 +253,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -384,6 +389,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  noRowTypes?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   /**
    * Static Description
    */
@@ -431,6 +441,34 @@ export interface Category {
   };
   blocksPosts?: {
     docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoin?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinNoRowTypes?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -491,16 +529,6 @@ export interface HiddenPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "singular".
- */
-export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
  */
 export interface Version {
@@ -533,6 +561,16 @@ export interface CategoriesVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -822,6 +860,23 @@ export interface FolderPoly2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1073,6 +1128,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  noRowTypes?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
   hiddenPosts?: T;
@@ -1086,6 +1142,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
+  polymorphicJoin?: T;
+  polymorphicJoinNoRowTypes?: T;
   polymorphic?: T;
   polymorphics?: T;
   localizedPolymorphic?: T;
@@ -1343,6 +1401,14 @@ export interface FolderPoly2Select<T extends boolean = true> {
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

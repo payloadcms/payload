@@ -22,6 +22,10 @@ type Props = {
    * Slug of the variant options collection, defaults to 'variantOptions'.
    */
   variantOptionsSlug?: string
+  /**
+   * Slug of the variant types collection, defaults to 'variantTypes'.
+   */
+  variantTypesSlug?: string
 }
 
 export const createVariantsCollection: (props: Props) => CollectionConfig = (props) => {
@@ -31,6 +35,7 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
     inventory = true,
     productsSlug = 'products',
     variantOptionsSlug = 'variantOptions',
+    variantTypesSlug = 'variantTypes',
   } = props || {}
   const { supportedCurrencies } = currenciesConfig || {}
 
@@ -68,11 +73,15 @@ export const createVariantsCollection: (props: Props) => CollectionConfig = (pro
           },
         },
       },
+      custom: {
+        productsSlug,
+        variantTypesSlug,
+      },
       hasMany: true,
       label: 'Variant options',
       relationTo: variantOptionsSlug,
       required: true,
-      validate: validateOptions(),
+      validate: validateOptions({ productsCollectionSlug: productsSlug }),
     },
     ...(inventory ? [inventoryField()] : []),
   ]

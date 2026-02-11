@@ -1,6 +1,36 @@
 import { z } from 'zod'
 
 export const toolSchemas = {
+  findGlobal: {
+    description: 'Find a Payload global singleton configuration.',
+    parameters: z.object({
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
+    }),
+  },
+
   findResources: {
     description: 'Find documents in a collection by ID or where clause using Find or FindByID.',
     parameters: z.object({
@@ -9,6 +39,20 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: specific document ID to retrieve. If not provided, returns all documents',
+        ),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships (default: 0)'),
+      draft: z
+        .boolean()
+        .optional()
+        .describe(
+          'Optional: Whether the document should be queried from the versions table/collection or not.',
         ),
       fallbackLocale: z
         .string()
@@ -35,6 +79,12 @@ export const toolSchemas = {
         .optional()
         .default(1)
         .describe('Page number for pagination (default: 1)'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       sort: z
         .string()
         .optional()
@@ -52,6 +102,14 @@ export const toolSchemas = {
     description: 'Create a document in a collection.',
     parameters: z.object({
       data: z.string().describe('JSON string containing the data for the new document'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships in response (default: 0)'),
       draft: z
         .boolean()
         .optional()
@@ -66,6 +124,12 @@ export const toolSchemas = {
         .optional()
         .describe(
           'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
         ),
     }),
   },
@@ -108,6 +172,12 @@ export const toolSchemas = {
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        ),
       where: z
         .string()
         .optional()
@@ -144,6 +214,38 @@ export const toolSchemas = {
         .string()
         .optional()
         .describe('Optional: JSON string for where clause to delete multiple documents'),
+    }),
+  },
+
+  updateGlobal: {
+    description: 'Update a Payload global singleton configuration.',
+    parameters: z.object({
+      data: z.string().describe('JSON string containing the data to update'),
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('Depth of population for relationships'),
+      draft: z.boolean().optional().default(false).describe('Whether to update as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
+        ),
     }),
   },
 

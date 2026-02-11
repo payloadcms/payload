@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "3.69.0",
+  "version": "3.76.1",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
@@ -48,7 +48,7 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.2",
+    "@modelcontextprotocol/sdk": "~1.24.0",
     "@types/json-schema": "7.0.15",
     "@vercel/mcp-adapter": "^1.0.0",
     "json-schema-to-zod": "2.6.1",

@@ -1,20 +1,22 @@
-import type { SelectType } from 'payload'
+import type {
+  CollectionSlug,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+  UploadCollectionSlug,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
-  CollectionSlug,
-  PayloadGeneratedTypes,
   PopulateType,
   RequiredDataFromCollectionSlug,
   TransformCollectionWithSelect,
-  TypedLocale,
-  UploadCollectionSlug,
 } from '../types.js'
 
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 
 export type CreateOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 > = {
@@ -55,7 +57,7 @@ export type CreateOptions<
 }
 
 export async function create<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectType,
 >(

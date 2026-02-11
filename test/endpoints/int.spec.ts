@@ -3,12 +3,13 @@ import { type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   applicationEndpoint,
   collectionSlug,
+  customCorsEndpoint,
   globalEndpoint,
   globalSlug,
   noEndpointsCollectionSlug,
@@ -112,6 +113,20 @@ describe('Endpoints', () => {
 
       expect(response.status).toBe(200)
       expect(params).toMatchObject(data)
+    })
+
+    it('should call custom OPTIONS endpoint with custom CORS headers', async () => {
+      const response = await restClient.OPTIONS(`/${customCorsEndpoint}`)
+      const data = await response.json()
+
+      // Custom OPTIONS handler should be called and return custom response
+      expect(response.status).toBe(200)
+      expect(data.message).toBe('Custom OPTIONS handler')
+
+      // Custom CORS headers should be present
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://custom-domain.com')
+      expect(response.headers.get('Access-Control-Allow-Methods')).toBe('POST, GET, OPTIONS')
+      expect(response.headers.get('Access-Control-Allow-Headers')).toBe('X-Custom-Header')
     })
   })
 })

@@ -56,16 +56,16 @@
     "@playwright/test": "1.56.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
-    "@types/node": "^22.5.4",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/node": "22.19.9",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "copyfiles": "2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.23.0",
-    "eslint-config-next": "15.4.7",
+    "eslint-config-next": "15.4.11",
     "graphql": "^16.8.1",
     "mongodb-memory-server": "10.1.4",
-    "next": "15.4.10",
+    "next": "15.4.11",
     "open": "^10.1.0",
     "payload": "3.37.0",
     "prettier": "^3.4.2",
@@ -76,8 +76,8 @@
     "sharp": "0.34.2",
     "sort-package-json": "^2.10.0",
     "typescript": "5.7.3",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.2"
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "4.0.18"
   },
   "peerDependencies": {
     "payload": "^3.37.0"

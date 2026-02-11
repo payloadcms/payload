@@ -46,6 +46,7 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
 no-restrict-file-*
 
@@ -262,6 +263,7 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+!.vscode/mcp.json
 
 # Local History for Visual Studio Code
 .history/
@@ -344,6 +346,14 @@ test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
 /media-documents
+/media-with-always-insert-fields
+
 
 
 licenses.csv
+
+# SQLite DB
+payload.db
+
+# Screenshots created by Playwright MCP
+.playwright-mcp

@@ -12,6 +12,7 @@ import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
+import { optionsAreEqual } from './optionsAreEqual.js'
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -178,19 +179,7 @@ function generateAuthEntitySchemas(entities: SanitizedCollectionConfig[]): JSONS
   const properties: JSONSchema4[] = [...entities]
     .filter(({ auth }) => Boolean(auth))
     .map(({ slug }) => {
-      return {
-        allOf: [
-          { $ref: `#/definitions/${slug}` },
-          {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              collection: { type: 'string', enum: [slug] },
-            },
-            required: ['collection'],
-          },
-        ],
-      }
+      return { $ref: `#/definitions/${slug}` }
     }, {})
 
   return {
@@ -662,8 +651,15 @@ export function fieldsToJSONSchema(
             const isTimezoneField =
               previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
+            // Check if the timezone field's options match the global config's supported timezones
+            const hasMatchingGlobalTimezones =
+              isTimezoneField &&
+              config &&
+              optionsAreEqual(field.options, config.admin?.timezones?.supportedTimezones)
+
             // Timezone selects should reference the supportedTimezones definition
-            if (isTimezoneField) {
+            // only if the field's options match the global config
+            if (isTimezoneField && hasMatchingGlobalTimezones) {
               fieldSchema = {
                 $ref: `#/definitions/supportedTimezones`,
               }
@@ -823,17 +819,30 @@ export function entityToJSONSchema(
     })
   }
 
+  const isAuthCollection = 'auth' in entity && entity.auth
+
+  const fieldsSchema = fieldsToJSONSchema(
+    collectionIDFieldTypes,
+    mutableFields,
+    interfaceNameDefinitions,
+    config,
+    i18n,
+  )
+
+  // Add collection property to auth collections
+  if (isAuthCollection) {
+    fieldsSchema.properties = {
+      ...fieldsSchema.properties,
+      collection: { type: 'string', enum: [entity.slug] },
+    }
+    fieldsSchema.required = [...(fieldsSchema.required || []), 'collection']
+  }
+
   const jsonSchema: JSONSchema4 = {
     type: 'object',
     additionalProperties: false,
     title,
-    ...fieldsToJSONSchema(
-      collectionIDFieldTypes,
-      mutableFields,
-      interfaceNameDefinitions,
-      config,
-      i18n,
-    ),
+    ...fieldsSchema,
   }
 
   const entityDescription = entityOrFieldToJsDocs({ entity, i18n })
@@ -1269,6 +1278,14 @@ export function configToJSONSchema(
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
+      ...(config.typescript?.strictDraftTypes
+        ? {
+            strictDraftTypes: {
+              type: 'boolean',
+              const: true,
+            },
+          }
+        : {}),
       user: generateAuthEntitySchemas(config.collections),
     },
     required: [
@@ -1279,6 +1296,7 @@ export function configToJSONSchema(
       'collectionsSelect',
       'collectionsJoins',
       'globalsSelect',
+      ...(config.typescript?.strictDraftTypes ? ['strictDraftTypes'] : []),
       'globals',
       'auth',
       'db',
