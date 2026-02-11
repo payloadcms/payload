@@ -189,9 +189,8 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       { localeCodes },
     )
 
-    // Flatten docs first without padding so dataColumns reflects what toCSV actually produced.
-    // Fields intentionally removed by toCSV (returning undefined) must stay absent here
-    // so mergeColumns can detect and remove the replaced original columns.
+    // Flatten docs without padding yet. This preserves the exact keys produced by toCSV hooks,
+    // allowing mergeColumns to detect which schema columns were replaced with derived ones.
     transformed = docs.map((doc) =>
       flattenObject({
         doc,
@@ -216,8 +215,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       columns = mergeColumns(schemaColumns, dataColumns)
     }
 
-    // Now pad rows so every row has a key for every final column.
-    // Use the computed columns list (not raw schema keys) so replaced originals stay removed.
+    // Pad rows with null for missing columns (uses merged columns, not raw schema)
     if (!fields || fields.length === 0) {
       const paddingKeys = columns ?? possibleKeys
       for (const row of transformed) {

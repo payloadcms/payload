@@ -205,11 +205,10 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
  * Filters schema columns to only include those matching user-selected fields.
  * Preserves the order specified by the user in selectedFields.
  *
- * For container fields (groups, arrays, blocks) that don't produce their own column,
- * prefix expansion finds their children (e.g., 'group' → 'group_name', 'group_age').
- * For leaf fields (date, text, select, etc.) that produce their own exact column,
- * only the exact match is included — preventing sibling fields with similar prefixes
- * from being pulled in (e.g., 'dateWithTimezone' won't include 'dateWithTimezone_tz').
+ * Container fields (groups, arrays, blocks) don't produce their own column, so we prefix-expand
+ * to find their children (e.g., 'group' → 'group_name', 'group_age').
+ * Leaf fields (date, text, select) produce an exact column, so we only match exactly to avoid
+ * including siblings with similar prefixes (e.g., 'dateWithTimezone' won't pull 'dateWithTimezone_tz').
  */
 export function filterToSelectedFields(columns: string[], selectedFields: string[]): string[] {
   const result: string[] = []
@@ -233,11 +232,7 @@ export function filterToSelectedFields(columns: string[], selectedFields: string
       result.push(pattern.exact)
     }
 
-    // Only prefix-expand if the field doesn't exist as its own column.
-    // Container fields (groups, arrays, blocks) don't produce their own column —
-    // only their children do — so prefix expansion is needed to find them.
-    // Leaf fields (date, text, select, etc.) produce an exact column,
-    // so prefix expansion would incorrectly include unrelated sibling fields.
+    // Only prefix-expand if no exact column match exists (containers need expansion, leaves don't)
     if (!hasExactColumn) {
       for (const column of columns) {
         if (column.startsWith(pattern.prefix)) {
