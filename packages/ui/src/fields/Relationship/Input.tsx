@@ -739,7 +739,26 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     valueRef.current = value
   }, [value])
 
-  const valueToRender = findOptionsByValue({ allowEdit, options, value })
+  const optionsWithIdx = useMemo(
+    () =>
+      options.map((g, gi) => ({
+        ...g,
+        options: g.options?.map((o, oi) => ({ ...o, _idx: `${gi}-${oi}` })) ?? [],
+      })),
+    [options],
+  )
+  let valueToRender = findOptionsByValue({ allowEdit, options: optionsWithIdx, value })
+  // Ensure unique keys when same option appears multiple times in value (e.g. duplicate user)
+  if (Array.isArray(valueToRender)) {
+    valueToRender = valueToRender.map((opt, i) =>
+      opt
+        ? {
+            ...opt,
+            _idx: `${typeof opt._idx === 'string' ? opt._idx : 'v'}_${i}`,
+          }
+        : opt,
+    )
+  }
 
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') {
     valueToRender.value = null
@@ -791,13 +810,15 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               disabled={readOnly || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
-              getOptionValue={(option: ValueWithRelation) => {
+              getOptionValue={(option: { _idx?: string } & ValueWithRelation) => {
                 if (!option) {
                   return undefined
                 }
-                return hasMany && Array.isArray(relationTo)
-                  ? `${option.relationTo}_${option.value}`
-                  : (option.value as string)
+                const k =
+                  hasMany && Array.isArray(relationTo)
+                    ? `${option.relationTo}_${option.value}`
+                    : String(option.value)
+                return option._idx != null ? `${k}_${option._idx}` : k
               }}
               isLoading={appearance === 'select' && isLoading}
               isMulti={hasMany}
@@ -895,8 +916,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               options={
                 typeof formatDisplayedOptions === 'function'
-                  ? formatDisplayedOptions(options)
-                  : options
+                  ? formatDisplayedOptions(optionsWithIdx)
+                  : optionsWithIdx
               }
               placeholder={placeholder}
               showError={showError}
