@@ -50,6 +50,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     listMenuItems,
+    listSelectionItems,
     newDocumentURL,
     queryPreset,
     queryPresetPermissions,
@@ -184,6 +185,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 isTrashEnabled={isTrashEnabled}
+                listSelectionItems={listSelectionItems}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
@@ -251,6 +253,7 @@ export function DefaultListView(props: ListViewClientProps) {
                           disableBulkDelete={disableBulkDelete}
                           disableBulkEdit={disableBulkEdit}
                           label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          ListSelectionItems={listSelectionItems}
                           showSelectAllAcrossPages={!isGroupingBy}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>
