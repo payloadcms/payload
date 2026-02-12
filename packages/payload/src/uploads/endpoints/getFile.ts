@@ -129,6 +129,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
   headers.set('Content-Type', mimeType)
   headers.set('Accept-Ranges', 'bytes')
 
+  if (mimeType === 'image/svg+xml') {
+    headers.set('Content-Security-Policy', "script-src 'none'")
+  }
+
   let data: ReadableStream
   let status: number
   const isPartial = rangeResult.type === 'partial'

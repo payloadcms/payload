@@ -998,6 +998,73 @@ test.describe('Import Export Plugin', () => {
     })
   })
 
+  test.describe('toCSV Preview Customizations', () => {
+    let pagesURL: AdminUrlUtil
+
+    test.beforeAll(async () => {
+      pagesURL = new AdminUrlUtil(serverURL, 'pages')
+
+      // Create a page with custom relationship fields for toCSV testing
+      const users = await payload.find({ collection: 'users', limit: 1 })
+      const userId = users.docs[0]!.id
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'E2E toCSV Preview Test',
+          customRelationship: userId,
+          customRelNameEmail: userId,
+          customRelIdName: userId,
+          _status: 'published',
+        },
+      })
+    })
+
+    test.afterAll(async () => {
+      await payload.delete({
+        collection: 'pages',
+        where: { title: { equals: 'E2E toCSV Preview Test' } },
+      })
+    })
+
+    test('should show derived columns instead of original columns in export preview', async () => {
+      await page.goto(pagesURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Pages',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await expect(async () => {
+        const headerCells = page.locator('.export-preview table thead th')
+        const headerTexts = await headerCells.allTextContents()
+
+        // Derived columns from toCSV should be present in the preview headers
+        expect(headerTexts).not.toContain('customRelationship')
+        expect(headerTexts).toContain('customRelationship_id')
+        expect(headerTexts).toContain('customRelationship_email')
+        expect(headerTexts).toContain('customRelNameEmail_name')
+        expect(headerTexts).toContain('customRelNameEmail_email')
+        expect(headerTexts).toContain('customRelIdName_id')
+        expect(headerTexts).toContain('customRelIdName_locationName')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+    })
+  })
+
   test.describe('Max Limit Enforcement', () => {
     let postsWithLimitsURL: AdminUrlUtil
     let postsWithLimitsExportURL: AdminUrlUtil

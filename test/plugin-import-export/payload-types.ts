@@ -195,6 +195,8 @@ export interface Page {
   localized?: string | null;
   custom?: string | null;
   customRelationship?: (string | null) | User;
+  customRelNameEmail?: (string | null) | User;
+  customRelIdName?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -1055,6 +1057,8 @@ export interface PagesSelect<T extends boolean = true> {
   localized?: T;
   custom?: T;
   customRelationship?: T;
+  customRelNameEmail?: T;
+  customRelIdName?: T;
   group?:
     | T
     | {
