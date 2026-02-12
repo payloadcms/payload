@@ -615,9 +615,10 @@ jobs:
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} ${{ steps.db.outputs.POSTGRES_URL }}
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
+          DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Store Playwright's Version
         run: |
