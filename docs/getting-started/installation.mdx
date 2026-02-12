@@ -10,13 +10,19 @@ keywords: documentation, getting started, guide, Content Management System, cms,
 
 Payload requires the following software:
 
-- Any JavaScript package manager (pnpm, npm, or yarn - pnpm is preferred)
+- Any JavaScript package manager (pnpm, npm, or yarn 2+ - pnpm is preferred, yarn 1.x is not supported)
 - Node.js version 20.9.0+
+- Next.js (one of the following version ranges):
+  - `15.2.9` - `15.2.x`
+  - `15.3.9` - `15.3.x`
+  - `15.4.11` - `15.4.x`
+  - `16.2.0-canary.10`+
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
   **Important:** Before proceeding any further, please ensure that you have the
-  above requirements met.
+  above requirements met. Not all Next.js 15/16 releases are compatible — make
+  sure you're using one of the supported version ranges listed above.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -34,10 +40,6 @@ Then just follow the prompts! You'll get set up with a new folder and a function
 Adding Payload to an existing Next.js app is super straightforward. You can either run the `npx create-payload-app` command inside your Next.js project's folder, or manually install Payload by following the steps below.
 
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
-
-<Banner type="info">
-  **Note:** Next.js version 15 or higher is required for Payload.
-</Banner>
 
 #### 1. Install the relevant packages
 
