@@ -8,6 +8,9 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { loginClientSide } from '../__helpers/e2e/auth/login.js'
+import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -15,10 +18,6 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { loginClientSide } from '../__helpers/e2e/auth/login.js'
-import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
-import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
@@ -26,8 +25,9 @@ import {
   selectInput,
 } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
@@ -883,6 +883,95 @@ test.describe('Multi Tenant', () => {
           })
         })
         .toBeFalsy()
+    })
+  })
+
+  test.describe('Client-side Login Race Condition', () => {
+    test('should not clear tenant cookie when setTenant is called before tenant options load', async () => {
+      // Find the seeded "Spicy Mac" document and its tenant ID
+      const menuItems = await payload.find({
+        collection: menuItemsSlug,
+        where: { name: { equals: 'Spicy Mac' } },
+      })
+      const spicyMacDoc = menuItems.docs[0]!
+
+      const tenantId =
+        typeof spicyMacDoc.tenant === 'object' && spicyMacDoc.tenant !== null
+          ? spicyMacDoc.tenant.id
+          : spicyMacDoc.tenant
+
+      // Clear cookies to ensure a clean state (no stale session or tenant cookie)
+      await page.context().clearCookies()
+
+      // Navigate to the login page (full page load).
+      // SSR renders TenantSelectionProviderClient with initialTenantOptions = []
+      // because no user is authenticated.
+      await page.goto(`${serverURL}/admin/login`)
+
+      // Intercept the populate-tenant-options endpoint to delay it.
+      // This keeps tenantOptions as [] after login, simulating the race window
+      // where syncTenants() hasn't resolved yet.
+      await page.route('**/populate-tenant-options*', async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, 5_000))
+        await route.continue()
+      })
+
+      try {
+        // Login via the standard login form.
+        // This triggers router.push('/') — a client-side redirect that preserves
+        // the root layout from the pre-login SSR, so initialTenantOptions stays [].
+        await page.fill('#field-email', credentials.admin.email)
+        await page.fill('#field-password', credentials.admin.password)
+        await page.click('[type=submit]')
+
+        // Wait for the dashboard to load
+        await expect(page.locator('.step-nav__home')).toBeVisible()
+
+        // Client-side navigate to the food-items collection via the nav Link
+        await openNav(page)
+        await page.locator('#nav-food-items').click()
+
+        // Wait for the list, then click the seeded document (another client-side navigation)
+        const spicyMacLink = page.locator('.cell-name a', { hasText: 'Spicy Mac' })
+        await expect(spicyMacLink).toBeVisible()
+        await spicyMacLink.click()
+
+        // Wait for the document edit view to load
+        await expect(page.locator('#field-name')).toHaveValue('Spicy Mac')
+
+        // Assert: the payload-tenant cookie must be set to the document's tenant ID.
+        //
+        // BUG: In setTenant(), the condition:
+        //   !tenantOptions.find((option) => option.value === id)
+        // is true when tenantOptions is [] (still loading), so the valid tenant ID
+        // is wrongly treated as invalid. setTenantAndCookie({ id: tenantOptions[0]?.value })
+        // resolves to { id: undefined }, which deletes the cookie.
+        await expect
+          .poll(async () => {
+            const cookies = await page.context().cookies()
+            return cookies.find((c) => c.name === 'payload-tenant')?.value
+          })
+          .toBe(String(tenantId))
+
+        // Also verify that creating a document via the REST API succeeds.
+        // The server's defaultValue for the tenant field reads the payload-tenant cookie.
+        // Without the cookie, the default is null, failing the required validation.
+        const createResponse = await page.request.post(`${serverURL}/api/${menuItemsSlug}`, {
+          data: { name: 'Item Created After Client Login' },
+        })
+
+        expect(createResponse.status()).toBe(201)
+
+        // Clean up the created document
+        const result = await createResponse.json()
+
+        if (result.doc?.id) {
+          await payload.delete({ collection: menuItemsSlug, id: result.doc.id })
+        }
+      } finally {
+        // Always remove the route interception to avoid affecting other tests
+        await page.unroute('**/populate-tenant-options*')
+      }
     })
   })
 })
