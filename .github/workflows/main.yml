@@ -614,7 +614,7 @@ jobs:
       - name: Start PostgreSQL
         uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: "14" # See https://hub.docker.com/_/postgres for available versions
+          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
           postgresql db: ${{ env.POSTGRES_DB }}
           postgresql user: ${{ env.POSTGRES_USER }}
           postgresql password: ${{ env.POSTGRES_PASSWORD }}
@@ -639,7 +639,7 @@ jobs:
           key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
+        uses: supercharge/mongodb-github-action@1.12.1
         with:
           mongodb-version: 6.0
         if: matrix.database == 'mongodb'
@@ -783,4 +783,4 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         uses: exoego/esbuild-bundle-analyzer@v1
         with:
-          metafiles: "packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json"
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'
