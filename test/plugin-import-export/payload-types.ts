@@ -77,6 +77,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimit;
     'posts-with-s3': PostsWithS3;
     media: Media;
+    'custom-id-pages': CustomIdPage;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
@@ -103,6 +104,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
     'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
@@ -125,9 +127,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: {
       createCollectionExport: TaskCreateCollectionExport;
@@ -183,6 +183,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -477,6 +478,16 @@ export interface PostsWithS3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages".
+ */
+export interface CustomIdPage {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -671,15 +682,7 @@ export interface PostsWithLimitsExport {
  */
 export interface Import {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -716,15 +719,7 @@ export interface Import {
  */
 export interface PostsImport {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -761,15 +756,7 @@ export interface PostsImport {
  */
 export interface PostsWithS3Import {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -806,15 +793,7 @@ export interface PostsWithS3Import {
  */
 export interface PostsWithLimitsImport {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -996,6 +975,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'custom-id-pages';
+        value: string | CustomIdPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1227,6 +1210,16 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages_select".
+ */
+export interface CustomIdPagesSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1590,6 +1583,8 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
+    id?: string | null;
+    batchSize?: number | null;
     userID?: string | null;
     userCollection?: string | null;
     exportCollection?: string | null;

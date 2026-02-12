@@ -236,9 +236,46 @@ test.describe('Import Export Plugin', () => {
           await expect(page.locator('.export-preview')).toBeVisible()
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
+        // Ensure the export is for custom-id-pages (id + title columns visible) before saving
+        await expect(async () => {
+          await expect(
+            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
+          ).toBeVisible()
+          await expect(
+            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
+          ).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Verify the collection field is set to Custom ID Pages before saving
+        await expect(async () => {
+          await expect(page.locator('#field-collectionSlug')).toContainText('Custom')
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Set a unique export name to avoid filename conflicts in the full test suite
+        const nameField = page.locator('#field-name')
+        await expect(nameField).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+        await nameField.fill(`custom-id-export-${uniqueId}`)
+
         await saveDocAndAssert(page, '#action-save')
 
-        await expect(page).toHaveURL(/\/exports\//)
+        // After save, we're redirected to the export document page
+        await expect(page).toHaveURL(/\/exports\/[^/]+$/, { timeout: POLL_TOPASS_TIMEOUT })
+
+        // Extract export ID from URL and verify it has the correct collectionSlug
+        const urlMatch = page.url().match(/\/exports\/([^/]+)$/)
+        expect(urlMatch).toBeTruthy()
+        const exportId = urlMatch![1]
+
+        const { docs } = await payload.find({
+          collection: 'exports' as any,
+          where: {
+            id: {
+              equals: exportId,
+            },
+          },
+        })
+        expect(docs.length).toBe(1)
+        expect(docs[0].collectionSlug).toBe('custom-id-pages')
 
         await runJobsQueue({ serverURL })
 
@@ -260,10 +297,95 @@ test.describe('Import Export Plugin', () => {
         const content = fs.readFileSync(tempPath, 'utf8')
         fs.unlinkSync(tempPath)
 
-        expect(content).toContain(`e2e-export-${uniqueId}-1`)
-        expect(content).toContain(`e2e-export-${uniqueId}-2`)
-        expect(content).toContain('E2E Export Custom Page 1')
-        expect(content).toContain('E2E Export Custom Page 2')
+        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        await expect(() => {
+          expect(content).toMatch(/^\uFEFF?id,title,createdAt,updatedAt/m)
+          expect(content).not.toContain('_status')
+
+          expect(content).toContain(`e2e-export-${uniqueId}-1`)
+          expect(content).toContain(`e2e-export-${uniqueId}-2`)
+          expect(content).toContain('E2E Export Custom Page 1')
+          expect(content).toContain('E2E Export Custom Page 2')
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      })
+
+      test('should not show duplicate columns in export preview for custom ID collection', async () => {
+        const uniqueId = Date.now()
+
+        const createdPages: string[] = []
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `preview-export-${uniqueId}-1`,
+            title: 'Preview Export Test 1',
+          },
+        })
+        createdPages.push(`preview-export-${uniqueId}-1`)
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `preview-export-${uniqueId}-2`,
+            title: 'Preview Export Test 2',
+          },
+        })
+        createdPages.push(`preview-export-${uniqueId}-2`)
+
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const previewTable = page.locator('.export-preview table')
+        const tableHeaders = previewTable.locator('thead th')
+        const headerTexts = await tableHeaders.allTextContents()
+
+        // Normalize headers to lowercase for case-insensitive comparison
+        const normalizedHeaders = headerTexts.map((h) => h.trim().toLowerCase())
+
+        // Check for duplicates by creating a Set and comparing sizes
+        const uniqueHeaders = new Set(normalizedHeaders)
+        expect(uniqueHeaders.size).toBe(normalizedHeaders.length)
+
+        // Verify expected columns are present (id, title, createdAt, updatedAt)
+        expect(normalizedHeaders).toContain('id')
+        expect(normalizedHeaders).toContain('title')
+        expect(normalizedHeaders).toContain('createdat')
+        expect(normalizedHeaders).toContain('updatedat')
+
+        // Verify we don't have duplicates of these key columns
+        const idCount = normalizedHeaders.filter((h) => h === 'id').length
+        const createdAtCount = normalizedHeaders.filter((h) => h === 'createdat').length
+        const updatedAtCount = normalizedHeaders.filter((h) => h === 'updatedat').length
+
+        expect(idCount).toBe(1)
+        expect(createdAtCount).toBe(1)
+        expect(updatedAtCount).toBe(1)
+
+        // Cleanup
+        for (const id of createdPages) {
+          await payload.delete({
+            collection: 'custom-id-pages' as any,
+            id,
+          })
+        }
       })
     })
 
@@ -669,6 +791,54 @@ test.describe('Import Export Plugin', () => {
 
         expect(importedPages.totalDocs).toBe(2)
         expect(importedPages.docs[0]?.id).toContain(`e2e-custom-${uniqueId}`)
+      })
+
+      test('should not show duplicate columns in import preview for custom ID collection', async () => {
+        const csvContent = `id,title\npreview-test-1,Test Title 1\npreview-test-2,Test Title 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'preview-columns-test.csv',
+          buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Verify columns from the CSV (id, title) are present and not duplicated
+        await expect(async () => {
+          const previewTable = page.locator('.import-preview table')
+          const tableHeaders = previewTable.locator('thead th')
+          const headerTexts = await tableHeaders.allTextContents()
+
+          // Normalize headers to lowercase for case-insensitive comparison
+          const normalizedHeaders = headerTexts.map((h) => h.trim().toLowerCase())
+
+          // Check for duplicates by creating a Set and comparing sizes
+          const uniqueHeaders = new Set(normalizedHeaders)
+          expect(uniqueHeaders.size).toBe(normalizedHeaders.length)
+
+          // Verify expected columns from CSV are present (id, title only - CSV has no timestamps)
+          expect(normalizedHeaders).toContain('id')
+          expect(normalizedHeaders).toContain('title')
+
+          // Verify we don't have duplicates of these columns
+          const idCount = normalizedHeaders.filter((h) => h === 'id').length
+          const titleCount = normalizedHeaders.filter((h) => h === 'title').length
+
+          expect(idCount).toBe(1)
+          expect(titleCount).toBe(1)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
       })
     })
   })
