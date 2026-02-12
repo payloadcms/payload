@@ -299,7 +299,7 @@ test.describe('Import Export Plugin', () => {
 
         // Ensure we got the custom-id-pages export (id,title only; no _status)
         await expect(() => {
-          expect(content).toMatch(/^\uFEFF?id,title,createdAt,updatedAt/m)
+          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
           expect(content).not.toContain('_status')
 
           expect(content).toContain(`e2e-export-${uniqueId}-1`)
