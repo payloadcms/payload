@@ -155,7 +155,7 @@ export const TenantSelectionProviderClient = ({
           // if there is only one tenant, auto-select that tenant
           setTenantAndCookie({ id: tenantOptions[0].value, refresh: true })
         }
-      } else if (!tenantOptions.find((option) => option.value === id)) {
+      } else if (tenantOptions.length > 0 && !tenantOptions.find((option) => option.value === id)) {
         // if the tenant is invalid, set the first tenant as selected
         setTenantAndCookie({
           id: tenantOptions[0]?.value,
