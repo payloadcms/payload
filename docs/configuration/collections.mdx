@@ -216,6 +216,8 @@ The following options are available:
 
 #### Edit View Options
 
+Custom components within the Edit View are configured under `admin.components.edit`:
+
 ```ts
 import type { CollectionConfig } from 'payload'
 
@@ -224,15 +226,18 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        // highlight-line
-        // ...
+        // highlight-start
+        Status: '/path/to/CustomStatus',
+        SaveButton: '/path/to/CustomSaveButton',
+        PublishButton: '/path/to/CustomPublishButton',
+        // highlight-end
       },
     },
   },
 }
 ```
 
-The following options are available:
+The following components can be customized within `admin.components.edit`:
 
 | Option                   | Description                                                                                                                                                                                             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -245,6 +250,14 @@ The following options are available:
 | `UnpublishButton`        | Replace the default Unpublish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#unpublishbutton).                                |
 | `PreviewButton`          | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#previewbutton).                                     |
 | `Upload`                 | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload).                                         |
+
+<Banner type="warning">
+  **Important:** All edit view components must be configured under
+  `admin.components.edit`, not directly under `admin.components`.
+
+For example, use `admin.components.edit.Status`, not `admin.components.Status`.
+
+</Banner>
 
 <Banner type="success">
   **Note:** For details on how to build Custom Components, see [Building Custom
