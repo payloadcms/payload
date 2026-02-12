@@ -5,6 +5,7 @@ import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { isURLAllowed } from '../../utilities/isURLAllowed.js'
+import { safeFetch } from '../safeFetch.js'
 
 // If doc id is provided, it means we are updating the doc
 // /:collectionSlug/paste-url/:doc-id?src=:fileUrl
@@ -48,15 +49,20 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
     const validatedUrl = new URL(src)
 
-    if (
-      typeof config.upload?.pasteURL === 'object' &&
-      !isURLAllowed(validatedUrl.href, config.upload.pasteURL.allowList)
-    ) {
+    if (config.upload?.pasteURL === false) {
+      throw new APIError('Pasting URLs is disabled for this collection.', 400)
+    }
+
+    if (typeof config.upload?.pasteURL !== 'object') {
+      throw new APIError('Server-side URL fetching is not configured for this collection.', 400)
+    }
+
+    if (!isURLAllowed(validatedUrl.href, config.upload.pasteURL.allowList)) {
       throw new APIError(`The provided URL (${validatedUrl.href}) is not allowed.`, 400)
     }
 
     // Fetch the file with no compression
-    const response = await fetch(validatedUrl.href, {
+    const response = await safeFetch(validatedUrl.href, {
       headers: {
         'Accept-Encoding': 'identity',
       },
@@ -67,15 +73,28 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
     }
 
     const decodedFileName = decodeURIComponent(validatedUrl.pathname.split('/').pop() || '')
+      .replace(/[\r\n]/g, '')
+      .replace(/[\x00-\x1F\x7F]/g, '')
+
+    const headers: Record<string, string> = {
+      'Content-Disposition': `attachment; filename="${decodedFileName || 'file'}"`,
+      'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+    }
+
+    const contentLength = response.headers.get('content-length')
+    if (contentLength) {
+      headers['Content-Length'] = contentLength
+    }
 
     return new Response(response.body, {
       headers: {
-        'Content-Disposition': `attachment; filename="${decodedFileName}"`,
-        'Content-Length': response.headers.get('content-length') || '',
-        'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+        ...headers,
       },
     })
   } catch (err) {
+    if (err instanceof APIError) {
+      throw err
+    }
     throw new APIError(
       `Error fetching file: ${err instanceof Error ? err.message : 'Unknown error'}`,
       500,
