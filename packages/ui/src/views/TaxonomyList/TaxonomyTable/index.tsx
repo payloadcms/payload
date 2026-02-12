@@ -1,199 +1,31 @@
 'use client'
 
-import type { ClientUser, PaginatedDocs } from 'payload'
+import type { PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, getBestFitFromSizes, isImage } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { TaxonomyDocument } from '../../../elements/TaxonomyTree/types.js'
 import type { SlotColumn } from './SlotTable.js'
+import type { RelatedGroup, TableRow } from './types.js'
 
 import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
-import { Link } from '../../../elements/Link/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
-import { Locked } from '../../../elements/Locked/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
-import { Thumbnail } from '../../../elements/Thumbnail/index.js'
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { DocumentIcon } from '../../../icons/Document/index.js'
-import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
-import { useTaxonomy } from '../../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { ChildNameCell } from './ChildNameCell.js'
+import { DateCell } from './DateCell.js'
+import { RelatedNameCell } from './RelatedNameCell.js'
 import { SlotTable } from './SlotTable.js'
+import { baseClass } from './types.js'
 import './index.scss'
-
-const baseClass = 'taxonomy-table'
-
-function formatDate(dateString: string, locale: string): string {
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString(locale, {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
-  } catch {
-    return dateString
-  }
-}
-
-type RelatedGroup = {
-  collectionSlug: string
-  data: PaginatedDocs
-  hasMany: boolean
-  label: string
-}
-
-// Row type for tables
-type TableRow = {
-  [key: string]: unknown
-  _collectionSlug: string
-  _hasChildren?: boolean
-  _isLocked?: boolean
-  _userEditing?: ClientUser
-  id: number | string
-}
-
-// Cell component for children (taxonomy items)
-const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
-  const { getEntityConfig } = useConfig()
-  const { isLocked } = useDocumentSelection()
-  const { selectParent } = useTaxonomy()
-
-  const config = getEntityConfig({ collectionSlug: row._collectionSlug })
-  const titleField = config?.admin?.useAsTitle || 'id'
-  const rawTitle = row[titleField] || row.id
-  const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
-
-  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-
-  if (locked && row._userEditing) {
-    return (
-      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
-        <Locked user={row._userEditing} />
-        <span className={`${baseClass}__name-text`}>{title}</span>
-      </span>
-    )
-  }
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    selectParent(row.id)
-  }
-
-  return (
-    <button className={`${baseClass}__name-link`} onClick={handleClick} type="button">
-      <TagIcon />
-      <span className={`${baseClass}__name-text`}>{title}</span>
-      {row._hasChildren && (
-        <span className={`${baseClass}__chevron`}>
-          <ChevronIcon direction="right" />
-        </span>
-      )}
-    </button>
-  )
-}
-
-// Cell component for related documents
-const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
-  const { getEntityConfig } = useConfig()
-  const {
-    config: {
-      routes: { admin: adminRoute },
-    },
-  } = useConfig()
-  const { isLocked } = useDocumentSelection()
-
-  const config = getEntityConfig({ collectionSlug: row._collectionSlug })
-  const titleField = config?.admin?.useAsTitle || 'id'
-  const rawTitle =
-    typeof row[titleField] === 'string' || typeof row[titleField] === 'number'
-      ? row[titleField]
-      : row.id
-  const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
-
-  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-
-  // Check if this is an upload-enabled collection
-  const isUploadCollection = Boolean(config?.upload)
-  const previewAllowed = config?.upload?.displayPreview ?? true
-
-  // Calculate thumbnail source for upload collections
-  let thumbnailSrc: string | undefined
-  if (isUploadCollection && previewAllowed) {
-    const mimeType = row.mimeType as string | undefined
-    const isFileImage = mimeType ? isImage(mimeType) : false
-    thumbnailSrc = isFileImage
-      ? (row.thumbnailURL as string) || (row.url as string)
-      : (row.thumbnailURL as string)
-
-    if (isFileImage) {
-      thumbnailSrc = getBestFitFromSizes({
-        sizes: row.sizes as Record<string, { url?: string; width?: number }>,
-        thumbnailURL: row.thumbnailURL as string,
-        url: row.url as string,
-        width: row.width as number,
-      })
-    }
-  }
-
-  // Render icon or thumbnail
-  const renderIcon = () => {
-    if (isUploadCollection && previewAllowed) {
-      return (
-        <Thumbnail
-          className={`${baseClass}__thumbnail`}
-          collectionSlug={config?.slug}
-          doc={row}
-          fileSrc={thumbnailSrc}
-          imageCacheTag={config?.upload?.cacheTags ? (row.updatedAt as string) : undefined}
-          size="small"
-          uploadConfig={config?.upload}
-        />
-      )
-    }
-    return <DocumentIcon />
-  }
-
-  if (locked && row._userEditing) {
-    return (
-      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
-        <Locked user={row._userEditing} />
-        {renderIcon()}
-        <span className={`${baseClass}__name-text`}>{title}</span>
-      </span>
-    )
-  }
-
-  const editUrl = formatAdminURL({
-    adminRoute,
-    path: `/collections/${row._collectionSlug}/${row.id}`,
-  })
-
-  return (
-    <Link className={`${baseClass}__name-link`} href={editUrl}>
-      {renderIcon()}
-      <span className={`${baseClass}__name-text`}>{title}</span>
-    </Link>
-  )
-}
-
-const DateCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
-  const { i18n } = useTranslation()
-
-  if (!row.updatedAt || typeof row.updatedAt !== 'string') {
-    return <span>—</span>
-  }
-
-  return <span>{formatDate(String(row.updatedAt), i18n.language)}</span>
-}
 
 export type TaxonomyTableProps = {
   childrenData?: PaginatedDocs<TaxonomyDocument>
@@ -243,23 +75,15 @@ export function TaxonomyTable({
     Record<
       string,
       {
-        docs: unknown[]
-        hasNextPage: boolean
         isLoading: boolean
-        page: number
-        totalDocs: number
-      }
+      } & Partial<PaginatedDocs>
     >
   >(() => {
     const initial: Record<
       string,
       {
-        docs: unknown[]
-        hasNextPage: boolean
         isLoading: boolean
-        page: number
-        totalDocs: number
-      }
+      } & Partial<PaginatedDocs>
     > = {}
     for (const group of relatedGroups) {
       initial[group.collectionSlug] = {
@@ -432,38 +256,6 @@ export function TaxonomyTable({
     toggleSelection({ id: row.id, collectionSlug: slug })
   }
 
-  // Column definitions for children
-  const childColumns: SlotColumn<TableRow>[] = [
-    {
-      accessor: 'name',
-      Cell: ChildNameCell,
-      className: `${baseClass}__col-name`,
-      heading: t('general:name'),
-    },
-    {
-      accessor: 'updatedAt',
-      Cell: DateCell,
-      className: `${baseClass}__col-date`,
-      heading: t('general:updatedAt'),
-    },
-  ]
-
-  // Column definitions for related documents
-  const relatedColumns: SlotColumn<TableRow>[] = [
-    {
-      accessor: 'name',
-      Cell: RelatedNameCell,
-      className: `${baseClass}__col-name`,
-      heading: t('general:name'),
-    },
-    {
-      accessor: 'updatedAt',
-      Cell: DateCell,
-      className: `${baseClass}__col-date`,
-      heading: t('general:updatedAt'),
-    },
-  ]
-
   if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
 
@@ -498,7 +290,21 @@ export function TaxonomyTable({
           <div>
             <SlotTable
               collectionSlug={collectionSlug}
-              columns={childColumns}
+              columns={[
+                // Column definitions for children
+                {
+                  accessor: 'name',
+                  Cell: ChildNameCell,
+                  className: `${baseClass}__col-name`,
+                  heading: t('general:name'),
+                },
+                {
+                  accessor: 'updatedAt',
+                  Cell: DateCell,
+                  className: `${baseClass}__col-date`,
+                  heading: t('general:updatedAt'),
+                },
+              ]}
               data={childTableData}
               enableCheckbox={true}
               enableDragHandle={false}
@@ -551,7 +357,21 @@ export function TaxonomyTable({
             key={group.collectionSlug}
           >
             <SlotTable
-              columns={relatedColumns}
+              columns={[
+                // Column definitions for related documents
+                {
+                  accessor: 'name',
+                  Cell: RelatedNameCell,
+                  className: `${baseClass}__col-name`,
+                  heading: t('general:name'),
+                },
+                {
+                  accessor: 'updatedAt',
+                  Cell: DateCell,
+                  className: `${baseClass}__col-date`,
+                  heading: t('general:updatedAt'),
+                },
+              ]}
               data={relatedTableData}
               enableCheckbox={true}
               enableDragHandle={false}
