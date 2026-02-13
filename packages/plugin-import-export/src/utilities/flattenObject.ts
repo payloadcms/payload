@@ -8,12 +8,6 @@ type Args = {
   doc: Document
   fields?: string[]
   prefix?: string
-  /**
-   * Set of auto-generated timezone companion field names (from collectTimezoneCompanionFields).
-   * These fields are excluded unless explicitly selected.
-   * If not provided, no timezone filtering is applied.
-   */
-  timezoneCompanionFields?: Set<string>
   toCSVFunctions: Record<string, ToCSVFunction>
 }
 
@@ -21,7 +15,6 @@ export const flattenObject = ({
   doc,
   fields,
   prefix,
-  timezoneCompanionFields,
   toCSVFunctions,
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
@@ -33,14 +26,25 @@ export const flattenObject = ({
     return toCSVFunctions?.[fullPath] ?? toCSVFunctions?.[baseFieldName]
   }
 
-  const flatten = (siblingDoc: Document, prefix?: string) => {
+  // When fields are selected, build a set of top-level document keys to process.
+  // This prevents sibling fields with similar prefixes from being included
+  // (e.g. selecting 'dateWithTimezone' won't pull in 'dateWithTimezone_tz')
+  const selectedTopLevelKeys =
+    Array.isArray(fields) && fields.length > 0
+      ? new Set(fields.map((f) => f.split('.')[0]))
+      : undefined
+
+  const flattenWithFilter = (siblingDoc: Document, currentPrefix?: string) => {
     Object.entries(siblingDoc).forEach(([key, value]) => {
-      const newKey = prefix ? `${prefix}_${key}` : key
+      // At the document root, skip keys that don't match any selected field
+      if (!currentPrefix && selectedTopLevelKeys && !selectedTopLevelKeys.has(key)) {
+        return
+      }
+
+      const newKey = currentPrefix ? `${currentPrefix}_${key}` : key
       const toCSVFn = getToCSVFunction(newKey, key)
 
       if (Array.isArray(value)) {
-        // If a custom toCSV function exists for this array field, run it first.
-        // If it produces output, skip per-item handling; otherwise, fall back.
         if (toCSVFn) {
           try {
             const result = toCSVFn({
@@ -49,22 +53,19 @@ export const flattenObject = ({
               doc,
               row,
               siblingDoc,
-              value, // whole array
+              value,
             })
 
             if (typeof result !== 'undefined') {
-              // Custom function returned a single value for this array field.
               row[newKey] = result
               return
             }
 
-            // If the custom function wrote any keys for this field, consider it handled.
             for (const k in row) {
               if (k === newKey || k.startsWith(`${newKey}_`)) {
                 return
               }
             }
-            // Otherwise, fall through to per-item handling.
           } catch (error) {
             throw new Error(
               `Error in toCSVFunction for array "${newKey}": ${JSON.stringify(value)}\n${
@@ -79,7 +80,6 @@ export const flattenObject = ({
             const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
             const itemPrefix = blockType ? `${newKey}_${index}_${blockType}` : `${newKey}_${index}`
 
-            // Case: hasMany polymorphic relationships
             if (
               'relationTo' in item &&
               'value' in item &&
@@ -91,17 +91,14 @@ export const flattenObject = ({
               return
             }
 
-            // Fallback: deep-flatten nested objects
-            flatten(item, itemPrefix)
+            flattenWithFilter(item, itemPrefix)
           } else {
-            // Primitive array item.
             row[`${newKey}_${index}`] = item
           }
         })
       } else if (typeof value === 'object' && value !== null) {
-        // Object field: use custom toCSV if present, else recurse.
         if (!toCSVFn) {
-          flatten(value, newKey)
+          flattenWithFilter(value, newKey)
         } else {
           try {
             const result = toCSVFn({
@@ -151,7 +148,7 @@ export const flattenObject = ({
     })
   }
 
-  flatten(doc, prefix)
+  flattenWithFilter(doc, prefix)
 
   if (Array.isArray(fields) && fields.length > 0) {
     const orderedResult: Record<string, unknown> = {}
@@ -162,17 +159,6 @@ export const flattenObject = ({
       regex: fieldToRegex(field),
     }))
 
-    // Track which timezone companion fields were explicitly selected
-    // Convert dotted notation to underscore for matching against flattened keys
-    const explicitlySelectedTimezoneFields = new Set(
-      fields
-        .filter((f) => {
-          const underscored = f.replace(/\./g, '_')
-          return timezoneCompanionFields?.has(underscored)
-        })
-        .map((f) => f.replace(/\./g, '_')),
-    )
-
     // Single pass through row keys - O(keys * fields) regex tests but only one iteration
     const rowKeys = Object.keys(row)
 
@@ -181,11 +167,6 @@ export const flattenObject = ({
       for (const key of rowKeys) {
         // Skip if already added (a key might match multiple field patterns)
         if (key in orderedResult) {
-          continue
-        }
-
-        // Skip auto-generated timezone companion fields unless explicitly selected
-        if (timezoneCompanionFields?.has(key) && !explicitlySelectedTimezoneFields.has(key)) {
           continue
         }
 
