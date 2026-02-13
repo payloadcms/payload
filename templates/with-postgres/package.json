@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "ci": "payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -16,20 +15,21 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "ci": "payload migrate && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/db-postgres": "3.75.0",
-    "@payloadcms/next": "3.75.0",
-    "@payloadcms/richtext-lexical": "3.75.0",
-    "@payloadcms/ui": "3.75.0",
+    "@payloadcms/next": "3.76.1",
+    "@payloadcms/richtext-lexical": "3.76.1",
+    "@payloadcms/ui": "3.76.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.4.11",
-    "payload": "3.75.0",
+    "payload": "3.76.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "sharp": "0.34.2"
+    "sharp": "0.34.2",
+    "@payloadcms/db-postgres": "3.76.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
