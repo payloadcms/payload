@@ -4,7 +4,12 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  hasLocalizeStatusEnabled,
+  hasScheduledPublishEnabled,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -150,6 +155,8 @@ export function PublishButton({
     }
   })
 
+  const localizeStatusEnabled = hasLocalizeStatusEnabled(entityConfig)
+
   const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
       return
@@ -159,7 +166,7 @@ export function PublishButton({
       {
         depth: 0,
         locale: localeCode,
-        publishAllLocales: true,
+        ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
     )
@@ -185,6 +192,7 @@ export function PublishButton({
     }
   }, [
     localeCode,
+    localizeStatusEnabled,
     api,
     collectionSlug,
     globalSlug,

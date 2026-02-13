@@ -1091,6 +1091,8 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
+      await page.locator('input[name="email"]').waitFor({ state: 'visible' })
+
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
     })
 
@@ -1100,6 +1102,8 @@ describe('Trash', () => {
       await page.goto(usersUrl.trash)
 
       await page.locator('.row-1 .cell-name').click()
+
+      await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
@@ -1117,6 +1121,8 @@ describe('Trash', () => {
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
+
+      await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
