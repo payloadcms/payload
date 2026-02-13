@@ -1089,7 +1089,9 @@ describe('Trash', () => {
       await page.goto(usersUrl.trash)
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
-      await page.locator('.row-1 .cell-name').click()
+      const nameLink = page.locator('.row-1 .cell-name a')
+      await expect(nameLink).toBeVisible()
+      await nameLink.click()
 
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
@@ -1101,7 +1103,9 @@ describe('Trash', () => {
 
       await page.goto(usersUrl.trash)
 
-      await page.locator('.row-1 .cell-name').click()
+      const nameLink = page.locator('.row-1 .cell-name a')
+      await expect(nameLink).toBeVisible()
+      await nameLink.click()
 
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
@@ -1120,7 +1124,9 @@ describe('Trash', () => {
       await page.goto(usersUrl.trash)
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
-      await page.locator('.row-1 .cell-name').click()
+      const nameLink = page.locator('.row-1 .cell-name a')
+      await expect(nameLink).toBeVisible()
+      await nameLink.click()
 
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 

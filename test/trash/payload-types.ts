@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     posts: Post;
     'restricted-collection': RestrictedCollection;
+    'differentiated-trash-collection': DifferentiatedTrashCollection;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'restricted-collection': RestrictedCollectionSelect<false> | RestrictedCollectionSelect<true>;
+    'differentiated-trash-collection': DifferentiatedTrashCollectionSelect<false> | DifferentiatedTrashCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -155,6 +157,18 @@ export interface RestrictedCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash-collection".
+ */
+export interface DifferentiatedTrashCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -216,6 +230,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restricted-collection';
         value: string | RestrictedCollection;
+      } | null)
+    | ({
+        relationTo: 'differentiated-trash-collection';
+        value: string | DifferentiatedTrashCollection;
       } | null)
     | ({
         relationTo: 'users';
@@ -289,6 +307,17 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "restricted-collection_select".
  */
 export interface RestrictedCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash-collection_select".
+ */
+export interface DifferentiatedTrashCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
