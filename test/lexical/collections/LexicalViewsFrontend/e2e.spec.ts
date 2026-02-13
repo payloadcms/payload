@@ -9,7 +9,7 @@ import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { lexicalViews2Slug, lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
+import { lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)

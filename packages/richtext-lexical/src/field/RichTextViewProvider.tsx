@@ -5,29 +5,38 @@ import React, { createContext, use, useMemo } from 'react'
 import type { LexicalEditorNodeMap, LexicalEditorViewMap } from '../types.js'
 
 /**
- * Context type for rich text view management.
+ * Context for managing richtext editor view state and inheritance.
  */
 type RichTextViewContextType = {
   /**
-   * The name of the currently active view (e.g., 'default', 'frontend', 'debug')
+   * The currently active view name (e.g., 'default', 'frontend', 'debug').
    */
   currentView: string
   /**
-   * The node map for the currently active view, containing rendering overrides for each node type.
-   * This is the resolved view from the views map based on currentView.
+   * The resolved node map for the current view, containing rendering overrides for each node type.
    */
   currentViewMap?: LexicalEditorNodeMap
-  hasInheritedView?: boolean
   /**
-   * If true, the current view will be inherited by nested richtext editors.
+   * True if the current view was explicitly set (via prop) by this provider or an ancestor.
+   * Used to distinguish intentional view settings from automatic defaults.
+   */
+  hasExplicitCurrentView?: boolean
+  /**
+   * True if this provider inherited its view from a parent provider.
+   * When true, the ViewSelector is hidden because the view is controlled by an ancestor.
+   */
+  hasInheritedViews?: boolean
+  /**
+   * If true, nested richtext editors will inherit this provider's currentView and views.
    */
   inheritable?: boolean
   /**
-   * Function to change the current view.
+   * Function to programmatically change the current view.
    */
   setCurrentView: (view: string) => void
   /**
-   * The complete map of all available views for this field.
+   * Map of all available views for this editor. Each key is a view name, each value contains
+   * admin config, node overrides, and lexical config for that view.
    */
   views?: LexicalEditorViewMap
 }
@@ -39,19 +48,19 @@ const RichTextViewContext = createContext<RichTextViewContextType>({
 })
 
 /**
- * Provider component for rich text view context.
+ * Provider for managing richtext editor view state and its inheritance.
  *
- * This provider manages the current view state internally and makes it accessible to child components
- * via the useRichTextView hook. It automatically resolves the current view's node map
- * based on the active view name.
+ * Handles two key scenarios:
+ * 1. **Explicit view setting**: Wrap with `currentView` and `inheritable={true}` to force nested editors to a specific view
+ * 2. **View map inheritance**: Nested editors inherit `views` from parents, allowing view switching across the hierarchy
+ *
+ * When a nested editor inherits from a parent, its ViewSelector is hidden because the view is controlled by an ancestor.
  *
  * @example
+ * Force all nested richtext editors to use "frontend" view:
  * ```tsx
- * <RichTextViewProvider
- *   currentView="frontend"
- *   views={myViews}
- * >
- *   <MyEditor />
+ * <RichTextViewProvider currentView="frontend" inheritable={true}>
+ *   <MyForm /> {/* All richtext fields inside will use "frontend" view }
  * </RichTextViewProvider>
  * ```
  */
@@ -63,19 +72,34 @@ export const RichTextViewProvider: React.FC<{
 }> = (args) => {
   const parentContext = useRichTextView()
 
-  const hasInheritedView = parentContext.inheritable && Boolean(parentContext.views)
+  // Track if this provider explicitly sets currentView (not just using the default)
+  const hasOwnExplicitView = args.currentView !== undefined
+
+  const hasInheritedViews =
+    parentContext.inheritable && Boolean(parentContext.hasExplicitCurrentView)
+
+  // This provider has explicit currentView if it sets one OR inherits one from parent
+  const hasExplicitCurrentView =
+    hasOwnExplicitView ||
+    (parentContext.inheritable && Boolean(parentContext.hasExplicitCurrentView))
 
   const {
     children,
     currentView: currentViewFromProps,
     inheritable,
     views,
-  } = hasInheritedView
-    ? {
-        ...parentContext,
-        ...args,
-      }
-    : args
+  } = {
+    children: args.children,
+    // Only inherit currentView if parent has an explicit one
+    currentView:
+      parentContext.inheritable && parentContext.hasExplicitCurrentView
+        ? parentContext.currentView
+        : args.currentView,
+    // Propagate inheritable flag through the hierarchy
+    inheritable: parentContext.inheritable || args.inheritable,
+    // Only inherit views if parent has a views map
+    views: parentContext.inheritable && parentContext.views ? parentContext.views : args.views,
+  }
 
   const [currentView, setCurrentView] = useControllableState(currentViewFromProps, 'default')
 
@@ -84,40 +108,33 @@ export const RichTextViewProvider: React.FC<{
     return {
       currentView,
       currentViewMap,
-      hasInheritedView,
+      hasExplicitCurrentView,
+      hasInheritedViews,
       inheritable,
       setCurrentView,
       views,
     }
-  }, [currentView, inheritable, hasInheritedView, setCurrentView, views])
+  }, [currentView, inheritable, hasExplicitCurrentView, hasInheritedViews, setCurrentView, views])
 
   return <RichTextViewContext value={value}>{children}</RichTextViewContext>
 }
 
 /**
- * Hook to access the current rich text view context.
+ * Access the current richtext editor view context.
  *
- * Use this hook to access the currently active view and its node map,
- * or to programmatically switch between views.
- *
- * @returns An object containing:
- * - `currentView`: The name of the active view
- * - `currentViewMap`: The node overrides for the current view
- * - `setCurrentView`: Function to change views
- * - `views`: All available views
+ * Returns the active view name, node overrides, inheritance state, and a function to switch views.
  *
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { currentView, currentViewMap, setCurrentView } = useRichTextView()
+ *   const { currentView, currentViewMap, hasInheritedViews, setCurrentView } = useRichTextView()
  *
  *   return (
  *     <div>
- *       <p>Current view: {currentView}</p>
- *       {currentViewMap?.heading && <p>Heading overrides are active</p>}
- *       <button onClick={() => setCurrentView('frontend')}>
- *         Switch to frontend view
- *       </button>
+ *       <p>Active view: {currentView}</p>
+ *       {hasInheritedViews && <p>View inherited from parent</p>}
+ *       {currentViewMap?.heading && <p>Custom heading renderer active</p>}
+ *       <button onClick={() => setCurrentView('frontend')}>Switch to frontend</button>
  *     </div>
  *   )
  * }

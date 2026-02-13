@@ -428,14 +428,6 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
-  await _payload.create({
-    collection: 'lexical-views-2',
-    data: {
-      customView: editorStateBasic,
-    },
-    depth: 0,
-  })
-
   const lexicalLocalizedDoc1 = await _payload.create({
     collection: lexicalLocalizedFieldsSlug,
     data: {
