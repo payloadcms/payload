@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/release-commenter
         continue-on-error: true
         env:
@@ -44,7 +44,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Announce Release - Releases Channel
         uses: SethCohen/github-releases-to-discord@v1.19.0
