@@ -51,17 +51,19 @@ describe('Lexical Views Provider', () => {
       await expect(viewSelector).toHaveCount(0)
     })
 
-    test('should have data-lexical-view set to frontend', async () => {
+    test('should have data-lexical-view set to frontend', async ({ page }) => {
       // The parent RichTextViewProvider sets currentView="frontend",
       // which should be inherited by the inner richtext field
-      await expect(lexical.editor.first()).toHaveAttribute('data-lexical-view', 'frontend')
+      const richTextDiv = page.locator('.rich-text-lexical').first()
+      await expect(richTextDiv).toHaveAttribute('data-lexical-view', 'frontend')
     })
 
-    test('should apply the frontend view hideGutter admin config', async () => {
+    test('should apply the frontend view hideGutter admin config', async ({ page }) => {
       // The frontend view sets admin.hideGutter = true,
       // so the gutter class should NOT be present
+      const richTextDiv = page.locator('.rich-text-lexical').first()
       await expect(async () => {
-        const classes = await lexical.editor.first().getAttribute('class')
+        const classes = await richTextDiv.getAttribute('class')
         expect(classes).not.toContain('rich-text-lexical--show-gutter')
       }).toPass()
     })

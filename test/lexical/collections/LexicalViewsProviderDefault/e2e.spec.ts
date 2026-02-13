@@ -52,40 +52,10 @@ describe('Lexical Views Provider Default', () => {
       await expect(viewSelector).toHaveCount(0)
     })
 
-    test('should have data-lexical-view set to default', async () => {
+    test('should have data-lexical-view set to default', async ({ page }) => {
       // Parent provider explicitly sets currentView="default"
-      await expect(lexical.editor.first()).toHaveAttribute('data-lexical-view', 'default')
-    })
-
-    test('should NOT apply frontend view config (forced to default)', async () => {
-      // The field has views configured with a "frontend" option that sets hideGutter=false,
-      // but since we're forcing "default" view (which doesn't exist in the views map),
-      // no custom view config should be applied
-
-      // On large viewports, default behavior is to show the gutter
-      // (The test might run on small viewport, so we check both cases)
-      const classes = await lexical.editor.first().getAttribute('class')
-
-      // We're using "default" view, not "frontend", so frontend's hideGutter setting
-      // should NOT be applied. Default view behavior depends on viewport size.
-      // We just verify we're in "default" view mode, not "frontend"
-      await expect(lexical.editor.first()).toHaveAttribute('data-lexical-view', 'default')
-    })
-
-    test('should lock nested fields to default view (hasExplicitCurrentView propagates)', async ({
-      page,
-    }) => {
-      // This test verifies that even though "default" looks like a default value,
-      // when explicitly set, it propagates hasExplicitCurrentView=true through the hierarchy.
-
-      // In a real scenario with nested fields, they would also be locked to "default"
-      // and have their ViewSelectors hidden. For this simple collection with no nesting,
-      // we just verify the main field behavior is correct.
-
-      await expect(lexical.editor.first()).toHaveAttribute('data-lexical-view', 'default')
-
-      const viewSelector = page.locator('.lexical-view-selector')
-      await expect(viewSelector).toHaveCount(0)
+      const richTextDiv = page.locator('.rich-text-lexical').first()
+      await expect(richTextDiv).toHaveAttribute('data-lexical-view', 'default')
     })
   })
 })
