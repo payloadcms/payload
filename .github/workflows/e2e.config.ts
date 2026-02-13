@@ -89,6 +89,7 @@ export default createE2EConfig([
   { file: 'plugin-form-builder', shards: 1 },
   { file: 'plugin-import-export', shards: 1 },
   { file: 'plugin-multi-tenant', shards: 2 },
+  { file: 'plugin-multi-tenant#config.conditionalProvider.ts', shards: 1 },
   { file: 'plugin-nested-docs', shards: 1 },
   { file: 'plugin-redirects', shards: 1 },
   { file: 'plugin-seo', shards: 1 },
