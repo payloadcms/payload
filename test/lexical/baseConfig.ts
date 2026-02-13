@@ -23,7 +23,6 @@ import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import { LexicalViews } from './collections/LexicalViews/index.js'
-import { LexicalViews2 } from './collections/LexicalViews2/index.js'
 import { LexicalViewsFrontend } from './collections/LexicalViewsFrontend/index.js'
 import { OnDemandForm } from './collections/OnDemandForm/index.js'
 import { OnDemandOutsideForm } from './collections/OnDemandOutsideForm/index.js'
@@ -49,7 +48,6 @@ export const baseConfig: Partial<Config> = {
       inlineBlocks: lexicalInlineBlocks,
     }),
     LexicalViews,
-    LexicalViews2,
     LexicalViewsFrontend,
     LexicalMigrateFields,
     LexicalLocalizedFields,
