@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+import type { Field, PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
@@ -18,6 +18,7 @@ export const updateGlobalTool = (
   globalSlug: string,
   globals: PluginMCPServerConfig['globals'],
   schema: JSONSchema4,
+  fields?: Field[],
 ) => {
   const tool = async (
     data: string,
@@ -147,7 +148,7 @@ ${JSON.stringify(result, null, 2)}
   }
 
   if (globals?.[globalSlug]?.enabled) {
-    const convertedFields = convertCollectionSchemaToZod(schema)
+    const convertedFields = convertCollectionSchemaToZod(schema, fields)
 
     // Make all fields optional for partial updates (PATCH-style)
     const optionalFields = Object.fromEntries(

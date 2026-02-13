@@ -117,6 +117,10 @@ export const getMCPHandler = (
             const allowFind: boolean | undefined = toolCapabilities?.find as boolean
             const allowDelete: boolean | undefined = toolCapabilities?.delete as boolean
 
+            const collectionConfig = payload.config.collections.find(
+              (c) => c.slug === enabledCollectionSlug,
+            )
+
             if (allowCreate) {
               registerTool(
                 allowCreate,
@@ -130,6 +134,7 @@ export const getMCPHandler = (
                     enabledCollectionSlug,
                     collectionsPluginConfig,
                     schema,
+                    collectionConfig?.fields,
                   ),
                 payload,
                 useVerboseLogs,
@@ -148,6 +153,7 @@ export const getMCPHandler = (
                     enabledCollectionSlug,
                     collectionsPluginConfig,
                     schema,
+                    collectionConfig?.fields,
                   ),
                 payload,
                 useVerboseLogs,
@@ -208,6 +214,8 @@ export const getMCPHandler = (
             const allowFind: boolean | undefined = toolCapabilities?.['find'] as boolean
             const allowUpdate: boolean | undefined = toolCapabilities?.['update'] as boolean
 
+            const globalConfig = payload.config.globals.find((g) => g.slug === enabledGlobalSlug)
+
             if (allowFind) {
               registerTool(
                 allowFind,
@@ -238,6 +246,7 @@ export const getMCPHandler = (
                     enabledGlobalSlug,
                     globalsPluginConfig,
                     schema,
+                    globalConfig?.fields,
                   ),
                 payload,
                 useVerboseLogs,

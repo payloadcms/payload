@@ -341,6 +341,10 @@ describe('@payloadcms/plugin-mcp', () => {
         'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
       )
 
+      // Virtual fields should NOT appear in create schema
+      expect(json.result.tools[1].inputSchema.properties.relatedProducts).toBeUndefined()
+      expect(json.result.tools[1].inputSchema.properties.computedLabel).toBeUndefined()
+
       expect(json.result.tools[2].inputSchema).toBeDefined()
       expect(json.result.tools[2].inputSchema.required).not.toBeDefined()
       expect(json.result.tools[2].inputSchema.type).toBe('object')
@@ -547,6 +551,10 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
         'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
       )
+
+      // Virtual fields should NOT appear in update schema
+      expect(updateToolSchema.inputSchema.properties.relatedProducts).toBeUndefined()
+      expect(updateToolSchema.inputSchema.properties.computedLabel).toBeUndefined()
     })
   })
 

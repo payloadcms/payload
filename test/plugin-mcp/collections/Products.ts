@@ -15,5 +15,10 @@ export const Products: CollectionConfig = {
       name: 'price',
       type: 'number',
     },
+    {
+      name: 'relatedPost',
+      type: 'relationship',
+      relationTo: 'posts',
+    },
   ],
 }

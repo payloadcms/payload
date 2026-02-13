@@ -36,6 +36,17 @@ export const Posts: CollectionConfig = {
         description: 'Geographic location coordinates',
       },
     },
+    {
+      name: 'relatedProducts',
+      type: 'join',
+      collection: 'products',
+      on: 'relatedPost',
+    },
+    {
+      name: 'computedLabel',
+      type: 'text',
+      virtual: true,
+    },
   ],
   hooks: {
     beforeRead: [
