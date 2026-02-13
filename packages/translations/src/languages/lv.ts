@@ -370,8 +370,7 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Nav atrasts neviens {{label}}. Vai nu vēl nav izveidots, vai neviens neatbilst augstāk norādītajiem filtriem.',
     noResultsDescription:
       'Vai nu neviens neeksistē, vai neviens neatbilst jūsu iepriekš norādītajiem filtriem.',
-    noResultsFound:
-      'Ievērojiet sākotnējā teksta nozīmi Payload kontekstā. Šeit ir saraksts ar izplatītiem Payload terminiem, kas ietver ļoti konkrētas nozīmes:\n    - Collection: Kolekcija ir dokumentu grupa, kurai ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas, lai organizētu un pārvaldītu saturu Payload.\n    - Field: Lauks ir konkrēta datu daļa dokumentā kolekcijā. Lauki nosaka to str',
+    noResultsFound: 'Nav rezultātu.',
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',

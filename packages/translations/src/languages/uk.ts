@@ -368,7 +368,7 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Жодного {{label}} не знайдено. Або {{label}} ще не існує, або жоден з них не відповідає фільтрам, що ви задали више.',
     noResultsDescription:
       'Або жодних не існує, або жодні не відповідають фільтрам, які ви вказали вище.',
-    noResultsFound: 'No Results.',
+    noResultsFound: 'Результатів не знайдено.',
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
     noTrashResults: 'Немає {{label}} у смітнику.',

@@ -367,8 +367,7 @@ export const csTranslations: DefaultTranslationsObject = {
       'Nebyly nalezeny žádné {{label}}. Buď ještě neexistují žádné {{label}}, nebo žádné nesplňují filtry, které jste zadali výše.',
     noResultsDescription:
       'Buď žádné neexistují, nebo žádné neodpovídají filtrům, které jste výše specifikovali.',
-    noResultsFound:
-      'Vážte si význam původního textu v kontextu Payload. Zde je seznam běžných termínů Payload, které mají velmi specifické významy:\n    - Collection: Sbírka je skupina dokumentů sdílejících společnou strukturu a účel. Sbírky se používají k organizaci a správě obsahu v Payload.\n    - Field: Pole je konkrétní kus dat v dokumentu ve sbírce. Pole definují strukturu a typ dat, které lze v',
+    noResultsFound: 'Žádné výsledky.',
     notFound: 'Nenalezeno',
     nothingFound: 'Nic nenalezeno',
     noTrashResults: 'Žádný {{label}} v koši.',

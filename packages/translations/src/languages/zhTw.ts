@@ -349,8 +349,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     noOptions: '無選項',
     noResults: '找不到符合條件的 {{label}}。可能尚未建立或篩選條件不符。',
     noResultsDescription: '或者是不存在，或者是都不符合您上面指定的過濾條件。',
-    noResultsFound:
-      '在Payload的背景下，尊重原文的意義。以下是一些常見的Payload詞彙，它們具有非常特定的含義：\n- 集合（Collection）：集合是一組共享相同結構和目的的文件。集合用於組織和管理Payload中的內容。\n- 欄位（Field）：欄位是集合中文件內的特定數據塊。欄位定義了可以在文件中存儲的數據的結',
+    noResultsFound: '沒有結果。',
     notFound: '找不到',
     nothingFound: '查無資料',
     noTrashResults: '{{label}} 垃圾桶為空。',

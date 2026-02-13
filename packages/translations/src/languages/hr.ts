@@ -369,8 +369,7 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
     noResultsDescription:
       'Ili ne postoje ili se nijedan ne podudara s filterima koje ste gore odredili.',
-    noResultsFound:
-      'Poštujte značenje izvornog teksta u kontekstu Payloada. Evo popisa uobičajenih termina Payloada koji imaju vrlo specifična značenja:\n    - Zbirka: Zbirka je skupina dokumenata koji dijele zajedničku strukturu i svrhu. Zbirke se koriste za organizaciju i upravljanje sadržajem u Payload.\n    - Polje: Polje je specifični dio podataka unutar dokumenta u zbirci. Polja definiraju strukturu i vrstu podataka koji se mogu poh',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u smeću.',

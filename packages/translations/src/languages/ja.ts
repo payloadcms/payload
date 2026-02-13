@@ -370,8 +370,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     noResults:
       '{{label}} データが見つかりませんでした。データが存在しない、または、絞り込みに一致するものがありません。',
     noResultsDescription: '存在しないか、指定したフィルターに一致するものがありません。',
-    noResultsFound:
-      'Payloadの文脈におけるオリジナルテキストの意味を尊重します。ここでは、非常に特定の意味を持つ一般的なPayload用語のリストがあります。\n    - Collection：集合体は、共通の構造と目的を共有するドキュメントの集団です。Collectionは、Payload内のコンテンツを整理したり管理するために使用されます。\n    - Field：フィールドとは、コレクション内のドキュメントでの特定のデータ',
+    noResultsFound: '結果がありません。',
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
     noTrashResults: 'ゴミ箱に{{label}}はありません。',
