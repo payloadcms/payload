@@ -228,7 +228,7 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 If you need to convert raw HTML into a Lexical editor state, use `convertHTMLToLexical` from `@payloadcms/richtext-lexical`, along with the [editorConfigFactory to retrieve the editor config](/docs/rich-text/converters#retrieving-the-editor-config):
 
 <Banner type="warning">
-  **Important:** When converting HTML to Lexical, `<img>` tags are NOT automatically uploaded to prevent unintended database modifications. Images will be omitted from the conversion unless you provide the proper data attributes. See [Converting HTML with Images](#converting-html-with-images) for guidance on handling images.
+  **Important:** When converting HTML to Lexical, `<img>` tags are NOT automatically uploaded. This is intentional because we don't know which uploads-enabled collection to add them to, and that collection may have required fields that cannot be auto-filled. Images will be omitted from the conversion unless you provide the proper data attributes. See [Converting HTML with Images](#converting-html-with-images) for guidance on handling images.
 </Banner>
 
 ```ts
@@ -376,50 +376,29 @@ const lexicalJSON = await convertHTMLWithImageUpload(
 )
 ```
 
-### Approach 3: Manually Construct Upload Nodes
+### Approach 3: Construct Upload Nodes with buildEditorState
 
-If you already have upload IDs and want to build the Lexical JSON structure manually, you can construct upload nodes directly.
+If you already have upload IDs and want to build the Lexical JSON structure, use the `buildEditorState` helper for a type-safe, simplified approach. This helper requires less boilerplate and eliminates the need to manually construct the root node.
 
 ```ts
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import { v4 as uuid } from 'uuid'
 
-// Manually construct Lexical JSON with upload nodes
-const lexicalJSON = {
-  root: {
-    type: 'root',
-    format: '',
-    indent: 0,
-    version: 1,
-    children: [
-      {
-        type: 'paragraph',
-        format: '',
-        indent: 0,
-        version: 1,
-        children: [
-          {
-            type: 'text',
-            format: 0,
-            text: 'Some text content',
-            mode: 'normal',
-            version: 1,
-          },
-        ],
-        direction: 'ltr',
-      },
-      {
-        type: 'upload',
-        format: '',
-        version: 3,
-        relationTo: 'media',
-        value: 'your-upload-id-here', // ID of the uploaded document
-        fields: {}, // Any additional fields configured for the upload feature
-        id: uuid(), // Unique ID for this node instance (not the upload document ID)
-      },
-    ],
-    direction: 'ltr',
-  },
-}
+// Build Lexical JSON with upload nodes using the helper
+const lexicalJSON = buildEditorState({
+  text: 'Some text content',
+  nodes: [
+    {
+      type: 'upload',
+      format: '',
+      version: 3,
+      relationTo: 'media',
+      value: 'your-upload-id-here', // ID of the uploaded document
+      fields: {}, // Any additional fields configured for the upload feature
+      id: uuid(), // Unique ID for this node instance (not the upload document ID)
+    },
+  ],
+})
 
 // Save to your collection
 await payload.create({
