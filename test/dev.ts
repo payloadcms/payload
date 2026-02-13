@@ -70,7 +70,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await runInit(testSuiteArg, true)
+await runInit(testSuiteArg, true, false, testSuiteConfigOverride)
 
 // This is needed to forward the environment variables to the next process that were created after loadEnv()
 // for example process.env.DATABASE_URL otherwise app.prepare() will clear them
