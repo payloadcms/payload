@@ -30,6 +30,10 @@ export const itTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': "Riassunto dell'Importazione",
     importDocumentLabel: 'Importa {{label}}',
     importResults: "Risultati dell'Importazione",
+    limitCapped: 'Limite fissato a un massimo di {{limit}}',
+    limitExceededExport: 'Esportazione limitata a {{limit}} documenti',
+    limitExceededImport:
+      'Il file di importazione contiene {{count}} documenti ma il limite è {{limit}}',
     matchBy: 'Corrispondenza per',
     mode: 'Modalità',
     noDataToPreview: 'Nessun dato da visualizzare',

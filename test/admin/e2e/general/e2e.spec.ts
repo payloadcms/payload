@@ -12,9 +12,9 @@ import {
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -55,12 +55,12 @@ let payload: PayloadTestSDK<Config>
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '../../../helpers/e2e/openDocControls.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -846,6 +846,59 @@ describe('General', () => {
       await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
+    })
+
+    test('should render beforeNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      await expect(beforeNav).toContainText('beforeNav')
+    })
+
+    test('should render afterNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      await expect(afterNav).toContainText('afterNav')
+    })
+
+    test('should render beforeNav and afterNav outside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNav is outside the nav element
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      const beforeNavInNav = page.locator('nav.nav__wrap #before-nav-component')
+      await expect(beforeNavInNav).toHaveCount(0)
+
+      // Verify afterNav is outside the nav element
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      const afterNavInNav = page.locator('nav.nav__wrap #after-nav-component')
+      await expect(afterNavInNav).toHaveCount(0)
+    })
+
+    test('should render beforeNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNavLinks is inside the nav element
+      const beforeNavLinksInNav = page.locator('nav.nav__wrap #before-nav-links-component')
+      await expect(beforeNavLinksInNav).toBeVisible()
+      await expect(beforeNavLinksInNav).toContainText('beforeNavLinks')
+    })
+
+    test('should render afterNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify afterNavLinks is inside the nav element
+      const afterNavLinksInNav = page.locator('nav.nav__wrap #after-nav-links-component')
+      await expect(afterNavLinksInNav).toBeVisible()
+      await expect(afterNavLinksInNav).toContainText('afterNavLinks')
     })
   })
 

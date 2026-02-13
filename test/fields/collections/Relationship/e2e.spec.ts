@@ -1,18 +1,18 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { openCreateDocDrawer } from '__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import {
@@ -21,11 +21,11 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 

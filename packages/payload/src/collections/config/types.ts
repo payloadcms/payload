@@ -2,8 +2,15 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type { CustomStatus, CustomUpload, ViewTypes } from '../../admin/types.js'
-import type { AdminViewConfig } from '../../admin/views/index.js'
+import type {
+  CustomStatus,
+  CustomUpload,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  ViewTypes,
+} from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -39,6 +46,7 @@ import type {
   CollectionAdminCustom,
   CollectionCustom,
   CollectionSlug,
+  GeneratedTypes,
   JsonObject,
   RequestContext,
   TypedAuthOperations,
@@ -69,12 +77,47 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
+/**
+ * Collection slugs that do not have drafts enabled.
+ * Detects collections without drafts by checking for the absence of the `_status` field.
+ */
+export type CollectionsWithoutDrafts = {
+  [TSlug in CollectionSlug]: DataFromCollectionSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[CollectionSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on collection configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on collections without drafts.
+ */
+export type DraftFlagFromCollectionSlug<TSlug extends CollectionSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends CollectionsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this collection does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the document(s) should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
+
 export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
   TypedAuthOperations[TSlug]
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
+  'collection' | 'createdAt' | 'deletedAt' | 'id' | 'updatedAt'
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -86,9 +129,9 @@ export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
  * The id field is optional since it's auto-generated
  */
 export type DraftDataFromCollection<TData extends JsonObject> = Partial<
-  Omit<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
+  Omit<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>
 > &
-  Partial<Pick<TData, 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
+  Partial<Pick<TData, 'collection' | 'createdAt' | 'deletedAt' | 'id' | 'sizes' | 'updatedAt'>>
 
 export type DraftDataFromCollectionSlug<TSlug extends CollectionSlug> = DraftDataFromCollection<
   DataFromCollectionSlug<TSlug>
@@ -178,6 +221,10 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: T
   req: PayloadRequest
 }) => any
@@ -187,6 +234,10 @@ export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -197,6 +248,10 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
   context: RequestContext
   doc: T
   findMany?: boolean
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: { [key: string]: any }
   req: PayloadRequest
 }) => any
@@ -359,7 +414,7 @@ export type CollectionAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomComponent
+      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -375,6 +430,11 @@ export type CollectionAdminOptions = {
        * Replaces the "Status" section
        */
       Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
       /**
        * Replaces the "Upload" section
        * + upload must be enabled

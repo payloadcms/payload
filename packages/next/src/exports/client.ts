@@ -12,4 +12,5 @@ export {
   QueryPresetsGroupByField,
   QueryPresetsWhereCell,
   QueryPresetsWhereField,
+  SlugField,
 } from '@payloadcms/ui'

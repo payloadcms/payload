@@ -319,6 +319,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const handleActionableClick = useEffectEvent((e: MouseEvent) => {
     const target = e.target as HTMLElement
+
+    // Allow opting out with data-popup-prevent-close attribute on element or ancestor
+    if (target.closest('[data-popup-prevent-close]')) {
+      return
+    }
+
     // Check if the clicked element or any ancestor is an actionable element
     const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
     if (actionable && popupRef.current?.contains(actionable)) {
