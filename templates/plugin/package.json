@@ -53,7 +53,7 @@
     "@payloadcms/next": "3.37.0",
     "@payloadcms/richtext-lexical": "3.37.0",
     "@payloadcms/ui": "3.37.0",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.58.2",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
     "@types/node": "22.19.9",

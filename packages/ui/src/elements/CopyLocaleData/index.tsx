@@ -91,7 +91,12 @@ export const CopyLocaleData: React.FC = () => {
 
         toggleModal(drawerSlug)
       } catch (error) {
-        toast.error(error.message)
+        setCopying(false)
+        const errorMessage = (error as Error).message || 'error:unknown'
+        const translatedMessage = errorMessage.startsWith('error:')
+          ? t(errorMessage as any)
+          : errorMessage
+        toast.error(translatedMessage)
       }
     },
     [
@@ -104,6 +109,7 @@ export const CopyLocaleData: React.FC = () => {
       router,
       admin,
       startRouteTransition,
+      t,
     ],
   )
 

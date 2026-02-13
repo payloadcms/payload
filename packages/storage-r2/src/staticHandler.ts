@@ -90,6 +90,12 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
         obj.writeHttpMetadata(headers)
       }
 
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      const contentType = headers.get('Content-Type')
+      if (contentType === 'image/svg+xml') {
+        headers.set('Content-Security-Policy', "script-src 'none'")
+      }
+
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
       if (

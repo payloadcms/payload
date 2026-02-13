@@ -67,6 +67,9 @@ const cmdRunnerAsync =
 async function main() {
   console.log({ projectRoot: PROJECT_ROOT })
 
+  header(`⬇️  Pulling latest from remote...`, { enable: true })
+  execSync('git pull', execOpts)
+
   if (!process.env.GITHUB_TOKEN) {
     throw new Error('GITHUB_TOKEN env var is required')
   }
