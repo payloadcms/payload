@@ -365,6 +365,10 @@ export const viTranslations: DefaultTranslationsObject = {
     noOptions: 'Không có lựa chọn',
     noResults:
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
+    noResultsDescription:
+      'Hoặc là không có hoặc không có gì phù hợp với các bộ lọc bạn đã chỉ định ở trên.',
+    noResultsFound:
+      'Tôn trọng ý nghĩa của văn bản gốc trong ngữ cảnh của Payload. Dưới đây là danh sách các thuật ngữ Payload phổ biến mang ý nghĩa rất cụ thể:\n    - Collection: Collection là một nhóm các tài liệu chia sẻ một cấu trúc và mục đích chung. Collection được sử dụng để tổ chức và quản lý nội dung trong Payload.\n    - Field: Field là một phần cụ thể của dữ liệu trong một tài liệu trong collection',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
     noTrashResults: 'Không có {{label}} trong thùng rác.',

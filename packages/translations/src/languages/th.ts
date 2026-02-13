@@ -358,6 +358,9 @@ export const thTranslations: DefaultTranslationsObject = {
     noOptions: 'ไม่มีตัวเลือก',
     noResults:
       'ไม่พบ {{label}} เนื่องจากยังไม่มี {{label}} หรือไม่มี {{label}} ใดตรงกับการกรองด้านบน',
+    noResultsDescription: 'อาจไม่มีอยู่หรือไม่ตรงกับตัวกรองที่คุณระบุไว้ด้านบน',
+    noResultsFound:
+      'ให้เคารพความหมายของข้อความต้นฉบับในบริบทของ Payload นี่คือรายการของคำภาษาอังกฤษทั่วไปที่มีความหมายที่เฉพาะเจาะจง:\n    - Collection: Collection เป็นกลุ่มของเอกสารที่มีโครงสร้างและวัตถุประส',
     notFound: 'ไม่พบ',
     nothingFound: 'ไม่พบสิ่งใด',
     noTrashResults: 'ไม่มี {{label}} ในถังขยะ.',

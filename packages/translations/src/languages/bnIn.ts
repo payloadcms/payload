@@ -369,6 +369,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     noOptions: 'কোনো বিকল্প নেই',
     noResults:
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
+    noResultsDescription:
+      'আপনার উপরে নির্দিষ্ট ফিল্টারগুলির সাথে মেলে যায় এমন কোনো বিষয়টি নেই, অথবা সবচেয়ে সম্ভবত কোনো বিষয়টি নেই।',
+    noResultsFound: 'ফলাফল নেই।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোনো {{label}} নেই।',

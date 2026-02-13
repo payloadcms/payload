@@ -366,6 +366,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen alternativer',
     noResults:
       'Ingen {{label}} funnet. Enten finnes det ingen {{label}} enda eller ingen matcher filterne du har spesifisert ovenfor.',
+    noResultsDescription:
+      'Enten finnes det ingen, eller ingen samsvarer med filtrene du har spesifisert ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke funnet',
     nothingFound: 'Ingenting funnet',
     noTrashResults: 'Ingen {{label}} i søppelkassen.',

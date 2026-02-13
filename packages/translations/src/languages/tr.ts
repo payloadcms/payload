@@ -369,6 +369,9 @@ export const trTranslations: DefaultTranslationsObject = {
     noOptions: 'Seçenek yok',
     noResults:
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
+    noResultsDescription:
+      'Ya hiçbiri mevcut değil ya da belirttiğiniz filtrelerle eşleşen hiçbiri yok.',
+    noResultsFound: 'Sonuç Yok.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',

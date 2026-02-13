@@ -368,6 +368,10 @@ export const itTranslations: DefaultTranslationsObject = {
     noOptions: 'Nessuna opzione',
     noResults:
       'Nessun {{label}} trovato. Non esiste ancora nessun {{label}} oppure nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsDescription:
+      'O non ne esistono o nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsFound:
+      "Rispettate il significato del testo originale nel contesto di Payload. Ecco un elenco di termini comuni di Payload che hanno significati molto specifici:\n    - Collezione: Una collezione è un gruppo di documenti che condividono una struttura e uno scopo comuni. Le collezioni vengono utilizzate per organizzare e gestire contenuti in Payload.\n    - Campo: Un campo è una specifica parte di dati all'interno di un documento in una collezione. I campi definiscono la struttura e il tipo di dati che possono essere memorizzati in un documento.\n    - Documento: Un documento è un record",
     notFound: 'Non Trovato',
     nothingFound: 'Non è stato trovato nulla',
     noTrashResults: 'Nessun {{label}} nel cestino.',

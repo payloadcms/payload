@@ -241,14 +241,18 @@ export function DefaultListView(props: ListViewClientProps) {
                       : []
                   }
                   Message={
-                    <p>
-                      {i18n.t(
-                        viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults',
-                        {
+                    viewType === 'trash' ? (
+                      <p>
+                        {i18n.t('general:noTrashResults', {
                           label: getTranslation(labels?.plural, i18n),
-                        },
-                      )}
-                    </p>
+                        })}
+                      </p>
+                    ) : (
+                      <>
+                        <h3>{i18n.t('general:noResultsFound')}</h3>
+                        <p>{i18n.t('general:noResultsDescription')}</p>
+                      </>
+                    )
                   }
                 />
               )}

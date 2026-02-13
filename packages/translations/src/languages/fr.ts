@@ -376,6 +376,9 @@ export const frTranslations: DefaultTranslationsObject = {
     noOptions: 'Aucune option',
     noResults:
       'Aucun(e) {{label}} trouvé(e). Soit aucun(e) {{label}} n’existe encore, soit aucun(e) ne correspond aux filtres que vous avez spécifiés ci-dessus',
+    noResultsDescription:
+      "Soit il n'en existe aucun, soit aucun ne correspond aux filtres que vous avez spécifiés ci-dessus.",
+    noResultsFound: 'Aucun résultat.',
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
     noTrashResults: 'Aucun {{label}} dans la corbeille.',

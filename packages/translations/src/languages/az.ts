@@ -368,6 +368,9 @@ export const azTranslations: DefaultTranslationsObject = {
     noOptions: 'Heç bir seçim yoxdur',
     noResults:
       'Heç bir {{label}} tapılmadı. Ya hələ {{label}} yoxdur, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsDescription:
+      'Ya heç biri mövcud deyil, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsFound: 'Nəticə yoxdur.',
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',

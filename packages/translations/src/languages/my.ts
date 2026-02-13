@@ -368,6 +368,10 @@ export const myTranslations: DefaultTranslationsObject = {
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
     noResults:
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
+    noResultsDescription:
+      'Sama ada tiada yang wujud atau tiada yang sepadan dengan penapis yang anda tentukan di atas.',
+    noResultsFound:
+      'Menghormati makna teks asal dalam konteks Payload. Berikut adalah senarai terma Payload biasa yang membawa maksud yang sangat tertentu:\n- Koleksi: Koleksi adalah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n- Bidang: Bidang adalah potongan data tertentu dalam dokumen dalam koleksi. Bidang menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n- Dokumen: Dokumen adalah rekod individu dalam koleksi. Ia mengandungi data yang terstruktur mengikut bidang',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'Tiada {{label}} dalam tong sampah.',

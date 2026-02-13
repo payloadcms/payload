@@ -362,6 +362,9 @@ export const etTranslations: DefaultTranslationsObject = {
     noOptions: 'Valikud puuduvad',
     noResults:
       '{{label}} ei leitud. Kas ühtegi {{label}} pole veel olemas või ükski ei vasta ülal määratud filtritele.',
+    noResultsDescription:
+      'Kas neid ei eksisteeri või ükski neist ei vasta filtritele, mille olete ülal määranud.',
+    noResultsFound: 'Tulemusi ei ole.',
     notFound: 'Ei leitud',
     nothingFound: 'Midagi ei leitud',
     noTrashResults: 'Pole {{label}} prügikastis.',

@@ -348,6 +348,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     none: '无',
     noOptions: '没有选项',
     noResults: '没有找到 {{label}}。{{label}} 并不存在或没有符合您上面所指定的过滤条件。',
+    noResultsDescription: '要么不存在，要么与您以上指定的过滤器不匹配。',
+    noResultsFound: '没有结果。',
     notFound: '未找到',
     nothingFound: '没有找到任何东西',
     noTrashResults: '回收站中没有 {{label}}。',

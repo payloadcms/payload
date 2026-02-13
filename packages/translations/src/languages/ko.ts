@@ -363,6 +363,9 @@ export const koTranslations: DefaultTranslationsObject = {
     noOptions: '옵션 없음',
     noResults:
       '{{label}}를 찾을 수 없습니다. 아직 {{label}}이 없거나 설정한 필터와 일치하는 것이 없습니다.',
+    noResultsDescription: '존재하지 않거나 지정한 필터와 일치하는 것이 없습니다.',
+    noResultsFound:
+      '원문의 의미를 Payload의 문맥 안에서 존중하십시오. 다음은 매우 특정한 의미를 가진 일반적인 Payload 용어들의 목록입니다:\n    - Collection: 컬렉션은 공통의 구조와 목적을 공유하는 문서들의 집합입니다. 컬렉션은 Payload에서 콘텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션 내의 문서에 있는 특정한 데이터 조',
     notFound: '찾을 수 없음',
     nothingFound: '찾을 수 없습니다',
     noTrashResults: '휴지통에 {{label}}이 없습니다.',

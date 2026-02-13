@@ -354,6 +354,9 @@ export const heTranslations: DefaultTranslationsObject = {
     none: 'ללא',
     noOptions: 'אין אפשרויות',
     noResults: 'לא נמצאו {{label}}. אין עדיין {{label}}, או שאינם תואמים למסננים שנבחרו.',
+    noResultsDescription: 'או שאף אחד לא קיים או שאף אחד לא תואם למסננים שציינת לעיל.',
+    noResultsFound:
+      'נושא את המשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים מקובלים של Payload שבהם משמעויות מאוד מסוימות:\n    - אוסף: אוסף הוא קבוצה של מסמכים השותפים מבנה ומטרה משות',
     notFound: 'לא נמצא',
     nothingFound: 'לא נמצא כלום',
     noTrashResults: 'אין {{label}} בפח.',

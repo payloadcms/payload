@@ -365,6 +365,9 @@ export const plTranslations: DefaultTranslationsObject = {
     noOptions: 'Brak opcji',
     noResults:
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
+    noResultsDescription:
+      'Albo żadne nie istnieją, albo żadne nie spełniają filtrów, które określiłeś powyżej.',
+    noResultsFound: 'Brak wyników.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',

@@ -369,6 +369,9 @@ export const huTranslations: DefaultTranslationsObject = {
     noOptions: 'Nincs lehetőség',
     noResults:
       'Nem találtunk {{label}}. Vagy még nem létezik {{label}}, vagy egyik sem felel meg a fent megadott szűrőknek.',
+    noResultsDescription:
+      'Semelyik sem létezik, semelyik sem felel meg a fent beállított szűrőknek.',
+    noResultsFound: 'Nincsenek eredmények.',
     notFound: 'Nem található',
     nothingFound: 'Nincs találat',
     noTrashResults: 'Nincs {{label}} a szemetesben.',

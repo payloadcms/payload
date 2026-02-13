@@ -355,6 +355,8 @@ export const arTranslations: DefaultTranslationsObject = {
     noOptions: 'لا خيارات',
     noResults:
       'لا يوجد {{label}}. إما أن لا {{label}} موجودة حتى الآن أو لا تتطابق مع عوامل التصفية التي حددتها أعلاه.',
+    noResultsDescription: 'إما أن لا يوجد شيء أو أنه لا يوجد شيء يطابق الفلاتر التي حددتها أعلاه.',
+    noResultsFound: 'لا توجد نتائج.',
     notFound: 'غير موجود',
     nothingFound: 'لم يتم العثور على شيء',
     noTrashResults: 'لا {{label}} في المهملات.',

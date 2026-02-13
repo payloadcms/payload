@@ -367,6 +367,10 @@ export const hyTranslations: DefaultTranslationsObject = {
     noOptions: 'Ընտրանքներ չկան',
     noResults:
       '{{label}}-ը չի գտնվել։ Կա՛մ դեռևս {{label}} չկա, կա՛մ ոչ մեկը չի համապատասխանում վերևում նշված ֆիլտրերին։',
+    noResultsDescription:
+      'Հավելյալ ոչ մեկը գոյություն չունի կամ ոչ մեկը չի համապատասխանում վերոնշյալ զտիչն',
+    noResultsFound:
+      'Հիմնական տեքստի նշանակությունը պետք է պաշտպանվի Payload կոնտեքստում։ Այստեղ այցելել է ո',
     notFound: 'Չի գտնվել',
     nothingFound: 'Ոչինչ չի գտնվել',
     noTrashResults: 'Ոչ մի {{label}} աղբարկղում:',
