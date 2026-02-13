@@ -935,6 +935,12 @@ export const MyCustomCellComponent: React.FC<DefaultCellComponentProps> = ({
 }
 ```
 
+<Banner type="warning">
+  **Important:** Use `DefaultCellComponentProps` for client components (with
+  `'use client'` directive) and `DefaultServerCellComponentProps` for server
+  components. Omitting `'use client'` will change the expected prop types.
+</Banner>
+
 All Cell Components receive the following props:
 
 | Property              | Description                                                                  |
