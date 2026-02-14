@@ -263,6 +263,19 @@ describe('Join Field', () => {
     }
   })
 
+  test('should not break editing via drawer for polymorphic relationships', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-polymorphicJoin.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
+    const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
+    await toggler.click()
+
+    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(drawer).toBeHidden()
+  })
+
   test('should not render collection type in polymorphic relationship table with disableRowTypes true', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-polymorphicJoinNoRowTypes.field-type.join')
