@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
+    'related-docs': RelatedDoc;
+    'virtual-fields': VirtualField;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +81,8 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'related-docs': RelatedDocsSelect<false> | RelatedDocsSelect<true>;
+    'virtual-fields': VirtualFieldsSelect<false> | VirtualFieldsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -186,6 +190,33 @@ export interface AutosavePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "related-docs".
+ */
+export interface RelatedDoc {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-fields".
+ */
+export interface VirtualField {
+  id: string;
+  relation?: (string | null) | RelatedDoc;
+  embedded?: {
+    title?: string | null;
+    description?: string | null;
+    updatedAt?: string | null;
+    createdAt?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -240,6 +271,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-posts';
         value: string | AutosavePost;
+      } | null)
+    | ({
+        relationTo: 'related-docs';
+        value: string | RelatedDoc;
+      } | null)
+    | ({
+        relationTo: 'virtual-fields';
+        value: string | VirtualField;
       } | null)
     | ({
         relationTo: 'users';
@@ -350,6 +389,33 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "related-docs_select".
+ */
+export interface RelatedDocsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-fields_select".
+ */
+export interface VirtualFieldsSelect<T extends boolean = true> {
+  relation?: T;
+  embedded?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        updatedAt?: T;
+        createdAt?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

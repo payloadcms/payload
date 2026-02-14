@@ -9,9 +9,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { postsSlug } from './collections/Posts/index.js'
+import { relatedSlug, virtualFieldsSlug } from './collections/VirtualFields/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { mergeServerFormState } from '../../packages/ui/src/forms/Form/mergeServerFormState.js'
@@ -769,5 +770,100 @@ describe('Form State', () => {
 
     expect(state.array).toBeDefined()
     expect(state?.array?.rows).toEqual([]) // should be [] not undefined
+  })
+
+  describe('afterRead hooks in buildFormState', () => {
+    it('should populate virtual fields via afterRead hook when relation is set', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      const related = await payload.create({
+        collection: relatedSlug,
+        data: { title: 'Test Title', description: 'Test Description' },
+      })
+
+      const formState: FormState = {
+        relation: {
+          value: related.id,
+          initialValue: related.id,
+          valid: true,
+        },
+        embedded: {
+          disableFormData: true,
+          valid: true,
+        },
+        'embedded.title': {
+          value: undefined,
+          initialValue: undefined,
+          valid: true,
+        },
+        'embedded.description': {
+          value: undefined,
+          initialValue: undefined,
+          valid: true,
+        },
+      }
+
+      const { state } = await buildFormState({
+        mockRSCs: true,
+        collectionSlug: virtualFieldsSlug,
+        docPermissions: { create: true, delete: true, fields: true, read: true, update: true },
+        docPreferences: { fields: {} },
+        formState,
+        operation: 'create',
+        renderAllFields: false,
+        req,
+        schemaPath: virtualFieldsSlug,
+      })
+
+      expect(state['embedded.title']).toMatchObject({
+        value: 'Test Title',
+        initialValue: 'Test Title',
+      })
+      expect(state['embedded.description']).toMatchObject({
+        value: 'Test Description',
+        initialValue: 'Test Description',
+      })
+    })
+
+    it('should clear virtual fields via afterRead hook when relation is removed', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      const formState: FormState = {
+        relation: {
+          value: null,
+          initialValue: null,
+          valid: true,
+        },
+        embedded: {
+          disableFormData: true,
+          valid: true,
+        },
+        'embedded.title': {
+          value: 'Stale Title',
+          initialValue: 'Stale Title',
+          valid: true,
+        },
+        'embedded.description': {
+          value: 'Stale Description',
+          initialValue: 'Stale Description',
+          valid: true,
+        },
+      }
+
+      const { state } = await buildFormState({
+        mockRSCs: true,
+        collectionSlug: virtualFieldsSlug,
+        docPermissions: { create: true, delete: true, fields: true, read: true, update: true },
+        docPreferences: { fields: {} },
+        formState,
+        operation: 'create',
+        renderAllFields: false,
+        req,
+        schemaPath: virtualFieldsSlug,
+      })
+
+      expect(state['embedded.title']?.value).toBeNull()
+      expect(state['embedded.description']?.value).toBeNull()
+    })
   })
 })
