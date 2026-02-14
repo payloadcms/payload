@@ -1,6 +1,10 @@
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
+import { Buffer } from 'buffer'
+import { URL } from 'url'
+import { fetch, Headers } from 'undici'
+
 import { APIError } from '../errors/index.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
@@ -27,7 +31,7 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
 
     if (trimAuthCookies) {
       cookies = cookies.filter(
-        (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
+        (cookie: string) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
       )
     }
 
@@ -89,12 +93,13 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
     }
 
     const data = await res.arrayBuffer()
+    const buffer = Buffer.from(data)
 
     return {
       name: filename,
-      data: Buffer.from(data),
-      mimetype: res.headers.get('content-type') || undefined!,
-      size: Number(res.headers.get('content-length')) || 0,
+      data: buffer,
+      mimetype: res.headers.get('content-type') || 'application/octet-stream',
+      size: buffer.length,
     }
   }
 
