@@ -1547,7 +1547,19 @@ export type Block = {
   }
   imageAltText?: string
   /**
-   * Preferred aspect ratio of the image is 3 : 2
+   * Icon alt text for the block icon displayed in Lexical editor menus and toolbars (20x20px).
+   */
+  iconImageAltText?: string
+  /**
+   * Icon image URL for the block displayed in Lexical editor menus and toolbars.
+   * This image will be scaled to 20x20px. Use square images for best results.
+   * Falls back to imageURL if not provided, then to default block icon.
+   */
+  iconImageURL?: string
+  /**
+   * Thumbnail image URL for the block displayed in the Admin UI block selection drawer.
+   * Preferred aspect ratio of the image is 3:2 (e.g., 480x320, 600x400, 900x600).
+   * Images are displayed using object-fit: cover and will be cropped if aspect ratio doesn't match.
    */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
@@ -1567,7 +1579,7 @@ export type ClientBlock = {
   admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'iconImageAltText' | 'iconImageURL' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlocksField = {
   admin?: {
