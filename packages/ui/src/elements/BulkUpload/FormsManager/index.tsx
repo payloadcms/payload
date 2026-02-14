@@ -8,6 +8,7 @@ import type {
   JsonObject,
   SanitizedDocumentPermissions,
   UploadEdits,
+  ValidationFieldError,
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
@@ -365,10 +366,17 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
 
       // should expose some sort of helper for this
+      type APIErrorItem = {
+        data?: { errors?: Array<{ message?: string; path?: string }> }
+        message?: string
+      }
       const [fieldErrors, nonFieldErrors] = (json?.errors || []).reduce(
-        ([fieldErrs, nonFieldErrs], err) => {
-          const newFieldErrs: any[] = []
-          const newNonFieldErrs: any[] = []
+        (
+          [fieldErrs, nonFieldErrs]: [ValidationFieldError[], Array<{ message?: string }>],
+          err: APIErrorItem,
+        ) => {
+          const newFieldErrs: ValidationFieldError[] = []
+          const newNonFieldErrs: Array<{ message?: string }> = []
 
           if (err?.message) {
             newNonFieldErrs.push(err)
@@ -377,7 +385,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           if (Array.isArray(err?.data?.errors)) {
             err.data?.errors.forEach((dataError) => {
               if (dataError?.path) {
-                newFieldErrs.push(dataError)
+                newFieldErrs.push({ message: dataError.message ?? '', path: dataError.path })
               } else {
                 newNonFieldErrs.push(dataError)
               }
@@ -389,7 +397,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             [...nonFieldErrs, ...newNonFieldErrs],
           ]
         },
-        [[], []],
+        [[], []] as [ValidationFieldError[], Array<{ message?: string }>],
       )
 
       const missingFile = !fileValue && req.status === 400
