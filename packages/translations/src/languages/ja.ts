@@ -369,6 +369,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     noOptions: '選択肢なし',
     noResults:
       '{{label}} データが見つかりませんでした。データが存在しない、または、絞り込みに一致するものがありません。',
+    noResultsDescription: '存在しないか、指定したフィルターに一致するものがありません。',
+    noResultsFound: '結果がありません。',
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
     noTrashResults: 'ゴミ箱に{{label}}はありません。',

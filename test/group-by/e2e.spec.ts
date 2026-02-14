@@ -9,14 +9,6 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  exactText,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { sortColumn, toggleColumn } from '../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
@@ -26,10 +18,18 @@ import {
   closeGroupBy,
   openGroupBy,
 } from '../__helpers/e2e/groupBy/index.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+  selectTableRow,
+} from '../__helpers/e2e/helpers.js'
 import { deletePreferences } from '../__helpers/e2e/preferences.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -473,7 +473,7 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(0)
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should paginate globally (all tables)', async () => {

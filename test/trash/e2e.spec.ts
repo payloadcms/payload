@@ -794,6 +794,7 @@ describe('Trash', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
+        await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'Versions' }).click()
@@ -842,6 +843,7 @@ describe('Trash', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
+        await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'Versions' }).click()
@@ -896,6 +898,7 @@ describe('Trash', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
+        await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'Versions' }).click()
@@ -950,6 +953,7 @@ describe('Trash', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
+        await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
 
         await page.getByRole('link', { name: 'API' }).click()
@@ -998,6 +1002,7 @@ describe('Trash', () => {
         // Click on the first row to go to the trashed doc edit view
         await page.locator('.row-1 .cell-title').click()
 
+        await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
         await page.getByRole('link', { name: 'API' }).click()
 
@@ -1091,6 +1096,7 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
+      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
@@ -1101,8 +1107,10 @@ describe('Trash', () => {
 
       await page.goto(usersUrl.trash)
 
+      await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
+      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
@@ -1122,6 +1130,7 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       await page.locator('.row-1 .cell-name').click()
 
+      await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)

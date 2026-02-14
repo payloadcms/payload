@@ -370,6 +370,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     noOptions: 'Jokių variantų',
     noResults:
       'Nerasta jokių {{label}}. Arba dar nėra sukurtų {{label}}, arba jie neatitinka nurodytų filtrų aukščiau.',
+    noResultsDescription: 'Arba jų nėra, arba jie neatitinka viršuje nurodytų filtrų.',
+    noResultsFound: 'Nėra rezultatų.',
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
     noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',

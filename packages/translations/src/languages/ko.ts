@@ -364,6 +364,8 @@ export const koTranslations: DefaultTranslationsObject = {
     noOptions: '옵션 없음',
     noResults:
       '{{label}}를 찾을 수 없습니다. 아직 {{label}}이 없거나 설정한 필터와 일치하는 것이 없습니다.',
+    noResultsDescription: '존재하지 않거나 지정한 필터와 일치하는 것이 없습니다.',
+    noResultsFound: '결과 없음.',
     notFound: '찾을 수 없음',
     nothingFound: '찾을 수 없습니다',
     noTrashResults: '휴지통에 {{label}}이 없습니다.',

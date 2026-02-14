@@ -367,6 +367,8 @@ export const skTranslations: DefaultTranslationsObject = {
     noOptions: 'Žiadne možnosti',
     noResults:
       'Neboli nájdené žiadne {{label}}. Buď neexistujú žiadne {{label}}, alebo žiadne nespĺňajú filtre, ktoré ste zadali vyššie.',
+    noResultsDescription: 'Žiadne neexistujú alebo nesúladia s filtrami, ktoré ste vyššie určili.',
+    noResultsFound: 'Bez výsledkov.',
     notFound: 'Nenájdené',
     nothingFound: 'Nič nenájdené',
     noTrashResults: 'Žiadne {{label}} v koši.',

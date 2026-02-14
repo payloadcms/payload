@@ -348,6 +348,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     none: '無',
     noOptions: '無選項',
     noResults: '找不到符合條件的 {{label}}。可能尚未建立或篩選條件不符。',
+    noResultsDescription: '或者是不存在，或者是都不符合您上面指定的過濾條件。',
+    noResultsFound: '沒有結果。',
     notFound: '找不到',
     nothingFound: '查無資料',
     noTrashResults: '{{label}} 垃圾桶為空。',

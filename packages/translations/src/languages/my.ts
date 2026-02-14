@@ -369,6 +369,9 @@ export const myTranslations: DefaultTranslationsObject = {
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
     noResults:
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
+    noResultsDescription:
+      'Sama ada tiada yang wujud atau tiada yang sepadan dengan penapis yang anda tentukan di atas.',
+    noResultsFound: 'ရလဒ်မရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'Tiada {{label}} dalam tong sampah.',

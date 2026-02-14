@@ -365,6 +365,9 @@ export const taTranslations: DefaultTranslationsObject = {
     noOptions: 'விருப்பங்கள் எதுவும் இல்லை',
     noResults:
       'எந்த {{label}} கிடைக்கவில்லை. இன்னும் {{label}} இல்லை அல்லது நீங்கள் தேர்ந்தெடுத்த வடிகட்டுகளுக்கு பொருந்தவில்லை.',
+    noResultsDescription:
+      'உங்கள் மேலே குறிப்பிட்டுள்ள வடிகட்டுகளுக்கு ஏற்ப எந்தவொரு பொருளும் இல்லை அல்லது இல்லை.',
+    noResultsFound: 'முடிவுகள் இல்லை.',
     notFound: 'கிடைக்கவில்லை',
     nothingFound: 'எதுவும் கிடைக்கவில்லை',
     noTrashResults: 'குப்பையில் {{label}} எதுவும் இல்லை.',

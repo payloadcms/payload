@@ -371,6 +371,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noOptions: 'কোনো বিকল্প নেই',
     noResults:
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
+    noResultsDescription:
+      'আপনার দেওয়া ফিল্টারের সাথে মিলে যায় এমন কোনও বিষয় উপস্থিত নেই বা মিলতে পারে এমন কোনও বিষয় বিদ্যমান নেই।',
+    noResultsFound: 'ফলাফল নেই।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোন {{label}} নেই।',

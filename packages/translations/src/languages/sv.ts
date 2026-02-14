@@ -367,6 +367,9 @@ export const svTranslations: DefaultTranslationsObject = {
     noOptions: 'Inga alternativ',
     noResults:
       'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller så matchar inga filtren du har angett ovan.',
+    noResultsDescription:
+      'Antingen finns ingen eller ingen matchar de filter du har specificerat ovan.',
+    noResultsFound: 'Inga resultat.',
     notFound: 'Hittades inte',
     nothingFound: 'Inget hittades',
     noTrashResults: 'Inget {{label}} i papperskorgen.',

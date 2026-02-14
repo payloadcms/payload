@@ -366,6 +366,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     noOptions: 'Няма опции',
     noResults:
       '{{label}} не е открит. {{label}} не съществува или никой не отговаря на зададените филтри.',
+    noResultsDescription:
+      'Или не съществува такава, или никоя не отговаря на филтрите, които сте посочили по-горе.',
+    noResultsFound: 'Няма резултати.',
     notFound: 'Няма открит',
     nothingFound: 'Нищо не беше открито',
     noTrashResults: 'Няма {{label}} в кошчето.',

@@ -359,6 +359,9 @@ export const faTranslations: DefaultTranslationsObject = {
     noOptions: 'گزینه‌ای وجود ندارد',
     noResults:
       'هیچ موردی برای "{{label}}" یافت نشد. یا موردی ایجاد نشده یا با فیلترهای شما مطابقت ندارد.',
+    noResultsDescription:
+      'هیچ کدام وجود ندارند یا هیچ کدام با فیلترهایی که در بالا مشخص کرده اید مطابقت ندارند.',
+    noResultsFound: 'نتیجه‌ای یافت نشد.',
     notFound: 'یافت نشد',
     nothingFound: 'موردی یافت نشد',
     noTrashResults: 'هیچ {{label}} در سطل زباله وجود ندارد.',

@@ -372,6 +372,9 @@ export const esTranslations: DefaultTranslationsObject = {
     noOptions: 'Sin opciones',
     noResults:
       'No se encontró ningún {{label}}. Puede que aún no existan o que no coincidan con los filtros aplicados.',
+    noResultsDescription:
+      'O bien ninguno existe o ninguno coincide con los filtros que ha especificado anteriormente.',
+    noResultsFound: 'No hay resultados.',
     notFound: 'No encontrado',
     nothingFound: 'No se encontró nada',
     noTrashResults: 'No hay {{label}} en la papelera.',
