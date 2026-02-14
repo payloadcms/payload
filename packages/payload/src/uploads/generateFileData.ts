@@ -84,7 +84,10 @@ export const generateFileData = async <T>({
 
   const { serverURL, sharp } = req.payload.config
 
-  let file = req.file
+  // When duplicating, clear req.file so we always fetch the correct source file
+  // for the document being duplicated. Without this, req.file from a previous
+  // duplicate() call on the same request would leak and be reused.
+  let file = isDuplicating ? undefined : req.file
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,

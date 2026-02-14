@@ -1376,6 +1376,51 @@ describe('Collections - Uploads', () => {
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
     })
+
+    it('should not leak req.file between sequential duplicate() calls', async () => {
+      const filePath1 = path.resolve(dirname, './image.png')
+      const file1 = await getFileByPath(filePath1)
+      file1.name = 'alpha.png'
+
+      const filePath2 = path.resolve(dirname, './small.png')
+      const file2 = await getFileByPath(filePath2)
+      file2.name = 'bravo.png'
+
+      const doc1 = await payload.create({
+        collection: 'media',
+        data: {},
+        file: file1,
+      })
+
+      const doc2 = await payload.create({
+        collection: 'media',
+        data: {},
+        file: file2,
+      })
+
+      expect(doc1.filename).toContain('alpha')
+      expect(doc2.filename).toContain('bravo')
+
+      // Duplicate both documents using a shared req object
+      const req = await createPayloadRequest({ payload })
+
+      const dup1 = await payload.duplicate({
+        collection: 'media',
+        id: doc1.id,
+        req,
+      })
+
+      const dup2 = await payload.duplicate({
+        collection: 'media',
+        id: doc2.id,
+        req,
+      })
+
+      // Each duplicated doc should derive its filename from its own source,
+      // not from the first document's file
+      expect(dup1.filename).toContain('alpha')
+      expect(dup2.filename).toContain('bravo')
+    })
   })
 
   describe('serverURL handling', () => {
