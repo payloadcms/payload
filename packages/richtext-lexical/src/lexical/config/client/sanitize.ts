@@ -245,11 +245,13 @@ export function sanitizeClientEditorConfig(
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
   lexical?: LexicalEditorConfig,
   admin?: LexicalFieldAdminClientProps,
+  view?: string,
 ): SanitizedClientEditorConfig {
   return {
     admin,
     features: sanitizeClientFeatures(resolvedClientFeatureMap),
     lexical: lexical!,
     resolvedFeatureMap: resolvedClientFeatureMap,
+    view,
   }
 }
