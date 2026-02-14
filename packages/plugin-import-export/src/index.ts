@@ -109,6 +109,7 @@ export const importExportPlugin =
       if (!exportDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             exportCollectionSlug: exportSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
@@ -119,6 +120,7 @@ export const importExportPlugin =
       if (!importDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             importCollectionSlug: importSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
@@ -213,6 +215,11 @@ declare module 'payload' {
 
   export interface CollectionAdminCustom {
     'plugin-import-export'?: {
+      /**
+       * Array of collection slugs that this export/import collection can target.
+       * Used by CollectionField to populate the dropdown options.
+       */
+      collectionSlugs?: string[]
       /**
        * Array of field paths that are disabled for import/export.
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.

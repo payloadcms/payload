@@ -16,6 +16,7 @@ export const parseCSV = async ({ data, req }: ParseCSVArgs): Promise<Record<stri
     const records: Record<string, unknown>[] = []
 
     const parser = parse({
+      bom: true,
       cast: (value, _context) => {
         // Empty strings become undefined to preserve existing data during updates
         if (value === '') {

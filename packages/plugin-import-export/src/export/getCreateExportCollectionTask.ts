@@ -21,7 +21,17 @@ export const getCreateCollectionExportTask = (
   input: ExportJobInput
   output: object
 }> => {
-  const inputSchema = getFields(config).concat(
+  // Job queue task needs all collection slugs since it can handle exports for any collection
+  const allCollectionSlugs = config.collections?.map((c) => c.slug) || []
+  const inputSchema = getFields({ collectionSlugs: allCollectionSlugs, config }).concat(
+    {
+      name: 'id',
+      type: 'text',
+    },
+    {
+      name: 'batchSize',
+      type: 'number',
+    },
     {
       name: 'userID',
       type: 'text',

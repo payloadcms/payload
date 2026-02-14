@@ -2,7 +2,6 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
-  Config,
 } from 'payload'
 
 import { FileRetrievalError } from 'payload'
@@ -17,11 +16,14 @@ import { getFields } from './getFields.js'
 import { handlePreview } from './handlePreview.js'
 
 export const getImportCollection = ({
-  config,
+  collectionSlugs,
   importConfig,
   pluginConfig,
 }: {
-  config: Config
+  /**
+   * Collection slugs that this import collection supports.
+   */
+  collectionSlugs: string[]
   importConfig?: ImportConfig
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
@@ -33,9 +35,6 @@ export const getImportCollection = ({
   const batchSize = importConfig?.batchSize ?? 100
   const defaultVersionStatus = importConfig?.defaultVersionStatus ?? 'published'
 
-  // Get collection slugs for the dropdown
-  const collectionSlugs = pluginConfig.collections?.map((c) => c.slug)
-
   const collection: CollectionConfig = {
     slug: 'imports',
     access: {
@@ -45,6 +44,11 @@ export const getImportCollection = ({
       components: {
         edit: {
           SaveButton: '@payloadcms/plugin-import-export/rsc#ImportSaveButton',
+        },
+      },
+      custom: {
+        'plugin-import-export': {
+          collectionSlugs,
         },
       },
       disableCopyToLocale: true,
@@ -59,7 +63,7 @@ export const getImportCollection = ({
         path: '/preview-data',
       },
     ],
-    fields: getFields(config, { collectionSlugs }),
+    fields: getFields({ collectionSlugs }),
     hooks: {
       afterChange,
       beforeOperation,
