@@ -153,8 +153,10 @@ Blocks are defined as separate configs of their own.
 | **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                                                                                        |
 | **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                                                                                     |
 | **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.                                                                 |
-| **`imageURL`**             | Provide a custom image thumbnail URL to help editors identify this block in the Admin UI. The image will be displayed in a 3:2 aspect ratio container and cropped using `object-fit: cover` if needed. [More details](#block-image-guidelines). |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                                                                                |
+| **`imageURL`**             | Provide a custom image thumbnail URL to help editors identify this block in the Admin UI block selection drawer. The image will be displayed in a 3:2 aspect ratio container and cropped using `object-fit: cover` if needed. [More details](#block-image-guidelines). |
+| **`imageAltText`**         | Alt text for the block thumbnail displayed in the block selection drawer.                                                                                                                                                                       |
+| **`iconImageURL`**         | Provide a custom icon URL for this block in Lexical editor menus and toolbars (displayed at 20x20px). Use square images for best results. Falls back to `imageURL` if not provided. [More details](#block-image-guidelines).                    |
+| **`iconImageAltText`**     | Alt text for the block icon displayed in Lexical editor. Falls back to `imageAltText` if not provided.                                                                                                                                          |
 | **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                             |
 | **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                                                                                    |
 | **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                                                                                           |
@@ -164,33 +166,58 @@ _\* An asterisk denotes that a property is required._
 
 ### Block Image Guidelines
 
-When providing a custom thumbnail via `imageURL`, it's important to understand how images are displayed in the Admin UI to ensure they look correct.
+Blocks support two types of images to optimize display in different contexts:
 
-**Aspect Ratio and Cropping**:
+1. **`iconImageURL`** - Small icon for Lexical editor menus and toolbars (20x20px)
+2. **`imageURL`** - Larger thumbnail for block selection drawer (3:2 aspect ratio)
 
-- The image container uses a **3:2 aspect ratio** (e.g., 480x320 pixels)
-- Images are scaled using `object-fit: cover`, which means:
-  - Images that don't match 3:2 will be **cropped** to fill the container
-  - The image maintains its aspect ratio while being scaled
-  - Cropping is centered, removing edges as needed
+#### Icon Images (`iconImageURL`)
 
-**Display Contexts**:
+Used in Lexical editor slash menus, toolbar dropdowns, and inline block menus.
 
-1. **Block Selection Drawer**: Images appear as thumbnails in a responsive grid when editors add blocks
-2. **Lexical Editor**: Images are scaled down to 20x20px icons in menus and toolbars
+**Requirements**:
+
+- Displayed at **20x20 pixels**
+- **Square images** (1:1 aspect ratio) work best
+- Use simple, recognizable icons or symbols
+- Falls back to `imageURL` if not provided, then to default block icon
 
 **Recommendations**:
 
-- Use images with a **3:2 aspect ratio** to avoid unwanted cropping (e.g., 480x320, 600x400, 900x600)
-- Keep important visual content **centered** in your image, as edges may be cropped
-- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
-- Always include `imageAltText` for accessibility
+- Use SVG for crisp rendering at small sizes
+- Keep designs simple with bold shapes
+- Ensure adequate contrast for visibility
+- Provide web-optimized images (SVG, PNG with transparency)
 
-**Example**:
+#### Thumbnail Images (`imageURL`)
+
+Used in the block selection drawer when editors add blocks to a blocks field.
+
+**Requirements**:
+
+- **3:2 aspect ratio** (e.g., 480x320, 600x400, 900x600)
+- Images are scaled using `object-fit: cover`
+- Non-matching aspect ratios will be **cropped** to fill the container
+- Cropping is centered, removing edges as needed
+
+**Recommendations**:
+
+- Use images with **3:2 aspect ratio** to avoid unwanted cropping
+- Keep important visual content **centered** in your image
+- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
+- Always include alt text for accessibility
+
+#### Usage Examples
+
+**Example 1: Using both icon and thumbnail**
 
 ```ts
 const QuoteBlock: Block = {
   slug: 'quote',
+  // Icon for Lexical editor (20x20px, square)
+  iconImageURL: 'https://example.com/icons/quote-icon-20x20.svg',
+  iconImageAltText: 'Quote icon',
+  // Thumbnail for block drawer (3:2 aspect ratio)
   imageURL: 'https://example.com/thumbnails/quote-block-480x320.jpg',
   imageAltText: 'Quote block with text and attribution',
   fields: [
@@ -203,7 +230,36 @@ const QuoteBlock: Block = {
 }
 ```
 
-If no `imageURL` is provided, a default placeholder graphic is displayed automatically.
+**Example 2: Using only thumbnail (backwards compatible)**
+
+```ts
+const CallToActionBlock: Block = {
+  slug: 'cta',
+  // Only thumbnail provided - will be used in both contexts
+  imageURL: 'https://example.com/thumbnails/cta-block-480x320.jpg',
+  imageAltText: 'Call to action block',
+  fields: [
+    {
+      name: 'buttonText',
+      type: 'text',
+    },
+  ],
+}
+```
+
+**Example 3: Using only icon**
+
+```ts
+const DividerBlock: Block = {
+  slug: 'divider',
+  // Only icon provided - drawer will use default placeholder
+  iconImageURL: 'https://example.com/icons/divider-20x20.svg',
+  iconImageAltText: 'Divider icon',
+  fields: [],
+}
+```
+
+If neither `iconImageURL` nor `imageURL` is provided, default graphics are displayed automatically in both contexts.
 
 ### Admin Options
 

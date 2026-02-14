@@ -32,6 +32,21 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
       ],
     },
     {
+      slug: prefix ? `${prefix}WithIcon` : 'withIcon',
+      imageURL: '/api/uploads/file/payload480x320.jpg',
+      imageAltText: 'Block thumbnail',
+      iconImageURL: '/api/uploads/file/payload20x20.png',
+      iconImageAltText: 'Block icon',
+      interfaceName: prefix ? `${prefix}WithIconBlock` : 'WithIconBlock',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
       slug: prefix ? `${prefix}NoBlockname` : 'noBlockname',
       interfaceName: prefix ? `${prefix}NoBlockname` : 'NoBlockname',
       admin: {
