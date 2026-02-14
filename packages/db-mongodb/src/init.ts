@@ -30,7 +30,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]
 
-    const schema = buildCollectionSchema(collection, this.payload, schemaOptions)
+    const schema = buildCollectionSchema(collection, this.payload, schemaOptions, this.idType)
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
 
@@ -40,6 +40,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
         buildSchemaOptions: {
           disableUnique: true,
           draftsEnabled: true,
+          idType: this.idType,
           indexSortableFields: this.payload.config.indexSortableFields,
           options: {
             minimize: false,
@@ -92,6 +93,7 @@ export const init: Init = async function init(this: MongooseAdapter) {
         buildSchemaOptions: {
           disableUnique: true,
           draftsEnabled: true,
+          idType: this.idType,
           indexSortableFields: this.payload.config.indexSortableFields,
           options: {
             minimize: false,
