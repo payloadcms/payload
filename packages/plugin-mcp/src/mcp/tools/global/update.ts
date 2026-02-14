@@ -112,7 +112,7 @@ export const updateGlobalTool = (
             type: 'text' as const,
             text: `Global "${globalSlug}" updated successfully!
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

@@ -79,7 +79,7 @@ export const runJob = async (
 
 ## Input Data
 \`\`\`json
-${JSON.stringify(input, null, 2)}
+${JSON.stringify(input)}
 \`\`\`
 
 ## Job Status
@@ -121,7 +121,7 @@ console.log('Job result:', result)
 
 ## Input Data Provided:
 \`\`\`json
-${JSON.stringify(input, null, 2)}
+${JSON.stringify(input)}
 \`\`\`
 
 ## Next Steps:
