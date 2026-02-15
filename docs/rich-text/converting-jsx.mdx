@@ -81,6 +81,60 @@ export const MyComponent: React.FC<{
 }
 ```
 
+### Custom Components
+
+Both `LinkJSXConverter` and `UploadJSXConverter` accept optional component props, so you can use framework-specific components (e.g. `next/link`, `next/image`) without overriding the full converter logic:
+
+```tsx
+import {
+  type JSXConvertersFunction,
+  LinkJSXConverter,
+  UploadJSXConverter,
+} from '@payloadcms/richtext-lexical/react'
+import Image from 'next/image'
+import Link from 'next/link'
+
+const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  ...LinkJSXConverter({
+    internalDocToHref: ({ linkNode }) => `/${linkNode.fields.doc?.value?.slug}`,
+    LinkComponent: ({ href, children, ...rest }) => (
+      <Link href={href} {...rest}>
+        {children}
+      </Link>
+    ),
+  }),
+  ...UploadJSXConverter({
+    buildFullUrl: (path) => `https://cdn.example.com${path}`,
+    ImageComponent: ({ alt, height, src, width }) => (
+      <Image
+        alt={alt ?? ''}
+        height={height ?? 0}
+        src={src}
+        width={width ?? 0}
+      />
+    ),
+    LinkComponent: ({ href, children, ...rest }) => (
+      <Link href={href} {...rest}>
+        {children}
+      </Link>
+    ),
+  }),
+})
+```
+
+**`LinkJSXConverter` options:**
+
+- **`LinkComponent`** – Replaces `<a>` for both autolink and link nodes. Receives `href`, `rel`, `target`, and `children`.
+
+**`UploadJSXConverter` options:**
+
+- **`ImageComponent`** – Replaces `<img>` for images. For images with sizes, it replaces the fallback `<img>` inside `<picture>`.
+- **`LinkComponent`** – Replaces `<a>` for non-image file uploads.
+- **`buildFullUrl`** – Transforms upload paths into absolute URLs (e.g. for CDN). Applied to the main URL and all size URLs.
+
+All parameters are optional — calling `UploadJSXConverter()` with no arguments or `LinkJSXConverter({})` produces the same defaults as before.
+
 ### Lexical Blocks
 
 If your rich text includes custom Blocks or Inline Blocks, you must supply custom converters that match each block's slug. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
@@ -137,7 +191,9 @@ export const MyComponent: React.FC<{
 
 You can override any of the default JSX converters by passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
 
-Example - overriding the upload node converter to use next/image:
+For common customizations like using `next/image` or `next/link`, use the built-in component props on `UploadJSXConverter` and `LinkJSXConverter` as shown in the [Custom Components](#custom-components) section above.
+
+For fully custom rendering logic, you can override a converter entirely by providing your own function keyed to the node type:
 
 ```tsx
 'use client'
