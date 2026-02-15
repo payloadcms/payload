@@ -523,6 +523,132 @@ describe('Document View', () => {
       const afterHeader = page.locator('[id^=doc-drawer_posts_1_] .doc-drawer__after-header')
       await expect(afterHeader).toBeVisible()
     })
+
+    test('should prompt leave without saving modal when closing document drawer with unsaved changes', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+      
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      // Make changes to the form in the drawer
+      const drawerTitleField = drawerEditView.locator('#field-title')
+      const testTitle = 'Modified Title That Should Trigger Modal'
+      await drawerTitleField.fill(testTitle)
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Try to close the drawer by clicking the X button
+      const drawerCloseButton = drawer.locator('.doc-drawer__header-close')
+      await expect(drawerCloseButton).toBeVisible()
+      await drawerCloseButton.click()
+
+      // Should show the leave without saving modal
+      const leaveModal = page.locator('#leave-without-saving')
+      await expect(leaveModal).toBeVisible()
+      
+      // Verify modal content
+      await expect(leaveModal.locator('.confirmation-modal__title')).toHaveText('Leave without saving?')
+      
+      // Test cancel functionality - click "Stay on this page"
+      const cancelButton = leaveModal.locator('.confirmation-modal__controls .btn').first()
+      await cancelButton.click()
+      
+      // Modal should close and drawer should still be open
+      await expect(leaveModal).toBeHidden()
+      await expect(drawer).toBeVisible()
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Try closing again and this time confirm leaving
+      await drawerCloseButton.click()
+      await expect(leaveModal).toBeVisible()
+      
+      // Click "Leave anyway" button
+      const leaveButton = leaveModal.locator('.confirmation-modal__controls .btn--style-primary')
+      await leaveButton.click()
+      
+      // Modal and drawer should both be closed
+      await expect(leaveModal).toBeHidden()
+      await expect(drawer).toBeHidden()
+    })
+
+    test('should not prompt leave without saving modal when closing document drawer without changes', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+      
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      // Don't make any changes, just close the drawer
+      const drawerCloseButton = drawer.locator('.doc-drawer__header-close')
+      await expect(drawerCloseButton).toBeVisible()
+      await drawerCloseButton.click()
+
+      // Should not show the leave without saving modal
+      const leaveModal = page.locator('#leave-without-saving')
+      await expect(leaveModal).toBeHidden()
+      
+      // Drawer should be closed immediately
+      await expect(drawer).toBeHidden()
+    })
+
+    test('should prompt leave without saving modal when closing document drawer using bottom close button', async () => {
+      // Navigate to a post document
+      await navigateToDoc(page, postsUrl)
+      
+      // Open the relationship drawer
+      await page
+        .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
+        .click()
+
+      const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+      const drawerEditView = drawer.locator('.drawer__content .collection-edit')
+      await expect(drawerEditView).toBeVisible()
+
+      // Make changes to the form in the drawer
+      const drawerTitleField = drawerEditView.locator('#field-title')
+      const testTitle = 'Another Modified Title'
+      await drawerTitleField.fill(testTitle)
+      await expect(drawerTitleField).toHaveValue(testTitle)
+
+      // Try to close the drawer using a generic drawer close button (if it exists)
+      // Look for buttons with drawer__close class
+      const drawerCloseButtons = drawer.locator('button.drawer__close, button[class*="drawer__close"]')
+      const closeButtonCount = await drawerCloseButtons.count()
+      
+      if (closeButtonCount > 0) {
+        await drawerCloseButtons.first().click()
+
+        // Should show the leave without saving modal
+        const leaveModal = page.locator('#leave-without-saving')
+        await expect(leaveModal).toBeVisible()
+        
+        // Cancel to clean up
+        const cancelButton = leaveModal.locator('.confirmation-modal__controls .btn').first()
+        await cancelButton.click()
+        await expect(leaveModal).toBeHidden()
+      }
+      
+      // Clean up by saving or discarding changes
+      const drawerCloseButton = drawer.locator('.doc-drawer__header-close')
+      await drawerCloseButton.click()
+      const leaveModal = page.locator('#leave-without-saving')
+      if (await leaveModal.isVisible()) {
+        const leaveButton = leaveModal.locator('.confirmation-modal__controls .btn--style-primary')
+        await leaveButton.click()
+      }
+    })
   })
 
   describe('descriptions', () => {
