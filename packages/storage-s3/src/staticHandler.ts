@@ -135,6 +135,11 @@ export const getHandler = ({
       headers.append('Content-Type', String(headObject.ContentType))
       headers.append('ETag', String(headObject.ETag))
 
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (object.ContentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
+
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = headObject.ETag
 

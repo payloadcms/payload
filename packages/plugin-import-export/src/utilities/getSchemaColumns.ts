@@ -124,40 +124,77 @@ export const getSchemaColumns = ({
 /**
  * Merges schema-derived columns with data-discovered columns.
  * Schema columns provide the base ordering, data columns add any additional
- * columns (e.g., array indices beyond 0, dynamic fields).
+ * columns (e.g., array indices beyond 0, dynamic fields, derived columns from toCSV).
  */
 export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): string[] => {
   const result = [...schemaColumns]
   const schemaSet = new Set(schemaColumns)
+  const insertedDerived = new Map<string, string[]>()
 
   // Add any data columns not in schema (preserves schema ordering, appends new ones)
   for (const col of dataColumns) {
     if (!schemaSet.has(col)) {
-      // Find the best position to insert this column
-      // For array indices (e.g., field_1_*), insert after field_0_*
-      const match = col.match(/^(.+?)_(\d+)(_.*)?$/)
-      if (match) {
-        const [, basePath, index, suffix] = match
-        if (basePath && index) {
-          const prevIndex = parseInt(index, 10) - 1
-          const prevCol = `${basePath}_${prevIndex}${suffix ?? ''}`
-          const prevIdx = result.indexOf(prevCol)
-          if (prevIdx !== -1) {
-            // Insert after the previous index column
-            result.splice(prevIdx + 1, 0, col)
-            schemaSet.add(col)
-            continue
+      let inserted = false
+
+      // Check if this is a derived column from a schema column (e.g., field_id, field_email)
+      // Pattern: schemaCol_suffix where suffix is NOT a number (array indices are handled separately)
+      for (const schemaCol of schemaColumns) {
+        if (col.startsWith(`${schemaCol}_`)) {
+          const suffix = col.slice(schemaCol.length + 1)
+          // Skip if suffix starts with a digit (array index pattern like field_0_*)
+          if (!/^\d/.test(suffix)) {
+            const baseIdx = result.indexOf(schemaCol)
+            if (baseIdx !== -1) {
+              const derivedList = insertedDerived.get(schemaCol) || []
+              const insertIdx = baseIdx + 1 + derivedList.length
+              result.splice(insertIdx, 0, col)
+              derivedList.push(col)
+              insertedDerived.set(schemaCol, derivedList)
+              schemaSet.add(col)
+              inserted = true
+              break
+            }
           }
         }
       }
-      // Otherwise append at the end (before timestamps)
-      const createdAtIdx = result.indexOf('createdAt')
-      if (createdAtIdx !== -1) {
-        result.splice(createdAtIdx, 0, col)
-      } else {
-        result.push(col)
+
+      if (!inserted) {
+        // Check for array indices (e.g., field_1_*), insert after field_0_*
+        const match = col.match(/^(.+?)_(\d+)(_.*)?$/)
+        if (match) {
+          const [, basePath, index, suffix] = match
+          if (basePath && index) {
+            const prevIndex = parseInt(index, 10) - 1
+            const prevCol = `${basePath}_${prevIndex}${suffix ?? ''}`
+            const prevIdx = result.indexOf(prevCol)
+            if (prevIdx !== -1) {
+              // Insert after the previous index column
+              result.splice(prevIdx + 1, 0, col)
+              schemaSet.add(col)
+              continue
+            }
+          }
+        }
+
+        // Otherwise append at the end (before timestamps)
+        const createdAtIdx = result.indexOf('createdAt')
+        if (createdAtIdx !== -1) {
+          result.splice(createdAtIdx, 0, col)
+        } else {
+          result.push(col)
+        }
+        schemaSet.add(col)
       }
-      schemaSet.add(col)
+    }
+  }
+
+  // Remove schema columns that were fully replaced by toCSV-derived columns (e.g. "user" → "user_id", "user_email")
+  for (const [schemaCol, derivedCols] of insertedDerived) {
+    if (!dataColumns.includes(schemaCol) && derivedCols.length > 0) {
+      const idx = result.indexOf(schemaCol)
+      if (idx !== -1) {
+        result.splice(idx, 1)
+      }
     }
   }
 
@@ -167,9 +204,13 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
 /**
  * Filters schema columns to only include those matching user-selected fields.
  * Preserves the order specified by the user in selectedFields.
- * Handles nested field selection (e.g., 'group.value' includes 'group_value' and 'group_value_*')
+ *
+ * Container fields (groups, arrays, blocks) don't produce their own column, so we prefix-expand
+ * to find their children (e.g., 'group' → 'group_name', 'group_age').
+ * Leaf fields (date, text, select) produce an exact column, so we only match exactly to avoid
+ * including siblings with similar prefixes (e.g., 'dateWithTimezone' won't pull 'dateWithTimezone_tz').
  */
-function filterToSelectedFields(columns: string[], selectedFields: string[]): string[] {
+export function filterToSelectedFields(columns: string[], selectedFields: string[]): string[] {
   const result: string[] = []
   const columnsSet = new Set(columns)
 
@@ -185,16 +226,19 @@ function filterToSelectedFields(columns: string[], selectedFields: string[]): st
 
   // Iterate through user-specified fields in order to preserve their ordering
   for (const pattern of patterns) {
-    // First add the exact match if it exists
-    if (columnsSet.has(pattern.exact)) {
+    const hasExactColumn = columnsSet.has(pattern.exact)
+
+    if (hasExactColumn && !result.includes(pattern.exact)) {
       result.push(pattern.exact)
     }
 
-    // Then add any columns with the prefix (nested fields)
-    for (const column of columns) {
-      if (column !== pattern.exact && column.startsWith(pattern.prefix)) {
-        if (!result.includes(column)) {
-          result.push(column)
+    // Only prefix-expand if no exact column match exists (containers need expansion, leaves don't)
+    if (!hasExactColumn) {
+      for (const column of columns) {
+        if (column.startsWith(pattern.prefix)) {
+          if (!result.includes(column)) {
+            result.push(column)
+          }
         }
       }
     }

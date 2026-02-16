@@ -6,7 +6,7 @@ import type { FindArgs } from '../database/types.js'
 import type { Payload, TypedFallbackLocale } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
-import type { Options } from './operations/local/find.js'
+import type { FindOptions } from './operations/local/find.js'
 
 import { isValidID } from '../utilities/isValidID.js'
 
@@ -195,7 +195,7 @@ const createFindDataloaderCacheKey = ({
   showHiddenFields,
   sort,
   where,
-}: Options<string, SelectType>): string =>
+}: FindOptions<string, SelectType>): string =>
   JSON.stringify([
     collection,
     currentDepth,

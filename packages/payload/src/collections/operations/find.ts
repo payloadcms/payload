@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -48,12 +48,11 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 const lockDurationDefault = 300 // Default 5 minutes in seconds
 
@@ -74,6 +73,7 @@ export const findOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -217,6 +217,14 @@ export const findOperation = async <
       })
     }
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result.docs = result.docs.map((doc) => ({ ...doc, collection: collectionConfig.slug }))
+    }
+
     if (includeLockStatus) {
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
@@ -292,6 +300,7 @@ export const findOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
@@ -344,9 +353,10 @@ export const findOperation = async <
                 context: req.context,
                 doc: docRef,
                 findMany: true,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
-              })) || doc
+              })) || docRef
           }
 
           return docRef
@@ -362,6 +372,7 @@ export const findOperation = async <
       args,
       collection: collectionConfig,
       operation: 'find',
+      overrideAccess: overrideAccess!,
       result,
     })
 

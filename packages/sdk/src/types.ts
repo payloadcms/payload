@@ -7,6 +7,7 @@ import type {
   SelectType,
   Sort,
   TransformDataWithSelect,
+  TypedCollectionSelect,
   TypeWithID,
   Where,
 } from 'payload'
@@ -33,19 +34,24 @@ export type DataFromGlobalSlug<
 export type SelectFromCollectionSlug<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-> = SelectType & T['collectionsSelect'][TSlug]
+> = TSlug extends keyof T['collectionsSelect'] ? T['collectionsSelect'][TSlug] : SelectType
 
 export type SelectFromGlobalSlug<
   T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
-> = SelectType & T['globalsSelect'][TSlug]
+> = TSlug extends keyof T['globalsSelect'] ? T['globalsSelect'][TSlug] : SelectType
 
 export type TransformCollectionWithSelect<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<(JsonObject & TypeWithID) & T['collections'][TSlug], TSelect>
+  ? TransformDataWithSelect<
+      T['collections'][TSlug] extends JsonObject
+        ? T['collections'][TSlug]
+        : JsonObject & TypeWithID,
+      TSelect
+    >
   : T['collections'][TSlug]
 
 export type TransformGlobalWithSelect<
@@ -53,7 +59,10 @@ export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug<T>,
   TSelect,
 > = TSelect extends SelectType
-  ? TransformDataWithSelect<JsonObject & T['globals'][TSlug], TSelect>
+  ? TransformDataWithSelect<
+      T['globals'][TSlug] extends JsonObject ? T['globals'][TSlug] : JsonObject & TypeWithID,
+      TSelect
+    >
   : T['globals'][TSlug]
 
 type SystemFields = 'createdAt' | 'id' | 'sizes' | 'updatedAt'

@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -184,6 +184,55 @@ describe('@payloadcms/storage-s3', () => {
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/png')
+
+      // CRITICAL: Verify that the database stores the full S3 URL, not a relative path
+      // This is important because disablePayloadAccessControl means files should be accessed directly from S3
+      const dbDoc = await payload.db.findOne({
+        collection: mediaWithDirectAccessSlug,
+        where: {
+          id: {
+            equals: upload.id,
+          },
+        },
+      })
+
+      expect(dbDoc).toBeDefined()
+      expect(dbDoc.url).toBeDefined()
+      // URL in database should be the full S3 URL, not a relative path
+      expect(dbDoc.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.url).toContain(getTestBucketName())
+      expect(dbDoc.url).not.toMatch(/^\/api\//)
+    })
+
+    it('should store full S3 URLs in database for image sizes when disablePayloadAccessControl is true', async () => {
+      const upload = await payload.create({
+        collection: mediaWithDirectAccessSlug,
+        data: {},
+        filePath: path.resolve(dirname, '../uploads/image.png'),
+      })
+
+      expect(upload.id).toBeTruthy()
+
+      // Verify image sizes URLs are returned correctly
+      expect(upload.sizes?.thumbnail?.url).toContain(process.env.S3_ENDPOINT)
+      expect(upload.sizes?.thumbnail?.url).toContain(getTestBucketName())
+
+      // CRITICAL: Verify that image size URLs are also stored as full S3 URLs in the database
+      const dbDoc = await payload.db.findOne({
+        collection: mediaWithDirectAccessSlug,
+        where: {
+          id: {
+            equals: upload.id,
+          },
+        },
+      })
+
+      expect(dbDoc).toBeDefined()
+      expect(dbDoc.sizes.thumbnail.url).toContain(process.env.S3_ENDPOINT)
+      expect(dbDoc.sizes.thumbnail.url).toContain(getTestBucketName())
+      expect(dbDoc.sizes.thumbnail.url).not.toMatch(/^\/api\//)
+
+      await payload.delete({ collection: mediaWithDirectAccessSlug, id: upload.id })
     })
 
     it('should return direct S3 URL without encoding issues for normal filenames', async () => {

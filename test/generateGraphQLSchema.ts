@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 
@@ -36,6 +36,8 @@ if (testConfigDir) {
     .forEach((dir) => {
       const suiteDir = path.resolve(testDir, dir.name)
       const configFound = setTestEnvPaths(suiteDir)
-      if (configFound) generateSchema(config)
+      if (configFound) {
+        generateSchema(config)
+      }
     })
 }

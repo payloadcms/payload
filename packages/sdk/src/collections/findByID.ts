@@ -1,19 +1,25 @@
 import type {
   ApplyDisableErrors,
   CollectionSlug,
+  FindOptions,
   PayloadTypesShape,
   SelectType,
   TypedLocale,
 } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'
+import type {
+  JoinQuery,
+  PopulateType,
+  SelectFromCollectionSlug,
+  TransformCollectionWithSelect,
+} from '../types.js'
 
 export type FindByIDOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -53,17 +59,13 @@ export type FindByIDOptions<
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType<T>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-}
+} & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
 
 export async function findByID<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(
   sdk: PayloadSDK<T>,
   options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
