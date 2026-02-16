@@ -80,6 +80,11 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  dashboard: {
+    addWidget: 'Widget toevoegen',
+    deleteWidget: 'Verwijder widget {{id}}',
+    searchWidgets: 'Zoek widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
     autosaving: 'Er is een probleem opgetreden bij het automatisch bewaren van dit document.',
@@ -117,6 +122,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
     restoringTitle:
       'Er is een fout opgetreden bij het herstellen van {{title}}. Controleer uw verbinding en probeer het opnieuw.',
+    revertingDocument: 'Er was een probleem bij het terugdraaien van dit document.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
     unableToCopy: 'Kan niet kopiëren.',
@@ -338,6 +344,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
+    layout: 'Indeling',
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',
@@ -404,6 +411,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',
@@ -558,6 +566,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'U staat op het punt om de wijzigingen van dit document terug te draaien naar de gepubliceerde staat. Weet u het zeker?',
     aboutToUnpublish:
       'U staat op het punt om de publicatie van dit document ongedaan te maken. Weet u het zeker?',
+    aboutToUnpublishIn:
+      'U staat op het punt dit document in {{locale}} te onpubliceren. Weet u het zeker?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Automatisch bewaren',
@@ -605,6 +615,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     restoring: 'Herstellen...',
     reverting: 'Terugdraaien...',
     revertToPublished: 'Terugdraaien naar gepubliceerde versie',
+    revertUnsuccessful: 'Herstel mislukt. Geen eerder gepubliceerde versie gevonden.',
     saveDraft: 'Bewaar concept',
     scheduledSuccessfully: 'Succesvol gepland.',
     schedulePublish: 'Publicatie plannen',
@@ -615,6 +626,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifieke versie',
     status: 'Status',
     unpublish: 'Publicatie ongedaan maken',
+    unpublished: 'Ongepubliceerd',
+    unpublishedSuccessfully: 'Succesvol niet-gepubliceerd.',
+    unpublishIn: 'Onpubliceren in {{locale}}',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',
     versionAgo: '{{distance}} geleden',

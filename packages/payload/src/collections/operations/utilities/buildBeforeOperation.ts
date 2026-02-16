@@ -80,14 +80,14 @@ export async function buildBeforeOperation<
 export async function buildBeforeOperation<TOperationGeneric extends CollectionSlug>(
   operationArgs: Omit<BeforeOperationArg<TOperationGeneric>, 'context' | 'req'>,
 ): Promise<unknown> {
-  const { args, collection, operation } = operationArgs
+  const { args, collection, operation, overrideAccess } = operationArgs
 
   let newArgs = args
 
   if (args.collection.config.hooks?.beforeOperation?.length) {
+    // TODO: v4 should not need this mapping
     // Map the operation to the hook operation type for backward compatibility
-    const hookOperation =
-      operationToHookOperation[operation as keyof typeof operationToHookOperation]
+    const hookOperation = operationToHookOperation[operation]
 
     for (const hook of args.collection.config.hooks.beforeOperation) {
       const hookResult = await hook({
@@ -95,6 +95,7 @@ export async function buildBeforeOperation<TOperationGeneric extends CollectionS
         collection,
         context: args.req!.context,
         operation: hookOperation,
+        overrideAccess,
         req: args.req!,
       } as BeforeOperationArg<TOperationGeneric>)
 

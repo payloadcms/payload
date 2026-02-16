@@ -2,17 +2,19 @@ import type {
   BeforeDocumentControlsServerPropsOnly,
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
+  Locale,
   PayloadRequest,
   PreviewButtonServerPropsOnly,
   PublishButtonServerPropsOnly,
   SanitizedCollectionConfig,
-  SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
+  SanitizedPermissions,
   SaveButtonServerPropsOnly,
   SaveDraftButtonServerPropsOnly,
   ServerFunction,
   ServerProps,
   StaticDescription,
+  UnpublishButtonServerPropsOnly,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
 } from 'payload'
@@ -28,10 +30,11 @@ export const renderDocumentSlots: (args: {
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
   id?: number | string
-  permissions: SanitizedDocumentPermissions
+  locale: Locale
+  permissions: SanitizedPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
-  const { id, collectionConfig, globalConfig, hasSavePermission, req } = args
+  const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -42,7 +45,9 @@ export const renderDocumentSlots: (args: {
   const serverProps: ServerProps = {
     id,
     i18n: req.i18n,
+    locale,
     payload: req.payload,
+    permissions,
     user: req.user,
     // TODO: Add remaining serverProps
   }
@@ -120,6 +125,20 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    const CustomStatus =
+      collectionConfig?.admin?.components?.edit?.Status ||
+      globalConfig?.admin?.components?.elements?.Status
+
+    if (CustomStatus) {
+      components.Status = RenderServerComponent({
+        Component: CustomStatus,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
   if (hasSavePermission) {
     if (hasDraftsEnabled(collectionConfig || globalConfig)) {
       const CustomPublishButton =
@@ -131,6 +150,18 @@ export const renderDocumentSlots: (args: {
           Component: CustomPublishButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies PublishButtonServerPropsOnly,
+        })
+      }
+
+      const CustomUnpublishButton =
+        collectionConfig?.admin?.components?.edit?.UnpublishButton ||
+        globalConfig?.admin?.components?.elements?.UnpublishButton
+
+      if (CustomUnpublishButton) {
+        components.UnpublishButton = RenderServerComponent({
+          Component: CustomUnpublishButton,
+          importMap: req.payload.importMap,
+          serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
         })
       }
 
@@ -185,7 +216,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
   collectionSlug: string
   id?: number | string
 }> = async (args) => {
-  const { id, collectionSlug, req } = args
+  const { id, collectionSlug, locale, permissions, req } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -193,7 +224,8 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     throw new Error(req.t('error:incorrectCollection'))
   }
 
-  const { docPermissions, hasSavePermission } = await getDocumentPermissions({
+  const { hasSavePermission } = await getDocumentPermissions({
+    id,
     collectionConfig,
     data: {},
     req,
@@ -203,7 +235,8 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     id,
     collectionConfig,
     hasSavePermission,
-    permissions: docPermissions,
+    locale,
+    permissions,
     req,
   })
 }

@@ -1,6 +1,5 @@
-import type { Config, PayloadRequest, TaskConfig, TypedUser } from 'payload'
+import type { Config, TaskConfig } from 'payload'
 
-import type { ImportExportPluginConfig } from '../types.js'
 import type { Export } from './createExport.js'
 
 import { createExport } from './createExport.js'
@@ -18,14 +17,13 @@ export type ExportJobInput = {
 
 export const getCreateCollectionExportTask = (
   config: Config,
-  pluginConfig?: ImportExportPluginConfig,
 ): TaskConfig<{
   input: ExportJobInput
   output: object
 }> => {
-  const inputSchema = getFields(config, pluginConfig).concat(
+  const inputSchema = getFields(config).concat(
     {
-      name: 'user',
+      name: 'userID',
       type: 'text',
     },
     {
@@ -33,33 +31,28 @@ export const getCreateCollectionExportTask = (
       type: 'text',
     },
     {
-      name: 'exportsCollection',
+      name: 'exportCollection',
       type: 'text',
+    },
+    {
+      name: 'maxLimit',
+      type: 'number',
     },
   )
 
   return {
     slug: 'createCollectionExport',
-    handler: async ({ input, req }: { input: ExportJobInput; req: PayloadRequest }) => {
-      let user: TypedUser | undefined
+    handler: async ({ input, req }) => {
+      if (!input) {
+        req.payload.logger.error('No input provided to createCollectionExport task')
 
-      if (input.userCollection && input.user) {
-        user = (await req.payload.findByID({
-          id: input.user,
-          collection: input.userCollection,
-        })) as TypedUser
-
-        req.user = user
+        return { output: {} }
       }
 
-      if (!user) {
-        throw new Error('User not found')
-      }
-
-      // Strip out user and userCollection from input - they're only needed for rehydration
-      const { user: _userId, userCollection: _userCollection, ...exportInput } = input
-
-      await createExport({ input: exportInput, req, user })
+      await createExport({
+        ...input,
+        req,
+      })
 
       return {
         output: {},

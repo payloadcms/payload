@@ -79,6 +79,11 @@ export const esTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.',
   },
+  dashboard: {
+    addWidget: 'Agregar Widget',
+    deleteWidget: 'Eliminar widget {{id}}',
+    searchWidgets: 'Buscar widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Esta cuenta ya fue activada.',
     autosaving: 'Hubo un problema al guardar automáticamente este documento.',
@@ -116,6 +121,7 @@ export const esTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocurrió un problema al subir el archivo.',
     restoringTitle:
       'Hubo un error al restaurar {{title}}. Por favor, verifique su conexión e intente nuevamente.',
+    revertingDocument: 'Hubo un problema al revertir este documento.',
     tokenInvalidOrExpired: 'El token es inválido o ya expiró.',
     tokenNotProvided: 'Token no proporcionado.',
     unableToCopy: 'No se puede copiar.',
@@ -336,6 +342,7 @@ export const esTranslations: DefaultTranslationsObject = {
     items: 'artículos',
     language: 'Idioma',
     lastModified: 'Última modificación',
+    layout: 'Diseño',
     leaveAnyway: 'Salir de todos modos',
     leaveWithoutSaving: 'Salir sin guardar',
     light: 'Claro',
@@ -402,6 +409,7 @@ export const esTranslations: DefaultTranslationsObject = {
     row: 'Fila',
     rows: 'Filas',
     save: 'Guardar',
+    saveChanges: 'Guardar Cambios',
     saving: 'Guardando...',
     schedulePublishFor: 'Programar publicación para {{title}}',
     searchBy: 'Buscar por {{label}}',
@@ -555,6 +563,7 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Estás a punto de revertir los cambios de este documento a su estado publicado. ¿Estás seguro?',
     aboutToUnpublish: 'Estás a punto de despublicar este documento. ¿Estás seguro?',
+    aboutToUnpublishIn: 'Está a punto de despublicar este documento en {{locale}}. ¿Está seguro?',
     aboutToUnpublishSelection:
       'Estás a punto de despublicar todos los {{label}} seleccionados. ¿Estás seguro?',
     autosave: 'Autoguardado',
@@ -602,6 +611,8 @@ export const esTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revirtiendo...',
     revertToPublished: 'Revertir a la versión publicada',
+    revertUnsuccessful:
+      'Reversión no exitosa. No se encontró ninguna versión previamente publicada.',
     saveDraft: 'Guardar borrador',
     scheduledSuccessfully: 'Programado con éxito.',
     schedulePublish: 'Programar publicación',
@@ -612,6 +623,9 @@ export const esTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versión Específica',
     status: 'Estado',
     unpublish: 'Despublicar',
+    unpublished: 'No publicado',
+    unpublishedSuccessfully: 'Sin publicar exitosamente.',
+    unpublishIn: 'Despublicar en {{locale}}',
     unpublishing: 'Despublicando...',
     version: 'Versión',
     versionAgo: 'hace {{distance}}',

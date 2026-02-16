@@ -17,7 +17,7 @@
     "cross-env": "^7.0.3",
     "express": "^4.21.1",
     "graphql": "^16.8.1",
-    "next": "15.4.8",
+    "next": "15.4.11",
     "payload": "latest",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
@@ -25,8 +25,8 @@
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/node": "^18.11.5",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",

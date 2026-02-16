@@ -82,6 +82,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     doc: incomingDoc,
     draft,
     fallbackLocale,
+    fieldDepth: 0,
     fieldPromises,
     fields: (collection?.fields || global?.fields)!,
     findMany: findMany!,

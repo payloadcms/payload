@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-sqlite",
-  "version": "3.66.0",
+  "version": "3.76.1",
   "description": "The officially supported SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -64,13 +64,12 @@
   ],
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@libsql/client": "0.14.0",

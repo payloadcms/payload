@@ -8,19 +8,21 @@ import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { AfterReadCollection } from './collections/AfterRead/index.js'
 import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
 import {
   BeforeDelete2Collection,
   BeforeDeleteCollection,
 } from './collections/BeforeDelete/index.js'
+import { BeforeOperationCollection } from './collections/BeforeOperation/index.js'
 import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
-import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterChangeHooks from './collections/NestedAfterChangeHook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import { OverrideAccessCollection } from './collections/OverrideAccess/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
@@ -34,6 +36,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   },
   collections: [
+    BeforeOperationCollection,
     BeforeChangeHooks,
     BeforeValidateCollection,
     AfterOperationCollection,
@@ -48,8 +51,9 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     DataHooks,
     BeforeDeleteCollection,
     BeforeDelete2Collection,
-    FieldPaths,
     ValueCollection,
+    AfterReadCollection,
+    OverrideAccessCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [

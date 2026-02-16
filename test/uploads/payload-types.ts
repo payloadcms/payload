@@ -105,6 +105,8 @@ export interface Config {
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
     'admin-upload-control': AdminUploadControl;
+    'no-files-required': NoFilesRequired;
+    'relation-to-no-files-required': RelationToNoFilesRequired;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
@@ -170,6 +172,8 @@ export interface Config {
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
     'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
+    'no-files-required': NoFilesRequiredSelect<false> | NoFilesRequiredSelect<true>;
+    'relation-to-no-files-required': RelationToNoFilesRequiredSelect<false> | RelationToNoFilesRequiredSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
@@ -198,12 +202,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -1447,6 +1450,36 @@ export interface AdminUploadControl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-files-required".
+ */
+export interface NoFilesRequired {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-to-no-files-required".
+ */
+export interface RelationToNoFilesRequired {
+  id: string;
+  title?: string | null;
+  uploadField?: (string | null) | NoFilesRequired;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
@@ -1811,6 +1844,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1970,6 +2004,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'admin-upload-control';
         value: string | AdminUploadControl;
+      } | null)
+    | ({
+        relationTo: 'no-files-required';
+        value: string | NoFilesRequired;
+      } | null)
+    | ({
+        relationTo: 'relation-to-no-files-required';
+        value: string | RelationToNoFilesRequired;
       } | null)
     | ({
         relationTo: 'optional-file';
@@ -3361,6 +3403,34 @@ export interface AdminUploadControlSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-files-required_select".
+ */
+export interface NoFilesRequiredSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-to-no-files-required_select".
+ */
+export interface RelationToNoFilesRequiredSelect<T extends boolean = true> {
+  title?: T;
+  uploadField?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

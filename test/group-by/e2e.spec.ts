@@ -1,28 +1,35 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { sortColumn, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   selectTableRow,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { sortColumn, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
+import {
+  addGroupBy,
+  clearGroupBy,
+  closeGroupBy,
+  openGroupBy,
+} from '../__helpers/e2e/groupBy/index.js'
+import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -683,9 +690,15 @@ test.describe('Group By', () => {
   })
 
   test('can bulk edit across pages within a single table without affecting the others', async () => {
+    // TODO: This test is flaky, only in CI.
     await page.goto(url.list)
+    await wait(500)
+    // Wait until it doesn't say loading anywhere on the page
+    await expect(page.locator('body')).not.toContainText('Loading')
+    await wait(500)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await wait(500)
 
     const firstTable = page.locator('.table-wrap').first()
     const secondTable = page.locator('.table-wrap').nth(1)
@@ -695,20 +708,30 @@ test.describe('Group By', () => {
 
     // click the select all checkbox, then the "select all across pages" button
     await firstTable.locator('input#select-all').check()
+    await wait(500)
+
     await firstTable.locator('button#select-all-across-pages').click()
+    await wait(500)
 
     // now edit all titles and ensure that only the first table gets updated, not the second
     await firstTable.locator('.list-selection .edit-many__toggle').click()
+    await wait(500)
+
     const modal = page.locator('[id$="-edit-posts"]').first()
 
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
+    await wait(500)
+
     await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await wait(500)
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
     await field.fill('Bulk edit across all pages')
+    await wait(500)
+
     await modal.locator('.form-submit button[type="submit"].edit-many__save').click()
 
     await expect(
@@ -923,4 +946,129 @@ test.describe('Group By', () => {
       },
     }) as unknown as Promise<Post>
   }
+
+  test.describe('Query Presets with Virtual Fields', () => {
+    test('should display virtual field label in preset drawer when groupBy is saved', async () => {
+      await page.goto(url.list)
+
+      // Add group by virtual field
+      const { groupByContainer } = await openGroupBy(page)
+      const field = groupByContainer.locator('#group-by--field-select')
+      await field.click()
+      await field
+        .locator('.rs__option', {
+          hasText: exactText('Virtual Title From Page'),
+        })
+        .click()
+
+      await expect(field.locator('.react-select--single-value')).toHaveText(
+        'Virtual Title From Page',
+      )
+      await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+      // Create a new preset with this groupBy
+      await page.locator('#create-new-preset').click()
+      const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(modal).toBeVisible()
+
+      const presetTitle = 'Virtual Field Preset'
+      await modal.locator('input[name="title"]').fill(presetTitle)
+
+      // Check that the groupBy field shows the proper label (not "page.title")
+      const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('ascending')
+
+      await saveDocAndAssert(page)
+      await expect(modal).toBeHidden()
+
+      await expect(page).toHaveURL(/groupBy=page\.title/)
+    })
+
+    test('should display virtual field label in preset list cell', async () => {
+      await page.goto(url.list)
+
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: 'page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: 'Virtual Field Cell Test',
+          where: {},
+        },
+        user,
+      })
+
+      // Open the preset drawer
+      await page.click('button#select-preset')
+      const drawer = page.locator('dialog[id^="list-drawer_0_"]')
+      await expect(drawer).toBeVisible()
+
+      // Find the row with our preset in the drawer
+      const presetRow = drawer.locator('tbody tr', {
+        has: page.locator('button:has-text("Virtual Field Cell Test")'),
+      })
+      await expect(presetRow).toBeVisible()
+
+      // Check the groupBy cell displays the proper label (not "page.title")
+      const groupByCell = presetRow.locator('td.cell-groupBy')
+      await expect(groupByCell).toBeVisible()
+      await expect(groupByCell).toContainText('Virtual Title From Page')
+      await expect(groupByCell).toContainText('ascending')
+    })
+
+    test('should display virtual field label when editing a preset', async () => {
+      await page.goto(url.list)
+
+      const presetTitle = 'Virtual Field Edit Test'
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: '-page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: presetTitle,
+          where: {},
+        },
+        user,
+      })
+
+      // Select the preset to make it active
+      await page.locator('button#select-preset').click()
+      const drawer = page.locator('[id^=list-drawer_0_]')
+      await expect(drawer).toBeVisible()
+
+      await drawer
+        .locator('tbody tr td button', {
+          hasText: exactText(presetTitle),
+        })
+        .first()
+        .click()
+
+      await expect(drawer).toBeHidden()
+
+      // Now open the edit preset drawer
+      await page.locator('#edit-preset').click()
+      const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(editModal).toBeVisible()
+
+      // Check that the groupBy field shows the proper label with descending direction
+      const groupByField = editModal.locator('.query-preset-group-by-field .value-wrapper')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('descending')
+    })
+  })
 })

@@ -81,6 +81,11 @@ export const huTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
+  dashboard: {
+    addWidget: 'Adjon hozzá widgetet',
+    deleteWidget: 'Törölje a(z) {{id}} widgetet',
+    searchWidgets: 'Keresés widgetek...',
+  },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',
     autosaving: 'Hiba történt a dokumentum automatikus mentése közben.',
@@ -118,6 +123,7 @@ export const huTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Hiba történt a fájl feltöltése közben.',
     restoringTitle:
       'Hiba történt a {{title}} visszaállítása közben. Kérjük, ellenőrizze az internetkapcsolatát, és próbálkozzon újra.',
+    revertingDocument: 'Probléma merült fel a dokumentum visszaállítása közben.',
     tokenInvalidOrExpired: 'A token érvénytelen vagy lejárt.',
     tokenNotProvided: 'Token nem biztosított.',
     unableToCopy: 'Másolás nem lehetséges.',
@@ -335,6 +341,7 @@ export const huTranslations: DefaultTranslationsObject = {
     items: 'tételek',
     language: 'Nyelv',
     lastModified: 'Utoljára módosítva',
+    layout: 'Elrendezés',
     leaveAnyway: 'Távozás mindenképp',
     leaveWithoutSaving: 'Távozás mentés nélkül',
     light: 'Világos',
@@ -400,6 +407,7 @@ export const huTranslations: DefaultTranslationsObject = {
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',
+    saveChanges: 'Mentése a változásoknak',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',
@@ -556,6 +564,8 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Arra készül, hogy visszaállítsa a dokumentum módosításait a közzétett állapotába. Biztos benne?',
     aboutToUnpublish: 'A dokumentum közzétételének visszavonására készül. Biztos benne?',
+    aboutToUnpublishIn:
+      'Ön hamarosan közzététel nélkül hagyja ezt a dokumentumot {{locale}}. Biztos benne?',
     aboutToUnpublishSelection:
       'Arra készül, hogy visszavonja a kijelölésben szereplő összes {{label}} közzétételét. biztos vagy ebben?',
     autosave: 'Automatikus mentés',
@@ -603,6 +613,7 @@ export const huTranslations: DefaultTranslationsObject = {
     restoring: 'Visszaállítás...',
     reverting: 'Visszaállítás...',
     revertToPublished: 'Visszatérés a közzétetthez',
+    revertUnsuccessful: 'Visszaállítás sikertelen. Nem található korábban közzétett verzió.',
     saveDraft: 'Piszkozat mentése',
     scheduledSuccessfully: 'Sikeresen ütemezve.',
     schedulePublish: 'Közzététel ütemezése',
@@ -613,6 +624,9 @@ export const huTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifikus verzió',
     status: 'Állapot',
     unpublish: 'Közzététel visszavonása',
+    unpublished: 'Nem közzétett',
+    unpublishedSuccessfully: 'Sikeresen van visszavonva a közzététel.',
+    unpublishIn: 'Ne jelenjen meg a(z) {{locale}} nyelvi beállításban',
     unpublishing: 'Közzététel visszavonása...',
     version: 'Verzió',
     versionAgo: '{{distance}} ezelőtt',

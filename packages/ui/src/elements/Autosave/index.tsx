@@ -4,10 +4,12 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import {
+  formatAdminURL,
   getAutosaveInterval,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
 } from 'payload/shared'
+import * as qs from 'qs-esm'
 import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 
 import type { OnSaveContext } from '../../views/Edit/index.js'
@@ -45,7 +47,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -74,24 +75,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const saving = useDeferredValue(_saving)
 
   const debouncedFormState = useDebounce(formState, interval)
-
-  const formStateRef = useRef(formState)
-  const modifiedRef = useRef(modified)
-  const localeRef = useRef(locale)
-
-  // Store fields in ref so the autosave func
-  // can always retrieve the most to date copies
-  // after the timeout has executed
-  formStateRef.current = formState
-
-  // Store modified in ref so the autosave func
-  // can bail out if modified becomes false while
-  // timing out during autosave
-  modifiedRef.current = modified
-
-  // Store locale in ref so the autosave func
-  // can always retrieve the most to date locale
-  localeRef.current = locale
 
   const { queueTask } = useQueue()
 
@@ -127,24 +110,42 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let url: string
           let method: string
           let entitySlug: string
+          const params = qs.stringify(
+            {
+              autosave: true,
+              depth: 0,
+              draft: true,
+              'fallback-locale': 'null',
+              locale,
+            },
+            {
+              addQueryPrefix: true,
+            },
+          )
 
           if (collection && id) {
             entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/${entitySlug}/${id}${params}`,
+            })
             method = 'PATCH'
           }
 
           if (globalDoc) {
             entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?depth=0&draft=true&autosave=true&locale=${localeRef.current}&fallback-locale=null`
+            url = formatAdminURL({
+              apiRoute: api,
+              path: `/globals/${entitySlug}${params}`,
+            })
             method = 'POST'
           }
 
-          const { valid } = reduceFieldsToValuesWithValidation(formStateRef.current, true)
+          const { valid } = reduceFieldsToValuesWithValidation(formState, true)
 
           const skipSubmission = submitted && !valid && validateOnDraft
 
-          if (!skipSubmission && modifiedRef.current && url) {
+          if (!skipSubmission && modified && url) {
             const result = await submit<any, OnSaveContext>({
               acceptValues: {
                 overrideLocalChanges: false,

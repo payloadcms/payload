@@ -95,7 +95,6 @@ export const renderDocument = async ({
         config,
         config: {
           routes: { admin: adminRoute, api: apiRoute },
-          serverURL,
         },
       },
       user,
@@ -129,7 +128,6 @@ export const renderDocument = async ({
       const redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
-        serverURL,
       })
       redirect(redirectURL)
     } else {
@@ -274,11 +272,14 @@ export const renderDocument = async ({
 
   const apiQueryParams = `?${formattedParams.toString()}`
 
-  const apiURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
-      : ''
+  const apiURL = formatAdminURL({
+    apiRoute,
+    path: collectionSlug
+      ? `/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+      : globalSlug
+        ? `/${globalSlug}${apiQueryParams}`
+        : '',
+  })
 
   let View: ViewToRender = null
 
@@ -341,7 +342,6 @@ export const renderDocument = async ({
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
-          serverURL,
         })
 
         redirect(redirectURL)
@@ -356,7 +356,8 @@ export const renderDocument = async ({
     collectionConfig,
     globalConfig,
     hasSavePermission,
-    permissions: docPermissions,
+    locale,
+    permissions,
     req,
   })
 

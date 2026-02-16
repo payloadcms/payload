@@ -1,13 +1,13 @@
 import type { CollectionPermission, Payload, PayloadRequest } from 'payload'
 
-/* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { whereCacheSameSlug, whereCacheUniqueSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -64,7 +64,7 @@ describePostgres('Access Control - postgres logs', () => {
           },
         })
 
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
         // Get permissions - all operations return same where query
         const permissions = await getEntityPermissions({
@@ -104,7 +104,7 @@ describePostgres('Access Control - postgres logs', () => {
           },
         })
 
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
         // Get permissions - all operations return same where query
         const permissions = await getEntityPermissions({
@@ -149,7 +149,7 @@ describePostgres('Access Control - postgres logs', () => {
           },
         })
 
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
         // Get permissions - each operation returns unique where query
         const permissions = await getEntityPermissions({
@@ -192,7 +192,7 @@ describePostgres('Access Control - postgres logs', () => {
           },
         })
 
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
         // Get permissions - each operation returns unique where query
         const permissions = await getEntityPermissions({
@@ -272,7 +272,7 @@ describePostgres('Access Control - postgres logs', () => {
           },
         })
 
-        const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+        const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
         // Get permissions - each operation returns unique where query
         const permissions = await getEntityPermissions({

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-vercel-postgres",
-  "version": "3.66.0",
+  "version": "3.76.1",
   "description": "Vercel Postgres adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -64,14 +64,13 @@
   ],
   "scripts": {
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo  && pnpm build:types && pnpm build:swc && pnpm build:esbuild && pnpm renamePredefinedMigrations",
+    "build:debug": "pnpm build",
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepack": "pnpm clean && pnpm turbo build",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
@@ -90,7 +89,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {

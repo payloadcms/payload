@@ -1,7 +1,7 @@
-// storage-adapter-import-placeholder
-import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite' // database-adapter-import
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import fs from 'fs'
 import path from 'path'
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
@@ -13,8 +13,9 @@ import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
 
-const isCLI = process.argv.some((value) => value.match(/^(generate|migrate):?/))
+const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
 const isProduction = process.env.NODE_ENV === 'production'
 
 const cloudflare =
@@ -35,11 +36,8 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // database-adapter-config-start
   db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
-  // database-adapter-config-end
   plugins: [
-    // storage-adapter-placeholder
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },

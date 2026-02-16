@@ -27,7 +27,14 @@ process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-tu
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const { _: args, bail, part } = minimist(process.argv.slice(2))
+const {
+  _: args,
+  bail,
+  'fully-parallel': fullyParallel,
+  part,
+  shard,
+  workers,
+} = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
 // Run all
@@ -98,10 +105,17 @@ if (!suiteName) {
 
   console.log(`${allSuitesInFolder.join('\n')}\n`)
 
-  for (const file of allSuitesInFolder) {
-    clearWebpackCache()
-    executePlaywright(file, baseTestFolder, false, suiteConfigPath)
-  }
+  // Run all spec files in the folder with a single dev server and playwright invocation
+  // This avoids port conflicts when multiple spec files exist in the same folder
+  executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -114,12 +128,16 @@ console.log('\n')
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
 function executePlaywright(
-  suitePath: string,
+  suitePaths: string | string[],
   baseTestFolder: string,
   bail = false,
   suiteConfigPath?: string,
+  shardArg?: string,
+  fullyParallelArg?: boolean,
+  workersArg?: number,
 ) {
-  console.log(`Executing ${suitePath}...`)
+  const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
+  console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
@@ -141,19 +159,24 @@ function executePlaywright(
   process.env.START_MEMORY_DB = 'true'
 
   const child = spawn('pnpm', spawnDevArgs, {
-    stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
     env: {
       ...process.env,
     },
+    stdio: 'inherit',
   })
 
-  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
+  const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
+  const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const cmd = slash(
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}`,
+  )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
   })
-  const suite = path.basename(path.dirname(suitePath))
+  const suite = path.basename(path.dirname(paths[0]!))
   const results = { code, suiteName: suite }
 
   if (code) {

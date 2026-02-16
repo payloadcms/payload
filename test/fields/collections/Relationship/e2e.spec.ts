@@ -1,18 +1,18 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { openCreateDocDrawer } from 'helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { openCreateDocDrawer } from '__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
 import {
@@ -21,13 +21,14 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -82,7 +83,7 @@ describe('relationship', () => {
     await loadCreatePage()
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
     const textField = page.locator('.drawer__content #field-text')
     await expect(textField).toBeEnabled()
@@ -94,6 +95,32 @@ describe('relationship', () => {
     await expect(
       page.locator('#field-relationship .relationship--single-value__text'),
     ).toContainText(textValue)
+    await page.locator('#action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  })
+
+  test('should save correct relationTo when creating doc in second collection (bug #14728)', async () => {
+    await loadCreatePage()
+
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+
+    // Select the SECOND collection (array-fields) instead of the first (text-fields)
+    await page
+      .locator('.popup__content .relationship-add-new__relation-button--array-fields')
+      .click()
+
+    await page.locator('[id^=doc-drawer_array-fields_1_] #action-save').click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await page.locator('[id^=close-drawer__doc-drawer_array-fields_1_]').click()
+
+    const relationshipValue = page.locator('#field-relationship .relationship--single-value__text')
+    await expect(relationshipValue).toBeVisible()
+    await expect(async () => {
+      const valueText = await relationshipValue.textContent()
+      expect(valueText).not.toContain('Another text document')
+      expect(valueText).not.toContain('Untitled')
+    }).toPass()
+
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
@@ -305,7 +332,7 @@ describe('relationship', () => {
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
-      .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
+      .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
 
     await page.locator('.drawer__content #field-text').fill('something')
@@ -465,8 +492,8 @@ describe('relationship', () => {
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-create').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
       await drawer1Content.locator('#field-text').fill(title)
@@ -525,8 +552,8 @@ describe('relationship', () => {
       const originalText = 'Text'
       await drawer1Content.locator('#field-text').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-duplicate').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-duplicate').click()
       const duplicateID = drawer1Content.locator('.id-label')
       await expect(duplicateID).not.toHaveText(originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
@@ -582,8 +609,8 @@ describe('relationship', () => {
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalID = await drawer1Content.locator('.id-label').textContent()
-      await openDocControls(drawer1Content)
-      await drawer1Content.locator('#action-delete').click()
+      await openDocControls(drawer1Content, page)
+      await page.locator('.popup__content #action-delete').click()
 
       await page
         .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
@@ -695,6 +722,74 @@ describe('relationship', () => {
       fieldLabel: 'Relationship',
       operatorLabel: 'equals',
       value: 'some text',
+    })
+
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should allow filtering by non-polymorphic hasMany relationship field / equals', async () => {
+    const textDoc1 = await createTextFieldDoc({ text: 'Text 1' })
+    const textDoc2 = await createTextFieldDoc({ text: 'Text 2' })
+    const textDoc3 = await createTextFieldDoc({ text: 'Text 3' })
+
+    await createRelationshipFieldDoc(
+      { value: textDoc1.id, relationTo: 'text-fields' },
+      {
+        relationshipHasMany: [textDoc1.id],
+      },
+    )
+
+    await createRelationshipFieldDoc(
+      { value: textDoc2.id, relationTo: 'text-fields' },
+      {
+        relationshipHasMany: [textDoc2.id, textDoc3.id],
+      },
+    )
+
+    await page.goto(url.list)
+    await wait(1000)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship Has Many',
+      operatorLabel: 'equals',
+      value: 'Text 1',
+      multiSelect: true,
+    })
+
+    await expect(page.locator(tableRowLocator)).toHaveCount(1)
+  })
+
+  test('should allow filtering by polymorphic hasMany relationship field / equals', async () => {
+    const textDoc1 = await createTextFieldDoc({ text: 'Poly Text 1' })
+    const textDoc2 = await createTextFieldDoc({ text: 'Poly Text 2' })
+
+    await createRelationshipFieldDoc(
+      { value: textDoc1.id, relationTo: 'text-fields' },
+      {
+        relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: textDoc1.id }],
+      },
+    )
+
+    await createRelationshipFieldDoc(
+      { value: textDoc2.id, relationTo: 'text-fields' },
+      {
+        relationHasManyPolymorphic: [
+          { relationTo: 'text-fields', value: textDoc1.id },
+          { relationTo: 'text-fields', value: textDoc2.id },
+        ],
+      },
+    )
+
+    await page.goto(url.list)
+    await wait(1000)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Relation Has Many Polymorphic',
+      operatorLabel: 'equals',
+      value: 'Poly Text 1',
+      multiSelect: true,
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)

@@ -81,6 +81,11 @@ export const frTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
+  dashboard: {
+    addWidget: 'Ajouter un Widget',
+    deleteWidget: 'Supprimer le widget {{id}}',
+    searchWidgets: 'Rechercher des widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Ce compte a déjà été activé.',
     autosaving: 'Un problème est survenu lors de l’enregistrement automatique de ce document.',
@@ -119,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     restoringTitle:
       'Il y a eu une erreur lors de la restauration de {{title}}. Veuillez vérifier votre connexion et réessayer.',
+    revertingDocument: 'Il y a eu un problème lors de la restauration de ce document.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',
@@ -341,6 +347,7 @@ export const frTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
+    layout: 'Disposition',
     leaveAnyway: 'Quitter quand même',
     leaveWithoutSaving: 'Quitter sans sauvegarder',
     light: 'Clair',
@@ -406,6 +413,7 @@ export const frTranslations: DefaultTranslationsObject = {
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',
+    saveChanges: 'Enregistrer les modifications',
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',
@@ -564,6 +572,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de rétablir les modifications apportées à ce document à la version publiée. Êtes-vous sûr ?',
     aboutToUnpublish:
       'Vous êtes sur le point d’annuler la publication de ce document. Êtes-vous sûr ?',
+    aboutToUnpublishIn:
+      'Vous êtes sur le point de dépublier ce document en {{locale}}. Êtes-vous sûr ?',
     aboutToUnpublishSelection:
       'Vous êtes sur le point de dépublier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     autosave: 'Enregistrement automatique',
@@ -611,6 +621,8 @@ export const frTranslations: DefaultTranslationsObject = {
     restoring: 'Restauration en cours...',
     reverting: 'Republication en cours...',
     revertToPublished: 'Republier',
+    revertUnsuccessful:
+      "Annulation infructueuse. Aucune version précédemment publiée n'a été trouvée.",
     saveDraft: 'Enregistrer le brouillon',
     scheduledSuccessfully: 'Programmé avec succès.',
     schedulePublish: 'Programmer la publication',
@@ -621,6 +633,9 @@ export const frTranslations: DefaultTranslationsObject = {
     specificVersion: 'Version spécifique',
     status: 'Statut',
     unpublish: 'Annuler la publication',
+    unpublished: 'Non publié',
+    unpublishedSuccessfully: 'Non publié avec succès.',
+    unpublishIn: 'Dépublier en {{locale}}',
     unpublishing: 'Annulation en cours...',
     version: 'Version',
     versionAgo: 'il y a {{distance}}',

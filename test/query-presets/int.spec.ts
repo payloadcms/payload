@@ -1,10 +1,11 @@
 import type { Payload, User } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const queryPresetsCollectionSlug = 'payload-query-presets'
 

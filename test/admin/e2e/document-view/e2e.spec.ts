@@ -12,10 +12,11 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customEditLabel,
   customNestedTabViewPath,
@@ -28,7 +29,9 @@ import {
   overriddenDefaultRouteTabLabel,
 } from '../../shared.js'
 import {
+  customDocumentControlsSlug,
   customFieldsSlug,
+  customGlobalDocumentControlsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   editMenuItemsSlug,
@@ -42,6 +45,7 @@ import {
   postsCollectionSlug,
   reorderTabsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -53,14 +57,15 @@ let payload: PayloadTestSDK<Config>
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { selectInput } from '../../../helpers/e2e/selectInput.js'
-import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -71,6 +76,7 @@ describe('Document View', () => {
   let globalURL: AdminUrlUtil
   let serverURL: string
   let customViewsURL: AdminUrlUtil
+  let customDocumentControlsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
   let placeholderURL: AdminUrlUtil
   let collectionCustomViewPathId: string
@@ -91,6 +97,7 @@ describe('Document View', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    customDocumentControlsURL = new AdminUrlUtil(serverURL, customDocumentControlsSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
     placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
@@ -116,6 +123,8 @@ describe('Document View', () => {
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
+      // Wait for hydration
+      await wait(1000)
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
@@ -539,6 +548,38 @@ describe('Document View', () => {
     })
   })
 
+  describe('collection — custom document controls', () => {
+    test('should render status component', async () => {
+      await navigateToDoc(page, postsUrl)
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await navigateToDoc(page, customDocumentControlsURL)
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
+    })
+  })
+
+  describe('global — custom document controls', () => {
+    test('should render status component', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await page.goto(globalURL.global(customGlobalDocumentControlsSlug))
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
+    })
+  })
+
   describe('custom fields', () => {
     test('should render custom field component', async () => {
       await page.goto(customFieldsURL.create)
@@ -766,7 +807,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const customEditMenuItem = page.locator('.popup-button-list__button', {
+      const customEditMenuItem = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Custom Edit Menu Item',
       })
 
@@ -782,7 +823,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {
@@ -801,7 +842,7 @@ describe('Document View', () => {
       await expect(threeDotMenu).toBeVisible()
       await threeDotMenu.click()
 
-      const popup = page.locator('.popup--active .popup__content')
+      const popup = page.locator('.popup__content')
       await expect(popup).toBeVisible()
 
       const customEditMenuItem = popup.getByRole('link', {

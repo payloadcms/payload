@@ -80,6 +80,11 @@ export const skTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
+  dashboard: {
+    addWidget: 'Pridať Widget',
+    deleteWidget: 'Odstrániť widget {{id}}',
+    searchWidgets: 'Hľadať doplnky...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet už bol aktivovaný.',
     autosaving: 'Pri automatickom ukladaní tohto dokumentu došlo k chybe.',
@@ -117,6 +122,7 @@ export const skTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nahrávaní súboru došlo k chybe.',
     restoringTitle:
       'Pri obnovovaní {{title}} sa vyskytla chyba. Skontrolujte prosím svoje pripojenie a skúste to znova.',
+    revertingDocument: 'Pri obnovení tohto dokumentu sa vyskytol problém.',
     tokenInvalidOrExpired: 'Token je neplatný alebo vypršal.',
     tokenNotProvided: 'Token nie je poskytnutý.',
     unableToCopy: 'Kopírovanie nie je možné.',
@@ -332,6 +338,7 @@ export const skTranslations: DefaultTranslationsObject = {
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy zmenené',
+    layout: 'Rozloženie',
     leaveAnyway: 'Presto odísť',
     leaveWithoutSaving: 'Odísť bez uloženia',
     light: 'Svetlý',
@@ -395,6 +402,7 @@ export const skTranslations: DefaultTranslationsObject = {
     row: 'Riadok',
     rows: 'Riadky',
     save: 'Uložiť',
+    saveChanges: 'Uložiť zmeny',
     saving: 'Ukladanie...',
     schedulePublishFor: 'Naplánovať publikovanie pre {{title}}',
     searchBy: 'Vyhľadať podľa {{label}}',
@@ -547,6 +555,8 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte sa vrátiť zmeny tohto dokumentu do jeho publikovaného stavu. Ste si istý?',
     aboutToUnpublish: 'Chystáte sa zrušiť publikovanie tohto dokumentu. Ste si istý?',
+    aboutToUnpublishIn:
+      'Chystáte sa zrušiť publikovanie tohto dokumentu v {{locale}}. Ste si istý?',
     aboutToUnpublishSelection:
       'Chystáte sa zrušiť publikovanie všetkých {{label}} vo výbere. Ste si istý?',
     autosave: 'Automatické uloženie',
@@ -594,6 +604,8 @@ export const skTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovovanie...',
     reverting: 'Vracanie...',
     revertToPublished: 'Vrátiť sa k publikovanému',
+    revertUnsuccessful:
+      'Vrátenie neúspešné. Nebola nájdená žiadna predchádzajúca publikovaná verzia.',
     saveDraft: 'Uložiť návrh',
     scheduledSuccessfully: 'Úspešne naplánované.',
     schedulePublish: 'Naplánovať publikovanie',
@@ -604,6 +616,9 @@ export const skTranslations: DefaultTranslationsObject = {
     specificVersion: 'Špecifická verzia',
     status: 'Stav',
     unpublish: 'Zrušiť publikovanie',
+    unpublished: 'Neuverejnené',
+    unpublishedSuccessfully: 'Úspešne nezverejnené.',
+    unpublishIn: 'Zrušiť publikovanie v {{locale}}',
     unpublishing: 'Zrušujem publikovanie...',
     version: 'Verzia',
     versionAgo: 'pred {{distance}}',

@@ -2,31 +2,33 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { login } from 'helpers/e2e/auth/login.js'
-import { logout } from 'helpers/e2e/auth/logout.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
+import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { login } from '../__helpers/e2e/auth/login.js'
+import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
   ensureCompilationIsDone,
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { apiKeysSlug, slug } from './shared.js'
+import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 let payload: PayloadTestSDK<Config>
 
@@ -42,12 +44,18 @@ describe('Auth', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
+  let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-    apiURL = `${serverURL}/api`
+    apiURL = formatAdminURL({ apiRoute: '/api', path: '', serverURL })
     url = new AdminUrlUtil(serverURL, slug)
+
+    const {
+      routes: { admin: adminRouteFromConfig },
+    } = getRoutes({})
+    adminRoute = adminRouteFromConfig
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -89,7 +97,7 @@ describe('Auth', () => {
       } = getRoutes({})
 
       // wait for create first user route
-      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
 
       await expect(page.locator('.create-first-user')).toBeVisible()
 
@@ -141,7 +149,7 @@ describe('Auth', () => {
       } = getRoutes({})
 
       // wait for create first user route
-      await page.goto(serverURL + `${adminRoute}${createFirstUserRoute}`)
+      await page.goto(formatAdminURL({ adminRoute, path: createFirstUserRoute, serverURL }))
 
       await expect(page.locator('.create-first-user')).toBeVisible()
 
@@ -196,7 +204,9 @@ describe('Auth', () => {
         await logout(page, serverURL)
 
         // Inspect the page source (before authentication)
-        const loginPageRes = await page.goto(`${serverURL}/admin/login`)
+        const loginPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '/login', serverURL }),
+        )
         const loginPageSource = await loginPageRes?.text()
         expect(loginPageSource).not.toContain('shouldNotShowInClientConfigUnlessAuthenticated')
 
@@ -211,7 +221,7 @@ describe('Auth', () => {
 
         await login({ page, serverURL })
 
-        await page.goto(serverURL + '/admin')
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
 
         // Inspect the client config (after authentication)
         await expect(page.locator('#authenticated-client-config')).toBeAttached()
@@ -223,7 +233,9 @@ describe('Auth', () => {
         ).toHaveCount(1)
 
         // Inspect the page source (after authentication)
-        const dashboardPageRes = await page.goto(`${serverURL}/admin`)
+        const dashboardPageRes = await page.goto(
+          formatAdminURL({ adminRoute, path: '', serverURL }),
+        )
         const dashboardPageSource = await dashboardPageRes?.text()
         expect(dashboardPageSource).toContain('shouldNotShowInClientConfigUnlessAuthenticated')
       })
@@ -265,11 +277,12 @@ describe('Auth', () => {
       })
 
       test('should prevent new user creation without confirm password', async () => {
+        await page.goto(url.list)
         await page.goto(url.create)
         await page.locator('#field-email').fill('dev2@payloadcms.com')
         await page.locator('#field-password').fill('password')
         // should fail to save without confirm password
-        await page.locator('#action-save').click()
+        await page.locator('#action-save').click({ delay: 100 })
         await expect(
           page.locator('.field-type.confirm-password .tooltip--show', {
             hasText: exactText('This field is required.'),
@@ -302,7 +315,10 @@ describe('Auth', () => {
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)
 
+        // Wait for hydration
+        await wait(1000)
         await page.locator('.table .row-1 .cell-custom a').click()
+        await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
         await expect(textInput).toBeVisible()
@@ -324,8 +340,11 @@ describe('Auth', () => {
         await expect.poll(() => lockedDocs.docs.length).toBe(1)
 
         await openNav(page)
-
-        await page.locator('.nav .nav__controls a[href="/admin/logout"]').click()
+        await page
+          .locator(
+            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout', adminRoute: '/admin' })}"]`,
+          )
+          .click()
 
         // Locate the modal container
         const modalContainer = page.locator('.payload__modal-container')
@@ -447,7 +466,11 @@ describe('Auth', () => {
           limit: 1,
         })
 
-        const userDocumentRoute = `${serverURL}/admin/collections/users/${users?.docs?.[0]?.id}`
+        const userDocumentRoute = formatAdminURL({
+          adminRoute,
+          path: `/collections/users/${users?.docs?.[0]?.id}`,
+          serverURL,
+        })
 
         await logout(page, serverURL)
 
@@ -480,9 +503,12 @@ describe('Auth', () => {
 
         await logout(page, serverURL)
 
-        await page.goto(
-          `${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`,
-        )
+        const notInUserCollectionURL = formatAdminURL({
+          adminRoute,
+          path: `/collections/relationsCollection/${notInUserCollection.id}`,
+          serverURL,
+        })
+        await page.goto(notInUserCollectionURL)
 
         await expect
           .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
@@ -497,7 +523,7 @@ describe('Auth', () => {
         // Expect to be redirected to the correct page
         await expect
           .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
-          .toBe(`${serverURL}/admin/collections/relationsCollection/${notInUserCollection.id}`)
+          .toBe(notInUserCollectionURL)
 
         // Previously, this would crash the page with a "Cannot read properties of null (reading 'fields')" error
         await expect(page.locator('#field-rel')).toBeVisible()

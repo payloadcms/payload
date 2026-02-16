@@ -264,7 +264,8 @@ export const buildJoinAggregation = async ({
     }
 
     for (const join of joinsList) {
-      if (projection && !projection[join.joinPath]) {
+      const projectionPath = versions ? `version.${join.joinPath}` : join.joinPath
+      if (projection && !projection[projectionPath]) {
         continue
       }
 

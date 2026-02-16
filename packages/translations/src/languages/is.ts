@@ -80,6 +80,11 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  dashboard: {
+    addWidget: 'Bæta við smáforriti',
+    deleteWidget: 'Eyða græju {{id}}',
+    searchWidgets: 'Leita að græjum...',
+  },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
     autosaving: 'Villa kom upp við sjálfvirka vistun á færslu.',
@@ -117,6 +122,7 @@ export const isTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Vandamál kom upp við að hlaða upp skránni.',
     restoringTitle:
       'Villa kom upp við að endurheimta {{title}}. Vinsamlegast athugaðu tenginguna þína og reyndu aftur.',
+    revertingDocument: 'Það kom upp vandamál við að endurheimta þetta skjal.',
     tokenInvalidOrExpired: 'Token er annað hvort ógilt eða útrunnið.',
     tokenNotProvided: 'Token var gefið upp.',
     unableToCopy: 'Ekki hægt að afrita.',
@@ -329,6 +335,7 @@ export const isTranslations: DefaultTranslationsObject = {
     items: 'hlutir',
     language: 'Tungumál',
     lastModified: 'Síðast breytt',
+    layout: 'Útlag',
     leaveAnyway: 'Fara samt',
     leaveWithoutSaving: 'Fara án þess að vista',
     light: 'Ljóst',
@@ -393,6 +400,7 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveChanges: 'Vista breytingar',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',
@@ -547,6 +555,7 @@ export const isTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Þú munt endursetja breytingar á þessari færslu í útgefna stöðu. Ertu viss?',
     aboutToUnpublish: 'Þú munt taka þessa færslu úr birtingu. Ertu viss?',
+    aboutToUnpublishIn: 'Þú ert að fara að afbirta þetta skjal í {{locale}}. Ertu viss?',
     aboutToUnpublishSelection: 'Þú munt taka úr birtingu allar valdar {{label}}. Ertu viss?',
     autosave: 'Sjálfvirk vistun',
     autosavedSuccessfully: 'Sjálfvirk vistun tókst.',
@@ -593,6 +602,7 @@ export const isTranslations: DefaultTranslationsObject = {
     restoring: 'Endurheimti...',
     reverting: 'Sný til baka...',
     revertToPublished: 'Snúa til baka í útgefið',
+    revertUnsuccessful: 'Endurheimt ekki hægt. Engin fyrri útgáfu fannst.',
     saveDraft: 'Vista drög',
     scheduledSuccessfully: 'Áætlað.',
     schedulePublish: 'Áætla útgáfu',
@@ -603,6 +613,9 @@ export const isTranslations: DefaultTranslationsObject = {
     specificVersion: 'Tiltekin útgáfa',
     status: 'Staða',
     unpublish: 'Taka úr birtingu',
+    unpublished: 'Óútgefið',
+    unpublishedSuccessfully: 'Tókst að afturkalla útgáfu.',
+    unpublishIn: 'Óútgefið í {{locale}}',
     unpublishing: 'Tek úr birtingu...',
     version: 'Útgáfa',
     versionAgo: '{{distance}} síðan',

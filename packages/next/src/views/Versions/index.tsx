@@ -1,7 +1,7 @@
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
 import { type DocumentViewServerProps, type PaginatedDocs, type Where } from 'payload'
-import { hasDraftsEnabled, isNumber } from 'payload/shared'
+import { formatAdminURL, hasDraftsEnabled, isNumber } from 'payload/shared'
 import React from 'react'
 
 import { fetchLatestVersion, fetchVersions } from '../Version/fetchVersions.js'
@@ -67,6 +67,7 @@ export async function VersionsView(props: DocumentViewServerProps) {
     depth: 0,
     globalSlug,
     limit: limitToUse,
+    locale: req.locale,
     overrideAccess: false,
     page: page ? parseInt(page.toString(), 10) : undefined,
     parentID: id,
@@ -86,15 +87,25 @@ export async function VersionsView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
           select: {
             id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
           status: 'published',
           user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
+          },
         })
       : Promise.resolve(null),
     draftsEnabled
@@ -102,22 +113,33 @@ export async function VersionsView(props: DocumentViewServerProps) {
           collectionSlug,
           depth: 0,
           globalSlug,
+          locale: req.locale,
           overrideAccess: false,
           parentID: id,
           req,
           select: {
             id: true,
             updatedAt: true,
+            version: {
+              _status: true,
+              updatedAt: true,
+            },
           },
           status: 'draft',
           user,
+          where: {
+            snapshot: {
+              not_equals: true,
+            },
+          },
         })
       : Promise.resolve(null),
   ])
 
-  const fetchURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/versions`
-    : `${serverURL}${apiRoute}/globals/${globalSlug}/versions`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: collectionSlug ? `/${collectionSlug}/versions` : `/${globalSlug}/versions`,
+  })
 
   const columns = buildVersionColumns({
     collectionConfig,

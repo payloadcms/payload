@@ -20,7 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
+import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -46,12 +46,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+  unpublishAllLocales?: boolean
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -72,6 +73,7 @@ export const updateByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     if (args.publishSpecificLocale) {
@@ -89,6 +91,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -100,6 +103,7 @@ export const updateByIDOperation = async <
       select: incomingSelect,
       showHiddenFields,
       trash = false,
+      unpublishAllLocales,
     } = args
 
     if (!id) {
@@ -197,7 +201,6 @@ export const updateByIDOperation = async <
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
-      accessResults,
       autosave,
       collectionConfig,
       config,
@@ -212,11 +215,21 @@ export const updateByIDOperation = async <
       overrideLock: overrideLock!,
       payload,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req,
       select: select!,
       showHiddenFields: showHiddenFields!,
+      unpublishAllLocales,
     })
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     await unlinkTempFiles({
       collectionConfig,
@@ -232,6 +245,7 @@ export const updateByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'updateByID',
+      overrideAccess,
       result,
     })) as TransformCollectionWithSelect<TSlug, TSelect>
 

@@ -1,5 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
-
+import { describe, it, expect } from 'vitest'
 import { normalizeRelationshipValue } from './normalizeRelationshipValue.js'
 
 describe('normalizeRelationshipValue', () => {
