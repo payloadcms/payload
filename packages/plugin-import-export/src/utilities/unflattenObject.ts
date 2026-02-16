@@ -11,6 +11,19 @@ type UnflattenArgs = {
   req: PayloadRequest
 }
 
+/**
+ * Converts flattened CSV data back into a nested document structure.
+ *
+ * The algorithm:
+ * 1. Sorts keys to ensure array indices are processed in order
+ * 2. For each flattened key (e.g., "blocks_0_hero_title"), splits by underscore into path segments
+ * 3. Traverses/builds the nested structure, handling:
+ *    - Arrays (numeric segments like "0", "1")
+ *    - Blocks (blockType detection from slug patterns)
+ *    - Polymorphic relationships (_relationTo and _id suffix pairs)
+ *    - Regular nested objects
+ * 4. Post-processes to handle localized fields, hasMany conversions, and relationship transforms
+ */
 export const unflattenObject = ({
   data,
   fields,
@@ -64,9 +77,7 @@ export const unflattenObject = ({
       )
 
       if (isPolymorphic) {
-        // Check if we've already processed this field
         if (baseKey in result) {
-          // Skipping because already processed
           continue
         }
 
@@ -110,19 +121,18 @@ export const unflattenObject = ({
       })
     }
 
-    // Parse the flat key into segments
     // Example: "blocks_0_content_text" -> ["blocks", "0", "content", "text"]
-    const segments = flatKey.split('_')
-    let current: Record<string, unknown> = result
+    const pathSegments = flatKey.split('_')
+    let currentObject: Record<string, unknown> = result
 
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i]
+    for (let i = 0; i < pathSegments.length; i++) {
+      const segment = pathSegments[i]
       if (!segment) {
         continue
       } // Skip empty segments
 
-      const nextSegment = segments[i + 1]
-      const isLast = i === segments.length - 1
+      const nextSegment = pathSegments[i + 1]
+      const isLast = i === pathSegments.length - 1
 
       // Check if next segment is a numeric array index (e.g., "0", "1", "2")
       const isArrayIndex = nextSegment !== undefined && /^\d+$/.test(nextSegment)
@@ -131,14 +141,13 @@ export const unflattenObject = ({
         // Special handling for blockType suffix in blocks
         if (segment === 'blockType' && i >= 3) {
           // Pattern: blocks_0_hero_blockType -> set blockType on the block
-          const blockFieldName = segments[0] // 'blocks'
+          const blockFieldName = pathSegments[0] // 'blocks'
           const isBlockField = fields.some(
             (field) => field.name === blockFieldName && field.type === 'blocks',
           )
 
-          if (isBlockField && segments[1]?.match(/^\d+$/)) {
-            // This is a block type field
-            const parent = getParentObject(result, segments.slice(0, 2))
+          if (isBlockField && pathSegments[1]?.match(/^\d+$/)) {
+            const parent = getParentObject(result, pathSegments.slice(0, 2))
             if (parent && typeof parent === 'object') {
               parent.blockType = value
             }
@@ -148,11 +157,10 @@ export const unflattenObject = ({
 
         // Special handling for relationship fields with _id suffix
         if (segment === 'id' && i > 0) {
-          const parentKey = segments[i - 1]
-          // Check if the previous segment is an array index
-          const prevIsIndex = parentKey ? /^\d+$/.test(parentKey) : false
+          const parentKey = pathSegments[i - 1]
+          const isPreviousSegmentArrayIndex = parentKey ? /^\d+$/.test(parentKey) : false
 
-          if (!prevIsIndex) {
+          if (!isPreviousSegmentArrayIndex) {
             // Check if this is a relationship field
             const isRelationship = fields.some(
               (field) => field.name === parentKey && field.type === 'relationship',
@@ -165,12 +173,10 @@ export const unflattenObject = ({
                 field && 'relationTo' in field && Array.isArray(field.relationTo)
 
               if (isPolymorphic) {
-                // For polymorphic relationships, check for the corresponding _relationTo field
-                const relationToKey = segments.slice(0, i).concat('relationTo').join('_')
+                const relationToKey = pathSegments.slice(0, i).concat('relationTo').join('_')
                 const relationToValue = data[relationToKey]
 
-                // This is a polymorphic relationship
-                const parent = getParentObject(result, segments.slice(0, i - 1))
+                const parent = getParentObject(result, pathSegments.slice(0, i - 1))
                 if (parent && parentKey && typeof parent === 'object') {
                   // Both fields must be defined to create/update the relationship
                   // If either is undefined, skip the field entirely (preserve existing data)
@@ -192,8 +198,7 @@ export const unflattenObject = ({
                 }
                 continue
               } else if (!isPolymorphic) {
-                // Non-polymorphic relationship
-                const parent = getParentObject(result, segments.slice(0, i - 1))
+                const parent = getParentObject(result, pathSegments.slice(0, i - 1))
                 if (parent && parentKey && typeof parent === 'object') {
                   parent[parentKey] = value
                 }
@@ -203,9 +208,9 @@ export const unflattenObject = ({
           }
         }
 
-        // Special handling for _relationTo suffix (skip it, handled above)
+        // _relationTo suffix is handled when processing the _id field above
         if (segment === 'relationTo' && i > 0) {
-          const parentKey = segments[i - 1]
+          const parentKey = pathSegments[i - 1]
           if (parentKey && !parentKey.match(/^\d+$/)) {
             const field = fields.find((f) => f.name === parentKey && f.type === 'relationship')
             const isPolymorphic = field && 'relationTo' in field && Array.isArray(field.relationTo)
@@ -218,15 +223,14 @@ export const unflattenObject = ({
           }
         }
 
-        current[segment] = value
+        currentObject[segment] = value
       } else if (isArrayIndex && nextSegment !== undefined) {
-        // Initialize array if needed
-        if (!current[segment] || !Array.isArray(current[segment])) {
-          current[segment] = []
+        if (!currentObject[segment] || !Array.isArray(currentObject[segment])) {
+          currentObject[segment] = []
         }
 
         const arrayIndex = parseInt(nextSegment)
-        const arr = current[segment] as unknown[]
+        const arr = currentObject[segment] as unknown[]
 
         // Ensure array has sufficient length
         while (arr.length <= arrayIndex) {
@@ -238,80 +242,67 @@ export const unflattenObject = ({
           arr[arrayIndex] = {}
         }
 
-        // Check if this is a blocks field with block slug pattern
+        // Handle blocks field with block slug pattern (e.g., blocks_0_hero_title)
         const isBlocksField = fields.some((f) => f.name === segment && f.type === 'blocks')
-        if (isBlocksField && i + 3 < segments.length) {
-          // Pattern: blocks_0_hero_title where 'hero' is the block slug
-          const blockSlug = segments[i + 2]
-          const blockFieldName = segments[i + 3]
+        if (isBlocksField && i + 3 < pathSegments.length) {
+          const blockSlug = pathSegments[i + 2]
+          const blockFieldName = pathSegments[i + 3]
 
           if (blockSlug && blockFieldName) {
             const blockObject = arr[arrayIndex] as Record<string, unknown>
-
-            // Set the blockType based on the slug
             blockObject.blockType = blockSlug
 
-            // Handle nested block fields
-            if (i + 3 === segments.length - 1) {
-              // Direct field on the block
+            if (i + 3 === pathSegments.length - 1) {
               blockObject[blockFieldName] = value
             } else {
-              // Nested field in the block
               if (!blockObject[blockFieldName] || typeof blockObject[blockFieldName] !== 'object') {
                 blockObject[blockFieldName] = {}
               }
-              // Continue processing remaining segments
-              current = blockObject[blockFieldName] as Record<string, unknown>
-              i = i + 3 // Skip index, slug, and field name
-              continue // Continue processing the remaining segments (not break!)
+              currentObject = blockObject[blockFieldName] as Record<string, unknown>
+              i = i + 3
+              continue
             }
             break
           }
         }
 
-        // If this is the last segment after the index, set the value
-        if (i + 2 === segments.length - 1) {
-          const lastSegment = segments[segments.length - 1]
+        if (i + 2 === pathSegments.length - 1) {
+          const lastSegment = pathSegments[pathSegments.length - 1]
           if (lastSegment && arr[arrayIndex] && typeof arr[arrayIndex] === 'object') {
             ;(arr[arrayIndex] as Record<string, unknown>)[lastSegment] = value
           }
           break
-        } else if (i + 1 === segments.length - 1) {
+        } else if (i + 1 === pathSegments.length - 1) {
           // Direct array value (e.g., tags_0 = "value")
           arr[arrayIndex] = value
           break
         } else {
-          // Continue traversing into the array element
-          current = arr[arrayIndex] as Record<string, unknown>
-          i++ // skip the index segment
+          currentObject = arr[arrayIndex] as Record<string, unknown>
+          i++
         }
       } else {
-        // Regular object property
-        // Check if this segment is already set to null (polymorphic relationship already processed)
-        if (current[segment] === null && isLast && segment === 'relationTo') {
-          // This is a relationTo for a polymorphic field that was already set to null
-          // Skip creating a new object
+        // Skip if already set to null (polymorphic relationship already processed)
+        if (currentObject[segment] === null && isLast && segment === 'relationTo') {
           continue
         }
 
         if (
-          !current[segment] ||
-          typeof current[segment] !== 'object' ||
-          Array.isArray(current[segment])
+          !currentObject[segment] ||
+          typeof currentObject[segment] !== 'object' ||
+          Array.isArray(currentObject[segment])
         ) {
-          current[segment] = {}
+          currentObject[segment] = {}
         }
 
-        // Handle special cases for polymorphic relationships
-        if (segment === 'relationTo' && i > 0 && segments[i - 1]?.match(/^\d+$/)) {
-          // This is part of a polymorphic relationship array
-          current[segment] = value
+        // Handle polymorphic relationship arrays
+        if (segment === 'relationTo' && i > 0 && pathSegments[i - 1]?.match(/^\d+$/)) {
+          currentObject[segment] = value
         } else if (
-          typeof current[segment] === 'object' &&
-          !Array.isArray(current[segment]) &&
-          current[segment] !== null
+          typeof currentObject[segment] === 'object' &&
+          !Array.isArray(currentObject[segment]) &&
+          currentObject[segment] !== null
         ) {
-          current = current[segment] as Record<string, unknown>
+          currentObject = currentObject[segment] as Record<string, unknown>
         }
       }
     }
@@ -369,9 +360,15 @@ const getParentObject = (
   return current
 }
 
+/**
+ * Post-processes the unflattened document to handle special field types:
+ * - Localized fields: transforms field_locale keys to nested { field: { locale: value } }
+ * - Number hasMany: converts comma-separated strings or arrays to number arrays
+ * - Relationship hasMany: converts comma-separated IDs to arrays
+ * - Polymorphic relationships: transforms flat {relationTo, id} to {relationTo, value}
+ * - Rich text fields: ensures proper data structure
+ */
 const postProcessDocument = (doc: Record<string, unknown>, fields: FlattenedField[]): void => {
-  // Handle localized fields - transform from field_locale to { field: { locale: value } }
-  // This is the format Payload stores in the database
   const localizedFields = fields.filter((field) => field.localized)
   const processedLocalizedFields = new Set<string>()
 

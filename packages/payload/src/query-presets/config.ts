@@ -51,8 +51,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Cell: '@payloadcms/next/client#QueryPresetsWhereCell',
+          Field: '@payloadcms/next/client#QueryPresetsWhereField',
         },
       },
       hooks: {
@@ -78,8 +78,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
-          Field: '@payloadcms/ui#QueryPresetsColumnField',
+          Cell: '@payloadcms/next/client#QueryPresetsColumnsCell',
+          Field: '@payloadcms/next/client#QueryPresetsColumnField',
         },
       },
       validate: (value) => {
@@ -99,8 +99,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'text',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
-          Field: '@payloadcms/ui#QueryPresetsGroupByField',
+          Cell: '@payloadcms/next/client#QueryPresetsGroupByCell',
+          Field: '@payloadcms/next/client#QueryPresetsGroupByField',
         },
       },
       label: 'Group By',

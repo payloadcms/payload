@@ -155,6 +155,18 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'settings',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'siteName',
+        },
+      ],
+    },
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

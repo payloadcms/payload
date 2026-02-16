@@ -6,7 +6,7 @@ import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type {
   Config,
   Page as PageType,
@@ -22,11 +22,11 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -196,7 +196,9 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
       await expect(
         page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
@@ -270,8 +272,9 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
 
       const bulkText = 'Bulk update title'
-
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 

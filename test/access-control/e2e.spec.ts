@@ -6,7 +6,7 @@ import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
@@ -15,16 +15,16 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
-import { login } from '../helpers/e2e/auth/login.js'
-import { openListFilters } from '../helpers/e2e/filters/index.js'
-import { openGroupBy } from '../helpers/e2e/groupBy/index.js'
-import { openDocControls } from '../helpers/e2e/openDocControls.js'
-import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { RESTClient } from '../helpers/rest.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { login } from '../__helpers/e2e/auth/login.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
+import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
@@ -410,7 +410,6 @@ describe('Access Control', () => {
 
       await page.goto(restrictedUrl.list)
 
-       
       expect(errors).not.toHaveLength(0)
     })
 
@@ -704,6 +703,9 @@ describe('Access Control', () => {
       const adminUserRow = page.locator('.table tr').filter({ hasText: devUser.email })
       const nonAdminUserRow = page.locator('.table tr').filter({ hasText: nonAdminEmail })
 
+      // Wait for hydration
+      await wait(1000)
+
       // Ensure admin user cannot unlock other users
       await adminUserRow.locator('.cell-id a').click()
       await page.waitForURL(`**/collections/users/**`)
@@ -714,6 +716,9 @@ describe('Access Control', () => {
       await expect(page.locator('.payload-toast-container')).toContainText('Successfully unlocked')
 
       await page.goto(usersUrl.list)
+
+      // Wait for hydration
+      await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
       await nonAdminUserRow.locator('.cell-id a').click()

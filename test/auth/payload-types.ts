@@ -106,24 +106,12 @@ export interface Config {
   globalsSelect: {};
   locale: null;
   user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PartialDisableLocalStrategy & {
-        collection: 'partial-disable-local-strategies';
-      })
-    | (DisableLocalStrategyPassword & {
-        collection: 'disable-local-strategy-password';
-      })
-    | (ApiKey & {
-        collection: 'api-keys';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      })
-    | (ApiKeysWithFieldReadAccess & {
-        collection: 'api-keys-with-field-read-access';
-      });
+    | User
+    | PartialDisableLocalStrategy
+    | DisableLocalStrategyPassword
+    | ApiKey
+    | PublicUser
+    | ApiKeysWithFieldReadAccess;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -305,6 +293,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -329,6 +318,7 @@ export interface PartialDisableLocalStrategy {
       }[]
     | null;
   password?: string | null;
+  collection: 'partial-disable-local-strategies';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -339,6 +329,7 @@ export interface DisableLocalStrategyPassword {
   password: string;
   updatedAt: string;
   createdAt: string;
+  collection: 'disable-local-strategy-password';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -351,6 +342,7 @@ export interface ApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -377,6 +369,7 @@ export interface PublicUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -400,6 +393,7 @@ export interface ApiKeysWithFieldReadAccess {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'api-keys-with-field-read-access';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -735,6 +729,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
