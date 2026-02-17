@@ -225,10 +225,12 @@ export const createCollectionTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'createCollection',
-    toolSchemas.createCollection.description,
-    toolSchemas.createCollection.parameters.shape,
+    {
+      description: toolSchemas.createCollection.description,
+      inputSchema: toolSchemas.createCollection.parameters.shape,
+    },
     async ({ collectionDescription, collectionName, fields, hasUpload }) => {
       return await tool(collectionName, collectionDescription, fields, hasUpload)
     },

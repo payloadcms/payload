@@ -176,10 +176,12 @@ ${JSON.stringify(result, null, 2)}
         ),
     })
 
-    server.tool(
+    server.registerTool(
       `update${globalSlug.charAt(0).toUpperCase() + toCamelCase(globalSlug).slice(1)}`,
-      `${toolSchemas.updateGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
-      updateGlobalSchema.shape,
+      {
+        description: `${toolSchemas.updateGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
+        inputSchema: updateGlobalSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const { depth, draft, fallbackLocale, locale, select, ...rest } = params
         const data = JSON.stringify(rest)
