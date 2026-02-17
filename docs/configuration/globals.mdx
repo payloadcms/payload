@@ -161,23 +161,28 @@ The following options are available:
 
 #### Edit View Options
 
-```ts
-import type { SanitizedGlobalConfig } from 'payload'
+Custom components within the Edit View are configured under `admin.components.elements`:
 
-export const MyGlobal: SanitizedGlobalConfig = {
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const MyGlobal: GlobalConfig = {
   // ...
   admin: {
     components: {
       elements: {
-        // highlight-line
-        // ...
+        // highlight-start
+        Status: '/path/to/CustomStatus',
+        SaveButton: '/path/to/CustomSaveButton',
+        PublishButton: '/path/to/CustomPublishButton',
+        // highlight-end
       },
     },
   },
 }
 ```
 
-The following options are available:
+The following elements can be customized within `admin.components.elements`:
 
 | Option                   | Description                                                                                                                                                                                                |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

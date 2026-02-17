@@ -627,7 +627,7 @@ describe('General', () => {
       await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
+      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?.*limit=[^&]+`)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(pattern)
       await page.goBack()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(postsUrl.admin)

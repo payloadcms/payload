@@ -1093,6 +1093,8 @@ describe('Trash', () => {
       await expect(nameLink).toBeVisible()
       await nameLink.click()
 
+      await page.locator('input[name="email"]').waitFor({ state: 'visible' })
+
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
     })
 
@@ -1104,6 +1106,8 @@ describe('Trash', () => {
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
       await nameLink.click()
+
+      await page.locator('input[name="email"]').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 
@@ -1123,6 +1127,8 @@ describe('Trash', () => {
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
       await nameLink.click()
+
+      await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
 
       await expect(page).toHaveURL(/\/users\/trash\/[a-f0-9]{24}/)
 

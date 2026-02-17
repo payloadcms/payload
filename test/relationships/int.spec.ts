@@ -971,6 +971,93 @@ describe('Relationships', () => {
           // should not affect other fields
           expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
         })
+
+        describe('Local API', () => {
+          it('should populate to depth via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 2,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+            const chainedRel = doc?.chainedRelation as EasierChained
+
+            expect(chainedRel.id).toEqual(chained.id)
+            expect(chainedRel.relation.id).toEqual(chained2.id)
+            expect(chainedRel.relation.relation as unknown as string).toEqual(chained3.id)
+          })
+
+          it('should only populate ID if depth 0 via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 0,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+
+            expect(doc?.chainedRelation).toEqual(chained.id)
+          })
+
+          it('should respect maxDepth at field level via local API find', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 1,
+              where: {
+                id: { equals: post.id },
+              },
+            })
+
+            const doc = result.docs[0]
+
+            expect(doc?.maxDepthRelation).toEqual(relation.id)
+            expect(doc?.maxDepthRelation).not.toHaveProperty('name')
+            // should not affect other fields
+            expect(doc?.relationField).toMatchObject({ id: relation.id, name: relation.name })
+          })
+
+          it('should use depth option even if req.query.depth is set', async () => {
+            const result = await payload.find({
+              collection: slug,
+              depth: 0,
+              where: {
+                id: { equals: post.id },
+              },
+              req: { query: { depth: 5 } } as Partial<PayloadRequest> as PayloadRequest,
+            })
+
+            const doc = result.docs[0]
+
+            // depth: 0 from options should be used, not depth: 5 from req.query
+            expect(doc?.chainedRelation).toEqual(chained.id)
+          })
+
+          it('should ignore req.query.depth when no depth option is provided', async () => {
+            // When no depth option is provided, req.query.depth should be ignored
+            // and the default depth behavior should apply
+            const result = await payload.find({
+              collection: slug,
+              where: {
+                id: { equals: post.id },
+              },
+              req: { query: { depth: 0 } } as Partial<PayloadRequest> as PayloadRequest,
+            })
+
+            const doc = result.docs[0]
+
+            // Default depth should apply, not depth: 0 from req.query
+            // So relationships should be populated (not just IDs)
+            const chainedRel = doc?.chainedRelation as EasierChained
+
+            expect(chainedRel).toHaveProperty('id')
+            expect(chainedRel.id).toEqual(chained.id)
+          })
+        })
       })
 
       describe('with localization', () => {

@@ -20,6 +20,7 @@ import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-mul
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
   enlargeSlug,
@@ -562,6 +563,33 @@ describe('Collections - Uploads', () => {
         })
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
+      it('should not crash when adminThumbnail size is not generated', async () => {
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+
+        // SVGs cannot be resized, so sizes.small should have null fields
+        const doc = await payload.create({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'test-thumbnail.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(doc.id).toBeDefined()
+        expect(doc.filename).toBeDefined()
+        expect(doc.thumbnailURL).toBeNull()
+
+        // Clean up
+        await payload.delete({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
     })
 
@@ -1632,6 +1660,74 @@ describe('Collections - Uploads', () => {
 
       const arrayBuffer = await response.arrayBuffer()
       expect(arrayBuffer.byteLength).toBe(1)
+    })
+  })
+
+  describe('SVG Security', () => {
+    let xssPayloadDoc: Media
+    const docIDs: (number | string)[] = []
+
+    afterAll(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            id,
+          })
+        } catch {
+          // ignore
+        }
+      }
+    })
+
+    it('should serve SVG files with Content-Security-Policy header to prevent XSS', async () => {
+      // Upload an SVG with embedded JavaScript
+      const filePath = path.resolve(dirname, './xss-payload.svg')
+      const file = await getFileByPath(filePath)
+
+      xssPayloadDoc = (await payload.create({
+        collection: noRestrictFileTypesSlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(xssPayloadDoc.id)
+
+      // Fetch the SVG file
+      const response = await restClient.GET(
+        `/${noRestrictFileTypesSlug}/file/${xssPayloadDoc.filename}`,
+      )
+
+      expect(response.status).toBe(200)
+
+      // Verify the Content-Security-Policy header is present
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
+    })
+
+    it('should serve all SVG files with CSP headers regardless of content', async () => {
+      // Upload a safe SVG file
+      const filePath = path.resolve(dirname, './image.svg')
+      const file = await getFileByPath(filePath)
+
+      const safeDoc = (await payload.create({
+        collection: svgOnlySlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(safeDoc.id)
+
+      // Fetch the uploaded SVG file
+      const response = await restClient.GET(`/${svgOnlySlug}/file/${safeDoc.filename}`)
+
+      expect(response.status).toBe(200)
+
+      // Expect to have CSP headers
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
     })
   })
 

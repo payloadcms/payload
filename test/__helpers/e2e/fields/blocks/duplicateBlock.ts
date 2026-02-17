@@ -1,6 +1,6 @@
-import type { Locator, Page } from 'playwright'
+import type { Locator, Page } from '@playwright/test'
 
-import { expect } from 'playwright/test'
+import { expect } from '@playwright/test'
 
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
 
