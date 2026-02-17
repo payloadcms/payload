@@ -43,7 +43,7 @@
         margin-right: calc(var(--base) * 0.25);
       }
       [dir='rtl'] & {
-        margin-left: calc(var(--base) * 0.25);
+        margin-inline-end: calc(var(--base) * 0.25);
       }
     }
 

@@ -54,8 +54,8 @@
 
           [dir='rtl'] & {
             top: 0;
-            left: 0;
-            border-left: var(--main-border);
+            inset-inline-end: 0;
+            border-inline-end: var(--main-border);
           }
         }
 
@@ -177,7 +177,7 @@
             }
 
             [dir='rtl'] & {
-              border-left: 0;
+              border-inline-end: 0;
             }
           }
 

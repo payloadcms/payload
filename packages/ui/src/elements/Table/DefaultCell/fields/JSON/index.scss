@@ -16,7 +16,7 @@
       padding-left: base(0.0875 + 0.25);
     }
     [dir='rtl'] & {
-      padding-right: base(0.0875 + 0.25);
+      padding-inline-start: base(0.0875 + 0.25);
     }
 
     background: var(--theme-elevation-100);

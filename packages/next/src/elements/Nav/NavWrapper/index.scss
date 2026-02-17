@@ -12,8 +12,8 @@
     opacity: 0;
 
     [dir='rtl'] & {
-      border-right: none;
-      border-left: 1px solid var(--theme-elevation-100);
+      border-inline-start: none;
+      border-inline-end: 1px solid var(--theme-elevation-100);
     }
 
     &--nav-animate {

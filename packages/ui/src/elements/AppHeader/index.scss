@@ -21,8 +21,8 @@
     // place the localizer outside the `overflow: hidden` container so that the popup is visible
     // this means we need to use a placeholder div so that the space is retained in the DOM
     [dir='rtl'] &__localizer {
-      right: unset;
-      left: base(4.5);
+      inset-inline-start: unset;
+      inset-inline-end: base(4.5);
     }
 
     &__localizer-spacing {

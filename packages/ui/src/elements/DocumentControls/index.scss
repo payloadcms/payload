@@ -189,7 +189,7 @@
 
       &__popup {
         [dir='rtl'] & {
-          padding-left: var(--gutter-h);
+          padding-inline-end: var(--gutter-h);
         }
       }
 

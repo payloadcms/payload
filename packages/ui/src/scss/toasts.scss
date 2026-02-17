@@ -28,9 +28,9 @@
         background: none;
       }
 
-      [dir='RTL'] & {
-        right: unset;
-        left: 0.5rem;
+      [dir='rtl'] & {
+        inset-inline-start: unset;
+        inset-inline-end: 0.5rem;
       }
     }
 

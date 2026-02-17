@@ -16,7 +16,7 @@
       margin-right: auto;
     }
     [dir='rtl'] & {
-      margin-left: auto;
+      margin-inline-end: auto;
     }
 
     .required {
@@ -28,7 +28,7 @@
         margin-left: base(0.25);
       }
       [dir='rtl'] & {
-        margin-right: base(0.25);
+        margin-inline-start: base(0.25);
       }
     }
   }
@@ -39,7 +39,7 @@
       margin-left: base(0.25);
     }
     [dir='rtl'] & {
-      margin-right: base(0.25);
+      margin-inline-start: base(0.25);
     }
   }
 }

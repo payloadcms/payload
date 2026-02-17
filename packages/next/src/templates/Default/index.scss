@@ -6,8 +6,8 @@
     color: var(--theme-text);
 
     [dir='rtl'] &__nav-toggler-wrapper {
-      left: unset;
-      right: 0;
+      inset-inline-end: unset;
+      inset-inline-start: 0;
     }
 
     &__nav-toggler-wrapper {

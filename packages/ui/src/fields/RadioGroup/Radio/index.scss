@@ -49,8 +49,8 @@
     }
 
     [dir='rtl'] &__label {
-      margin-left: 0;
-      margin-right: base(0.5);
+      margin-inline-end: 0;
+      margin-inline-start: base(0.5);
     }
 
     &__label {

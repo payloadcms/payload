@@ -21,7 +21,7 @@
           padding-right: $baseline;
         }
         [dir='rtl'] & {
-          padding-left: $baseline;
+          padding-inline-end: $baseline;
         }
       }
     }

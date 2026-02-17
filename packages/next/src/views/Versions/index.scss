@@ -31,7 +31,7 @@
       }
 
       [dir='rtl'] & {
-        margin-right: auto;
+        margin-inline-start: auto;
       }
     }
 
@@ -59,8 +59,8 @@
       }
 
       [dir='rtl'] & {
-        margin-left: var(--base);
-        margin-right: auto;
+        margin-inline-end: var(--base);
+        margin-inline-start: auto;
       }
     }
 
@@ -97,7 +97,7 @@
         }
 
         [dir='rtl'] & {
-          margin-right: 0;
+          margin-inline-start: 0;
         }
       }
 

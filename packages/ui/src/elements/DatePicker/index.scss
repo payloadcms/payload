@@ -6,7 +6,7 @@ $cal-icon-width: 18px;
   [dir='rtl'] {
     .date-time-picker {
       .react-datepicker__input-container input {
-        padding-right: base(3.4);
+        padding-inline-start: base(3.4);
       }
     }
   }

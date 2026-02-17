@@ -13,8 +13,8 @@
       }
 
       [dir='rtl'] & {
-        margin-left: base(1);
-        margin-right: auto;
+        margin-inline-end: base(1);
+        margin-inline-start: auto;
       }
     }
 

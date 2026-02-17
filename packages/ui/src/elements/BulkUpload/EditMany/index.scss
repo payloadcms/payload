@@ -84,9 +84,9 @@
       flex-grow: 1;
     }
     [dir='rtl'] &__sidebar-wrap {
-      left: 0;
-      border-right: 1px solid var(--theme-elevation-100);
-      right: auto;
+      inset-inline-end: 0;
+      border-inline-start: 1px solid var(--theme-elevation-100);
+      inset-inline-start: auto;
     }
 
     &__sidebar-wrap {

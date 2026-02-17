@@ -22,7 +22,7 @@
       }
 
       [dir='rtl'] & {
-        margin-right: calc(-1 * var(--tenant-gutter-h-right));
+        margin-inline-start: calc(-1 * var(--tenant-gutter-h-right));
         background-image: repeating-linear-gradient(
           -120deg,
           var(--theme-elevation-50) 0px,

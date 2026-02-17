@@ -27,8 +27,8 @@ $header-height: base(5);
     }
 
     [dir='rtl'] &__actions {
-      margin-right: auto;
-      margin-left: unset;
+      margin-inline-start: auto;
+      margin-inline-end: unset;
     }
 
     &__actions {

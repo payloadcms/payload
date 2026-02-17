@@ -126,15 +126,15 @@
       align-items: center;
 
       html:not([dir='RTL']) & {
-        border-left: 1px solid var(--theme-bg);
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        border-inline-start: 1px solid var(--theme-bg);
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
       }
 
       html[dir='RTL'] & {
-        border-right: 1px solid var(--theme-bg);
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
+        border-inline-start: 1px solid var(--theme-bg);
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
       }
 
       &:hover,
@@ -349,13 +349,13 @@
 
     &--withPopup .btn {
       html:not([dir='RTL']) & {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
       }
 
       html[dir='RTL'] & {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
       }
     }
 

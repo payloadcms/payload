@@ -63,11 +63,11 @@
       }
       [dir='rtl'] & {
         // Vertical gutter
-        border-right: 2px solid var(--theme-elevation-100);
+        border-inline-start: 2px solid var(--theme-elevation-100);
         // Center-align the gutter with the chevron
-        margin-right: 3px;
+        margin-inline-start: 3px;
         // Content indentation
-        padding-right: calc(var(--base) * 0.5);
+        padding-inline-start: calc(var(--base) * 0.5);
       }
     }
 

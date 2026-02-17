@@ -18,7 +18,7 @@
         margin-left: var(--base);
       }
       [dir='rtl'] & {
-        margin-right: var(--base);
+        margin-inline-start: var(--base);
       }
     }
   }

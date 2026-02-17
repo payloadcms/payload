@@ -29,8 +29,8 @@
     }
 
     [dir='rtl'] &__input {
-      margin-right: 0;
-      margin-left: base(0.5);
+      margin-inline-start: 0;
+      margin-inline-end: base(0.5);
     }
 
     &__input {

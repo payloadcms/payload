@@ -274,10 +274,10 @@
     // See comment above for why we need this
     &__listItemUnchecked[dir='rtl'],
     &__listItemChecked[dir='rtl'] {
-      margin-left: 0;
-      padding-left: 0;
-      padding-right: 25px;
-      margin-right: 15px;
+      margin-inline-end: 0;
+      padding-inline-end: 0;
+      padding-inline-start: 25px;
+      margin-inline-start: 15px;
     }
 
     &__listItemChecked {
@@ -299,8 +299,8 @@
 
     &__listItemUnchecked[dir='rtl']:before,
     &__listItemChecked[dir='rtl']:before {
-      left: auto;
-      right: 0;
+      inset-inline-end: auto;
+      inset-inline-start: 0;
     }
 
     &__listItemUnchecked:focus:before,
