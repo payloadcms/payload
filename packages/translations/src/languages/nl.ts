@@ -373,7 +373,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     none: 'Niets',
     noOptions: 'Geen opties',
     noResults:
-      'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
+      'Geen {{label}} gevonden. Of er bestaan nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
     noTrashResults: 'Geen {{label}} in prullenbak.',
