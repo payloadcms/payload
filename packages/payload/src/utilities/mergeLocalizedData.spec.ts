@@ -873,5 +873,54 @@ describe('mergeLocalizedData', () => {
         es: 'Spanish Value',
       })
     })
+
+    it('should preserve other locale data when updating through unnamed tabs', () => {
+      const fields: Field[] = [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab 1',
+              fields: [
+                {
+                  name: 'tabFieldLocalized',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      // Document has both en and es data
+      const docWithLocales = {
+        tabFieldLocalized: {
+          en: 'English Value',
+          es: 'Spanish Value',
+        },
+      }
+
+      // Only updating en
+      const dataWithLocales = {
+        tabFieldLocalized: {
+          en: 'Updated English Value',
+        },
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      // es should be preserved
+      expect(result.tabFieldLocalized).toEqual({
+        en: 'Updated English Value',
+        es: 'Spanish Value',
+      })
+    })
   })
 })
