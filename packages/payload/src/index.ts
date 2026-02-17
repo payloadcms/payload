@@ -1664,6 +1664,8 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export { createFolderCollection, createFolderField } from './folders/index.js'
+export type { CreateFolderCollectionOptions, CreateFolderFieldOptions } from './folders/index.js'
 export type { FolderSortKeys } from './folders/types.js'
 
 export { getFolderData } from './folders/utils/getFolderData.js'
