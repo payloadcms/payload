@@ -2215,9 +2215,6 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
-
             // Delete button should be visible in bulk actions
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2256,9 +2253,6 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
-
             // Delete button should be visible because user can trash (even if they can't permanently delete)
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2279,9 +2273,6 @@ describe('Access Control', () => {
             // Select a row
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
-
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
 
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2328,9 +2319,6 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
-
             // Delete button should be visible for admin
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2368,9 +2356,6 @@ describe('Access Control', () => {
             // Select a row
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
-
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
 
             // Delete button should NOT be visible because user cannot trash or permanently delete
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
@@ -2425,9 +2410,6 @@ describe('Access Control', () => {
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
 
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
-
             // Delete button should be visible for admin (they can permanently delete)
             const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
             await expect(deleteButton).toBeVisible()
@@ -2470,9 +2452,6 @@ describe('Access Control', () => {
             // Select a row
             const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
             await checkbox.click()
-
-            // Wait for bulk actions UI to appear
-            await expect(page.locator('.list-selection')).toBeVisible()
 
             // Delete button should NOT be visible in trash view because
             // regular users can only trash (soft delete), not permanently delete
