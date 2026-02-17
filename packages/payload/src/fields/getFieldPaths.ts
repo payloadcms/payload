@@ -1,3 +1,5 @@
+import type { MarkOptional } from 'ts-essentials'
+
 import type { ClientTab } from '../admin/types.js'
 import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
@@ -17,7 +19,7 @@ export type ParentFieldPaths = {
   /**
    * Like `FieldPaths['path']`, but relative to this field's parent.
    */
-  parentPath?: string
+  parentPath: string
   /**
    * Like `FieldPaths['schemaPath']`, but relative to this field's parent.
    */
@@ -95,7 +97,7 @@ export function getFieldPaths({
   parentIndexPath,
   parentPath = '',
   parentSchemaPath,
-}: GetFieldPathsArgs): FieldPaths {
+}: MarkOptional<GetFieldPathsArgs, 'parentPath'>): FieldPaths {
   const parentPathSegments = parentPath.split('.')
 
   const parentPathIsUnnamed =

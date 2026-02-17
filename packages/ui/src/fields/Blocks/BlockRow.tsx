@@ -2,9 +2,8 @@
 import type {
   ClientBlock,
   ClientField,
-  FieldPaths,
+  FieldPathProps,
   Labels,
-  ParentFieldPaths,
   Row,
   SanitizedFieldPermissions,
 } from 'payload'
@@ -51,8 +50,7 @@ type BlocksFieldProps = {
   rowCount: number
   rowIndex: number
   setCollapse: (id: string, collapsed: boolean) => void
-} & NonNullable<Pick<ParentFieldPaths, 'parentPath'>> &
-  Omit<FieldPaths, 'indexPath'> &
+} & FieldPathProps &
   UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({

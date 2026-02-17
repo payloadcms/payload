@@ -3,8 +3,7 @@ import type {
   ArrayField,
   ClientComponentProps,
   ClientField,
-  FieldPaths,
-  ParentFieldPaths,
+  FieldPathProps,
   Row,
   SanitizedFieldPermissions,
 } from 'payload'
@@ -48,9 +47,8 @@ type ArrayRowProps = {
   readonly rowIndex: number
   readonly scrollIdPrefix: string
   readonly setCollapse: (rowID: string, collapsed: boolean) => void
-} & Omit<FieldPaths, 'indexPath'> &
+} & FieldPathProps &
   Pick<ClientComponentProps, 'forceRender'> &
-  Required<Pick<ParentFieldPaths, 'parentPath'>> &
   UseDraggableSortableReturn
 
 export const ArrayRow: React.FC<ArrayRowProps> = ({
@@ -144,10 +142,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             : undefined
         }
         header={
-          <div
-            className={`${baseClass}__row-header`}
-            id={`${scrollIdPrefix}-row-${rowIndex}`}
-          >
+          <div className={`${baseClass}__row-header`} id={`${scrollIdPrefix}-row-${rowIndex}`}>
             {isLoading ? (
               <ShimmerEffect height="1rem" width="8rem" />
             ) : (

@@ -16,10 +16,9 @@ const baseClass = 'tabs-field__tab-button'
 type TabProps = {
   readonly hidden?: boolean
   readonly isActive?: boolean
-  readonly parentPath: ParentFieldPaths['parentPath']
   readonly setIsActive: () => void
   readonly tab: ClientTab
-}
+} & Pick<ParentFieldPaths, 'parentPath'>
 
 export const TabComponent: React.FC<TabProps> = ({
   hidden,

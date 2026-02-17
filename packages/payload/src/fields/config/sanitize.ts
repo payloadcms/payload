@@ -53,9 +53,7 @@ type Args = {
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
-  parentIndexPath?: ParentFieldPaths['parentIndexPath']
   parentIsLocalized: boolean
-  parentSchemaPath?: ParentFieldPaths['parentSchemaPath']
   polymorphicJoins?: SanitizedJoin[]
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -73,7 +71,7 @@ type Args = {
    * This validation will be skipped if validRelationships is null.
    */
   validRelationships: null | string[]
-}
+} & Partial<Pick<ParentFieldPaths, 'parentIndexPath' | 'parentSchemaPath'>>
 
 export const sanitizeFields = async ({
   collectionConfig,
