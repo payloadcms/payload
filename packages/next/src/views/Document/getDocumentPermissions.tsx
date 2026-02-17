@@ -81,7 +81,7 @@ export const getDocumentPermissions = async (args: {
           })
         ).delete
 
-        const { deletedAt: _, ...dataWithoutDeletedAt } = data
+        const { deletedAt: _, ...dataWithoutDeletedAt } = data || {}
 
         hasDeletePermission = (
           await docAccessOperation({
