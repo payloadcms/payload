@@ -149,7 +149,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
             >
               <Tooltip
                 className={`${baseClass}__tooltip`}
-                position="top"
+                position={index === 0 ? 'bottom' : 'top'} // TODO: set to "top" when we portal tooltips
                 show={hoveredTab === tab.slug}
               >
                 {tab.label}
