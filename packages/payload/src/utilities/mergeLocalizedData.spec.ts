@@ -832,5 +832,46 @@ describe('mergeLocalizedData', () => {
         es: 'Spanish Nested Localized',
       })
     })
+
+    it('should not lose other locale data when processing row fields', () => {
+      const fields: Field[] = [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'rowFieldLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        rowFieldLocalized: {
+          en: 'English Value',
+          es: 'Spanish Value',
+        },
+      }
+
+      const dataWithLocales = {
+        rowFieldLocalized: {
+          en: 'Updated English Value',
+        },
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      expect(result.rowFieldLocalized).toEqual({
+        en: 'Updated English Value',
+        es: 'Spanish Value',
+      })
+    })
   })
 })
