@@ -166,16 +166,7 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      })
-    | (AuthCollection & {
-        collection: 'auth-collection';
-      });
+  user: User | PublicUser | AuthCollection;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -269,6 +260,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -293,6 +285,7 @@ export interface PublicUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -837,6 +830,7 @@ export interface AuthCollection {
         expiresAt: string;
       }[]
     | null;
+  collection: 'auth-collection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
