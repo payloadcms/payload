@@ -74,7 +74,7 @@ export const getDocumentPermissions = async (args: {
               config: collectionConfig,
             },
             data: {
-              ...data,
+              ...(data || {}),
               deletedAt: new Date().toISOString(),
             },
             req,
