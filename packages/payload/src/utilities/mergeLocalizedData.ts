@@ -4,6 +4,34 @@ import type { JsonObject } from '../types/index.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
+/**
+ * Extracts all field names from a field tree, recursing into pass-through fields.
+ */
+function getFieldNames(fields: Field[]): Set<string> {
+  const names = new Set<string>()
+  for (const field of fields) {
+    if (fieldAffectsData(field)) {
+      names.add(field.name)
+    } else if ('fields' in field && Array.isArray(field.fields)) {
+      // Pass-through fields (row, collapsible, unnamed group)
+      for (const name of getFieldNames(field.fields)) {
+        names.add(name)
+      }
+    } else if (field.type === 'tabs') {
+      for (const tab of field.tabs) {
+        if (tabHasName(tab)) {
+          names.add(tab.name)
+        } else {
+          for (const name of getFieldNames(tab.fields)) {
+            names.add(name)
+          }
+        }
+      }
+    }
+  }
+  return names
+}
+
 type MergeDataToSelectedLocalesArgs = {
   configBlockReferences: SanitizedConfig['blocks']
   dataWithLocales: JsonObject
@@ -178,17 +206,6 @@ export function mergeLocalizedData({
                 })
               }
             }
-          } else {
-            // Unnamed groups pass through the same data level
-            const merged = mergeLocalizedData({
-              configBlockReferences,
-              dataWithLocales,
-              docWithLocales: result, // Use current result to avoid re-processing already-handled fields
-              fields: field.fields,
-              parentIsLocalized,
-              selectedLocales,
-            })
-            Object.assign(result, merged)
           }
           break
         }
@@ -234,17 +251,24 @@ export function mergeLocalizedData({
       // Layout-only fields that don't affect data structure
       switch (field.type) {
         case 'collapsible':
+        case 'group':
         case 'row': {
           // These pass through the same data level
           const merged = mergeLocalizedData({
             configBlockReferences,
             dataWithLocales,
-            docWithLocales: result, // Use current result to avoid re-processing already-handled fields
+            docWithLocales,
             fields: field.fields,
             parentIsLocalized,
             selectedLocales,
           })
-          Object.assign(result, merged)
+          // Only copy fields that belong to this layout field to avoid overwriting already-processed fields
+          const fieldNames = getFieldNames(field.fields)
+          for (const name of fieldNames) {
+            if (name in merged) {
+              result[name] = merged[name]
+            }
+          }
           break
         }
 
@@ -290,12 +314,18 @@ export function mergeLocalizedData({
               const merged = mergeLocalizedData({
                 configBlockReferences,
                 dataWithLocales,
-                docWithLocales: result, // Use current result to avoid re-processing already-handled fields
+                docWithLocales,
                 fields: tab.fields,
                 parentIsLocalized,
                 selectedLocales,
               })
-              Object.assign(result, merged)
+              // Only copy fields that belong to this tab to avoid overwriting already-processed fields
+              const tabFieldNames = getFieldNames(tab.fields)
+              for (const name of tabFieldNames) {
+                if (name in merged) {
+                  result[name] = merged[name]
+                }
+              }
             }
           }
           break
