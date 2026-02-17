@@ -13,6 +13,7 @@ import {
   lexicalInlineBlocks,
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
+import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
@@ -37,6 +38,7 @@ export const baseConfig: Partial<Config> = {
   // ...extend config here
   collections: [
     LexicalFullyFeatured,
+    LexicalAutosave,
     LexicalLinkFeature,
     LexicalListsFeature,
     LexicalHeadingFeature,

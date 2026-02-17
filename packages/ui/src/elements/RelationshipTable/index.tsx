@@ -52,7 +52,7 @@ type RelationshipTableComponentProps = {
   readonly relationTo: string | string[]
 }
 
-export type OnDrawerOpen = (id?: string) => void
+export type OnDrawerOpen = (id?: string, collectionSlug?: string) => void
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
@@ -237,13 +237,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [data, renderTable],
   )
 
-  const onDrawerOpen = useCallback<OnDrawerOpen>((id) => {
+  const onDrawerOpen = useCallback<OnDrawerOpen>((id, collectionSlug) => {
     openDrawerWhenRelationChanges.current = true
 
     if (id) {
       setCurrentDrawerID(id)
     } else {
       setCurrentDrawerID(undefined)
+    }
+
+    if (collectionSlug) {
+      setSelectedCollection(collectionSlug)
+    } else {
+      setSelectedCollection(undefined)
     }
   }, [])
 
