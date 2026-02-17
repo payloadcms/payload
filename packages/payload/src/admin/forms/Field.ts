@@ -33,10 +33,17 @@ export type ClientComponentProps = {
   permissions?: SanitizedFieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-  schemaPath?: FieldPaths['schemaPath']
-}
+} & MarkOptional<Pick<FieldPaths, 'schemaPath'>, 'schemaPath'>
 
-export type FieldPathProps = FieldPaths & Pick<ParentFieldPaths, 'parentPath' | 'parentSchemaPath'>
+/**
+ * Props required of all field components, as it relates to field paths.
+ * Evaluates to `{ path: string, indexPath?: string, parentPath?: string, parentSchemaPath?: string }`.
+ */
+export type FieldPathProps = MarkOptional<Pick<FieldPaths, 'indexPath' | 'path'>, 'indexPath'> &
+  MarkOptional<
+    Pick<ParentFieldPaths, 'parentPath' | 'parentSchemaPath'>,
+    'parentPath' | 'parentSchemaPath'
+  >
 
 /**
  * TODO: This should be renamed to `FieldComponentServerProps` or similar
