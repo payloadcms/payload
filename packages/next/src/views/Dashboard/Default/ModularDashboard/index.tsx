@@ -11,6 +11,7 @@ import type {
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
@@ -26,7 +27,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets = [] } = props.payload.config.admin.dashboard || {}
   const { importMap } = props.payload
   const { user } = props
-  const { req } = props.initPageResult
+  const { cookies, locale, permissions, req } = props.initPageResult
   const { i18n } = req
 
   const layout =
@@ -40,6 +41,9 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
         Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
         importMap,
         serverProps: {
+          cookies,
+          locale,
+          permissions,
           req,
           widgetSlug,
           // TODO: widgets will support state in the future
@@ -71,7 +75,7 @@ async function getItemsFromPreferences(
   user: TypedUser,
 ): Promise<null | WidgetItem[]> {
   const savedPreferences = await getPreferences(
-    'dashboard-layout',
+    PREFERENCE_KEYS.DASHBOARD_LAYOUT,
     payload,
     user.id,
     user.collection,

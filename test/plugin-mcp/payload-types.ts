@@ -107,13 +107,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'en' | 'es' | 'fr';
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PayloadMcpApiKey & {
-        collection: 'payload-mcp-api-keys';
-      });
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -181,6 +175,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -219,6 +214,13 @@ export interface Post {
    * The author of the post
    */
   author?: (string | null) | User;
+  /**
+   * Geographic location coordinates
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -405,6 +407,7 @@ export interface PayloadMcpApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -565,6 +568,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  location?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -760,6 +764,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

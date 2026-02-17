@@ -253,6 +253,16 @@ export interface ErrorField {
         id?: string | null;
       }[]
     | null;
+  tabWithRequiredArray: {
+    requiredArray: {
+      arrayText: string;
+      id?: string | null;
+    }[];
+  };
+  unnamedRequiredArray: {
+    arrayText: string;
+    id?: string | null;
+  }[];
   layout?:
     | {
         tabText: string;
@@ -629,6 +639,22 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
         textarea?: T;
         id?: T;
       };
+  tabWithRequiredArray?:
+    | T
+    | {
+        requiredArray?:
+          | T
+          | {
+              arrayText?: T;
+              id?: T;
+            };
+      };
+  unnamedRequiredArray?:
+    | T
+    | {
+        arrayText?: T;
+        id?: T;
+      };
   layout?:
     | T
     | {
@@ -850,6 +876,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

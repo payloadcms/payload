@@ -18,7 +18,7 @@ export async function dynamicImport<T = unknown>(modulePathOrSpecifier: string):
   // Vitest runs tests in a VM context where eval'd dynamic imports fail with
   // ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING. Use direct import in test environment.
   if (process.env.VITEST) {
-    return await import(importPath)
+    return await import(/* webpackIgnore: true */ importPath)
   }
 
   // Without the eval, the Next.js bundler will throw this error when encountering the import statement:

@@ -50,6 +50,7 @@ export const ExportPreview: React.FC = () => {
   })
   const [dataToRender, setDataToRender] = useState<any[]>([])
   const [exportTotalDocs, setExportTotalDocs] = useState<number>(0)
+  const [maxLimit, setMaxLimit] = useState<number | undefined>(undefined)
   const [columns, setColumns] = useState<Column[]>([])
   const { i18n, t } = useTranslation<
     PluginImportExportTranslations,
@@ -128,6 +129,7 @@ export const ExportPreview: React.FC = () => {
             hasNextPage,
             hasPrevPage,
             limit: responseLimit,
+            maxLimit: serverMaxLimit,
             page: responsePage,
             totalPages,
           }: ExportPreviewResponse = await res.json()
@@ -166,6 +168,7 @@ export const ExportPreview: React.FC = () => {
           }))
 
           setExportTotalDocs(serverExportTotalDocs)
+          setMaxLimit(serverMaxLimit)
           setPaginationData({
             hasNextPage,
             hasPrevPage,
@@ -224,17 +227,34 @@ export const ExportPreview: React.FC = () => {
           <Translation i18nKey="version:preview" t={t} />
         </h3>
         {exportTotalDocs > 0 && !isPending && (
-          <span className={`${baseClass}__export-count`}>
-            <Translation
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
-              i18nKey="plugin-import-export:documentsToExport"
-              t={t}
-              variables={{
-                count: exportTotalDocs,
-              }}
-            />
-          </span>
+          <div className={`${baseClass}__export-info`}>
+            <span className={`${baseClass}__export-count`}>
+              <Translation
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                i18nKey="plugin-import-export:documentsToExport"
+                t={t}
+                variables={{
+                  count: exportTotalDocs,
+                }}
+              />
+            </span>
+            {typeof maxLimit === 'number' &&
+              maxLimit > 0 &&
+              typeof limit === 'number' &&
+              limit > maxLimit && (
+                <span className={`${baseClass}__limit-capped`}>
+                  <Translation
+                    // @ts-expect-error - plugin translations not typed
+                    i18nKey="plugin-import-export:limitCapped"
+                    t={t}
+                    variables={{
+                      limit: maxLimit,
+                    }}
+                  />
+                </span>
+              )}
+          </div>
         )}
       </div>
       {isPending && !dataToRender && (

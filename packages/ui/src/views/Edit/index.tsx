@@ -63,6 +63,7 @@ export function DefaultEditView({
   SaveButton,
   SaveDraftButton,
   Status,
+  UnpublishButton,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -209,7 +210,7 @@ export function DefaultEditView({
           ? documentLockState.current?.user?.id
           : documentLockState.current?.user
 
-      if (lockedState) {
+      if (lockedState && lockedState.user) {
         const lockedUserID =
           typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
             ? lockedState.user
@@ -643,6 +644,7 @@ export function DefaultEditView({
               SaveButton,
               SaveDraftButton,
               Status,
+              UnpublishButton,
             }}
             data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}

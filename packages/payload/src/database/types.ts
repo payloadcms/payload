@@ -507,6 +507,7 @@ export type UpdateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateArgs = {
   collection: CollectionSlug
+  customID?: number | string
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
@@ -724,8 +725,15 @@ export type DBIdentifierName =
     }) => string)
   | string
 
+export type DynamicMigrationTemplate = (args: { filePath: string; payload: Payload }) => Promise<{
+  downSQL?: string
+  imports?: string
+  upSQL?: string
+}>
+
 export type MigrationTemplateArgs = {
   downSQL?: string
+  dynamic?: DynamicMigrationTemplate
   imports?: string
   packageName?: string
   upSQL?: string

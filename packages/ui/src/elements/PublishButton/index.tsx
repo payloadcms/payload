@@ -4,7 +4,12 @@ import type { PublishButtonClientProps } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasScheduledPublishEnabled } from 'payload/shared'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  hasLocalizeStatusEnabled,
+  hasScheduledPublishEnabled,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -21,7 +26,9 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
-export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
+export function PublishButton({
+  label: labelProp,
+}: { label?: string } & PublishButtonClientProps = {}) {
   const {
     id,
     collectionSlug,
@@ -148,6 +155,8 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
   })
 
+  const localizeStatusEnabled = hasLocalizeStatusEnabled(entityConfig)
+
   const publish = useCallback(async () => {
     if (uploadStatus === 'uploading') {
       return
@@ -157,7 +166,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       {
         depth: 0,
         locale: localeCode,
-        publishAllLocales: true,
+        ...(localizeStatusEnabled && { publishAllLocales: true }),
       },
       { addQueryPrefix: true },
     )
@@ -183,6 +192,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     }
   }, [
     localeCode,
+    localizeStatusEnabled,
     api,
     collectionSlug,
     globalSlug,
