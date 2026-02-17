@@ -7,7 +7,7 @@ import type {
 } from 'payload'
 
 export type WhereBuilderProps = {
-  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
   /** When set, WhereBuilder is controlled by the form (value + onChange) instead of list query. */

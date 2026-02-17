@@ -50,7 +50,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
   const collectionPluralLabel = isFormMode
     ? (collectionConfig?.labels?.plural ?? collectionSlug)
-    : collectionPluralLabelProp
+    : (collectionPluralLabelProp ?? collectionSlug)
   const fields = isFormMode ? collectionConfig?.fields : fieldsProp
   const fieldsSafe = fields ?? []
 
