@@ -27,11 +27,13 @@ export type TreeInitialData = {
 
 export type TreeProps = {
   collectionSlug: string
+  expandedNodes: Set<number | string>
   icon?: ComponentType
   initialData?: null | TreeInitialData
   onNodeClick?: (id: number | string) => void
   parentFieldName: string
   selectedNodeId?: number | string
+  toggleNode: (id: number | string) => void
   treeLimit?: number
 }
 
