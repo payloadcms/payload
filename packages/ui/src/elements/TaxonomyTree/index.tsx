@@ -78,11 +78,15 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
           const parentMeta = initialData.loadedParents[parentKey]
 
           if (parentMeta) {
-            // We have metadata from server about this parent
+            // Calculate page number based on loaded count
+            // If server loaded multiple pages to find a selected node, loadedCount > treeLimit
+            const loadedCount = parentMeta.loadedCount ?? docs.length
+            const currentPage = Math.ceil(loadedCount / treeLimit) || 1
+
             cache.set(cacheKey, {
               children: docs,
               hasMore: parentMeta.hasMore,
-              page: 1,
+              page: currentPage,
               totalDocs: parentMeta.totalDocs,
             })
           } else {

@@ -59,11 +59,15 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
     parentFieldName = taxonomyConfig?.parentFieldName || 'parent'
     treeLimit = taxonomyConfig?.treeLimit
 
+    // Track the immediate parent of the selected node (for ensuring siblings are loaded)
+    let selectedNodeParentId: null | number | string = null
+
     // If there's a selected node, ensure its ancestor chain is expanded
     if (selectedNodeId) {
       // Walk up the parent chain to root
       const ancestorIds: (number | string)[] = []
       let currentNodeId: null | number | string = selectedNodeId
+      let isFirstIteration = true
 
       while (currentNodeId) {
         try {
@@ -76,6 +80,13 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
           })
 
           const parentId = node?.[parentFieldName]
+
+          // Capture the immediate parent of the selected node
+          if (isFirstIteration) {
+            selectedNodeParentId = parentId ?? null
+            isFirstIteration = false
+          }
+
           if (parentId) {
             ancestorIds.push(parentId)
             currentNodeId = parentId
@@ -103,6 +114,8 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
         payload,
         user,
       } as any,
+      selectedNodeId,
+      selectedNodeParentId,
     })
   } catch (error) {
     payload.logger.warn({

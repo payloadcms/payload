@@ -1,11 +1,9 @@
+import type { TypeWithID } from 'payload'
 import type React from 'react'
 
 export type TaxonomyDocument = {
   [key: string]: unknown
-  createdAt: string
-  id: number | string
-  updatedAt: string
-}
+} & TypeWithID
 
 export type TaxonomyNode = {
   hasChildren: boolean
@@ -16,7 +14,7 @@ export type TaxonomyNode = {
 export type TaxonomyInitialData = {
   docs: TaxonomyDocument[]
   // Metadata about what was loaded - keyed by parent ID ('null' for root)
-  loadedParents: Record<string, { hasMore: boolean; totalDocs: number }>
+  loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
 export type TaxonomyTreeProps = {

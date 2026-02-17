@@ -1,21 +1,18 @@
-import type { PaginatedDocs } from 'payload'
+import type { PaginatedDocs, TypeWithID } from 'payload'
 
 export type TaxonomyDocument = {
   [key: string]: unknown
   _hasChildren?: boolean
-  createdAt: string
-  id: number | string
-  updatedAt: string
-}
+} & TypeWithID
 
 export type InitialTreeData = {
   docs: TaxonomyDocument[]
-  loadedParents: Record<string, { hasMore: boolean; totalDocs: number }>
+  loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
 export type TreeCacheEntry = {
   docs: TaxonomyDocument[]
-  loadedParents: Record<string, { hasMore: boolean; totalDocs: number }>
+  loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
 export type HydrateData = {
