@@ -318,7 +318,7 @@ export const traverseFields = ({
             isTopLevel: false,
             leavesFirst,
             parentIsLocalized: false,
-            parentPath: tabHasName(tab) ? `${parentPath}${tab.name}` : parentPath,
+            parentPath: tabHasName(tab) ? `${parentPath}${tab.name}.` : parentPath,
             parentRef: currentParentRef,
             ref: tabRef,
           })

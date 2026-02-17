@@ -1,7 +1,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
   Payload,
@@ -31,13 +30,14 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
+import { describe, it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
 import {
   defaultValuesSlug,
@@ -790,17 +790,6 @@ describe('database', () => {
 
     expect(res.values).toStrictEqual(titles)
 
-    // const resREST = await restClient
-    //   .GET('/posts/distinct', {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     query: { sortOrder: 'asc', field: 'title' },
-    //   })
-    //   .then((res) => res.json())
-
-    // expect(resREST.values).toEqual(titles)
-
     const resLimit = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
@@ -827,6 +816,59 @@ describe('database', () => {
     })
 
     expect(resAscDefault.values).toStrictEqual(titles)
+  })
+
+  it('should sort find on a different field with findDistinct', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const titles: {
+      title: string
+    }[] = [
+      'title-1',
+      'title-2',
+      'title-3',
+      'title-4',
+      'title-5',
+      'title-6',
+      'title-7',
+      'title-8',
+      'title-9',
+    ].map((title) => ({ title }))
+
+    const numbers = [42, 7, 3, 19, 73, 8, 100, 1, 56]
+
+    const titlesSortedByNumber = titles.toSorted(
+      (a, b) => numbers[titles.indexOf(a)]! - numbers[titles.indexOf(b)]!,
+    )
+
+    for (const entry of titles) {
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({
+          collection: 'posts',
+          data: {
+            number: numbers[titles.indexOf(entry)]! + Math.random(),
+            title: entry.title,
+          },
+        })
+      }
+    }
+
+    const resDesc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: '-number',
+    })
+
+    const resAsc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: 'number',
+    })
+
+    const reversed = titlesSortedByNumber.toReversed()
+
+    expect(resAsc.values).toStrictEqual(titlesSortedByNumber)
+    expect(resDesc.values).toStrictEqual(reversed)
   })
 
   it('should populate distinct relationships when depth>0', async () => {

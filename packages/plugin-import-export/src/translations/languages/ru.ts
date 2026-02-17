@@ -30,6 +30,10 @@ export const ruTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Сводка импорта',
     importDocumentLabel: 'Импорт {{label}}',
     importResults: 'Результаты импорта',
+    limitCapped: 'Лимит ограничен максимумом {{limit}}',
+    limitExceededExport: 'Экспорт ограничен {{limit}} документами',
+    limitExceededImport:
+      'Файл для импорта содержит {{count}} документов, но лимит составляет {{limit}}',
     matchBy: 'Соответствует',
     mode: 'Режим',
     noDataToPreview: 'Нет данных для предпросмотра',

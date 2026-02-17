@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.72.0",
+  "version": "3.76.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -103,8 +103,8 @@
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {
@@ -131,21 +131,21 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "15.4.7",
+    "@next/eslint-plugin-next": "16.2.0-canary.29",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*",
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.4.10",
+    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0",
     "payload": "workspace:*"
   },
   "engines": {

@@ -1,5 +1,6 @@
 import { ar } from '@payloadcms/translations/languages/ar'
 
+import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { AccessResult } from '../../config/types.js'
 import type {
   JsonObject,
@@ -33,10 +34,10 @@ export type GlobalFindOneArgs = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   slug: string
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
@@ -72,6 +73,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: args.req.context,
             global: globalConfig,
             operation: 'read',
+            overrideAccess,
             req: args.req,
           })) || args
       }
@@ -203,6 +205,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }
@@ -253,6 +256,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }

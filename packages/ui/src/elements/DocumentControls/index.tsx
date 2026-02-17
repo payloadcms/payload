@@ -51,6 +51,7 @@ export const DocumentControls: React.FC<{
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
     readonly Status?: React.ReactNode
+    readonly UnpublishButton?: React.ReactNode
   }
   readonly data?: Data
   readonly disableActions?: boolean
@@ -88,6 +89,7 @@ export const DocumentControls: React.FC<{
       SaveButton: CustomSaveButton,
       SaveDraftButton: CustomSaveDraftButton,
       Status: CustomStatus,
+      UnpublishButton: CustomUnpublishButton,
     } = {},
     data,
     disableActions,
@@ -275,12 +277,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                      <RenderCustomComponent
-                        CustomComponent={CustomSaveDraftButton}
-                        Fallback={<SaveDraftButton />}
-                      />
-                    )}
-                    <UnpublishButton />
+                        <RenderCustomComponent
+                          CustomComponent={CustomSaveDraftButton}
+                          Fallback={<SaveDraftButton />}
+                        />
+                      )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -398,6 +399,10 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                <RenderCustomComponent
+                  CustomComponent={CustomUnpublishButton}
+                  Fallback={<UnpublishButton />}
+                />
                 {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>

@@ -17,7 +17,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
+import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -51,7 +51,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   /**
    * Sort the documents, can be a string or an array of strings
@@ -62,7 +61,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   trash?: boolean
   unpublishAllLocales?: boolean
   where: Where
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateOperation = async <
   TSlug extends CollectionSlug,
@@ -87,6 +86,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -246,7 +246,7 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
-        const updatedDoc = await updateDocument({
+        let updatedDoc = await updateDocument({
           id,
           autosave,
           collectionConfig,
@@ -269,6 +269,14 @@ export const updateOperation = async <
           showHiddenFields: showHiddenFields!,
           unpublishAllLocales,
         })
+
+        // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
+        }
 
         if (docShouldCommit) {
           await commitTransaction(req)
@@ -321,6 +329,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      overrideAccess,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })

@@ -90,7 +90,6 @@ export const getHandler = ({
         if (useSignedURL) {
           const command = new GetObjectCommand({ Bucket: bucket, Key: key })
           const signedUrl = await getSignedUrl(
-            // @ts-expect-error mismatch versions
             getStorageClient(),
             command,
             typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
@@ -148,6 +147,11 @@ export const getHandler = ({
 
       headers.append('Content-Type', String(object.ContentType))
       headers.append('ETag', String(object.ETag))
+
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (object.ContentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag

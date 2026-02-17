@@ -194,6 +194,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         })
 
         if (Object.keys(objectType.getFields()).length) {
+          // Store block slug in extensions for use in select building
+          objectType.extensions = {
+            ...objectType.extensions,
+            blockSlug: block.slug,
+          }
           graphqlResult.types.blockTypes[block.slug] = objectType
         }
       }
@@ -447,7 +452,6 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         if (count && limit === 0) {
           return await req.payload.count({
             collection,
-            depth: 0,
             overrideAccess: false,
             req,
             where: fullWhere,

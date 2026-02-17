@@ -5,9 +5,10 @@ import type {
   Config,
 } from 'payload'
 
-import type { ExportConfig, ImportExportPluginConfig } from '../types.js'
+import type { ExportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { Export } from './createExport.js'
 
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
 import { handleDownload } from './handleDownload.js'
@@ -86,11 +87,22 @@ export const getExportCollection = ({
       const { user } = req
       const debug = pluginConfig.debug
 
+      // Get max limit from the target collection's config
+      const exportData = args.data as Export
+      const targetCollection = req.payload.collections[exportData.collectionSlug]
+      const exportLimitConfig: Limit | undefined =
+        targetCollection?.config.custom?.['plugin-import-export']?.exportLimit
+      const maxLimit = await resolveLimit({
+        limit: exportLimitConfig,
+        req,
+      })
+
       await createExport({
-        ...(args.data as Export),
+        ...exportData,
         batchSize,
         debug,
-        exportsCollection: collectionConfig.slug,
+        exportCollection: collectionConfig.slug,
+        maxLimit,
         req,
         userCollection: user?.collection || user?.user?.collection,
         userID: user?.id || user?.user?.id,
@@ -104,10 +116,22 @@ export const getExportCollection = ({
 
       const { user } = req
 
+      // Get max limit from the target collection's config
+      // For job-based exports, we resolve the limit now since function limits
+      // cannot be serialized. This means dynamic limits are resolved at queue time.
+      const targetCollection = req.payload.collections[doc.collectionSlug]
+      const exportLimitConfig: Limit | undefined =
+        targetCollection?.config.custom?.['plugin-import-export']?.exportLimit
+      const maxLimit = await resolveLimit({
+        limit: exportLimitConfig,
+        req,
+      })
+
       const input: Export = {
         ...doc,
         batchSize,
-        exportsCollection: collectionConfig.slug,
+        exportCollection: collectionConfig.slug,
+        maxLimit,
         userCollection: user?.collection || user?.user?.collection,
         userID: user?.id || user?.user?.id,
       }

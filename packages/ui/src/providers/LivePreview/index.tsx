@@ -2,7 +2,7 @@
 import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { LivePreviewContextType } from './context.js'
 
@@ -248,6 +248,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     )
   }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
 
+  const dndContextID = useId()
+
   return (
     <LivePreviewContext
       value={{
@@ -286,7 +288,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         zoom,
       }}
     >
-      <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
+      <DndContext
+        collisionDetection={customCollisionDetection}
+        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+        id={dndContextID}
+        onDragEnd={handleDragEnd}
+      >
         {children}
       </DndContext>
     </LivePreviewContext>

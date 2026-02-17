@@ -287,7 +287,8 @@ export const promise = async ({
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
-            previousValue: previousDoc?.[field.name],
+            previousValue:
+              getNestedValue(previousValData, pathSegments) ?? previousValData?.[field.name],
             req,
             schemaPath: schemaPathSegments,
             siblingData,

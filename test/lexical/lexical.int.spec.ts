@@ -14,13 +14,14 @@ import {
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
+import { it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { NextRESTClient } from '../helpers/NextRESTClient.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
@@ -740,12 +741,188 @@ describe('Lexical', () => {
       expect(child.doc.relationTo).toEqual('array-fields')
 
       if (payload.db.defaultIDType === 'number') {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('number')
       } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
         expect(typeof child.doc.value.id).toBe('string')
       }
 
       expect(child.doc.value.items).toHaveLength(6)
+    })
+
+    it('should disallow unsafe query paths', async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children from': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children."unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.(unsafe"': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.unsafe="': { equals: 5 },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: 'select(' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: '"unsafe' },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `'unsafe` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe\\` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+
+      await expect(
+        payload.find({
+          collection: 'rich-text-fields',
+          where: {
+            'richText.children.value': { equals: `unsafe=` },
+          },
+        }),
+      ).rejects.toBeTruthy()
+    })
+  })
+
+  describe('Autosave', () => {
+    it('should populate previousValue in afterChange hooks for fields inside lexical', async () => {
+      const { autosaveHookLog, clearAutosaveHookLog } = await import(
+        './collections/LexicalAutosave/index.js'
+      )
+
+      clearAutosaveHookLog()
+
+      const doc = await payload.create({
+        collection: 'lexical-autosave',
+        data: {
+          title: 'Autosave test document',
+          cta: [
+            {
+              richText: {
+                root: {
+                  children: [
+                    {
+                      type: 'block',
+                      version: 2,
+                      format: '',
+                      fields: {
+                        id: 'block-id-1',
+                        blockName: '',
+                        blockTitle: 'Initial block title',
+                        blockType: 'textBlock',
+                      },
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      // Verify create operation has undefined previousValue (expected)
+      expect(autosaveHookLog.relationshipField?.operation).toBe('create')
+      expect(autosaveHookLog.relationshipField?.previousValue).toBeUndefined()
+      expect(autosaveHookLog.relationshipField?.value).toBe('Initial block title')
+
+      clearAutosaveHookLog()
+
+      // Simulate autosave by updating the document
+      await payload.update({
+        collection: 'lexical-autosave',
+        id: doc.id,
+        data: {
+          title: 'Updated via autosave',
+          cta: [
+            {
+              richText: {
+                root: {
+                  children: [
+                    {
+                      type: 'block',
+                      version: 2,
+                      format: '',
+                      fields: {
+                        id: 'block-id-1',
+                        blockName: '',
+                        blockTitle: 'Updated block title',
+                        blockType: 'textBlock',
+                      },
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      expect(autosaveHookLog.relationshipField?.operation).toBe('update')
+      expect(autosaveHookLog.relationshipField?.previousValue).toBe('Initial block title')
+      expect(autosaveHookLog.relationshipField?.value).toBe('Updated block title')
     })
   })
 })
