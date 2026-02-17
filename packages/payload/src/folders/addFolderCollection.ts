@@ -2,7 +2,7 @@ import type { Config, SanitizedConfig } from '../config/types.js'
 import type { CollectionConfig } from '../index.js'
 
 import { sanitizeCollection } from '../collections/config/sanitize.js'
-import { createFolderCollection } from './createFolderCollection.js'
+import { createInternalFolderCollection } from './createFolderCollection.js'
 
 export async function addFolderCollection({
   collectionSpecific,
@@ -21,7 +21,7 @@ export async function addFolderCollection({
     return
   }
 
-  let folderCollectionConfig = createFolderCollection({
+  let folderCollectionConfig = createInternalFolderCollection({
     slug: config.folders!.slug as string,
     collectionSpecific,
     debug: config.folders!.debug,
