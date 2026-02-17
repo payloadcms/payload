@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -604,14 +605,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -623,6 +627,7 @@ describe('database', () => {
       },
     )
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -5517,4 +5522,30 @@ describe('database', () => {
       expect(collatedMappedResults).toEqual(expectedSortedItems)
     },
   )
+
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
+    }
+  })
 })
