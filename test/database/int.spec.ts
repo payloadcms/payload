@@ -4211,6 +4211,32 @@ describe('database', () => {
     }
   })
 
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
+    }
+  })
+
   it('should allow to query like by ID with draft: true', async () => {
     const category = await payload.create({
       collection: 'categories',
@@ -5522,30 +5548,4 @@ describe('database', () => {
       expect(collatedMappedResults).toEqual(expectedSortedItems)
     },
   )
-
-  it('should allow creating docs with payload.db.create with custom ID', async () => {
-    if (payload.db.name === 'mongoose') {
-      const customId = new mongoose.Types.ObjectId().toHexString()
-      const res = await payload.db.create({
-        collection: 'simple',
-        customID: customId,
-        data: {
-          text: 'Test with custom ID',
-        },
-      })
-
-      expect(res.id).toBe(customId)
-    } else {
-      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
-      const res = await payload.db.create({
-        collection: 'simple',
-        customID: id,
-        data: {
-          text: 'Test with custom ID',
-        },
-      })
-
-      expect(res.id).toBe(id)
-    }
-  })
 })
