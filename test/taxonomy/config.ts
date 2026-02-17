@@ -76,8 +76,8 @@ export const Posts: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
-    createTaxonomyField({ taxonomySlug: categoriesSlug }),
+    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug, label: 'Tags' }),
+    createTaxonomyField({ taxonomySlug: categoriesSlug, label: 'Categories' }),
   ],
 }
 
@@ -97,7 +97,7 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
+    createTaxonomyField({ hasMany: false, taxonomySlug: tagsSlug }),
   ],
 }
 
@@ -124,7 +124,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Posts, Pages, Media, Categories, Tags],
+  collections: [Posts, Pages, Media, Tags, Categories],
   debug: true,
   onInit: async (payload) => {
     await payload.create({
