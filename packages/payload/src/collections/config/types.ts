@@ -619,6 +619,19 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   */
+  folder?: {
+    /**
+     * The field name used for parent relationship. Defaults to 'parent'.
+     */
+    parentFieldName?: string
+    /**
+     * Collections that can be organized by this folder collection.
+     */
+    relatedCollections?: string[]
+  }
+  /**
    * Enables folders for this collection
    */
   folders?: boolean | CollectionFoldersConfiguration
@@ -824,6 +837,7 @@ export interface SanitizedCollectionConfig
     | 'auth'
     | 'endpoints'
     | 'fields'
+    | 'folder'
     | 'folders'
     | 'hierarchy'
     | 'slug'
@@ -840,6 +854,21 @@ export interface SanitizedCollectionConfig
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+  /**
+   * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   */
+  folder?:
+    | {
+        /**
+         * The field name used for parent relationship. Defaults to 'parent'.
+         */
+        parentFieldName: string
+        /**
+         * Collections that can be organized by this folder collection.
+         */
+        relatedCollections: string[]
+      }
+    | false
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
