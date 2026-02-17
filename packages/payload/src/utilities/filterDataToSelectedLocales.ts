@@ -68,13 +68,18 @@ export function filterDataToSelectedLocales({
               }
 
               if (block) {
-                return filterDataToSelectedLocales({
+                const filtered = filterDataToSelectedLocales({
                   configBlockReferences,
                   docWithLocales: blockData,
                   fields: block?.fields || [],
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
                 })
+                return {
+                  ...filtered,
+                  blockType: blockData.blockType,
+                  ...(blockData.id !== undefined && { id: blockData.id }),
+                }
               }
 
               return blockData
