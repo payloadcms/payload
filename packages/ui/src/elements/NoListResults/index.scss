@@ -1,10 +1,9 @@
 .no-results {
-  padding: calc(var(--base) * 2) var(--base);
+  padding-top: calc(var(--base) / 2);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  border: 1px solid var(--theme-border-color);
   border-radius: var(--style-radius-m);
 
   h3 {
