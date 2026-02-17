@@ -5,16 +5,17 @@ import type { JsonObject } from '../types/index.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../fields/config/types.js'
 
 /**
- * Extracts all field names from a field tree, recursing into pass-through fields.
+ * Collects field names at the current data level, recursing through pass-through fields
+ * (row, collapsible, unnamed group, unnamed tab) but stopping at named fields.
  */
-function getFieldNames(fields: Field[]): Set<string> {
+function collectFlattenedFieldNames(fields: Field[]): Set<string> {
   const names = new Set<string>()
   for (const field of fields) {
     if (fieldAffectsData(field)) {
       names.add(field.name)
     } else if ('fields' in field && Array.isArray(field.fields)) {
       // Pass-through fields (row, collapsible, unnamed group)
-      for (const name of getFieldNames(field.fields)) {
+      for (const name of collectFlattenedFieldNames(field.fields)) {
         names.add(name)
       }
     } else if (field.type === 'tabs') {
@@ -22,7 +23,7 @@ function getFieldNames(fields: Field[]): Set<string> {
         if (tabHasName(tab)) {
           names.add(tab.name)
         } else {
-          for (const name of getFieldNames(tab.fields)) {
+          for (const name of collectFlattenedFieldNames(tab.fields)) {
             names.add(name)
           }
         }
@@ -263,7 +264,7 @@ export function mergeLocalizedData({
             selectedLocales,
           })
           // Only copy fields that belong to this layout field to avoid overwriting already-processed fields
-          const fieldNames = getFieldNames(field.fields)
+          const fieldNames = collectFlattenedFieldNames(field.fields)
           for (const name of fieldNames) {
             if (name in merged) {
               result[name] = merged[name]
@@ -320,7 +321,7 @@ export function mergeLocalizedData({
                 selectedLocales,
               })
               // Only copy fields that belong to this tab to avoid overwriting already-processed fields
-              const tabFieldNames = getFieldNames(tab.fields)
+              const tabFieldNames = collectFlattenedFieldNames(tab.fields)
               for (const name of tabFieldNames) {
                 if (name in merged) {
                   result[name] = merged[name]
