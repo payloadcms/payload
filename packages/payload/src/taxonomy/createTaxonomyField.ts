@@ -26,13 +26,18 @@ import { getTaxonomyFieldName } from './constants.js'
  */
 export function createTaxonomyField(options: CreateTaxonomyFieldOptions): RelationshipField {
   const { admin: adminOverrides, taxonomySlug, ...restOptions } = options
+  const { components: componentOverrides, ...restAdminOverrides } = adminOverrides || {}
 
   return {
     name: getTaxonomyFieldName(taxonomySlug),
     type: 'relationship',
     admin: {
+      components: {
+        Field: '@payloadcms/ui/rsc#TaxonomyField',
+        ...componentOverrides,
+      },
       position: 'sidebar',
-      ...adminOverrides,
+      ...restAdminOverrides,
     },
     hasMany: false,
     index: true,

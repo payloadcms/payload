@@ -107,6 +107,17 @@ export type {
   RenderListServerFnReturnType,
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
+export { useTaxonomyDrawer } from '../../elements/Taxonomy/TaxonomyDrawer/index.js'
+export type {
+  SelectionWithPath,
+  TaxonomyDrawerProps,
+  TaxonomyDrawerTogglerProps,
+  UseTaxonomyDrawer,
+  UseTaxonomyDrawerArgs,
+} from '../../elements/Taxonomy/TaxonomyDrawer/types.js'
+export { TaxonomyFieldClient } from '../../elements/Taxonomy/TaxonomyField/index.client.js'
+export { SelectedTaxonomies } from '../../elements/Taxonomy/TaxonomyField/SelectedTaxonomies.js'
+export type { SelectedTaxonomiesProps } from '../../elements/Taxonomy/TaxonomyField/SelectedTaxonomies.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
