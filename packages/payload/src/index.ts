@@ -1624,16 +1624,6 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
 
 export type { FieldPaths, ParentFieldPaths } from './fields/getFieldPaths.js'

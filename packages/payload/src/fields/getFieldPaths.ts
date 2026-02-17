@@ -6,41 +6,85 @@ export type GetFieldPathsArgs = {
   index: number
 } & ParentFieldPaths
 
+/**
+ * Like `FieldPaths`, but relative to this field's parent.
+ */
 export type ParentFieldPaths = {
   /**
-   * Like `indexPath`, but relative to this field's parent.
+   * Like `FieldPaths['indexPath']`, but relative to this field's parent.
    */
   parentIndexPath: string
   /**
-   * Like `path`, but relative to this field's parent.
+   * Like `FieldPaths['path']`, but relative to this field's parent.
    */
   parentPath?: string
   /**
-   * Like `schemaPath`, but relative to this field's parent.
+   * Like `FieldPaths['schemaPath']`, but relative to this field's parent.
    */
   parentSchemaPath: string
 }
 
 /**
- * A group of paths related to a field's position within the schema and data.
+ * A group of paths related to this field's position within the:
+ *  - Payload Config, via `schemaPath`
+ *  - Data object, via `path`
  */
 export type FieldPaths = {
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
+   * Used internally to build up the `schemaPath` and `path` for unnamed fields such as tabs.
    */
   indexPath: string
   /**
-   * Path for this field relative to its position in the data.
-   * Arrays and block rows will be represented by their indexes.
-   * @example path: 'array.0.group.text'
+   * Path to this field relative to its position in a data object:
+   * @example
+   * ```
+   * {
+   *   array: [
+   *     {
+   *       group: {
+   *         text: 'value'
+   *       }
+   *     }
+   *   ]
+   * }
+   * ```
+   * The path to `text` field would be `array.[n].group.text`.
+   * Note that `[n]` is used to represent the index of the array item, as this is dynamic and can change.
+   * This same thing applies to blocks or any other array-represented field.
    */
   path: string
   /**
-   * The path for this field relative to its position in the Payload config.
-   * Unnamed fields such as tabs will use `_index-` prefixes to represent their position.
-   * @example schemaPath: '_index-0-0.text'
-   * This translates an unnamed field in the first position (e.g. tabs) > another unnamed field in the first position (e.g. tab) > text field.
+   * The path for this field relative to its position in the Payload Config.
+   * @example
+   * ```
+   * {
+   *   fields: [
+   *     {
+   *       type: 'tabs',
+   *       tabs: [
+   *         {
+   *           name: 'tab1',
+   *           fields: [
+   *             {
+   *               name: 'group',
+   *               fields: [
+   *                 {
+   *                   name: 'text',
+   *                   type: 'text'
+   *                 }
+   *               ]
+   *             }
+   *           ]
+   *         }
+   *       ]
+   *     }
+   *   ]
+   * ```
+   * The schemaPath to `text` field would be `_index-0.tab1.group.text`.
+   * Note that `_index-0` is used to represent the index of the `tabs` field, as this is an unnamed field.
+   * Sequential unnamed fields stack their indexes, so if there was another unnamed field after `tabs`, it would be `_index-0-0`, and so on.
    */
   schemaPath: string
 }
