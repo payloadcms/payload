@@ -7,8 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 
 let payload: Payload
 let token: string
@@ -316,7 +316,11 @@ describe('@payloadcms/plugin-mcp', () => {
         'The content of the post',
       )
       expect(json.result.tools[1].inputSchema.properties.author).toBeDefined()
-      expect(json.result.tools[1].inputSchema.properties.author.type).toBe(undefined)
+      expect(json.result.tools[1].inputSchema.properties.author.type).toHaveLength(2)
+      expect(['string', 'number']).toContain(
+        json.result.tools[1].inputSchema.properties.author.type[0],
+      )
+      expect(json.result.tools[1].inputSchema.properties.author.type[1]).toBe('null')
       expect(json.result.tools[1].inputSchema.properties.author.description).toBe(
         'The author of the post',
       )
@@ -943,6 +947,95 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain(
         '"content": "Updated content for test post to update."',
       )
+    })
+
+    it('should call updatePosts with nullable union type field set to null', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          content: 'Content to be cleared',
+          title: 'Union Type Null Test',
+        },
+      })
+
+      const apiKey = await getApiKey(true, true)
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: post.id,
+              content: null,
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
+      expect(json.result.content[0].text).toContain(
+        'Document updated successfully in collection "posts"!',
+      )
+      expect(json.result.content[0].text).toContain('"content": null')
+
+      await payload.delete({ id: post.id, collection: 'posts' })
+    })
+
+    it('should call updatePosts with relationship union type field', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Union Type Relationship Test',
+        },
+      })
+
+      const apiKey = await getApiKey(true, true)
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: post.id,
+              author: userId,
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].type).toBe('text')
+      expect(json.result.content[0].text).toContain(
+        'Document updated successfully in collection "posts"!',
+      )
+
+      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
+      expect(jsonMatch).toBeDefined()
+      const updatedDoc = JSON.parse(jsonMatch[1])
+      expect(updatedDoc.author).toBe(userId)
+
+      await payload.delete({ id: post.id, collection: 'posts' })
     })
 
     it('should call updatePosts with select to limit returned fields', async () => {

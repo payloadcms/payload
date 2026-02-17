@@ -7,7 +7,7 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
 import { toolSchemas } from '../schemas.js'
 
 export const updateGlobalTool = (
