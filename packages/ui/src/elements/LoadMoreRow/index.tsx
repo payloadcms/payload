@@ -35,6 +35,7 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
       buttonStyle="none"
       className={`${baseClass}__button`}
       disabled={isLoading}
+      margin={false}
       onClick={onLoadMore}
     >
       {isLoading ? 'Loading...' : 'Load more'}
