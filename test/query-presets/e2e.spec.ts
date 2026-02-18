@@ -649,6 +649,66 @@ describe('Query Presets', () => {
     await expect(page.locator('.group-by-header').first()).toBeVisible()
   })
 
+  test('create preset with title, columns (Text + ID) and groupBy Text, then verify list view', async ({
+    page,
+  }) => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+    await page.goto(postsUrl.list)
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'Preset Text ID GroupBy'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    const columnsField = modal.locator('.query-preset-columns-field')
+    await expect(columnsField).toBeVisible()
+    let selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    while (selectedCount > 0) {
+      await columnsField.locator('.pill-selector__pill--selected').first().click()
+      selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    }
+    await columnsField
+      .locator('.pill-selector__pill', { hasText: exactText('Text') })
+      .first()
+      .click()
+    await columnsField
+      .locator('.pill-selector__pill', { hasText: exactText('ID') })
+      .first()
+      .click()
+
+    const groupByField = modal.locator('.query-preset-group-by-field')
+    await expect(groupByField).toBeVisible()
+    await groupByField.locator('#group-by--field-select').click()
+    await page
+      .locator('.rs__option', { hasText: exactText('Text') })
+      .first()
+      .click()
+
+    await saveDocAndAssert(page)
+    // Close modal if it did not close automatically after save
+    // eslint-disable-next-line playwright/no-conditional-in-test -- drawer may or may not auto-close
+    if (await modal.isVisible()) {
+      await modal.locator('button.doc-drawer__header-close').click()
+    }
+    await expect(modal).toBeHidden({ timeout: 10000 })
+
+    await expect(page).toHaveURL(/preset=/)
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(
+      page.locator('button#select-preset', { hasText: exactText(presetTitle) }),
+    ).toBeVisible()
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(
+      page.locator('.collection-list .table th', { hasText: exactText('Text') }).first(),
+    ).toBeVisible()
+    await expect(
+      page.locator('.collection-list .table th', { hasText: exactText('ID') }).first(),
+    ).toBeVisible()
+    await expect(page.locator('.collection-list .table tbody tr').first()).toBeVisible()
+  })
+
   test('should not show save button after page reload with preset applied', async ({ page }) => {
     await page.goto(pagesUrl.list)
 
