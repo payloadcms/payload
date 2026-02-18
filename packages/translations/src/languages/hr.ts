@@ -367,6 +367,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoje ili se nijedan ne podudara s filterima koje ste gore odredili.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u smeću.',

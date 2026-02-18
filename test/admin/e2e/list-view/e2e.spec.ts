@@ -45,6 +45,13 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
+import {
+  openListColumns,
+  reorderColumns,
+  sortColumn,
+  toggleColumn,
+  waitForColumnInURL,
+} from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
 import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
@@ -54,13 +61,6 @@ import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import {
-  openListColumns,
-  reorderColumns,
-  sortColumn,
-  toggleColumn,
-  waitForColumnInURL,
-} from '../../../__helpers/e2e/columns/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -325,7 +325,10 @@ describe('List View', () => {
       await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
-      await page.waitForURL(url)
+      // Use regex to allow for additional query params like depth=1
+      await page.waitForURL(
+        new RegExp(`${postsUrl.list.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?.*search=post1`),
+      )
     })
 
     test('search should not persist between navigation', async () => {

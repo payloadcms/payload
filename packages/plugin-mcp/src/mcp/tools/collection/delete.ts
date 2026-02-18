@@ -216,10 +216,12 @@ export const deleteCollectionTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'deleteCollection',
-    toolSchemas.deleteCollection.description,
-    toolSchemas.deleteCollection.parameters.shape,
+    {
+      description: toolSchemas.deleteCollection.description,
+      inputSchema: toolSchemas.deleteCollection.parameters.shape,
+    },
     ({ collectionName, confirmDeletion, updateConfig }) => {
       return tool(collectionName, confirmDeletion, updateConfig)
     },

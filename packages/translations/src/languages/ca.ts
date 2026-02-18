@@ -368,6 +368,9 @@ export const caTranslations: DefaultTranslationsObject = {
     noOptions: 'Sense opcions',
     noResults:
       "No s'ha trobat cap {{label}}. O no n'hi ha cap encara o cap coincideix amb els filtres que has especificat anteriorment.",
+    noResultsDescription:
+      'O bé no en existeix cap o cap coincideix amb els filtres que heu especificat anteriorment.',
+    noResultsFound: 'Sense resultats.',
     notFound: 'No trobat',
     nothingFound: 'Res trobat',
     noTrashResults: 'No hi ha cap {{label}} a la paperera.',

@@ -27,6 +27,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
     "@azure/storage-blob": "^12.11.0",
+    "@cloudflare/workers-types": "4.20260218.0",
     "@date-fns/tz": "1.2.0",
     "@miniflare/d1": "2.14.4",
     "@miniflare/shared": "2.14.4",

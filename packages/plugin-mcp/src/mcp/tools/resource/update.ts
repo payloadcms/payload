@@ -7,7 +7,7 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
@@ -335,10 +335,12 @@ ${JSON.stringify(errors, null, 2)}
         .describe('JSON string for where clause to update multiple documents'),
     })
 
-    server.tool(
+    server.registerTool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
-      updateResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
+        inputSchema: updateResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const {
           id,
