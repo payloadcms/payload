@@ -1631,6 +1631,7 @@ describe('List View', () => {
       await page.locator('button:has-text("Select posts")').click()
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
@@ -1648,6 +1649,7 @@ describe('List View', () => {
 
       // Reopen the drawer
       await page.locator('button:has-text("Select posts")').click()
+      await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
@@ -1786,6 +1788,9 @@ describe('List View', () => {
 
       // sort by title
       await page.locator('#heading-title button.sort-column__asc').click()
+      await page
+        .locator('#heading-title button.sort-column__asc.sort-column--active')
+        .waitFor({ state: 'visible' })
       await page.waitForURL(/sort=title/)
 
       // enable a column that is _not_ part of this collection's default columns

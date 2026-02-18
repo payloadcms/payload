@@ -26,13 +26,15 @@ export const sortColumn = async (
 
   if (options.targetState === 'asc') {
     await upChevron.click()
-    await expect(columnHeading.locator('button.sort-column__asc.sort-column--active')).toBeVisible()
+    const activeButton = columnHeading.locator('button.sort-column__asc.sort-column--active')
+    await activeButton.waitFor({ state: 'visible' })
+    await expect(activeButton).toBeVisible()
     await page.waitForURL(() => page.url().includes(`sort=${options.fieldPath}`))
   } else if (options.targetState === 'desc') {
     await downChevron.click()
-    await expect(
-      columnHeading.locator('button.sort-column__desc.sort-column--active'),
-    ).toBeVisible()
+    const activeButton = columnHeading.locator('button.sort-column__desc.sort-column--active')
+    await activeButton.waitFor({ state: 'visible' })
+    await expect(activeButton).toBeVisible()
     await page.waitForURL(() => page.url().includes(`sort=-${options.fieldPath}`))
   }
 }
