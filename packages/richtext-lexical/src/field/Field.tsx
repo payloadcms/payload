@@ -48,6 +48,7 @@ const RichTextComponent: React.FC<
     },
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
@@ -178,6 +179,8 @@ const RichTextComponent: React.FC<
   return (
     <div
       className={classes}
+      data-field-path={path}
+      data-field-schemaPath={schemaPath}
       data-lexical-view={editorConfig?.view}
       key={pathWithEditDepth}
       style={styles}
