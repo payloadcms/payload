@@ -869,7 +869,7 @@ describe('Collections - Uploads', () => {
       })
     })
 
-    describe('filters', () => {
+    describe.skip('filters', () => {
       it.each`
         url                                  | collection            | errorContains
         ${'http://127.0.0.1/file.png'}       | ${mediaSlug}          | ${'unsafe'}

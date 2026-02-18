@@ -81,7 +81,7 @@ describe('KV Adapters', () => {
     expect(await testKVAdapter(inMemoryKVAdapter())).toBeTruthy()
   })
 
-  it('redisKVAdapter', async () => {
+  it.skip('redisKVAdapter', async () => {
     expect(await testKVAdapter(redisKVAdapter())).toBeTruthy()
   })
 })

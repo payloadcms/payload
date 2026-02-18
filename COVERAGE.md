@@ -38,6 +38,21 @@ This runs:
 2. Integration tests with MongoDB, Postgres, and SQLite
 3. Merges all coverage into `coverage/merged/`
 
+### Full Coverage (Unit + Integration + E2E)
+
+```bash
+pnpm test:coverage:full
+```
+
+This runs:
+
+1. Unit tests with coverage
+2. Integration tests with coverage (MongoDB by default)
+3. E2E tests with coverage (Playwright browser tests)
+4. Processes and merges all coverage into `coverage/merged/`
+
+**Note:** E2E tests take significantly longer and collect browser-based coverage.
+
 ## Available Scripts
 
 ### Individual Coverage Collection
@@ -54,6 +69,12 @@ pnpm test:coverage:int:mongodb
 pnpm test:coverage:int:postgres
 pnpm test:coverage:int:sqlite
 pnpm test:coverage:int:firestore
+
+# E2E tests (Playwright)
+pnpm test:coverage:e2e
+
+# Process E2E coverage data (convert to Istanbul format)
+pnpm test:coverage:e2e:process
 ```
 
 ### Coverage Management
@@ -84,6 +105,8 @@ coverage/
 ├── int-postgres/            # Integration test coverage (Postgres)
 │   └── coverage-final.json
 ├── int-sqlite/              # Integration test coverage (SQLite)
+│   └── coverage-final.json
+├── e2e/                     # E2E test coverage (Playwright)
 │   └── coverage-final.json
 └── merged/                  # Cumulative merged coverage
     ├── index.html          # HTML report (open in browser)
@@ -118,7 +141,7 @@ coverage/merged/lcov.info
 Each test type collects coverage independently:
 
 - **Vitest** (unit & integration): Uses V8 coverage provider
-- **Playwright** (e2e): Currently not configured (see below)
+- **Playwright** (e2e): Uses Playwright's coverage API to collect browser-based JS coverage
 
 ### 2. Coverage Merging
 
@@ -248,35 +271,53 @@ For **CI/CD**: Use all adapters (comprehensive coverage)
 
 ## E2E Test Coverage
 
-### Current Status
+**Status: ✅ Fully Implemented!**
 
-E2E test coverage is not yet configured. Playwright tests run but don't collect coverage.
+E2E coverage uses Playwright's built-in coverage API to collect JavaScript coverage from the browser.
 
-### To Enable E2E Coverage
+### How It Works
 
-You'll need to:
+**Coverage Flow:**
 
-1. Instrument the Next.js application for coverage
-2. Configure Playwright to collect coverage from the running app
-3. Add coverage collection to E2E test setup
+1. Playwright starts and enables JS coverage collection
+2. Tests run in the browser, exercising the application
+3. Coverage data is collected from each page/context
+4. Raw V8 coverage is converted to Istanbul format
+5. E2E coverage is merged with unit and integration coverage
 
-**Example approach using `@playwright/test` with instrumentation:**
+### Running E2E Tests with Coverage
 
-```typescript
-// test/playwright.config.ts
-export default defineConfig({
-  use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL,
-    // Add coverage collection hooks
-  },
-  webServer: {
-    command: 'pnpm dev --coverage', // Start instrumented server
-    port: 3000,
-  },
-})
+```bash
+# Run all E2E tests with coverage
+pnpm test:coverage:e2e
+
+# Process the collected coverage data
+pnpm test:coverage:e2e:process
+
+# Or run everything together (unit + int + e2e)
+pnpm test:coverage:full
 ```
 
-This requires additional setup and is beyond the current scope. Most coverage will come from unit and integration tests.
+### Implementation Details
+
+- **Coverage Collection**: Uses Playwright's `page.coverage.startJSCoverage()` API
+- **Format Conversion**: Converts V8 coverage to Istanbul format for NYC merging
+- **Config**: Uses `test/playwright.coverage.config.ts` when coverage is enabled
+- **Storage**: E2E coverage saved to `coverage/e2e/coverage-final.json`
+- **Fixtures**: Custom Playwright fixtures automatically enable/disable coverage
+
+### Performance Considerations
+
+E2E tests are slower than unit/integration tests:
+
+- Browser startup/teardown overhead
+- Network requests and rendering
+- Coverage collection adds ~10-15% overhead
+
+**Recommendation:**
+
+- **Local development**: Use `pnpm test:coverage` (unit + integration only)
+- **CI/CD or final checks**: Use `pnpm test:coverage:full` (all tests)
 
 ## Troubleshooting
 

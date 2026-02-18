@@ -43,10 +43,40 @@ export const NestedFields: CollectionConfig = {
         },
       ],
     },
+    // both are valid depending on config
+
+    // group.field.en
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'field',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
+
+    // group.en.field
+    // group.es.field
+    // the locale passed in is what we need to match on "group[equals]='bla'" if locale === 'en' returns doc, if locale === 'es' this would miss in a query
+    // group: { en: { field: 'bla'}, es: { field: 'spanish' }, }
+    {
+      name: 'group',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'field',
+          type: 'text',
+        },
+      ],
+    },
+
     {
       name: 'blocks',
       type: 'blocks',
-      localized: true,
       blocks: [
         {
           slug: 'block',
