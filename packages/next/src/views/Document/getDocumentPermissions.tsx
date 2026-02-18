@@ -67,8 +67,10 @@ export const getDocumentPermissions = async (args: {
       }
 
       if (collectionConfig.trash) {
-        hasTrashPermission = (
-          await docAccessOperation({
+        const { deletedAt: _, ...dataWithoutDeletedAt } = data || {}
+
+        const [trashPermissionResult, deletePermissionResult] = await Promise.all([
+          docAccessOperation({
             id,
             collection: {
               config: collectionConfig,
@@ -78,21 +80,19 @@ export const getDocumentPermissions = async (args: {
               deletedAt: new Date().toISOString(),
             },
             req,
-          })
-        ).delete
-
-        const { deletedAt: _, ...dataWithoutDeletedAt } = data || {}
-
-        hasDeletePermission = (
-          await docAccessOperation({
+          }),
+          docAccessOperation({
             id,
             collection: {
               config: collectionConfig,
             },
             data: dataWithoutDeletedAt,
             req,
-          })
-        ).delete
+          }),
+        ])
+
+        hasTrashPermission = trashPermissionResult.delete
+        hasDeletePermission = deletePermissionResult.delete
       } else {
         // When trash is not enabled, delete permission is straightforward
         hasDeletePermission = 'delete' in docPermissions ? Boolean(docPermissions.delete) : false
