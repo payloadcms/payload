@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -1300,13 +1300,6 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Blocks fields', () => {
     const createdPageIds: (number | string)[] = []
 
-    afterEach(async () => {
-      for (const id of createdPageIds) {
-        await payload.delete({ collection: 'pages', id })
-      }
-      createdPageIds.length = 0
-    })
-
     const getPagesApiKey = async (enableUpdate = false) => {
       const doc = await payload.create({
         collection: 'payload-mcp-api-keys',
@@ -1361,10 +1354,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('"blockType": "hero"')
       expect(json.result.content[0].text).toContain('"heading": "Welcome to our site"')
 
-      const responseText = json.result.content[0].text
-      const match = responseText.match(/"id":\s*"?([^",}\s]+)"?/)
-      if (match) {
-        createdPageIds.push(match[1])
+      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
+      if (jsonMatch) {
+        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
       }
     })
 
@@ -1410,10 +1402,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('"heading": "Page Hero"')
       expect(json.result.content[0].text).toContain('"body": "This is the body text."')
 
-      const responseText = json.result.content[0].text
-      const match = responseText.match(/"id":\s*"?([^",}\s]+)"?/)
-      if (match) {
-        createdPageIds.push(match[1])
+      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
+      if (jsonMatch) {
+        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
       }
     })
 
