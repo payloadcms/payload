@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
@@ -458,7 +458,7 @@ export const sanitizeQueryValue = ({
         // For array fields, we need to use $elemMatch to search within array elements
         if (typeof formattedValue === 'string') {
           // Search for documents where any array element contains this string
-          const escapedValue = formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
+          const escapedValue = escapeRegExp(formattedValue)
           return {
             rawQuery: {
               [path]: {
@@ -474,7 +474,7 @@ export const sanitizeQueryValue = ({
           return {
             rawQuery: {
               $or: formattedValue.map((val) => {
-                const escapedValue = String(val).replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
+                const escapedValue = escapeRegExp(String(val))
                 return {
                   [path]: {
                     $elemMatch: {
@@ -491,7 +491,7 @@ export const sanitizeQueryValue = ({
         // Regular (non-hasMany) text field
         formattedValue = {
           $options: 'i',
-          $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+          $regex: escapeRegExp(formattedValue),
         }
       }
     }
