@@ -1624,9 +1624,6 @@ importers:
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
-      '@cloudflare/workers-types':
-        specifier: 4.20260218.0
-        version: 4.20260218.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -16591,7 +16588,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260128.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20260218.0': {}
+  '@cloudflare/workers-types@4.20260218.0':
+    optional: true
 
   '@corex/deepmerge@4.0.43': {}
 

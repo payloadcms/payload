@@ -50,7 +50,6 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260218.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
