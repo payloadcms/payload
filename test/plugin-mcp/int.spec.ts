@@ -1297,6 +1297,132 @@ describe('@payloadcms/plugin-mcp', () => {
     })
   })
 
+  describe('Virtual Fields', () => {
+    it('should not include virtual fields in createPosts tool schema', async () => {
+      const apiKey = await getApiKey(true)
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const createTool = json.result.tools.find((t: any) => t.name === 'createPosts')
+      expect(createTool).toBeDefined()
+      expect(createTool.inputSchema.properties.computedTitle).toBeUndefined()
+    })
+
+    it('should not include virtual fields in updatePosts tool schema', async () => {
+      const apiKey = await getApiKey(true)
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const updateTool = json.result.tools.find((t: any) => t.name === 'updatePosts')
+      expect(updateTool).toBeDefined()
+      expect(updateTool.inputSchema.properties.computedTitle).toBeUndefined()
+    })
+
+    it('should ignore virtual fields when creating a post via MCP', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPosts',
+            arguments: {
+              title: 'Virtual Field Create Test',
+              content: 'Testing virtual field exclusion on create',
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain(
+        'Resource created successfully in collection "posts"!',
+      )
+      expect(json.result.content[0].text).toContain('"title": "Virtual Field Create Test"')
+      // Virtual field should not appear in the created document
+      expect(json.result.content[0].text).not.toContain('"computedTitle"')
+
+      // Clean up
+      const createdId = JSON.parse(
+        json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)?.[1] || '{}',
+      ).id
+      if (createdId) {
+        await payload.delete({ id: createdId, collection: 'posts' })
+      }
+    })
+
+    it('should ignore virtual fields when updating a post via MCP', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'Virtual Field Update Test' },
+      })
+
+      const apiKey = await getApiKey(true, false)
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePosts',
+            arguments: {
+              id: post.id,
+              title: 'Virtual Field Updated Title',
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.content[0].text).toContain('Document updated successfully')
+      expect(json.result.content[0].text).toContain('"title": "Virtual Field Updated Title"')
+      expect(json.result.content[0].text).not.toContain('"computedTitle"')
+
+      await payload.delete({ id: post.id, collection: 'posts' })
+    })
+  })
+
   describe('payloadAPI context', () => {
     it('should call operations with the payloadAPI context as MCP', async () => {
       await payload.create({
