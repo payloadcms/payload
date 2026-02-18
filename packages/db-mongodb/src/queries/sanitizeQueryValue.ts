@@ -450,9 +450,49 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
-      formattedValue = {
-        $options: 'i',
-        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      if (
+        'hasMany' in field &&
+        field.hasMany &&
+        ['number', 'select', 'text'].includes(field.type)
+      ) {
+        // For array fields, we need to use $elemMatch to search within array elements
+        if (typeof formattedValue === 'string') {
+          // Search for documents where any array element contains this string
+          const escapedValue = formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
+          return {
+            rawQuery: {
+              [path]: {
+                $elemMatch: {
+                  $options: 'i',
+                  $regex: escapedValue,
+                },
+              },
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          // Search for documents where any array element contains any of the search values
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => {
+                const escapedValue = String(val).replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
+                return {
+                  [path]: {
+                    $elemMatch: {
+                      $options: 'i',
+                      $regex: escapedValue,
+                    },
+                  },
+                }
+              }),
+            },
+          }
+        }
+      } else {
+        // Regular (non-hasMany) text field
+        formattedValue = {
+          $options: 'i',
+          $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+        }
       }
     }
 
