@@ -1628,7 +1628,9 @@ describe('List View', () => {
       await page.goto(withListViewUrl.list)
 
       // Open the list drawer via the "Select posts" button
-      await page.locator('button:has-text("Select posts")').click()
+      const selectButton = page.locator('button:has-text("Select posts")')
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
       await listDrawer.waitFor({ state: 'visible' })
@@ -1648,7 +1650,8 @@ describe('List View', () => {
       await expect(listDrawer).toBeHidden()
 
       // Reopen the drawer
-      await page.locator('button:has-text("Select posts")').click()
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
@@ -1672,6 +1675,7 @@ describe('List View', () => {
 
     test('should sort', async () => {
       await page.reload()
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
@@ -1785,9 +1789,12 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await expect(page.locator(tableRowLocator)).toBeVisible()
 
       // sort by title
-      await page.locator('#heading-title button.sort-column__asc').click()
+      const sortButton = page.locator('#heading-title button.sort-column__asc')
+      await sortButton.waitFor({ state: 'visible' })
+      await sortButton.click()
       await page
         .locator('#heading-title button.sort-column__asc.sort-column--active')
         .waitFor({ state: 'visible' })

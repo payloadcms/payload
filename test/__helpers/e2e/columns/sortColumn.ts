@@ -25,12 +25,14 @@ export const sortColumn = async (
   const downChevron = columnHeading.locator('button.sort-column__desc')
 
   if (options.targetState === 'asc') {
+    await upChevron.waitFor({ state: 'visible' })
     await upChevron.click()
     const activeButton = columnHeading.locator('button.sort-column__asc.sort-column--active')
     await activeButton.waitFor({ state: 'visible' })
     await expect(activeButton).toBeVisible()
     await page.waitForURL(() => page.url().includes(`sort=${options.fieldPath}`))
   } else if (options.targetState === 'desc') {
+    await downChevron.waitFor({ state: 'visible' })
     await downChevron.click()
     const activeButton = columnHeading.locator('button.sort-column__desc.sort-column--active')
     await activeButton.waitFor({ state: 'visible' })
