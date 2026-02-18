@@ -238,6 +238,16 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  // For hasMany relationship/upload fields, contains should use equals operator
+  if (
+    'hasMany' in field &&
+    field.hasMany &&
+    operator === 'contains' &&
+    (field.type === 'relationship' || field.type === 'upload')
+  ) {
+    operator = 'equals'
+  }
+
   if (operator === 'near' && field.type === 'point' && typeof formattedValue === 'string') {
     const [lng, lat, maxDistance, minDistance] = formattedValue.split(',')
 
@@ -245,10 +255,17 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'contains') {
-    if (Array.isArray(formattedValue)) {
-      // For array values, wrap each element with % for LIKE matching
+    // Handle array values for hasMany text/number/select fields
+    if (
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany &&
+      ['number', 'select', 'text'].includes(field.type)
+    ) {
+      // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
       formattedValue = formattedValue.map((val) => `%${val}%`)
-    } else {
+    } else if (!Array.isArray(formattedValue)) {
+      // For non-array values, wrap with % for LIKE matching
       formattedValue = `%${formattedValue}%`
     }
   }

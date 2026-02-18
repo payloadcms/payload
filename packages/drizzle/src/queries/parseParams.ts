@@ -390,7 +390,14 @@ export function parseParams({
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
                 }
 
-                if (operator === 'contains' && Array.isArray(queryValue)) {
+                // Handle hasMany text/number/select fields with contains operator and array values
+                if (
+                  operator === 'contains' &&
+                  Array.isArray(queryValue) &&
+                  'hasMany' in field &&
+                  field.hasMany &&
+                  ['number', 'select', 'text'].includes(field.type)
+                ) {
                   // Create OR conditions for each value in the array
                   orConditions.push(
                     ...queryValue.map((val) =>
