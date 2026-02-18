@@ -180,7 +180,7 @@ const RichTextComponent: React.FC<
     <div
       className={classes}
       data-field-path={path}
-      data-field-schemaPath={schemaPath}
+      data-field-schemapath={schemaPath}
       data-lexical-view={editorConfig?.view}
       key={pathWithEditDepth}
       style={styles}
