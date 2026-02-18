@@ -338,6 +338,7 @@ export const idTranslations: DefaultTranslationsObject = {
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',
+    layout: 'Tata Letak',
     leaveAnyway: 'Tetap pergi',
     leaveWithoutSaving: 'Pergi tanpa menyimpan',
     light: 'Terang',
@@ -367,6 +368,9 @@ export const idTranslations: DefaultTranslationsObject = {
     noOptions: 'Tidak ada opsi',
     noResults:
       'Tidak ada {{label}} yang ditemukan. Entah belum ada {{label}} atau tidak ada yang cocok dengan filter yang Anda tentukan di atas.',
+    noResultsDescription:
+      'Baik tidak ada yang ada atau tidak ada yang cocok dengan filter yang telah Anda tentukan di atas.',
+    noResultsFound: 'Tidak Ada Hasil.',
     notFound: 'Tidak Ditemukan',
     nothingFound: 'Tidak ada yang ditemukan',
     noTrashResults: 'Tidak ada {{label}} di tempat sampah.',
@@ -403,6 +407,7 @@ export const idTranslations: DefaultTranslationsObject = {
     row: 'Baris',
     rows: 'Baris',
     save: 'Simpan',
+    saveChanges: 'Simpan Perubahan',
     saving: 'Menyimpan...',
     schedulePublishFor: 'Jadwalkan publikasi untuk {{title}}',
     searchBy: 'Cari berdasarkan {{label}}',

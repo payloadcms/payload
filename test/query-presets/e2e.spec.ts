@@ -404,13 +404,13 @@ describe('Query Presets', () => {
     await page.goto(postsURL.list)
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
-    await expect(drawer.locator('.collection-list__no-results')).toBeVisible()
+    await expect(drawer.locator('.no-results')).toBeVisible()
 
     // results on `pages` collection
     await page.goto(pagesUrl.list)
     await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
-    await drawer.locator('.collection-list__no-results').isHidden()
+    await drawer.locator('.no-results').isHidden()
   })
 
   test('should display single relationship value in query preset modal', async ({ page }) => {

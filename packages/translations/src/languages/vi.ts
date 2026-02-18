@@ -336,6 +336,7 @@ export const viTranslations: DefaultTranslationsObject = {
     items: 'mục',
     language: 'Ngôn ngữ',
     lastModified: 'Chỉnh sửa lần cuối vào lúc',
+    layout: 'Bố cục',
     leaveAnyway: 'Tiếp tục thoát',
     leaveWithoutSaving: 'Thay đổi chưa được lưu',
     light: 'Nền sáng',
@@ -365,6 +366,9 @@ export const viTranslations: DefaultTranslationsObject = {
     noOptions: 'Không có lựa chọn',
     noResults:
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
+    noResultsDescription:
+      'Hoặc là không có hoặc không có gì phù hợp với các bộ lọc bạn đã chỉ định ở trên.',
+    noResultsFound: 'Không có kết quả.',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
     noTrashResults: 'Không có {{label}} trong thùng rác.',
@@ -400,6 +404,7 @@ export const viTranslations: DefaultTranslationsObject = {
     row: 'Hàng',
     rows: 'Hàng',
     save: 'Lưu',
+    saveChanges: 'Lưu Thay Đổi',
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
     searchBy: 'Tìm với {{label}}',

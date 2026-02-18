@@ -6,7 +6,6 @@ import { APIError } from 'payload'
 import { Readable } from 'stream'
 
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
-import { collectTimezoneCompanionFields } from '../utilities/collectTimezoneCompanionFields.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFilename } from '../utilities/getFilename.js'
@@ -41,8 +40,7 @@ export type Export = {
   maxLimit?: number
   name: string
   page?: number
-  slug: string
-  sort: Sort
+  sort?: Sort
   userCollection: string
   userID: number | string
   where?: Where
@@ -125,7 +123,8 @@ export const createExport = async (args: CreateExportArgs) => {
     and: [whereFromInput, draft ? {} : publishedWhere],
   }
 
-  const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
+  const baseName = nameArg ?? getFilename()
+  const name = `${baseName}-${collectionSlug}.${format}`
   const isCSV = format === 'csv'
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
@@ -201,9 +200,6 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
-  // Collect auto-generated timezone companion fields from schema
-  const timezoneCompanionFields = collectTimezoneCompanionFields(collectionConfig.flattenedFields)
-
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
@@ -266,7 +262,6 @@ export const createExport = async (args: CreateExportArgs) => {
         fields,
         locale,
         localeCodes,
-        timezoneCompanionFields,
       })
 
       if (debug) {
@@ -327,7 +322,11 @@ export const createExport = async (args: CreateExportArgs) => {
           // --- CSV Streaming ---
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
-              flattenObject({ doc, fields, timezoneCompanionFields, toCSVFunctions }),
+              flattenObject({
+                doc,
+                fields,
+                toCSVFunctions,
+              }),
             ),
           )
 
@@ -420,7 +419,13 @@ export const createExport = async (args: CreateExportArgs) => {
   // Transform function based on format
   const transformDoc = (doc: unknown) =>
     isCSV
-      ? filterDisabledCSV(flattenObject({ doc, fields, timezoneCompanionFields, toCSVFunctions }))
+      ? filterDisabledCSV(
+          flattenObject({
+            doc,
+            fields,
+            toCSVFunctions,
+          }),
+        )
       : filterDisabledJSON(doc)
 
   // Skip fetching if access was denied - we'll create an empty export
@@ -460,7 +465,6 @@ export const createExport = async (args: CreateExportArgs) => {
       fields,
       locale,
       localeCodes,
-      timezoneCompanionFields,
     })
 
     // Merge schema columns with data-discovered columns

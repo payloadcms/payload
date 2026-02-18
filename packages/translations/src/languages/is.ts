@@ -335,6 +335,7 @@ export const isTranslations: DefaultTranslationsObject = {
     items: 'hlutir',
     language: 'Tungumál',
     lastModified: 'Síðast breytt',
+    layout: 'Útlag',
     leaveAnyway: 'Fara samt',
     leaveWithoutSaving: 'Fara án þess að vista',
     light: 'Ljóst',
@@ -363,6 +364,9 @@ export const isTranslations: DefaultTranslationsObject = {
     noOptions: 'Engir valkostir',
     noResults:
       'Engar {{label}} fundust. Annað hvort er engin {{label}} til eða ekkert passar við síu sem þú hefur valið fyrir ofan.',
+    noResultsDescription:
+      'Það eru hvorki neinar til eða neinar sem passa við síurnar sem þú skilgreindir að ofan.',
+    noResultsFound: 'Engin niðurstöður.',
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
@@ -399,6 +403,7 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveChanges: 'Vista breytingar',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',

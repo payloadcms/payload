@@ -340,6 +340,7 @@ export const trTranslations: DefaultTranslationsObject = {
     items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
+    layout: 'Düzen',
     leaveAnyway: 'Yine de ayrıl',
     leaveWithoutSaving: 'Kaydetmeden ayrıl',
     light: 'Aydınlık',
@@ -369,6 +370,9 @@ export const trTranslations: DefaultTranslationsObject = {
     noOptions: 'Seçenek yok',
     noResults:
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
+    noResultsDescription:
+      'Ya hiçbiri mevcut değil ya da belirttiğiniz filtrelerle eşleşen hiçbiri yok.',
+    noResultsFound: 'Sonuç Yok.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',
@@ -406,6 +410,7 @@ export const trTranslations: DefaultTranslationsObject = {
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',
+    saveChanges: 'Değişiklikleri Kaydet',
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',

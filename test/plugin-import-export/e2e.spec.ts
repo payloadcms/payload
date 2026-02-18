@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as fs from 'fs'
+import * as os from 'os'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -27,6 +28,7 @@ test.describe('Import Export Plugin', () => {
   let exportsURL: AdminUrlUtil
   let importsURL: AdminUrlUtil
   let postsURL: AdminUrlUtil
+  let customIdPagesURL: AdminUrlUtil
   let s3ExportsURL: AdminUrlUtil
   let s3ImportsURL: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
@@ -41,6 +43,7 @@ test.describe('Import Export Plugin', () => {
     exportsURL = new AdminUrlUtil(serverURL, 'exports')
     importsURL = new AdminUrlUtil(serverURL, 'imports')
     postsURL = new AdminUrlUtil(serverURL, 'posts')
+    customIdPagesURL = new AdminUrlUtil(serverURL, 'custom-id-pages')
     s3ExportsURL = new AdminUrlUtil(serverURL, postsWithS3ExportSlug)
     s3ImportsURL = new AdminUrlUtil(serverURL, postsWithS3ImportSlug)
 
@@ -62,11 +65,13 @@ test.describe('Import Export Plugin', () => {
 
       await runJobsQueue({ serverURL })
 
-      await page.reload()
+      await expect(async () => {
+        await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should navigate to exports collection and create a JSON export', async () => {
@@ -82,11 +87,13 @@ test.describe('Import Export Plugin', () => {
 
       await runJobsQueue({ serverURL })
 
-      await page.reload()
+      await expect(async () => {
+        await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.json')
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.json')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should show export in list view after creation', async () => {
@@ -120,7 +127,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should download directly in the browser', async () => {
@@ -140,6 +147,359 @@ test.describe('Import Export Plugin', () => {
 
       const suggestedFilename = download.suggestedFilename()
       expect(suggestedFilename).toMatch(/\.csv|\.json/)
+    })
+
+    test('should enforce format restriction in UI and API when format is configured', async () => {
+      const postsNoJobsQueueURL = new AdminUrlUtil(serverURL, 'posts-no-jobs-queue')
+      await page.goto(postsNoJobsQueueURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const formatField = page.locator('#field-format')
+      await expect(formatField).toBeVisible()
+
+      const formatControl = formatField.locator('.rs__control')
+      await expect(formatControl).toHaveClass(/rs__control--is-disabled/)
+
+      await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
+
+      const response = await page.request.post(
+        `${serverURL}/api/posts-no-jobs-queue-export/download`,
+        {
+          data: {
+            data: {
+              name: 'test-export',
+              collectionSlug: 'posts-no-jobs-queue',
+              format: 'json',
+              sort: '-createdAt',
+            },
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
+
+      expect(response.status()).toBe(400)
+      const responseBody = await response.json()
+      expect(responseBody.errors).toBeDefined()
+      expect(responseBody.errors[0].message).toContain('format')
+    })
+
+    test.describe('Custom ID Exports', () => {
+      test('should export documents with custom IDs through UI', async () => {
+        const uniqueId = Date.now()
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `e2e-export-${uniqueId}-1`,
+            title: 'E2E Export Custom Page 1',
+          },
+        })
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `e2e-export-${uniqueId}-2`,
+            title: 'E2E Export Custom Page 2',
+          },
+        })
+
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Ensure the export is for custom-id-pages (id + title columns visible) before saving
+        await expect(async () => {
+          await expect(
+            page.locator('.export-preview table thead th').filter({ hasText: 'id' }),
+          ).toBeVisible()
+          await expect(
+            page.locator('.export-preview table thead th').filter({ hasText: 'title' }),
+          ).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Verify the collection field is set to Custom ID Pages before saving
+        await expect(async () => {
+          await expect(page.locator('#field-collectionSlug')).toContainText('Custom')
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Set a unique export name to avoid filename conflicts in the full test suite
+        const nameField = page.locator('#field-name')
+        await expect(nameField).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+        await nameField.fill(`custom-id-export-${uniqueId}`)
+
+        await saveDocAndAssert(page, '#action-save')
+
+        // After save, we're redirected to the export document page
+        await expect(page).toHaveURL(/\/exports\/[^/]+$/, { timeout: POLL_TOPASS_TIMEOUT })
+
+        // Extract export ID from URL and verify it has the correct collectionSlug
+        const urlMatch = page.url().match(/\/exports\/([^/]+)$/)
+        expect(urlMatch).toBeTruthy()
+        const exportId = urlMatch![1]
+
+        const { docs } = await payload.find({
+          collection: 'exports' as any,
+          where: {
+            id: {
+              equals: exportId,
+            },
+          },
+        })
+        expect(docs.length).toBe(1)
+        expect(docs[0].collectionSlug).toBe('custom-id-pages')
+
+        await runJobsQueue({ serverURL })
+
+        await expect(async () => {
+          await page.reload()
+
+          const exportFilename = page.locator('.file-details__main-detail')
+          await expect(exportFilename).toBeVisible()
+          await expect(exportFilename).toContainText('.csv')
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const downloadLink = page.locator('.file-details__main-detail a')
+        await expect(downloadLink).toHaveAttribute('href', /.+/)
+
+        const [download] = await Promise.all([page.waitForEvent('download'), downloadLink.click()])
+
+        const tempPath = path.join(os.tmpdir(), `export-test-${uniqueId}.csv`)
+        await download.saveAs(tempPath)
+        const content = fs.readFileSync(tempPath, 'utf8')
+        fs.unlinkSync(tempPath)
+
+        // Ensure we got the custom-id-pages export (id,title only; no _status)
+        await expect(() => {
+          expect(content).toMatch(/^\uFEFF?id,title,updatedAt,createdAt/m)
+          expect(content).not.toContain('_status')
+
+          expect(content).toContain(`e2e-export-${uniqueId}-1`)
+          expect(content).toContain(`e2e-export-${uniqueId}-2`)
+          expect(content).toContain('E2E Export Custom Page 1')
+          expect(content).toContain('E2E Export Custom Page 2')
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      })
+
+      test('should not show duplicate columns in export preview for custom ID collection', async () => {
+        const uniqueId = Date.now()
+
+        const createdPages: string[] = []
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `preview-export-${uniqueId}-1`,
+            title: 'Preview Export Test 1',
+          },
+        })
+        createdPages.push(`preview-export-${uniqueId}-1`)
+
+        await payload.create({
+          collection: 'custom-id-pages' as any,
+          data: {
+            id: `preview-export-${uniqueId}-2`,
+            title: 'Preview Export Test 2',
+          },
+        })
+        createdPages.push(`preview-export-${uniqueId}-2`)
+
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await expect(async () => {
+          await expect(page.locator('.export-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const previewTable = page.locator('.export-preview table')
+        const tableHeaders = previewTable.locator('thead th')
+        const headerTexts = await tableHeaders.allTextContents()
+
+        // Normalize headers to lowercase for case-insensitive comparison
+        const normalizedHeaders = headerTexts.map((h) => h.trim().toLowerCase())
+
+        // Check for duplicates by creating a Set and comparing sizes
+        const uniqueHeaders = new Set(normalizedHeaders)
+        expect(uniqueHeaders.size).toBe(normalizedHeaders.length)
+
+        // Verify expected columns are present (id, title, createdAt, updatedAt)
+        expect(normalizedHeaders).toContain('id')
+        expect(normalizedHeaders).toContain('title')
+        expect(normalizedHeaders).toContain('createdat')
+        expect(normalizedHeaders).toContain('updatedat')
+
+        // Verify we don't have duplicates of these key columns
+        const idCount = normalizedHeaders.filter((h) => h === 'id').length
+        const createdAtCount = normalizedHeaders.filter((h) => h === 'createdat').length
+        const updatedAtCount = normalizedHeaders.filter((h) => h === 'updatedat').length
+
+        expect(idCount).toBe(1)
+        expect(createdAtCount).toBe(1)
+        expect(updatedAtCount).toBe(1)
+
+        // Cleanup
+        for (const id of createdPages) {
+          await payload.delete({
+            collection: 'custom-id-pages' as any,
+            id,
+          })
+        }
+      })
+    })
+
+    test.describe('Collection Selector', () => {
+      test('should show only collections without custom export collections in base exports selector', async () => {
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.locator('.rs__control').click()
+
+        const menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Posts Exports Only")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Media")')).toBeVisible()
+
+        await expect(menu.locator('.rs__option:text-is("Posts")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Posts No Jobs Queue")')).toBeHidden()
+
+        await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Users")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Exports")')).toBeHidden()
+        await expect(menu.locator('.rs__option:text-is("Imports")')).toBeHidden()
+
+        await expect(menu.locator('.rs__option:text-is("Posts Imports Only")')).toBeHidden()
+      })
+
+      test('custom export collection should only show its target collection', async () => {
+        const postsExportURL = new AdminUrlUtil(serverURL, 'posts-export')
+        await page.goto(postsExportURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+
+        const control = collectionField.locator('.rs__control')
+        await expect(control).toHaveAttribute('aria-disabled', 'true')
+
+        const singleValue = collectionField.locator('.rs__single-value')
+        await expect(singleValue).toContainText('Posts')
+      })
+
+      test('should show correct collections after exporting via dropdown then navigating to create page', async () => {
+        await page.goto(customIdPagesURL.list)
+        await expect(page.locator('.collection-list')).toBeVisible()
+
+        const listMenuButton = page.locator('#list-menu')
+        await expect(listMenuButton).toBeVisible()
+        await listMenuButton.click()
+
+        const createExportButton = page.locator('.popup__scroll-container button', {
+          hasText: 'Export',
+        })
+        await expect(createExportButton).toBeVisible()
+        await createExportButton.click()
+
+        await expect(page.locator('.drawer__content')).toBeVisible()
+
+        await page.keyboard.press('Escape')
+        await expect(page.locator('.drawer__content')).toBeHidden()
+
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.locator('.rs__control').click()
+
+        const menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+
+        await expect(menu.locator('.rs__option:text-is("Payload Jobs")')).toBeHidden()
+      })
+
+      test('should show same collections after page refresh', async () => {
+        await page.goto(exportsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await expect(collectionField).toBeVisible()
+        await collectionField.locator('.rs__control').click()
+
+        let menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        let optionsBefore = 0
+        await expect(async () => {
+          optionsBefore = await menu.locator('.rs__option').count()
+          expect(optionsBefore).toBeGreaterThan(0)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await page.keyboard.press('Escape')
+        await page.reload()
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        await collectionField.locator('.rs__control').click()
+        menu = page.locator('.rs__menu')
+        await expect(menu).toBeVisible()
+
+        await expect(async () => {
+          const optionsAfter = await menu.locator('.rs__option').count()
+          expect(optionsAfter).toBe(optionsBefore)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
+        await expect(menu.locator('.rs__option:text-is("Custom Id Pages")')).toBeVisible()
+      })
     })
   })
 
@@ -202,7 +562,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await importModeField.click()
@@ -241,7 +601,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await importModeField.click()
@@ -276,7 +636,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       await saveDocAndAssert(page)
 
@@ -306,7 +666,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.import-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('should handle import with update mode', async () => {
@@ -333,7 +693,7 @@ test.describe('Import Export Plugin', () => {
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
-      await page.locator('.rs__option:has-text("pages")').click()
+      await page.locator('.rs__option:text-is("Pages")').click()
 
       const importModeField = page.locator('#field-importMode')
       await expect(importModeField).toBeVisible()
@@ -358,6 +718,129 @@ test.describe('Import Export Plugin', () => {
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
     })
+
+    test.describe('Custom ID Imports', () => {
+      test('should show custom IDs in import preview', async () => {
+        const csvContent = `id,title\ncustom-preview-1,Preview Custom Page 1\ncustom-preview-2,Preview Custom Page 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'custom-id-preview.csv',
+          buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const previewTable = page.locator('.import-preview table')
+        await expect(previewTable).toContainText('custom-preview-1')
+        await expect(previewTable).toContainText('Preview Custom Page 1')
+        await expect(previewTable).toContainText('custom-preview-2')
+      })
+
+      test('should import documents with custom IDs through UI', async () => {
+        const uniqueId = Date.now()
+        const csvContent = `id,title\ne2e-custom-${uniqueId}-1,E2E Custom Page 1\ne2e-custom-${uniqueId}-2,E2E Custom Page 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'custom-id-import.csv',
+          buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        await saveDocAndAssert(page, '#action-save')
+
+        await runJobsQueue({ serverURL })
+
+        await expect(async () => {
+          await page.reload()
+          const statusField = page.locator('#field-status')
+          await expect(statusField).toBeVisible()
+          await expect(statusField).toContainText(/completed|partial/i)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        const importedPages = await payload.find({
+          collection: 'custom-id-pages' as any,
+          where: {
+            id: { contains: `e2e-custom-${uniqueId}` },
+          },
+        })
+
+        expect(importedPages.totalDocs).toBe(2)
+        expect(importedPages.docs[0]?.id).toContain(`e2e-custom-${uniqueId}`)
+      })
+
+      test('should not show duplicate columns in import preview for custom ID collection', async () => {
+        const csvContent = `id,title\npreview-test-1,Test Title 1\npreview-test-2,Test Title 2`
+
+        await page.goto(importsURL.create)
+        await expect(page.locator('.collection-edit')).toBeVisible()
+
+        const collectionField = page.locator('#field-collectionSlug')
+        await collectionField.locator('.rs__control').click()
+        await expect(page.locator('.rs__menu')).toBeVisible()
+        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+
+        const fileInput = page.locator('input[type="file"]')
+        await fileInput.setInputFiles({
+          name: 'preview-columns-test.csv',
+          buffer: Buffer.from(csvContent),
+          mimeType: 'text/csv',
+        })
+
+        await expect(async () => {
+          await expect(page.locator('.import-preview table')).toBeVisible()
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+        // Verify columns from the CSV (id, title) are present and not duplicated
+        await expect(async () => {
+          const previewTable = page.locator('.import-preview table')
+          const tableHeaders = previewTable.locator('thead th')
+          const headerTexts = await tableHeaders.allTextContents()
+
+          // Normalize headers to lowercase for case-insensitive comparison
+          const normalizedHeaders = headerTexts.map((h) => h.trim().toLowerCase())
+
+          // Check for duplicates by creating a Set and comparing sizes
+          const uniqueHeaders = new Set(normalizedHeaders)
+          expect(uniqueHeaders.size).toBe(normalizedHeaders.length)
+
+          // Verify expected columns from CSV are present (id, title only - CSV has no timestamps)
+          expect(normalizedHeaders).toContain('id')
+          expect(normalizedHeaders).toContain('title')
+
+          // Verify we don't have duplicates of these columns
+          const idCount = normalizedHeaders.filter((h) => h === 'id').length
+          const titleCount = normalizedHeaders.filter((h) => h === 'title').length
+
+          expect(idCount).toBe(1)
+          expect(titleCount).toBe(1)
+        }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      })
+    })
   })
 
   test.describe('S3 Storage', () => {
@@ -375,9 +858,10 @@ test.describe('Import Export Plugin', () => {
       await page.setInputFiles('input[type="file"]', csvPath)
       await expect(page.locator('.file-field__filename')).toHaveValue(csvFilename)
 
+      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
-      await page.locator(`.rs__option:has-text("${postsWithS3Slug}")`).click()
+      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With S3s')
 
       await saveDocAndAssert(page)
 
@@ -455,7 +939,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadButton = page.locator('.doc-controls__controls button', {
         hasText: 'Download',
@@ -494,7 +978,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -511,6 +995,73 @@ test.describe('Import Export Plugin', () => {
 
       const exportCount = page.locator('.export-preview__export-count')
       await expect(exportCount).toContainText('documents to export')
+    })
+  })
+
+  test.describe('toCSV Preview Customizations', () => {
+    let pagesURL: AdminUrlUtil
+
+    test.beforeAll(async () => {
+      pagesURL = new AdminUrlUtil(serverURL, 'pages')
+
+      // Create a page with custom relationship fields for toCSV testing
+      const users = await payload.find({ collection: 'users', limit: 1 })
+      const userId = users.docs[0]!.id
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'E2E toCSV Preview Test',
+          customRelationship: userId,
+          customRelNameEmail: userId,
+          customRelIdName: userId,
+          _status: 'published',
+        },
+      })
+    })
+
+    test.afterAll(async () => {
+      await payload.delete({
+        collection: 'pages',
+        where: { title: { equals: 'E2E toCSV Preview Test' } },
+      })
+    })
+
+    test('should show derived columns instead of original columns in export preview', async () => {
+      await page.goto(pagesURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Pages',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview table')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      await expect(async () => {
+        const headerCells = page.locator('.export-preview table thead th')
+        const headerTexts = await headerCells.allTextContents()
+
+        // Derived columns from toCSV should be present in the preview headers
+        expect(headerTexts).not.toContain('customRelationship')
+        expect(headerTexts).toContain('customRelationship_id')
+        expect(headerTexts).toContain('customRelationship_email')
+        expect(headerTexts).toContain('customRelNameEmail_name')
+        expect(headerTexts).toContain('customRelNameEmail_email')
+        expect(headerTexts).toContain('customRelIdName_id')
+        expect(headerTexts).toContain('customRelIdName_locationName')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
   })
 
@@ -559,7 +1110,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -586,7 +1137,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('10')
@@ -625,11 +1176,14 @@ test.describe('Import Export Plugin', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await saveDocAndAssert(page, '#action-save')
-      await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+      await expect(async () => {
+        await page.reload()
+
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadLink = page.locator('.file-details__main-detail a')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -652,9 +1206,10 @@ test.describe('Import Export Plugin', () => {
       await page.goto(postsWithLimitsImportURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
+      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
-      await page.locator('.rs__option:text-is("posts-with-limits")').click()
+      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With Limits')
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({
@@ -739,7 +1294,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await expect(async () => {
         await expect(page.locator('.export-preview table')).toBeVisible()
@@ -769,11 +1324,14 @@ test.describe('Import Export Plugin', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       await saveDocAndAssert(page, '#action-save')
-      await page.reload()
 
-      const exportFilename = page.locator('.file-details__main-detail')
-      await expect(exportFilename).toBeVisible()
-      await expect(exportFilename).toContainText('.csv')
+      await expect(async () => {
+        await page.reload()
+
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const downloadLink = page.locator('.file-details__main-detail a')
       await expect(downloadLink).toHaveAttribute('href', /.+/)
@@ -804,7 +1362,7 @@ test.describe('Import Export Plugin', () => {
 
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
-      }).toPass()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const limitField = page.locator('input[name="limit"]')
       await limitField.fill('20')
@@ -834,9 +1392,10 @@ test.describe('Import Export Plugin', () => {
       await page.goto(postsWithLimitsImportURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
+      // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
-      await collectionField.click()
-      await page.locator('.rs__option:text-is("posts-with-limits")').click()
+      await expect(collectionField.locator('.rs__control')).toHaveAttribute('aria-disabled', 'true')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts With Limits')
 
       const fileInput = page.locator('input[type="file"]')
       await fileInput.setInputFiles({

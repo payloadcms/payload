@@ -291,10 +291,13 @@ export const updateJobTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'updateJob',
-    'Updates an existing Payload job with new configuration, schema, or handler code',
-    toolSchemas.updateJob.parameters.shape,
+    {
+      description:
+        'Updates an existing Payload job with new configuration, schema, or handler code',
+      inputSchema: toolSchemas.updateJob.parameters.shape,
+    },
     async (args) => {
       const {
         configUpdate,

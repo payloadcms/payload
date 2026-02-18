@@ -341,6 +341,7 @@ export const huTranslations: DefaultTranslationsObject = {
     items: 'tételek',
     language: 'Nyelv',
     lastModified: 'Utoljára módosítva',
+    layout: 'Elrendezés',
     leaveAnyway: 'Távozás mindenképp',
     leaveWithoutSaving: 'Távozás mentés nélkül',
     light: 'Világos',
@@ -369,6 +370,9 @@ export const huTranslations: DefaultTranslationsObject = {
     noOptions: 'Nincs lehetőség',
     noResults:
       'Nem találtunk {{label}}. Vagy még nem létezik {{label}}, vagy egyik sem felel meg a fent megadott szűrőknek.',
+    noResultsDescription:
+      'Semelyik sem létezik, semelyik sem felel meg a fent beállított szűrőknek.',
+    noResultsFound: 'Nincsenek eredmények.',
     notFound: 'Nem található',
     nothingFound: 'Nincs találat',
     noTrashResults: 'Nincs {{label}} a szemetesben.',
@@ -406,6 +410,7 @@ export const huTranslations: DefaultTranslationsObject = {
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',
+    saveChanges: 'Mentése a változásoknak',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',
