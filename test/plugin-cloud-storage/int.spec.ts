@@ -13,6 +13,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,
+  mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
   prefix,
   restrictedMediaSlug,
@@ -265,6 +266,42 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         expect(apiResponse.url).toContain('test-cdn.example.com')
+        expect(apiResponse.url).toContain(prefix)
+      })
+
+      it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
+        const upload = await payload.create({
+          collection: mediaWithGenerateFileURLSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.filename).toBeTruthy()
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaWithGenerateFileURLSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          prefix: string
+          url: string
+        }
+
+        // The URL should be the CDN URL, not a relative path
+        expect(dbRecord.url).toContain('cdn-proxied.example.com')
+        expect(dbRecord.url).toContain(prefix)
+        expect(dbRecord.url).toContain(encodeURIComponent(dbRecord.filename))
+        expect(dbRecord.url).toMatch(/^https:\/\//)
+
+        const apiResponse = await payload.findByID({
+          collection: mediaWithGenerateFileURLSlug,
+          id: upload.id,
+        })
+
+        expect(apiResponse.url).toContain('cdn-proxied.example.com')
         expect(apiResponse.url).toContain(prefix)
       })
     })

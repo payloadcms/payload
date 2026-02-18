@@ -1789,6 +1789,7 @@ export {
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { dynamicImport } from './utilities/dynamicImport.js'
+export { escapeRegExp } from './utilities/escapeRegExp.js'
 export {
   findUp,
   findUpSync,

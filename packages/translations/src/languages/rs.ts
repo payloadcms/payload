@@ -368,6 +368,9 @@ export const rsTranslations: DefaultTranslationsObject = {
     noOptions: 'Нема опција',
     noResults:
       'Нема пронађених {{label}}. Могуће да {{label}} још увек не постоји или нема резултата у складу са постављеним филтерима.',
+    noResultsDescription:
+      'Ili ne postoji nijedan, ili nijedan ne odgovara filterima koje ste gore naveli.',
+    noResultsFound: 'Bez rezultata.',
     notFound: 'Није пронађено',
     nothingFound: 'Ништа није пронађено',
     noTrashResults: 'Nema {{label}} u otpadu.',

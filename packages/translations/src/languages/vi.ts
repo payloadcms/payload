@@ -366,6 +366,9 @@ export const viTranslations: DefaultTranslationsObject = {
     noOptions: 'Không có lựa chọn',
     noResults:
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
+    noResultsDescription:
+      'Hoặc là không có hoặc không có gì phù hợp với các bộ lọc bạn đã chỉ định ở trên.',
+    noResultsFound: 'Không có kết quả.',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
     noTrashResults: 'Không có {{label}} trong thùng rác.',

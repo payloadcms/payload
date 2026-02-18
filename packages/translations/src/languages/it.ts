@@ -369,6 +369,9 @@ export const itTranslations: DefaultTranslationsObject = {
     noOptions: 'Nessuna opzione',
     noResults:
       'Nessun {{label}} trovato. Non esiste ancora nessun {{label}} oppure nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsDescription:
+      'O non ne esistono o nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsFound: 'Nessun risultato.',
     notFound: 'Non Trovato',
     nothingFound: 'Non è stato trovato nulla',
     noTrashResults: 'Nessun {{label}} nel cestino.',

@@ -44,36 +44,30 @@ export const getSchemaColumns = ({
   locale,
   localeCodes,
 }: GetSchemaColumnsArgs): string[] => {
-  const hasVersions = Boolean(collectionConfig.versions)
-
-  // Determine if we need locale expansion
   const expandLocales = locale === 'all' && localeCodes && localeCodes.length > 0
 
-  // Get all possible columns from schema (excludes system fields like id, createdAt, updatedAt)
   let schemaColumns = getFlattenedFieldKeys(
     collectionConfig.flattenedFields,
     '',
     expandLocales ? { localeCodes } : {},
   )
 
-  // Add system fields that aren't in flattenedFields
-  const systemFields = ['id', 'createdAt', 'updatedAt']
-  schemaColumns = [...systemFields, ...schemaColumns]
+  // Add id if not present in schema
+  const hasIdField = schemaColumns.includes('id')
+  if (!hasIdField) {
+    schemaColumns = ['id', ...schemaColumns]
+  }
 
-  // Filter to user-selected fields if specified
   if (selectedFields && selectedFields.length > 0) {
     schemaColumns = filterToSelectedFields(schemaColumns, selectedFields)
   }
 
-  // Remove disabled fields
   if (disabledFields.length > 0) {
     const disabledSet = new Set<string>()
     for (const path of disabledFields) {
-      // Convert dot notation to underscore and add to set
       disabledSet.add(path.replace(/\./g, '_'))
     }
     schemaColumns = schemaColumns.filter((col) => {
-      // Check if column matches any disabled path
       for (const disabled of disabledSet) {
         if (col === disabled || col.startsWith(`${disabled}_`)) {
           return false
@@ -83,42 +77,7 @@ export const getSchemaColumns = ({
     })
   }
 
-  // When user has selected specific fields, preserve their ordering
-  // filterToSelectedFields() already returns columns in user's specified order
-  if (selectedFields && selectedFields.length > 0) {
-    return schemaColumns
-  }
-
-  // No fields selected - apply default ordering (id first, timestamps last)
-  const orderedColumns: string[] = []
-
-  // 1. ID always first
-  if (schemaColumns.includes('id')) {
-    orderedColumns.push('id')
-  }
-
-  // 2. Status field for versioned collections
-  if (hasVersions) {
-    orderedColumns.push('_status')
-  }
-
-  // 3. All other fields (excluding id, timestamps, status)
-  const excludeFromMiddle = new Set(['_status', 'createdAt', 'id', 'updatedAt'])
-  for (const col of schemaColumns) {
-    if (!excludeFromMiddle.has(col)) {
-      orderedColumns.push(col)
-    }
-  }
-
-  // 4. Timestamps at the end
-  if (schemaColumns.includes('createdAt')) {
-    orderedColumns.push('createdAt')
-  }
-  if (schemaColumns.includes('updatedAt')) {
-    orderedColumns.push('updatedAt')
-  }
-
-  return orderedColumns
+  return schemaColumns
 }
 
 /**
@@ -131,13 +90,10 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
   const schemaSet = new Set(schemaColumns)
   const insertedDerived = new Map<string, string[]>()
 
-  // Add any data columns not in schema (preserves schema ordering, appends new ones)
   for (const col of dataColumns) {
     if (!schemaSet.has(col)) {
       let inserted = false
 
-      // Check if this is a derived column from a schema column (e.g., field_id, field_email)
-      // Pattern: schemaCol_suffix where suffix is NOT a number (array indices are handled separately)
       for (const schemaCol of schemaColumns) {
         if (col.startsWith(`${schemaCol}_`)) {
           const suffix = col.slice(schemaCol.length + 1)
@@ -176,7 +132,6 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
           }
         }
 
-        // Otherwise append at the end (before timestamps)
         const createdAtIdx = result.indexOf('createdAt')
         if (createdAtIdx !== -1) {
           result.splice(createdAtIdx, 0, col)
