@@ -1,13 +1,11 @@
 /**
  * R2 API types compatible with both Node (Miniflare) and Cloudflare Workers.
- * R2Range is aligned with Cloudflare's union so cloudflare.env.R2 is assignable
- * without type assertions. We use our own types (not @cloudflare/workers-types)
+ * R2Range is sourced from Cloudflare so it cannot drift; other types are our own
  * so Node's Blob/Buffer/Headers are accepted and we avoid strict Workers-only types.
  */
-export type R2Range =
-  | { length: number; offset?: number }
-  | { length?: number; offset: number }
-  | { suffix: number }
+import type { R2Range } from '@cloudflare/workers-types/2023-07-01'
+
+export type { R2Range }
 
 export interface R2GetOptions {
   [key: string]: any
