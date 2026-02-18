@@ -18,6 +18,8 @@ import { seed } from './seed/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+export const capturedMcpEvents: unknown[] = []
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -133,6 +135,9 @@ export default buildConfigWithDefaults({
         handlerOptions: {
           verboseLogs: true,
           maxDuration: 60,
+          onEvent: (event: unknown) => {
+            capturedMcpEvents.push(event)
+          },
         },
         serverOptions: {
           serverInfo: {

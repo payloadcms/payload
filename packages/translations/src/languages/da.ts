@@ -365,6 +365,9 @@ export const daTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen muligheder',
     noResults:
       'No {{label}} fundet. Enten findes der endnu ingen {{label}}, eller også matcher ingen af de filtre angivet ovenfor.',
+    noResultsDescription:
+      'Enten findes der ingen, eller ingen matcher de filtre, du har angivet ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke fundet',
     nothingFound: 'Intet fundet',
     noTrashResults: 'Ingen {{label}} i papirkurven.',

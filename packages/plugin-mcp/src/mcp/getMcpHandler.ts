@@ -1,6 +1,6 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import { createMcpHandler } from '@vercel/mcp-adapter'
+import { createMcpHandler } from 'mcp-handler'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
@@ -260,10 +260,12 @@ export const getMCPHandler = (
             isToolEnabled,
             tool.name,
             () =>
-              server.tool(
+              server.registerTool(
                 tool.name,
-                tool.description,
-                tool.parameters,
+                {
+                  description: tool.description,
+                  inputSchema: tool.parameters,
+                },
                 payloadToolHandler(tool.handler),
               ),
             payload,
@@ -507,9 +509,10 @@ export const getMCPHandler = (
       },
       {
         basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
+        disableSse: MCPHandlerOptions.disableSse ?? true,
         maxDuration: MCPHandlerOptions.maxDuration || 60,
-        // INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
-        // redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
+        onEvent: MCPHandlerOptions.onEvent,
+        redisUrl: MCPHandlerOptions.redisUrl,
         verboseLogs: useVerboseLogs,
       },
     )

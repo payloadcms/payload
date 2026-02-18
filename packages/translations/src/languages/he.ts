@@ -355,6 +355,8 @@ export const heTranslations: DefaultTranslationsObject = {
     none: 'ללא',
     noOptions: 'אין אפשרויות',
     noResults: 'לא נמצאו {{label}}. אין עדיין {{label}}, או שאינם תואמים למסננים שנבחרו.',
+    noResultsDescription: 'או שאף אחד לא קיים או שאף אחד לא תואם למסננים שציינת לעיל.',
+    noResultsFound: 'אין תוצאות.',
     notFound: 'לא נמצא',
     nothingFound: 'לא נמצא כלום',
     noTrashResults: 'אין {{label}} בפח.',
