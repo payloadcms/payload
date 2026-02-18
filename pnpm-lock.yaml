@@ -2299,6 +2299,9 @@ importers:
       '@azure/storage-blob':
         specifier: ^12.11.0
         version: 12.31.0
+      '@cloudflare/workers-types':
+        specifier: 4.20260218.0
+        version: 4.20260218.0
       '@date-fns/tz':
         specifier: 1.2.0
         version: 1.2.0
