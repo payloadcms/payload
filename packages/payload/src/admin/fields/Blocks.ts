@@ -24,7 +24,7 @@ type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
 
 type BlocksFieldBaseClientProps = {
   readonly validate?: BlocksFieldValidation
-} & FieldPathProps
+}
 
 type BlocksFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 

@@ -1,5 +1,5 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { MarkOptional } from 'ts-essentials'
+import type { MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
@@ -33,12 +33,12 @@ export type ClientComponentProps = {
   permissions?: SanitizedFieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
-}
+} & FieldPathProps
 
 /**
  * Path-related props required of all field components.
  */
-export type FieldPathProps = Partial<FieldPaths> & Partial<ParentFieldPaths>
+export type FieldPathProps = MarkRequired<Partial<FieldPaths>, 'path'> & Partial<ParentFieldPaths>
 
 /**
  * TODO: This should be renamed to `FieldComponentServerProps` or similar

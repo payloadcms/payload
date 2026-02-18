@@ -51,7 +51,7 @@ type Args = {
    */
   siblingDocWithLocales: JsonObject
   skipValidation?: boolean
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 /**
  * This function is responsible for the following actions, in order:

@@ -3,8 +3,7 @@ import type {
   ClientComponentProps,
   ClientTab,
   DocumentPreferences,
-  FieldPaths,
-  ParentFieldPaths,
+  FieldPathProps,
   SanitizedFieldPermissions,
   StaticDescription,
   TabsFieldClientComponent,
@@ -122,12 +121,22 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
 
-        const newIndex = typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
+        const newIndex =
+          typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
         setActiveTabIndex(newIndex)
       }
       void getInitialPref()
     }
-  }, [path, getPreference, preferencesKey, tabsPrefKey, tabs, parentPath, parentSchemaPath])
+  }, [
+    path,
+    getPreference,
+    preferencesKey,
+    tabsPrefKey,
+    tabs,
+    parentPath,
+    parentSchemaPath,
+    tabStates.length,
+  ])
 
   useEffect(() => {
     if (activeTabInfo?.passesCondition === false) {
@@ -207,9 +216,8 @@ type ActiveTabProps = {
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly: boolean
   readonly tabIndex: number
-} & Pick<ClientComponentProps, 'forceRender'> &
-  Pick<FieldPaths, 'path'> &
-  Required<ParentFieldPaths>
+} & FieldPathProps &
+  Pick<ClientComponentProps, 'forceRender'>
 
 function TabContent({
   description,

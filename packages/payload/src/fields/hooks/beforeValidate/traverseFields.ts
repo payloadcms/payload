@@ -33,7 +33,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 export const traverseFields = async <T>({
   id,

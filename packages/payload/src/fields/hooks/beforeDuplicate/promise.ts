@@ -23,7 +23,7 @@ type Args<T> = {
   req: PayloadRequest
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 export const promise = async <T>({
   id,

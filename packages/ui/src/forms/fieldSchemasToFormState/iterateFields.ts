@@ -77,7 +77,7 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 /**
  * Flattens the fields schema and fields data

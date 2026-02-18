@@ -38,7 +38,7 @@ type Args<T> = {
    */
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 // This function is responsible for the following actions, in order:
 // - Sanitize incoming data

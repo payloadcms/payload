@@ -45,7 +45,7 @@ export type BuildVersionFieldsArgs = {
   selectedLocales: string[]
   versionFromSiblingData: object
   versionToSiblingData: object
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 /**
  * Build up an object that contains rendered diff components for each field.

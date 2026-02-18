@@ -23,7 +23,7 @@ type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
   readonly validate?: ArrayFieldValidation
-} & FieldPathProps
+}
 
 type ArrayFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 

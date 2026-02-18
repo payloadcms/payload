@@ -38,7 +38,7 @@ type RenderFieldProps = {
   clientFieldConfig: ClientField
   permissions: SanitizedFieldPermissions
 } & FieldPathProps &
-  Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
+  Pick<ClientComponentProps, 'forceRender' | 'readOnly'>
 
 export function RenderField({
   clientFieldConfig,
@@ -125,7 +125,7 @@ export function RenderField({
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'row':
-      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+      return <RowField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'select':
       return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />

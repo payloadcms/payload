@@ -55,7 +55,7 @@ type Args = {
   siblingDoc: JsonObject
   triggerAccessControl?: boolean
   triggerHooks?: boolean
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 export const traverseFields = ({
   blockData,

@@ -15,5 +15,5 @@ export type RenderFieldsProps = {
       }
     | SanitizedFieldPermissions
   readonly readOnly?: boolean
-} & Pick<ClientComponentProps, 'forceRender'> &
-  Required<ParentFieldPaths>
+} & ParentFieldPaths &
+  Pick<ClientComponentProps, 'forceRender'>

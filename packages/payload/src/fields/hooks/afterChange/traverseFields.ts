@@ -29,7 +29,7 @@ type Args = {
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 export const traverseFields = async ({
   blockData,

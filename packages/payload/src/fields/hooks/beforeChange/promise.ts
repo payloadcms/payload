@@ -56,7 +56,7 @@ type Args = {
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 // This function is responsible for the following actions, in order:
 // - Run condition

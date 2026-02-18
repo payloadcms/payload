@@ -19,7 +19,7 @@ type Args<T> = {
   parentIsLocalized: boolean
   req: PayloadRequest
   siblingDoc: JsonObject
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 export const traverseFields = async <T>({
   id,

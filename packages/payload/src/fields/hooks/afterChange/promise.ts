@@ -31,7 +31,7 @@ type Args = {
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-} & Required<ParentFieldPaths>
+} & ParentFieldPaths
 
 // This function is responsible for the following actions, in order:
 // - Execute field hooks
