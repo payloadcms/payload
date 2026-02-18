@@ -181,10 +181,12 @@ ${JSON.stringify(result, null, 2)}
         ),
     })
 
-    server.tool(
+    server.registerTool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
-      createResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
+        inputSchema: createResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const { depth, draft, fallbackLocale, locale, select, ...fieldData } = params
         const data = JSON.stringify(fieldData)

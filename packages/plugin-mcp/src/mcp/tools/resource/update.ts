@@ -335,10 +335,12 @@ ${JSON.stringify(errors, null, 2)}
         .describe('JSON string for where clause to update multiple documents'),
     })
 
-    server.tool(
+    server.registerTool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
-      updateResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
+        inputSchema: updateResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const {
           id,

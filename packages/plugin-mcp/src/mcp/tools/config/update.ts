@@ -271,10 +271,12 @@ export const updateConfigTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'updateConfig',
-    toolSchemas.updateConfig.description,
-    toolSchemas.updateConfig.parameters.shape,
+    {
+      description: toolSchemas.updateConfig.description,
+      inputSchema: toolSchemas.updateConfig.parameters.shape,
+    },
     (args) => {
       return tool(args)
     },

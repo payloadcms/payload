@@ -3,12 +3,13 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
+import { capturedMcpEvents } from './config.js'
 
 let payload: Payload
 let token: string
@@ -116,6 +117,78 @@ describe('@payloadcms/plugin-mcp', () => {
 
     const json = await parseStreamResponse(response)
     expect(json).toBeDefined()
+  })
+
+  describe('Create MCP Handler', () => {
+    it('should invoke onEvent callback when MCP requests are processed', async () => {
+      capturedMcpEvents.length = 0
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json).toBeDefined()
+      expect(json.result).toBeDefined()
+
+      // Events are emitted asynchronously after the response stream completes
+      await vi.waitFor(() => expect(capturedMcpEvents.length).toBeGreaterThan(0), {
+        timeout: 2000,
+        interval: 100,
+      })
+    })
+
+    it('should capture events for multiple sequential requests', async () => {
+      capturedMcpEvents.length = 0
+
+      const apiKey = await getApiKey()
+
+      // First request
+      await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'ping',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const eventsAfterFirst = capturedMcpEvents.length
+
+      // Second request
+      await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 2,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      expect(capturedMcpEvents.length).toBeGreaterThan(eventsAfterFirst)
+    })
   })
 
   describe('API Keyed Access', () => {
