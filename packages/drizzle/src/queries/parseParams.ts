@@ -390,7 +390,6 @@ export function parseParams({
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
                 }
 
-                // Handle hasMany text/number/select fields with contains operator and array values
                 if (
                   operator === 'contains' &&
                   Array.isArray(queryValue) &&
