@@ -372,6 +372,9 @@ export const roTranslations: DefaultTranslationsObject = {
     noOptions: 'Fără opțiuni',
     noResults:
       'Nici un {{label}} găsit. Fie nu există încă niciun {{label}}, fie niciunul nu se potrivește cu filtrele pe care le-ați specificat mai sus..',
+    noResultsDescription:
+      'Fie că nu există, fie că niciunul nu se potrivește cu filtrele pe care le-ați specificat mai sus.',
+    noResultsFound: 'Fără rezultate.',
     notFound: 'Nu a fost găsit',
     nothingFound: 'Nimic găsit',
     noTrashResults: 'Niciun {{label}} în coșul de gunoi.',
