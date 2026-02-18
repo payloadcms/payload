@@ -15,7 +15,9 @@ export const goToNextPage = async (
   } = { targetPage: 2, affectsURL: true },
 ) => {
   const pageControls = (options.scope || page).locator('.paginator')
-  await pageControls.locator('button').nth(1).click()
+  const nextButton = pageControls.locator('button').nth(1)
+  await nextButton.waitFor({ state: 'visible' })
+  await nextButton.click({ delay: 100 })
 
   if (options.affectsURL) {
     const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)
@@ -40,7 +42,9 @@ export const goToPreviousPage = async (
   },
 ) => {
   const pageControls = (options.scope || page).locator('.paginator')
-  await pageControls.locator('button').nth(0).click()
+  const prevButton = pageControls.locator('button').nth(0)
+  await prevButton.waitFor({ state: 'visible' })
+  await prevButton.click({ delay: 100 })
 
   if (options.affectsURL) {
     const regex = new RegExp(`page=${options.targetPage}(?:&|$)`)

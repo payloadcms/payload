@@ -1630,7 +1630,7 @@ describe('List View', () => {
       // Open the list drawer via the "Select posts" button
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
+      await selectButton.click({ delay: 100 })
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
       await listDrawer.waitFor({ state: 'visible' })
@@ -1651,7 +1651,7 @@ describe('List View', () => {
 
       // Reopen the drawer
       await selectButton.waitFor({ state: 'visible' })
-      await selectButton.click()
+      await selectButton.click({ delay: 100 })
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
@@ -1789,12 +1789,12 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
-      await expect(page.locator(tableRowLocator)).toBeVisible()
+      await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
       // sort by title
       const sortButton = page.locator('#heading-title button.sort-column__asc')
       await sortButton.waitFor({ state: 'visible' })
-      await sortButton.click()
+      await sortButton.click({ delay: 100 })
       await page
         .locator('#heading-title button.sort-column__asc.sort-column--active')
         .waitFor({ state: 'visible' })
