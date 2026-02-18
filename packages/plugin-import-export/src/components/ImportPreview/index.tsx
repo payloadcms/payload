@@ -1,6 +1,5 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, ConditionalDateProps, PaginatedDocs } from 'payload'
+import type { ClientField, Column, ConditionalDateProps, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
