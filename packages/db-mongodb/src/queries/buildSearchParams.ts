@@ -2,7 +2,7 @@ import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, getFieldByPath, getLocalizedPaths } from 'payload'
+import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
@@ -316,7 +316,7 @@ export async function buildSearchParam({
             $and: words.map((word) => ({
               [path]: {
                 $options: 'i',
-                $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                $regex: escapeRegExp(word),
               },
             })),
           },
@@ -334,7 +334,7 @@ export async function buildSearchParam({
               [path]: {
                 $not: {
                   $options: 'i',
-                  $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                  $regex: escapeRegExp(word),
                 },
               },
             })),
