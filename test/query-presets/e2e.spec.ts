@@ -115,10 +115,10 @@ describe('Query Presets', () => {
     await expect(whereField.locator('.where-builder')).toBeVisible()
     await expect(whereField.locator('.where-builder__no-filters')).toBeVisible()
 
-    // Verify the Columns field is visible and no columns are selected (0 selected pills)
+    // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    await expect(columnsField.locator('.pill-selector__pill--selected')).toHaveCount(0)
+    await expect(columnsField.locator('.pill-selector__pill--selected')).toHaveCount(4)
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
