@@ -1,5 +1,6 @@
 'use client'
-import type { ClientField, Column, PaginatedDocs, Where } from 'payload'
+import type { Column } from '@payloadcms/ui'
+import type { ClientField, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
