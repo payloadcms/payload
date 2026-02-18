@@ -1,10 +1,5 @@
 'use client'
-<<<<<<< GermanJablo/create-query-preset
-import type { ClientField, Column, ConditionalDateProps, PaginatedDocs } from 'payload'
-=======
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, PaginatedDocs } from 'payload'
->>>>>>> main
+import type { ClientField, Column, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
