@@ -1373,7 +1373,6 @@ describe('@payloadcms/plugin-mcp', () => {
         'Resource created successfully in collection "posts"!',
       )
       expect(json.result.content[0].text).toContain('"title": "Virtual Field Create Test"')
-      // Virtual field should not appear in the created document
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
 
       // Clean up
