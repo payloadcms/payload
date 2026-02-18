@@ -238,10 +238,6 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if ('hasMany' in field && field.hasMany && operator === 'contains') {
-    operator = 'equals'
-  }
-
   if (operator === 'near' && field.type === 'point' && typeof formattedValue === 'string') {
     const [lng, lat, maxDistance, minDistance] = formattedValue.split(',')
 
@@ -249,7 +245,12 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'contains') {
-    formattedValue = `%${formattedValue}%`
+    if (Array.isArray(formattedValue)) {
+      // For array values, wrap each element with % for LIKE matching
+      formattedValue = formattedValue.map((val) => `%${val}%`)
+    } else {
+      formattedValue = `%${formattedValue}%`
+    }
   }
 
   if (operator === 'exists') {

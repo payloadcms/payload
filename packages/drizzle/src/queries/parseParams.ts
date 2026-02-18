@@ -390,6 +390,21 @@ export function parseParams({
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
                 }
 
+                if (operator === 'contains' && Array.isArray(queryValue)) {
+                  // Create OR conditions for each value in the array
+                  orConditions.push(
+                    ...queryValue.map((val) =>
+                      adapter.operators[queryOperator](resolvedColumn, val),
+                    ),
+                  )
+                  // Set constraint to combine all OR conditions
+                  const constraint = orConditions.length > 0 ? or(...orConditions) : undefined
+                  if (constraint) {
+                    constraints.push(constraint)
+                  }
+                  break
+                }
+
                 let constraint = adapter.operators[queryOperator](
                   resolvedColumn,
                   resolvedQueryValue,
