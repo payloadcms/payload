@@ -317,7 +317,6 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'textContent';
-            [k: string]: unknown;
           }
       )[]
     | null;
@@ -334,7 +333,6 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
-  [k: string]: unknown;
 }
 /**
  * API keys control which collections, resources, tools, and prompts MCP clients can access

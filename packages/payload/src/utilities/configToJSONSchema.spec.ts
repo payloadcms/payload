@@ -143,7 +143,7 @@ describe('configToJSONSchema', () => {
             oneOf: [
               {
                 type: 'object',
-                additionalProperties: true,
+                additionalProperties: false,
                 properties: {
                   id: {
                     type: ['string', 'null'],
@@ -169,7 +169,7 @@ describe('configToJSONSchema', () => {
             oneOf: [
               {
                 type: 'object',
-                additionalProperties: true,
+                additionalProperties: false,
                 properties: {
                   id: {
                     type: ['string', 'null'],
@@ -390,7 +390,7 @@ describe('configToJSONSchema', () => {
 
     const expectedBlockSchema = {
       type: 'object',
-      additionalProperties: true,
+      additionalProperties: false,
       properties: {
         id: { type: ['string', 'null'] },
         blockName: { type: ['string', 'null'] },

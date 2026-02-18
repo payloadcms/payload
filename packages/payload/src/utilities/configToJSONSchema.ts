@@ -338,7 +338,7 @@ export function fieldsToJSONSchema(
 
                         const resolvedBlockSchema: JSONSchema4 = {
                           type: 'object',
-                          additionalProperties: true,
+                          additionalProperties: false,
                           properties: {
                             ...resolvedBlockFieldSchemas.properties,
                             blockType: {
@@ -367,7 +367,7 @@ export function fieldsToJSONSchema(
                       )
                       const blockSchema: JSONSchema4 = {
                         type: 'object',
-                        additionalProperties: true,
+                        additionalProperties: false,
                         properties: {
                           ...blockFieldSchemas.properties,
                           blockType: {
