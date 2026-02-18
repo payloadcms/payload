@@ -100,7 +100,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -202,7 +202,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.15.30)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(lightningcss@1.30.2)(sass-embedded@1.97.3)(sass@1.97.3)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       wrangler:
         specifier: ~4.61.1
-        version: 4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
 
   packages/admin-bar:
     dependencies:
@@ -297,7 +297,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -377,7 +377,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -423,7 +423,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -466,7 +466,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -509,7 +509,7 @@ importers:
         version: 2.0.3
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -1624,6 +1624,9 @@ importers:
         specifier: workspace:*
         version: link:../plugin-cloud-storage
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: 4.20260218.0
+        version: 4.20260218.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -2194,7 +2197,7 @@ importers:
         version: 15.4.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
       next-sitemap:
         specifier: ^4.2.3
-        version: 4.2.3(next@15.4.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))
+        version: 4.2.3(next@15.4.11(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -2313,7 +2316,7 @@ importers:
         version: 16.2.0-canary.29
       '@opennextjs/cloudflare':
         specifier: 1.16.1
-        version: 1.16.1(encoding@0.1.13)(next@16.2.0-canary.29(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6))
+        version: 1.16.1(encoding@0.1.13)(next@16.2.0-canary.29(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))
       '@payloadcms/admin-bar':
         specifier: workspace:*
         version: link:../packages/admin-bar
@@ -2481,7 +2484,7 @@ importers:
         version: 0.31.7
       drizzle-orm:
         specifier: 0.44.7
-        version: 0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
+        version: 0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3)
       escape-html:
         specifier: 1.0.3
         version: 1.0.3
@@ -2556,7 +2559,7 @@ importers:
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.9)(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(lightningcss@1.30.2)(sass-embedded@1.97.3)(sass@1.77.4)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       wrangler:
         specifier: ~4.61.1
-        version: 4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+        version: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       zod:
         specifier: ^3.25.5
         version: 3.25.76
@@ -3788,6 +3791,9 @@ packages:
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
+
+  '@cloudflare/workers-types@4.20260218.0':
+    resolution: {integrity: sha512-E28uJNJb9J9pca3RaxjXm1JxAjp8td9/cudkY+IT8rio71NlshN7NKMe2Cr/6GN+RufbSnp+N3ZKP74xgUaL0A==}
 
   '@corex/deepmerge@4.0.43':
     resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
@@ -16585,6 +16591,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260128.0':
     optional: true
 
+  '@cloudflare/workers-types@4.20260218.0': {}
+
   '@corex/deepmerge@4.0.43': {}
 
   '@cspotcode/source-map-support@0.8.1':
@@ -18181,7 +18189,7 @@ snapshots:
       - aws-crt
       - supports-color
 
-  '@opennextjs/cloudflare@1.16.1(encoding@0.1.13)(next@16.2.0-canary.29(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6))':
+  '@opennextjs/cloudflare@1.16.1(encoding@0.1.13)(next@16.2.0-canary.29(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))':
     dependencies:
       '@ast-grep/napi': 0.40.0
       '@dotenvx/dotenvx': 1.31.0
@@ -18191,7 +18199,7 @@ snapshots:
       glob: 12.0.0
       next: 16.2.0-canary.29(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       ts-tqdm: 0.8.6
-      wrangler: 4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      wrangler: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       yargs: 18.0.0
     transitivePeerDependencies:
       - aws-crt
@@ -22256,8 +22264,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3):
+  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.10.2)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3):
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20260218.0
       '@libsql/client': 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@opentelemetry/api': 1.9.0
       '@types/better-sqlite3': 7.6.13
@@ -22266,8 +22275,9 @@ snapshots:
       better-sqlite3: 11.10.0
       pg: 8.16.3
 
-  drizzle-orm@0.44.7(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3):
+  drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(@opentelemetry/api@1.9.0)(@types/better-sqlite3@7.6.13)(@types/pg@8.11.6)(@vercel/postgres@0.9.0)(better-sqlite3@11.10.0)(pg@8.16.3):
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20260218.0
       '@libsql/client': 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@opentelemetry/api': 1.9.0
       '@types/better-sqlite3': 7.6.13
@@ -25074,7 +25084,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  next-sitemap@4.2.3(next@15.4.11(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)):
+  next-sitemap@4.2.3(next@15.4.11(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)):
     dependencies:
       '@corex/deepmerge': 4.0.43
       '@next/env': 13.5.11
@@ -28047,7 +28057,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260128.0
       '@cloudflare/workerd-windows-64': 1.20260128.0
 
-  wrangler@4.61.1(bufferutil@4.1.0)(utf-8-validate@6.0.6):
+  wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.2
       '@cloudflare/unenv-preset': 2.12.0(unenv@2.0.0-rc.24)(workerd@1.20260128.0)
@@ -28058,6 +28068,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260128.0
     optionalDependencies:
+      '@cloudflare/workers-types': 4.20260218.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
