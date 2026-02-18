@@ -5,10 +5,7 @@ import React, { useMemo } from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
-import { useAuth } from '../../../../providers/Auth/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
-import { useTranslation } from '../../../../providers/Translation/index.js'
-import { reduceFieldsToOptions } from '../../../../utilities/reduceFieldsToOptions.js'
 import { GroupByBuilder } from '../../../GroupByBuilder/index.js'
 import './index.scss'
 
@@ -19,8 +16,6 @@ export const QueryPresetsGroupByField: TextFieldClientComponent = ({
   const relatedCollectionField = useField({ path: 'relatedCollection' })
   const relatedCollection = relatedCollectionField.value as string | undefined
   const { config } = useConfig()
-  const { i18n } = useTranslation()
-  const { permissions } = useAuth()
 
   const collectionConfig = useMemo(() => {
     if (!relatedCollection) {
