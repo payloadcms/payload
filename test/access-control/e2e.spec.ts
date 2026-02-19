@@ -2212,11 +2212,16 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should be visible in bulk actions
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeVisible()
           })
         })
@@ -2250,11 +2255,16 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should be visible because user can trash (even if they can't permanently delete)
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeVisible()
           })
 
@@ -2271,10 +2281,15 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
 
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeVisible()
             await deleteButton.click()
 
@@ -2316,11 +2331,16 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should be visible for admin
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeVisible()
           })
         })
@@ -2354,11 +2374,16 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should NOT be visible because user cannot trash or permanently delete
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeHidden()
           })
         })
@@ -2407,11 +2432,16 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should be visible for admin (they can permanently delete)
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeVisible()
           })
         })
@@ -2450,12 +2480,17 @@ describe('Access Control', () => {
             await expect(page.locator('.table tbody tr').first()).toBeVisible()
 
             // Select a row
-            const checkbox = page.locator('.table tbody tr .select-row__checkbox').first()
-            await checkbox.click()
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
 
             // Delete button should NOT be visible in trash view because
             // regular users can only trash (soft delete), not permanently delete
-            const deleteButton = page.locator('.list-selection button', { hasText: 'Delete' })
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
             await expect(deleteButton).toBeHidden()
           })
         })
