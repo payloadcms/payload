@@ -1,14 +1,18 @@
 import type { Config } from '../../config/types.js'
+import type { SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type { CollectionConfig } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { addHierarchyToCollection } from '../../hierarchy/addHierarchyToCollection.js'
 import { buildParentField } from '../../hierarchy/buildParentField.js'
 import {
+  DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
   HIERARCHY_PARENT_FIELD,
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
 } from '../../hierarchy/constants.js'
+import { slugify as defaultSlugify } from '../../utilities/slugify.js'
 
 /**
  * Sanitize and apply hierarchy configuration to a collection config
@@ -72,6 +76,12 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
     collectionConfig.hierarchy.slugPathFieldName || HIERARCHY_SLUG_PATH_FIELD
   const titlePathFieldName =
     collectionConfig.hierarchy.titlePathFieldName || HIERARCHY_TITLE_PATH_FIELD
+  const allowHasMany = collectionConfig.hierarchy.allowHasMany ?? DEFAULT_ALLOW_HAS_MANY
+  const collectionSpecific = collectionConfig.hierarchy.collectionSpecific ?? false
+  const slugify =
+    collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')
+  const treeLimit = collectionConfig.hierarchy.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
+  const iconComponent = collectionConfig.hierarchy.admin?.components?.Icon
 
   // Apply hierarchy to collection (adds fields and hooks)
   addHierarchyToCollection({
@@ -81,11 +91,20 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
     titlePathFieldName,
   })
 
-  // Set sanitized hierarchy config
-  collectionConfig.hierarchy = {
-    parentFieldName: collectionConfig.hierarchy.parentFieldName,
+  // Set sanitized hierarchy config (cast needed as we're transitioning from HierarchyConfig to SanitizedHierarchyConfig)
+  ;(collectionConfig as unknown as { hierarchy: SanitizedHierarchyConfig }).hierarchy = {
+    admin: {
+      components: {
+        ...(iconComponent && { Icon: iconComponent }),
+      },
+      treeLimit,
+    },
+    allowHasMany,
+    collectionSpecific,
+    parentFieldName,
+    relatedCollections: {},
+    slugify,
     slugPathFieldName,
     titlePathFieldName,
-    ...(collectionConfig.hierarchy.slugify && { slugify: collectionConfig.hierarchy.slugify }),
   }
 }
