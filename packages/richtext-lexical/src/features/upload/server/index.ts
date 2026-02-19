@@ -18,6 +18,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import { UploadMarkdownTransformer } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { uploadValidation } from './validate.js'
 
@@ -130,6 +131,7 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
+      markdownTransformers: [UploadMarkdownTransformer],
       nodes: [
         createNode({
           converters: {
