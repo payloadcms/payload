@@ -1,17 +1,14 @@
 import type { Config } from '../config/types.js'
 
 /**
- * Add a sidebar tab for folders if any collections have folders enabled.
- * The tab shows a tree view for navigating folder structure.
+ * Add a sidebar tab for each folder collection.
+ * Each tab shows the tree for that specific folder collection.
  */
-export const addFolderSidebarTab = (config: Config): void => {
-  // Check if folders feature is enabled
-  if (config.folders === false) {
-    return
-  }
-
-  // Find collections with folder config
-  const folderCollections = config.collections?.filter((collection) => collection.folders)
+export const addFolderSidebarTabs = (config: Config): void => {
+  // Find all collections with folder enabled
+  const folderCollections = config.collections?.filter(
+    (collection) => collection.folder && typeof collection.folder === 'object',
+  )
 
   if (!folderCollections || folderCollections.length === 0) {
     return
@@ -31,22 +28,25 @@ export const addFolderSidebarTab = (config: Config): void => {
     config.admin.components.sidebar.tabs = []
   }
 
-  const tabSlug = 'folders'
+  // Add a tab for each folder collection
+  for (const collection of folderCollections) {
+    const tabSlug = `folder-${collection.slug}`
 
-  // Check if tab already exists
-  const hasTab = config.admin.components.sidebar.tabs.some((tab) => tab.slug === tabSlug)
+    // Check if tab already exists
+    const hasTab = config.admin.components.sidebar.tabs.some((tab) => tab.slug === tabSlug)
 
-  if (!hasTab) {
-    config.admin.components.sidebar.tabs.push({
-      slug: tabSlug,
-      component: {
-        clientProps: {
-          folderCollectionSlug: config.folders!.slug,
+    if (!hasTab) {
+      config.admin.components.sidebar.tabs.push({
+        slug: tabSlug,
+        component: {
+          clientProps: {
+            collectionSlug: collection.slug,
+          },
+          path: '@payloadcms/ui/rsc#FolderSidebarTabServer',
         },
-        path: '@payloadcms/ui/rsc#FolderSidebarTabServer',
-      },
-      icon: '@payloadcms/ui#FolderIcon',
-      label: 'Folders',
-    })
+        icon: '@payloadcms/ui#FolderIcon',
+        label: collection.labels?.plural || collection.slug,
+      })
+    }
   }
 }

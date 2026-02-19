@@ -8,8 +8,10 @@ import type { Config } from '../config/types.js'
  * (see validateTaxonomyFields called from config/sanitize.ts)
  */
 export const addTaxonomySidebarTabs = (config: Config): void => {
-  // Find all collections with taxonomy enabled
-  const taxonomyCollections = config.collections?.filter((collection) => collection.taxonomy)
+  // Find all collections with taxonomy enabled (skip folders - they use FolderSidebarTab)
+  const taxonomyCollections = config.collections?.filter(
+    (collection) => collection.taxonomy && !collection.folder,
+  )
 
   if (!taxonomyCollections || taxonomyCollections.length === 0) {
     return

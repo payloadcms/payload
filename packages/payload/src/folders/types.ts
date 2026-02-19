@@ -1,127 +1,53 @@
-import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
-import type { Document } from '../types/index.js'
-
-export type FolderInterface = {
-  documentsAndFolders?: {
-    docs: {
-      relationTo: CollectionSlug
-      value: Document
-    }[]
-  }
-  folder?: FolderInterface | (number | string | undefined)
-  folderType: CollectionSlug[]
-  name: string
-} & TypeWithID
-
-export type FolderBreadcrumb = {
-  folderType?: CollectionSlug[]
-  id: null | number | string
-  name: string
-}
-
-export type Subfolder = {
-  fileCount: number
-  hasSubfolders: boolean
-  id: number | string
-  name: string
-  subfolderCount: number
-}
-
-export type FolderEnabledColection = {
-  admin: {
-    custom: {
-      folderCollectionSlug: CollectionSlug
-    }
-  }
-  slug: CollectionSlug
-} & SanitizedCollectionConfig
+import type { HierarchyConfig } from '../hierarchy/types.js'
 
 /**
- * `${relationTo}-${id}` is used as a key for the item
+ * Sanitized related collection info with computed field name.
  */
-export type FolderDocumentItemKey = `${string}-${number | string}`
+export type SanitizedFolderRelatedCollection = {
+  /** Name of the folder relationship field */
+  fieldName: string
+}
 
 /**
- * Needed for document card view for upload enabled collections
+ * Configuration for folder collection behavior.
+ *
+ * When a collection has a `folder` property, it is treated as a folder collection
+ * that can organize documents from other collections.
+ *
+ * Inherits hierarchy options (parentFieldName, slugPathFieldName, titlePathFieldName, slugify)
+ * which are passed through to the underlying hierarchy configuration.
  */
-type DocumentMediaData = {
-  filename?: string
-  mimeType?: string
-  url?: string
-}
-/**
- * A generic structure for a folder or document item.
- */
-export type FolderOrDocument = {
-  itemKey: FolderDocumentItemKey
-  relationTo: CollectionSlug
-  value: {
-    _folderOrDocumentTitle: string
-    createdAt?: string
-    folderID?: number | string
-    folderType: CollectionSlug[]
-    id: number | string
-    updatedAt?: string
-  } & DocumentMediaData
-}
-
-export type GetFolderDataResult = {
-  breadcrumbs: FolderBreadcrumb[] | null
-  documents: FolderOrDocument[]
-  folderAssignedCollections: CollectionSlug[] | undefined
-  subfolders: FolderOrDocument[]
-}
-
-export type RootFoldersConfiguration = {
+export type FolderConfig = {
   /**
-   * If true, the browse by folder view will be enabled
+   * If true, folders can be scoped to specific collections.
+   * Adds a `folderType` select field to choose which collections
+   * a folder can contain.
    *
-   * @default true
-   */
-  browseByFolder?: boolean
-  /**
-   * An array of functions to be ran when the folder collection is initialized
-   * This allows plugins to modify the collection configuration
-   */
-  collectionOverrides?: (({
-    collection,
-  }: {
-    collection: Omit<CollectionConfig, 'trash'>
-  }) => Omit<CollectionConfig, 'trash'> | Promise<Omit<CollectionConfig, 'trash'>>)[]
-  /**
-   * If true, you can scope folders to specific collections.
-   *
-   * @default true
+   * When creating nested folders, the scope is inherited from the parent.
+   * @default false
    */
   collectionSpecific?: boolean
   /**
-   * Ability to view hidden fields and collections related to folders
-   *
-   * @default false
+   * Maximum number of children to load per parent node in the tree
+   * @default 100
    */
-  debug?: boolean
+  treeLimit?: number
+} & Partial<HierarchyConfig>
+
+/**
+ * Sanitized folder configuration with all defaults applied.
+ * Folder-specific settings only - shared hierarchy settings live on `taxonomy` config.
+ */
+export type SanitizedFolderConfig = {
   /**
-   * The Folder field name
-   *
-   * @default "folder"
+   * If true, folders can be scoped to specific collections.
    */
-  fieldName?: string
-  /**
-   * Slug for the folder collection
-   *
-   * @default "payload-folders"
-   */
-  slug?: string
+  collectionSpecific: boolean
 }
 
-export type CollectionFoldersConfiguration = {
-  /**
-   * If true, the collection will be included in the browse by folder view
-   *
-   * @default true
-   */
-  browseByFolder?: boolean
+export type FolderBreadcrumb = {
+  id: null | number | string
+  name: string
 }
 
 type BaseFolderSortKeys = 'createdAt' | 'name' | 'updatedAt'
