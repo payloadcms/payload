@@ -22,12 +22,15 @@ import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
+import { DocumentListSelection } from '../TaxonomyList/DocumentListSelection/index.js'
+import { TaxonomyTable } from '../TaxonomyList/TaxonomyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.scss'
 
@@ -56,6 +59,7 @@ export function DefaultListView(props: ListViewClientProps) {
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
+    taxonomyData,
     viewType,
   } = props
 
@@ -94,6 +98,8 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { i18n } = useTranslation()
 
+  const collectionLabel = getTranslation(labels?.plural, i18n)
+
   const { setStepNav } = useStepNav()
 
   const {
@@ -122,22 +128,43 @@ export function DefaultListView(props: ListViewClientProps) {
   useEffect(() => {
     if (!isInDrawer) {
       const baseLabel = {
-        label: getTranslation(labels?.plural, i18n),
+        label: collectionLabel,
         url:
           isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
               })
-            : undefined,
+            : taxonomyData
+              ? formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}`,
+                })
+              : undefined,
       }
 
       const trashLabel = {
         label: i18n.t('general:trash'),
       }
 
-      const navItems =
-        isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+      let navItems = isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+
+      // Add taxonomy breadcrumbs
+      if (taxonomyData?.breadcrumbs) {
+        const taxonomyBreadcrumbs = taxonomyData.breadcrumbs.map((crumb, index) => {
+          const isLast = index === taxonomyData.breadcrumbs.length - 1
+          return {
+            label: crumb.title,
+            url: isLast
+              ? undefined
+              : formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+                }),
+          }
+        })
+        navItems = [...navItems, ...taxonomyBreadcrumbs]
+      }
 
       setStepNav(navItems)
     }
@@ -151,6 +178,8 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
     i18n,
     collectionSlug,
+    taxonomyData,
+    collectionLabel,
   ])
 
   return (
@@ -207,16 +236,48 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs?.length > 0 && (
+              {taxonomyData ? (
+                <DocumentSelectionProvider
+                  collectionData={{
+                    [collectionSlug]: { docs: taxonomyData.childrenData.docs },
+                    ...Object.fromEntries(
+                      Object.entries(taxonomyData.relatedDocumentsByCollection).map(
+                        ([slug, related]) => [slug, { docs: related.result.docs }],
+                      ),
+                    ),
+                  }}
+                >
+                  <TaxonomyTable
+                    childrenData={taxonomyData.childrenData}
+                    collectionSlug={collectionSlug}
+                    key={taxonomyData.parentId}
+                    parentId={taxonomyData.parentId}
+                    relatedGroups={Object.entries(taxonomyData.relatedDocumentsByCollection).map(
+                      ([slug, related]) => ({
+                        collectionSlug: slug,
+                        data: related.result,
+                        hasMany: related.hasMany,
+                        label: related.label,
+                      }),
+                    )}
+                    taxonomyLabel={collectionLabel}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  />
+                  <DocumentListSelection
+                    disableBulkDelete={disableBulkDelete}
+                    disableBulkEdit={disableBulkEdit}
+                  />
+                </DocumentSelectionProvider>
+              ) : docs?.length > 0 ? (
                 <div className={`${baseClass}__tables`}>
                   <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
-              )}
+              ) : null}
               {docs?.length === 0 && (
                 <div className={`${baseClass}__no-results`}>
                   <p>
                     {i18n.t(viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults', {
-                      label: getTranslation(labels?.plural, i18n),
+                      label: collectionLabel,
                     })}
                   </p>
                   {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
@@ -248,7 +309,7 @@ export function DefaultListView(props: ListViewClientProps) {
                           collectionConfig={collectionConfig}
                           disableBulkDelete={disableBulkDelete}
                           disableBulkEdit={disableBulkEdit}
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          label={collectionLabel}
                           showSelectAllAcrossPages={!isGroupingBy}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>

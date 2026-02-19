@@ -55,6 +55,7 @@ import type {
   TypedCollectionSelect,
   TypedLocale,
 } from '../../index.js'
+import type { SanitizedTaxonomyConfig, TaxonomyConfig } from '../../taxonomy/types.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
@@ -730,6 +731,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enable taxonomy functionality for this collection.
+   * Taxonomies are hierarchical collections that can be referenced by other collections.
+   * Automatically enables hierarchy with parent-child relationships.
+   *
+   * @example
+   * // Enable with defaults
+   * taxonomy: true
+   *
+   * @example
+   * // Customize related collections and hierarchy settings
+   * taxonomy: {
+   *   relatedCollections: ['posts', 'pages'],
+   *   parentFieldName: 'parent'
+   * }
+   *
+   * @experimental This is a beta feature and its behavior may be refined in future releases.
+   */
+  taxonomy?: TaxonomyConfig
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -807,6 +827,7 @@ export interface SanitizedCollectionConfig
     | 'folders'
     | 'hierarchy'
     | 'slug'
+    | 'taxonomy'
     | 'upload'
     | 'versions'
   > {
@@ -825,7 +846,6 @@ export interface SanitizedCollectionConfig
   folders: CollectionFoldersConfiguration | false
   hierarchy: false | SanitizedHierarchyConfig
   joins: SanitizedJoins
-
   /**
    * List of all polymorphic join fields
    */
@@ -834,6 +854,8 @@ export interface SanitizedCollectionConfig
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
+
+  taxonomy?: SanitizedTaxonomyConfig
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

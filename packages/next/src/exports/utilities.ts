@@ -2,6 +2,12 @@
 
 export { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 export { getPayloadHMR } from '../utilities/getPayloadHMR.js'
+export { getTaxonomyAncestry } from '../utilities/getTaxonomyAncestry.js'
+export type {
+  GetTaxonomyAncestryArgs,
+  TaxonomyAncestryItem,
+  TaxonomyAncestryResult,
+} from '../utilities/getTaxonomyAncestry.js'
 
 import {
   addDataAndFileToRequest as _addDataAndFileToRequest,

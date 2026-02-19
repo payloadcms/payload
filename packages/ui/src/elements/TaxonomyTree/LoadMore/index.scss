@@ -1,0 +1,26 @@
+// Tree-specific overrides for the shared LoadMoreRow component
+
+.taxonomy-tree__load-more.load-more-row {
+  padding: var(--taxonomy-tree-node-padding-y) var(--taxonomy-tree-node-padding-x);
+  padding-left: calc(var(--taxonomy-tree-depth, 0) * var(--taxonomy-tree-indent));
+  height: var(--taxonomy-tree-node-content-height);
+  position: relative;
+  margin-bottom: var(--taxonomy-tree-row-gap);
+  padding-top: 0;
+
+  .load-more-row__connector {
+    margin-left: 2px;
+  }
+}
+
+// Tree-specific button styling (uses native button for focus management)
+.taxonomy-tree__load-more-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--theme-text);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}

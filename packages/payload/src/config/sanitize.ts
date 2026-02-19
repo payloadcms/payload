@@ -32,6 +32,8 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
+import { addTaxonomySidebarTabs } from '../taxonomy/addTaxonomySidebarTab.js'
+import { validateTaxonomyFields } from '../taxonomy/validateTaxonomyFields.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -301,6 +303,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       )
     }
   }
+
+  // Validate taxonomy fields exist in related collections and build sanitized config
+  validateTaxonomyFields(config as unknown as Config)
+
+  // Add sidebar tabs for taxonomy collections
+  addTaxonomySidebarTabs(config as unknown as Config)
 
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(

@@ -49,6 +49,22 @@
       }
     }
 
+    &--style-dashed {
+      --color: var(--theme-elevation-500);
+      --bg-color: transparent;
+      --hover-color: var(--theme-text);
+      --btn-border: 1px dashed var(--theme-elevation-150);
+      --hover-btn-border: 1px dashed var(--theme-elevation-300);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-250);
+        --hover-color: var(--color);
+        --hover-bg: transparent;
+        --btn-border: 1px dashed var(--theme-elevation-200);
+        --hover-btn-border: var(--btn-border);
+      }
+    }
+
     &--style-pill {
       --bg-color: var(--theme-elevation-150);
       --color: var(--theme-elevation-800);
@@ -111,6 +127,27 @@
         --hover-color: var(--color);
       }
     }
+
+    &--style-muted-text {
+      padding: 0;
+      --color: var(--theme-elevation-500);
+      --bg-color: transparent;
+      --hover-color: var(--theme-elevation-700);
+      --hover-bg: transparent;
+      --margin-block: 0;
+
+      &:hover,
+      &:focus-visible,
+      &:focus,
+      &:active {
+        text-decoration: underline;
+      }
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-300);
+        --hover-color: var(--color);
+      }
+    }
   }
 
   .popup--active .btn {
@@ -144,6 +181,14 @@
         background-color: var(--hover-bg);
         color: var(--hover-color);
         box-shadow: var(--hover-box-shadow);
+        border: var(--hover-btn-border, 1px solid transparent);
+
+        .btn__icon .stroke {
+          stroke: var(--hover-color, currentColor);
+        }
+        .btn__icon .fill {
+          fill: var(--hover-color, currentColor);
+        }
       }
     }
   }
@@ -157,6 +202,14 @@
       color: var(--hover-color);
       box-shadow: var(--hover-box-shadow);
       background-color: var(--hover-bg);
+      border: var(--hover-btn-border, 1px solid transparent);
+
+      .btn__icon .stroke {
+        stroke: var(--hover-color, currentColor);
+      }
+      .btn__icon .fill {
+        fill: var(--hover-color, currentColor);
+      }
     }
   }
 
@@ -177,6 +230,7 @@
     --btn-icon-content-gap: calc(var(--base) * 0.4);
     --margin-block: calc(var(--base) * 1.2);
     --btn-line-height: calc(var(--base) * 1.2);
+    --btn-base-transition: 100ms cubic-bezier(0, 0.2, 0.2, 1);
 
     border-radius: var(--style-radius-s);
     font-size: var(--base-body-size);
@@ -184,15 +238,13 @@
     font-weight: var(--btn-font-weight, normal);
     margin-block: var(--margin-block);
     line-height: var(--btn-line-height);
-    border: 0;
+    border: var(--btn-border, 1px solid transparent);
     cursor: pointer;
     text-decoration: none;
-    transition-property: border, color, box-shadow, background;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    transition: border, color, box-shadow, background, var(--btn-base-transition);
     padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
       var(--btn-padding-block-end) var(--btn-padding-inline-start);
-    color: var(--color, inherit);
+    color: var(--color, currentColor);
     background-color: var(--bg-color, transparent);
     box-shadow: var(--box-shadow, none);
 
@@ -203,10 +255,12 @@
       .stroke {
         stroke: var(--color, currentColor);
         fill: none;
+        transition: stroke var(--btn-base-transition);
       }
 
       .fill {
         fill: var(--color, currentColor);
+        transition: fill var(--btn-base-transition);
       }
     }
 
@@ -225,8 +279,7 @@
       border: 1px solid var(--btn-icon-border-color);
       border-radius: 100%;
       padding: var(--btn-icon-padding);
-      color: inherit;
-
+      color: currentColor;
       svg {
         width: 100%;
         height: 100%;
@@ -263,7 +316,7 @@
     }
 
     &--size-small {
-      --btn-icon-size: calc(var(--base) * 0.9);
+      --btn-icon-size: var(--base);
       // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: 0;
@@ -285,7 +338,7 @@
     }
 
     &--size-xsmall {
-      --btn-icon-size: calc(var(--base) * 0.8);
+      --btn-icon-size: var(--base);
       // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: 0;

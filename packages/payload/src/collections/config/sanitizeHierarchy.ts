@@ -20,6 +20,7 @@ import {
  */
 export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: Config): void => {
   if (!collectionConfig.hierarchy) {
+    collectionConfig.hierarchy = false
     return
   }
 

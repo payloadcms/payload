@@ -33,6 +33,7 @@
       opacity: 1;
       transition: opacity 0.2s ease-in-out;
       cursor: default;
+      z-index: 10000;
     }
 
     &--caret-center {

@@ -16,9 +16,10 @@
       top: 0;
       left: 0;
       height: 0;
-      width: var(--gutter-h);
+      width: fit-content;
       display: flex;
       justify-content: center;
+      padding-left: var(--base);
     }
 
     &__nav-toggler-container {

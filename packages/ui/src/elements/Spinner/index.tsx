@@ -12,13 +12,18 @@ export type SpinnerProps = {
    * @default 'Loading...' (translated)
    */
   loadingText?: null | string
+  /**
+   * Size of the spinner
+   * @default 'default'
+   */
+  size?: 'default' | 'small'
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ loadingText }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ loadingText, size = 'medium' }) => {
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, `${baseClass}--${size}`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__circle`} />
 
       {loadingText !== null && (

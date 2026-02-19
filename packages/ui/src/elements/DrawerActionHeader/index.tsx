@@ -33,11 +33,16 @@ export const DrawerActionHeader = ({
         <h1 className={`${baseClass}__title`}>{title}</h1>
 
         <div className={`${baseClass}__actions`}>
-          <Button aria-label={t('general:cancel')} buttonStyle="secondary" onClick={onCancel}>
+          <Button
+            aria-label={t('general:cancel')}
+            buttonStyle="secondary"
+            margin={false}
+            onClick={onCancel}
+          >
             {cancelLabel || t('general:cancel')}
           </Button>
 
-          <FormSubmit aria-label={t('general:applyChanges')} onClick={onSave}>
+          <FormSubmit aria-label={t('general:applyChanges')} margin={false} onClick={onSave}>
             {saveLabel || t('general:applyChanges')}
           </FormSubmit>
         </div>

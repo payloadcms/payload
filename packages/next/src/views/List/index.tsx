@@ -10,9 +10,16 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
+  TaxonomyViewData,
 } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HydrateAuthProvider,
+  HydrateTaxonomyProvider,
+  ListQueryProvider,
+  TaxonomyListView,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
@@ -30,6 +37,7 @@ import React, { Fragment } from 'react'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
+import { handleTaxonomy } from './handleTaxonomy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
@@ -255,6 +263,24 @@ export const renderListView = async (
     select,
   })
 
+  // Check for taxonomy parent param
+  const isTaxonomyCollection = Boolean(collectionConfig.taxonomy)
+  let taxonomyParentId: null | number | string = null
+
+  if (isTaxonomyCollection) {
+    if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
+      taxonomyParentId = null
+    } else if (typeof searchParams?.parent === 'string') {
+      taxonomyParentId =
+        payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
+          ? Number(searchParams.parent)
+          : searchParams.parent
+    }
+  }
+
+  // Taxonomy data for client-side rendering
+  let taxonomyData: TaxonomyViewData | undefined
+
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
       ;({ columnState, data, Table } = await handleGroupBy({
@@ -336,6 +362,21 @@ export const renderListView = async (
     }
   }
 
+  // Fetch taxonomy data for taxonomy collections
+  if (isTaxonomyCollection) {
+    taxonomyData = await handleTaxonomy({
+      collectionConfig,
+      collectionSlug,
+      parentId: taxonomyParentId,
+      permissions,
+      req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      user,
+    })
+
+    data = taxonomyData.childrenData
+  }
+
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
@@ -394,44 +435,60 @@ export const renderListView = async (
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
   query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
+  const listContent = RenderServerComponent({
+    clientProps: {
+      ...listViewSlots,
+      collectionSlug,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+      disableQueryPresets,
+      enableRowSelections,
+      hasCreatePermission,
+      hasDeletePermission,
+      listPreferences: collectionPreferences,
+      newDocumentURL,
+      queryPreset,
+      queryPresetPermissions,
+      renderedFilters,
+      resolvedFilterOptions,
+      Table,
+      taxonomyData,
+      viewType,
+    } satisfies ListViewClientProps,
+    Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
+    Fallback: isTaxonomyCollection ? TaxonomyListView : DefaultListView,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
   return {
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
-        <ListQueryProvider
-          collectionSlug={collectionSlug}
-          data={data}
-          modifySearchParams={!isInDrawer}
-          orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-          query={query}
-        >
-          {RenderServerComponent({
-            clientProps: {
-              ...listViewSlots,
-              collectionSlug,
-              columnState,
-              disableBulkDelete,
-              disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
-              disableQueryPresets,
-              enableRowSelections,
-              hasCreatePermission,
-              hasDeletePermission,
-              listPreferences: collectionPreferences,
-              newDocumentURL,
-              queryPreset,
-              queryPresetPermissions,
-              renderedFilters,
-              resolvedFilterOptions,
-              Table,
-              viewType,
-            } satisfies ListViewClientProps,
-            Component:
-              ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-            Fallback: DefaultListView,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-        </ListQueryProvider>
+        {isTaxonomyCollection ? (
+          <Fragment>
+            <HydrateTaxonomyProvider
+              collectionSlug={collectionSlug}
+              expandedNodes={taxonomyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parentFieldName={collectionConfig.taxonomy?.parentFieldName}
+              selectedParentId={taxonomyParentId}
+              tableData={data}
+              treeLimit={collectionConfig.taxonomy?.treeLimit}
+            />
+            {listContent}
+          </Fragment>
+        ) : (
+          <ListQueryProvider
+            collectionSlug={collectionSlug}
+            data={data}
+            modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
+          >
+            {listContent}
+          </ListQueryProvider>
+        )}
       </Fragment>
     ),
   }

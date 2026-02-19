@@ -70,6 +70,7 @@ export { AnimateHeight } from '../../elements/AnimateHeight/index.js'
 export { PillSelector, type SelectablePill } from '../../elements/PillSelector/index.js'
 export { Card } from '../../elements/Card/index.js'
 export { Collapsible, useCollapsible } from '../../elements/Collapsible/index.js'
+export { TaxonomySidebarTab } from '../../elements/TaxonomyTree/TaxonomySidebarTab.js'
 export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
 export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
@@ -95,6 +96,7 @@ export { GenerateConfirmation } from '../../elements/GenerateConfirmation/index.
 export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
+export { HydrateTaxonomyProvider } from '../../elements/HydrateTaxonomyProvider/index.js'
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
@@ -105,6 +107,17 @@ export type {
   RenderListServerFnReturnType,
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
+export { useTaxonomyDrawer } from '../../elements/Taxonomy/TaxonomyDrawer/index.js'
+export type {
+  SelectionWithPath,
+  TaxonomyDrawerProps,
+  TaxonomyDrawerTogglerProps,
+  UseTaxonomyDrawer,
+  UseTaxonomyDrawerArgs,
+} from '../../elements/Taxonomy/TaxonomyDrawer/types.js'
+export { TaxonomyFieldClient } from '../../elements/Taxonomy/TaxonomyField/index.client.js'
+export { SelectedTaxonomies } from '../../elements/Taxonomy/TaxonomyField/SelectedTaxonomies.js'
+export type { SelectedTaxonomiesProps } from '../../elements/Taxonomy/TaxonomyField/SelectedTaxonomies.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
@@ -117,6 +130,8 @@ export { FormLoadingOverlayToggle } from '../../elements/Loading/index.js'
 export { LoadingOverlay } from '../../elements/Loading/index.js'
 export { Spinner } from '../../elements/Spinner/index.js'
 export type { SpinnerProps } from '../../elements/Spinner/index.js'
+export { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
+export type { DelayedSpinnerProps } from '../../elements/DelayedSpinner/index.js'
 export { Logout } from '../../elements/Logout/index.js'
 export { Modal, useModal } from '../../elements/Modal/index.js'
 export { NavToggler } from '../../elements/Nav/NavToggler/index.js'
@@ -301,6 +316,7 @@ export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.j
 export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
 export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'
 export { Warning as WarningIcon } from '../../providers/ToastContainer/icons/Warning.js'
+export { TagIcon } from '../../icons/Tag/index.js'
 
 // providers
 export {
@@ -353,6 +369,16 @@ export {
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
 export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
+export {
+  DocumentSelectionProvider,
+  useDocumentSelection,
+} from '../../providers/DocumentSelection/index.js'
+export type {
+  CollectionData,
+  DocumentSelectionContextValue,
+  SelectableDocument,
+} from '../../providers/DocumentSelection/types.js'
+export { TaxonomyProvider, useTaxonomy } from '../../providers/Taxonomy/index.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
@@ -371,6 +397,7 @@ export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
+export { TaxonomyListView } from '../../views/TaxonomyList/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
 export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
 

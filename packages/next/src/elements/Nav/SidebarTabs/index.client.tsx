@@ -1,8 +1,8 @@
 'use client'
 
-import { Spinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
+import { DelayedSpinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { Activity, useCallback, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
 
@@ -20,10 +20,10 @@ export type SidebarTabsClientProps = {
   initialActiveTabID: string
   initialTabContents: Record<string, React.ReactNode>
   /**
-   * Minimum time (in ms) to show the loading overlay, prevents flashing on fast loads
-   * @default 500
+   * Delay before showing loading spinner (in ms), prevents flashing on fast loads
+   * @default 200
    */
-  minLoadingTime?: number
+  loadingDelay?: number
   tabs: TabMetadata[]
 }
 
@@ -31,7 +31,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   baseClass,
   initialActiveTabID,
   initialTabContents,
-  minLoadingTime = 500,
+  loadingDelay = 200,
   tabs,
 }) => {
   const { setPreference } = usePreferences()
@@ -43,7 +43,6 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const [hoveredTab, setHoveredTab] = useState<null | string>(null)
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
-  const loadingStartTimeRef = useRef<null | number>(null)
 
   const loadTabContent = useCallback(
     async (tabSlug: string) => {
@@ -52,9 +51,8 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         return
       }
 
-      // Mark as loading and record start time
+      // Mark as loading
       loadingTabsRef.current.add(tabSlug)
-      loadingStartTimeRef.current = Date.now()
       setLoadingTab(tabSlug)
 
       try {
@@ -90,24 +88,38 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         tabContentRef.current = newContent
         setTabContent(newContent)
       } finally {
-        // Ensure minimum loading time before hiding overlay
-        const elapsedTime = Date.now() - (loadingStartTimeRef.current || 0)
-        const remainingTime = Math.max(0, minLoadingTime - elapsedTime)
-        setTimeout(() => {
-          loadingTabsRef.current.delete(tabSlug)
-          setLoadingTab(null)
-          loadingStartTimeRef.current = null
-        }, remainingTime)
+        loadingTabsRef.current.delete(tabSlug)
+        setLoadingTab(null)
       }
     },
-    [minLoadingTime, serverFunction],
+    [serverFunction],
   )
 
-  const handleTabChange = (slug: string) => {
-    setActiveTabID(slug)
-    void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
-    void loadTabContent(slug)
-  }
+  const handleTabChange = useCallback(
+    (slug: string) => {
+      setActiveTabID(slug)
+      void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
+      void loadTabContent(slug)
+    },
+    [setPreference, loadTabContent],
+  )
+
+  const handleTabKeyDown = useCallback(
+    (e: React.KeyboardEvent, currentIndex: number) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault()
+        const direction = e.key === 'ArrowLeft' ? -1 : 1
+        const newIndex = (currentIndex + direction + tabs.length) % tabs.length
+        const newTab = tabs[newIndex]
+        handleTabChange(newTab.slug)
+        // Focus will be handled by the tabIndex change
+        setTimeout(() => {
+          document.querySelector<HTMLButtonElement>(`.${baseClass}__tab--active`)?.focus()
+        }, 0)
+      }
+    },
+    [baseClass, handleTabChange, tabs],
+  )
 
   const activeContent = tabContent[activeTabID]
 
@@ -118,20 +130,28 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__tabs`}>
-        {tabs.map((tab) => {
+      <div className={`${baseClass}__tabs`} role="tablist">
+        {tabs.map((tab, index) => {
           const isActive = tab.slug === activeTabID
 
           return (
             <button
+              aria-selected={isActive}
               className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
               key={tab.slug}
               onClick={() => handleTabChange(tab.slug)}
+              onKeyDown={(e) => handleTabKeyDown(e, index)}
               onMouseEnter={() => setHoveredTab(tab.slug)}
               onMouseLeave={() => setHoveredTab(null)}
+              role="tab"
+              tabIndex={isActive ? 0 : -1}
               type="button"
             >
-              <Tooltip className={`${baseClass}__tooltip`} show={hoveredTab === tab.slug}>
+              <Tooltip
+                className={`${baseClass}__tooltip`}
+                position={index === 0 ? 'bottom' : 'top'} // TODO: set to "top" when we portal tooltips
+                show={hoveredTab === tab.slug}
+              >
                 {tab.label}
               </Tooltip>
               <span className={`${baseClass}__tab-icon`}>{tab.icon}</span>
@@ -140,8 +160,24 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           )
         })}
       </div>
-      <div className={`${baseClass}__content`}>
-        {loadingTab === activeTabID ? <Spinner /> : activeContent}
+      <div className={`${baseClass}__content`} role="tabpanel">
+        <DelayedSpinner
+          baseClass={baseClass}
+          delay={loadingDelay}
+          isLoading={loadingTab === activeTabID}
+        />
+        {tabs.map((tab) => {
+          const content = tabContent[tab.slug]
+          if (!content) {
+            return null
+          }
+          const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
+          return (
+            <Activity key={tab.slug} mode={isActive ? 'visible' : 'hidden'}>
+              {content}
+            </Activity>
+          )
+        })}
       </div>
     </div>
   )

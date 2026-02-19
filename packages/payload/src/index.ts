@@ -1694,10 +1694,13 @@ export { findVersionsOperation as findVersionsOperationGlobal } from './globals/
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+// Hierarchy
+export type { Ancestor, HierarchyConfig, SanitizedHierarchyConfig } from './hierarchy/index.js'
+export { getAncestors } from './hierarchy/index.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
+
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
-
 export type {
   CollapsedPreferences,
   CollectionPreferences,
@@ -1716,6 +1719,7 @@ export type {
 export type { QueryPreset } from './query-presets/types.js'
 export { jobAfterRead } from './queues/config/collection.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
@@ -1740,21 +1744,29 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-
 export { JobCancelledError } from './queues/errors/index.js'
+
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
-
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
+
+// Taxonomy
+export { DEFAULT_TAXONOMY_TREE_LIMIT } from './taxonomy/constants.js'
+export { createTaxonomyCollection } from './taxonomy/createTaxonomyCollection.js'
+export type { CreateTaxonomyCollectionOptions } from './taxonomy/createTaxonomyCollection.js'
+export { createTaxonomyField } from './taxonomy/createTaxonomyField.js'
+export { getInitialTreeData } from './taxonomy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './taxonomy/getInitialTreeData.js'
+export type { CreateTaxonomyFieldOptions } from './taxonomy/types.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1824,9 +1836,9 @@ export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
+
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
-
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
@@ -1837,6 +1849,7 @@ export type {
   MongoLocalizeStatusArgs,
   SqlLocalizeStatusArgs,
 } from './versions/migrations/localizeStatus/index.js'
+
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 
