@@ -16,6 +16,7 @@ import {
   Pill,
   RenderFields,
   SectionTitle,
+  ShimmerEffect,
   useConfig,
   useDocumentInfo,
   useEditDepth,
@@ -83,6 +84,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
     return data
   })
+
+  const isLoading = Object.keys(blockFormState).length === 0
 
   const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
   const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
@@ -316,6 +319,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
           Error: Block '{blockType}' not found in the config but exists in the lexical data
         </div>
       </BlockCollapsible>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
+        <ShimmerEffect height={'12rem'} />
+      </div>
     )
   }
 

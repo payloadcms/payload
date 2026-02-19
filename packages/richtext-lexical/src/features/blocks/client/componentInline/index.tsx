@@ -12,6 +12,7 @@ import {
   formatDrawerSlug,
   FormSubmit,
   RenderFields,
+  ShimmerEffect,
   useConfig,
   useEditDepth,
   useFormFields,
@@ -98,6 +99,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
     return data
   })
+
+  const isLoading = Object.keys(blockFormState).length === 0
 
   const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
   const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
@@ -194,6 +197,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             <RemoveButton />
           </div>
         ) : null}
+      </InlineBlockContainer>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <InlineBlockContainer>
+        <ShimmerEffect height="1rem" width="4rem" />
       </InlineBlockContainer>
     )
   }
