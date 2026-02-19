@@ -91,6 +91,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('div')
     addClassNamesToElement(element, config?.theme?.block)
+    element.setAttribute('data-block-id', this.__fields.id)
     return element
   }
 

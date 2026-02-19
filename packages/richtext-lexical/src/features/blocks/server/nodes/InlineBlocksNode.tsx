@@ -65,6 +65,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('span')
     addClassNamesToElement(element, config?.theme?.inlineBlock)
+    element.setAttribute('data-block-id', this.__fields.id)
     return element
   }
 
