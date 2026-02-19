@@ -369,6 +369,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     noOptions: 'Нет вариантов',
     noResults:
       'Ничего не найдено. Возможно, {{label}} еще не существует или не соответствует указанным фильтрам.',
+    noResultsDescription:
+      'Либо они не существуют, либо не соответствуют указанным вами фильтрам выше.',
+    noResultsFound: 'Результатов не найдено.',
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noTrashResults: 'Нет {{label}} в корзине.',

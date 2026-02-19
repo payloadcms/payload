@@ -21,8 +21,8 @@ import {
   selectTableRow,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
@@ -342,6 +342,43 @@ describe('Text', () => {
 
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - contains single value', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'contains',
+      value: 'two',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - contains multiple values', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    // Add filter with first value
+    const { condition } = await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'contains',
+      value: 'one',
+    })
+
+    // Add second value to the same filter
+    const valueInput = condition.locator('.condition__value input')
+    await valueInput.click()
+    await page.keyboard.type('three')
+    await page.keyboard.press('Enter')
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
 
   describe('A11y', () => {

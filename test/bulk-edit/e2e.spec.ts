@@ -344,7 +344,7 @@ test.describe('Bulk Edit', () => {
       'Deleted 3 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should delete all with filters and across pages', async () => {
@@ -374,7 +374,7 @@ test.describe('Bulk Edit', () => {
       'Deleted 6 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should update all with filters and across pages', async () => {

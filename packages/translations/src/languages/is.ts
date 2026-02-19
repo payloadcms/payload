@@ -364,6 +364,9 @@ export const isTranslations: DefaultTranslationsObject = {
     noOptions: 'Engir valkostir',
     noResults:
       'Engar {{label}} fundust. Annað hvort er engin {{label}} til eða ekkert passar við síu sem þú hefur valið fyrir ofan.',
+    noResultsDescription:
+      'Það eru hvorki neinar til eða neinar sem passa við síurnar sem þú skilgreindir að ofan.',
+    noResultsFound: 'Engin niðurstöður.',
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
