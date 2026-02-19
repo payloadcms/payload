@@ -72,12 +72,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const { config } = useConfig()
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}`
+  const blockSchemaPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}`
+  const blockFieldsSchemaPath = `${blockSchemaPath}.fields`
+  const blockFieldsPath = `${path}.${id}`
 
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
-    componentMapRenderedBlockPath
+  const blocksField: BlocksFieldClient = featureClientSchemaMap?.blocks?.[
+    blockSchemaPath
   ]?.[0] as BlocksFieldClient
 
   const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
@@ -88,13 +88,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const clientBlockFields = clientBlock?.fields ?? []
 
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${clientBlock?.slug}.fields`
-
-  const parentPath = `${path}.${id}`
-
   const blockFormState: FormState = useFormFields(([fields]) => {
     const data: FormState = {}
-    const prefix = `${parentPath}.`
+    const prefix = `${blockFieldsPath}.`
     for (const [key, value] of Object.entries(fields)) {
       if (key.startsWith(prefix)) {
         data[key.slice(prefix.length)] = value
@@ -216,8 +212,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             fields={clientBlock?.fields}
             forceRender
             parentIndexPath=""
-            parentPath={parentPath}
-            parentSchemaPath={schemaFieldsPath}
+            parentPath={blockFieldsPath}
+            parentSchemaPath={blockFieldsSchemaPath}
             permissions={true}
             readOnly={!isEditable}
           />

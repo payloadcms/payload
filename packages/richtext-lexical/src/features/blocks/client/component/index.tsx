@@ -59,12 +59,23 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
 
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
+  const blockSchemaPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
+  const blockFieldsSchemaPath = `${blockSchemaPath}.fields`
+  const blockFieldsPath = `${path}.${id}`
 
-  const parentPath = `${path}.${id}`
+  const blocksField: BlocksFieldClient | undefined = featureClientSchemaMap?.blocks?.[
+    blockSchemaPath
+  ]?.[0] as BlocksFieldClient | undefined
+
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
+
   const blockFormState: FormState = useFormFields(([fields]) => {
     const data: FormState = {}
-    const prefix = `${parentPath}.`
+    const prefix = `${blockFieldsPath}.`
     for (const [key, value] of Object.entries(fields)) {
       if (key.startsWith(prefix)) {
         data[key.slice(prefix.length)] = value
@@ -77,20 +88,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false)
-
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
-
-  const clientSchemaMap = featureClientSchemaMap['blocks']
-
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
-
-  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -291,8 +288,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
             fields={clientBlock?.fields ?? []}
             forceRender
             parentIndexPath=""
-            parentPath={parentPath}
-            parentSchemaPath={schemaFieldsPath}
+            parentPath={blockFieldsPath}
+            parentSchemaPath={blockFieldsSchemaPath}
             permissions={true}
             readOnly={!isEditable}
           />
@@ -307,8 +304,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
       t,
       isEditable,
       clientBlock?.fields,
-      schemaFieldsPath,
-      parentPath,
+      blockFieldsSchemaPath,
+      blockFieldsPath,
     ],
   )
 
@@ -332,8 +329,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
       errorCount={0}
       formSchema={clientBlock?.fields ?? []}
       nodeKey={nodeKey}
-      parentPath={parentPath}
-      parentSchemaPath={schemaFieldsPath}
+      parentPath={blockFieldsPath}
+      parentSchemaPath={blockFieldsSchemaPath}
       RemoveButton={RemoveButton}
     />
   )
