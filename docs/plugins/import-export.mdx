@@ -41,10 +41,10 @@ import { buildConfig } from 'payload'
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 
 const config = buildConfig({
-  collections: [Pages, Media],
+  collections: [Users, Pages],
   plugins: [
     importExportPlugin({
-      collections: ['users', 'pages'],
+      collections: [{ slug: 'users' }, { slug: 'pages' }],
       // see below for a list of available options
     }),
   ],
@@ -52,6 +52,51 @@ const config = buildConfig({
 
 export default config
 ```
+
+## Jobs Queue Requirements
+
+By default, the plugin uses Payload's [Jobs Queue](/docs/jobs-queue/overview) for import and export operations. Queued jobs require a runner to be configured, otherwise imports and exports will stay in "pending" status and never complete.
+
+Configure `jobs.autoRun` in your Payload config so that queued jobs are processed:
+
+```ts
+import { buildConfig } from 'payload'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const config = buildConfig({
+  collections: [Users, Pages],
+  jobs: {
+    autoRun: [
+      {
+        cron: '*/5 * * * *', // Check every 5 minutes
+        queue: 'default',
+      },
+    ],
+  },
+  plugins: [
+    importExportPlugin({
+      collections: [{ slug: 'users' }, { slug: 'pages' }],
+    }),
+  ],
+})
+
+export default config
+```
+
+Alternatively, use `allQueues: true` to process jobs from all queues:
+
+```ts
+jobs: {
+  autoRun: [
+    {
+      allQueues: true,
+      cron: '*/5 * * * *',
+    },
+  ],
+},
+```
+
+For smaller datasets or testing, you can run imports and exports synchronously by setting `disableJobsQueue: true` in the per-collection [ExportConfig](#exportconfig-options) or [ImportConfig](#importconfig-options). This avoids the need for a jobs runner but blocks the request until the operation completes.
 
 ## Options
 
@@ -143,6 +188,34 @@ export default buildConfig({
   ],
 })
 ```
+
+## Collection Visibility
+
+The `exports` and `imports` collections are hidden from the admin navigation by default (`admin.group: false`). Their routes remain accessible (for example `/admin/collections/exports` and `/admin/collections/imports`), so you can open them directly or link to them from your app. To list them in the sidebar, use `overrideExportCollection` and `overrideImportCollection` to set a `group`:
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+importExportPlugin({
+  overrideExportCollection: ({ collection }) => ({
+    ...collection,
+    admin: {
+      ...collection.admin,
+      group: 'Data Management',
+    },
+  }),
+  overrideImportCollection: ({ collection }) => ({
+    ...collection,
+    admin: {
+      ...collection.admin,
+      group: 'Data Management',
+    },
+  }),
+  collections: [{ slug: 'pages' }],
+})
+```
+
+With a group set, the Exports and Imports collections appear in the admin navigation under "Data Management", and you can open saved exports or import documents from there (including downloading saved export files).
 
 ## Limiting Import and Export Size
 
@@ -432,7 +505,12 @@ There are four possible ways that the plugin allows for exporting documents, the
 3. Local API - A create call to the uploads collection: `payload.create({ slug: 'uploads', ...parameters })`
 4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters })`
 
-By default, a user can use the Export drawer to create a file download by choosing `Save` or stream a downloadable file directly without persisting it by using the `Download` button. Either option can be disabled to provide the export experience you desire for your use-case.
+In the Export drawer you can choose:
+
+- **Download** — Streams the export file directly to the browser without saving. Nothing is stored in the exports collection.
+- **Save** — Creates a document in the exports collection (an upload) so the export is stored and can be reused or downloaded later.
+
+To download a saved export, open the exports collection (go to `/admin/collections/exports` or, if you made it visible as in [Collection Visibility](#collection-visibility), use the sidebar), open the export document, and use the file download from there. Either the Download or Save option can be disabled per collection via [ExportConfig](#exportconfig-options) (`disableDownload`, `disableSave`).
 
 The UI for creating exports provides options so that users can be selective about which documents to include and also which columns or fields to include.
 
