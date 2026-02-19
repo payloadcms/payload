@@ -21,8 +21,8 @@ import { migrationsCollection } from '../database/migrations/migrationsCollectio
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { addFolderSidebarTabs } from '../folders/addFolderSidebarTab.js'
-import { validateFolderFields } from '../folders/validateFolderFields.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import { validateHierarchyFields } from '../hierarchy/validateHierarchyFields.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
   getLockedDocumentsCollection,
@@ -33,7 +33,6 @@ import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-pres
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
 import { addTaxonomySidebarTabs } from '../taxonomy/addTaxonomySidebarTab.js'
-import { validateTaxonomyFields } from '../taxonomy/validateTaxonomyFields.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -285,11 +284,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  // Validate taxonomy fields exist in related collections and build sanitized config
-  validateTaxonomyFields(config as unknown as Config)
-
-  // Validate folder fields exist in related collections and inject collectionSpecific validation
-  validateFolderFields(config as unknown as Config)
+  // Validate hierarchy fields exist in related collections and build sanitized config
+  validateHierarchyFields(config as unknown as Config)
 
   // Add sidebar tabs for taxonomy collections
   addTaxonomySidebarTabs(config as unknown as Config)
