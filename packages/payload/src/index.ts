@@ -1705,7 +1705,12 @@ export { findVersionsOperation as findVersionsOperationGlobal } from './globals/
 
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export type { Ancestor, HierarchyConfig, SanitizedHierarchyConfig } from './hierarchy/index.js'
+export type {
+  Ancestor,
+  HierarchyConfig,
+  SanitizedHierarchyConfig,
+  SanitizedHierarchyRelatedCollection,
+} from './hierarchy/index.js'
 
 export { getAncestors } from './hierarchy/index.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'

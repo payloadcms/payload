@@ -6,6 +6,37 @@
  */
 export type HierarchyConfig = {
   /**
+   * UI configuration for hierarchy
+   */
+  admin?: {
+    /**
+     * Custom components for hierarchy UI
+     */
+    components?: {
+      /**
+       * Custom icon component path for hierarchy items
+       */
+      Icon?: string
+    }
+    /**
+     * Maximum number of items to load in tree views
+     * @default 100
+     */
+    treeLimit?: number
+  }
+  /**
+   * Whether related documents can have multiple values of this hierarchy
+   * Set to false for folder-like behavior (single parent), true for tag-like behavior (multiple)
+   * @default true
+   */
+  allowHasMany?: boolean
+  /**
+   * Whether this hierarchy is scoped to specific collections
+   * When true, hierarchy items can be restricted to certain collections
+   * @default false
+   */
+  collectionSpecific?: boolean
+  /**
    * Name of the field that references the parent document
    * Will automatically create this field if it does not exist
    * @default HIERARCHY_PARENT_FIELD ('_h_parent')
@@ -33,8 +64,28 @@ export type HierarchyConfig = {
  * Sanitized hierarchy configuration with all defaults applied
  */
 export type SanitizedHierarchyConfig = {
+  admin: {
+    components: {
+      Icon?: string
+    }
+    treeLimit: number
+  }
+  allowHasMany: boolean
+  collectionSpecific: boolean
   parentFieldName: string
+  /**
+   * Auto-populated during validation - maps collection slug to field info
+   */
+  relatedCollections: Record<string, SanitizedHierarchyRelatedCollection>
   slugify: (text: string) => string
   slugPathFieldName: string
   titlePathFieldName: string
+}
+
+/**
+ * Information about how a collection relates to this hierarchy
+ */
+export type SanitizedHierarchyRelatedCollection = {
+  fieldName: string
+  hasMany: boolean
 }

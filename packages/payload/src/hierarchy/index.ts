@@ -1,4 +1,8 @@
-export type { HierarchyConfig, SanitizedHierarchyConfig } from './types.js'
+export type {
+  HierarchyConfig,
+  SanitizedHierarchyConfig,
+  SanitizedHierarchyRelatedCollection,
+} from './types.js'
 export { computePaths } from './utils/computePaths.js'
 export type { Ancestor } from './utils/getAncestors.js'
 export { getAncestors } from './utils/getAncestors.js'
