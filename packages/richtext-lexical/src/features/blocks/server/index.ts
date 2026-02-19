@@ -5,6 +5,7 @@ import type {
   Config,
   FieldSchemaMap,
   FlattenedBlocksField,
+  PayloadComponent,
   UIFieldClientProps,
   UIFieldServerProps,
 } from 'payload'
@@ -154,16 +155,23 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
-              blockFields.unshift({
-                name: `_components`,
-                type: 'ui',
-                admin: {
-                  components: {
-                    Block: block.admin?.components?.Block,
-                    BlockLabel: block.admin?.components?.Label,
+              const uiComponents: Record<string, PayloadComponent | undefined> = {}
+              if (block.admin.components.Block) {
+                uiComponents.Block = block.admin.components.Block
+              }
+              if (block.admin.components.Label) {
+                uiComponents.BlockLabel = block.admin.components.Label
+              }
+
+              if (Object.keys(uiComponents).length > 0) {
+                blockFields.unshift({
+                  name: `_components`,
+                  type: 'ui',
+                  admin: {
+                    components: uiComponents,
                   },
-                },
-              })
+                })
+              }
             }
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
               fields: blockFields,
@@ -182,16 +190,23 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
-              blockFields.unshift({
-                name: `_components`,
-                type: 'ui',
-                admin: {
-                  components: {
-                    Block: block.admin?.components?.Block,
-                    BlockLabel: block.admin?.components?.Label,
+              const uiComponents: Record<string, PayloadComponent | undefined> = {}
+              if (block.admin.components.Block) {
+                uiComponents.Block = block.admin.components.Block
+              }
+              if (block.admin.components.Label) {
+                uiComponents.BlockLabel = block.admin.components.Label
+              }
+
+              if (Object.keys(uiComponents).length > 0) {
+                blockFields.unshift({
+                  name: `_components`,
+                  type: 'ui',
+                  admin: {
+                    components: uiComponents,
                   },
-                },
-              })
+                })
+              }
             }
 
             schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
