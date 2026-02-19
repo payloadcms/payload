@@ -1,15 +1,15 @@
 'use client'
 
-import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload'
 import React from 'react'
 
-import type { TaxonomyTreeProps } from './types.js'
+import type { HierarchyTreeProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { Tree } from '../Tree/index.js'
 
-export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
+export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   collectionSlug,
   initialData,
   onNodeClick,
@@ -20,8 +20,8 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
-  const parentFieldName = collectionConfig.taxonomy?.parentFieldName || 'parent'
-  const treeLimit = collectionConfig.taxonomy?.treeLimit ?? DEFAULT_TAXONOMY_TREE_LIMIT
+  const parentFieldName = collectionConfig.hierarchy?.parentFieldName || 'parent'
+  const treeLimit = collectionConfig.hierarchy?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
 
   return (

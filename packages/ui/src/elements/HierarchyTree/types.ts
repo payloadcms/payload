@@ -1,32 +1,32 @@
 import type { TypeWithID } from 'payload'
 import type React from 'react'
 
-export type TaxonomyDocument = {
+export type HierarchyDocument = {
   [key: string]: unknown
 } & TypeWithID
 
-export type TaxonomyNode = {
+export type HierarchyNode = {
   hasChildren: boolean
   id: number | string
   title: string
 }
 
-export type TaxonomyInitialData = {
-  docs: TaxonomyDocument[]
+export type HierarchyInitialData = {
+  docs: HierarchyDocument[]
   // Metadata about what was loaded - keyed by parent ID ('null' for root)
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
-export type TaxonomyTreeProps = {
+export type HierarchyTreeProps = {
   collectionSlug: string
-  initialData?: null | TaxonomyInitialData
+  initialData?: HierarchyInitialData | null
   onNodeClick?: (id: number | string) => void
   selectedNodeId?: null | number | string
   useAsTitle?: string
 }
 
 export type CachedChildren = {
-  children: TaxonomyDocument[]
+  children: HierarchyDocument[]
   hasMore: boolean
   page: number
   totalDocs: number
@@ -38,7 +38,7 @@ export type TreeNodeProps = {
   depth?: number
   expandedNodes: Set<number | string>
   limit?: number
-  node: TaxonomyNode
+  node: HierarchyNode
   onSelect: (id: number | string) => void
   onToggle: (id: number | string) => void
   parentFieldName: string

@@ -6,16 +6,16 @@ import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
-import type { TaxonomyInitialData } from './types.js'
+import type { HierarchyInitialData } from './types.js'
 
 import { HydrateTaxonomyProvider } from '../../elements/HydrateTaxonomyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { TaxonomyTree } from './index.js'
+import { HierarchyTree } from './index.js'
 
-export const TaxonomySidebarTab: React.FC<
+export const HierarchySidebarTab: React.FC<
   {
     collectionSlug: string
-    initialData?: null | TaxonomyInitialData
+    initialData?: HierarchyInitialData | null
     initialExpandedNodes?: (number | string)[]
     parentFieldName?: string
     selectedNodeId?: null | string
@@ -63,8 +63,8 @@ export const TaxonomySidebarTab: React.FC<
         treeData={initialData}
         treeLimit={treeLimit}
       />
-      <div className="taxonomy-sidebar-tab">
-        <TaxonomyTree
+      <div className="hierarchy-sidebar-tab">
+        <HierarchyTree
           collectionSlug={collectionSlug}
           initialData={initialData}
           key={collectionSlug}

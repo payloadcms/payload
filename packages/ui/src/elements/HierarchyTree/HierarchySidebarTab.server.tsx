@@ -4,13 +4,13 @@ import { getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
-import { TaxonomySidebarTab } from './TaxonomySidebarTab.js'
+import { HierarchySidebarTab } from './HierarchySidebarTab.js'
 
-export type TaxonomySidebarTabServerProps = {
+export type HierarchySidebarTabServerProps = {
   collectionSlug: string
 } & SidebarTabServerProps
 
-export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> = async ({
+export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
   collectionSlug,
   payload,
   searchParams,
@@ -56,9 +56,9 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
 
     // STEP 2: Get collection config
     const collectionConfig = payload.collections[collectionSlug]?.config
-    const taxonomyConfig = collectionConfig?.taxonomy
-    parentFieldName = taxonomyConfig?.parentFieldName || 'parent'
-    treeLimit = taxonomyConfig?.treeLimit
+    const hierarchyConfig = collectionConfig?.hierarchy
+    parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
+    treeLimit = hierarchyConfig?.admin?.treeLimit
     useAsTitle = collectionConfig?.admin?.useAsTitle
 
     // Track the immediate parent of the selected node (for ensuring siblings are loaded)
@@ -122,13 +122,13 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
   } catch (error) {
     payload.logger.warn({
       err: error,
-      msg: `Failed to fetch taxonomy data for ${collectionSlug}`,
+      msg: `Failed to fetch hierarchy data for ${collectionSlug}`,
     })
     // Fall back to client-side fetching if server fetch fails
   }
 
   return (
-    <TaxonomySidebarTab
+    <HierarchySidebarTab
       collectionSlug={collectionSlug}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}

@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { Button } from '../Button/index.js'
-import { TreeConnector } from '../TaxonomyTree/TreeConnector.js'
+import { TreeConnector } from '../HierarchyTree/TreeConnector.js'
 import './index.scss'
 
 const baseClass = 'load-more-row'

@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
-import type { TaxonomyDocument } from '../../../elements/TaxonomyTree/types.js'
+import type { HierarchyDocument } from '../../../elements/HierarchyTree/types.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
@@ -28,7 +28,7 @@ import { baseClass } from './types.js'
 import './index.scss'
 
 export type HierarchyTableProps = {
-  childrenData?: PaginatedDocs<TaxonomyDocument>
+  childrenData?: PaginatedDocs<HierarchyDocument>
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
   collectionSlug: string
