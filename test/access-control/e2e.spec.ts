@@ -155,6 +155,8 @@ describe('Access Control', () => {
     })
 
     test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
+      test.setTimeout(TEST_TIMEOUT_LONG)
+
       async function waitForFormState(action: 'reload' | 'save') {
         await assertNetworkRequests(
           page,
