@@ -2,7 +2,7 @@
 
 import React, { createContext, use, useCallback, useState } from 'react'
 
-import type { FolderInitialData } from '../../elements/FolderTree/types.js'
+import type { FolderInitialData } from '../../elements/FolderSidebarTab/types.js'
 import type { FolderContextValue } from './types.js'
 
 const FolderContext = createContext<FolderContextValue | undefined>(undefined)

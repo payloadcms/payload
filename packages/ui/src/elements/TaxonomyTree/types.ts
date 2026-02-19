@@ -22,6 +22,7 @@ export type TaxonomyTreeProps = {
   initialData?: null | TaxonomyInitialData
   onNodeClick?: (id: number | string) => void
   selectedNodeId?: null | number | string
+  useAsTitle?: string
 }
 
 export type CachedChildren = {

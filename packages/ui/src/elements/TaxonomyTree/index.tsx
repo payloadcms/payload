@@ -14,6 +14,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
   initialData,
   onNodeClick,
   selectedNodeId,
+  useAsTitle: useAsTitleProp,
 }) => {
   const { expandedNodes, toggleNode } = useTaxonomy()
   const { getEntityConfig } = useConfig()
@@ -21,6 +22,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
   const parentFieldName = collectionConfig.taxonomy?.parentFieldName || 'parent'
   const treeLimit = collectionConfig.taxonomy?.treeLimit ?? DEFAULT_TAXONOMY_TREE_LIMIT
+  const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
 
   return (
     <Tree
@@ -32,6 +34,7 @@ export const TaxonomyTree: React.FC<TaxonomyTreeProps> = ({
       selectedNodeId={selectedNodeId ?? undefined}
       toggleNode={toggleNode}
       treeLimit={treeLimit}
+      useAsTitle={useAsTitle}
     />
   )
 }

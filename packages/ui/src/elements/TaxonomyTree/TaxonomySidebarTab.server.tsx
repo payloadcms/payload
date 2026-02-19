@@ -25,6 +25,7 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
   let selectedNodeId: null | string = null
   let parentFieldName = 'parent'
   let treeLimit: number | undefined
+  let useAsTitle: string | undefined
 
   try {
     // Get selected node from URL (?parent=<id>)
@@ -58,6 +59,7 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
     const taxonomyConfig = collectionConfig?.taxonomy
     parentFieldName = taxonomyConfig?.parentFieldName || 'parent'
     treeLimit = taxonomyConfig?.treeLimit
+    useAsTitle = collectionConfig?.admin?.useAsTitle
 
     // Track the immediate parent of the selected node (for ensuring siblings are loaded)
     let selectedNodeParentId: null | number | string = null
@@ -133,6 +135,7 @@ export const TaxonomySidebarTabServer: React.FC<TaxonomySidebarTabServerProps> =
       parentFieldName={parentFieldName}
       selectedNodeId={selectedNodeId}
       treeLimit={treeLimit}
+      useAsTitle={useAsTitle}
     />
   )
 }

@@ -1,4 +1,4 @@
-import type { FolderInitialData } from '../../elements/FolderTree/types.js'
+import type { FolderInitialData } from '../../elements/FolderSidebarTab/types.js'
 
 export type FolderContextValue = {
   collectionSlug: string

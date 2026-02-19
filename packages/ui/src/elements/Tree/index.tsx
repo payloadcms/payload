@@ -38,6 +38,7 @@ const TreeInner: React.FC<TreeProps> = ({
   selectedNodeId,
   toggleNode,
   treeLimit = DEFAULT_TREE_LIMIT,
+  useAsTitle,
 }) => {
   const { moveFocus } = useTreeFocus()
 
@@ -165,7 +166,7 @@ const TreeInner: React.FC<TreeProps> = ({
       {rootNodes.map((node) => {
         const nodeId: number | string = node.id
         const nodeIdStr = typeof nodeId === 'number' ? String(nodeId) : nodeId
-        const nodeTitle = getDocumentTitle(node, undefined)
+        const nodeTitle = getDocumentTitle(node, useAsTitle)
         const isSelected = nodeIdStr === String(selectedNodeId)
 
         return (
@@ -186,6 +187,7 @@ const TreeInner: React.FC<TreeProps> = ({
             parentFieldName={parentFieldName}
             selected={isSelected}
             selectedNodeId={selectedNodeId}
+            useAsTitle={useAsTitle}
           />
         )
       })}

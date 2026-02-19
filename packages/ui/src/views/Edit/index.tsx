@@ -544,7 +544,7 @@ export function DefaultEditView({
     !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
-  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+  const isFolderCollection = Boolean(collectionConfig?.folder)
 
   return (
     <main

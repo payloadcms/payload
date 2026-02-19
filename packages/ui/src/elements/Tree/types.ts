@@ -35,6 +35,7 @@ export type TreeProps = {
   selectedNodeId?: number | string
   toggleNode: (id: number | string) => void
   treeLimit?: number
+  useAsTitle?: string
 }
 
 export type TreeNodeProps = {

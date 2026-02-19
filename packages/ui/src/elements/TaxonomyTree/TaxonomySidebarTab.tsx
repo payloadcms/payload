@@ -20,6 +20,7 @@ export const TaxonomySidebarTab: React.FC<
     parentFieldName?: string
     selectedNodeId?: null | string
     treeLimit?: number
+    useAsTitle?: string
   } & SidebarTabClientProps
 > = ({
   collectionSlug,
@@ -28,6 +29,7 @@ export const TaxonomySidebarTab: React.FC<
   parentFieldName,
   selectedNodeId: selectedNodeIdFromServer,
   treeLimit,
+  useAsTitle,
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -68,6 +70,7 @@ export const TaxonomySidebarTab: React.FC<
           key={collectionSlug}
           onNodeClick={handleNodeClick}
           selectedNodeId={selectedNodeId}
+          useAsTitle={useAsTitle}
         />
       </div>
     </>
