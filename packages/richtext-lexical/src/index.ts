@@ -20,7 +20,7 @@ import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider }
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
-import { getGetBuildFormState } from './utilities/buildFormState.js'
+import { getGetBuildFormState, getGetCalculateDefaultValues } from './utilities/buildFormState.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
@@ -99,6 +99,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     return {
       buildFormState: getGetBuildFormState({
+        features: finalSanitizedEditorConfig.features,
+      }),
+      calculateDefaultValues: getGetCalculateDefaultValues({
         features: finalSanitizedEditorConfig.features,
       }),
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
