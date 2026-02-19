@@ -12,7 +12,6 @@ import {
   EditDepthProvider,
   ErrorPill,
   formatDrawerSlug,
-  FormSubmit,
   Pill,
   RenderFields,
   SectionTitle,
@@ -21,6 +20,7 @@ import {
   useDocumentInfo,
   useEditDepth,
   useFormFields,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
@@ -55,6 +55,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     depth: editDepth,
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { closeModal } = useModal()
 
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
@@ -296,11 +297,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
             permissions={true}
             readOnly={!isEditable}
           />
-          <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
+          <Button onClick={() => closeModal(drawerSlug)}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
     ),
     [
+      closeModal,
       drawerSlug,
       blockID,
       blockDisplayName,

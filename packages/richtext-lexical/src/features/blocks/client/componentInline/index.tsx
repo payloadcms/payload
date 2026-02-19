@@ -10,12 +10,12 @@ import {
   Drawer,
   EditDepthProvider,
   formatDrawerSlug,
-  FormSubmit,
   RenderFields,
   ShimmerEffect,
   useConfig,
   useEditDepth,
   useFormFields,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
@@ -69,6 +69,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     depth: editDepth,
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { closeModal } = useModal()
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const { config } = useConfig()
@@ -228,7 +229,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             permissions={true}
             readOnly={!isEditable}
           />
-          <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
+          <Button onClick={() => closeModal(drawerSlug)}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
