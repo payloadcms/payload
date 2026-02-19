@@ -14,7 +14,7 @@ import { GroupField } from '@payloadcms/ui'
  *
  * Expected behavior:
  * - Nested richtext fields should have data-lexical-view="frontend"
- * - ViewSelector should be hidden (hasInheritedViews=true)
+ * - ViewSelector should be hidden (isControlledByParent=true)
  * - Each nested field uses its own views map to resolve the "frontend" view
  */
 export const ViewProviderGroupWrapper: GroupFieldClientComponent = (props) => {

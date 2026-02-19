@@ -55,7 +55,7 @@ const RichTextComponent: React.FC<
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
   const editDepth = useEditDepth()
-  const { hasInheritedViews } = useRichTextView()
+  const { isControlledByParent } = useRichTextView()
 
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
@@ -193,7 +193,7 @@ const RichTextComponent: React.FC<
         {Label || (
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         )}
-        {!hasInheritedViews && <ViewSelector />}
+        {!isControlledByParent && <ViewSelector />}
       </div>
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>

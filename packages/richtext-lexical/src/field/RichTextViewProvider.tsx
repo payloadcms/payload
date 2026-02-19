@@ -22,14 +22,15 @@ type RichTextViewContextType = {
    */
   hasExplicitCurrentView?: boolean
   /**
-   * True if this provider inherited its view from a parent provider.
-   * When true, the ViewSelector is hidden because the view is controlled by an ancestor.
-   */
-  hasInheritedViews?: boolean
-  /**
    * If true, nested richtext editors will inherit this provider's currentView and views.
    */
   inheritable?: boolean
+  /**
+   * True if this provider's view is controlled by an ancestor provider — either because the
+   * ancestor has a views map (view-map inheritance) or an explicit `currentView` prop.
+   * When true, the ViewSelector is hidden.
+   */
+  isControlledByParent?: boolean
   /**
    * Function to programmatically change the current view.
    */
@@ -75,8 +76,9 @@ export const RichTextViewProvider: React.FC<{
   // Track if this provider explicitly sets currentView (not just using the default)
   const hasOwnExplicitView = args.currentView !== undefined
 
-  const hasInheritedViews =
-    parentContext.inheritable && Boolean(parentContext.hasExplicitCurrentView)
+  const isControlledByParent =
+    parentContext.inheritable &&
+    (Boolean(parentContext.views) || Boolean(parentContext.hasExplicitCurrentView))
 
   // This provider has explicit currentView if it sets one OR inherits one from parent
   const hasExplicitCurrentView =
@@ -90,15 +92,11 @@ export const RichTextViewProvider: React.FC<{
     views,
   } = {
     children: args.children,
-    // Only inherit currentView if parent has an explicit one
-    currentView:
-      parentContext.inheritable && parentContext.hasExplicitCurrentView
-        ? parentContext.currentView
-        : args.currentView,
+    currentView: isControlledByParent ? parentContext.currentView : args.currentView,
     // Propagate inheritable flag through the hierarchy
     inheritable: parentContext.inheritable || args.inheritable,
     // Only inherit views if parent has a views map
-    views: parentContext.inheritable && parentContext.views ? parentContext.views : args.views,
+    views: isControlledByParent ? parentContext.views : args.views,
   }
 
   const [currentView, setCurrentView] = useControllableState(currentViewFromProps, 'default')
@@ -109,12 +107,19 @@ export const RichTextViewProvider: React.FC<{
       currentView,
       currentViewMap,
       hasExplicitCurrentView,
-      hasInheritedViews,
       inheritable,
+      isControlledByParent,
       setCurrentView,
       views,
     }
-  }, [currentView, inheritable, hasExplicitCurrentView, hasInheritedViews, setCurrentView, views])
+  }, [
+    currentView,
+    inheritable,
+    hasExplicitCurrentView,
+    isControlledByParent,
+    setCurrentView,
+    views,
+  ])
 
   return <RichTextViewContext value={value}>{children}</RichTextViewContext>
 }
@@ -127,12 +132,12 @@ export const RichTextViewProvider: React.FC<{
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { currentView, currentViewMap, hasInheritedViews, setCurrentView } = useRichTextView()
+ *   const { currentView, currentViewMap, isControlledByParent, setCurrentView } = useRichTextView()
  *
  *   return (
  *     <div>
  *       <p>Active view: {currentView}</p>
- *       {hasInheritedViews && <p>View inherited from parent</p>}
+ *       {isControlledByParent && <p>View controlled by parent</p>}
  *       {currentViewMap?.heading && <p>Custom heading renderer active</p>}
  *       <button onClick={() => setCurrentView('frontend')}>Switch to frontend</button>
  *     </div>

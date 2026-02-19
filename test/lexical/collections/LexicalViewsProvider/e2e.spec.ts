@@ -46,7 +46,7 @@ describe('Lexical Views Provider', () => {
       page,
     }) => {
       // The parent RichTextViewProvider sets inheritable={true} with explicit currentView="frontend",
-      // so the inner field should see hasInheritedViews=true and hide the ViewSelector
+      // so the inner field should see isControlledByParent=true and hide the ViewSelector
       const viewSelector = page.locator('.lexical-view-selector')
       await expect(viewSelector).toHaveCount(0)
     })
@@ -91,7 +91,7 @@ describe('Lexical Views Provider', () => {
       // from the ancestor RichTextViewProvider wrapper (not from its direct parent field).
       // The nested field has its own views configured, but inherits the forced currentView.
 
-      // The nested richtext should NOT have a view selector (hasInheritedViews=true)
+      // The nested richtext should NOT have a view selector (isControlledByParent=true)
       const nestedViewSelector = nestedRichText.locator('.lexical-view-selector')
       await expect(nestedViewSelector).toHaveCount(0)
 
