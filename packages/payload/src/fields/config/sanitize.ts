@@ -163,6 +163,10 @@ export const sanitizeFields = async ({
     }
 
     // assert that field names do not contain forbidden characters
+    if (fieldAffectsData && !field?.name) {
+      throw new InvalidFieldName(field, 'no field name')
+    }
+    // assert that field names do not contain forbidden characters
     if (fieldAffectsData && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name)
     }

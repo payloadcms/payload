@@ -41,7 +41,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type { FolderConfig, SanitizedFolderConfig } from '../../folders/types.js'
 import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
@@ -620,21 +620,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   fields: Field[]
   /**
    * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   * Set to false to explicitly disable folder functionality.
    */
-  folder?: {
-    /**
-     * The field name used for parent relationship. Defaults to 'parent'.
-     */
-    parentFieldName?: string
-    /**
-     * Collections that can be organized by this folder collection.
-     */
-    relatedCollections?: string[]
-  }
-  /**
-   * Enables folders for this collection
-   */
-  folders?: boolean | CollectionFoldersConfiguration
+  folder?: false | FolderConfig
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -857,22 +845,10 @@ export interface SanitizedCollectionConfig
   /**
    * Configuration for folder collections. When present, this collection is treated as a folder collection.
    */
-  folder?:
-    | {
-        /**
-         * The field name used for parent relationship. Defaults to 'parent'.
-         */
-        parentFieldName: string
-        /**
-         * Collections that can be organized by this folder collection.
-         */
-        relatedCollections: string[]
-      }
-    | false
+  folder?: false | SanitizedFolderConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   hierarchy: false | SanitizedHierarchyConfig
   joins: SanitizedJoins
   /**
