@@ -1,5 +1,7 @@
 'use client'
 
+import type { BlocksFieldClient, ClientBlock, CollapsedPreferences, FormState } from 'payload'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
@@ -17,11 +19,10 @@ import {
   useConfig,
   useDocumentInfo,
   useEditDepth,
-  useFormSubmitted,
+  useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
-import { type BlocksFieldClient, type ClientBlock, type CollapsedPreferences } from 'payload'
 import React, { useCallback, useMemo } from 'react'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -38,7 +39,6 @@ type Props = {
 
 export const BlockComponent: React.FC<Props> = (props) => {
   const { id, blockType, className: baseClass, nodeKey } = props
-  const submitted = useFormSubmitted()
 
   const {
     fieldProps: { featureClientSchemaMap, field: parentLexicalRichTextField, path, schemaPath },
@@ -62,6 +62,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
   const parentPath = `${path}.${id}`
+  const blockFormState: FormState = useFormFields(([fields]) => {
+    const data: FormState = {}
+    const prefix = `${parentPath}.`
+    for (const [key, value] of Object.entries(fields)) {
+      if (key.startsWith(prefix)) {
+        data[key.slice(prefix.length)] = value
+      }
+    }
+    return data
+  })
+
+  const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
+  const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(false)
 
@@ -164,11 +177,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [baseClass, isEditable, removeBlock],
   )
 
-  const CustomBlock =
-    submitted && false // TODO: custom block components need rethinking with unified form state
-      ? undefined
-      : undefined
-
   const BlockCollapsible = useMemo(
     () =>
       ({
@@ -199,6 +207,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__block-header`}>
                   {typeof Label !== 'undefined' ? (
                     Label
+                  ) : typeof CustomLabel !== 'undefined' ? (
+                    CustomLabel
                   ) : (
                     <div className={`${baseClass}__block-label`}>
                       {typeof CustomPill !== 'undefined' ? (
@@ -257,6 +267,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       baseClass,
       clientBlock?.admin?.disableBlockName,
       blockType,
+      CustomLabel,
       i18n,
       isCollapsed,
       onCollapsedChange,

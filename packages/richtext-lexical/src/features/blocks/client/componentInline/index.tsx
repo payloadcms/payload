@@ -1,6 +1,6 @@
 'use client'
 
-import type { BlocksFieldClient, ClientBlock } from 'payload'
+import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -14,6 +14,7 @@ import {
   RenderFields,
   useConfig,
   useEditDepth,
+  useFormFields,
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
@@ -91,6 +92,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const parentPath = `${path}.${id}`
 
+  const blockFormState: FormState = useFormFields(([fields]) => {
+    const data: FormState = {}
+    const prefix = `${parentPath}.`
+    for (const [key, value] of Object.entries(fields)) {
+      if (key.startsWith(prefix)) {
+        data[key.slice(prefix.length)] = value
+      }
+    }
+    return data
+  })
+
+  const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
+  const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
+
   useEffect(() => {
     if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
       if (clientBlockFields.length > 2) {
@@ -165,10 +180,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   )
 
   const Label = useMemo(() => {
-    return () => (
-      <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
-    )
-  }, [clientBlock?.labels, i18n])
+    if (CustomLabel) {
+      return () => CustomLabel
+    } else {
+      return () => (
+        <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
+      )
+    }
+  }, [CustomLabel, clientBlock?.labels, i18n])
 
   if (!clientBlock) {
     return (
@@ -205,15 +224,28 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
         </Drawer>
       </EditDepthProvider>
-      <InlineBlockContainer>
-        <Label />
-        {isEditable ? (
-          <div className={`${baseClass}__actions`}>
-            <EditButton />
-            <RemoveButton />
-          </div>
-        ) : null}
-      </InlineBlockContainer>
+      {CustomBlock ? (
+        <InlineBlockComponentContext
+          value={{
+            EditButton,
+            InlineBlockContainer,
+            Label,
+            nodeKey,
+            RemoveButton,
+          }}
+        >
+          {CustomBlock}
+        </InlineBlockComponentContext>
+      ) : (
+        <InlineBlockContainer>
+          {isEditable ? (
+            <div className={`${baseClass}__actions`}>
+              <EditButton />
+              <RemoveButton />
+            </div>
+          ) : null}
+        </InlineBlockContainer>
+      )}
     </>
   )
 }
