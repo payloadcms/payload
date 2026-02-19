@@ -2,7 +2,6 @@ import type {
   ClientComponentProps,
   FieldPaths,
   RichTextFieldClient,
-  RichTextField as RichTextFieldType,
   ServerComponentProps,
 } from 'payload'
 
@@ -28,11 +27,8 @@ export const RscEntryLexicalField: React.FC<
     Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
 > = (args) => {
-  const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
-
-  const disabled = args?.readOnly || field?.admin?.readOnly
 
   if (!(args?.clientField as RichTextFieldClient)?.name) {
     throw new Error('Initialized lexical RSC field without a field name')
