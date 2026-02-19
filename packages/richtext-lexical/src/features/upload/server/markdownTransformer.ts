@@ -1,6 +1,13 @@
 import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
-import { $isUploadServerNode, UploadServerNode } from './nodes/UploadNode.js'
+import {
+  $createUploadServerNode,
+  $isUploadServerNode,
+  UploadServerNode,
+} from './nodes/UploadNode.js'
+
+/** Matches upload placeholder written by export: ![relationTo:id]() */
+const UPLOAD_PLACEHOLDER_REGEX = /!\[([^\]:]+):([^\]]+)\]\(\)/
 
 export const UploadMarkdownTransformer: ElementTransformer = {
   type: 'element',
@@ -40,11 +47,22 @@ export const UploadMarkdownTransformer: ElementTransformer = {
     const id = typeof value === 'object' ? (value as Record<string, string>)?.id : value
     return `![${data.relationTo}:${id}]()`
   },
-  // This regex is intentionally set to never match during import,
-  // as upload nodes should be created through the upload UI, not from markdown
-  regExp: /(?!x)x/,
-  replace: () => {
-    // Upload nodes are not created from markdown input
-    return false
+  regExp: UPLOAD_PLACEHOLDER_REGEX,
+  replace: (parentNode, _children, match, isImport) => {
+    if (!isImport || !match[1] || !match[2]) {
+      return false
+    }
+    const relationTo = match[1]
+    const value = match[2]
+    const id = /^\d+$/.test(value) ? Number(value) : value
+    const node = $createUploadServerNode({
+      data: {
+        fields: {},
+        relationTo,
+        value: id,
+      },
+    })
+    parentNode.replace(node)
+    return true
   },
 }
