@@ -27,7 +27,7 @@ export const RscEntryLexicalField: React.FC<
     Pick<FieldPaths, 'path'> &
     Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
-> = async (args) => {
+> = (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
