@@ -94,7 +94,11 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
     await lexical.slashCommand('myblock')
-    await page.locator('#field-someText').first().focus()
+    const blockId = await lexical.editor
+      .locator('.LexicalEditorTheme__block')
+      .first()
+      .getAttribute('data-block-id')
+    await page.locator(`#field-richText__${blockId}__someText`).first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.press('Backspace')
