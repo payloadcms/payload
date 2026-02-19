@@ -91,7 +91,7 @@ export const enTranslations = {
     editDashboard: 'Edit Dashboard',
     editingDashboard: 'Editing Dashboard',
     noItems:
-      '  There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
+      'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
     resetLayout: 'Reset Layout',
     searchWidgets: 'Search widgets...',
   },
