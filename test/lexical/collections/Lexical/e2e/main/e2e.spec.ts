@@ -1413,7 +1413,14 @@ describe('lexicalMain', () => {
   // https://github.com/payloadcms/payload/issues/5146
   test('Preserve indent and text-align when converting Lexical <-> HTML', async () => {
     await page.goto('http://localhost:3000/admin/collections/rich-text-fields?limit=10')
-    await page.getByLabel('Create new Rich Text Field').click()
+
+    await expect(page.locator('tbody tr').first()).toBeVisible()
+
+    const createButton = page.getByLabel('Create new Rich Text Field')
+    await expect(createButton).toBeEnabled()
+    const href = await createButton.getAttribute('href')
+    await page.goto(`${serverURL}${href}`)
+    await waitForFormReady(page)
     await page.getByLabel('Title*').click()
     await page.getByLabel('Title*').fill('Indent and Text-align')
     await page.getByRole('paragraph').nth(1).click()
