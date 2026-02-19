@@ -246,6 +246,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
+          <Label />
           {isEditable ? (
             <div className={`${baseClass}__actions`}>
               <EditButton />
