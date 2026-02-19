@@ -67,10 +67,10 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    tags: Tag;
     posts: Post;
     pages: Page;
     media: Media;
+    tags: Tag;
     categories: Category;
     'payload-kv': PayloadKv;
     users: User;
@@ -80,10 +80,10 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    tags: TagsSelect<false> | TagsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -124,6 +124,19 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  content?: string | null;
+  _t_tags?: (string | Tag)[] | null;
+  _t_categories?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tags".
  */
 export interface Tag {
@@ -138,15 +151,16 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "categories".
  */
-export interface Post {
+export interface Category {
   id: string;
-  title: string;
-  content?: string | null;
-  _t_tags?: (string | Tag)[] | null;
+  parentCategory?: (string | null) | Category;
+  name: string;
   updatedAt: string;
   createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -156,7 +170,7 @@ export interface Page {
   id: string;
   title: string;
   content?: string | null;
-  _t_tags?: (string | Tag)[] | null;
+  _t_tags?: (string | null) | Tag;
   updatedAt: string;
   createdAt: string;
 }
@@ -178,19 +192,6 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  parentCategory?: (string | null) | Category;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -242,10 +243,6 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'tags';
-        value: string | Tag;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -256,6 +253,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
       } | null)
     | ({
         relationTo: 'categories';
@@ -309,25 +310,13 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags_select".
- */
-export interface TagsSelect<T extends boolean = true> {
-  parent?: T;
-  name?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   _t_tags?: T;
+  _t_categories?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -359,6 +348,19 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
