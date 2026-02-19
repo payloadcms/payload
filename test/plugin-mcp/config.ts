@@ -12,10 +12,13 @@ import { Products } from './collections/Products.js'
 import { ReturnedResources } from './collections/ReturnedResources.js'
 import { Rolls } from './collections/Rolls.js'
 import { Users } from './collections/Users.js'
+import { SiteSettings } from './globals/SiteSettings.js'
 import { seed } from './seed/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
   admin: {
@@ -42,6 +45,7 @@ export default buildConfigWithDefaults({
       },
     ],
   },
+  globals: [SiteSettings],
   onInit: seed,
   plugins: [
     mcpPlugin({
@@ -118,10 +122,22 @@ export default buildConfigWithDefaults({
           description: 'This is a Payload collection with Media documents.',
         },
       },
+      globals: {
+        'site-settings': {
+          enabled: {
+            find: true,
+            update: true,
+          },
+          description: 'Site-wide configuration settings.',
+        },
+      },
       mcp: {
         handlerOptions: {
           verboseLogs: true,
           maxDuration: 60,
+          onEvent: (event: unknown) => {
+            capturedMcpEvents.push(event)
+          },
         },
         serverOptions: {
           serverInfo: {

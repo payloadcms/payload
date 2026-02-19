@@ -14,6 +14,10 @@ export const Users: CollectionConfig = {
       name: 'name',
       type: 'text',
     },
+    {
+      name: 'limit',
+      type: 'number',
+    },
     // Email added by default
     // Add more fields as needed
   ],

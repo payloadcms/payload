@@ -92,7 +92,7 @@ export const svTranslations: DefaultTranslationsObject = {
     noItems:
       'Det finns inga widgets på din instrumentpanel. Du kan lägga till dem från "Instrumentpanel" -menyn som finns i den översta fältet.',
     resetLayout: 'Återställ layout',
-    searchWidgets: 'Sök widgetar...',
+    searchWidgets: 'Sök efter widget...',
   },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
@@ -133,6 +133,7 @@ export const svTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det uppstod ett problem när filen laddades upp.',
     restoringTitle:
       'Det uppstod ett fel vid återställning av {{title}}. Vänligen kontrollera din anslutning och försök igen.',
+    revertingDocument: 'Det uppstod ett problem när detta dokument skulle återställas.',
     tokenInvalidOrExpired: 'Token är antingen ogiltig eller har löpt ut.',
     tokenNotProvided: 'Token inte tillhandahållet.',
     unableToCopy: 'Kan inte kopiera.',
@@ -175,7 +176,7 @@ export const svTranslations: DefaultTranslationsObject = {
     editRelationship: 'Redigera relation',
     enterURL: 'Ange en URL',
     internalLink: 'Intern länk',
-    itemsAndMore: '{{items}} och {{count}} mer',
+    itemsAndMore: '{{items}} och {{count}} till',
     labelRelationship: '{{label}}-relation',
     latitude: 'Latitud',
     linkedTo: 'Länkad till <0>{{label}}</0>',
@@ -348,6 +349,7 @@ export const svTranslations: DefaultTranslationsObject = {
     items: 'artiklar',
     language: 'Språk',
     lastModified: 'Senast ändrad',
+    layout: 'Layout',
     leaveAnyway: 'Lämna ändå',
     leaveWithoutSaving: 'Lämna utan att spara',
     light: 'Ljust',
@@ -377,6 +379,9 @@ export const svTranslations: DefaultTranslationsObject = {
     noOptions: 'Inga alternativ',
     noResults:
       'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller så matchar inga filtren du har angett ovan.',
+    noResultsDescription:
+      'Antingen finns ingen eller ingen matchar de filter du har specificerat ovan.',
+    noResultsFound: 'Inga resultat.',
     notFound: 'Hittades inte',
     nothingFound: 'Inget hittades',
     noTrashResults: 'Inget {{label}} i papperskorgen.',
@@ -414,6 +419,7 @@ export const svTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
+    saveChanges: 'Spara Ändringar',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',
@@ -435,7 +441,7 @@ export const svTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} skapades',
     successfullyDuplicated: '{{label}} duplicerades',
     successfullyReindexed:
-      'Lyckades med att omin­dexera {{count}} av {{total}} dokument från {{collections}}, och {{skips}} utkast hoppades över.',
+      'Omindexerade {{count}} av {{total}} dokument från {{collections}}. {{skips}} utkast hoppades över.',
     takeOver: 'Ta över',
     thisLanguage: 'Svenska',
     time: 'Tid',
@@ -476,9 +482,9 @@ export const svTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiera till',
     copyToLocale: 'Kopiera till språk',
     localeToPublish: 'Publicera språk',
-    selectedLocales: 'Valda språkinställningar',
+    selectedLocales: 'Valda språk',
     selectLocaleToCopy: 'Välj språk att kopiera',
-    selectLocaleToDuplicate: 'Välj platser att duplicera',
+    selectLocaleToDuplicate: 'Välj språk att duplicera',
   },
   operators: {
     contains: 'innehåller',
@@ -566,6 +572,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du kommer återställa det här dokumentets ändringar till dess publicerade tillstånd. Är du säker?',
     aboutToUnpublish: 'Du kommer avpublicera detta dokument. Är du säker?',
+    aboutToUnpublishIn: 'Du är på väg att avpublicera detta dokument på {{locale}}. Är du säker?',
     aboutToUnpublishSelection:
       'Du är på väg att avpublicera alla {{label}} i urvalet. Är du säker?',
     autosave: 'Spara automatiskt',
@@ -613,6 +620,7 @@ export const svTranslations: DefaultTranslationsObject = {
     restoring: 'Återställer...',
     reverting: 'Återställer...',
     revertToPublished: 'Återgå till publicerad',
+    revertUnsuccessful: 'Återställning misslyckades. Ingen tidigare publicerad version hittades.',
     saveDraft: 'Spara Utkast',
     scheduledSuccessfully: 'Schemalagd',
     schedulePublish: 'Schemalägg publicering',
@@ -623,6 +631,9 @@ export const svTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik version',
     status: 'Status',
     unpublish: 'Avpublicera',
+    unpublished: 'Opublicerad',
+    unpublishedSuccessfully: 'Publicerades inte framgångsrikt.',
+    unpublishIn: 'Avpublicera i {{locale}}',
     unpublishing: 'Avpublicerar...',
     version: 'Version',
     versionAgo: '{{distance}} sedan',

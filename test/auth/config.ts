@@ -84,6 +84,17 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
         {
+          name: 'loginMetadata',
+          type: 'array',
+          label: 'Login Metadata',
+          fields: [
+            {
+              name: 'info',
+              type: 'text',
+            },
+          ],
+        },
+        {
           name: 'namedSaveToJWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,

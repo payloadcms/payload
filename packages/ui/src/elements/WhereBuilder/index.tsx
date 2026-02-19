@@ -2,6 +2,7 @@
 import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { dequal } from 'dequal/lite'
 import { transformWhereQuery, validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
@@ -13,8 +14,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
-import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
 import './index.scss'
+import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
 
 const baseClass = 'where-builder'
 
@@ -103,12 +104,24 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           field: field.field,
           operator: incomingOperator,
         })
+
+        // Skip if nothing changed
+        const existingValue = existingCondition[String(field.value)]?.[validOperator]
+        if (typeof existingValue !== 'undefined' && existingValue === value) {
+          return
+        }
+
         const newRowCondition = {
           [String(field.value)]: { [validOperator]: value },
         }
 
+        if (dequal(existingCondition, newRowCondition)) {
+          return
+        }
+
         const newConditions = [...conditions]
         newConditions[orIndex].and[andIndex] = newRowCondition
+
         await handleWhereChange({ or: newConditions })
       }
     },

@@ -13,6 +13,7 @@ import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { useModal } from '../../elements/Modal/index.js'
+import { NoListResults } from '../../elements/NoListResults/index.js'
 import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
@@ -163,17 +164,19 @@ export function DefaultListView(props: ListViewClientProps) {
               <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderCustomComponent
-                      CustomComponent={Description}
-                      Fallback={
-                        <ViewDescription
-                          collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
-                        />
-                      }
-                    />
-                  </div>
+                  Description || collectionConfig?.admin?.description ? (
+                    <div className={`${baseClass}__sub-header`}>
+                      <RenderCustomComponent
+                        CustomComponent={Description}
+                        Fallback={
+                          <ViewDescription
+                            collectionSlug={collectionSlug}
+                            description={collectionConfig?.admin?.description}
+                          />
+                        }
+                      />
+                    </div>
+                  ) : undefined
                 }
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
@@ -213,30 +216,45 @@ export function DefaultListView(props: ListViewClientProps) {
                 </div>
               )}
               {docs?.length === 0 && (
-                <div className={`${baseClass}__no-results`}>
-                  <p>
-                    {i18n.t(viewType === 'trash' ? 'general:noTrashResults' : 'general:noResults', {
-                      label: getTranslation(labels?.plural, i18n),
-                    })}
-                  </p>
-                  {hasCreatePermission && newDocumentURL && viewType !== 'trash' && (
-                    <Fragment>
-                      {isInDrawer ? (
-                        <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      ) : (
-                        <Button el="link" to={newDocumentURL}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      )}
-                    </Fragment>
-                  )}
-                </div>
+                <NoListResults
+                  Actions={
+                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                      ? [
+                          isInDrawer ? (
+                            <Button
+                              el="button"
+                              key="create"
+                              onClick={() => openModal(createNewDrawerSlug)}
+                            >
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ) : (
+                            <Button el="link" key="create" to={newDocumentURL}>
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ),
+                        ]
+                      : []
+                  }
+                  Message={
+                    viewType === 'trash' ? (
+                      <p>
+                        {i18n.t('general:noTrashResults', {
+                          label: getTranslation(labels?.plural, i18n),
+                        })}
+                      </p>
+                    ) : (
+                      <>
+                        <h3>{i18n.t('general:noResultsFound')}</h3>
+                        <p>{i18n.t('general:noResultsDescription')}</p>
+                      </>
+                    )
+                  }
+                />
               )}
               {AfterListTable}
               {docs?.length > 0 && !isGroupingBy && (

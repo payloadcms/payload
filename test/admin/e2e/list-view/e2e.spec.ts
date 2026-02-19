@@ -12,9 +12,9 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   openColumnControls,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
@@ -39,27 +39,27 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
+import path from 'path'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+
 import {
   openListColumns,
   reorderColumns,
   sortColumn,
   toggleColumn,
   waitForColumnInURL,
-} from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
-import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
-import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
-import path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
-
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
+import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -322,10 +322,13 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
-      await page.waitForURL(url)
+      // Use regex to allow for additional query params like depth=1
+      await page.waitForURL(
+        new RegExp(`${postsUrl.list.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?.*search=post1`),
+      )
     })
 
     test('search should not persist between navigation', async () => {
@@ -1597,6 +1600,8 @@ describe('List View', () => {
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
+      // Wait until only 1 row is visible
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])
@@ -1610,6 +1615,7 @@ describe('List View', () => {
 
       await mapAsync([...Array(20)], async (_, i) => {
         await payload.create({
+          disableTransaction: true,
           collection: listDrawerSlug,
           data: {
             title: `List Drawer Item ${i + 1}`,
@@ -1841,6 +1847,36 @@ describe('List View', () => {
       await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+    })
+
+    test('should not show sort chevrons for virtual: true fields', async () => {
+      const post = await createPost({ title: 'Test Post' })
+      await createVirtualDoc({ post: post.id, textField: 'test text' })
+
+      await page.goto(virtualsUrl.list)
+
+      await openListColumns(page, {})
+      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+
+      // Check that virtualText (virtual: true) does NOT have sort buttons
+      const virtualTextHeading = page.locator('#heading-virtualText')
+      await expect(virtualTextHeading).toBeVisible()
+      await expect(virtualTextHeading.locator('.sort-column__buttons')).toHaveCount(0)
+
+      // Check that textField (regular field) DOES have sort buttons as a control
+      const textFieldHeading = page.locator('#heading-textField')
+      await expect(textFieldHeading).toBeVisible()
+      await expect(textFieldHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__desc')).toBeVisible()
+
+      // Check that virtualTitleFromPost (virtual: 'post.title') DOES have sort buttons
+      const virtualTitleHeading = page.locator('#heading-virtualTitleFromPost')
+      await expect(virtualTitleHeading).toBeVisible()
+      await expect(virtualTitleHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__desc')).toBeVisible()
     })
   })
 
@@ -2113,6 +2149,7 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -2128,6 +2165,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -2138,6 +2176,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
+    disableTransaction: true,
     data: {
       title,
       ...overrides,
@@ -2147,6 +2186,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
@@ -2157,6 +2197,7 @@ async function createArray() {
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
+    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,

@@ -1,5 +1,7 @@
 import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
 
+import { dynamicImport } from '../../../../utilities/dynamicImport.js'
+
 /**
  * Imports a handler function from a given path.
  */
@@ -7,9 +9,9 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner!: T
   const [runnerPath, runnerImportName] = path.split('#')
 
-  let runnerModule
+  let runnerModule: Record<string, unknown>
   try {
-    runnerModule = await import(runnerPath!.replaceAll('\\', '/'))
+    runnerModule = await dynamicImport<Record<string, unknown>>(runnerPath!)
   } catch (e) {
     throw new Error(
       `Error importing job queue handler module for path ${path}. This is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the /api/payload-jobs/run endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. If you're using an endpoint to execute your jobs, it's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js. Import Error: \n${e instanceof Error ? e.message : 'Unknown error'}`,
@@ -18,17 +20,17 @@ export async function importHandlerPath<T>(path: string): Promise<T> {
 
   // If the path has indicated an #exportName, try to get it
   if (runnerImportName && runnerModule[runnerImportName]) {
-    runner = runnerModule[runnerImportName]
+    runner = runnerModule[runnerImportName] as T
   }
 
   // If there is a default export, use it
   if (!runner && runnerModule.default) {
-    runner = runnerModule.default
+    runner = runnerModule.default as T
   }
 
   // Finally, use whatever was imported
   if (!runner) {
-    runner = runnerModule
+    runner = runnerModule as T
   }
 
   return runner

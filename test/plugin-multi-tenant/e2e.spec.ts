@@ -1,36 +1,35 @@
 import type { Page } from '@playwright/test'
-import type { BasePayload } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { loginClientSide } from '../__helpers/e2e/auth/login.js'
+import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { loginClientSide } from '../helpers/e2e/auth/login.js'
-import { openRelationshipFieldDrawer } from '../helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
-import { goToListDoc } from '../helpers/e2e/goToListDoc.js'
+  waitForFormReady,
+} from '../__helpers/e2e/helpers.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
   selectInput,
-} from '../helpers/e2e/selectInput.js'
-import { closeNav, openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/selectInput.js'
+import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { seed } from './seed/index.js'
 import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -48,6 +47,7 @@ test.describe('Multi Tenant', () => {
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
@@ -62,15 +62,16 @@ test.describe('Multi Tenant', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test.beforeEach(async () => {
     await reInitializeDB({
       serverURL,
       snapshotKey: 'multiTenant',
     })
-    if (seed) {
-      await seed(payload as unknown as BasePayload)
-      await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
-    }
+    await page.goto(usersURL.admin)
   })
 
   test.describe('Filters', () => {
@@ -407,11 +408,14 @@ test.describe('Multi Tenant', () => {
       await page.keyboard.up('Shift')
       await page.locator('.toolbar-popup__button-link').click()
       await expect(page.locator('.lexical-link-edit-drawer')).toBeVisible()
+      await wait(1000)
       const linkRadio = page.locator('.radio-input__styled-radio').last()
       await expect(linkRadio).toBeVisible()
       await linkRadio.click({
         delay: 100,
       })
+      await wait(300)
+
       await page.locator('.drawer__content').locator('.rs__input').click()
       await expect(page.getByText('Chorizo Con Queso')).toBeVisible()
       await expect(page.getByText('Pretzel Bites')).toBeHidden()
@@ -785,15 +789,19 @@ test.describe('Multi Tenant', () => {
       })
 
       await page.goto(tenantsURL.create)
-      await wait(300)
-      await expect(page.locator('#field-name')).toBeVisible()
-      await expect(page.locator('#field-domain')).toBeVisible()
+      await waitForFormReady(page)
+      await wait(500)
 
       await page.locator('#field-name').fill('House Rules')
+      await wait(500)
+
       await page.locator('#field-domain').fill('house-rules.com')
+      await wait(500)
+
       await saveDocAndAssert(page)
 
       await page.goto(tenantsURL.list)
+      await wait(500)
 
       // Check the tenant selector
       await expect
@@ -801,6 +809,105 @@ test.describe('Multi Tenant', () => {
           return (await getTenantOptions({ page })).sort()
         })
         .toEqual(['Blue Dog', 'Steel Cat', 'Anchor Bar', 'Public Tenant', 'House Rules'].sort())
+    })
+
+    test('should allow clearing tenant filter from dashboard view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Blue Dog',
+        urlUtil: tenantsURL,
+      })
+
+      // Navigate to dashboard view
+      await page.goto(`${serverURL}/admin`)
+
+      // Clear the tenant filter from the dashboard
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
+
+    test('should allow clearing tenant filter from list view', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      // First set a tenant filter
+      await setTenantFilter({
+        page,
+        tenant: 'Steel Cat',
+        urlUtil: menuItemsURL,
+      })
+
+      // Verify tenant is set
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBe('Steel Cat')
+
+      // Clear the tenant filter from the list view
+      await clearTenantFilter({ page })
+
+      // Verify the tenant selector is cleared
+      await openNav(page)
+
+      await expect
+        .poll(async () => {
+          return await getSelectInputValue<false>({
+            multiSelect: false,
+            selectLocator: page.locator('.tenant-selector'),
+          })
+        })
+        .toBeFalsy()
+    })
+
+    test('should populate tenant selector after standard form login with tree-restructuring provider', async () => {
+      // This test verifies the fix for a bug where TenantSelectionProviderClient
+      // loses state on remount. The ConditionalWrapperProvider (registered in the
+      // test config) changes its tree structure when the user authenticates
+      // (DummyContext.Provider → Fragment), causing React to remount the subtree.
+      // Without the fix, useState(initialTenantOptions) re-initializes with stale
+      // RSC props and useRef(userID) re-initializes to the current userID, so
+      // userChanged is false and syncTenants never fires.
+
+      // Use the "owner" user who has access to multiple tenants (Blue Dog + Anchor Bar).
+      // The tenant selector only renders when options.length > 1.
+      await loginClientSide({
+        data: credentials.owner,
+        page,
+        serverURL,
+      })
+
+      // After login, the tenant selector should be populated with the owner's tenants
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Anchor Bar', 'Blue Dog'].sort())
     })
   })
 })

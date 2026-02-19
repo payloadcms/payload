@@ -133,6 +133,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     restoringTitle:
       '{{title}} পুনরুদ্ধার করার সময় একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    revertingDocument: 'এই ডকুমেন্টটি ফিরে আনার সময় একটি সমস্যা হয়েছিল।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করা সম্ভব নয়।',
@@ -352,6 +353,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     items: 'আইটেমগুলি',
     language: 'ভাষা',
     lastModified: 'সর্বশেষ পরিবর্তিত',
+    layout: 'লেআউট',
     leaveAnyway: 'যাই হোক ছেড়ে দিন',
     leaveWithoutSaving: 'সংরক্ষণ না করে ছেড়ে দিন',
     light: 'লাইট',
@@ -381,6 +383,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noOptions: 'কোনো বিকল্প নেই',
     noResults:
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
+    noResultsDescription:
+      'আপনার দেওয়া ফিল্টারের সাথে মিলে যায় এমন কোনও বিষয় উপস্থিত নেই বা মিলতে পারে এমন কোনও বিষয় বিদ্যমান নেই।',
+    noResultsFound: 'ফলাফল নেই।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোন {{label}} নেই।',
@@ -418,6 +423,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',
+    saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
     saving: 'সংরক্ষণ করা হচ্ছে...',
     schedulePublishFor: '{{title}} এর জন্য প্রকাশ নির্ধারণ করুন',
     searchBy: '{{label}} দ্বারা অনুসন্ধান করুন',
@@ -571,6 +577,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'আপনি এই ডকুমেন্টের পরিবর্তনগুলি তার প্রকাশিত অবস্থায় ফিরিয়ে আনতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublish: 'আপনি এই ডকুমেন্টটি আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
+    aboutToUnpublishIn: 'আপনি এই ডকুমেন্টটি {{locale}} এ অপ্রকাশ্য করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublishSelection:
       'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     autosave: 'স্বয়ংক্রিয় সংরক্ষণ',
@@ -619,6 +626,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     reverting: 'পূর্বাবস্থায় ফেরানো হচ্ছে...',
     revertToPublished: 'প্রকাশিত সংস্করণে ফিরে যান',
+    revertUnsuccessful:
+      'পূর্বাবস্থায় ফেরার ব্যর্থ হয়েছে। কোনও পূর্বে প্রকাশিত সংস্করণ পাওয়া যায়নি।',
     saveDraft: 'খসড়া সংরক্ষণ করুন',
     scheduledSuccessfully: 'সফলভাবে নির্ধারিত হয়েছে।',
     schedulePublish: 'প্রকাশের সময়সূচী নির্ধারণ করুন',
@@ -629,6 +638,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
+    unpublished: 'অপ্রকাশিত',
+    unpublishedSuccessfully: 'সফলভাবে অপ্রকাশিত করা হয়েছে।',
+    unpublishIn: '{{locale}} এ অপ্রকাশিত করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',
     version: 'সংস্করণ',
     versionAgo: '{{distance}} পূর্বে',

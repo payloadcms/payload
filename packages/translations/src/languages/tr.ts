@@ -134,6 +134,7 @@ export const trTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Dosya yüklenirken bir sorun oluştu.',
     restoringTitle:
       '{{title}} geri yüklenirken bir hata oluştu. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    revertingDocument: 'Bu belge geri alınırken bir problem oluştu.',
     tokenInvalidOrExpired: 'Geçersiz veya süresi dolmuş token.',
     tokenNotProvided: 'Jeton sağlanmadı.',
     unableToCopy: 'Kopyalanamıyor.',
@@ -351,6 +352,7 @@ export const trTranslations: DefaultTranslationsObject = {
     items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
+    layout: 'Düzen',
     leaveAnyway: 'Yine de ayrıl',
     leaveWithoutSaving: 'Kaydetmeden ayrıl',
     light: 'Aydınlık',
@@ -380,6 +382,9 @@ export const trTranslations: DefaultTranslationsObject = {
     noOptions: 'Seçenek yok',
     noResults:
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
+    noResultsDescription:
+      'Ya hiçbiri mevcut değil ya da belirttiğiniz filtrelerle eşleşen hiçbiri yok.',
+    noResultsFound: 'Sonuç Yok.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',
@@ -417,6 +422,7 @@ export const trTranslations: DefaultTranslationsObject = {
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',
+    saveChanges: 'Değişiklikleri Kaydet',
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',
@@ -569,6 +575,8 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Bu dökümanın değişikliklerini yayınladığı haline geri getirmek üzeresiniz. Devam etmek istiyor musunuz?',
     aboutToUnpublish: 'Bu dökümanı yayından kaldırmak üzeresiniz. Devam etmek istiyor musunuz?',
+    aboutToUnpublishIn:
+      'Bu belgeyi {{locale}} dilinde yayından kaldırmak üzeresiniz. Emin misiniz?',
     aboutToUnpublishSelection: 'Seçimdeki tüm {{label}} yayınını kaldırmak üzeresiniz. Emin misin?',
     autosave: 'Otomatik kaydet',
     autosavedSuccessfully: 'Otomatik kaydetme başarılı',
@@ -615,6 +623,7 @@ export const trTranslations: DefaultTranslationsObject = {
     restoring: 'Geri döndürülüyor...',
     reverting: 'Değişiklikler geri alınıyor...',
     revertToPublished: 'Yayınlanana geri döndür',
+    revertUnsuccessful: 'Geri alınamadı. Daha önce yayımlanmış bir sürüm bulunamadı.',
     saveDraft: 'Taslağı kaydet',
     scheduledSuccessfully: 'Başarıyla planlandı.',
     schedulePublish: 'Yayını Planla',
@@ -625,6 +634,9 @@ export const trTranslations: DefaultTranslationsObject = {
     specificVersion: 'Belirli Sürüm',
     status: 'Durum',
     unpublish: 'Yayından Kaldır',
+    unpublished: 'Yayınlanmamış',
+    unpublishedSuccessfully: 'Başarıyla yayınlanmadı.',
+    unpublishIn: "{{locale}}'da yayından kaldır",
     unpublishing: 'Yayından kaldırılıyor...',
     version: 'Sürüm',
     versionAgo: '{{distance}} önce',

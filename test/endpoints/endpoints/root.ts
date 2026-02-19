@@ -1,6 +1,6 @@
 import type { Config } from 'payload'
 
-import { applicationEndpoint, rootEndpoint } from '../shared.js'
+import { applicationEndpoint, customCorsEndpoint, rootEndpoint } from '../shared.js'
 
 export const endpoints: Config['endpoints'] = [
   {
@@ -37,5 +37,22 @@ export const endpoints: Config['endpoints'] = [
     },
     method: 'post',
     path: `/${rootEndpoint}`,
+  },
+  {
+    handler: () => {
+      return Response.json(
+        { message: 'Custom OPTIONS handler' },
+        {
+          headers: {
+            'Access-Control-Allow-Origin': 'https://custom-domain.com',
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'X-Custom-Header',
+          },
+          status: 200,
+        },
+      )
+    },
+    method: 'options',
+    path: `/${customCorsEndpoint}`,
   },
 ]

@@ -35,8 +35,8 @@
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
     "tsx": "^4.16.2",

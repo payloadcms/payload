@@ -133,6 +133,7 @@ export const azTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Faylın yüklənməsi zamanı problem yarandı.',
     restoringTitle:
       '{{title}} bərpa olunarkən xəta baş verdi. Zəhmət olmasa, internet bağlantınızı yoxlayın və yenidən cəhd edin.',
+    revertingDocument: 'Bu sənədi qaytarmaq zamanı problem yarandı.',
     tokenInvalidOrExpired: 'Token ya yanlışdır və ya müddəti bitib.',
     tokenNotProvided: 'Token təqdim edilməyib.',
     unableToCopy: 'Kopyalama mümkün deyil.',
@@ -350,6 +351,7 @@ export const azTranslations: DefaultTranslationsObject = {
     items: 'maddələr',
     language: 'Dil',
     lastModified: 'Son dəyişdirildi',
+    layout: 'Dizayn',
     leaveAnyway: 'Heç olmasa çıx',
     leaveWithoutSaving: 'Saxlamadan çıx',
     light: 'Açıq',
@@ -379,6 +381,9 @@ export const azTranslations: DefaultTranslationsObject = {
     noOptions: 'Heç bir seçim yoxdur',
     noResults:
       'Heç bir {{label}} tapılmadı. Ya hələ {{label}} yoxdur, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsDescription:
+      'Ya heç biri mövcud deyil, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsFound: 'Nəticə yoxdur.',
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
@@ -415,6 +420,7 @@ export const azTranslations: DefaultTranslationsObject = {
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
+    saveChanges: 'Dəyişiklikləri Saxla',
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',
@@ -569,6 +575,7 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Bu sənədin dəyişikliklərini dərc edilmiş vəziyyətinə qaytarmağa hazırsınız. Əminsiniz?',
     aboutToUnpublish: 'Bu sənədi dərcdən çıxartmağa hazırsınız. Əminsiniz?',
+    aboutToUnpublishIn: 'Siz bu sənədi {{locale}} dilində yayından çıxarmaq üzərəsiniz. Əminsiniz?',
     aboutToUnpublishSelection:
       'Seçimdə olan bütün {{label}}-i dərcdən çıxartmağa hazırsınız. Əminsiniz?',
     autosave: 'Avtomatik yadda saxlama',
@@ -616,6 +623,7 @@ export const azTranslations: DefaultTranslationsObject = {
     restoring: 'Bərpa olunur...',
     reverting: 'Qayıdılır...',
     revertToPublished: 'Dərc edilmişə qayıt',
+    revertUnsuccessful: 'Bərpa uğursuz oldu. Əvvəlki nəşr olunmuş versiya tapılmadı.',
     saveDraft: 'Qaralamayı yadda saxla',
     scheduledSuccessfully: 'Uğurla cədvələ qoyuldu.',
     schedulePublish: 'Nəşr Cədvəli',
@@ -626,6 +634,9 @@ export const azTranslations: DefaultTranslationsObject = {
     specificVersion: 'Xüsusi Versiya',
     status: 'Status',
     unpublish: 'Dərcdən çıxart',
+    unpublished: 'Nəşr edilməmiş',
+    unpublishedSuccessfully: 'Uğurla yayımlanmadı.',
+    unpublishIn: '{{locale}} dilində yayınlamanı ləğv et',
     unpublishing: 'Dərcdən çıxarılır...',
     version: 'Versiya',
     versionAgo: '{{distance}} əvvəl',

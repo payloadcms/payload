@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.69.0",
+  "version": "3.77.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -64,6 +64,15 @@
       "import": "./src/exports/i18n/*.ts",
       "types": "./src/exports/i18n/*.ts",
       "default": "./src/exports/i18n/*.ts"
+    },
+    "./migrations": {
+      "import": "./src/exports/migrations.ts",
+      "types": "./src/exports/migrations.ts",
+      "default": "./src/exports/migrations.ts"
+    },
+    "./__testing__/predefinedMigration": {
+      "import": "./src/__testing__/predefinedMigration.js",
+      "default": "./src/__testing__/predefinedMigration.js"
     }
   },
   "main": "./src/index.ts",
@@ -116,10 +125,9 @@
     "qs-esm": "7.0.2",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
-    "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.20.3",
-    "undici": "7.10.0",
+    "tsx": "4.21.0",
+    "undici": "7.18.2",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },
@@ -136,7 +144,7 @@
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
@@ -176,6 +184,15 @@
         "import": "./dist/exports/i18n/*.js",
         "types": "./dist/exports/i18n/*.d.ts",
         "default": "./dist/exports/i18n/*.js"
+      },
+      "./migrations": {
+        "import": "./dist/exports/migrations.js",
+        "types": "./dist/exports/migrations.d.ts",
+        "default": "./dist/exports/migrations.js"
+      },
+      "./__testing__/predefinedMigration": {
+        "import": "./dist/__testing__/predefinedMigration.js",
+        "default": "./dist/__testing__/predefinedMigration.js"
       }
     },
     "main": "./dist/index.js",

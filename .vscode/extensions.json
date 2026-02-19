@@ -2,6 +2,7 @@
   "recommendations": [
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
     "vitest.explorer",
     "ms-playwright.playwright"
   ]

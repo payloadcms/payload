@@ -6,10 +6,11 @@ import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { PayloadRequest } from '../types/index.js'
+import type { Document, PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, Forbidden, MissingFile } from '../errors/index.js'
+import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
@@ -17,7 +18,7 @@ import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
 import { getSafeFileName } from './getSafeFilename.js'
-import { resizeAndTransformImageSizes } from './imageResizer.js'
+import { createImageSizes } from './image-resizing/createImageSizes.js'
 import { isImage } from './isImage.js'
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 type Args<T> = {
@@ -81,7 +82,7 @@ export const generateFileData = async <T>({
     }
   }
 
-  const { sharp } = req.payload.config
+  const { serverURL, sharp } = req.payload.config
 
   let file = req.file
 
@@ -107,25 +108,31 @@ export const generateFileData = async <T>({
 
   const staticPath = staticDir
 
-  const incomingFileData = isDuplicating ? originalDoc : data
+  const incomingFileData: Document = isDuplicating ? originalDoc : data
+  let isLocalFile = false
 
   if (
     !file &&
     (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
   ) {
     const { filename, url } = incomingFileData as unknown as FileData
-
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
       throw new Forbidden(req.t)
     }
 
+    if ((serverURL && url?.startsWith(serverURL)) || url?.startsWith('/')) {
+      isLocalFile = true
+    }
+
     try {
-      if (url && url.startsWith('/') && !disableLocalStorage) {
+      if (!disableLocalStorage && isLocalFile) {
+        // File is stored locally
         const filePath = `${staticPath}/${filename}`
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
       } else if (filename && url) {
+        // File is remote
         file = await getExternalFile({
           data: incomingFileData as unknown as FileData,
           req,
@@ -148,7 +155,7 @@ export const generateFileData = async <T>({
     }
 
     return {
-      data,
+      data: incomingFileData!,
       files: [],
     }
   }
@@ -163,7 +170,7 @@ export const generateFileData = async <T>({
     await fs.mkdir(staticPath!, { recursive: true })
   }
 
-  let newData = data
+  let newData = incomingFileData as T
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
@@ -267,6 +274,7 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+
     let fileForResize = file
 
     if (cropData && sharp) {
@@ -340,20 +348,31 @@ export const generateFileData = async <T>({
         req.file = fileForResize
       }
     } else {
+      // For non-image files with useTempFiles, read the buffer from the temp file
+      // since file.data is empty when using temp files
+      let bufferToSave: Buffer
+      if (fileBuffer?.data) {
+        bufferToSave = fileBuffer.data
+      } else if (file.tempFilePath) {
+        bufferToSave = await fs.readFile(file.tempFilePath)
+      } else {
+        bufferToSave = file.data
+      }
+
       filesToSave.push({
-        buffer: fileBuffer?.data || file.data,
+        buffer: bufferToSave,
         path: `${staticPath}/${fsSafeName}`,
       })
 
       // If using temp files and the image is being resized, write the file to the temp path
-      if (fileBuffer?.data || file.data.length > 0) {
+      if (fileBuffer?.data || bufferToSave.length > 0) {
         if (file.tempFilePath) {
-          await fs.writeFile(file.tempFilePath, fileBuffer?.data || file.data) // write fileBuffer to the temp path
+          await fs.writeFile(file.tempFilePath, fileBuffer?.data || bufferToSave) // write fileBuffer to the temp path
         } else {
           // Assign the _possibly modified_ file to the request object
           req.file = {
             ...file,
-            data: fileBuffer?.data || file.data,
+            data: fileBuffer?.data || bufferToSave,
             size: fileBuffer?.info.size,
           }
         }
@@ -362,7 +381,16 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize && (Array.isArray(imageSizes) || focalPointEnabled !== false)) {
       req.payloadUploadSizes = {}
-      const { focalPoint, sizeData, sizesToSave } = await resizeAndTransformImageSizes({
+      // Focal point adjustments
+      const focalPoint =
+        focalPointEnabled && uploadEdits?.focalPoint
+          ? {
+              x: isNumber(uploadEdits.focalPoint.x) ? Math.round(uploadEdits.focalPoint.x) : 50,
+              y: isNumber(uploadEdits.focalPoint.y) ? Math.round(uploadEdits.focalPoint.y) : 50,
+            }
+          : undefined
+
+      const { sizeData, sizesToSave } = await createImageSizes({
         config: collectionConfig,
         dimensions: !cropData
           ? dimensions!
@@ -372,12 +400,12 @@ export const generateFileData = async <T>({
               width: fileData.width!,
             },
         file: fileForResize,
+        focalPoint,
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,
         sharp,
         staticPath: staticPath!,
-        uploadEdits,
         withMetadata,
       })
 
@@ -437,8 +465,9 @@ function parseUploadEditsFromReqOrIncomingData(args: {
     if (isDuplicating) {
       uploadEdits.focalPoint = {
         x: incomingData?.focalX || origDoc.focalX!,
-        y: incomingData?.focalY || origDoc.focalX!,
+        y: incomingData?.focalY || origDoc.focalY!,
       }
+      return uploadEdits
     }
   }
 

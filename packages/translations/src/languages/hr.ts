@@ -134,6 +134,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Došlo je do problema pri učitavanju datoteke.',
     restoringTitle:
       'Došlo je do pogreške prilikom vraćanja {{title}}. Provjerite svoju vezu i pokušajte ponovno.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Token je neispravan ili je istekao.',
     tokenNotProvided: 'Token nije pružen.',
     unableToCopy: 'Nije moguće kopirati.',
@@ -348,6 +349,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promjena',
+    layout: 'Izgled',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez spremanja',
     light: 'Svijetlo',
@@ -377,6 +379,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoje ili se nijedan ne podudara s filterima koje ste gore odredili.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u smeću.',
@@ -413,6 +418,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',
+    saveChanges: 'Spremi promjene',
     saving: 'Spremanje...',
     schedulePublishFor: 'Zakazano objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',
@@ -563,6 +569,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Vratit ćete promjene u dokumentu u objavljeno stanje. Jeste li sigurni? ',
     aboutToUnpublish: 'Poništit ćete objavu ovog dokumenta. Jeste li sigurni?',
+    aboutToUnpublishIn:
+      'Na rubu ste povlačenja objave ovog dokumenta na {{locale}}. Jeste li sigurni?',
     aboutToUnpublishSelection:
       'Upravo ćete poništiti objavu svih {{label}} u odabiru. Jeste li sigurni?',
     autosave: 'Automatsko spremanje',
@@ -611,6 +619,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restoring: 'Vraćanje...',
     reverting: 'Vraćanje...',
     revertToPublished: 'Vrati na objavljeno',
+    revertUnsuccessful: 'Povratak neuspješan. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Sačuvaj nacrt',
     scheduledSuccessfully: 'Uspješno zakazano.',
     schedulePublish: 'Raspored objavljivanja',
@@ -621,6 +630,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublished: 'Neobjavljeno',
+    unpublishedSuccessfully: 'Uspješno nepobjavljeno.',
+    unpublishIn: 'Povuci objavljivanje na {{locale}}',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
     versionAgo: 'prije {{distance}}',

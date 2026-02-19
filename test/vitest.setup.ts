@@ -1,6 +1,3 @@
-import console from 'console'
-global.console = console
-
 import dotenv from 'dotenv'
 dotenv.config()
 

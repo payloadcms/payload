@@ -82,6 +82,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
     'cannot-create-default-locale': CannotCreateDefaultLocale;
+    'locale-restricted': LocaleRestricted;
     nested: Nested;
     groups: Group;
     tabs: Tab;
@@ -111,6 +112,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
     'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
+    'locale-restricted': LocaleRestrictedSelect<false> | LocaleRestrictedSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
@@ -135,15 +137,15 @@ export interface Config {
   globals: {
     'global-array': GlobalArray;
     'global-text': GlobalText;
+    'global-drafts': GlobalDraft;
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
+    'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -391,6 +393,11 @@ export interface AllFieldsLocalized {
   radio?: ('radio1' | 'radio2') | null;
   checkbox?: boolean | null;
   date?: string | null;
+  richTextSlate?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   localizedGroup?: {
     title?: string | null;
     description?: string | null;
@@ -484,6 +491,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -653,6 +661,16 @@ export interface RelationshipLocalized {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted".
+ */
+export interface LocaleRestricted {
+  id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -933,6 +951,10 @@ export interface PayloadLockedDocument {
         value: string | CannotCreateDefaultLocale;
       } | null)
     | ({
+        relationTo: 'locale-restricted';
+        value: string | LocaleRestricted;
+      } | null)
+    | ({
         relationTo: 'nested';
         value: string | Nested;
       } | null)
@@ -959,10 +981,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1187,6 +1205,7 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   radio?: T;
   checkbox?: T;
   date?: T;
+  richTextSlate?: T;
   localizedGroup?:
     | T
     | {
@@ -1454,6 +1473,15 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
  */
 export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
   name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted_select".
+ */
+export interface LocaleRestrictedSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1743,6 +1771,17 @@ export interface GlobalText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-drafts".
+ */
+export interface GlobalDraft {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1768,6 +1807,17 @@ export interface GlobalTextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-drafts_select".
+ */
+export interface GlobalDraftsSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1776,6 +1826,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

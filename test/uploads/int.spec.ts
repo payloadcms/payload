@@ -10,14 +10,17 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
+  adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
   enlargeSlug,
@@ -217,6 +220,40 @@ describe('Collections - Uploads', () => {
         // Check api response
         expect(doc.sizes.tablet.filename).toBeNull()
         expect(doc.sizes.icon.filename).toBeDefined()
+      })
+
+      it('should not set url on image sizes that cannot be generated', async () => {
+        // Create image too small for size generation
+        const formData = new FormData()
+        const filePath = path.join(dirname, './small.png')
+        const { file, handle } = await createStreamableFile(filePath)
+        formData.append('file', file)
+
+        const response = await restClient.POST(`/${mediaSlug}`, {
+          body: formData,
+          file,
+        })
+        const { doc } = await response.json()
+
+        await handle.close()
+
+        expect(response.status).toBe(201)
+
+        // Check ungenerated sizes are empty, including the URL
+        expect(doc.sizes.tablet.filename).toBeNull()
+        expect(doc.sizes.tablet.width).toBeNull()
+        expect(doc.sizes.tablet.height).toBeNull()
+        expect(doc.sizes.tablet.mimeType).toBeNull()
+        expect(doc.sizes.tablet.filesize).toBeNull()
+        expect(doc.sizes.tablet.url).toBeNull()
+
+        // Also verify the database
+        const dbDoc = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(dbDoc.sizes.tablet.url).toBeNull()
       })
 
       it('creates images from a different format', async () => {
@@ -526,6 +563,33 @@ describe('Collections - Uploads', () => {
         })
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
         expect(doc.mimeType).toEqual('image/svg+xml')
+      })
+
+      it('should not crash when adminThumbnail size is not generated', async () => {
+        const svgFilePath = path.resolve(dirname, './svgWithXml.svg')
+        const fileBuffer = fs.readFileSync(svgFilePath)
+
+        // SVGs cannot be resized, so sizes.small should have null fields
+        const doc = await payload.create({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/svg+xml',
+            name: 'test-thumbnail.svg',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(doc.id).toBeDefined()
+        expect(doc.filename).toBeDefined()
+        expect(doc.thumbnailURL).toBeNull()
+
+        // Clean up
+        await payload.delete({
+          collection: adminThumbnailSizeSlug as CollectionSlug,
+          id: doc.id,
+        })
       })
     })
 
@@ -1314,6 +1378,181 @@ describe('Collections - Uploads', () => {
     })
   })
 
+  describe('serverURL handling', () => {
+    it('should store relative URLs in database even when serverURL is set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+        expect(mediaDoc.url).toBeDefined()
+
+        // payload.find should return full URLs with serverURL prefix (through afterRead hooks)
+        expect(mediaDoc.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.tablet?.url).toContain('http://local-images:3000')
+        expect(mediaDoc.sizes?.icon?.url).toContain('http://local-images:3000')
+
+        // Direct database query should return relative URLs (no hooks applied)
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: mediaDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        expect(dbDoc.sizes?.icon?.url).toBeDefined()
+        expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when duplicating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'duplicate-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Duplicate the upload (this will pass full URLs from afterRead hooks)
+        const duplicatedDoc = (await payload.duplicate({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+        })) as unknown as Media
+
+        expect(duplicatedDoc).toBeDefined()
+        expect(duplicatedDoc.id).not.toEqual(mediaDoc.id)
+
+        // Check that the duplicated file exists
+        const expectedPath = path.join(dirname, './media')
+        expect(duplicatedDoc.filename).toBeDefined()
+        expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename!))).toBe(true)
+
+        // Direct database query on duplicated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: duplicatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+
+    it('should strip serverURL when updating an upload with serverURL set', async () => {
+      // Temporarily set serverURL for this test
+      const originalServerURL = payload.config.serverURL
+      payload.config.serverURL = 'http://local-images:3000'
+
+      try {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        expect(file).toBeDefined()
+        file!.name = 'update-serverurl-test.png'
+
+        // Create an upload
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })) as unknown as Media
+
+        expect(mediaDoc).toBeDefined()
+
+        // Update the upload (changing focal point triggers a re-upload)
+        const updatedDoc = (await payload.update({
+          collection: mediaSlug,
+          id: mediaDoc.id,
+          data: {
+            focalX: 75,
+            focalY: 25,
+          },
+        })) as unknown as Media
+
+        expect(updatedDoc).toBeDefined()
+        expect(updatedDoc.focalX).toEqual(75)
+        expect(updatedDoc.focalY).toEqual(25)
+
+        // Direct database query on updated doc should return relative URLs
+        const dbDoc = (await payload.db.findOne({
+          collection: mediaSlug,
+          where: {
+            id: {
+              equals: updatedDoc.id,
+            },
+          },
+        })) as unknown as Media
+
+        expect(dbDoc).toBeDefined()
+        expect(dbDoc.url).toBeDefined()
+        expect(dbDoc.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.url).toMatch(/^\/api\/media\/file\//)
+
+        // Check that size URLs are also relative in the database
+        expect(dbDoc.sizes?.tablet?.url).toBeDefined()
+        expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
+        expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+      } finally {
+        // Restore original serverURL
+        payload.config.serverURL = originalServerURL
+      }
+    })
+  })
+
   describe('HTTP Range Requests', () => {
     let uploadedDoc: Media
     let uploadedFilename: string
@@ -1423,13 +1662,204 @@ describe('Collections - Uploads', () => {
       expect(arrayBuffer.byteLength).toBe(1)
     })
   })
+
+  describe('SVG Security', () => {
+    let xssPayloadDoc: Media
+    const docIDs: (number | string)[] = []
+
+    afterAll(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({
+            collection: noRestrictFileTypesSlug as CollectionSlug,
+            id,
+          })
+        } catch {
+          // ignore
+        }
+      }
+    })
+
+    it('should serve SVG files with Content-Security-Policy header to prevent XSS', async () => {
+      // Upload an SVG with embedded JavaScript
+      const filePath = path.resolve(dirname, './xss-payload.svg')
+      const file = await getFileByPath(filePath)
+
+      xssPayloadDoc = (await payload.create({
+        collection: noRestrictFileTypesSlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(xssPayloadDoc.id)
+
+      // Fetch the SVG file
+      const response = await restClient.GET(
+        `/${noRestrictFileTypesSlug}/file/${xssPayloadDoc.filename}`,
+      )
+
+      expect(response.status).toBe(200)
+
+      // Verify the Content-Security-Policy header is present
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
+    })
+
+    it('should serve all SVG files with CSP headers regardless of content', async () => {
+      // Upload a safe SVG file
+      const filePath = path.resolve(dirname, './image.svg')
+      const file = await getFileByPath(filePath)
+
+      const safeDoc = (await payload.create({
+        collection: svgOnlySlug as CollectionSlug,
+        data: {},
+        file,
+      })) as unknown as Media
+
+      docIDs.push(safeDoc.id)
+
+      // Fetch the uploaded SVG file
+      const response = await restClient.GET(`/${svgOnlySlug}/file/${safeDoc.filename}`)
+
+      expect(response.status).toBe(200)
+
+      // Expect to have CSP headers
+      const cspHeader = response.headers.get('Content-Security-Policy')
+      expect(cspHeader).toBeTruthy()
+      expect(cspHeader).toContain("script-src 'none'")
+    })
+  })
+
+  describe('External File Upload - Redirect Blocking', () => {
+    const validPNG = Buffer.from(
+      '89504e470d0a1a0a0000000d494844520000000100000001' +
+        '0806000000ifad8300000010494441541865000000018001' +
+        'ffa500051f37dbba0000000049454e44ae426082',
+      'hex',
+    )
+
+    const startServer = async (server: ReturnType<typeof createServer>): Promise<number> => {
+      return new Promise<number>((resolve) => {
+        server.listen(0, '0.0.0.0', () => {
+          resolve((server.address() as AddressInfo).port)
+        })
+      })
+    }
+
+    it('should block malicious redirect', async () => {
+      const internalServer = createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('SECRET_CREDENTIALS')
+      })
+
+      const internalServerPort = await startServer(internalServer)
+
+      const attackerServer = createServer((req, res) => {
+        res.writeHead(302, {
+          Location: `http://127.0.0.1:${internalServerPort}/secret`,
+        })
+        res.end()
+      })
+
+      const attackerServerPort = await startServer(attackerServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: mediaSlug,
+            data: {
+              filename: 'malicious.jpg',
+              url: `http://127.0.0.1:${attackerServerPort}/image.jpg`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        attackerServer.close()
+        internalServer.close()
+      }
+    })
+
+    it('should allow legitimate redirects within allowlist', async () => {
+      const edgeServer = createServer((req, res) => {
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': validPNG.length.toString(),
+        })
+        res.end(validPNG)
+      })
+
+      const edgeServerPort = await startServer(edgeServer)
+
+      const cdnServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${edgeServerPort}/image.png` })
+        res.end()
+      })
+
+      const cdnServerPort = await startServer(cdnServer)
+
+      try {
+        const doc = await payload.create({
+          collection: allowListMediaSlug,
+          data: {
+            filename: 'cdn-image.png',
+            url: `http://127.0.0.1:${cdnServerPort}/image.png`,
+          },
+        })
+
+        expect(doc.filename).toBe('cdn-image.png')
+        expect(doc.mimeType).toBe('image/png')
+      } finally {
+        cdnServer.close()
+        edgeServer.close()
+      }
+    })
+
+    it('should not allow infinite redirect loops', async () => {
+      let redirectServerPort: number
+
+      const redirectServer = createServer((req, res) => {
+        res.writeHead(302, { Location: `http://127.0.0.1:${redirectServerPort}/loop` })
+        res.end()
+      })
+
+      redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'loop.png',
+              url: `http://127.0.0.1:${redirectServerPort}/loop`,
+            },
+          }),
+        ).rejects.toThrow(/Too many redirects/)
+      } finally {
+        redirectServer.close()
+      }
+    })
+  })
+
+  describe('tempFileDir', () => {
+    it.each([
+      { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
+      { dir: 'tmp', expectedPrefix: path.join(process.cwd(), 'tmp'), description: 'relative path' },
+    ])('creates temp files in correct location for $description', ({ dir, expectedPrefix }) => {
+      const handler = tempFileHandler({ tempFileDir: dir }, 'field', 'file.png')
+      const filePath = handler.getFilePath()
+
+      expect(filePath.startsWith(expectedPrefix)).toBe(true)
+      handler.cleanup()
+    })
+  })
 })
 
 async function fileExists(fileName: string): Promise<boolean> {
   try {
     await stat(fileName)
     return true
-  } catch (err) {
+  } catch (_err) {
     return false
   }
 }

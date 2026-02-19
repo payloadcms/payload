@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.69.0",
+  "version": "3.77.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -138,8 +138,8 @@
   },
   "dependencies": {
     "@date-fns/tz": "1.2.0",
-    "@dnd-kit/core": "6.0.8",
-    "@dnd-kit/sortable": "7.0.2",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0",
     "@faceless-ui/scroll-info": "2.0.0",
@@ -169,16 +169,16 @@
     "@babel/preset-typescript": "7.27.1",
     "@hyrious/esbuild-plugin-commonjs": "0.2.6",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.2.8 || ^15.3.8 || ^15.4.10 || ^15.5.9",
+    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"

@@ -110,8 +110,15 @@ export const renderListView = async (
     },
     visibleEntities,
   } = initPageResult
+  const {
+    routes: { admin: adminRoute },
+  } = config
 
-  if (!permissions?.collections?.[collectionSlug]?.read) {
+  if (
+    !collectionConfig ||
+    !permissions?.collections?.[collectionSlug]?.read ||
+    (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility)
+  ) {
     throw new Error('not-found')
   }
 
@@ -136,7 +143,44 @@ export const renderListView = async (
     },
   })
 
-  query.preset = collectionPreferences?.preset
+  let queryPreset: QueryPreset | undefined
+  let queryPresetPermissions: SanitizedCollectionPermission | undefined
+
+  if (collectionPreferences?.preset) {
+    try {
+      queryPreset = (await payload.findByID({
+        id: collectionPreferences?.preset,
+        collection: 'payload-query-presets',
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })) as QueryPreset
+
+      if (queryPreset) {
+        queryPresetPermissions = (
+          await getDocumentPermissions({
+            id: queryPreset.id,
+            collectionConfig: req.payload.collections['payload-query-presets'].config,
+            data: queryPreset,
+            req,
+          })
+        )?.docPermissions
+      }
+    } catch (err) {
+      req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
+    }
+  }
+
+  query.preset = queryPreset?.id
+  if (queryPreset?.where && !query.where) {
+    query.where = queryPreset.where
+  }
+  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+
+  const columnPreference = query.columns
+    ? transformColumnsToPreferences(query.columns)
+    : (queryPreset?.columns ?? collectionPreferences?.columns)
+  query.columns = transformColumnsToSearchParams(columnPreference)
 
   query.page = isNumber(query?.page) ? Number(query.page) : 0
 
@@ -146,293 +190,251 @@ export const renderListView = async (
     collectionPreferences?.sort ||
     (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
-  query.groupBy = collectionPreferences?.groupBy
+  const baseFilterConstraint = await (
+    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+  )?.({
+    limit: query.limit,
+    page: query.page,
+    req,
+    sort: query.sort,
+  })
 
-  query.columns = transformColumnsToSearchParams(collectionPreferences?.columns || [])
+  let whereWithMergedSearch = mergeListSearchAndWhere({
+    collectionConfig,
+    search: typeof query?.search === 'string' ? query.search : undefined,
+    where: combineWhereConstraints([query?.where, baseFilterConstraint]),
+  })
 
-  const {
-    routes: { admin: adminRoute },
-  } = config
-
-  if (collectionConfig) {
-    if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
-      throw new Error('not-found')
-    }
-
-    const baseFilterConstraint = await (
-      collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
-    )?.({
-      limit: query.limit,
-      page: query.page,
-      req,
-      sort: query.sort,
-    })
-
-    let queryPreset: QueryPreset | undefined
-    let queryPresetPermissions: SanitizedCollectionPermission | undefined
-
-    let whereWithMergedSearch = mergeListSearchAndWhere({
-      collectionConfig,
-      search: typeof query?.search === 'string' ? query.search : undefined,
-      where: combineWhereConstraints([query?.where, baseFilterConstraint]),
-    })
-
-    if (trash === true) {
-      whereWithMergedSearch = {
-        and: [
-          whereWithMergedSearch,
-          {
-            deletedAt: {
-              exists: true,
-            },
+  if (trash === true) {
+    whereWithMergedSearch = {
+      and: [
+        whereWithMergedSearch,
+        {
+          deletedAt: {
+            exists: true,
           },
-        ],
-      }
-    }
-
-    if (collectionPreferences?.preset) {
-      try {
-        queryPreset = (await payload.findByID({
-          id: collectionPreferences?.preset,
-          collection: 'payload-query-presets',
-          depth: 0,
-          overrideAccess: false,
-          user,
-        })) as QueryPreset
-
-        if (queryPreset) {
-          queryPresetPermissions = await getDocumentPermissions({
-            id: queryPreset.id,
-            collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),
-            data: queryPreset,
-            req,
-          })?.then(({ docPermissions }) => docPermissions)
-        }
-      } catch (err) {
-        req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
-      }
-    }
-
-    let Table: React.ReactNode | React.ReactNode[] = null
-    let columnState: Column[] = []
-    let data: PaginatedDocs = {
-      // no results default
-      docs: [],
-      hasNextPage: false,
-      hasPrevPage: false,
-      limit: query.limit,
-      nextPage: null,
-      page: 1,
-      pagingCounter: 0,
-      prevPage: null,
-      totalDocs: 0,
-      totalPages: 0,
-    }
-
-    const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const columns = getColumns({
-      clientConfig,
-      collectionConfig: clientCollectionConfig,
-      collectionSlug,
-      columns: collectionPreferences?.columns,
-      i18n,
-      permissions,
-    })
-
-    const select = collectionConfig.admin.enableListViewSelectAPI
-      ? transformColumnsToSelect(columns)
-      : undefined
-
-    /** Force select image fields for list view thumbnails */
-    appendUploadSelectFields({
-      collectionConfig,
-      select,
-    })
-
-    try {
-      if (collectionConfig.admin.groupBy && query.groupBy) {
-        ;({ columnState, data, Table } = await handleGroupBy({
-          clientCollectionConfig,
-          clientConfig,
-          collectionConfig,
-          collectionSlug,
-          columns,
-          customCellProps,
-          drawerSlug,
-          enableRowSelections,
-          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
-          query,
-          req,
-          select,
-          trash,
-          user,
-          viewType,
-          where: whereWithMergedSearch,
-        }))
-
-        // Enrich documents with correct display status for drafts
-        data = await enrichDocsWithVersionStatus({
-          collectionConfig,
-          data,
-          req,
-        })
-      } else {
-        data = await req.payload.find({
-          collection: collectionSlug,
-          depth: 0,
-          draft: true,
-          fallbackLocale: false,
-          includeLockStatus: true,
-          limit: query?.limit ? Number(query.limit) : undefined,
-          locale: req.locale,
-          overrideAccess: false,
-          page: query?.page ? Number(query.page) : undefined,
-          req,
-          select,
-          sort: query?.sort,
-          trash,
-          user,
-          where: whereWithMergedSearch,
-        })
-
-        // Enrich documents with correct display status for drafts
-        data = await enrichDocsWithVersionStatus({
-          collectionConfig,
-          data,
-          req,
-        })
-        ;({ columnState, Table } = renderTable({
-          clientCollectionConfig,
-          collectionConfig,
-          columns,
-          customCellProps,
-          data,
-          drawerSlug,
-          enableRowSelections,
-          fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
-          i18n: req.i18n,
-          orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-          payload: req.payload,
-          query,
-          req,
-          useAsTitle: collectionConfig.admin.useAsTitle,
-          viewType,
-        }))
-      }
-    } catch (err) {
-      if (err.name !== 'QueryError') {
-        // QueryErrors are expected when a user filters by a field they do not have access to
-        req.payload.logger.error({
-          err,
-          msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
-        })
-        throw err
-      }
-    }
-
-    const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
-
-    const resolvedFilterOptions = await resolveAllFilterOptions({
-      fields: collectionConfig.fields,
-      req,
-    })
-
-    const staticDescription =
-      typeof collectionConfig.admin.description === 'function'
-        ? collectionConfig.admin.description({ t: i18n.t })
-        : collectionConfig.admin.description
-
-    const newDocumentURL = formatAdminURL({
-      adminRoute,
-      path: `/collections/${collectionSlug}/create`,
-    })
-
-    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
-    const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
-
-    // Check if there's a notFound query parameter (document ID that wasn't found)
-    const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
-
-    const serverProps: ListViewServerPropsOnly = {
-      collectionConfig,
-      data,
-      i18n,
-      limit: query.limit,
-      listPreferences: collectionPreferences,
-      listSearchableFields: collectionConfig.admin.listSearchableFields,
-      locale: fullLocale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    }
-
-    const listViewSlots = renderListViewSlots({
-      clientProps: {
-        collectionSlug,
-        hasCreatePermission,
-        hasDeletePermission,
-        newDocumentURL,
-      },
-      collectionConfig,
-      description: staticDescription,
-      notFoundDocId,
-      payload,
-      serverProps,
-    })
-
-    const isInDrawer = Boolean(drawerSlug)
-
-    // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
-    // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
-    query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
-
-    return {
-      List: (
-        <Fragment>
-          <HydrateAuthProvider permissions={permissions} />
-          <ListQueryProvider
-            collectionSlug={collectionSlug}
-            data={data}
-            modifySearchParams={!isInDrawer}
-            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-            query={query}
-          >
-            {RenderServerComponent({
-              clientProps: {
-                ...listViewSlots,
-                collectionSlug,
-                columnState,
-                disableBulkDelete,
-                disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
-                disableQueryPresets,
-                enableRowSelections,
-                hasCreatePermission,
-                hasDeletePermission,
-                listPreferences: collectionPreferences,
-                newDocumentURL,
-                queryPreset,
-                queryPresetPermissions,
-                renderedFilters,
-                resolvedFilterOptions,
-                Table,
-                viewType,
-              } satisfies ListViewClientProps,
-              Component:
-                ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-              Fallback: DefaultListView,
-              importMap: payload.importMap,
-              serverProps,
-            })}
-          </ListQueryProvider>
-        </Fragment>
-      ),
+        },
+      ],
     }
   }
 
-  throw new Error('not-found')
+  let Table: React.ReactNode | React.ReactNode[] = null
+  let columnState: Column[] = []
+  let data: PaginatedDocs = {
+    // no results default
+    docs: [],
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: query.limit,
+    nextPage: null,
+    page: 1,
+    pagingCounter: 0,
+    prevPage: null,
+    totalDocs: 0,
+    totalPages: 0,
+  }
+
+  const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+
+  const columns = getColumns({
+    clientConfig,
+    collectionConfig: clientCollectionConfig,
+    collectionSlug,
+    columns: columnPreference,
+    i18n,
+    permissions,
+  })
+
+  const select = collectionConfig.admin.enableListViewSelectAPI
+    ? transformColumnsToSelect(columns)
+    : undefined
+
+  /** Force select image fields for list view thumbnails */
+  appendUploadSelectFields({
+    collectionConfig,
+    select,
+  })
+
+  try {
+    if (collectionConfig.admin.groupBy && query.groupBy) {
+      ;({ columnState, data, Table } = await handleGroupBy({
+        clientCollectionConfig,
+        clientConfig,
+        collectionConfig,
+        collectionSlug,
+        columns,
+        customCellProps,
+        drawerSlug,
+        enableRowSelections,
+        fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        query,
+        req,
+        select,
+        trash,
+        user,
+        viewType,
+        where: whereWithMergedSearch,
+      }))
+
+      // Enrich documents with correct display status for drafts
+      data = await enrichDocsWithVersionStatus({
+        collectionConfig,
+        data,
+        req,
+      })
+    } else {
+      data = await req.payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        fallbackLocale: false,
+        includeLockStatus: true,
+        limit: query?.limit ? Number(query.limit) : undefined,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page ? Number(query.page) : undefined,
+        req,
+        select,
+        sort: query?.sort,
+        trash,
+        user,
+        where: whereWithMergedSearch,
+      })
+
+      // Enrich documents with correct display status for drafts
+      data = await enrichDocsWithVersionStatus({
+        collectionConfig,
+        data,
+        req,
+      })
+      ;({ columnState, Table } = renderTable({
+        clientCollectionConfig,
+        collectionConfig,
+        columns,
+        customCellProps,
+        data,
+        drawerSlug,
+        enableRowSelections,
+        fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
+        i18n: req.i18n,
+        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+        payload: req.payload,
+        query,
+        req,
+        useAsTitle: collectionConfig.admin.useAsTitle,
+        viewType,
+      }))
+    }
+  } catch (err) {
+    if (err.name !== 'QueryError') {
+      // QueryErrors are expected when a user filters by a field they do not have access to
+      req.payload.logger.error({
+        err,
+        msg: `There was an error fetching the list view data for collection ${collectionSlug}`,
+      })
+      throw err
+    }
+  }
+
+  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+
+  const resolvedFilterOptions = await resolveAllFilterOptions({
+    fields: collectionConfig.fields,
+    req,
+  })
+
+  const staticDescription =
+    typeof collectionConfig.admin.description === 'function'
+      ? collectionConfig.admin.description({ t: i18n.t })
+      : collectionConfig.admin.description
+
+  const newDocumentURL = formatAdminURL({
+    adminRoute,
+    path: `/collections/${collectionSlug}/create`,
+  })
+
+  const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+  const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
+
+  // Check if there's a notFound query parameter (document ID that wasn't found)
+  const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
+
+  const serverProps: ListViewServerPropsOnly = {
+    collectionConfig,
+    data,
+    i18n,
+    limit: query.limit,
+    listPreferences: collectionPreferences,
+    listSearchableFields: collectionConfig.admin.listSearchableFields,
+    locale: fullLocale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user,
+  }
+
+  const listViewSlots = renderListViewSlots({
+    clientProps: {
+      collectionSlug,
+      hasCreatePermission,
+      hasDeletePermission,
+      newDocumentURL,
+    },
+    collectionConfig,
+    description: staticDescription,
+    notFoundDocId,
+    payload,
+    serverProps,
+  })
+
+  const isInDrawer = Boolean(drawerSlug)
+
+  // Needed to prevent: Only plain objects can be passed to Client Components from Server Components. Objects with toJSON methods are not supported. Convert it manually to a simple value before passing it to props.
+  // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
+  query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
+
+  return {
+    List: (
+      <Fragment>
+        <HydrateAuthProvider permissions={permissions} />
+        <ListQueryProvider
+          collectionSlug={collectionSlug}
+          data={data}
+          modifySearchParams={!isInDrawer}
+          orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+          query={query}
+        >
+          {RenderServerComponent({
+            clientProps: {
+              ...listViewSlots,
+              collectionSlug,
+              columnState,
+              disableBulkDelete,
+              disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+              disableQueryPresets,
+              enableRowSelections,
+              hasCreatePermission,
+              hasDeletePermission,
+              listPreferences: collectionPreferences,
+              newDocumentURL,
+              queryPreset,
+              queryPresetPermissions,
+              renderedFilters,
+              resolvedFilterOptions,
+              Table,
+              viewType,
+            } satisfies ListViewClientProps,
+            Component:
+              ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
+            Fallback: DefaultListView,
+            importMap: payload.importMap,
+            serverProps,
+          })}
+        </ListQueryProvider>
+      </Fragment>
+    ),
+  }
 }
 
 export const ListView: React.FC<RenderListViewArgs> = async (args) => {
@@ -440,6 +442,7 @@ export const ListView: React.FC<RenderListViewArgs> = async (args) => {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
   } catch (error) {
+    // Pass through Next.js errors
     if (error.message === 'not-found') {
       notFound()
     } else {

@@ -134,6 +134,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Failo įkelti nepavyko dėl problemos.',
     restoringTitle:
       'Įvyko klaida atkuriant {{title}}. Prašome patikrinti savo ryšį ir bandyti dar kartą.',
+    revertingDocument: 'Šio dokumento grąžinimo metu kilo problema.',
     tokenInvalidOrExpired: 'Žetonas yra neteisingas arba jo galiojimas pasibaigė.',
     tokenNotProvided: 'Žetonas nesuteiktas.',
     unableToCopy: 'Nepavyko nukopijuoti.',
@@ -351,6 +352,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     items: 'elementai',
     language: 'Kalba',
     lastModified: 'Paskutinį kartą modifikuota',
+    layout: 'Išdėstymas',
     leaveAnyway: 'Vis tiek išeikite',
     leaveWithoutSaving: 'Išeikite neišsaugoję',
     light: 'Šviesa',
@@ -380,6 +382,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     noOptions: 'Jokių variantų',
     noResults:
       'Nerasta jokių {{label}}. Arba dar nėra sukurtų {{label}}, arba jie neatitinka nurodytų filtrų aukščiau.',
+    noResultsDescription: 'Arba jų nėra, arba jie neatitinka viršuje nurodytų filtrų.',
+    noResultsFound: 'Nėra rezultatų.',
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
     noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',
@@ -415,6 +419,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     row: 'Eilutė',
     rows: 'Eilutės',
     save: 'Išsaugoti',
+    saveChanges: 'Išsaugoti pakeitimus',
     saving: 'Išsaugoti...',
     schedulePublishFor: 'Suplanuokite publikaciją „{{title}}“',
     searchBy: 'Ieškokite pagal {{label}}',
@@ -570,6 +575,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Jūs ketinate atšaukti šio dokumento pakeitimus ir grįžti prie publikuotos versijos. Ar esate įsitikinęs?',
     aboutToUnpublish: 'Jūs ketinate panaikinti šio dokumento publikavimą. Ar esate tikri?',
+    aboutToUnpublishIn: 'Jūs ketinate nepublikuoti šio dokumento {{locale}}. Ar esate tikras?',
     aboutToUnpublishSelection:
       'Jūs ketinate atšaukti visų {{label}} pasirinkime. Ar esate įsitikinęs?',
     autosave: 'Automatinis išsaugojimas',
@@ -617,6 +623,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     restoring: 'Atkuriamas...',
     reverting: 'Grįžtama...',
     revertToPublished: 'Grįžti prie publikuotojo',
+    revertUnsuccessful: 'Grįžtama nepavyko. Ankstesnės publikuotos versijos nerasta.',
     saveDraft: 'Išsaugoti juodraštį',
     scheduledSuccessfully: 'Sėkmingai suplanuota.',
     schedulePublish: 'Suplanuokite publikaciją',
@@ -627,6 +634,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifinė versija',
     status: 'Būsena',
     unpublish: 'Nebepublikuoti',
+    unpublished: 'Nepublikuota',
+    unpublishedSuccessfully: 'Sėkmingai nepaskelbta.',
+    unpublishIn: 'Nepublikuoti {{locale}}',
     unpublishing: 'Nebepublikuojama...',
     version: 'Versija',
     versionAgo: 'prieš {{distance}}',

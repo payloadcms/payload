@@ -52,7 +52,7 @@ export const getColumns = ({
     }
   }
 
-  return columns
+  return columns?.length
     ? columns?.filter((column) =>
         flattenTopLevelFields(fields, {
           i18n,
