@@ -15,10 +15,10 @@ import type {
 
 import {
   DefaultListView,
+  HierarchyListView,
   HydrateAuthProvider,
   HydrateTaxonomyProvider,
   ListQueryProvider,
-  TaxonomyListView,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
@@ -457,7 +457,7 @@ export const renderListView = async (
       viewType,
     } satisfies ListViewClientProps,
     Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-    Fallback: isTaxonomyCollection ? TaxonomyListView : DefaultListView,
+    Fallback: isTaxonomyCollection ? HierarchyListView : DefaultListView,
     importMap: payload.importMap,
     serverProps,
   })

@@ -107,6 +107,18 @@ export type {
   RenderListServerFnReturnType,
   UseListDrawer,
 } from '../../elements/ListDrawer/types.js'
+export { FolderButton } from '../../elements/Folder/FolderButton/index.js'
+export type { FolderButtonProps } from '../../elements/Folder/FolderButton/index.js'
+export { useFolderDrawer } from '../../elements/Folder/FolderDrawer/index.js'
+export type {
+  FolderDrawerProps,
+  FolderDrawerTogglerProps,
+  UseFolderDrawer,
+  UseFolderDrawerArgs,
+} from '../../elements/Folder/FolderDrawer/types.js'
+export { FolderFieldClient } from '../../elements/Folder/FolderField/index.client.js'
+export { SelectedFolder } from '../../elements/Folder/FolderField/SelectedFolder.js'
+export type { SelectedFolderProps } from '../../elements/Folder/FolderField/SelectedFolder.js'
 export { useTaxonomyDrawer } from '../../elements/Taxonomy/TaxonomyDrawer/index.js'
 export type {
   SelectionWithPath,
@@ -389,7 +401,7 @@ export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
-export { TaxonomyListView } from '../../views/TaxonomyList/index.js'
+export { HierarchyListView } from '../../views/HierarchyList/index.js'
 
 export type {
   /**

@@ -27,7 +27,7 @@ import { SlotTable } from './SlotTable.js'
 import { baseClass } from './types.js'
 import './index.scss'
 
-export type TaxonomyTableProps = {
+export type HierarchyTableProps = {
   childrenData?: PaginatedDocs<TaxonomyDocument>
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
@@ -41,7 +41,7 @@ export type TaxonomyTableProps = {
   useAsTitle: string
 }
 
-export function TaxonomyTable({
+export function HierarchyTable({
   childrenData,
   collections,
   collectionSlug,
@@ -52,7 +52,7 @@ export function TaxonomyTable({
   search,
   taxonomyLabel,
   useAsTitle,
-}: TaxonomyTableProps) {
+}: HierarchyTableProps) {
   const { i18n, t } = useTranslation()
   const { clearRouteCache } = useRouteCache()
   const {

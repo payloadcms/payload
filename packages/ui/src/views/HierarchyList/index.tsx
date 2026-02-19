@@ -23,13 +23,13 @@ import { DocumentSelectionProvider } from '../../providers/DocumentSelection/ind
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { TaxonomyListHeader } from './TaxonomyListHeader/index.js'
-import { TaxonomyTable } from './TaxonomyTable/index.js'
+import { HierarchyListHeader } from './HierarchyListHeader/index.js'
+import { HierarchyTable } from './HierarchyTable/index.js'
 import './index.scss'
 
-const baseClass = 'taxonomy-list'
+const baseClass = 'hierarchy-list'
 
-export function TaxonomyListView(props: ListViewClientProps) {
+export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,
     BeforeList,
@@ -190,7 +190,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
         {BeforeList}
         <DocumentSelectionProvider collectionData={collectionData}>
           <Gutter className={`${baseClass}__wrap`}>
-            <TaxonomyListHeader
+            <HierarchyListHeader
               collectionConfig={collectionConfig}
               collections={collections}
               currentItemTitle={currentItemTitle}
@@ -221,7 +221,7 @@ export function TaxonomyListView(props: ListViewClientProps) {
               />
             </div>
 
-            <TaxonomyTable
+            <HierarchyTable
               childrenData={filteredChildrenData}
               collections={collections}
               collectionSlug={collectionSlug}

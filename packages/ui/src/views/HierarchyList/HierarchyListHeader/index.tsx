@@ -14,9 +14,9 @@ import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { DocumentListSelection } from '../DocumentListSelection/index.js'
 import './index.scss'
 
-const baseClass = 'taxonomy-list-header'
+const baseClass = 'hierarchy-list-header'
 
-export type TaxonomyListHeaderProps = {
+export type HierarchyListHeaderProps = {
   collectionConfig: ClientCollectionConfig
   /** Collections available for creation with their initial data */
   collections: CollectionOption[]
@@ -29,7 +29,7 @@ export type TaxonomyListHeaderProps = {
   i18n: I18nClient
 }
 
-export function TaxonomyListHeader({
+export function HierarchyListHeader({
   collectionConfig,
   collections,
   currentItemTitle,
@@ -38,7 +38,7 @@ export function TaxonomyListHeader({
   disableBulkEdit,
   hasCreatePermission,
   i18n,
-}: TaxonomyListHeaderProps) {
+}: HierarchyListHeaderProps) {
   const { labels } = collectionConfig
   const title = currentItemTitle || getTranslation(labels?.plural, i18n)
   const { clearRouteCache } = useRouteCache()

@@ -29,8 +29,8 @@ import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
-import { DocumentListSelection } from '../TaxonomyList/DocumentListSelection/index.js'
-import { TaxonomyTable } from '../TaxonomyList/TaxonomyTable/index.js'
+import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
+import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.scss'
 
@@ -247,7 +247,7 @@ export function DefaultListView(props: ListViewClientProps) {
                     ),
                   }}
                 >
-                  <TaxonomyTable
+                  <HierarchyTable
                     childrenData={taxonomyData.childrenData}
                     collectionSlug={collectionSlug}
                     key={taxonomyData.parentId}
