@@ -8,7 +8,6 @@ import type {
   CollectionSlug,
   ColumnPreference,
   FieldPaths,
-  FolderSortKeys,
   GlobalSlug,
   SanitizedPermissions,
 } from '../../index.js'

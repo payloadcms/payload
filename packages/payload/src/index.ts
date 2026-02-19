@@ -1664,19 +1664,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-export {
-  createFolderCollection,
-  createFolderField,
-  DEFAULT_FOLDER_TREE_LIMIT,
-  FOLDER_PARENT_FIELD,
-  getFolderFieldName,
-} from './folders/index.js'
-export type {
-  CreateFolderCollectionOptions,
-  CreateFolderFieldOptions,
-  FolderConfig,
-} from './folders/index.js'
-export type { FolderSortKeys } from './folders/types.js'
 
 export {
   type ClientGlobalConfig,
@@ -1705,14 +1692,31 @@ export { findVersionsOperation as findVersionsOperationGlobal } from './globals/
 
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export {
+  createFolderCollection,
+  createFolderField,
+  createTagCollection,
+  createTagField,
+  DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  getAncestors,
+  getHierarchyFieldName,
+  HIERARCHY_DEFAULT_LOCALE,
+  HIERARCHY_PARENT_FIELD,
+  HIERARCHY_SLUG_PATH_FIELD,
+  HIERARCHY_TITLE_PATH_FIELD,
+  validateHierarchyFields,
+} from './hierarchy/index.js'
 export type {
   Ancestor,
+  CreateFolderCollectionOptions,
+  CreateFolderFieldOptions,
+  CreateTagCollectionOptions,
+  CreateTagFieldOptions,
   HierarchyConfig,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,
 } from './hierarchy/index.js'
-
-export { getAncestors } from './hierarchy/index.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
@@ -1769,14 +1773,6 @@ export {
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
-// Taxonomy
-export { DEFAULT_TAXONOMY_TREE_LIMIT } from './taxonomy/constants.js'
-export { createTaxonomyCollection } from './taxonomy/createTaxonomyCollection.js'
-export type { CreateTaxonomyCollectionOptions } from './taxonomy/createTaxonomyCollection.js'
-export { createTaxonomyField } from './taxonomy/createTaxonomyField.js'
-export { getInitialTreeData } from './taxonomy/getInitialTreeData.js'
-export type { GetInitialTreeDataArgs, InitialTreeData } from './taxonomy/getInitialTreeData.js'
-export type { CreateTaxonomyFieldOptions } from './taxonomy/types.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 
