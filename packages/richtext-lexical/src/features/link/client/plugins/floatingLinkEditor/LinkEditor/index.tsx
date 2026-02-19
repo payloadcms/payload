@@ -135,11 +135,21 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
     const fields = focusLinkParent.getStaleFields()
 
+    const basePath = `${fieldPath}.${nodeId}`
     dispatchFields({
       type: 'UPDATE',
-      path: `${fieldPath}.${nodeId}.text`,
+      path: `${basePath}.text`,
       value: focusLinkParent.getTextContent(),
     })
+    if (fields) {
+      for (const [key, val] of Object.entries(fields)) {
+        dispatchFields({
+          type: 'UPDATE',
+          path: `${basePath}.${key}`,
+          value: val,
+        })
+      }
+    }
 
     if (fields?.linkType === 'custom') {
       setLinkUrl(fields?.url ?? null)
