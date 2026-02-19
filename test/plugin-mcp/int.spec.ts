@@ -1297,6 +1297,179 @@ describe('@payloadcms/plugin-mcp', () => {
     })
   })
 
+  describe('Blocks fields', () => {
+    const createdPageIds: (number | string)[] = []
+
+    const getPagesApiKey = async (enableUpdate = false) => {
+      const doc = await payload.create({
+        collection: 'payload-mcp-api-keys',
+        data: {
+          enableAPIKey: true,
+          label: 'Pages API Key',
+          pages: { create: true, find: true, update: enableUpdate, delete: true },
+          posts: { create: false, find: false },
+          products: { find: false },
+          apiKey: randomUUID(),
+          user: userId,
+        },
+      })
+      return doc.apiKey as string
+    }
+
+    it('should create a page with a block', async () => {
+      const apiKey = await getPagesApiKey()
+
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPages',
+            arguments: {
+              title: 'Hero Page',
+              layout: [
+                {
+                  blockType: 'hero',
+                  heading: 'Welcome to our site',
+                  subheading: 'Discover amazing things',
+                },
+              ],
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.isError).toBeFalsy()
+      expect(json.result.content[0].type).toBe('text')
+      expect(json.result.content[0].text).toContain('"title": "Hero Page"')
+      expect(json.result.content[0].text).toContain('"blockType": "hero"')
+      expect(json.result.content[0].text).toContain('"heading": "Welcome to our site"')
+
+      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
+      if (jsonMatch) {
+        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
+      }
+    })
+
+    it('should create a page with multiple block types', async () => {
+      const apiKey = await getPagesApiKey()
+
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'createPages',
+            arguments: {
+              title: 'Multi-block Page',
+              layout: [
+                {
+                  blockType: 'hero',
+                  heading: 'Page Hero',
+                  subheading: 'Hero subtitle',
+                },
+                {
+                  blockType: 'textContent',
+                  body: 'This is the body text.',
+                },
+              ],
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.isError).toBeFalsy()
+      expect(json.result.content[0].text).toContain('"blockType": "hero"')
+      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
+      expect(json.result.content[0].text).toContain('"heading": "Page Hero"')
+      expect(json.result.content[0].text).toContain('"body": "This is the body text."')
+
+      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
+      if (jsonMatch) {
+        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
+      }
+    })
+
+    it('should update a page layout that contains blocks', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Page to Update',
+          layout: [],
+        },
+      })
+
+      createdPageIds.push(page.id)
+
+      const apiKey = await getPagesApiKey(true)
+
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'updatePages',
+            arguments: {
+              id: page.id,
+              layout: [
+                {
+                  blockType: 'hero',
+                  heading: 'Updated Hero Heading',
+                },
+                {
+                  blockType: 'textContent',
+                  body: 'Updated body text.',
+                },
+              ],
+            },
+          },
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+
+      expect(json.result).toBeDefined()
+      expect(json.result.isError).toBeFalsy()
+      expect(json.result.content[0].text).toContain('"blockType": "hero"')
+      expect(json.result.content[0].text).toContain('"heading": "Updated Hero Heading"')
+      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
+      expect(json.result.content[0].text).toContain('"body": "Updated body text."')
+
+      const updatedPage = await payload.findByID({
+        collection: 'pages',
+        id: page.id,
+      })
+
+      expect((updatedPage as any).layout).toHaveLength(2)
+      expect((updatedPage as any).layout[0].blockType).toBe('hero')
+      expect((updatedPage as any).layout[0].heading).toBe('Updated Hero Heading')
+    })
+  })
+
   describe('payloadAPI context', () => {
     it('should call operations with the payloadAPI context as MCP', async () => {
       await payload.create({
