@@ -285,11 +285,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                        <RenderCustomComponent
-                          CustomComponent={CustomSaveDraftButton}
-                          Fallback={<SaveDraftButton />}
-                        />
-                      )}
+                      <RenderCustomComponent
+                        CustomComponent={CustomSaveDraftButton}
+                        Fallback={<SaveDraftButton />}
+                      />
+                    )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}

@@ -8,6 +8,11 @@ import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
+import {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+} from '../utils/getVirtualFieldNames.js'
+import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { registerTool } from './registerTool.js'
 
 // Tools
@@ -107,7 +112,16 @@ export const getMCPHandler = (
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
           try {
-            const schema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+            const rawSchema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+
+            const virtualFieldNames = getCollectionVirtualFieldNames(
+              payload.config,
+              enabledCollectionSlug,
+            )
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
 
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledCollectionSlug)}`
@@ -200,7 +214,13 @@ export const getMCPHandler = (
 
         enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
           try {
-            const schema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+            const rawSchema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+
+            const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, enabledGlobalSlug)
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
 
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledGlobalSlug)}`
