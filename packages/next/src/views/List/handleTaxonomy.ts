@@ -7,6 +7,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { getAncestors } from 'payload'
 
 /**
  * Fetches taxonomy data for a collection with a selected parent.
@@ -38,95 +39,30 @@ export const handleTaxonomy = async ({
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
-  // Fetch the selected parent item (skip for root level)
+  // Fetch the selected parent item and breadcrumbs (skip for root level)
   let selectedItem: null | Record<string, unknown> = null
   let breadcrumbs: Array<{ id: number | string; title: string }> = []
 
   if (parentId !== null) {
     try {
-      selectedItem = await req.payload.findByID({
-        id: parentId,
-        collection: collectionSlug,
-        depth: 0,
-        overrideAccess: false,
-        req,
-        user,
-      })
+      const [item, ancestors] = await Promise.all([
+        req.payload.findByID({
+          id: parentId,
+          collection: collectionSlug,
+          depth: 0,
+          overrideAccess: false,
+          req,
+          user,
+        }),
+        getAncestors({
+          id: parentId,
+          collectionSlug,
+          req,
+        }),
+      ])
 
-      // Build breadcrumbs from the taxonomy path if available
-      if (selectedItem) {
-        const titlePathField = taxonomyConfig.titlePathFieldName
-
-        if (titlePathField && Array.isArray(selectedItem[titlePathField])) {
-          breadcrumbs = (selectedItem[titlePathField] as Array<{ doc: string; label: string }>).map(
-            (item) => ({
-              id: item.doc,
-              title: item.label,
-            }),
-          )
-        } else {
-          // Fallback: walk up the parent chain to build full breadcrumb path
-          const buildBreadcrumbs = async (
-            item: Record<string, unknown>,
-            itemId: number | string,
-          ): Promise<Array<{ id: number | string; title: string }>> => {
-            const crumbs: Array<{ id: number | string; title: string }> = []
-            let currentItem: null | Record<string, unknown> = item
-            let currentId: null | number | string = itemId
-
-            while (currentItem && currentId !== null) {
-              const rawTitle = currentItem[useAsTitle] || currentItem.id || currentId
-              let title: string
-
-              if (rawTitle && typeof rawTitle === 'object') {
-                title = JSON.stringify(rawTitle)
-              } else if (typeof rawTitle === 'string') {
-                title = rawTitle
-              } else if (typeof rawTitle === 'number') {
-                title = String(rawTitle)
-              } else {
-                title = String(currentId)
-              }
-
-              crumbs.unshift({ id: currentId, title })
-
-              // Get parent ID
-              const parentValue = currentItem[parentFieldName]
-              if (!parentValue) {
-                break
-              }
-
-              const nextParentId =
-                typeof parentValue === 'object' && parentValue !== null && 'id' in parentValue
-                  ? (parentValue as { id: number | string }).id
-                  : (parentValue as number | string)
-
-              if (!nextParentId) {
-                break
-              }
-
-              // Fetch parent
-              try {
-                currentItem = await req.payload.findByID({
-                  id: nextParentId,
-                  collection: collectionSlug,
-                  depth: 0,
-                  overrideAccess: false,
-                  req,
-                  user,
-                })
-                currentId = nextParentId
-              } catch {
-                break
-              }
-            }
-
-            return crumbs
-          }
-
-          breadcrumbs = await buildBreadcrumbs(selectedItem, parentId)
-        }
-      }
+      selectedItem = item
+      breadcrumbs = ancestors
     } catch (_error) {
       req.payload.logger.warn({
         msg: `Taxonomy item not found: ${parentId}`,
@@ -189,9 +125,7 @@ export const handleTaxonomy = async ({
       continue
     }
 
-    const { hasMany } = fieldInfo
-    // Field name is always _t_{taxonomySlug} by convention
-    const fieldName = `_t_${collectionSlug}`
+    const { fieldName, hasMany } = fieldInfo
 
     // Build where clause based on whether we're at root or nested level
     let relationshipWhere: Record<string, unknown>

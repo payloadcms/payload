@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../collections/config/types.js'
+import type { CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
 import { TAXONOMY_PARENT_FIELD } from './constants.js'
@@ -17,13 +17,17 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
 
   // Apply defaults for optional fields
   const parentFieldName = collectionConfig.taxonomy.parentFieldName || TAXONOMY_PARENT_FIELD
-  const relatedCollections = collectionConfig.taxonomy.relatedCollections || {}
 
   // Apply hierarchy configuration (which will add parent field and hooks)
+  // Only set optional fields if they're defined to avoid polluting the config
   collectionConfig.hierarchy = {
     parentFieldName,
-    slugPathFieldName: collectionConfig.taxonomy.slugPathFieldName,
-    titlePathFieldName: collectionConfig.taxonomy.titlePathFieldName,
+    ...(collectionConfig.taxonomy.slugPathFieldName && {
+      slugPathFieldName: collectionConfig.taxonomy.slugPathFieldName,
+    }),
+    ...(collectionConfig.taxonomy.titlePathFieldName && {
+      titlePathFieldName: collectionConfig.taxonomy.titlePathFieldName,
+    }),
     ...(collectionConfig.taxonomy.slugify && { slugify: collectionConfig.taxonomy.slugify }),
   }
 
@@ -46,17 +50,18 @@ export const sanitizeTaxonomy = (collectionConfig: CollectionConfig, _config: Co
     })
   }
 
-  // Set sanitized taxonomy config (will be further sanitized when hierarchy is applied)
-  collectionConfig.taxonomy = {
-    allowHasMany: collectionConfig.taxonomy.allowHasMany ?? true,
+  // Capture input values before casting
+  const { allowHasMany, icon, treeLimit } = collectionConfig.taxonomy
+
+  const sanitized = collectionConfig as unknown as SanitizedCollectionConfig
+
+  // Set sanitized taxonomy config (relatedCollections populated in validateTaxonomyFields,
+  // hierarchy fields populated in sanitizeHierarchy)
+  sanitized.taxonomy = {
+    allowHasMany: allowHasMany ?? true,
     parentFieldName,
-    relatedCollections,
-    slugPathFieldName: collectionConfig.taxonomy.slugPathFieldName,
-    titlePathFieldName: collectionConfig.taxonomy.titlePathFieldName,
-    ...(collectionConfig.taxonomy.icon && { icon: collectionConfig.taxonomy.icon }),
-    ...(collectionConfig.taxonomy.slugify && { slugify: collectionConfig.taxonomy.slugify }),
-    ...(collectionConfig.taxonomy.treeLimit !== undefined && {
-      treeLimit: collectionConfig.taxonomy.treeLimit,
-    }),
-  } // Type will be correct after hierarchy sanitization
+    relatedCollections: {}, // Auto-populated in validateTaxonomyFields
+    ...(icon && { icon }),
+    ...(treeLimit !== undefined && { treeLimit }),
+  }
 }

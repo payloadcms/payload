@@ -1,5 +1,5 @@
 import type { SingleRelationshipField } from '../fields/config/types.js'
-import type { HierarchyConfig, SanitizedHierarchyConfig } from '../hierarchy/types.js'
+import type { HierarchyConfig } from '../hierarchy/types.js'
 
 /**
  * Options for creating a taxonomy relationship field.
@@ -18,6 +18,9 @@ export type CreateTaxonomyFieldOptions = {
  *
  * Taxonomies are hierarchical collections that can be referenced by other collections.
  * They automatically use the hierarchy feature for parent-child relationships.
+ *
+ * Inherits hierarchy options (parentFieldName, slugPathFieldName, titlePathFieldName, slugify)
+ * which are passed through to the underlying hierarchy configuration.
  */
 export type TaxonomyConfig = {
   /**
@@ -34,24 +37,6 @@ export type TaxonomyConfig = {
    * If not provided, defaults to '@payloadcms/ui#TagIcon'
    */
   icon?: string
-  /**
-   * Collection slugs that reference this taxonomy (required).
-   * Each collection must include a taxonomy field created with `createTaxonomyField()`.
-   *
-   * After sanitization, this becomes a Record with field info.
-   *
-   * @example
-   * // In taxonomy collection config:
-   * taxonomy: {
-   *   relatedCollections: ['posts', 'pages'],
-   * }
-   *
-   * // In related collection config:
-   * fields: [
-   *   createTaxonomyField({ taxonomySlug: 'tags', hasMany: true }),
-   * ]
-   */
-  relatedCollections: Record<string, SanitizedRelatedCollection> | string[]
   /**
    * Maximum number of children to load per parent node in the tree
    * Controls initial load and pagination for tree views
@@ -76,13 +61,16 @@ export type SanitizedRelatedCollection = {
 export type SanitizedTaxonomyConfig = {
   /**
    * Whether related collections can reference multiple terms from this taxonomy.
-   * @default true
    */
   allowHasMany: boolean
   /**
    * Custom icon to display in the sidebar tab for this taxonomy
    */
   icon?: string
+  /**
+   * Name of the field that references the parent taxonomy term.
+   */
+  parentFieldName: string
   /**
    * Related collections with their sanitized configuration.
    * Key is collection slug, value contains the field info.
@@ -92,7 +80,8 @@ export type SanitizedTaxonomyConfig = {
   }
   /**
    * Maximum number of children to load per parent node in the tree
-   * If not set, consumers will use DEFAULT_TAXONOMY_TREE_LIMIT (100)
+   * Controls initial load and pagination for tree views
+   * @default 100
    */
   treeLimit?: number
-} & SanitizedHierarchyConfig
+}

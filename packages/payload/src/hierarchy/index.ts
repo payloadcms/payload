@@ -1,4 +1,6 @@
 export type { HierarchyConfig, SanitizedHierarchyConfig } from './types.js'
 export { computePaths } from './utils/computePaths.js'
+export type { Ancestor } from './utils/getAncestors.js'
+export { getAncestors } from './utils/getAncestors.js'
 export { getLocalizedValue } from './utils/getLocalizedValue.js'
 export { buildNestedTree, loadTree } from './utils/loadTree.js'

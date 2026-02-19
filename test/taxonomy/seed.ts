@@ -402,12 +402,12 @@ export const seed = async (payload: Payload): Promise<void> => {
     } as any,
   })
 
-  // Create pages with tags
+  // Create pages with tags (hasMany: false, so single value only)
   await payload.create({
     collection: pagesSlug as any,
     data: {
       content: 'Comprehensive React documentation and guides',
-      _t_tags: [react.id, javascript.id],
+      _t_tags: react.id,
       title: 'React Documentation',
     } as any,
   })
@@ -416,7 +416,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Curated list of UI/UX resources',
-      _t_tags: [uiux.id, design.id],
+      _t_tags: uiux.id,
       title: 'UI/UX Resources',
     } as any,
   })
@@ -425,7 +425,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Complete TypeScript reference',
-      _t_tags: [typescript.id],
+      _t_tags: typescript.id,
       title: 'TypeScript Handbook',
     } as any,
   })
@@ -434,7 +434,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Core JavaScript concepts',
-      _t_tags: [javascript.id, programming.id],
+      _t_tags: javascript.id,
       title: 'JavaScript Fundamentals',
     } as any,
   })

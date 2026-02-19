@@ -36,6 +36,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
   initialData,
   onNodeClick,
   selectedNodeId,
+  useAsTitle: useAsTitleProp,
 }) => {
   const { expandedNodes, toggleNode } = useTaxonomy()
   const { getEntityConfig } = useConfig()
@@ -48,6 +49,9 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
 
   // Get tree limit from taxonomy config, fallback to DEFAULT_TAXONOMY_TREE_LIMIT
   const treeLimit = collectionConfig.taxonomy?.treeLimit ?? DEFAULT_TAXONOMY_TREE_LIMIT
+
+  // Allow prop override for useAsTitle
+  const useAsTitle = useAsTitleProp ?? collectionConfig?.admin?.useAsTitle
 
   // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
   // This ensures expanded children find their data immediately without client-side fetch
@@ -173,7 +177,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
       {rootNodes.map((node) => {
         const nodeId: number | string = node.id
         const nodeIdStr = typeof nodeId === 'number' ? String(nodeId) : nodeId
-        const nodeTitle = getDocumentTitle(node, collectionConfig?.admin?.useAsTitle)
+        const nodeTitle = getDocumentTitle(node, useAsTitle)
         const isSelected = nodeIdStr === String(selectedNodeId)
 
         return (
@@ -194,7 +198,7 @@ const TaxonomyTreeInner: React.FC<TaxonomyTreeProps> = ({
             parentFieldName={parentFieldName}
             selected={isSelected}
             selectedNodeId={selectedNodeId}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
+            useAsTitle={useAsTitle}
           />
         )
       })}

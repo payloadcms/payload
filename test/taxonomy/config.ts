@@ -21,9 +21,7 @@ export const categoriesSlug = 'categories'
 // Categories taxonomy with custom configuration
 export const Categories = createTaxonomyCollection({
   slug: categoriesSlug,
-  admin: {
-    useAsTitle: 'name',
-  },
+  useAsTitle: 'name',
   fields: [
     {
       name: 'name',
@@ -34,16 +32,14 @@ export const Categories = createTaxonomyCollection({
   taxonomy: {
     icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
     parentFieldName: 'parentCategory',
-    relatedCollections: [postsSlug],
+    // relatedCollections auto-discovered from fields
   },
 })
 
 // Tags taxonomy collection
 export const Tags = createTaxonomyCollection({
   slug: tagsSlug,
-  admin: {
-    useAsTitle: 'name',
-  },
+  useAsTitle: 'name',
   fields: [
     {
       name: 'name',
@@ -56,7 +52,7 @@ export const Tags = createTaxonomyCollection({
     },
   ],
   taxonomy: {
-    relatedCollections: [postsSlug, pagesSlug, mediaSlug],
+    // relatedCollections auto-discovered from fields
   },
 })
 
