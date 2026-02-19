@@ -58,7 +58,7 @@ async function navigateToLexicalFields(
   // Wait for table to be fully loaded
   await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-  // Navigate to first document using helper
+  // Navigate to first document
   await goToFirstCell(page, serverURL)
   await waitForFormReady(page)
 
