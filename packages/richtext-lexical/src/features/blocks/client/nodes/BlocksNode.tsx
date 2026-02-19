@@ -39,11 +39,12 @@ export class BlockNode extends ServerBlockNode {
   }
 
   override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    const fields = this.getStaleFields()
     return (
       <BlockComponent
-        cacheBuster={this.getCacheBuster()}
+        blockType={fields.blockType}
         className={config.theme.block ?? 'LexicalEditorTheme__block'}
-        formData={this.getFields()}
+        id={fields.id}
         nodeKey={this.getKey()}
       />
     )

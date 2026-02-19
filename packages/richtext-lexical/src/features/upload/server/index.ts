@@ -235,6 +235,10 @@ export const UploadFeature = createServerFeature<
               nodeTypes: [UploadServerNode.getType()],
             },
           },
+          getSchemaPath: ({ node }) => {
+            const relationTo = node?.relationTo
+            return relationTo ? String(relationTo) : undefined
+          },
           getSubFields: ({ node, req }) => {
             if (!node) {
               let allSubFields: Field[] = []

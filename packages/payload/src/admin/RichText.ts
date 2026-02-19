@@ -15,7 +15,13 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
-import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
+import type { FormStateWithoutComponents } from './forms/Form.js'
+import type {
+  ClientFieldSchemaMap,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldSchemaMap,
+} from './types.js'
 
 export type AfterReadRichTextHookArgs<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -202,6 +208,93 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /**
+   * Build form state entries for nested fields within the rich text value (e.g. blocks, links, uploads).
+   *
+   * The adapter owns the iteration: it walks the rich text data, finds nodes with nested fields,
+   * and calls the provided `iterateFields` function for each. This mirrors how `generateSchemaMap`
+   * works — the adapter receives tools and handles traversal internally.
+   *
+   * Nested field paths use the node ID as a bridge: `{path}.{nodeId}.{fieldName}`.
+   * The node ID flattens the freeform tree — the form state doesn't care about tree depth or position.
+   */
+  buildFormState?: (args: {
+    /**
+     * The rich text field's data value. May be the original data (initial load) or include
+     * current nested field values merged in by `reduceFieldsToValues` + unflatten (on change).
+     */
+    data: any
+    fieldSchemaMap: FieldSchemaMap
+    /**
+     * The `iterateFields` function from `@payloadcms/ui`. Call this for each node's fields
+     * with the appropriate `parentPath` and `parentSchemaPath`.
+     */
+    iterateFields: (args: {
+      addErrorPathToParent: (fieldPath: string) => void
+      anyParentLocalized?: boolean
+      blockData: any
+      clientFieldSchemaMap?: ClientFieldSchemaMap
+      collectionSlug?: string
+      data: any
+      fields: any[]
+      fieldSchemaMap: FieldSchemaMap
+      filter?: any
+      forceFullValue?: boolean
+      fullData: any
+      id?: number | string
+      includeSchema?: boolean
+      mockRSCs?: any
+      omitParents?: boolean
+      operation: 'create' | 'update'
+      parentIndexPath: string
+      parentPassesCondition?: boolean
+      parentPath: string
+      parentSchemaPath: string
+      permissions: any
+      preferences?: any
+      previousFormState: any
+      readOnly?: boolean
+      renderAllFields: boolean
+      renderFieldFn: any
+      req: PayloadRequest
+      select?: any
+      selectMode?: any
+      skipConditionChecks?: boolean
+      skipValidation?: boolean
+      state?: FormStateWithoutComponents
+    }) => Promise<void>
+    /**
+     * Common args to forward to `iterateFields`. These come from the parent `addFieldStatePromise` context.
+     */
+    iterateFieldsArgs: {
+      addErrorPathToParent: (fieldPath: string) => void
+      anyParentLocalized?: boolean
+      clientFieldSchemaMap?: ClientFieldSchemaMap
+      collectionSlug?: string
+      fieldSchemaMap: FieldSchemaMap
+      filter?: any
+      forceFullValue?: boolean
+      fullData: any
+      id?: number | string
+      includeSchema?: boolean
+      mockRSCs?: any
+      omitParents?: boolean
+      operation: 'create' | 'update'
+      preferences?: any
+      previousFormState: any
+      readOnly?: boolean
+      renderAllFields: boolean
+      renderFieldFn: any
+      req: PayloadRequest
+      select?: any
+      selectMode?: any
+      skipConditionChecks?: boolean
+      skipValidation?: boolean
+      state: FormStateWithoutComponents
+    }
+    path: string
+    schemaPath: string
+  }) => Promise<void>
   /**
    * Provide a function that can be used to add items to the import map. This is useful for
    * making modules available to the client.

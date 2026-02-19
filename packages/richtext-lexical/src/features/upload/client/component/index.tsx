@@ -35,18 +35,15 @@ const initialParams = {
 
 export type ElementProps = {
   className: string
-  data: UploadData
   format?: ElementFormatType
+  id: string
   nodeKey: string
+  relationTo: string
+  value: UploadData['value']
 }
 
 export const UploadComponent: React.FC<ElementProps> = (props) => {
-  const {
-    className: baseClass,
-    data: { fields, relationTo, value },
-    format,
-    nodeKey,
-  } = props
+  const { id: uploadNodeId, className: baseClass, format, nodeKey, relationTo, value } = props
 
   if (typeof value === 'object') {
     throw new Error(
@@ -62,13 +59,13 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
     getEntityConfig,
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
-  const { uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
   const [editor] = useLexicalComposerContext()
 
   const {
     editorConfig,
     fieldProps: { schemaPath },
+    uuid,
   } = useEditorConfigContext()
   const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation()
@@ -131,7 +128,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
         const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
         if (uploadNode) {
           const newData: UploadData = {
-            ...uploadNode.getData(),
+            ...uploadNode.getStaleData(),
             fields: data,
           }
           uploadNode.setData(newData)
@@ -231,13 +228,13 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
       {value ? <DocumentDrawer onSave={updateUpload} /> : null}
       {hasExtraFields ? (
         <FieldsDrawer
-          data={fields}
           drawerSlug={extraFieldsDrawerSlug}
           drawerTitle={t('general:editLabel', {
             label: getTranslation(relatedCollection.labels.singular, i18n),
           })}
           featureKey="upload"
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
+          nodeId={uploadNodeId}
           schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}
         />

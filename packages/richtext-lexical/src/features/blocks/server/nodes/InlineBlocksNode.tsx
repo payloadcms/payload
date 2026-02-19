@@ -27,26 +27,15 @@ export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObje
 } & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
-  __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({
-    cacheBuster,
-    fields,
-    key,
-  }: {
-    cacheBuster?: number
-    fields: InlineBlockFields
-    key?: NodeKey
-  }) {
+  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
     super(key)
     this.__fields = fields
-    this.__cacheBuster = cacheBuster || 0
   }
 
   static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
-      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
@@ -95,16 +84,18 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
-      fields: this.getFields(),
+      fields: this.getStaleFields(),
       version: 1,
     }
   }
 
-  getCacheBuster(): number {
-    return this.getLatest().__cacheBuster
-  }
-
-  getFields(): InlineBlockFields {
+  /**
+   * Returns the node's in-memory field data. This may be stale — the parent
+   * document form state at `{richTextPath}.{nodeId}.*` is the source of truth.
+   * Stale data is synced back into the node on document save via the
+   * `beforeChange` hook.
+   */
+  getStaleFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
 
@@ -116,12 +107,9 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return true
   }
 
-  setFields(fields: InlineBlockFields, preventFormStateUpdate?: boolean): void {
+  setFields(fields: InlineBlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
-    if (!preventFormStateUpdate) {
-      writable.__cacheBuster++
-    }
   }
 
   override updateDOM(): boolean {

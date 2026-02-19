@@ -216,7 +216,10 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
-          // @ts-expect-error - TODO: fix this
+          getSchemaPath: ({ node }) => {
+            const blockType = node?.fields?.blockType
+            return blockType ? `lexical_blocks.${blockType}.fields` : undefined
+          },
           getSubFields: ({ node }) => {
             if (!node) {
               if (blockConfigs?.length) {
@@ -234,7 +237,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockType = node.fields.blockType
 
             const block = blockConfigs?.find((block) => block.slug === blockType)
-            return block?.fields
+            return block?.fields ?? null
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
@@ -244,7 +247,10 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
-          // @ts-expect-error - TODO: fix this
+          getSchemaPath: ({ node }) => {
+            const blockType = node?.fields?.blockType
+            return blockType ? `lexical_inline_blocks.${blockType}.fields` : undefined
+          },
           getSubFields: ({ node }) => {
             if (!node) {
               if (inlineBlockConfigs?.length) {
@@ -262,7 +268,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockType = node.fields.blockType
 
             const block = inlineBlockConfigs?.find((block) => block.slug === blockType)
-            return block?.fields
+            return block?.fields ?? null
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields

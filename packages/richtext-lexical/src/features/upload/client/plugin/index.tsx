@@ -126,7 +126,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
             const node = dfsNode.node
 
             if ($isUploadNode(node)) {
-              const nodeData = node.getData()
+              const nodeData = node.getStaleData()
               if ((nodeData as Internal_UploadData)?.pending) {
                 node.remove()
               }
@@ -141,7 +141,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
           for (const dfsNode of $dfsIterator()) {
             const node = dfsNode.node
             if ($isUploadNode(node)) {
-              const nodeData: Internal_UploadData = node.getData()
+              const nodeData: Internal_UploadData = node.getStaleData()
 
               if (nodeData?.pending) {
                 const newDoc = newDocsMap.get(nodeData.pending?.formID)
@@ -177,7 +177,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
        * Handle auto-uploading files if you copy & paste an image dom element from the clipboard
        */
       editor.registerNodeTransform(UploadNode, (node) => {
-        const nodeData: Internal_UploadData = node.getData()
+        const nodeData: Internal_UploadData = node.getStaleData()
         if (!nodeData?.pending) {
           return
         }

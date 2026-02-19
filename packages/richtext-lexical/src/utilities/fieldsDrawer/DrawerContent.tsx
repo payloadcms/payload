@@ -1,174 +1,55 @@
 'use client'
-import type { FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import {
-  Form,
-  FormSubmit,
-  RenderFields,
-  useDocumentForm,
-  useDocumentInfo,
-  useServerFunctions,
-  useTranslation,
-} from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { v4 as uuid } from 'uuid'
+import { FormSubmit, RenderFields, useForm, useTranslation } from '@payloadcms/ui'
+import React, { useCallback } from 'react'
 
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
 
 export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
-  data,
   featureKey,
   fieldMapOverride,
   handleDrawerSubmit,
+  nodeId,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
 }) => {
   const { t } = useTranslation()
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
-  const { fields: parentDocumentFields } = useDocumentForm()
   const isEditable = useLexicalEditable()
-
-  const onChangeAbortControllerRef = useRef(new AbortController())
-
-  const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
+  const { fields: formFields, getDataByPath } = useForm()
 
   const {
-    fieldProps: { featureClientSchemaMap },
+    fieldProps: { featureClientSchemaMap, path },
   } = useEditorConfigContext()
-
-  const { getFormState } = useServerFunctions()
 
   const schemaFieldsPath =
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
+  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath]
 
-  useEffect(() => {
-    const controller = new AbortController()
+  const parentPath = nodeId ? `${path}.${nodeId}` : ''
 
-    const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        data: data ?? {},
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        globalSlug,
-        initialBlockData: data,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: true,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      setInitialState(state)
-    }
-
-    void awaitInitialState()
-
-    return () => {
-      abortAndIgnore(controller)
-    }
-  }, [
-    schemaFieldsPath,
-    id,
-    data,
-    getFormState,
-    collectionSlug,
-    isEditable,
-    globalSlug,
-    getDocPreferences,
-    parentDocumentFields,
-  ])
-
-  const onChange = useCallback(
-    async ({ formState: prevFormState }: { formState: FormState }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        formState: prevFormState,
-        globalSlug,
-        initialBlockFormState: prevFormState,
-        operation: 'update',
-        readOnly: !isEditable,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!state) {
-        return prevFormState
-      }
-
-      return state
-    },
-    [
-      getFormState,
-      id,
-      isEditable,
-      collectionSlug,
-      getDocPreferences,
-      parentDocumentFields,
-      globalSlug,
-      schemaFieldsPath,
-    ],
-  )
-
-  // cleanup effect
-  useEffect(() => {
-    return () => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [])
-
-  if (initialState === false) {
-    return null
-  }
+  const onClick = useCallback(() => {
+    const data = nodeId ? (getDataByPath(parentPath) ?? {}) : {}
+    handleDrawerSubmit(formFields, data)
+  }, [nodeId, parentPath, getDataByPath, formFields, handleDrawerSubmit])
 
   return (
-    <Form
-      beforeSubmit={[onChange]}
-      disableValidationOnSubmit
-      fields={Array.isArray(fields) ? fields : []}
-      initialState={initialState}
-      onChange={[onChange]}
-      onSubmit={handleDrawerSubmit}
-      uuid={uuid()}
-    >
+    <>
       <RenderFields
         fields={Array.isArray(fields) ? fields : []}
         forceRender
         parentIndexPath=""
-        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentPath={parentPath}
         parentSchemaPath={schemaFieldsPath}
         permissions={true}
         readOnly={!isEditable}
       />
-      <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-    </Form>
+      <FormSubmit onClick={onClick}>{t('fields:saveChanges')}</FormSubmit>
+    </>
   )
 }

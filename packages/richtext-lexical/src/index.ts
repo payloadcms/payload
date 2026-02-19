@@ -20,6 +20,7 @@ import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider }
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { getGetBuildFormState } from './utilities/buildFormState.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
@@ -97,6 +98,9 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
+      buildFormState: getGetBuildFormState({
+        features: finalSanitizedEditorConfig.features,
+      }),
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
       DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
@@ -438,6 +442,34 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             } = args
 
             let { value } = args
+
+            // Merge flat node field data back into the tree.
+            // After reduceFieldsToValues + unflatten, value may contain:
+            //   { root: { children: [...] }, abc123: { text: "current" }, ... }
+            // Merge each nodeId entry back into the corresponding node and remove it from the root.
+            if (value && typeof value === 'object' && value.root?.children) {
+              const nodeIDMap: Record<string, SerializedLexicalNode> = {}
+              recurseNodeTree({ nodeIDMap, nodes: value.root.children })
+
+              for (const [key, nodeData] of Object.entries(value)) {
+                if (key === 'root') {
+                  continue
+                }
+                if (typeof nodeData === 'object' && nodeData !== null && nodeIDMap[key]) {
+                  const node = nodeIDMap[key]
+                  const getSubFieldsDataFn =
+                    finalSanitizedEditorConfig.features.getSubFieldsData?.get(node.type)
+
+                  if (getSubFieldsDataFn) {
+                    const existingFields = getSubFieldsDataFn({ node, req })
+                    if (existingFields && typeof existingFields === 'object') {
+                      Object.assign(existingFields, nodeData)
+                    }
+                  }
+                  delete (value as Record<string, unknown>)[key]
+                }
+              }
+            }
 
             if (finalSanitizedEditorConfig?.features?.hooks?.beforeChange?.length) {
               for (const hook of finalSanitizedEditorConfig.features.hooks.beforeChange) {

@@ -173,13 +173,19 @@ export class UploadServerNode extends DecoratorBlockNode {
   override exportJSON(): SerializedUploadNode {
     return {
       ...super.exportJSON(),
-      ...this.getData(),
+      ...this.getStaleData(),
       type: 'upload',
       version: 3,
     }
   }
 
-  getData(): UploadData {
+  /**
+   * Returns the node's in-memory data. The `fields` property may be stale —
+   * the parent document form state at `{richTextPath}.{nodeId}.*` is the
+   * source of truth. Stale data is synced back on document save via the
+   * `beforeChange` hook.
+   */
+  getStaleData(): UploadData {
     return this.getLatest().__data
   }
 

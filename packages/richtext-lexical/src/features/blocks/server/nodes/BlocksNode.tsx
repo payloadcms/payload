@@ -37,28 +37,23 @@ export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = 
 } & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
 
 export class ServerBlockNode extends DecoratorBlockNode {
-  __cacheBuster: number
   __fields: BlockFields
 
   constructor({
-    cacheBuster,
     fields,
     format,
     key,
   }: {
-    cacheBuster?: number
     fields: BlockFields
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
     this.__fields = fields
-    this.__cacheBuster = cacheBuster || 0
   }
 
   static override clone(node: ServerBlockNode): ServerBlockNode {
     return new this({
-      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       format: node.__format,
       key: node.__key,
@@ -115,16 +110,18 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return {
       ...super.exportJSON(),
       type: 'block',
-      fields: this.getFields(),
+      fields: this.getStaleFields(),
       version: 2,
     }
   }
 
-  getCacheBuster(): number {
-    return this.getLatest().__cacheBuster
-  }
-
-  getFields(): BlockFields {
+  /**
+   * Returns the node's in-memory field data. This may be stale — the parent
+   * document form state at `{richTextPath}.{nodeId}.*` is the source of truth.
+   * Stale data is synced back into the node on document save via the
+   * `beforeChange` hook.
+   */
+  getStaleFields(): BlockFields {
     return this.getLatest().__fields
   }
 
@@ -132,12 +129,9 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return `Block Field`
   }
 
-  setFields(fields: BlockFields, preventFormStateUpdate?: boolean): void {
+  setFields(fields: BlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
-    if (!preventFormStateUpdate) {
-      writable.__cacheBuster++
-    }
   }
 }
 

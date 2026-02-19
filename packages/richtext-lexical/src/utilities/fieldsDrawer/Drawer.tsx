@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, Data, FormState, JsonObject } from 'payload'
+import type { ClientField, FormState, JsonObject } from 'payload'
 
 import { Drawer, EditDepthProvider, useModal } from '@payloadcms/ui'
 import React from 'react'
@@ -8,12 +8,16 @@ import { DrawerContent } from './DrawerContent.js'
 
 export type FieldsDrawerProps = {
   readonly className?: string
-  readonly data?: Data
   readonly drawerSlug: string
   readonly drawerTitle?: string
   readonly featureKey: string
   readonly fieldMapOverride?: ClientField[]
   readonly handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
+  /**
+   * The node ID used to derive the parent form path: `{richTextFieldPath}.{nodeId}`.
+   * When provided, nested fields render through the parent document form state.
+   */
+  readonly nodeId?: string
   readonly schemaFieldsPathOverride?: string
   readonly schemaPath: string
   readonly schemaPathSuffix?: string
@@ -26,24 +30,21 @@ export type FieldsDrawerProps = {
  */
 export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   className,
-  data,
   drawerSlug,
   drawerTitle,
   featureKey,
   fieldMapOverride,
   handleDrawerSubmit,
+  nodeId,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
 }) => {
   const { closeModal } = useModal()
-  // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
-  // to DrawerContent, this should be faster
   return (
     <EditDepthProvider>
       <Drawer className={className} slug={drawerSlug} title={drawerTitle ?? ''}>
         <DrawerContent
-          data={data}
           featureKey={featureKey}
           fieldMapOverride={fieldMapOverride}
           handleDrawerSubmit={(args, args2) => {
@@ -52,13 +53,14 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
             closeModal(drawerSlug)
 
             // Actual drawer submit logic needs to be triggered after the drawer is closed.
-            // That's because the lexical selection / cursor restore logic that is striggerer by
+            // That's because the lexical selection / cursor restore logic that is triggered by
             // `useLexicalDrawer` neeeds to be triggered before any editor.update calls that may happen
             // in the `handleDrawerSubmit` function.
             setTimeout(() => {
               handleDrawerSubmit(args, args2)
             }, 1)
           }}
+          nodeId={nodeId}
           schemaFieldsPathOverride={schemaFieldsPathOverride}
           schemaPath={schemaPath}
           schemaPathSuffix={schemaPathSuffix}

@@ -36,11 +36,12 @@ export class InlineBlockNode extends ServerInlineBlockNode {
   }
 
   override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    const fields = this.getStaleFields()
     return (
       <InlineBlockComponent
-        cacheBuster={this.getCacheBuster()}
+        blockType={fields.blockType}
         className={config.theme.inlineBlock ?? 'LexicalEditorTheme__inlineBlock'}
-        formData={this.getFields()}
+        id={fields.id}
         nodeKey={this.getKey()}
       />
     )

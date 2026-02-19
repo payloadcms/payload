@@ -123,7 +123,7 @@ export class LinkNode extends ElementNode {
   }
 
   override exportJSON(): SerializedLinkNode {
-    const fields = this.getFields()
+    const fields = this.getStaleFields()
 
     if (fields?.linkType === 'internal') {
       delete fields.url
@@ -163,12 +163,18 @@ export class LinkNode extends ElementNode {
     )
   }
 
-  getFields(): LinkFields {
-    return this.getLatest().__fields
-  }
-
   getID(): string {
     return this.getLatest().__id
+  }
+
+  /**
+   * Returns the node's in-memory field data. For links, the Lexical node is
+   * kept in sync via `editor.update()` on drawer submit, so this data is
+   * current after a drawer save. Between edits in the form state, it may lag
+   * behind the parent form state at `{richTextPath}.{nodeId}.*`.
+   */
+  getStaleFields(): LinkFields {
+    return this.getLatest().__fields
   }
 
   override insertNewAfter(

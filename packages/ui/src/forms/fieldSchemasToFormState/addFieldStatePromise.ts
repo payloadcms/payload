@@ -765,6 +765,61 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         break
       }
 
+      case 'richText': {
+        if (data[field.name] !== undefined) {
+          fieldState.value = data[field.name]
+          fieldState.initialValue = data[field.name]
+        }
+
+        if (!filter || filter(args)) {
+          state[path] = fieldState
+        }
+
+        if (
+          field.editor &&
+          typeof field.editor === 'object' &&
+          'buildFormState' in field.editor &&
+          typeof field.editor.buildFormState === 'function' &&
+          data[field.name]
+        ) {
+          await field.editor.buildFormState({
+            data: data[field.name],
+            fieldSchemaMap,
+            iterateFields,
+            iterateFieldsArgs: {
+              id,
+              addErrorPathToParent: addErrorPathToParentArg,
+              anyParentLocalized: field.localized || anyParentLocalized,
+              clientFieldSchemaMap,
+              collectionSlug,
+              fieldSchemaMap,
+              filter,
+              forceFullValue,
+              fullData,
+              includeSchema,
+              mockRSCs,
+              omitParents,
+              operation,
+              preferences,
+              previousFormState,
+              readOnly,
+              renderAllFields,
+              renderFieldFn,
+              req,
+              select,
+              selectMode,
+              skipConditionChecks,
+              skipValidation,
+              state,
+            },
+            path,
+            schemaPath,
+          })
+        }
+
+        break
+      }
+
       case 'select': {
         if (typeof field.filterOptions === 'function') {
           fieldState.selectFilterOptions = field.filterOptions({

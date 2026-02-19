@@ -18,8 +18,6 @@ import type {
 } from './features/typesClient.js'
 import type { FeatureProviderServer } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
-import type { InitialLexicalFormState } from './utilities/buildInitialState.js'
-
 export type LexicalFieldAdminProps = {
   /**
    * Controls if the add block button should be hidden. @default false
@@ -127,7 +125,6 @@ export type LexicalRichTextFieldProps = {
    */
   featureClientImportMap?: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
-  initialLexicalFormState: InitialLexicalFormState
   lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
