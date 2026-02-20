@@ -229,14 +229,10 @@ function getNodeFieldData(
   nodeId: string,
   features: SanitizedServerFeatures,
 ): Record<string, any> {
-  if (parentData?.[nodeId] && typeof parentData[nodeId] === 'object') {
-    return parentData[nodeId]
-  }
-
   const getSubFieldsDataFn = features.getSubFieldsData?.get(node.type)
-  if (getSubFieldsDataFn) {
-    return getSubFieldsDataFn({ node, req: undefined as any }) ?? {}
-  }
+  const nodeFieldData = getSubFieldsDataFn?.({ node, req: undefined as any }) ?? {}
+  const formStateData =
+    parentData?.[nodeId] && typeof parentData[nodeId] === 'object' ? parentData[nodeId] : {}
 
-  return {}
+  return { ...nodeFieldData, ...formStateData }
 }
