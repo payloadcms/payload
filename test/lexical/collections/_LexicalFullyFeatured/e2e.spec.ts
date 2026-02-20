@@ -228,6 +228,10 @@ describe('Lexical Fully Featured', () => {
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.type("import { DoesNotExist } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
   })
 
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
