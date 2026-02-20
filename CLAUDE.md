@@ -170,7 +170,11 @@ describe('My Feature', () => {
 - `pnpm run test:int` - Integration tests (MongoDB, recommended)
 - `pnpm run test:int <dir>` - Specific test suite (e.g. `fields`)
 - `pnpm run test:int:postgres|sqlite` - Integration tests with other databases
-- `pnpm run test:e2e` - Playwright tests (add `:headed` or `:debug` suffix)
+- `pnpm run test:e2e` - ALL Playwright tests (slow! avoid unless asked)
+- `pnpm run test:e2e <suite>` - Specific e2e suite; uses `__` as path separator from `test/` dir
+  - Example: `pnpm run test:e2e "lexical__collections__Lexical__e2e__main"` runs all specs in `test/lexical/collections/Lexical/e2e/main/`
+  - IMPORTANT: `--grep` is NOT supported by `runE2E.ts`. To run a single test, temporarily add `.only` to the test (e.g., `test.only('my test', ...)`) before running the suite, and revert after.
+- `pnpm run test:e2e:headed` / `pnpm run test:e2e:debug` - Run directly via playwright (requires dev server already running separately)
 - `pnpm run test:unit|components|types` - Other test suites
 
 ### Test Structure
