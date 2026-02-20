@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
   WidgetInstance,
 } from './types.js'
 
@@ -207,18 +208,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     validRelationships.push(config.folders!.slug)
   }
 
-  if (config.admin?.dashboard?.widgets?.length) {
-    for (const widget of config.admin.dashboard.widgets) {
-      if (widget.fields?.length) {
-        widget.fields = await sanitizeFields({
-          config: config as unknown as Config,
-          existingFieldNames: new Set(),
-          fields: widget.fields,
-          parentIsLocalized: false,
-          richTextSanitizationPromises,
-          validRelationships,
-        })
-      }
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
     }
   }
 
