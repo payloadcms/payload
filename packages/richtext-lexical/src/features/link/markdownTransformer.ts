@@ -21,7 +21,7 @@ export const LinkMarkdownTransformer: TextMatchTransformer = {
       return null
     }
     const node: LinkNode = _node
-    const { url } = node.getStaleFields()
+    const { url } = node.getFields()
 
     const textContent = exportChildren(node)
 

@@ -149,6 +149,7 @@ export class UploadServerNode extends DecoratorBlockNode {
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('div')
     addClassNamesToElement(element, config?.theme?.upload)
+    element.setAttribute('data-upload-id', this.__data.id)
     return element
   }
 
@@ -173,25 +174,27 @@ export class UploadServerNode extends DecoratorBlockNode {
   override exportJSON(): SerializedUploadNode {
     return {
       ...super.exportJSON(),
-      ...this.getStaleData(),
+      ...this.getData(),
       type: 'upload',
       version: 3,
     }
   }
 
-  /**
-   * Returns the node's in-memory data. The `fields` property may be stale —
-   * the parent document form state at `{richTextPath}.{nodeId}.*` is the
-   * source of truth. Stale data is synced back on document save via the
-   * `beforeChange` hook.
-   */
-  getStaleData(): UploadData {
+  getData(): UploadData {
     return this.getLatest().__data
   }
 
   setData(data: UploadData): void {
     const writable = this.getWritable()
     writable.__data = data
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__data = {
+      ...writable.__data,
+      fields: { ...(writable.__data.fields as Record<string, unknown>), [path]: value },
+    }
   }
 
   override updateDOM(): false {

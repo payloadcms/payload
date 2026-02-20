@@ -3,8 +3,10 @@ import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
 import type { ClientField } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
+import { useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
+
+import { RenderLexicalFields } from '../../../../utilities/RenderLexicalFields.js'
 
 export type BlockCollapsibleProps = {
   /**
@@ -91,8 +93,15 @@ export const useBlockComponentContext = () => React.use(BlockComponentContext)
 export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const { Collapsible, ...contextProps } = props
 
-  const { BlockDrawer, CustomBlock, errorCount, formSchema, parentPath, parentSchemaPath } =
-    contextProps
+  const {
+    BlockDrawer,
+    CustomBlock,
+    errorCount,
+    formSchema,
+    nodeKey,
+    parentPath,
+    parentSchemaPath,
+  } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
@@ -123,9 +132,10 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
     </BlockComponentContext>
   ) : (
     <CollapsibleWithErrorProps>
-      <RenderFields
+      <RenderLexicalFields
         fields={formSchema}
         forceRender={true}
+        nodeKey={nodeKey}
         parentIndexPath=""
         parentPath={parentPath}
         parentSchemaPath={parentSchemaPath}

@@ -17,7 +17,7 @@ export const UploadMarkdownTransformer: ElementTransformer = {
       return null
     }
 
-    const data = node.getStaleData()
+    const data = node.getData()
     const value = data?.value
 
     // When the value is a populated document object (not just an ID),

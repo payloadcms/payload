@@ -7,12 +7,14 @@ import React, { useCallback } from 'react'
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
+import { RenderLexicalFields } from '../RenderLexicalFields.js'
 
 export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
   featureKey,
   fieldMapOverride,
   handleDrawerSubmit,
   nodeId,
+  nodeKey,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
@@ -38,17 +40,23 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     handleDrawerSubmit(formFields, data)
   }, [nodeId, parentPath, getDataByPath, formFields, handleDrawerSubmit])
 
+  const fieldProps = {
+    fields: Array.isArray(fields) ? fields : [],
+    forceRender: true as const,
+    parentIndexPath: '',
+    parentPath,
+    parentSchemaPath: schemaFieldsPath,
+    permissions: true as const,
+    readOnly: !isEditable,
+  }
+
   return (
     <>
-      <RenderFields
-        fields={Array.isArray(fields) ? fields : []}
-        forceRender
-        parentIndexPath=""
-        parentPath={parentPath}
-        parentSchemaPath={schemaFieldsPath}
-        permissions={true}
-        readOnly={!isEditable}
-      />
+      {nodeKey ? (
+        <RenderLexicalFields {...fieldProps} nodeKey={nodeKey} />
+      ) : (
+        <RenderFields {...fieldProps} />
+      )}
       <FormSubmit onClick={onClick}>{t('fields:saveChanges')}</FormSubmit>
     </>
   )

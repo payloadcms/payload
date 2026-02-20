@@ -113,11 +113,11 @@ function getMarkdownTransformerForBlock(
           return null
         }
 
-        if (node.getStaleFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
+        if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
           return null
         }
 
-        const nodeFields = node.getStaleFields()
+        const nodeFields = node.getFields()
         const lexicalToMarkdown = getLexicalToMarkdown(
           getEnabledNodesFromServerNodes({
             nodes: allNodes,
@@ -219,11 +219,11 @@ function getMarkdownTransformerForBlock(
         return null
       }
 
-      if (node.getStaleFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
+      if (node.getFields()?.blockType?.toLowerCase() !== block.slug.toLowerCase()) {
         return null
       }
 
-      const nodeFields = node.getStaleFields()
+      const nodeFields = node.getFields()
       const lexicalToMarkdown = getLexicalToMarkdown(
         getEnabledNodesFromServerNodes({
           nodes: allNodes,

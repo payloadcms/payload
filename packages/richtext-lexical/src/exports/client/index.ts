@@ -141,6 +141,7 @@ export {
   HorizontalRuleNode,
 } from '../../features/horizontalRule/client/nodes/HorizontalRuleNode.js'
 
+export { RenderLexicalFields } from '../../utilities/RenderLexicalFields.js'
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
 export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'

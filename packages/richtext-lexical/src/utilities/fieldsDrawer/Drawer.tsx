@@ -18,6 +18,11 @@ export type FieldsDrawerProps = {
    * When provided, nested fields render through the parent document form state.
    */
   readonly nodeId?: string
+  /**
+   * The Lexical runtime node key. When provided, field changes are automatically
+   * synced back into the node via `node.setSubFieldValue()`.
+   */
+  readonly nodeKey?: string
   readonly schemaFieldsPathOverride?: string
   readonly schemaPath: string
   readonly schemaPathSuffix?: string
@@ -36,6 +41,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   fieldMapOverride,
   handleDrawerSubmit,
   nodeId,
+  nodeKey,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
@@ -61,6 +67,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
             }, 1)
           }}
           nodeId={nodeId}
+          nodeKey={nodeKey}
           schemaFieldsPathOverride={schemaFieldsPathOverride}
           schemaPath={schemaPath}
           schemaPathSuffix={schemaPathSuffix}

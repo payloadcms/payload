@@ -39,7 +39,7 @@ export class BlockNode extends ServerBlockNode {
   }
 
   override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    const fields = this.getStaleFields()
+    const fields = this.getFields()
     return (
       <BlockComponent
         blockType={fields.blockType}

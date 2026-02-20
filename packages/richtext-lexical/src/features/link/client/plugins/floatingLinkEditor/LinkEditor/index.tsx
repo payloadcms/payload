@@ -133,7 +133,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     const nodeId = focusLinkParent.getID()
     setLinkNodeId(nodeId)
 
-    const fields = focusLinkParent.getStaleFields()
+    const fields = focusLinkParent.getFields()
 
     const basePath = `${fieldPath}.${nodeId}`
     dispatchFields({

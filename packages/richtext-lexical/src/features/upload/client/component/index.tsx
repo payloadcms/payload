@@ -64,7 +64,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   const {
     editorConfig,
-    fieldProps: { schemaPath },
+    fieldProps: { path: fieldPath, schemaPath },
     uuid,
   } = useEditorConfigContext()
   const isEditable = useLexicalEditable()
@@ -128,7 +128,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
         const uploadNode: null | UploadNode = $getNodeByKey(nodeKey)
         if (uploadNode) {
           const newData: UploadData = {
-            ...uploadNode.getStaleData(),
+            ...uploadNode.getData(),
             fields: data,
           }
           uploadNode.setData(newData)
@@ -235,6 +235,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
           featureKey="upload"
           handleDrawerSubmit={onExtraFieldsDrawerSubmit}
           nodeId={uploadNodeId}
+          nodeKey={nodeKey}
           schemaPath={schemaPath}
           schemaPathSuffix={relatedCollection.slug}
         />

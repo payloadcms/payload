@@ -85,18 +85,12 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
-      fields: this.getStaleFields(),
+      fields: this.getFields(),
       version: 1,
     }
   }
 
-  /**
-   * Returns the node's in-memory field data. This may be stale — the parent
-   * document form state at `{richTextPath}.{nodeId}.*` is the source of truth.
-   * Stale data is synced back into the node on document save via the
-   * `beforeChange` hook.
-   */
-  getStaleFields(): InlineBlockFields {
+  getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
 
@@ -111,6 +105,11 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   setFields(fields: InlineBlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
   }
 
   override updateDOM(): boolean {

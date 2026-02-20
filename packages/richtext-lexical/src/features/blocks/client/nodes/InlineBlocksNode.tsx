@@ -36,7 +36,7 @@ export class InlineBlockNode extends ServerInlineBlockNode {
   }
 
   override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
-    const fields = this.getStaleFields()
+    const fields = this.getFields()
     return (
       <InlineBlockComponent
         blockType={fields.blockType}

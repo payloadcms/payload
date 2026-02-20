@@ -14,6 +14,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useFieldChangeNotifier } from '../FieldChangeNotifier/index.js'
 import {
   useDocumentForm,
   useForm,
@@ -48,6 +49,7 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
 
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
+  const notifyFieldChange = useFieldChangeNotifier()
 
   const { t } = useTranslation()
   const { config } = useConfig()
@@ -88,11 +90,13 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
         value: val,
       })
 
+      notifyFieldChange?.({ path, value: val })
+
       if (!disableModifyingForm) {
         setModified(true)
       }
     },
-    [setModified, path, dispatchField, disableFormData, hasRows],
+    [setModified, path, dispatchField, disableFormData, hasRows, notifyFieldChange],
   )
 
   // Store result from hook as ref

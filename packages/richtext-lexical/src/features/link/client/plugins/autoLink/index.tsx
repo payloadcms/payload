@@ -320,7 +320,7 @@ function handleLinkEdit(
     const child = children[i]
     if (!$isTextNode(child) || !child.isSimpleText()) {
       replaceWithChildren(linkNode)
-      onChange(null, linkNode.getStaleFields()?.url ?? null)
+      onChange(null, linkNode.getFields()?.url ?? null)
       return
     }
   }
@@ -330,20 +330,20 @@ function handleLinkEdit(
   const match = findFirstMatch(text, matchers)
   if (match === null || match.text !== text) {
     replaceWithChildren(linkNode)
-    onChange(null, linkNode.getStaleFields()?.url ?? null)
+    onChange(null, linkNode.getFields()?.url ?? null)
     return
   }
 
   // Check neighbors
   if (!isPreviousNodeValid(linkNode) || !isNextNodeValid(linkNode)) {
     replaceWithChildren(linkNode)
-    onChange(null, linkNode.getStaleFields()?.url ?? null)
+    onChange(null, linkNode.getFields()?.url ?? null)
     return
   }
 
-  const url = linkNode.getStaleFields()?.url
+  const url = linkNode.getFields()?.url
   if (url !== match?.url) {
-    const flds = linkNode.getStaleFields()
+    const flds = linkNode.getFields()
     flds.url = match?.url
     linkNode.setFields(flds)
     onChange(match.url, url ?? null)
@@ -362,20 +362,20 @@ function handleBadNeighbors(
   const text = textNode.getTextContent()
 
   if ($isAutoLinkNode(previousSibling)) {
-    const isEmailURI = previousSibling.getStaleFields()?.url
-      ? (previousSibling.getStaleFields()?.url?.startsWith('mailto:') ?? false)
+    const isEmailURI = previousSibling.getFields()?.url
+      ? (previousSibling.getFields()?.url?.startsWith('mailto:') ?? false)
       : false
     if (!startsWithSeparator(text) || startsWithTLD(text, isEmailURI)) {
       previousSibling.append(textNode)
       handleLinkEdit(previousSibling, matchers, onChange)
-      onChange(null, previousSibling.getStaleFields()?.url ?? null)
+      onChange(null, previousSibling.getFields()?.url ?? null)
     }
   }
 
   if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {
     replaceWithChildren(nextSibling)
     handleLinkEdit(nextSibling, matchers, onChange)
-    onChange(null, nextSibling.getStaleFields()?.url ?? null)
+    onChange(null, nextSibling.getFields()?.url ?? null)
   }
 }
 

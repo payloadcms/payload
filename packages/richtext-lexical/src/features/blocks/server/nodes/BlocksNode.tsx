@@ -111,18 +111,12 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return {
       ...super.exportJSON(),
       type: 'block',
-      fields: this.getStaleFields(),
+      fields: this.getFields(),
       version: 2,
     }
   }
 
-  /**
-   * Returns the node's in-memory field data. This may be stale — the parent
-   * document form state at `{richTextPath}.{nodeId}.*` is the source of truth.
-   * Stale data is synced back into the node on document save via the
-   * `beforeChange` hook.
-   */
-  getStaleFields(): BlockFields {
+  getFields(): BlockFields {
     return this.getLatest().__fields
   }
 
@@ -133,6 +127,11 @@ export class ServerBlockNode extends DecoratorBlockNode {
   setFields(fields: BlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
   }
 }
 

@@ -13,7 +13,6 @@ import {
   ErrorPill,
   formatDrawerSlug,
   Pill,
-  RenderFields,
   SectionTitle,
   ShimmerEffect,
   useConfig,
@@ -27,9 +26,10 @@ import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useMemo } from 'react'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import './index.scss'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { RenderLexicalFields } from '../../../../utilities/RenderLexicalFields.js'
 import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
+import './index.scss'
 
 type Props = {
   readonly blockType: string
@@ -85,7 +85,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
     return data
   })
-
   const isLoading = Object.keys(blockFormState).length === 0
 
   const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
@@ -288,9 +287,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
-          <RenderFields
+          <RenderLexicalFields
             fields={clientBlock?.fields ?? []}
             forceRender
+            nodeKey={nodeKey}
             parentIndexPath=""
             parentPath={blockFieldsPath}
             parentSchemaPath={blockFieldsSchemaPath}
@@ -311,6 +311,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       clientBlock?.fields,
       blockFieldsSchemaPath,
       blockFieldsPath,
+      nodeKey,
     ],
   )
 

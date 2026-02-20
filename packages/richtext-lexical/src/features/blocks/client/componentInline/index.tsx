@@ -10,7 +10,6 @@ import {
   Drawer,
   EditDepthProvider,
   formatDrawerSlug,
-  RenderFields,
   ShimmerEffect,
   useConfig,
   useEditDepth,
@@ -18,14 +17,15 @@ import {
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
+import { $getNodeByKey } from 'lexical'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import { RenderLexicalFields } from '../../../../utilities/RenderLexicalFields.js'
 
 type Props = {
   readonly blockType: string
@@ -220,9 +220,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
-          <RenderFields
+          <RenderLexicalFields
             fields={clientBlock?.fields}
             forceRender
+            nodeKey={nodeKey}
             parentIndexPath=""
             parentPath={blockFieldsPath}
             parentSchemaPath={blockFieldsSchemaPath}
