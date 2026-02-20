@@ -1,0 +1,437 @@
+---
+title: Converting HTML
+label: Converting HTML
+order: 22
+desc: Converting between lexical richtext and HTML
+keywords: lexical, richtext, html
+---
+
+## Rich Text to HTML
+
+There are two main approaches to convert your Lexical-based rich text to HTML:
+
+1. **Generate HTML on-demand (Recommended)**: Convert JSON to HTML wherever you need it, on-demand.
+2. **Generate HTML within your Collection**: Create a new field that automatically converts your saved JSON content to HTML. This is not recommended because it adds overhead to the Payload API.
+
+### On-demand
+
+To convert JSON to HTML on-demand, use the `convertLexicalToHTML` function from `@payloadcms/richtext-lexical/html`. Here's an example of how to use it in a React component in your frontend:
+
+```tsx
+'use client'
+
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+
+import React from 'react'
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const html = convertLexicalToHTML({ data })
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+#### Dynamic Population (Advanced)
+
+By default, `convertLexicalToHTML` expects fully populated data (e.g. uploads, links, etc.). If you need to dynamically fetch and populate those nodes, use the async variant, `convertLexicalToHTMLAsync`, from `@payloadcms/richtext-lexical/html-async`. You must provide a `populate` function:
+
+```tsx
+'use client'
+
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
+import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
+import React, { useEffect, useState } from 'react'
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const [html, setHTML] = useState<null | string>(null)
+  useEffect(() => {
+    async function convert() {
+      const html = await convertLexicalToHTMLAsync({
+        data,
+        populate: getRestPopulateFn({
+          apiURL: `http://localhost:3000/api`,
+        }),
+      })
+      setHTML(html)
+    }
+
+    void convert()
+  }, [data])
+
+  return html && <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+Using the REST populate function will send a separate request for each node. If you need to populate a large number of nodes, this may be slow. For improved performance on the server, you can use the `getPayloadPopulateFn` function:
+
+```tsx
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { getPayloadPopulateFn } from '@payloadcms/richtext-lexical'
+import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
+import { getPayload } from 'payload'
+import React from 'react'
+
+import config from '../../config.js'
+
+export const MyRSCComponent = async ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
+  const payload = await getPayload({
+    config,
+  })
+
+  const html = await convertLexicalToHTMLAsync({
+    data,
+    populate: await getPayloadPopulateFn({
+      currentDepth: 0,
+      depth: 1,
+      payload,
+    }),
+  })
+
+  return html && <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+### HTML field
+
+The `lexicalHTMLField()` helper converts JSON to HTML and saves it in a field that is updated every time you read it via an `afterRead` hook. It's generally not recommended, as it creates a column with duplicate content in another format.
+
+Consider using the [on-demand HTML converter above](/docs/rich-text/converting-html#on-demand-recommended) or the [JSX converter](/docs/rich-text/converting-jsx) unless you have a good reason.
+
+```ts
+import type { HTMLConvertersFunction } from '@payloadcms/richtext-lexical/html'
+import type { MyTextBlock } from '@/payload-types.js'
+import type { CollectionConfig } from 'payload'
+
+import {
+  BlocksFeature,
+  type DefaultNodeTypes,
+  lexicalEditor,
+  lexicalHTMLField,
+  type SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
+
+const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'nameOfYourRichTextField',
+      type: 'richText',
+      editor: lexicalEditor(),
+    },
+    lexicalHTMLField({
+      htmlFieldName: 'nameOfYourRichTextField_html',
+      lexicalFieldName: 'nameOfYourRichTextField',
+    }),
+    {
+      name: 'customRichText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                interfaceName: 'MyTextBlock',
+                slug: 'myTextBlock',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
+    },
+    lexicalHTMLField({
+      htmlFieldName: 'customRichText_html',
+      lexicalFieldName: 'customRichText',
+      // can pass in additional converters or override default ones
+      converters: (({ defaultConverters }) => ({
+        ...defaultConverters,
+        blocks: {
+          myTextBlock: ({ node, providedCSSString }) =>
+            `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
+        },
+      })) as HTMLConvertersFunction<
+        DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+      >,
+    }),
+  ],
+}
+```
+
+## Blocks to HTML
+
+If your rich text includes Lexical blocks, you need to provide a way to convert them to HTML. For example:
+
+```tsx
+'use client'
+
+import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  convertLexicalToHTML,
+  type HTMLConvertersFunction,
+} from '@payloadcms/richtext-lexical/html'
+import React from 'react'
+
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<MyTextBlock>
+  | SerializedInlineBlockNode<MyInlineBlock>
+
+const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  blocks: {
+    // Each key should match your block's slug
+    myTextBlock: ({ node, providedCSSString }) =>
+      `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
+  },
+  inlineBlocks: {
+    // Each key should match your inline block's slug
+    myInlineBlock: ({ node, providedStyleTag }) =>
+      `<span${providedStyleTag}>${node.fields.text}</span$>`,
+  },
+})
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const html = convertLexicalToHTML({
+    converters: htmlConverters,
+    data,
+  })
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+## HTML to Richtext
+
+If you need to convert raw HTML into a Lexical editor state, use `convertHTMLToLexical` from `@payloadcms/richtext-lexical`, along with the [editorConfigFactory to retrieve the editor config](/docs/rich-text/converters#retrieving-the-editor-config):
+
+<Banner type="warning">
+  **Important:** When converting HTML to Lexical, `<img>` tags are NOT automatically uploaded. This is intentional because we don't know which uploads-enabled collection to add them to, and that collection may have required fields that cannot be auto-filled. Images will be omitted from the conversion unless you provide the proper data attributes. See [Converting HTML with Images](#converting-html-with-images) for guidance on handling images.
+</Banner>
+
+```ts
+import {
+  convertHTMLToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
+// Make sure you have jsdom and @types/jsdom installed
+import { JSDOM } from 'jsdom'
+
+const lexicalJSON = convertHTMLToLexical({
+  editorConfig: await editorConfigFactory.default({
+    config, // Your Payload Config
+  }),
+  html: '<p>text</p>',
+  JSDOM, // Pass in the JSDOM import; it's not bundled to keep package size small
+})
+```
+
+## Converting HTML with Images
+
+When converting HTML to Lexical, `<img>` tags require special handling because Payload does not automatically upload images to prevent unintended database modifications. Here are three approaches to handle images during HTML-to-Lexical conversion:
+
+### Approach 1: Pre-upload Images and Use Data Attributes (Recommended)
+
+The most reliable approach is to upload images to Payload first, then reference them in your HTML using special data attributes before conversion.
+
+```ts
+import {
+  convertHTMLToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
+import { getPayload } from 'payload'
+import { JSDOM } from 'jsdom'
+import config from '@payload-config'
+
+const payload = await getPayload({ config })
+
+// Step 1: Upload the image to Payload
+const uploadedMedia = await payload.create({
+  collection: 'media', // Your upload collection slug
+  data: {
+    alt: 'My image description',
+  },
+  filePath: '/path/to/local/image.jpg', // or file: fileData for file uploads
+})
+
+// Step 2: Construct HTML with the proper data attributes
+const htmlWithImage = `
+  <p>Some text content</p>
+  <img
+    src="${uploadedMedia.url}"
+    data-lexical-upload-id="${uploadedMedia.id}"
+    data-lexical-upload-relation-to="media"
+    alt="My image description"
+  />
+  <p>More content</p>
+`
+
+// Step 3: Convert to Lexical
+const lexicalJSON = convertHTMLToLexical({
+  editorConfig: await editorConfigFactory.default({ config }),
+  html: htmlWithImage,
+  JSDOM,
+})
+
+// The lexicalJSON will now contain a proper upload node
+```
+
+**Required data attributes:**
+
+- `data-lexical-upload-id`: The ID of the uploaded document
+- `data-lexical-upload-relation-to`: The collection slug (e.g., 'media')
+
+### Approach 2: Parse and Upload Images Before Conversion
+
+For bulk content migration or when dealing with external image URLs, parse the HTML first, upload images, then replace the image tags with proper attributes.
+
+```ts
+import {
+  convertHTMLToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
+import { getPayload } from 'payload'
+import { JSDOM } from 'jsdom'
+import config from '@payload-config'
+
+async function convertHTMLWithImageUpload(htmlString: string) {
+  const payload = await getPayload({ config })
+
+  // Step 1: Parse HTML to find all images
+  const dom = new JSDOM(htmlString)
+  const images = dom.window.document.querySelectorAll('img')
+
+  // Step 2: Upload each image and update the DOM
+  for (const img of Array.from(images)) {
+    const imageUrl = img.getAttribute('src')
+
+    if (!imageUrl) continue
+
+    try {
+      // Download the image (if external URL)
+      const response = await fetch(imageUrl)
+      const arrayBuffer = await response.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+
+      // Upload to Payload
+      const uploadedMedia = await payload.create({
+        collection: 'media',
+        data: {
+          alt: img.getAttribute('alt') || '',
+        },
+        file: {
+          data: buffer,
+          mimetype: response.headers.get('content-type') || 'image/jpeg',
+          name: imageUrl.split('/').pop() || 'image.jpg',
+          size: buffer.length,
+        },
+      })
+
+      // Update the img tag with data attributes
+      img.setAttribute('data-lexical-upload-id', String(uploadedMedia.id))
+      img.setAttribute('data-lexical-upload-relation-to', 'media')
+      img.setAttribute('src', uploadedMedia.url)
+    } catch (error) {
+      console.error(`Failed to upload image: ${imageUrl}`, error)
+      // Optionally remove the img tag if upload fails
+      img.remove()
+    }
+  }
+
+  // Step 3: Convert the updated HTML to Lexical
+  const updatedHTML = dom.window.document.body.innerHTML
+
+  return convertHTMLToLexical({
+    editorConfig: await editorConfigFactory.default({ config }),
+    html: updatedHTML,
+    JSDOM,
+  })
+}
+
+// Usage
+const lexicalJSON = await convertHTMLWithImageUpload(
+  '<p>Text</p><img src="https://example.com/image.jpg" />',
+)
+```
+
+### Approach 3: Construct Upload Nodes with buildEditorState
+
+If you already have upload IDs and want to build the Lexical JSON structure, use the `buildEditorState` helper for a type-safe, simplified approach. This helper requires less boilerplate and eliminates the need to manually construct the root node.
+
+```ts
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+import { v4 as uuid } from 'uuid'
+
+// Build Lexical JSON with upload nodes using the helper
+const lexicalJSON = buildEditorState({
+  text: 'Some text content',
+  nodes: [
+    {
+      type: 'upload',
+      format: '',
+      version: 3,
+      relationTo: 'media',
+      value: 'your-upload-id-here', // ID of the uploaded document
+      fields: {}, // Any additional fields configured for the upload feature
+      id: uuid(), // Unique ID for this node instance (not the upload document ID)
+    },
+  ],
+})
+
+// Save to your collection
+await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'My Page',
+    content: lexicalJSON,
+  },
+})
+```
+
+### Troubleshooting
+
+**Images disappear during conversion:**
+
+- Ensure images have both `data-lexical-upload-id` and `data-lexical-upload-relation-to` attributes
+- Verify the upload ID exists in your upload collection
+- Check that the `relationTo` value matches your upload collection slug
+
+**"Cannot read property 'id' of undefined" errors:**
+
+- The upload document may not exist - verify the ID is correct
+- Ensure the upload collection is properly configured
+- Check that the referenced upload hasn't been deleted
+
+**Images work in the admin UI but not in conversion:**
+
+- The admin UI handles pending uploads differently than server-side conversion
+- Server-side conversion requires existing upload IDs, not pending uploads
+- Always upload images before converting HTML
+
+<Banner type="success">
+  **Tip:** For large-scale content migrations, consider creating a migration
+  script that processes HTML in batches, uploads images in parallel with rate
+  limiting, and handles errors gracefully.
+</Banner>

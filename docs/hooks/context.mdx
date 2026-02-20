@@ -14,7 +14,7 @@ Context gives you a way forward on otherwise difficult problems such as:
 
 1. **Passing data between Hooks**: Needing data in multiple Hooks from a 3rd party API, it could be retrieved and used in `beforeChange` and later used again in an `afterChange` hook without having to fetch it twice.
 2. **Preventing infinite loops**: Calling `payload.update()` on the same document that triggered an `afterChange` hook will create an infinite loop, control the flow by assigning a no-op condition to context
-3. **Passing data to local API**: Setting values on the `req.context` and pass it to `payload.create()` you can provide additional data to hooks without adding extraneous fields.
+3. **Passing data to Local API**: Setting values on the `req.context` and pass it to `payload.create()` you can provide additional data to hooks without adding extraneous fields.
 4. **Passing data between hooks and middleware or custom endpoints**: Hooks could set context across multiple collections and then be used in a final `postMiddleware`.
 
 ## How To Use Context
@@ -23,7 +23,7 @@ Let's see examples on how context can be used in the first two scenarios mention
 
 ### Passing Data Between Hooks
 
-To pass data between hooks, you can assign values to context in an earlier hook in the lifecycle of a request and expect it the context in a later hook.
+To pass data between hooks, you can assign values to context in an earlier hook in the lifecycle of a request and expect it in the context of a later hook.
 
 For example:
 
@@ -128,20 +128,18 @@ const MyCollection: CollectionConfig = {
 
 ## TypeScript
 
-The default TypeScript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare` syntax.
+The default TypeScript interface for `context` is `{ [key: string]: unknown }`. If you prefer a more strict typing in your project or when authoring plugins for others, you can override this using the `declare module` syntax.
 
-This is known as "type augmentation", a TypeScript feature which allows us to add types to existing types. Simply put this in any `.ts` or `.d.ts` file:
+This is known as [module augmentation / declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation), a TypeScript feature which allows us to add properties to existing types. Simply put this in any `.ts` or `.d.ts` file:
 
 ```ts
-import { RequestContext as OriginalRequestContext } from 'payload'
-
 declare module 'payload' {
-  // Create a new interface that merges your additional fields with the original one
-  export interface RequestContext extends OriginalRequestContext {
+  // Augment the RequestContext interface to include your custom properties
+  export interface RequestContext {
     myObject?: string
     // ...
   }
 }
 ```
 
-This will add the property `myObject` with a type of string to every context object. Make sure to follow this example correctly, as type augmentation can mess up your types if you do it wrong.
+This will add the property `myObject` with a type of string to every context object. Make sure to follow this example correctly, as module augmentation can mess up your types if you do it wrong.

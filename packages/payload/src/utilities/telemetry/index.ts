@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { execSync } from 'child_process'
 import ciInfo from 'ci-info'
 import { randomBytes } from 'crypto'
@@ -47,36 +46,36 @@ let baseEvent: BaseEvent | null = null
 
 export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
   try {
-    const { packageJSON, packageJSONPath } = await getPackageJSON()
-
-    // Only generate the base event once
-    if (!baseEvent) {
-      const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON)
-      baseEvent = {
-        ciName: ciInfo.isCI ? ciInfo.name : null,
-        envID: getEnvID(),
-        isCI: ciInfo.isCI,
-        nodeEnv: process.env.NODE_ENV || 'development',
-        nodeVersion: process.version,
-        payloadVersion: getPayloadVersion(packageJSON),
-        projectID,
-        projectIDSource,
-        ...getLocalizationInfo(payload),
-        dbAdapter: payload.db.name,
-        emailAdapter: payload.email?.name || null,
-        uploadAdapters: payload.config.upload.adapters,
-      }
-    }
-
-    if (process.env.PAYLOAD_TELEMETRY_DEBUG) {
-      payload.logger.info({
-        event: { ...baseEvent, ...event, packageJSONPath },
-        msg: 'Telemetry Event',
-      })
-      return
-    }
-
     if (payload.config.telemetry !== false) {
+      const { packageJSON, packageJSONPath } = await getPackageJSON()
+
+      // Only generate the base event once
+      if (!baseEvent) {
+        const { projectID, source: projectIDSource } = getProjectID(payload, packageJSON!)
+        baseEvent = {
+          ciName: ciInfo.isCI ? ciInfo.name : null,
+          envID: getEnvID(),
+          isCI: ciInfo.isCI,
+          nodeEnv: process.env.NODE_ENV || 'development',
+          nodeVersion: process.version,
+          payloadVersion: getPayloadVersion(packageJSON!),
+          projectID,
+          projectIDSource,
+          ...getLocalizationInfo(payload),
+          dbAdapter: payload.db.name,
+          emailAdapter: payload.email?.name || null,
+          uploadAdapters: payload.config.upload.adapters,
+        }
+      }
+
+      if (process.env.PAYLOAD_TELEMETRY_DEBUG) {
+        payload.logger.info({
+          event: { ...baseEvent, ...event, packageJSONPath },
+          msg: 'Telemetry Event',
+        })
+        return
+      }
+
       await fetch('https://telemetry.payloadcms.com/events', {
         body: JSON.stringify({ ...baseEvent, ...event }),
         headers: {
@@ -154,10 +153,10 @@ const getPackageJSON = async (): Promise<{
     // Old logic
     const filename = fileURLToPath(import.meta.url)
     const dirname = path.dirname(filename)
-    packageJSONPath = await findUp({
+    packageJSONPath = (await findUp({
       dir: dirname,
       fileNames: ['package.json'],
-    })
+    }))!
   }
 
   const jsonContentString = await fs.promises.readFile(packageJSONPath, 'utf-8')

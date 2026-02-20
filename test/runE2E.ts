@@ -15,16 +15,26 @@ process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
-process.argv = process.argv.filter((arg) => arg !== '--prod')
 if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
+const turbo = process.argv.includes('--no-turbo') ? false : true
+
+process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
+
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const { _: args, bail, part } = minimist(process.argv.slice(2))
+const {
+  _: args,
+  bail,
+  'fully-parallel': fullyParallel,
+  part,
+  shard,
+  workers,
+} = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
 // Run all
@@ -79,17 +89,33 @@ if (!suiteName) {
 
   // Run specific suite
   clearWebpackCache()
-  const suitePath: string | undefined = path
-    .resolve(dirname, inputSuitePath, 'e2e.spec.ts')
+  const suiteFolderPath: string | undefined = path
+    .resolve(dirname, inputSuitePath)
     .replaceAll('__', '/')
+
+  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
 
   const baseTestFolder = inputSuitePath.split('__')[0]
 
-  if (!suitePath || !baseTestFolder) {
+  if (!baseTestFolder || !allSuitesInFolder?.length) {
     throw new Error(`No test suite found for ${suiteName}`)
   }
 
-  executePlaywright(suitePath, baseTestFolder, false, suiteConfigPath)
+  console.log(`\n\nExecuting all ${allSuitesInFolder.length} E2E tests...\n\n`)
+
+  console.log(`${allSuitesInFolder.join('\n')}\n`)
+
+  // Run all spec files in the folder with a single dev server and playwright invocation
+  // This avoids port conflicts when multiple spec files exist in the same folder
+  executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -102,12 +128,16 @@ console.log('\n')
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
 function executePlaywright(
-  suitePath: string,
+  suitePaths: string | string[],
   baseTestFolder: string,
   bail = false,
   suiteConfigPath?: string,
+  shardArg?: string,
+  fullyParallelArg?: boolean,
+  workersArg?: number,
 ) {
-  console.log(`Executing ${suitePath}...`)
+  const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
+  console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
@@ -122,22 +152,31 @@ function executePlaywright(
     spawnDevArgs.push('--prod')
   }
 
+  if (!turbo) {
+    spawnDevArgs.push('--no-turbo')
+  }
+
   process.env.START_MEMORY_DB = 'true'
 
   const child = spawn('pnpm', spawnDevArgs, {
-    stdio: 'inherit',
     cwd: path.resolve(dirname, '..'),
     env: {
       ...process.env,
     },
+    stdio: 'inherit',
   })
 
-  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
+  const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
+  const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const cmd = slash(
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}`,
+  )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
   })
-  const suite = path.basename(path.dirname(suitePath))
+  const suite = path.basename(path.dirname(paths[0]!))
   const results = { code, suiteName: suite }
 
   if (code) {

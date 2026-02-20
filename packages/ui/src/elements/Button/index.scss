@@ -6,18 +6,19 @@
   }
 
   .btn--withPopup {
-    margin-block: 24px;
+    margin-block: 4px;
     .btn {
       margin: 0;
     }
   }
 
   .btn {
+    --btn-font-weight: normal;
     * {
       pointer-events: none;
     }
 
-    // colors
+    // button aesthetic styles
     &--style-primary {
       --color: var(--theme-elevation-0);
       --bg-color: var(--theme-elevation-800);
@@ -51,7 +52,7 @@
     &--style-pill {
       --bg-color: var(--theme-elevation-150);
       --color: var(--theme-elevation-800);
-      --hover-color: var(--color);
+      --hover-color: var(--theme-elevation-800);
       --hover-bg: var(--theme-elevation-100);
 
       &.btn--disabled {
@@ -60,6 +61,60 @@
         --hover-color: var(--color);
       }
     }
+
+    // colors and padding are mixed on this class
+    &--style-icon-label,
+    &--style-icon-label.btn--icon-position-left,
+    &--style-icon-label.btn--icon-position-right {
+      padding: 0;
+      font-weight: 600;
+      --color: var(--theme-text);
+      --bg-color: transparent;
+      --hover-color: var(--theme-elevation-600);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-200);
+        --hover-color: var(--color);
+      }
+
+      .btn__content {
+        --btn-icon-content-gap: calc(var(--base) * 0.4);
+      }
+    }
+
+    &--style-subtle {
+      --color: var(--theme-text);
+      --bg-color: var(--theme-elevation-100);
+      --hover-bg: var(--theme-elevation-150);
+      --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-250);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-450);
+        --hover-box-shadow: var(--box-shadow);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+
+    &--style-tab {
+      --bg-color: transparent;
+      --hover-bg: var(--theme-elevation-50);
+      --color: var(--theme-text);
+      --btn-font-weight: 500;
+
+      &.btn--disabled {
+        --btn-font-weight: 600;
+        --hover-box-shadow: var(--box-shadow);
+        --bg-color: var(--theme-elevation-100);
+        --hover-bg: var(--bg-color);
+        --hover-color: var(--color);
+      }
+    }
+  }
+
+  .popup--active .btn {
+    background-color: var(--hover-bg);
   }
 
   .btn--withPopup {
@@ -111,26 +166,48 @@
   }
 
   .btn {
-    border-radius: $style-radius-s;
+    --btn-padding-block-start: 0;
+    --btn-padding-inline-end: 0;
+    --btn-padding-block-end: 0;
+    --btn-padding-inline-start: 0;
+
+    --btn-icon-size: calc(var(--base) * 1.2);
+    --btn-icon-border-color: currentColor;
+    --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+    --btn-icon-content-gap: calc(var(--base) * 0.4);
+    --margin-block: calc(var(--base) * 1.2);
+    --btn-line-height: calc(var(--base) * 1.2);
+
+    border-radius: var(--style-radius-s);
     font-size: var(--base-body-size);
-    margin-block: base(1.2);
-    line-height: base(1.2);
+    font-family: var(--font-body);
+    font-weight: var(--btn-font-weight, normal);
+    margin-block: var(--margin-block);
+    line-height: var(--btn-line-height);
     border: 0;
     cursor: pointer;
-    font-weight: normal;
     text-decoration: none;
     transition-property: border, color, box-shadow, background;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
-
+    padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
+      var(--btn-padding-block-end) var(--btn-padding-inline-start);
     color: var(--color, inherit);
     background-color: var(--bg-color, transparent);
     box-shadow: var(--box-shadow, none);
 
-    .icon {
-      @include color-svg(var(--color, currentColor));
+    &__icon {
       width: 100%;
       height: 100%;
+
+      .stroke {
+        stroke: var(--color, currentColor);
+        fill: none;
+      }
+
+      .fill {
+        fill: var(--color, currentColor);
+      }
     }
 
     &__content {
@@ -140,23 +217,23 @@
     }
 
     &__icon {
-      width: base(1.2);
-      height: base(1.2);
+      width: var(--btn-icon-size);
+      height: var(--btn-icon-size);
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid;
+      border: 1px solid var(--btn-icon-border-color);
       border-radius: 100%;
-      padding: base(0.1);
+      padding: var(--btn-icon-padding);
       color: inherit;
 
-      .icon {
+      svg {
         width: 100%;
         height: 100%;
       }
 
       &.btn--size-small {
-        padding: base(0.2);
+        padding: calc(var(--base) * (0.2));
       }
     }
 
@@ -168,79 +245,105 @@
       position: relative;
     }
 
-    &--icon-style-without-border {
-      .btn__icon {
-        border: none;
+    &--icon {
+      .btn__content {
+        gap: var(--btn-icon-content-gap);
       }
     }
 
+    &--icon-style-without-border,
     &--icon-style-none {
-      .btn__icon {
-        border: none;
+      --btn-icon-border-color: transparent;
+    }
+
+    &--icon-position-left {
+      .btn__content {
+        flex-direction: row-reverse;
       }
     }
 
     &--size-small {
-      padding: 0 base(0.4);
+      --btn-icon-size: calc(var(--base) * 0.9);
+      // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: 0;
+      --btn-padding-inline-end: calc(var(--base) * 0.4);
+      --btn-padding-inline-start: calc(var(--base) * 0.4);
+      --btn-padding-block-end: 0;
 
       &.btn--icon-position-left {
-        padding-inline-start: base(0.1);
-        padding-inline-end: base(0.4);
-
-        .btn__content {
-          flex-direction: row-reverse;
-        }
+        --btn-padding-inline-start: calc(var(--base) * 0.3);
       }
 
       &.btn--icon-position-right {
-        padding-inline-start: base(0.4);
-        padding-inline-end: base(0.1);
+        --btn-padding-inline-end: calc(var(--base) * 0.3);
+      }
+
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      }
+    }
+
+    &--size-xsmall {
+      --btn-icon-size: calc(var(--base) * 0.8);
+      // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: 0;
+      --btn-padding-inline-end: calc(var(--base) * 0.3);
+      --btn-padding-inline-start: calc(var(--base) * 0.3);
+      --btn-padding-block-end: 0;
+      &.btn--icon-position-left {
+        --btn-padding-inline-start: calc(var(--base) * 0.2);
+      }
+      &.btn--icon-position-right {
+        --btn-padding-inline-end: calc(var(--base) * 0.2);
+      }
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       }
     }
 
     &--size-medium {
-      padding: base(0.2) base(0.6);
+      // --btn-icon-padding: 0px;
+      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-content-gap: calc(var(--base) * 0.2);
+      --btn-padding-block-start: calc(var(--base) * 0.2);
+      --btn-padding-inline-end: calc(var(--base) * 0.6);
+      --btn-padding-block-end: calc(var(--base) * 0.2);
+      --btn-padding-inline-start: calc(var(--base) * 0.6);
 
       &.btn--icon-position-left {
-        padding-inline-start: base(0.4);
-        padding-inline-end: base(0.6);
-
-        .btn__content {
-          gap: base(0.2);
-          flex-direction: row-reverse;
-        }
+        --btn-padding-inline-start: calc(var(--base) * 0.4);
       }
 
       &.btn--icon-position-right {
-        padding-inline-start: base(0.6);
-        padding-inline-end: base(0.4);
+        --btn-padding-inline-end: calc(var(--base) * 0.4);
+      }
 
-        .btn__content {
-          gap: base(0.2);
-        }
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       }
     }
 
     &--size-large {
-      padding: base(0.4) base(0.8);
+      // --btn-icon-padding: 0px;
+      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-content-gap: calc(var(--base) * 0.4);
+      --btn-padding-block-start: calc(var(--base) * 0.4);
+      --btn-padding-inline-end: calc(var(--base) * 0.8);
+      --btn-padding-inline-start: calc(var(--base) * 0.8);
+      --btn-padding-block-end: calc(var(--base) * 0.4);
 
       &.btn--icon-position-left {
-        padding-inline-start: base(0.6);
-        padding-inline-end: base(0.8);
-
-        .btn__content {
-          gap: base(0.4);
-          flex-direction: row-reverse;
-        }
+        --btn-padding-inline-start: calc(var(--base) * 0.6);
       }
 
       &.btn--icon-position-right {
-        padding-inline-start: base(0.8);
-        padding-inline-end: base(0.6);
+        --btn-padding-inline-end: calc(var(--base) * 0.6);
+      }
 
-        .btn__content {
-          gap: base(0.4);
-        }
+      &.btn--icon-style-with-border {
+        // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       }
     }
 
@@ -256,37 +359,6 @@
       }
     }
 
-    &--style-icon-label,
-    &--style-icon-label.btn--icon-position-left,
-    &--style-icon-label.btn--icon-position-right {
-      padding: 0;
-      font-weight: 600;
-
-      .btn__content {
-        gap: base(0.4);
-      }
-    }
-
-    &--style-none {
-      padding: 0;
-    }
-
-    &:focus:not(:focus-visible) {
-      .btn__icon {
-        @include color-svg(var(--theme-elevation-800));
-        background: var(--theme-elevation-150);
-      }
-
-      outline: none;
-    }
-
-    &:active {
-      .btn__icon {
-        @include color-svg(var(--theme-elevation-0));
-        background: var(--theme-elevation-700);
-      }
-    }
-
     &:focus-visible {
       outline: var(--accessibility-outline);
       outline-offset: var(--accessibility-outline-offset);
@@ -294,6 +366,14 @@
 
     &.btn--disabled {
       cursor: not-allowed;
+    }
+
+    &--style-none {
+      padding: 0;
+    }
+
+    &--no-margin {
+      --margin-block: 0;
     }
   }
 }

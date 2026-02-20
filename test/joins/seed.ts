@@ -5,12 +5,10 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
 import {
   categoriesJoinRestrictedSlug,
   categoriesSlug,
   collectionRestrictedSlug,
-  collectionSlugs,
   hiddenPostsSlug,
   postsSlug,
   uploadsSlug,
@@ -213,14 +211,5 @@ export const seed = async (_payload: Payload) => {
   const post_5 = await _payload.create({
     collection: 'example-posts',
     data: { title: 'post 5', description: 'This is post 5', folder: sub_folder_2 },
-  })
-}
-
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'joinsTest',
   })
 }

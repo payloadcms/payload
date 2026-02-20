@@ -1,12 +1,23 @@
-import { jest } from '@jest/globals'
+import type { SelectField, ValidateOptions } from './config/types.js'
 
-import type { ValidateOptions } from './config/types.js'
+import {
+  blocks,
+  number,
+  password,
+  point,
+  relationship,
+  select,
+  text,
+  textarea,
+  type BlocksFieldValidation,
+  type PointFieldValidation,
+  type SelectFieldValidation,
+} from './validations.js'
+import { describe, expect, it, vitest } from 'vitest'
 
-import { number, password, point, relationship, select, text, textarea } from './validations.js'
+const t = vitest.fn((string) => string)
 
-const t = jest.fn((string) => string)
-
-let options: ValidateOptions<any, any, any> = {
+let options: ValidateOptions<any, any, any, any> = {
   data: undefined,
   operation: 'create',
   req: {
@@ -60,6 +71,11 @@ describe('Field Validations', () => {
       const val = undefined
       const result = text(val, { ...options, minLength: 10 })
       expect(result).toBe(true)
+    })
+    it('should validate minLength with empty string', () => {
+      const val = ''
+      const result = text(val, { ...options, required: false, minLength: 1 })
+      expect(result).toBe('validation:longerThanMin')
     })
     it('should validate an array of texts', async () => {
       const val = ['test']
@@ -158,18 +174,19 @@ describe('Field Validations', () => {
   })
 
   describe('point', () => {
-    const pointOptions = {
+    const pointOptions: Parameters<PointFieldValidation>[1] = {
       ...options,
       name: 'point',
       type: 'point',
     }
+    type PointFieldValue = [number | string, number | string]
     it('should validate numbers', () => {
-      const val = ['0.1', '0.2']
+      const val: PointFieldValue = ['0.1', '0.2']
       const result = point(val, pointOptions)
       expect(result).toBe(true)
     })
     it('should validate strings that could be numbers', () => {
-      const val = ['0.1', '0.2']
+      const val: PointFieldValue = ['0.1', '0.2']
       const result = point(val, pointOptions)
       expect(result).toBe(true)
     })
@@ -212,6 +229,46 @@ describe('Field Validations', () => {
       const val = [0.1]
       const result = point(val, pointOptions)
       expect(result).not.toBe(true)
+    })
+    it('should validate longitude within bounds', () => {
+      const val: PointFieldValue = ['180', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate longitude at lower bound', () => {
+      const val: PointFieldValue = ['-180', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should prevent longitude below lower bound', () => {
+      const val: PointFieldValue = ['-181', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:longitudeOutOfBounds')
+    })
+    it('should prevent longitude above upper bound', () => {
+      const val: PointFieldValue = ['181', '0']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:longitudeOutOfBounds')
+    })
+    it('should validate latitude within bounds', () => {
+      const val: PointFieldValue = ['0', '90']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should validate latitude at lower bound', () => {
+      const val: PointFieldValue = ['0', '-90']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should prevent latitude below lower bound', () => {
+      const val: PointFieldValue = ['0', '-91']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:latitudeOutOfBounds')
+    })
+    it('should prevent latitude above upper bound', () => {
+      const val: PointFieldValue = ['0', '91']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:latitudeOutOfBounds')
     })
   })
 
@@ -291,12 +348,12 @@ describe('Field Validations', () => {
   })
 
   describe('select', () => {
-    const selectOptions = {
+    const selectOptions: Parameters<SelectFieldValidation>[1] = {
       ...options,
       type: 'select',
       options: ['one', 'two', 'three'],
     }
-    const optionsRequired = {
+    const optionsRequired: Parameters<SelectFieldValidation>[1] = {
       ...selectOptions,
       options: [
         {
@@ -314,7 +371,7 @@ describe('Field Validations', () => {
       ],
       required: true,
     }
-    const optionsWithEmptyString = {
+    const optionsWithEmptyString: Parameters<SelectFieldValidation>[1] = {
       ...selectOptions,
       options: [
         {
@@ -327,7 +384,7 @@ describe('Field Validations', () => {
         },
       ],
     }
-    it('should allow valid input', () => {
+    it('should allow valid input', async () => {
       const val = 'one'
       const result = select(val, selectOptions)
       expect(result).toStrictEqual(true)
@@ -429,6 +486,180 @@ describe('Field Validations', () => {
       expect(result).not.toStrictEqual(true)
     })
   })
+
+  describe('blocks', () => {
+    const blocksOptions: Parameters<BlocksFieldValidation>[1] = {
+      ...options,
+    }
+    it('basic blocks should pass validation', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+      const result = await blocks(val, blocksOptions)
+      expect(result).toStrictEqual(true)
+    })
+
+    it('should respect required validation', async () => {
+      const result1 = await blocks(
+        [
+          {
+            blockType: 'block1',
+            someField: 'some data',
+          },
+        ],
+        { ...blocksOptions, required: true },
+      )
+      expect(result1).toStrictEqual(true)
+
+      const result2 = await blocks([], { ...blocksOptions, required: true })
+      expect(result2).not.toStrictEqual(true)
+
+      const result3 = await blocks(undefined, { ...blocksOptions, required: true })
+      expect(result3).not.toStrictEqual(true)
+
+      const result4 = await blocks(null, { ...blocksOptions, required: true })
+      expect(result4).not.toStrictEqual(true)
+    })
+
+    it('should respect minRows validation', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+      const result1 = await blocks(val, { ...blocksOptions, minRows: 0 })
+      expect(result1).toStrictEqual(true)
+      const result2 = await blocks(val, { ...blocksOptions, minRows: 2 })
+      expect(result2).toStrictEqual(true)
+
+      const result3 = await blocks(val, { ...blocksOptions, minRows: 3 })
+      expect(result3).not.toStrictEqual(true)
+    })
+
+    it('should respect maxRows validation', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+
+      const result1 = await blocks(val, { ...blocksOptions, maxRows: 2 })
+      expect(result1).toStrictEqual(true)
+      const result2 = await blocks(val, { ...blocksOptions, maxRows: 3 })
+      expect(result2).toStrictEqual(true)
+
+      const result3 = await blocks(val, { ...blocksOptions, maxRows: 1 })
+      expect(result3).not.toStrictEqual(true)
+    })
+
+    it('should respect both minRows and maxRows validation', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+      const result1 = await blocks(val, { ...blocksOptions, maxRows: 2, minRows: 2 })
+      expect(result1).toStrictEqual(true)
+
+      const result2 = await blocks(val, { ...blocksOptions, maxRows: 1, minRows: 4 })
+      expect(result2).not.toStrictEqual(true)
+
+      const result3 = await blocks(val, { ...blocksOptions, maxRows: 1, minRows: 0 })
+      expect(result3).not.toStrictEqual(true)
+
+      const result4 = await blocks(val, { ...blocksOptions, maxRows: 5, minRows: 3 })
+      expect(result4).not.toStrictEqual(true)
+    })
+
+    it('should validate static filterOptions', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+      const result1 = await blocks(val, { ...blocksOptions, filterOptions: ['block1', 'block2'] })
+      expect(result1).toStrictEqual(true)
+
+      const result2 = await blocks(val, {
+        ...blocksOptions,
+        filterOptions: ['block1', 'block2', 'block3'],
+      })
+      expect(result2).toStrictEqual(true)
+
+      const result3 = await blocks(val, { ...blocksOptions, filterOptions: ['block1', 'block3'] })
+      expect(result3).not.toStrictEqual(true)
+
+      const result4 = await blocks(val, { ...blocksOptions, filterOptions: [] })
+      expect(result4).not.toStrictEqual(true)
+    })
+
+    it('should validate dynamic filterOptions 1', async () => {
+      const val: any[] = [
+        {
+          blockType: 'block1',
+          someField: 'some data',
+        },
+        {
+          blockType: 'block2',
+          someField: 'some data',
+        },
+      ]
+      const result1 = await blocks(val, { ...blocksOptions, filterOptions: () => true })
+      expect(result1).toStrictEqual(true)
+
+      const result2 = await blocks(val, {
+        ...blocksOptions,
+        filterOptions: () => ['block1', 'block2'],
+      })
+      expect(result2).toStrictEqual(true)
+
+      const result3 = await blocks(val, {
+        ...blocksOptions,
+        filterOptions: () => ['block1', 'block2', 'block3'],
+      })
+      expect(result3).toStrictEqual(true)
+
+      const result4 = await blocks(val, { ...blocksOptions, filterOptions: () => [] })
+      expect(result4).not.toStrictEqual(true)
+
+      const result5 = await blocks(val, { ...blocksOptions, filterOptions: () => ['block1'] })
+      expect(result5).not.toStrictEqual(true)
+
+      const result6 = await blocks(val, {
+        ...blocksOptions,
+        filterOptions: () => ['block1', 'block3'],
+      })
+      expect(result6).not.toStrictEqual(true)
+    })
+  })
+
   describe('number', () => {
     const numberOptions = {
       ...options,

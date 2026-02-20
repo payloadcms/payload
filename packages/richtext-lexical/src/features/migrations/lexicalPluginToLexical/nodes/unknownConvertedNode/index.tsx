@@ -2,7 +2,7 @@ import type { EditorConfig, LexicalNode, NodeKey, SerializedLexicalNode, Spread 
 import type { JSX } from 'react'
 
 import { addClassNamesToElement } from '@lexical/utils'
-import { DecoratorNode } from 'lexical'
+import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 import * as React from 'react'
 
 export type UnknownConvertedNodeData = {
@@ -33,7 +33,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
   }
 
   static override clone(node: UnknownConvertedNode): UnknownConvertedNode {
-    return new UnknownConvertedNode({
+    return new this({
       data: node.__data,
       key: node.__key,
     })
@@ -80,7 +80,7 @@ export class UnknownConvertedNode extends DecoratorNode<JSX.Element> {
     return true
   }
 
-  override updateDOM(prevNode: UnknownConvertedNode, dom: HTMLElement): boolean {
+  override updateDOM(prevNode: this, dom: HTMLElement): boolean {
     return false
   }
 }
@@ -90,9 +90,11 @@ export function $createUnknownConvertedNode({
 }: {
   data: UnknownConvertedNodeData
 }): UnknownConvertedNode {
-  return new UnknownConvertedNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new UnknownConvertedNode({
+      data,
+    }),
+  )
 }
 
 export function $isUnknownConvertedNode(

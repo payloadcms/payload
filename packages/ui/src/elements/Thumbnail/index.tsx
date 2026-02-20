@@ -15,13 +15,23 @@ export type ThumbnailProps = {
   collectionSlug?: string
   doc?: Record<string, unknown>
   fileSrc?: string
+  height?: number
   imageCacheTag?: string
-  size?: 'expand' | 'large' | 'medium' | 'small'
+  size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
+  width?: number
 }
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename } = {}, fileSrc, imageCacheTag, size } = props
+  const {
+    className = '',
+    doc: { filename } = {},
+    fileSrc,
+    height,
+    imageCacheTag,
+    size,
+    width,
+  } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
@@ -31,6 +41,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -42,7 +53,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
-  let src: string = ''
+  let src: null | string = null
 
   /**
    * If an imageCacheTag is provided, append it to the fileSrc
@@ -56,7 +67,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} src={src} />}
+      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
       {fileExists === false && <File />}
     </div>
   )
@@ -68,7 +79,7 @@ type ThumbnailComponentProps = {
   readonly filename: string
   readonly fileSrc: string
   readonly imageCacheTag?: string
-  readonly size?: 'expand' | 'large' | 'medium' | 'small'
+  readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
   const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props
@@ -81,6 +92,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc

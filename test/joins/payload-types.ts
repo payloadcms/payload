@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -90,6 +91,10 @@ export interface Config {
     folders: Folder;
     'example-pages': ExamplePage;
     'example-posts': ExamplePost;
+    folderPoly1: FolderPoly1;
+    folderPoly2: FolderPoly2;
+    'payload-kv': PayloadKv;
+    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -100,11 +105,13 @@ export interface Config {
     };
     categories: {
       relatedPosts: 'posts';
+      noRowTypes: 'posts';
       hasManyPosts: 'posts';
       hasManyPostsLocalized: 'posts';
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      arrayHasManyPosts: 'posts';
       localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
@@ -112,9 +119,12 @@ export interface Config {
       localizedPolymorphic: 'posts';
       localizedPolymorphics: 'posts';
       filtered: 'posts';
+      inTab: 'posts';
       joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
+      polymorphicJoin: 'posts' | 'versions';
+      polymorphicJoinNoRowTypes: 'posts' | 'versions';
     };
     uploads: {
       relatedPosts: 'posts';
@@ -147,6 +157,9 @@ export interface Config {
     folders: {
       children: 'folders' | 'example-pages' | 'example-posts';
     };
+    'payload-folders': {
+      documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -173,6 +186,10 @@ export interface Config {
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'example-pages': ExamplePagesSelect<false> | ExamplePagesSelect<true>;
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
+    folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
+    folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -180,12 +197,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -229,7 +245,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -301,6 +325,12 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  arrayHasMany?:
+    | {
+        category?: (string | Category)[] | null;
+        id?: string | null;
+      }[]
+    | null;
   localizedArray?:
     | {
         category?: (string | null) | Category;
@@ -315,6 +345,12 @@ export interface Post {
         blockType: 'block';
       }[]
     | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: (string | null) | Category;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -349,6 +385,11 @@ export interface Category {
   id: string;
   name?: string | null;
   relatedPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  noRowTypes?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -388,6 +429,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  arrayHasManyPosts?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   localizedArrayPosts?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
@@ -395,6 +441,34 @@ export interface Category {
   };
   blocksPosts?: {
     docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoin?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  polymorphicJoinNoRowTypes?: {
+    docs?: (
+      | {
+          relationTo?: 'posts';
+          value: string | Post;
+        }
+      | {
+          relationTo?: 'versions';
+          value: string | Version;
+        }
+    )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -428,6 +502,11 @@ export interface Category {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  inTab?: {
+    docs?: (string | Post)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   joinWithError?: {
     docs?: (string | Post)[];
     hasNextPage?: boolean;
@@ -450,20 +529,11 @@ export interface HiddenPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "singular".
- */
-export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "versions".
  */
 export interface Version {
   id: string;
+  title: string;
   category?: (string | null) | Category;
   categoryVersion?: (string | null) | CategoriesVersion;
   categoryVersions?: (string | CategoriesVersion)[] | null;
@@ -477,6 +547,7 @@ export interface Version {
  */
 export interface CategoriesVersion {
   id: string;
+  title?: string | null;
   relatedVersions?: {
     docs?: (string | Version)[];
     hasNextPage?: boolean;
@@ -490,6 +561,16 @@ export interface CategoriesVersion {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular".
+ */
+export interface Singular {
+  id: string;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -727,6 +808,75 @@ export interface ExamplePost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1".
+ */
+export interface FolderPoly1 {
+  id: string;
+  folderPoly1Title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders".
+ */
+export interface FolderInterface {
+  id: string;
+  name: string;
+  folder?: (string | null) | FolderInterface;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'payload-folders';
+          value: string | FolderInterface;
+        }
+      | {
+          relationTo?: 'folderPoly1';
+          value: string | FolderPoly1;
+        }
+      | {
+          relationTo?: 'folderPoly2';
+          value: string | FolderPoly2;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2".
+ */
+export interface FolderPoly2 {
+  id: string;
+  folderPoly2Title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -827,6 +977,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'example-posts';
         value: string | ExamplePost;
+      } | null)
+    | ({
+        relationTo: 'folderPoly1';
+        value: string | FolderPoly1;
+      } | null)
+    | ({
+        relationTo: 'folderPoly2';
+        value: string | FolderPoly2;
+      } | null)
+    | ({
+        relationTo: 'payload-folders';
+        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -885,6 +1047,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -916,6 +1085,12 @@ export interface PostsSelect<T extends boolean = true> {
         category?: T;
         id?: T;
       };
+  arrayHasMany?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
   localizedArray?:
     | T
     | {
@@ -933,6 +1108,16 @@ export interface PostsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  first?:
+    | T
+    | {
+        tabText?: T;
+      };
+  tab?:
+    | T
+    | {
+        category?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -943,6 +1128,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   relatedPosts?: T;
+  noRowTypes?: T;
   hasManyPosts?: T;
   hasManyPostsLocalized?: T;
   hiddenPosts?: T;
@@ -953,14 +1139,18 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  arrayHasManyPosts?: T;
   localizedArrayPosts?: T;
   blocksPosts?: T;
+  polymorphicJoin?: T;
+  polymorphicJoinNoRowTypes?: T;
   polymorphic?: T;
   polymorphics?: T;
   localizedPolymorphic?: T;
   localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
+  inTab?: T;
   joinWithError?: T;
   enableErrorOnJoin?: T;
   updatedAt?: T;
@@ -999,6 +1189,7 @@ export interface UploadsSelect<T extends boolean = true> {
  * via the `definition` "versions_select".
  */
 export interface VersionsSelect<T extends boolean = true> {
+  title?: T;
   category?: T;
   categoryVersion?: T;
   categoryVersions?: T;
@@ -1011,6 +1202,7 @@ export interface VersionsSelect<T extends boolean = true> {
  * via the `definition` "categories-versions_select".
  */
 export interface CategoriesVersionsSelect<T extends boolean = true> {
+  title?: T;
   relatedVersions?: T;
   relatedVersionsMany?: T;
   updatedAt?: T;
@@ -1187,6 +1379,46 @@ export interface ExamplePostsSelect<T extends boolean = true> {
   folder?: T;
   title?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1_select".
+ */
+export interface FolderPoly1Select<T extends boolean = true> {
+  folderPoly1Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2_select".
+ */
+export interface FolderPoly2Select<T extends boolean = true> {
+  folderPoly2Title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-folders_select".
+ */
+export interface PayloadFoldersSelect<T extends boolean = true> {
+  name?: T;
+  folder?: T;
+  documentsAndFolders?: T;
+  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

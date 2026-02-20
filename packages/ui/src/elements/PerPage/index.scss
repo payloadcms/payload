@@ -36,10 +36,6 @@
       }
     }
 
-    &__chevron {
-      padding-left: calc(var(--base) / 4);
-    }
-
     &__button-active {
       font-weight: bold;
       color: var(--theme-text);

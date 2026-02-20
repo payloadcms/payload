@@ -1,4 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../payload" }, { "path": "../translations" }]
+  "references": [{ "path": "../payload" }, { "path": "../translations" }],
+  "compilerOptions": {
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
+  }
 }

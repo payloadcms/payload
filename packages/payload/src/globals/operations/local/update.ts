@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
@@ -8,11 +7,17 @@ import type {
   SelectType,
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
-import type { DataFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type {
+  DataFromGlobalSlug,
+  DraftFlagFromGlobalSlug,
+  SelectFromGlobalSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import {
   deepCopyObjectSimple,
+  type FindOptions,
   type GlobalSlug,
   type Payload,
   type RequestContext,
@@ -21,7 +26,7 @@ import {
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -38,10 +43,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   depth?: number
   /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale
@@ -51,7 +52,7 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -66,6 +67,12 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   populate?: PopulateType
   /**
+   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   *
+   * @default undefined
+   */
+  publishAllLocales?: boolean
+  /**
    * Publish the document / documents with a specific locale.
    */
   publishSpecificLocale?: TypedLocale
@@ -74,10 +81,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -88,12 +91,20 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   slug: TSlug
   /**
+   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   */
+  unpublishAllLocales?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
-export default async function updateLocal<
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
+  BaseOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+
+export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
@@ -108,9 +119,11 @@ export default async function updateLocal<
     overrideAccess = true,
     overrideLock,
     populate,
+    publishAllLocales,
     publishSpecificLocale,
     select,
     showHiddenFields,
+    unpublishAllLocales,
   } = options
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
@@ -128,9 +141,11 @@ export default async function updateLocal<
     overrideAccess,
     overrideLock,
     populate,
-    publishSpecificLocale,
-    req: await createLocalReq(options, payload),
+    publishAllLocales,
+    publishSpecificLocale: publishSpecificLocale!,
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    unpublishAllLocales,
   })
 }

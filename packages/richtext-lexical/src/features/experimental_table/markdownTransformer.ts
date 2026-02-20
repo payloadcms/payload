@@ -48,7 +48,10 @@ export const TableMarkdownTransformer: (props: {
       for (const cell of row.getChildren()) {
         // It's TableCellNode, so it's just to make flow happy
         if ($isTableCellNode(cell)) {
-          rowOutput.push($convertToMarkdownString(allTransformers, cell).replace(/\n/g, '\\n'))
+          rowOutput.push(
+            $convertToMarkdownString(allTransformers, cell).replace(/\n/g, '\\n').trim(),
+          )
+
           if (cell.__headerState === TableCellHeaderStates.ROW) {
             isHeaderRow = true
           }

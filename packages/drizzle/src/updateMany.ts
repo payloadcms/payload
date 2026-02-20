@@ -5,7 +5,7 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
 import { getTransaction } from './utilities/getTransaction.js'
@@ -16,24 +16,30 @@ export const updateMany: UpdateMany = async function updateMany(
     collection: collectionSlug,
     data,
     joins: joinQuery,
+    limit,
     locale,
     req,
     returning,
     select,
+    sort: sortArg,
     where: whereToUse,
   },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
-  const { joins, selectFields, where } = buildQuery({
+  const sort = sortArg !== undefined && sortArg !== null ? sortArg : collection.defaultSort
+
+  const { joins, orderBy, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.flattenedFields,
     locale,
+    sort,
     tableName,
     where: whereToUse,
   })
+
+  const db = await getTransaction(this, req)
 
   let idsToUpdate: (number | string)[] = []
 
@@ -41,6 +47,8 @@ export const updateMany: UpdateMany = async function updateMany(
     adapter: this,
     db,
     joins,
+    query: ({ query }) =>
+      orderBy ? query.orderBy(() => orderBy.map(({ column, order }) => order(column))) : query,
     selectFields,
     tableName,
     where,
@@ -48,19 +56,24 @@ export const updateMany: UpdateMany = async function updateMany(
 
   if (selectDistinctResult?.[0]?.id) {
     idsToUpdate = selectDistinctResult?.map((doc) => doc.id)
-
-    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
   } else if (whereToUse && !joins.length) {
+    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
+
     const _db = db as LibSQLDatabase
 
     const table = this.tables[tableName]
 
-    const docsToUpdate = await _db
-      .select({
-        id: table.id,
-      })
-      .from(table)
-      .where(where)
+    let query = _db.select({ id: table.id }).from(table).where(where).$dynamic()
+
+    if (typeof limit === 'number' && limit > 0) {
+      query = query.limit(limit)
+    }
+
+    if (orderBy) {
+      query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+    }
+
+    const docsToUpdate = await query
 
     idsToUpdate = docsToUpdate?.map((doc) => doc.id)
   }
@@ -76,6 +89,7 @@ export const updateMany: UpdateMany = async function updateMany(
     const result = await upsertRow({
       id: idToUpdate,
       adapter: this,
+      collectionSlug,
       data,
       db,
       fields: collection.flattenedFields,

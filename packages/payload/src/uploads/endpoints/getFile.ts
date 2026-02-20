@@ -1,6 +1,5 @@
 import type { Stats } from 'fs'
 
-// @ts-strict-ignore
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
 import { status as httpStatus } from 'http-status'
@@ -12,13 +11,14 @@ import { APIError } from '../../errors/APIError.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
 import { streamFile } from '../../uploads/fetchAPI-stream-file/index.js'
 import { getFileTypeFallback } from '../../uploads/getFileTypeFallback.js'
+import { parseRangeHeader } from '../../uploads/parseRangeHeader.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 
 export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
-  const filename = req.routeParams.filename as string
+  const filename = req.routeParams?.filename as string
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -27,26 +27,32 @@ export const getFileHandler: PayloadHandler = async (req) => {
     )
   }
 
-  const accessResult = await checkFileAccess({
+  const accessResult = (await checkFileAccess({
     collection,
     filename,
     req,
-  })
+  }))!
 
   if (accessResult instanceof Response) {
     return accessResult
   }
 
   if (collection.config.upload.handlers?.length) {
-    let customResponse = null
+    let customResponse: null | Response | void = null
+    const headers = new Headers()
+
     for (const handler of collection.config.upload.handlers) {
       customResponse = await handler(req, {
         doc: accessResult,
+        headers,
         params: {
           collection: collection.config.slug,
           filename,
         },
       })
+      if (customResponse && customResponse instanceof Response) {
+        break
+      }
     }
 
     if (customResponse instanceof Response) {
@@ -61,7 +67,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   try {
     stats = await fsPromises.stat(filePath)
   } catch (err) {
-    if (err.code === 'ENOENT') {
+    if ((err as { code?: string }).code === 'ENOENT') {
       req.payload.logger.error(
         `File ${filename} for collection ${collection.config.slug} is missing on the disk. Expected path: ${filePath}`,
       )
@@ -89,14 +95,63 @@ export const getFileHandler: PayloadHandler = async (req) => {
     throw err
   }
 
-  const data = streamFile(filePath)
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
+  let mimeType = fileTypeResult.mime
+
+  if (filePath.endsWith('.svg') && fileTypeResult.mime === 'application/xml') {
+    mimeType = 'image/svg+xml'
+  }
+
+  // Parse Range header for byte range requests
+  const rangeHeader = req.headers.get('range')
+  const rangeResult = parseRangeHeader({
+    fileSize: stats.size,
+    rangeHeader,
+  })
+
+  if (rangeResult.type === 'invalid') {
+    let headers = new Headers()
+    headers.set('Content-Range', `bytes */${stats.size}`)
+    headers = collection.config.upload?.modifyResponseHeaders
+      ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
+      : headers
+
+    return new Response(null, {
+      headers: headersWithCors({
+        headers,
+        req,
+      }),
+      status: httpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+    })
+  }
 
   let headers = new Headers()
-  headers.set('Content-Type', fileTypeResult.mime)
-  headers.set('Content-Length', stats.size + '')
+  headers.set('Content-Type', mimeType)
+  headers.set('Accept-Ranges', 'bytes')
+
+  if (mimeType === 'image/svg+xml') {
+    headers.set('Content-Security-Policy', "script-src 'none'")
+  }
+
+  let data: ReadableStream
+  let status: number
+  const isPartial = rangeResult.type === 'partial'
+  const range = rangeResult.range
+
+  if (isPartial && range) {
+    const contentLength = range.end - range.start + 1
+    headers.set('Content-Length', String(contentLength))
+    headers.set('Content-Range', `bytes ${range.start}-${range.end}/${stats.size}`)
+    data = streamFile({ filePath, options: { end: range.end, start: range.start } })
+    status = httpStatus.PARTIAL_CONTENT
+  } else {
+    headers.set('Content-Length', String(stats.size))
+    data = streamFile({ filePath })
+    status = httpStatus.OK
+  }
+
   headers = collection.config.upload?.modifyResponseHeaders
-    ? collection.config.upload.modifyResponseHeaders({ headers })
+    ? collection.config.upload.modifyResponseHeaders({ headers }) || headers
     : headers
 
   return new Response(data, {
@@ -104,6 +159,6 @@ export const getFileHandler: PayloadHandler = async (req) => {
       headers,
       req,
     }),
-    status: httpStatus.OK,
+    status,
   })
 }

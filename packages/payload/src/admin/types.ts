@@ -2,6 +2,7 @@ import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type {
   Block,
@@ -53,6 +54,11 @@ export type {
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
+export type {
+  EditMenuItemsClientProps,
+  EditMenuItemsServerProps,
+  EditMenuItemsServerPropsOnly,
+} from './elements/EditMenuItems.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,
@@ -74,8 +80,15 @@ export type {
   SaveDraftButtonServerProps,
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
+export type { CustomStatus } from './elements/Status.js'
 
 export type { Column } from './elements/Table.js'
+
+export type {
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  UnpublishButtonServerPropsOnly,
+} from './elements/UnpublishButton.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -553,17 +566,26 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  BeforeDocumentControls?: React.ReactNode
   Description?: React.ReactNode
+  EditMenuItems?: React.ReactNode
+  LivePreview?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Status?: React.ReactNode
+  UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
+  UploadControls?: React.ReactNode
 }
 
 export type {
+  BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
+  GetFolderResultsComponentAndDataArgs,
+  InitReqResult,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,
@@ -571,13 +593,19 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
+  SlugifyServerFunctionArgs,
 } from './functions/index.js'
 
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
+export { type WidgetServerProps } from './views/dashboard.js'
+
 export type {
+  BeforeDocumentControlsClientProps,
+  BeforeDocumentControlsServerProps,
+  BeforeDocumentControlsServerPropsOnly,
   DocumentSubViewTypes,
   DocumentTabClientProps,
   /**
@@ -612,7 +640,28 @@ export type {
   DocumentViewServerProps,
   DocumentViewServerPropsOnly,
   EditViewProps,
+  RenderDocumentVersionsProperties,
 } from './views/document.js'
+
+export type {
+  AfterFolderListClientProps,
+  AfterFolderListServerProps,
+  AfterFolderListServerPropsOnly,
+  AfterFolderListTableClientProps,
+  AfterFolderListTableServerProps,
+  AfterFolderListTableServerPropsOnly,
+  BeforeFolderListClientProps,
+  BeforeFolderListServerProps,
+  BeforeFolderListServerPropsOnly,
+  BeforeFolderListTableClientProps,
+  BeforeFolderListTableServerProps,
+  BeforeFolderListTableServerPropsOnly,
+  FolderListViewClientProps,
+  FolderListViewServerProps,
+  FolderListViewServerPropsOnly,
+  FolderListViewSlots,
+  FolderListViewSlotSharedClientProps,
+} from './views/folderList.js'
 
 export type {
   AdminViewClientProps,
@@ -682,7 +731,10 @@ export type ClientFieldSchemaMap = Map<
 >
 
 export type DocumentEvent = {
+  doc?: TypeWithID
+  drawerSlug?: string
   entitySlug: string
   id?: number | string
+  operation: 'create' | 'update'
   updatedAt: string
 }

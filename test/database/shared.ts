@@ -20,18 +20,3 @@ export const customIDsSlug = 'custom-ids'
 export const fakeCustomIDsSlug = 'fake-custom-ids'
 
 export const relationshipsMigrationSlug = 'relationships-migration'
-
-export const collectionSlugs = [
-  postsSlug,
-  errorOnUnnamedFieldsSlug,
-  defaultValuesSlug,
-  relationASlug,
-  relationBSlug,
-  pgMigrationSlug,
-  customSchemaSlug,
-  placesSlug,
-  fieldsPersistanceSlug,
-  customIDsSlug,
-  fakeCustomIDsSlug,
-  relationshipsMigrationSlug,
-]

@@ -1,11 +1,14 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
+import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { FormOnSuccess } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -15,6 +18,7 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
+import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -22,12 +26,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -37,17 +43,29 @@ import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
+
+export type OnSaveContext = {
+  getDocPermissions?: boolean
+  incrementVersionCount?: boolean
+}
 
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
+  BeforeDocumentControls,
   Description,
+  EditMenuItems,
+  LivePreview: CustomLivePreview,
   PreviewButton,
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
+  UnpublishButton,
   Upload: CustomUpload,
+  UploadControls,
 }: DocumentViewClientProps) {
   const {
     id,
@@ -58,11 +76,13 @@ export function DefaultEditView({
     BeforeFields,
     collectionSlug,
     currentEditor,
+    data,
     disableActions,
     disableCreate,
     disableLeaveWithoutSaving,
     docPermissions,
     documentIsLocked,
+    documentLockState,
     getDocPermissions,
     getDocPreferences,
     globalSlug,
@@ -72,15 +92,19 @@ export function DefaultEditView({
     initialState,
     isEditing,
     isInitializing,
+    isLocked,
+    isTrashed,
     lastUpdateTime,
+    redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    savedDocumentData,
+    redirectAfterRestore,
     setCurrentEditor,
+    setData,
     setDocumentIsLocked,
+    setLastUpdateTime,
     unlockDocument,
     updateDocumentEditor,
-    updateSavedDocumentData,
   } = useDocumentInfo()
 
   const {
@@ -88,6 +112,7 @@ export function DefaultEditView({
     drawerSlug,
     onDelete,
     onDuplicate,
+    onRestore,
     onSave: onSaveFromContext,
   } = useDocumentDrawerContext()
 
@@ -100,6 +125,7 @@ export function DefaultEditView({
     config: {
       admin: { user: userSlug },
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -115,6 +141,16 @@ export function DefaultEditView({
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
+  const { clearRouteCache } = useRouteCache()
+  const {
+    isLivePreviewEnabled,
+    isLivePreviewing,
+    previewWindowType,
+    setURL: setLivePreviewURL,
+    typeofLivePreviewURL,
+    url: livePreviewURL,
+  } = useLivePreviewContext()
+  const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -138,13 +174,7 @@ export function DefaultEditView({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
-
-  const preventLeaveWithoutSaving =
-    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
+  const autosaveEnabled = hasAutosaveEnabled(docConfig)
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -152,28 +182,13 @@ export function DefaultEditView({
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-
   const isLockExpired = Date.now() > lockExpiryTime
 
-  const documentLockStateRef = useRef<{
-    hasShownLockedModal: boolean
-    isLocked: boolean
-    user: ClientUser | number | string
-  } | null>({
-    hasShownLockedModal: false,
-    isLocked: false,
-    user: null,
-  })
-
-  const classes = [baseClass, (id || globalSlug) && `${baseClass}--is-editing`]
-
-  if (globalSlug) {
-    classes.push(`global-edit--${globalSlug}`)
-  }
-
-  if (collectionSlug) {
-    classes.push(`collection-edit--${collectionSlug}`)
-  }
+  const preventLeaveWithoutSaving =
+    !isReadOnlyForIncomingUser &&
+    (typeof disableLeaveWithoutSaving !== 'undefined'
+      ? !disableLeaveWithoutSaving
+      : !autosaveEnabled)
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -185,49 +200,95 @@ export function DefaultEditView({
     return false
   })
 
+  const nextHrefRef = React.useRef<null | string>(null)
+
   const handleDocumentLocking = useCallback(
     (lockedState: LockedState) => {
       setDocumentIsLocked(true)
       const previousOwnerID =
-        typeof documentLockStateRef.current?.user === 'object'
-          ? documentLockStateRef.current?.user?.id
-          : documentLockStateRef.current?.user
+        typeof documentLockState.current?.user === 'object'
+          ? documentLockState.current?.user?.id
+          : documentLockState.current?.user
 
-      if (lockedState) {
+      if (lockedState && lockedState.user) {
         const lockedUserID =
           typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
             ? lockedState.user
             : lockedState.user.id
 
-        if (!documentLockStateRef.current || lockedUserID !== previousOwnerID) {
+        if (!documentLockState.current || lockedUserID !== previousOwnerID) {
           if (previousOwnerID === user.id && lockedUserID !== user.id) {
             setShowTakeOverModal(true)
-            documentLockStateRef.current.hasShownLockedModal = true
+            documentLockState.current.hasShownLockedModal = true
           }
 
-          documentLockStateRef.current = {
-            hasShownLockedModal: documentLockStateRef.current?.hasShownLockedModal || false,
+          documentLockState.current = {
+            hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
             user: lockedState.user as ClientUser,
           }
           setCurrentEditor(lockedState.user as ClientUser)
         }
+
+        // Update lastUpdateTime when lock state changes
+        if (lockedState.lastEditedAt) {
+          setLastUpdateTime(new Date(lockedState.lastEditedAt).getTime())
+        }
       }
     },
-    [setCurrentEditor, setDocumentIsLocked, user?.id],
+    [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
-  const onSave = useCallback(
-    async (json): Promise<FormState> => {
+  const handlePrevent = useCallback((nextHref: null | string) => {
+    nextHrefRef.current = nextHref
+  }, [])
+
+  const handleLeaveConfirm = useCallback(async () => {
+    const lockUser = documentLockState.current?.user
+
+    const isLockOwnedByCurrentUser =
+      typeof lockUser === 'object' ? lockUser?.id === user?.id : lockUser === user?.id
+
+    if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
+      // Check where user is trying to go
+      const nextPath = nextHrefRef.current ? new URL(nextHrefRef.current).pathname : ''
+      const isInternalView = ['/preview', '/api', '/versions'].some((path) =>
+        nextPath.includes(path),
+      )
+
+      // Remove the lock if the user is navigating away from the document view they have locked
+      if (isLockOwnedByCurrentUser && !isInternalView) {
+        try {
+          await unlockDocument(id, collectionSlug ?? globalSlug)
+          setDocumentIsLocked(false)
+          setCurrentEditor(null)
+        } catch (err) {
+          console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
+        }
+      }
+    }
+  }, [
+    collectionSlug,
+    documentIsLocked,
+    documentLockState,
+    globalSlug,
+    id,
+    isLockingEnabled,
+    setCurrentEditor,
+    setDocumentIsLocked,
+    unlockDocument,
+    user?.id,
+  ])
+
+  const onSave: FormOnSuccess<any, OnSaveContext> = useCallback(
+    async (json, ctx) => {
+      const { context, formState } = ctx || {}
+
       const controller = handleAbortRef(abortOnSaveRef)
 
       const document = json?.doc || json?.result
 
-      reportUpdate({
-        id,
-        entitySlug,
-        updatedAt: document?.updatedAt || new Date().toISOString(),
-      })
+      const updatedAt = document?.updatedAt || new Date().toISOString()
 
       // If we're editing the doc of the logged-in user,
       // Refresh the cookie to get new permissions
@@ -235,18 +296,24 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      incrementVersionCount()
+      setLastUpdateTime(updatedAt)
 
-      if (typeof updateSavedDocumentData === 'function') {
-        void updateSavedDocumentData(document || {})
+      if (context?.incrementVersionCount !== false) {
+        incrementVersionCount()
+      }
+
+      if (typeof setData === 'function') {
+        void setData(document || {})
       }
 
       if (typeof onSaveFromContext === 'function') {
         const operation = id ? 'update' : 'create'
 
         void onSaveFromContext({
-          ...json,
+          ...(json as Record<string, unknown>),
+          context,
           operation,
+          // @ts-expect-error todo: this is not right, should be under `doc`?
           updatedAt:
             operation === 'update'
               ? new Date().toISOString()
@@ -254,7 +321,12 @@ export function DefaultEditView({
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
+        // Store success message to show after redirect
+        if (json.message && typeof window !== 'undefined') {
+          window.sessionStorage.setItem(PENDING_SUCCESS_TOAST_KEY, json.message)
+        }
+
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -266,63 +338,109 @@ export function DefaultEditView({
         resetUploadEdits()
       }
 
-      await getDocPermissions(json)
+      if (context?.getDocPermissions !== false) {
+        await getDocPermissions(json)
+      }
 
-      if ((id || globalSlug) && !autosaveEnabled) {
+      if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { state } = await getFormState({
+        const { livePreviewURL, previewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
           docPermissions,
           docPreferences,
+          formState,
           globalSlug,
           operation,
-          renderAllFields: true,
+          renderAllFields: false,
+          returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
           skipValidation: true,
         })
+
+        // For upload collections, clear the file field from the returned state
+        // to prevent the File object from persisting in form state after save
+        if (upload && state) {
+          delete state.file
+        }
 
         // Unlock the document after save
         if (isLockingEnabled) {
           setDocumentIsLocked(false)
         }
 
+        if (isLivePreviewEnabled && typeofLivePreviewURL === 'function') {
+          setLivePreviewURL(livePreviewURL)
+        }
+
+        if (isPreviewEnabled) {
+          setPreviewURL(previewURL)
+        }
+
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'update',
+          updatedAt,
+        })
+
         abortOnSaveRef.current = null
 
         return state
+      } else {
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'create',
+          updatedAt,
+        })
       }
     },
     [
-      reportUpdate,
-      id,
-      entitySlug,
       user,
       collectionSlug,
       userSlug,
-      incrementVersionCount,
-      updateSavedDocumentData,
+      id,
+      setLastUpdateTime,
+      setData,
       onSaveFromContext,
       isEditing,
       depth,
-      getDocPermissions,
+      redirectAfterCreate,
       globalSlug,
-      autosaveEnabled,
       refreshCookieAsync,
+      incrementVersionCount,
       adminRoute,
       locale,
+      startRouteTransition,
       router,
       resetUploadEdits,
+      getDocPermissions,
       getDocPreferences,
       getFormState,
       docPermissions,
       operation,
+      isLivePreviewEnabled,
+      typeofLivePreviewURL,
+      isPreviewEnabled,
       schemaPathSegments,
+      upload,
       isLockingEnabled,
+      reportUpdate,
+      drawerSlug,
+      entitySlug,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -341,7 +459,7 @@ export function DefaultEditView({
 
       const docPreferences = await getDocPreferences()
 
-      const { lockedState, state } = await getFormState({
+      const result = await getFormState({
         id,
         collectionSlug,
         docPermissions,
@@ -349,15 +467,19 @@ export function DefaultEditView({
         formState: prevFormState,
         globalSlug,
         operation,
-        skipValidation: !submitted,
-        // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
-        // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
         returnLockStatus: isLockingEnabled,
         schemaPath: schemaPathSegments.join('.'),
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
+
+      if (!result) {
+        return
+      }
+
+      const { lockedState, state } = result
 
       if (isLockingEnabled) {
         handleDocumentLocking(lockedState)
@@ -368,55 +490,26 @@ export function DefaultEditView({
       return state
     },
     [
-      id,
-      collectionSlug,
+      editSessionStartTime,
+      isLockingEnabled,
       getDocPreferences,
       getFormState,
+      id,
+      collectionSlug,
+      docPermissions,
       globalSlug,
-      handleDocumentLocking,
-      isLockingEnabled,
       operation,
       schemaPathSegments,
-      docPermissions,
-      editSessionStartTime,
+      handleDocumentLocking,
     ],
   )
 
   // Clean up when the component unmounts or when the document is unlocked
   useEffect(() => {
     return () => {
-      if (isLockingEnabled && documentIsLocked && (id || globalSlug)) {
-        // Only retain the lock if the user is still viewing the document
-        const shouldUnlockDocument = !['preview', 'api', 'versions'].some((path) =>
-          window.location.pathname.includes(path),
-        )
-        if (shouldUnlockDocument) {
-          // Check if this user is still the current editor
-          if (
-            typeof documentLockStateRef.current?.user === 'object'
-              ? documentLockStateRef.current?.user?.id === user?.id
-              : documentLockStateRef.current?.user === user?.id
-          ) {
-            void unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          }
-        }
-      }
-
       setShowTakeOverModal(false)
     }
-  }, [
-    collectionSlug,
-    globalSlug,
-    id,
-    unlockDocument,
-    user,
-    setCurrentEditor,
-    isLockingEnabled,
-    documentIsLocked,
-    setDocumentIsLocked,
-  ])
+  }, [])
 
   useEffect(() => {
     const abortOnChange = abortOnChangeRef.current
@@ -428,6 +521,18 @@ export function DefaultEditView({
     }
   }, [])
 
+  // Show pending success toast after redirect from create
+  useEffect(() => {
+    if (!isInitializing && typeof window !== 'undefined') {
+      const pendingMessage = window.sessionStorage.getItem(PENDING_SUCCESS_TOAST_KEY)
+
+      if (pendingMessage) {
+        window.sessionStorage.removeItem(PENDING_SUCCESS_TOAST_KEY)
+        toast.success(pendingMessage)
+      }
+    }
+  }, [isInitializing])
+
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
@@ -436,45 +541,66 @@ export function DefaultEditView({
       : currentEditor !== user?.id) &&
     !isReadOnlyForIncomingUser &&
     !showTakeOverModal &&
-    !documentLockStateRef.current?.hasShownLockedModal &&
+    !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
+  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+
   return (
-    <main className={classes.filter(Boolean).join(' ')}>
+    <main
+      className={[
+        baseClass,
+        (id || globalSlug) && `${baseClass}--is-editing`,
+        globalSlug && `global-edit--${globalSlug}`,
+        collectionSlug && `collection-edit--${collectionSlug}`,
+        isLivePreviewing && previewWindowType === 'iframe' && `${baseClass}--is-live-previewing`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <OperationProvider operation={operation}>
         <Form
           action={action}
           className={`${baseClass}__form`}
-          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
+          disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
+          disableSuccessStatus={!isEditing && depth < 2 && redirectAfterCreate !== false}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
           isInitializing={isInitializing}
+          key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
           onSuccess={onSave}
         >
-          {isInDrawer && <DocumentDrawerHeader drawerSlug={drawerSlug} />}
-          {isLockingEnabled && shouldShowDocumentLockedModal && !isReadOnlyForIncomingUser && (
+          {isInDrawer && (
+            <DocumentDrawerHeader
+              AfterHeader={Description}
+              drawerSlug={drawerSlug}
+              showDocumentID={!isFolderCollection}
+            />
+          )}
+          {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router, serverURL })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
                 setShowTakeOverModal(false)
               }}
               onTakeOver={() =>
-                handleTakeOver(
+                handleTakeOver({
                   id,
+                  clearRouteCache,
                   collectionSlug,
+                  documentLockStateRef: documentLockState,
                   globalSlug,
-                  user,
-                  false,
-                  updateDocumentEditor,
-                  setCurrentEditor,
-                  documentLockStateRef,
                   isLockingEnabled,
-                )
+                  isWithinDoc: false,
+                  setCurrentEditor,
+                  updateDocumentEditor,
+                  user,
+                })
               }
               updatedAt={lastUpdateTime}
               user={currentEditor}
@@ -482,7 +608,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router, serverURL })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -490,14 +616,19 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetDocumentStepNav
-            collectionSlug={collectionConfig?.slug}
-            globalSlug={globalConfig?.slug}
-            id={id}
-            pluralLabel={collectionConfig?.labels?.plural}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-          />
+          {preventLeaveWithoutSaving && (
+            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+          )}
+          {!isInDrawer && (
+            <SetDocumentStepNav
+              collectionSlug={collectionConfig?.slug}
+              globalSlug={globalConfig?.slug}
+              id={id}
+              isTrashed={isTrashed}
+              pluralLabel={collectionConfig?.labels?.plural}
+              useAsTitle={collectionConfig?.admin?.useAsTitle}
+            />
+          )}
           <SetDocumentTitle
             collectionConfig={collectionConfig}
             config={config}
@@ -506,86 +637,126 @@ export function DefaultEditView({
           />
           <DocumentControls
             apiURL={apiURL}
+            BeforeDocumentControls={BeforeDocumentControls}
             customComponents={{
               PreviewButton,
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
+              UnpublishButton,
             }}
-            data={savedDocumentData}
-            disableActions={disableActions}
+            data={data}
+            disableActions={disableActions || isFolderCollection || isTrashed}
             disableCreate={disableCreate}
+            EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}
             hasSavePermission={hasSavePermission}
             id={id}
             isEditing={isEditing}
+            isInDrawer={isInDrawer}
+            isTrashed={isTrashed}
             onDelete={onDelete}
             onDrawerCreateNew={clearDoc}
             onDuplicate={onDuplicate}
+            onRestore={onRestore}
             onSave={onSave}
             onTakeOver={() =>
-              handleTakeOver(
+              handleTakeOver({
                 id,
+                clearRouteCache,
                 collectionSlug,
+                documentLockStateRef: documentLockState,
                 globalSlug,
-                user,
-                true,
-                updateDocumentEditor,
-                setCurrentEditor,
-                documentLockStateRef,
                 isLockingEnabled,
+                isWithinDoc: true,
+                setCurrentEditor,
                 setIsReadOnlyForIncomingUser,
-              )
+                updateDocumentEditor,
+                user,
+              })
             }
             permissions={docPermissions}
             readOnlyForIncomingUser={isReadOnlyForIncomingUser}
             redirectAfterDelete={redirectAfterDelete}
             redirectAfterDuplicate={redirectAfterDuplicate}
+            redirectAfterRestore={redirectAfterRestore}
             slug={collectionConfig?.slug || globalConfig?.slug}
             user={currentEditor}
           />
-          <DocumentFields
-            AfterFields={AfterFields}
-            BeforeFields={
-              BeforeFields || (
-                <Fragment>
-                  {auth && (
-                    <Auth
-                      className={`${baseClass}__auth`}
-                      collectionSlug={collectionConfig.slug}
-                      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                      email={savedDocumentData?.email}
-                      loginWithUsername={auth?.loginWithUsername}
-                      operation={operation}
-                      readOnly={!hasSavePermission}
-                      requirePassword={!id}
-                      setValidateBeforeSubmit={setValidateBeforeSubmit}
-                      useAPIKey={auth.useAPIKey}
-                      username={savedDocumentData?.username}
-                      verify={auth.verify}
-                    />
-                  )}
-                  {upload && (
-                    <React.Fragment>
-                      {CustomUpload || (
-                        <Upload
+          <div
+            className={[
+              `${baseClass}__main-wrapper`,
+              previewWindowType === 'popup' && `${baseClass}--detached`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <div
+              className={[
+                `${baseClass}__main`,
+                previewWindowType === 'popup' && `${baseClass}__main--popup-open`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <DocumentFields
+                AfterFields={AfterFields}
+                BeforeFields={
+                  BeforeFields || (
+                    <Fragment>
+                      {auth && (
+                        <Auth
+                          className={`${baseClass}__auth`}
                           collectionSlug={collectionConfig.slug}
-                          initialState={initialState}
-                          uploadConfig={upload}
+                          disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                          email={data?.email}
+                          loginWithUsername={auth?.loginWithUsername}
+                          operation={operation}
+                          readOnly={!hasSavePermission}
+                          requirePassword={!id}
+                          setValidateBeforeSubmit={setValidateBeforeSubmit}
+                          // eslint-disable-next-line react-compiler/react-compiler
+                          useAPIKey={auth.useAPIKey}
+                          username={data?.username}
+                          verify={auth.verify}
                         />
                       )}
-                    </React.Fragment>
-                  )}
-                </Fragment>
-              )
-            }
-            Description={Description}
-            docPermissions={docPermissions}
-            fields={docConfig.fields}
-            readOnly={isReadOnlyForIncomingUser || !hasSavePermission}
-            schemaPathSegments={schemaPathSegments}
-          />
-          {AfterDocument}
+                      {upload && (
+                        <React.Fragment>
+                          <UploadControlsProvider>
+                            {CustomUpload || (
+                              <Upload
+                                collectionSlug={collectionConfig.slug}
+                                initialState={initialState}
+                                uploadConfig={upload}
+                                UploadControls={UploadControls}
+                              />
+                            )}
+                          </UploadControlsProvider>
+                        </React.Fragment>
+                      )}
+                    </Fragment>
+                  )
+                }
+                Description={Description}
+                docPermissions={docPermissions}
+                fields={docConfig.fields}
+                forceSidebarWrap={isLivePreviewing}
+                isTrashed={isTrashed}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
+                schemaPathSegments={schemaPathSegments}
+              />
+              {AfterDocument}
+            </div>
+            {isLivePreviewEnabled && !isInDrawer && livePreviewURL && (
+              <>
+                {CustomLivePreview || (
+                  <LivePreviewWindow collectionSlug={collectionSlug} globalSlug={globalSlug} />
+                )}
+              </>
+            )}
+          </div>
         </Form>
       </OperationProvider>
     </main>

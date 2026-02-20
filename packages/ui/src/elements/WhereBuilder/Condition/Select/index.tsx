@@ -3,7 +3,7 @@
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { SelectFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
@@ -11,6 +11,9 @@ import { formatOptions } from './formatOptions.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
+  field: {
+    admin: { placeholder },
+  },
   isClearable,
   onChange,
   operator,
@@ -77,6 +80,7 @@ export const Select: React.FC<Props> = ({
       isMulti={isMulti}
       onChange={onSelect}
       options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
+      placeholder={placeholder}
       value={valueToRender}
     />
   )

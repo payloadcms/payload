@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/email-nodemailer",
-  "version": "3.25.0",
+  "version": "3.77.0",
   "description": "Payload Nodemailer Email Adapter",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -33,18 +34,18 @@
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "nodemailer": "6.9.16"
+    "nodemailer": "7.0.12"
   },
   "devDependencies": {
-    "@types/nodemailer": "6.4.17",
+    "@types/nodemailer": "7.0.2",
     "payload": "workspace:*"
   },
   "peerDependencies": {

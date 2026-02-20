@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
 import { useConfig } from '../Config/index.js'
 
@@ -100,7 +100,7 @@ export const ThemeProvider: React.FC<{
     [cookieKey],
   )
 
-  return <Context.Provider value={{ autoMode, setTheme, theme }}>{children}</Context.Provider>
+  return <Context value={{ autoMode, setTheme, theme }}>{children}</Context>
 }
 
-export const useTheme = (): ThemeContext => useContext(Context)
+export const useTheme = (): ThemeContext => use(Context)

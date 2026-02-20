@@ -1,19 +1,21 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
 import type { Option } from '../../../ReactSelect/types.js'
-import type { Props, ValueWithRelation } from './types.js'
+import type { RelationshipFilterProps as Props, ValueWithRelation } from './types.js'
 
 import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../../providers/Config/index.js'
+import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import optionsReducer from './optionsReducer.js'
 import './index.scss'
+import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
@@ -22,16 +24,18 @@ const maxResultsPerRequest = 10
 export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { admin: { isSortable } = {}, hasMany, relationTo },
+    field: { admin = {}, hasMany, relationTo },
     filterOptions,
     onChange,
     value,
   } = props
 
+  const placeholder = 'placeholder' in admin ? admin?.placeholder : undefined
+  const isSortable = admin?.isSortable
+
   const {
     config: {
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -43,6 +47,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('')
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const { i18n, t } = useTranslation()
+  const locale = useLocale()
 
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
 
@@ -98,6 +103,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
+          locale: locale.code,
           page: loadedRelationship.nextPage,
           select: {
             [fieldToSearch]: true,
@@ -119,7 +125,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            formatAdminURL({
+              apiRoute: api,
+              path: `/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            }),
             {
               credentials: 'include',
               headers: {
@@ -256,12 +265,15 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
-        const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
+        const response = await fetch(
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (response.ok) {
           const data = await response.json()
@@ -272,7 +284,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, serverURL, t],
+    [i18n, addOptions, api, errorLoading, t],
   )
 
   /**
@@ -321,7 +333,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo, debouncedSearch])
+  }, [i18n, relationTo, debouncedSearch, filterOptions])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
@@ -371,7 +383,9 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      {!errorLoading && (
+      {errorLoading ? (
+        <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
+      ) : (
         <ReactSelect
           disabled={disabled}
           isMulti={hasMany}
@@ -409,11 +423,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           onInputChange={handleInputChange}
           onMenuScrollToBottom={handleScrollToBottom}
           options={options}
-          placeholder={t('general:selectValue')}
+          placeholder={placeholder}
           value={valueToRender}
         />
       )}
-      {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
     </div>
   )
 }

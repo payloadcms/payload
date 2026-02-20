@@ -1,11 +1,11 @@
 'use client'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Hamburger } from '../Hamburger/index.js'
 import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
@@ -34,6 +34,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
       },
       localization,
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 

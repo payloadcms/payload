@@ -1,18 +1,23 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
+import chalk from 'chalk'
+import { hasAutosaveEnabled } from 'payload/shared'
+
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
 
 import { defaults } from './defaults.js'
+import { getTenantOptionsEndpoint } from './endpoints/getTenantOptionsEndpoint.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
+import { filterDocumentsByTenants } from './filters/filterDocumentsByTenants.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
-import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsBySelectedTenant.js'
-import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
-import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
+import { translations } from './translations/index.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { combineListFilters } from './utilities/combineListFilters.js'
+import { combineFilters } from './utilities/combineFilters.js'
+import { miniChalk } from './utilities/miniChalk.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -37,7 +42,6 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    let tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
 
     /**
      * Add defaults for admin properties
@@ -48,7 +52,7 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
         actions: [],
-        beforeNavLinks: [],
+        beforeNav: [],
         providers: [],
       }
     }
@@ -58,43 +62,11 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin.components?.actions) {
       incomingConfig.admin.components.actions = []
     }
-    if (!incomingConfig.admin.components?.beforeNavLinks) {
-      incomingConfig.admin.components.beforeNavLinks = []
+    if (!incomingConfig.admin.components?.beforeNav) {
+      incomingConfig.admin.components.beforeNav = []
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
-    }
-
-    /**
-     * Add tenant selector localized labels
-     */
-    if (pluginConfig.tenantSelectorLabel && typeof pluginConfig.tenantSelectorLabel === 'object') {
-      if (!incomingConfig.i18n) {
-        incomingConfig.i18n = {}
-      }
-      Object.entries(pluginConfig.tenantSelectorLabel).forEach(([_locale, label]) => {
-        const locale = _locale as AcceptedLanguages
-        if (!incomingConfig.i18n) {
-          incomingConfig.i18n = {}
-        }
-        if (!incomingConfig.i18n.translations) {
-          incomingConfig.i18n.translations = {}
-        }
-        if (!(locale in incomingConfig.i18n.translations)) {
-          incomingConfig.i18n.translations[locale] = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        if (!('multiTenant' in incomingConfig.i18n.translations[locale])) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
-          incomingConfig.i18n.translations[locale].multiTenant = {}
-        }
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        incomingConfig.i18n.translations[locale].multiTenant.selectorLabel = label
-        tenantSelectorLabel = 'multiTenant:selectorLabel'
-      })
     }
 
     /**
@@ -127,6 +99,7 @@ export const multiTenantPlugin =
     }
 
     addCollectionAccess({
+      accessResultCallback: pluginConfig.usersAccessResultOverride,
       adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
@@ -140,14 +113,18 @@ export const multiTenantPlugin =
         adminUsersCollection.admin = {}
       }
 
-      adminUsersCollection.admin.baseListFilter = combineListFilters({
-        baseListFilter: adminUsersCollection.admin?.baseListFilter,
+      const baseFilter =
+        adminUsersCollection.admin?.baseFilter ?? adminUsersCollection.admin?.baseListFilter
+      adminUsersCollection.admin.baseFilter = combineFilters({
+        baseFilter,
         customFilter: (args) =>
-          filterUsersBySelectedTenant({
+          filterDocumentsByTenants<ConfigType>({
+            filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           }),
       })
     }
@@ -168,6 +145,102 @@ export const multiTenantPlugin =
       },
       [[], []],
     )
+
+    // used to track and not duplicate filterOptions on referenced blocks
+    const blockReferencesWithFilters: string[] = []
+
+    // used to validate enabled collection slugs
+    const multiTenantCollectionsFound: string[] = []
+
+    /**
+     * The folders collection is added AFTER the plugin is initialized
+     * so if they added the folder slug to the plugin collections,
+     * we can assume that they have folders enabled
+     */
+    const foldersSlug = incomingConfig.folders
+      ? incomingConfig.folders.slug || 'payload-folders'
+      : 'payload-folders'
+
+    if (collectionSlugs.includes(foldersSlug)) {
+      multiTenantCollectionsFound.push(foldersSlug)
+      incomingConfig.folders = incomingConfig.folders || {}
+      incomingConfig.folders.collectionOverrides = incomingConfig.folders.collectionOverrides || []
+      incomingConfig.folders.collectionOverrides.push(({ collection }) => {
+        /**
+         * Add filter options to all relationship fields
+         */
+        collection.fields = addFilterOptionsToFields({
+          blockReferencesWithFilters,
+          config: incomingConfig,
+          fields: collection.fields,
+          tenantEnabledCollectionSlugs: collectionSlugs,
+          tenantEnabledGlobalSlugs: globalCollectionSlugs,
+          tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          tenantsCollectionSlug,
+          userHasAccessToAllTenants,
+        })
+
+        if (pluginConfig.collections[foldersSlug]?.customTenantField !== true) {
+          /**
+           * Add tenant field to enabled collections
+           */
+          collection.fields.unshift(
+            tenantField({
+              name: tenantFieldName,
+              debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
+              overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+                ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+                : pluginConfig.tenantField || {},
+              tenantsArrayFieldName,
+              tenantsArrayTenantFieldName,
+              tenantsCollectionSlug,
+              unique: false,
+            }),
+          )
+        }
+
+        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
+        if (useBaseFilter ?? useBaseListFilter ?? true) {
+          /**
+           * Add list filter to enabled collections
+           * - filters results by selected tenant
+           */
+          collection.admin = collection.admin || {}
+          collection.admin.baseFilter = combineFilters({
+            baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
+            customFilter: (args) =>
+              filterDocumentsByTenants<ConfigType>({
+                filterFieldName: tenantFieldName,
+                req: args.req,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
+                tenantsCollectionSlug,
+                userHasAccessToAllTenants,
+              }),
+          })
+        }
+
+        if (pluginConfig.collections[foldersSlug]?.useTenantAccess !== false) {
+          /**
+           * Add access control constraint to tenant enabled folders collection
+           */
+          addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[foldersSlug]?.accessResultOverride,
+            adminUsersSlug: adminUsersCollection.slug,
+            collection,
+            fieldName: tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            userHasAccessToAllTenants,
+          })
+        }
+
+        return collection
+      })
+    }
 
     /**
      * Modify collections
@@ -203,12 +276,17 @@ export const multiTenantPlugin =
             collection.admin = {}
           }
 
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          const baseFilter = collection.admin?.baseFilter ?? collection.admin?.baseListFilter
+          collection.admin.baseFilter = combineFilters({
+            baseFilter,
             customFilter: (args) =>
-              filterTenantsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: 'id',
                 req: args.req,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -229,56 +307,105 @@ export const multiTenantPlugin =
             usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
+
+        /**
+         * Add custom tenant field that watches and dispatches updates to the selector
+         */
+        collection.fields.push({
+          name: '_watchTenant',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
+              },
+            },
+            disableBulkEdit: true,
+            disableListColumn: true,
+          },
+        })
+
+        collection.endpoints = [
+          ...(collection.endpoints || []),
+          getTenantOptionsEndpoint({
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            tenantsCollectionSlug,
+            useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+            userHasAccessToAllTenants,
+          }),
+        ]
       } else if (pluginConfig.collections?.[collection.slug]) {
+        multiTenantCollectionsFound.push(collection.slug)
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
         if (isGlobal) {
           collection.disableDuplicate = true
         }
 
+        if (!pluginConfig.debug && !isGlobal) {
+          collection.admin ??= {}
+          collection.admin.components ??= {}
+          collection.admin.components.edit ??= {}
+          collection.admin.components.edit.editMenuItems ??= []
+          collection.admin.components.edit.editMenuItems.push({
+            path: '@payloadcms/plugin-multi-tenant/client#AssignTenantFieldTrigger',
+          })
+        }
+
         /**
-         * Modify enabled collections
+         * Add filter options to all relationship fields
          */
-        addFilterOptionsToFields({
+        collection.fields = addFilterOptionsToFields({
+          blockReferencesWithFilters,
           config: incomingConfig,
           fields: collection.fields,
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
 
-        /**
-         * Add tenant field to enabled collections
-         */
-        collection.fields.splice(
-          0,
-          0,
-          tenantField({
-            ...(pluginConfig?.tenantField || {}),
-            name: tenantFieldName,
-            debug: pluginConfig.debug,
-            tenantsCollectionSlug,
-            unique: isGlobal,
-          }),
-        )
+        if (pluginConfig.collections[collection.slug]?.customTenantField !== true) {
+          /**
+           * Add tenant field to enabled collections
+           */
+          collection.fields.unshift(
+            tenantField({
+              name: tenantFieldName,
+              debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
+              overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+                ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
+                : pluginConfig.tenantField || {},
+              tenantsArrayFieldName,
+              tenantsArrayTenantFieldName,
+              tenantsCollectionSlug,
+              unique: isGlobal,
+            }),
+          )
+        }
 
-        if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
+        const { useBaseFilter, useBaseListFilter } = pluginConfig.collections[collection.slug] || {}
+        if (useBaseFilter ?? useBaseListFilter ?? true) {
           /**
            * Add list filter to enabled collections
            * - filters results by selected tenant
            */
-          if (!collection.admin) {
-            collection.admin = {}
-          }
-
-          collection.admin.baseListFilter = combineListFilters({
-            baseListFilter: collection.admin?.baseListFilter,
+          collection.admin = collection.admin || {}
+          collection.admin.baseFilter = combineFilters({
+            baseFilter: collection.admin?.baseFilter ?? collection.admin?.baseListFilter,
             customFilter: (args) =>
-              filterDocumentsBySelectedTenant({
+              filterDocumentsByTenants({
+                filterFieldName: tenantFieldName,
                 req: args.req,
-                tenantFieldName,
+                tenantsArrayFieldName,
+                tenantsArrayTenantFieldName,
                 tenantsCollectionSlug,
+                userHasAccessToAllTenants,
               }),
           })
         }
@@ -288,6 +415,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled collection
            */
           addCollectionAccess({
+            accessResultCallback: pluginConfig.collections[collection.slug]?.accessResultOverride,
             adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
@@ -303,13 +431,32 @@ export const multiTenantPlugin =
       throw new Error(`Tenants collection not found with slug: ${tenantsCollectionSlug}`)
     }
 
+    if (
+      multiTenantCollectionsFound.length !==
+      collectionSlugs.length + globalCollectionSlugs.length
+    ) {
+      const missingSlugs = [...collectionSlugs, ...globalCollectionSlugs].filter(
+        (slug) => !multiTenantCollectionsFound.includes(slug),
+      )
+      // eslint-disable-next-line no-console
+      console.error(
+        miniChalk.yellowBold('WARNING (plugin-multi-tenant)'),
+        'missing collections',
+        missingSlugs,
+        'try placing the multi-tenant plugin after other plugins.',
+      )
+    }
+
     /**
      * Add TenantSelectionProvider to admin providers
      */
     incomingConfig.admin.components.providers.push({
       clientProps: {
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
         tenantsCollectionSlug: tenantCollection.slug,
         useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+        userHasAccessToAllTenants,
       },
       path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelectionProvider',
     })
@@ -323,8 +470,11 @@ export const multiTenantPlugin =
         serverProps: {
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
           useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
+          userHasAccessToAllTenants,
         },
       })
     }
@@ -332,11 +482,45 @@ export const multiTenantPlugin =
     /**
      * Add tenant selector to admin UI
      */
-    incomingConfig.admin.components.beforeNavLinks.push({
+    incomingConfig.admin.components.beforeNav.push({
       clientProps: {
-        label: tenantSelectorLabel,
+        enabledSlugs: [
+          ...collectionSlugs,
+          ...globalCollectionSlugs,
+          adminUsersCollection.slug,
+          tenantCollection.slug,
+        ],
+        label: pluginConfig.tenantSelectorLabel || undefined,
       },
-      path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
+      path: '@payloadcms/plugin-multi-tenant/rsc#TenantSelector',
+    })
+
+    /**
+     * Merge plugin translations
+     */
+    if (!incomingConfig.i18n) {
+      incomingConfig.i18n = {}
+    }
+    Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
+      const typedLocale = locale as AcceptedLanguages
+      if (!incomingConfig.i18n!.translations) {
+        incomingConfig.i18n!.translations = {}
+      }
+      if (!(typedLocale in incomingConfig.i18n!.translations)) {
+        incomingConfig.i18n!.translations[typedLocale] = {}
+      }
+      if (!('plugin-multi-tenant' in incomingConfig.i18n!.translations[typedLocale]!)) {
+        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+          'plugin-multi-tenant'
+        ] = {} as PluginDefaultTranslationsObject['plugin-multi-tenant']
+      }
+
+      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
+        'plugin-multi-tenant'
+      ] = {
+        ...pluginI18nObject.translations['plugin-multi-tenant'],
+        ...(pluginConfig.i18n?.translations?.[typedLocale] || {}),
+      }
     })
 
     return incomingConfig

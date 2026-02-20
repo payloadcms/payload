@@ -42,9 +42,10 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
   const [errorCount, setErrorCount] = useState(0)
   const fieldHasErrors = errorCount > 0
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {} } = useField({
-    path,
-  })
+  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, disabled } =
+    useField({
+      path,
+    })
 
   const onToggle = useCallback(
     async (newCollapsedState: boolean): Promise<void> => {
@@ -107,7 +108,12 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
+      <WatchChildErrors
+        fields={fields}
+        // removes the 'collapsible' path segment, i.e. `_index-0`
+        path={path.split('.').slice(0, -1)}
+        setErrorCount={setErrorCount}
+      />
       <div
         className={[
           fieldBaseClass,
@@ -140,7 +146,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
             parentPath={parentPath}
             parentSchemaPath={parentSchemaPath}
             permissions={permissions}
-            readOnly={readOnly}
+            readOnly={readOnly || disabled}
           />
         </CollapsibleElement>
         {AfterInput}

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.25.0",
+  "version": "3.77.0",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -17,6 +17,7 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -28,6 +29,11 @@
       "import": "./src/exports/migration-utils.ts",
       "types": "./src/exports/migration-utils.ts",
       "default": "./src/exports/migration-utils.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     }
   },
   "main": "./src/index.ts",
@@ -38,15 +44,15 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc-build --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "mongoose": "8.9.5",
+    "mongoose": "8.15.1",
     "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",
     "uuid": "10.0.0"
@@ -56,8 +62,8 @@
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
     "@types/prompts": "^2.4.5",
     "@types/uuid": "10.0.0",
-    "mongodb": "6.12.0",
-    "mongodb-memory-server": "^10",
+    "mongodb": "6.16.0",
+    "mongodb-memory-server": "10.1.4",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -74,6 +80,11 @@
         "import": "./dist/exports/migration-utils.js",
         "types": "./dist/exports/migration-utils.d.ts",
         "default": "./dist/exports/migration-utils.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
       }
     },
     "main": "./dist/index.js",

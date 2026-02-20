@@ -57,11 +57,11 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       ],
     })
 
-    if (redirect.fields[2].type !== 'row') {
-      redirect.fields[2].label = 'Custom URL'
+    if (redirect.fields[2]!.type !== 'row') {
+      redirect.fields[2]!.label = 'Custom URL'
     }
 
-    redirect.fields[2].admin = {
+    redirect.fields[2]!.admin = {
       condition: (_, siblingData) => siblingData?.type === 'custom',
     }
   }

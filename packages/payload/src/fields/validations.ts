@@ -1,9 +1,10 @@
-// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
+
+import type { TFunction } from '@payloadcms/translations'
+import type { JSONSchema4 } from 'json-schema'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -29,6 +30,7 @@ import type {
   TextField,
   UploadField,
   Validate,
+  ValueWithRelation,
 } from './config/types.js'
 
 import { isNumber } from '../utilities/isNumber.js'
@@ -55,10 +57,10 @@ export const text: TextFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (!required) {
-    if (!value) {
+    if (value === undefined || value === null) {
       return true
     }
   }
@@ -77,7 +79,7 @@ export const text: TextFieldValidation = (
     maxLength = fieldMaxLength
   }
 
-  const stringsToValidate: string[] = Array.isArray(value) ? value : [value]
+  const stringsToValidate: string[] = Array.isArray(value) ? value : [value!]
 
   for (const stringValue of stringsToValidate) {
     const length = stringValue?.length || 0
@@ -114,7 +116,7 @@ export const password: PasswordFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -177,7 +179,7 @@ export const email: EmailFieldValidation = (
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -190,7 +192,19 @@ export const email: EmailFieldValidation = (
     }
   }
 
-  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
+  /**
+   * Disallows emails with double quotes (e.g., "user"@example.com, user@"example.com", "user@example.com")
+   * Rejects spaces anywhere in the email (e.g., user @example.com, user@ example.com, user name@example.com)
+   * Prevents consecutive dots in the local or domain part (e.g., user..name@example.com, user@example..com)
+   * Disallows domains that start or end with a hyphen (e.g., user@-example.com, user@example-.com)
+   * Allows standard email formats (e.g., user@example.com, user.name+alias@example.co.uk, user-name@example.org)
+   * Allows domains with consecutive hyphens as long as they are not leading/trailing (e.g., user@ex--ample.com)
+   * Supports multiple subdomains (e.g., user@sub.domain.example.com)
+   */
+  const emailRegex =
+    /^(?!.*\.\.)[\w!#$%&'*+/=?^`{|}~-](?:[\w!#$%&'*+/=?^`{|}~.-]*[\w!#$%&'*+/=?^`{|}~-])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+
+  if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
 
@@ -211,12 +225,12 @@ export const username: UsernameFieldValidation = (
     siblingData,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (collectionSlug) {
     const collection =
       collections?.[collectionSlug]?.config ??
-      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
+      config.collections.find(({ slug }) => slug === collectionSlug)! // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -258,7 +272,7 @@ export const textarea: TextareaFieldValidation = (
     required,
   },
 ) => {
-  let maxLength: number
+  let maxLength!: number
 
   if (typeof config?.defaultMaxTextLength === 'number') {
     maxLength = config.defaultMaxTextLength
@@ -298,11 +312,11 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = async (
+export const json: JSONFieldValidation = (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
-  const isNotEmpty = (value) => {
+  const isNotEmpty = (value: null | string | undefined) => {
     if (value === undefined || value === null) {
       return false
     }
@@ -318,11 +332,10 @@ export const json: JSONFieldValidation = async (
     return true
   }
 
-  const fetchSchema = ({ schema, uri }: Record<string, unknown>) => {
+  const fetchSchema = ({ schema, uri }: { schema: JSONSchema4; uri: string }) => {
     if (uri && schema) {
       return schema
     }
-    // @ts-expect-error
     return fetch(uri)
       .then((response) => {
         if (!response.ok) {
@@ -330,7 +343,10 @@ export const json: JSONFieldValidation = async (
         }
         return response.json()
       })
-      .then((json) => {
+      .then((_json) => {
+        const json = _json as {
+          id: string
+        }
         const jsonSchemaSanitizations = {
           id: undefined,
           $id: json.id,
@@ -351,16 +367,16 @@ export const json: JSONFieldValidation = async (
 
   if (jsonSchema && isNotEmpty(value)) {
     try {
-      jsonSchema.schema = await fetchSchema(jsonSchema)
+      jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error
+      // @ts-expect-error missing types
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
         return ajv.errorsText()
       }
     } catch (error) {
-      return error.message
+      return error instanceof Error ? error.message : 'Unknown error'
     }
   }
   return true
@@ -387,7 +403,7 @@ export const date: DateFieldValidation = (
   // We need to also check for the timezone data based on this field's config
   // We cannot do this inside the timezone field validation as it's visually hidden
   const hasRequiredTimezone = timezone && required
-  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  const selectedTimezone: string = siblingData?.[`${name}_tz` as keyof typeof siblingData]
   // Always resolve to true if the field is not required, as timezone may be optional too then
   const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
 
@@ -426,17 +442,17 @@ export const richText: RichTextFieldValidation = async (value, options) => {
 }
 
 const validateArrayLength = (
-  value,
+  value: unknown,
   options: {
     maxRows?: number
     minRows?: number
     required?: boolean
-    t: (key: string, options?: { [key: string]: number | string }) => string
+    t: TFunction
   },
 ) => {
   const { maxRows, minRows, required, t } = options
 
-  const arrayLength = Array.isArray(value) ? value.length : value || 0
+  const arrayLength = Array.isArray(value) ? value.length : (value as number) || 0
 
   if (!required && arrayLength === 0) {
     return true
@@ -484,7 +500,7 @@ export const number: NumberFieldValidation = (
     }
   }
 
-  const numbersToValidate: number[] = Array.isArray(value) ? value : [value]
+  const numbersToValidate: number[] = Array.isArray(value) ? value : [value!]
 
   for (const number of numbersToValidate) {
     if (!isNumber(number)) {
@@ -513,11 +529,100 @@ export const array: ArrayFieldValidation = (value, { maxRows, minRows, req: { t 
 
 export type BlocksFieldValidation = Validate<unknown, unknown, unknown, BlocksField>
 
-export const blocks: BlocksFieldValidation = (
+/**
+ * This function validates the blocks in a blocks field against the provided filterOptions.
+ * It will return a list of all block slugs found in the value, the allowed block slugs (if any),
+ * and a list of invalid block slugs that are used despite being disallowed.
+ *
+ * @internal - this may break or be removed at any time
+ */
+export async function validateBlocksFilterOptions({
+  id,
+  data,
+  filterOptions,
+  req,
+  siblingData,
   value,
-  { maxRows, minRows, req: { t }, required },
+}: { value: Parameters<BlocksFieldValidation>[0] } & Pick<
+  Parameters<BlocksFieldValidation>[1],
+  'data' | 'filterOptions' | 'id' | 'req' | 'siblingData'
+>): Promise<{
+  /**
+   * All block slugs found in the value of the blocks field
+   */
+  allBlockSlugs: string[]
+  /**
+   * All block slugs that are allowed. If undefined, all blocks are allowed.
+   */
+  allowedBlockSlugs: string[] | undefined
+  /**
+   * A list of block slugs that are used despite being disallowed. If undefined, field passed validation.
+   */
+  invalidBlockSlugs: string[] | undefined
+}> {
+  const allBlockSlugs = Array.isArray(value)
+    ? (value as Array<{ blockType?: string }>)
+        .map((b) => b.blockType)
+        .filter((s): s is string => Boolean(s))
+    : []
+
+  // if undefined => all blocks allowed
+  let allowedBlockSlugs: string[] | undefined = undefined
+
+  if (typeof filterOptions === 'function') {
+    const result = await filterOptions({
+      id: id!, // original code asserted presence
+      data,
+      req,
+      siblingData,
+      user: req.user,
+    })
+    if (result !== true && Array.isArray(result)) {
+      allowedBlockSlugs = result
+    }
+  } else if (Array.isArray(filterOptions)) {
+    allowedBlockSlugs = filterOptions
+  }
+
+  const invalidBlockSlugs: string[] = []
+  if (allowedBlockSlugs) {
+    for (const blockSlug of allBlockSlugs) {
+      if (!allowedBlockSlugs.includes(blockSlug)) {
+        invalidBlockSlugs.push(blockSlug)
+      }
+    }
+  }
+
+  return {
+    allBlockSlugs,
+    allowedBlockSlugs,
+    invalidBlockSlugs,
+  }
+}
+export const blocks: BlocksFieldValidation = async (
+  value,
+  { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
-  return validateArrayLength(value, { maxRows, minRows, required, t })
+  const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
+  if (typeof lengthValidationResult === 'string') {
+    return lengthValidationResult
+  }
+
+  if (filterOptions) {
+    const { invalidBlockSlugs } = await validateBlocksFilterOptions({
+      id,
+      data,
+      filterOptions,
+      req,
+      siblingData,
+      value,
+    })
+    if (invalidBlockSlugs?.length) {
+      return t('validation:invalidBlocks', { blocks: invalidBlockSlugs.join(', ') })
+    }
+  }
+
+  return true
 }
 
 const validateFilterOptions: Validate<
@@ -527,7 +632,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -543,7 +648,7 @@ const validateFilterOptions: Validate<
         let optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
-                id,
+                id: id!,
                 blockData,
                 data,
                 relationTo: collection,
@@ -578,15 +683,16 @@ const validateFilterOptions: Validate<
             and: [{ id: { in: valueIDs } }],
           }
 
+          // @ts-expect-error - I don't understand why optionFilter is inferred as `false | Where | null` instead of `boolean | Where | null`
           if (optionFilter && optionFilter !== true) {
-            findWhere.and.push(optionFilter)
+            findWhere.and?.push(optionFilter)
           }
 
           if (optionFilter === false) {
             falseCollections.push(collection)
           }
 
-          const result = await payload.find({
+          const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
             limit: 0,
@@ -633,11 +739,11 @@ const validateFilterOptions: Validate<
         return true
       }
 
-      if (!options[collection]) {
+      if (!options[collection!]) {
         return true
       }
 
-      return options[collection].indexOf(requestedID) === -1
+      return options[collection!]!.indexOf(requestedID!) === -1
     })
 
     if (invalidRelationships.length > 0) {
@@ -721,7 +827,7 @@ export const upload: UploadFieldValidation = async (value, options) => {
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
       return !isValidID(requestedID, idType)
     })
@@ -803,7 +909,7 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
 
     const invalidRelationships = values.filter((val) => {
       let collectionSlug: string
-      let requestedID
+      let requestedID: number | string | undefined | ValueWithRelation
 
       if (typeof relationTo === 'string') {
         collectionSlug = relationTo
@@ -824,9 +930,9 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
       }
 
       const idType =
-        payload.collections[collectionSlug]?.customIDType || payload?.db?.defaultIDType || 'text'
+        payload.collections[collectionSlug!]?.customIDType || payload?.db?.defaultIDType || 'text'
 
-      return !isValidID(requestedID, idType)
+      return !isValidID(requestedID as number | string, idType)
     })
 
     if (invalidRelationships.length > 0) {
@@ -853,13 +959,23 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = (
   value,
-  { hasMany, options, req: { t }, required },
+  { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
+  const filteredOptions =
+    typeof filterOptions === 'function'
+      ? filterOptions({
+          data,
+          options,
+          req,
+          siblingData,
+        })
+      : options
+
   if (
     Array.isArray(value) &&
     value.some(
       (input) =>
-        !options.some(
+        !filteredOptions.some(
           (option) => option === input || (typeof option !== 'string' && option?.value === input),
         ),
     )
@@ -867,9 +983,34 @@ export const select: SelectFieldValidation = (
     return t('validation:invalidSelection')
   }
 
+  // Check for duplicate values when hasMany is true
+  if (hasMany && Array.isArray(value) && value.length > 1) {
+    const counts = new Map<unknown, number>()
+
+    for (const item of value) {
+      counts.set(item, (counts.get(item) || 0) + 1)
+    }
+
+    const duplicates: unknown[] = []
+    for (const [item, count] of counts.entries()) {
+      if (count > 1) {
+        // Add the item 'count' times to show all occurrences
+        for (let i = 0; i < count; i++) {
+          duplicates.push(item)
+        }
+      }
+    }
+
+    if (duplicates.length > 0) {
+      return duplicates.reduce((err, duplicate, i) => {
+        return `${err} ${JSON.stringify(duplicate)}${i < duplicates.length - 1 ? ',' : ''}`
+      }, t('validation:invalidSelections')) as string
+    }
+  }
+
   if (
     typeof value === 'string' &&
-    !options.some(
+    !filteredOptions.some(
       (option) => option === value || (typeof option !== 'string' && option.value === value),
     )
   ) {
@@ -909,6 +1050,14 @@ export type PointFieldValidation = Validate<
 >
 
 export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
+  if (value === null) {
+    if (required) {
+      return t('validation:required')
+    }
+
+    return true
+  }
+
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
   if (
@@ -923,6 +1072,16 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
 
   if ((value[1] && Number.isNaN(lng)) || (value[0] && Number.isNaN(lat))) {
     return t('validation:invalidInput')
+  }
+
+  // Validate longitude bounds (-180 to 180)
+  if (value[0] && !Number.isNaN(lng) && (lng < -180 || lng > 180)) {
+    return t('validation:longitudeOutOfBounds')
+  }
+
+  // Validate latitude bounds (-90 to 90)
+  if (value[1] && !Number.isNaN(lat) && (lat < -90 || lat > 90)) {
+    return t('validation:latitudeOutOfBounds')
   }
 
   return true

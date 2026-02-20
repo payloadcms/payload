@@ -9,8 +9,11 @@ keywords: admin, components, custom, documentation, Content Management System, c
 Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](../custom-components/overview), such as [Custom Fields](../fields/overview#custom-components). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
-  **Reminder:**
-  All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](../custom-components/overview#client-components).
+  **Reminder:** All Custom Components are [React Server
+  Components](https://react.dev/reference/rsc/server-components) by default.
+  Hooks, on the other hand, are only available in client-side environments. To
+  use hooks, [ensure your component is a client
+  component](../custom-components/overview#client-components).
 </Banner>
 
 ## useField
@@ -29,11 +32,11 @@ export const CustomTextField: TextFieldClientComponent = ({ path }) => {
 
   return (
     <div>
-      <p>
-        {path}
-      </p>
+      <p>{path}</p>
       <input
-        onChange={(e) => { setValue(e.target.value) }}
+        onChange={(e) => {
+          setValue(e.target.value)
+        }}
         value={value}
       />
     </div>
@@ -43,12 +46,12 @@ export const CustomTextField: TextFieldClientComponent = ({ path }) => {
 
 The `useField` hook accepts the following arguments:
 
-| Property          | Description                                                                                                                                                                                                                   |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `path`            | If you do not provide a `path`, `name` will be used instead. This is the path to the field in the form data.                                                                                                                  |
+| Property          | Description                                                                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `path`            | If you do not provide a `path`, `name` will be used instead. This is the path to the field in the form data.                                                                                     |
 | `validate`        | A validation function executed client-side _before_ submitting the form to the server. Different than [Field-level Validation](../fields/overview#validation) which runs strictly on the server. |
-| `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                                                         |
-| `hasRows` | If `true`, the field will be treated as a field with rows. This is useful for fields like `array` and `blocks`.                                                                                                                                         |
+| `disableFormData` | If `true`, the field will not be included in the form data when the form is submitted.                                                                                                           |
+| `hasRows`         | If `true`, the field will be treated as a field with rows. This is useful for fields like `array` and `blocks`.                                                                                  |
 
 The `useField` hook returns the following object:
 
@@ -75,11 +78,12 @@ type FieldType<T> = {
 
 ## useFormFields
 
-There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
+There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields form states.
 
 <Banner type="success">
-  **This hook is great for retrieving only certain fields from form state** because it
-  ensures that it will only cause a rerender when the items that you ask for change.
+  **This hook is great for retrieving only certain fields from form state**
+  because it ensures that it will only cause a rerender when the items that you
+  ask for change.
 </Banner>
 
 Thanks to the awesome package [`use-context-selector`](https://github.com/dai-shi/use-context-selector), you can retrieve a specific field's state easily. This is ideal because you can ensure you have an up-to-date field state, and your component will only re-render when _that field's state_ changes.
@@ -95,17 +99,33 @@ const MyComponent: React.FC = () => {
   const amount = useFormFields(([fields, dispatch]) => fields.amount)
 
   // Do the same thing as above, but to the `feePercentage` field
-  const feePercentage = useFormFields(([fields, dispatch]) => fields.feePercentage)
+  const feePercentage = useFormFields(
+    ([fields, dispatch]) => fields.feePercentage,
+  )
 
-  if (typeof amount?.value !== 'undefined' && typeof feePercentage?.value !== 'undefined') {
+  if (
+    typeof amount?.value !== 'undefined' &&
+    typeof feePercentage?.value !== 'undefined'
+  ) {
     return <span>The fee is ${(amount.value * feePercentage.value) / 100}</span>
   }
 }
 ```
 
+<Banner type="warning">
+  Be aware: in the example above, `MyComponent` may re-render if an ancestor
+  component re-renders or if any of its props change (standard React behavior),
+  but not because any fields other than `amount` or `feePercentage` changed.
+</Banner>
+
 ## useAllFormFields
 
-**To retrieve more than one field**, you can use the `useAllFormFields` hook. Your component will re-render when _any_ field changes, so use this hook only if you absolutely need to. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+**To retrieve more than one field**, you can use the `useAllFormFields` hook. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+
+<Banner type="warning">
+  **Warning:** Your component will re-render when _any_ field changes, so use
+  this hook only if you absolutely need to.
+</Banner>
 
 You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
 
@@ -159,10 +179,11 @@ The `useForm` hook can be used to interact with the form itself, and sends back 
 <Banner type="warning">
   **Warning:**
 
-  This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
-  property will be out of date. You should only leverage this hook if you need to perform actions
-  against the form in response to your users' actions. Do not rely on its returned "fields" as being
-  up-to-date. They will be removed from this hook's response in an upcoming version.
+This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
+property will be out of date. You should only leverage this hook if you need to perform actions
+against the form in response to your users' actions. Do not rely on its returned "fields" as being
+up-to-date. They will be removed from this hook's response in an upcoming version.
+
 </Banner>
 
 The `useForm` hook returns an object with the following properties:
@@ -384,65 +405,63 @@ The `useForm` hook returns an object with the following properties:
     ]}
   />
 
-
 \`\`\`tsx
 import { useForm } from "@payloadcms/ui"
 
 export const CustomArrayManager = () => {
   const { addFieldRow } = useForm()
 
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        addFieldRow({
-          path: "arrayField",
-          schemaPath: "arrayField",
-          rowIndex: 0, // optionally specify the index to add the row at
-          subFieldState: {
-            textField: {
-              initialValue: 'New row text',
-              valid: true,
-              value: 'New row text',
-            },
-          },
-          // blockType: "yourBlockSlug",
-          // ^ if managing a block array, you need to specify the block type
-        })
-      }}
-    >
-      Add Row
-    </button>
-  )
-}
-\`\`\`
+return (
+
+<button
+  type="button"
+  onClick={() => {
+    addFieldRow({
+      path: 'arrayField',
+      schemaPath: 'arrayField',
+      rowIndex: 0, // optionally specify the index to add the row at
+      subFieldState: {
+        textField: {
+          initialValue: 'New row text',
+          valid: true,
+          value: 'New row text',
+        },
+      },
+      // blockType: "yourBlockSlug",
+      // ^ if managing a block array, you need to specify the block type
+    })
+  }}
+>
+  Add Row
+</button>
+) } \`\`\`
 
 An example config to go along with the Custom Component
 
 \`\`\`tsx
 const ExampleCollection = {
-  slug: "example-collection",
-  fields: [
-    {
-      name: "arrayField",
-      type: "array",
-      fields: [
-        {
-          name: "textField",
-          type: "text",
-        },
-      ],
-    },
-    {
-      type: "ui",
-      name: "customArrayManager",
-      admin: {
-        components: {
-          Field: '/path/to/CustomArrayManagerField',
-        },
-      },
-    },
-  ],
+slug: "example-collection",
+fields: [
+{
+name: "arrayField",
+type: "array",
+fields: [
+{
+name: "textField",
+type: "text",
+},
+],
+},
+{
+type: "ui",
+name: "customArrayManager",
+admin: {
+components: {
+Field: '/path/to/CustomArrayManagerField',
+},
+},
+},
+],
 }
 \`\`\`
 `
@@ -460,32 +479,28 @@ const ExampleCollection = {
         drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
         drawerContent:  `
-  <TableWithDrawers
-    columns={[
-      'Prop',
-      'Description',
-    ]}
-    rows={[
-      [
-        {
-          value: "**\\\`path\\\`**",
-        },
-        {
-          value: "The path to the array or block field",
-        },
-      ],
-      [
-        {
-          value: "**\\\`rowIndex\\\`**",
-        },
-        {
-          value: "The index of the row to remove",
-        },
-      ],
-    ]}
-  />
 
-
+<TableWithDrawers
+  columns={['Prop', 'Description']}
+  rows={[
+    [
+      {
+        value: '**\\\`path\\\`**',
+      },
+      {
+        value: 'The path to the array or block field',
+      },
+    ],
+    [
+      {
+        value: '**\\\`rowIndex\\\`**',
+      },
+      {
+        value: 'The index of the row to remove',
+      },
+    ],
+  ]}
+/>
 
 \`\`\`tsx
 import { useForm } from "@payloadcms/ui"
@@ -493,48 +508,47 @@ import { useForm } from "@payloadcms/ui"
 export const CustomArrayManager = () => {
   const { removeFieldRow } = useForm()
 
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        removeFieldRow({
-          path: "arrayField",
-          rowIndex: 0,
-        })
-      }}
-    >
-      Remove Row
-    </button>
-  )
-}
-\`\`\`
+return (
+
+<button
+  type="button"
+  onClick={() => {
+    removeFieldRow({
+      path: 'arrayField',
+      rowIndex: 0,
+    })
+  }}
+>
+  Remove Row
+</button>
+) } \`\`\`
 
 An example config to go along with the Custom Component
 
 \`\`\`tsx
 const ExampleCollection = {
-  slug: "example-collection",
-  fields: [
-    {
-      name: "arrayField",
-      type: "array",
-      fields: [
-        {
-          name: "textField",
-          type: "text",
-        },
-      ],
-    },
-    {
-      type: "ui",
-      name: "customArrayManager",
-      admin: {
-        components: {
-          Field: '/path/to/CustomArrayManagerField',
-        },
-      },
-    },
-  ],
+slug: "example-collection",
+fields: [
+{
+name: "arrayField",
+type: "array",
+fields: [
+{
+name: "textField",
+type: "text",
+},
+],
+},
+{
+type: "ui",
+name: "customArrayManager",
+admin: {
+components: {
+Field: '/path/to/CustomArrayManagerField',
+},
+},
+},
+],
 }
 \`\`\`
 `
@@ -552,41 +566,36 @@ const ExampleCollection = {
         drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
         drawerContent:  `
-  <TableWithDrawers
-    columns={[
-      'Prop',
-      'Description',
-    ]}
-    rows={[
-      [
-        {
-          value: "**\\\`path\\\`**",
-        },
-        {
-          value: "The path to the array or block field",
-        },
-      ],
-      [
-        {
-          value: "**\\\`rowIndex\\\`**",
-        },
-        {
-          value: "The index of the row to replace",
-        },
-      ],
-      [
-        {
-         value: "**\\\`data\\\`**",
-        },
-        {
-          value: "The data to replace within the row",
-        },
-      ],
-    ]}
-  />
 
-
-
+<TableWithDrawers
+  columns={['Prop', 'Description']}
+  rows={[
+    [
+      {
+        value: '**\\\`path\\\`**',
+      },
+      {
+        value: 'The path to the array or block field',
+      },
+    ],
+    [
+      {
+        value: '**\\\`rowIndex\\\`**',
+      },
+      {
+        value: 'The index of the row to replace',
+      },
+    ],
+    [
+      {
+        value: '**\\\`data\\\`**',
+      },
+      {
+        value: 'The data to replace within the row',
+      },
+    ],
+  ]}
+/>
 
 \`\`\`tsx
 import { useForm } from "@payloadcms/ui"
@@ -594,69 +603,68 @@ import { useForm } from "@payloadcms/ui"
 export const CustomArrayManager = () => {
   const { replaceFieldRow } = useForm()
 
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        replaceFieldRow({
-          path: "arrayField",
-          schemaPath: "arrayField",
-          rowIndex: 0, // optionally specify the index to add the row at
-          subFieldState: {
-            textField: {
-              initialValue: 'Updated text',
-              valid: true,
-              value: 'Upddated text',
-            },
-          },
-          // blockType: "yourBlockSlug",
-          // ^ if managing a block array, you need to specify the block type
-        })
-      }}
-    >
-      Replace Row
-    </button>
-  )
-}
-\`\`\`
+return (
+
+<button
+  type="button"
+  onClick={() => {
+    replaceFieldRow({
+      path: 'arrayField',
+      schemaPath: 'arrayField',
+      rowIndex: 0, // optionally specify the index to add the row at
+      subFieldState: {
+        textField: {
+          initialValue: 'Updated text',
+          valid: true,
+          value: 'Updated text',
+        },
+      },
+      // blockType: "yourBlockSlug",
+      // ^ if managing a block array, you need to specify the block type
+    })
+  }}
+>
+  Replace Row
+</button>
+) } \`\`\`
 
 An example config to go along with the Custom Component
 
 \`\`\`tsx
 const ExampleCollection = {
-  slug: "example-collection",
-  fields: [
-    {
-      name: "arrayField",
-      type: "array",
-      fields: [
-        {
-          name: "textField",
-          type: "text",
-        },
-      ],
-    },
-    {
-      type: "ui",
-      name: "customArrayManager",
-      admin: {
-        components: {
-          Field: '/path/to/CustomArrayManagerField',
-        },
-      },
-    },
-  ],
+slug: "example-collection",
+fields: [
+{
+name: "arrayField",
+type: "array",
+fields: [
+{
+name: "textField",
+type: "text",
+},
+],
+},
+{
+type: "ui",
+name: "customArrayManager",
+admin: {
+components: {
+Field: '/path/to/CustomArrayManagerField',
+},
+},
+},
+],
 }
 \`\`\`
 `
-      }
-    ],
-  ]}
+}
+],
+]}
 />
 
 ## useDocumentForm
 
-The `useDocumentForm` hook works the same way as the [useForm](#useform) hook, but it always gives you access to the top-level `Form` of a document. This is useful if you need to access the document's `Form` context from within a child  `Form`.
+The `useDocumentForm` hook works the same way as the [useForm](#useform) hook, but it always gives you access to the top-level `Form` of a document. This is useful if you need to access the document's `Form` context from within a child `Form`.
 
 An example where this could happen would be custom components within lexical blocks, as lexical blocks initialize their own child `Form`.
 
@@ -669,7 +677,9 @@ const MyComponent: React.FC = () => {
   const { fields: parentDocumentFields } = useDocumentForm()
 
   return (
-    <p>The document's Form has ${Object.keys(parentDocumentFields).length} fields</p>
+    <p>
+      The document's Form has ${Object.keys(parentDocumentFields).length} fields
+    </p>
   )
 }
 ```
@@ -711,23 +721,41 @@ const CustomComponent: React.FC = () => {
 
 The `useDocumentInfo` hook provides information about the current document being edited, including the following:
 
-| Property                  | Description                                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **`currentEditor`**       | The user currently editing the document.                                                                             |
-| **`docConfig`**              | Either the Collection or Global config of the document, depending on what is being edited.                         |
-| **`documentIsLocked`**    | Whether the document is currently locked by another user.                                                          |
-| **`id`**                  | If the doc is a collection, its ID will be returned                                                                |
-| **`getDocPermissions`**   | Method to retrieve document-level user preferences.                                                 |
-| **`getDocPreferences`**   | Method to retrieve document-level user preferences.                                                 |
-| **`hasPublishedDoc`**     | Whether the document has a published version.                                                                      |
-| **`incrementVersionCount`** | Method to increment the version count of the document.                                                           |
-| **`preferencesKey`**      | The `preferences` key to use when interacting with document-level user preferences.                                 |
-| **`versions`**            | Versions of the current doc.                                                                                        |
-| **`unpublishedVersions`** | Unpublished versions of the current doc.                                                                            |
-| **`publishedDoc`**        | The currently published version of the doc being edited.                                                            |
-| **`getVersions`**         | Method to retrieve document versions.                                                               |
-| **`docPermissions`**      | The current documents permissions. Collection document permissions fallback when no id is present (i.e. on create). |
-| **`versionCount`**        | The current version count of the document.                                                                          |
+| Property                           | Description                                                                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`action`**                       | The URL attached to the action attribute on the underlying form element, which specifies where to send the form data when the form is submitted. |
+| **`apiURL`**                       | The API URL for the current document.                                                                                                            |
+| **`collectionSlug`**               | The slug of the collection if editing a collection document.                                                                                     |
+| **`currentEditor`**                | The user currently editing the document.                                                                                                         |
+| **`docConfig`**                    | Either the Collection or Global config of the document, depending on what is being edited.                                                       |
+| **`docPermissions`**               | The current document's permissions. Fallback to collection permissions when no id is present.                                                    |
+| **`documentIsLocked`**             | Whether the document is currently locked by another user. [More details](./locked-documents).                                                    |
+| **`getDocPermissions`**            | Method to retrieve document-level permissions.                                                                                                   |
+| **`getDocPreferences`**            | Method to retrieve document-level user preferences. [More details](./preferences).                                                               |
+| **`globalSlug`**                   | The slug of the global if editing a global document.                                                                                             |
+| **`hasPublishedDoc`**              | Whether the document has a published version.                                                                                                    |
+| **`hasPublishPermission`**         | Whether the current user has permission to publish the document.                                                                                 |
+| **`hasSavePermission`**            | Whether the current user has permission to save the document.                                                                                    |
+| **`id`**                           | If the doc is a collection, its ID will be returned.                                                                                             |
+| **`incrementVersionCount`**        | Method to increment the version count of the document.                                                                                           |
+| **`initialData`**                  | The initial data of the document.                                                                                                                |
+| **`isEditing`**                    | Whether the document is being edited (as opposed to created).                                                                                    |
+| **`isInitializing`**               | Whether the document info is still initializing.                                                                                                 |
+| **`isLocked`**                     | Whether the document is locked. [More details](./locked-documents).                                                                              |
+| **`lastUpdateTime`**               | Timestamp of the last update to the document.                                                                                                    |
+| **`mostRecentVersionIsAutosaved`** | Whether the most recent version is an autosaved version.                                                                                         |
+| **`preferencesKey`**               | The `preferences` key to use when interacting with document-level user preferences. [More details](./preferences).                               |
+| **`data`**                         | The saved data of the document.                                                                                                                  |
+| **`setDocFieldPreferences`**       | Method to set preferences for a specific field. [More details](./preferences).                                                                   |
+| **`setDocumentTitle`**             | Method to set the document title.                                                                                                                |
+| **`setHasPublishedDoc`**           | Method to update whether the document has been published.                                                                                        |
+| **`title`**                        | The title of the document.                                                                                                                       |
+| **`unlockDocument`**               | Method to unlock a document. [More details](./locked-documents).                                                                                 |
+| **`unpublishedVersionCount`**      | The number of unpublished versions of the document.                                                                                              |
+| **`updateDocumentEditor`**         | Method to update who is currently editing the document. [More details](./locked-documents).                                                      |
+| **`updateSavedDocumentData`**      | Method to update the saved document data.                                                                                                        |
+| **`uploadStatus`**                 | Status of any uploads in progress ('idle', 'uploading', or 'failed').                                                                            |
+| **`versionCount`**                 | The current version count of the document.                                                                                                       |
 
 **Example:**
 
@@ -746,7 +774,9 @@ const LinkFromCategoryToPosts: React.FC = () => {
   }
 
   return (
-    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`}>
+    <a
+      href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`}
+    >
       View posts
     </a>
   )
@@ -772,17 +802,18 @@ const MyComponent: React.FC = () => {
 
 The `useListQuery` hook returns an object with the following properties:
 
-| Property          | Description                                                                                   |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| **`data`**        | The data that is being displayed in the List View.                                           |
-| **`defaultLimit`**| The default limit of items to display in the List View.                                      |
-| **`defaultSort`** | The default sort order of items in the List View.                                             |
-| **`handlePageChange`** | A method to handle page changes in the List View.                                         |
-| **`handlePerPageChange`** | A method to handle per page changes in the List View.                                   |
-| **`handleSearchChange`** | A method to handle search changes in the List View.                                     |
-| **`handleSortChange`** | A method to handle sort changes in the List View.                                         |
-| **`handleWhereChange`** | A method to handle where changes in the List View.                                       |
-| **`query`**       | The current query that is being used to fetch the data in the List View.                             |
+| Property                  | Description                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| **`data`**                | The data that is being displayed in the List View.                                     |
+| **`defaultLimit`**        | The default limit of items to display in the List View.                                |
+| **`defaultSort`**         | The default sort order of items in the List View.                                      |
+| **`handlePageChange`**    | A method to handle page changes in the List View.                                      |
+| **`handlePerPageChange`** | A method to handle per page changes in the List View.                                  |
+| **`handleSearchChange`**  | A method to handle search changes in the List View.                                    |
+| **`handleSortChange`**    | A method to handle sort changes in the List View.                                      |
+| **`handleWhereChange`**   | A method to handle where changes in the List View.                                     |
+| **`modified`**            | Whether the query has been changed from its [Query Preset](../query-presets/overview). |
+| **`query`**               | The current query that is being used to fetch the data in the List View.               |
 
 ## useSelection
 
@@ -811,11 +842,10 @@ const MyComponent: React.FC = () => {
 
   return (
     <>
-      <span>Selected {count} out of {totalDocs} docs!</span>
-      <button
-        type="button"
-        onClick={() => toggleAll(true)}
-      >
+      <span>
+        Selected {count} out of {totalDocs} docs!
+      </span>
+      <button type="button" onClick={() => toggleAll(true)}>
         Toggle All Selections
       </button>
     </>
@@ -856,7 +886,7 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`refreshCookie`**      | A method to trigger the silent refreshing of a user's auth token                        |
 | **`setToken`**           | Set the token of the user, to be decoded and used to reset the user and token in memory |
 | **`token`**              | The logged in user's token (useful for creating preview links, etc.)                    |
-| **`refreshPermissions`** | Load new permissions (useful when content that effects permissions has been changed)    |
+| **`refreshPermissions`** | Load new permissions (useful when content that affects permissions has been changed)    |
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
@@ -899,10 +929,12 @@ import { useConfig } from '@payloadcms/ui'
 const MyComponent: React.FC = () => {
   // highlight-start
   const { getEntityConfig } = useConfig()
-  const mediaConfig = getEntityConfig({ collectionSlug: 'media'})
+  const mediaConfig = getEntityConfig({ collectionSlug: 'media' })
   // highlight-end
 
-  return <span>The media collection has {mediaConfig.fields.length} fields.</span>
+  return (
+    <span>The media collection has {mediaConfig.fields.length} fields.</span>
+  )
 }
 ```
 
@@ -947,7 +979,9 @@ const MyComponent: React.FC = () => {
       </span>
       <button
         type="button"
-        onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+        onClick={() =>
+          setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+        }
       >
         Toggle theme
       </button>
@@ -958,7 +992,15 @@ const MyComponent: React.FC = () => {
 
 ## useTableColumns
 
-Returns methods to manipulate table columns
+Returns properties and methods to manipulate table columns:
+| Property | Description |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| **`columns`** | The current state of columns including their active status and configuration |
+| **`LinkedCellOverride`** | A component override for linked cells in the table |
+| **`moveColumn`** | A method to reorder columns. Accepts `{ fromIndex: number, toIndex: number }` as arguments |
+| **`resetColumnsState`** | A method to reset columns back to their default configuration as defined in the collection config |
+| **`setActiveColumns`** | A method to set specific columns to active state while preserving the existing column order. Accepts an array of column names to activate |
+| **`toggleColumn`** | A method to toggle a single column's visibility. Accepts a column name as string |
 
 ```tsx
 'use client'
@@ -966,17 +1008,30 @@ import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const { setActiveColumns } = useTableColumns()
+  const { setActiveColumns, resetColumnsState } = useTableColumns()
 
-  const resetColumns = () => {
-    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  const activateSpecificColumns = () => {
+    // Only activates the id and createdAt columns
+    // Other columns retain their current active/inactive state
+    // The original column order is preserved
+    setActiveColumns(['id', 'createdAt'])
+  }
+
+  const resetToDefaults = () => {
+    // Resets to the default columns defined in the collection config
+    resetColumnsState()
   }
   // highlight-end
 
   return (
-    <button type="button" onClick={resetColumns}>
-      Reset columns
-    </button>
+    <div>
+      <button type="button" onClick={activateSpecificColumns}>
+        Activate Specific Columns
+      </button>
+      <button type="button" onClick={resetToDefaults}>
+        Reset To Defaults
+      </button>
+    </div>
   )
 }
 ```
@@ -1004,18 +1059,19 @@ const ListenForUpdates: React.FC = () => {
 ```
 
 <Banner type="info">
-  Right now the `useDocumentEvents` hook only tracks recently updated documents, but in the future
-  it will track more document-related events as needed, such as document creation, deletion, etc.
+  Right now the `useDocumentEvents` hook only tracks recently updated documents,
+  but in the future it will track more document-related events as needed, such
+  as document creation, deletion, etc.
 </Banner>
 
 ## useStepNav
 
 The `useStepNav` hook provides a way to change the step-nav breadcrumb links in the app header.
 
-| Property         | Description                                                                       |
-| ---------------- | --------------------------------------------------------------------------------- |
-| **`setStepNav`** | A state setter function which sets the `stepNav` array.                           |
-| **`stepNav`**    | A `StepNavItem` array where each `StepNavItem` has a label and optionally a url.  |
+| Property         | Description                                                                      |
+| ---------------- | -------------------------------------------------------------------------------- |
+| **`setStepNav`** | A state setter function which sets the `stepNav` array.                          |
+| **`stepNav`**    | A `StepNavItem` array where each `StepNavItem` has a label and optionally a url. |
 
 **Example:**
 
@@ -1056,7 +1112,9 @@ const MyComponent: React.FC = () => {
   // Fetch data from a collection item using its ID
   const [{ data, isError, isLoading }, { setParams }] = usePayloadAPI(
     '/api/posts/123',
-    { initialParams: { depth: 1 } }
+    {
+      initialParams: { depth: 1 },
+    },
   )
 
   if (isLoading) return <p>Loading...</p>
@@ -1117,17 +1175,13 @@ This is useful for scenarios where you need to trigger another fetch regardless 
 
 Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
 
-By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions by default.
 
 ```tsx
 import { Link } from '@payloadcms/ui'
 
 const MyComponent = () => {
-  return (
-    <Link href="/somewhere">
-      Go Somewhere
-    </Link>
-  )
+  return <Link href="/somewhere">Go Somewhere</Link>
 }
 ```
 

@@ -1,9 +1,9 @@
-import type { Config } from 'payload'
+import type { Payload } from 'payload'
 
-import { devUser } from '../../credentials.js'
+import { credentials } from '../credentials.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
-export const seed: Config['onInit'] = async (payload) => {
+export const seed = async (payload: Payload) => {
   // create tenants
   const blueDogTenant = await payload.create({
     collection: tenantsSlug,
@@ -17,6 +17,22 @@ export const seed: Config['onInit'] = async (payload) => {
     data: {
       name: 'Steel Cat',
       domain: 'steelcat.com',
+    },
+  })
+  const anchorBarTenant = await payload.create({
+    collection: tenantsSlug,
+    data: {
+      name: 'Anchor Bar',
+      domain: 'anchorbar.com',
+      selectedLocales: ['en'],
+    },
+  })
+  const publicTenant = await payload.create({
+    collection: tenantsSlug,
+    data: {
+      name: 'Public Tenant',
+      domain: 'public.com',
+      isPublic: true,
     },
   })
 
@@ -43,6 +59,38 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   })
 
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by blue dog',
+      tenant: blueDogTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by steelcat',
+      tenant: steelCatTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by bar with no ac',
+      tenant: anchorBarTenant.id,
+    },
+  })
+
+  await payload.create({
+    collection: 'relationships',
+    data: {
+      title: 'Owned by public tenant',
+      tenant: publicTenant.id,
+    },
+  })
+
   // Create steel cat menu items
   await payload.create({
     collection: menuItemsSlug,
@@ -66,12 +114,56 @@ export const seed: Config['onInit'] = async (payload) => {
     },
   })
 
+  // Create anchor bar menu items
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Peanuts',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Peanuts EN',
+    },
+    locale: 'en',
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Pretzels',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Pretzels EN',
+    },
+    locale: 'en',
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Popcorn',
+      tenant: anchorBarTenant.id,
+      localizedName: 'Popcorn EN',
+    },
+    locale: 'en',
+  })
+
+  // Public tenant menu items
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Free Pizza',
+      tenant: publicTenant.id,
+    },
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Free Dogs',
+      tenant: publicTenant.id,
+    },
+  })
+
   // create users
   await payload.create({
     collection: usersSlug,
     data: {
-      email: devUser.email,
-      password: devUser.password,
+      ...credentials.admin,
       roles: ['admin'],
     },
   })
@@ -79,10 +171,25 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: usersSlug,
     data: {
-      email: 'jane@blue-dog.com',
-      password: 'test',
+      ...credentials.blueDog,
       roles: ['user'],
       tenants: [
+        {
+          tenant: blueDogTenant.id,
+        },
+      ],
+    },
+  })
+
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      ...credentials.owner,
+      roles: ['user'],
+      tenants: [
+        {
+          tenant: anchorBarTenant.id,
+        },
         {
           tenant: blueDogTenant.id,
         },
@@ -111,8 +218,7 @@ export const seed: Config['onInit'] = async (payload) => {
   await payload.create({
     collection: usersSlug,
     data: {
-      email: 'huel@steel-cat.com',
-      password: 'test',
+      ...credentials.steelCat,
       roles: ['user'],
       tenants: [
         {

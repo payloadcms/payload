@@ -107,10 +107,18 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   const sections = conventionalCommits.reduce(
     (sections, c) => {
       if (c.isBreaking) {
+        if (!sections.breaking) {
+          sections.breaking = []
+        }
         sections.breaking.push(c)
       }
 
       const typedCommitType: Section = c.type as Section
+
+      // Ignore template bump PRs formatted as "templates: bump for vX.X.X"
+      if (c.description.includes('bump for v')) {
+        return sections
+      }
 
       if (commitTypesForChangelog.includes(typedCommitType)) {
         if (!sections[typedCommitType]) {

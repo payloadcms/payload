@@ -19,10 +19,9 @@ export const getUserTenantIDs = <IDType extends number | string>(
     return []
   }
 
-  const {
-    tenantsArrayFieldName = defaults.tenantsArrayFieldName,
-    tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
-  } = options || {}
+  const tenantsArrayFieldName = options?.tenantsArrayFieldName || defaults.tenantsArrayFieldName
+  const tenantsArrayTenantFieldName =
+    options?.tenantsArrayTenantFieldName || defaults.tenantsArrayTenantFieldName
 
   return (
     (Array.isArray(user[tenantsArrayFieldName]) ? user[tenantsArrayFieldName] : [])?.reduce<

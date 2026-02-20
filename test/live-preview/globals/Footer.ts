@@ -8,17 +8,6 @@ export const Footer: GlobalConfig = {
     read: () => true,
     update: () => true,
   },
-  admin: {
-    components: {
-      views: {
-        edit: {
-          livePreview: {
-            actions: ['/components/GlobalLivePreviewButton/index.js#GlobalLivePreviewButton'],
-          },
-        },
-      },
-    },
-  },
   fields: [
     {
       name: 'navItems',

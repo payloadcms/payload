@@ -2,8 +2,8 @@ name: lock-issues
 
 on:
   schedule:
-    # Run nightly at 12am EST
-    - cron: '0 4 * * *'
+    # Run nightly at 12am EST, staggered with stale workflow
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions:

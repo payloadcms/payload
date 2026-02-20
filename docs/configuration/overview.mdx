@@ -23,8 +23,8 @@ export default buildConfig({
 The Payload Config is strongly typed and ties directly into Payload's TypeScript codebase. This means your IDE (such as VSCode) will provide helpful information like type-ahead suggestions while you write your config.
 
 <Banner type="success">
-  **Tip:**
-  The location of your Payload Config can be customized. [More details](#customizing-the-config-location).
+  **Tip:** The location of your Payload Config can be customized. [More
+  details](#customizing-the-config-location).
 </Banner>
 
 ## Config Options
@@ -40,7 +40,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET,
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URL,
   }),
   collections: [
     {
@@ -48,17 +48,19 @@ export default buildConfig({
       fields: [
         {
           name: 'title',
-          type: 'text'
-        }
-      ]
-    }
+          type: 'text',
+        },
+      ],
+    },
   ],
 })
 ```
 
 <Banner type="success">
-  **Note:**
-  For more complex examples, see the [Templates](https://github.com/payloadcms/payload/tree/main/templates) and [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload repository.
+  **Note:** For more complex examples, see the
+  [Templates](https://github.com/payloadcms/payload/tree/main/templates) and
+  [Examples](https://github.com/payloadcms/payload/tree/main/examples)
+  directories in the Payload repository.
 </Banner>
 
 The following options are available:
@@ -68,7 +70,7 @@ The following options are available:
 | **`admin`**                | The configuration options for the Admin Panel, including Custom Components, Live Preview, etc. [More details](../admin/overview#admin-options).                                                |
 | **`bin`**                  | Register custom bin scripts for Payload to execute. [More Details](#custom-bin-scripts).                                                                                                       |
 | **`editor`**               | The Rich Text Editor which will be used by `richText` fields. [More details](../rich-text/overview).                                                                                           |
-| **`db`** *                 | The Database Adapter which will be used by Payload. [More details](../database/overview).                                                                                                      |
+| **`db`** \*                | The Database Adapter which will be used by Payload. [More details](../database/overview).                                                                                                      |
 | **`serverURL`**            | A string used to define the absolute URL of your app. This includes the protocol, for example `https://example.com`. No paths allowed, only protocol, domain and (optionally) port.            |
 | **`collections`**          | An array of Collections for Payload to manage. [More details](./collections).                                                                                                                  |
 | **`compatibility`**        | Compatibility flags for earlier versions of Payload. [More details](#compatibility-flags).                                                                                                     |
@@ -82,6 +84,8 @@ The following options are available:
 | **`csrf`**                 | A whitelist array of URLs to allow Payload to accept cookies from. [More details](../authentication/cookies#csrf-attacks).                                                                     |
 | **`defaultDepth`**         | If a user does not specify `depth` while requesting a resource, this depth will be used. [More details](../queries/depth).                                                                     |
 | **`defaultMaxTextLength`** | The maximum allowed string length to be permitted application-wide. Helps to prevent malicious public document creation.                                                                       |
+| `folders`                  | An optional object to configure global folder settings. [More details](../folders/overview).                                                                                                   |
+| `queryPresets`             | An object that to configure Collection Query Presets. [More details](../query-presets/overview).                                                                                               |
 | **`maxDepth`**             | The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries. Defaults to `10`. [More details](../queries/depth).                          |
 | **`indexSortableFields`**  | Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar.                                     |
 | **`upload`**               | Base Payload upload configuration. [More details](../upload/overview#payload-wide-upload-options).                                                                                             |
@@ -95,18 +99,18 @@ The following options are available:
 | **`endpoints`**            | An array of Custom Endpoints added to the Payload router. [More details](../rest-api/overview#custom-endpoints).                                                                               |
 | **`custom`**               | Extension point for adding custom data (e.g. for plugins).                                                                                                                                     |
 | **`i18n`**                 | Internationalization configuration. Pass all i18n languages you'd like the admin UI to support. Defaults to English-only. [More details](./i18n).                                              |
-| **`secret`** *             | A secure, unguessable string that Payload will use for any encryption workflows - for example, password salt / hashing.                                                                        |
+| **`secret`** \*            | A secure, unguessable string that Payload will use for any encryption workflows - for example, password salt / hashing.                                                                        |
 | **`sharp`**                | If you would like Payload to offer cropping, focal point selection, and automatic media resizing, install and pass the Sharp module to the config here.                                        |
 | **`typescript`**           | Configure TypeScript settings here. [More details](#typescript).                                                                                                                               |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
-  **Note:**
-  Some properties are removed from the client-side bundle. [More details](../custom-components/overview#accessing-the-payload-config).
+  **Note:** Some properties are removed from the client-side bundle. [More
+  details](../custom-components/overview#accessing-the-payload-config).
 </Banner>
 
-### Typescript Config
+### TypeScript Config
 
 Payload exposes a variety of TypeScript settings that you can leverage. These settings are used to auto-generate TypeScript interfaces for your [Collections](./collections) and [Globals](./globals), and to ensure that Payload uses your [Generated Types](../typescript/overview) for all [Local API](../local-api/overview) methods.
 
@@ -117,33 +121,38 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  typescript: { // highlight-line
+  // highlight-start
+  typescript: {
     // ...
-  }
+  },
+  // highlight-end
 })
 ```
 
 The following options are available:
 
-| Option          | Description                                                                                                                                                                                                 |
-| --------------- | --------------------- |
-| **`autoGenerate`** | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview). |
-| **`declare`**     | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`. |
-| **`outputFile`**  | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path. |
+| Option                 | Description                                                                                                                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                         |
+| **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                      |
+| **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                           |
+| **`strictDraftTypes`** | Enable strict type safety for draft mode. When enabled: (1) Query operations (`find`, `findByID`) with `draft: true` will type required fields as optional, since validation is skipped for drafts. (2) The `draft` property is forbidden for collections without drafts in create operations. (3) Create operations enforce proper data requirements via discriminated unions. Defaults to `false`. **This will become the default behavior in v4.0.** |
 
 ## Config Location
 
 For Payload command-line scripts, we need to be able to locate your Payload Config. We'll check a variety of locations for the presence of `payload.config.ts` by default, including:
 
 1. The root current working directory
-1. The `compilerOptions` in your `tsconfig`*
-1. The `dist` directory*
+1. The `compilerOptions` in your `tsconfig`\*
+1. The `dist` directory\*
 
-_* Config location detection is different between development and production environments. See below for more details._
+_\* Config location detection is different between development and production environments. See below for more details._
 
 <Banner type="warning">
-  **Important:**
-  Ensure your `tsconfig.json` is properly configured for Payload to auto-detect your config location. If if does not exist, or does not specify the proper `compilerOptions`, Payload will default to the current working directory.
+  **Important:** Ensure your `tsconfig.json` is properly configured for Payload
+  to auto-detect your config location. If it does not exist, or does not specify
+  the proper `compilerOptions`, Payload will default to the current working
+  directory.
 </Banner>
 
 **Development Mode**
@@ -194,8 +203,8 @@ To use a custom config location, set the `PAYLOAD_CONFIG_PATH` environment varia
 ```
 
 <Banner type="info">
-  **Tip:**
-  `PAYLOAD_CONFIG_PATH` can be either an absolute path, or path relative to your current working directory.
+  **Tip:** `PAYLOAD_CONFIG_PATH` can be either an absolute path, or path
+  relative to your current working directory.
 </Banner>
 
 ## Telemetry
@@ -206,12 +215,12 @@ For more information about what we track, take a look at our [privacy policy](/p
 
 ## Cross-origin resource sharing (CORS)#cors
 
-Cross-origin resource sharing (CORS) can be configured with either a whitelist array of URLS to allow CORS requests from, a wildcard string (`*`) to accept incoming requests from any domain, or a object with the following properties:
+Cross-origin resource sharing (CORS) can be configured with either a whitelist array of URLS to allow CORS requests from, a wildcard string (`*`) to accept incoming requests from any domain, or an object with the following properties:
 
-| Option    | Description                                                                                                                                                                        |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Option        | Description                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **`origins`** | Either a whitelist array of URLS to allow CORS requests from, or a wildcard string (`'*'`) to accept incoming requests from any domain. |
-| **`headers`**  | A list of allowed headers that will be appended in `Access-Control-Allow-Headers`. |
+| **`headers`** | A list of allowed headers that will be appended in `Access-Control-Allow-Headers`.                                                      |
 
 Here's an example showing how to allow incoming requests from any domain:
 
@@ -220,7 +229,9 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  cors: '*' // highlight-line
+  // highlight-start
+  cors: '*',
+  // highlight-end
 })
 ```
 
@@ -233,9 +244,9 @@ export default buildConfig({
   // ...
   // highlight-start
   cors: {
-    origins: ['http://localhost:3000']
-    headers: ['x-custom-header']
-  }
+    origins: ['http://localhost:3000'],
+    headers: ['x-custom-header'],
+  },
   // highlight-end
 })
 ```
@@ -266,12 +277,10 @@ Payload localization works on a field-by-field basis. As you can nest fields wit
 
 By default, Payload will remove the `localized: true` property from sub-fields if a parent field is localized. Set this compatibility flag to `true` only if you have an existing Payload MongoDB database from pre-3.0, and you have nested localized fields that you would like to maintain without migrating.
 
-
 ## Custom bin scripts
 
 Using the `bin` configuration property, you can inject your own scripts to `npx payload`.
 Example for `pnpm payload seed`:
-
 
 Step 1: create `seed.ts` file in the same folder with `payload.config.ts` with:
 
@@ -283,13 +292,17 @@ import payload from 'payload'
 // Script must define a "script" function export that accepts the sanitized config
 export const script = async (config: SanitizedConfig) => {
   await payload.init({ config })
-  await payload.create({ collection: 'pages', data: { title: 'my title' } })
-  payload.logger.info('Succesffully seeded!')
+  await payload.create({
+    collection: 'pages',
+    data: { title: 'my title' },
+  })
+  payload.logger.info('Successfully seeded!')
   process.exit(0)
 }
 ```
 
 Step 2: add the `seed` script to `bin`:
+
 ```ts
 export default buildConfig({
   bin: [
@@ -302,6 +315,17 @@ export default buildConfig({
 ```
 
 Now you can run the command using:
+
 ```sh
 pnpm payload seed
 ```
+
+## Running bin scripts on a schedule
+
+Every bin script supports being run on a schedule using cron syntax. Simply pass the `--cron` flag followed by the cron expression when running the script. Example:
+
+```sh
+pnpm payload run ./myScript.ts --cron "0 * * * *"
+```
+
+This will use the `run` bin script to execute the specified script on the defined schedule.

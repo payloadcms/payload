@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -14,21 +13,25 @@ import type {
   Collection,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
+  TypeWithID,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
+import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
-import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -43,11 +46,13 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+  trash?: boolean
+  unpublishAllLocales?: boolean
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -64,18 +69,12 @@ export const updateByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'update',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'update',
+      overrideAccess: args.overrideAccess!,
+    })
 
     if (args.publishSpecificLocale) {
       args.req.locale = args.publishSpecificLocale
@@ -92,6 +91,7 @@ export const updateByIDOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -100,8 +100,10 @@ export const updateByIDOperation = async <
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
+      trash = false,
+      unpublishAllLocales,
     } = args
 
     if (!id) {
@@ -123,14 +125,40 @@ export const updateByIDOperation = async <
     // Retrieve document
     // /////////////////////////////////////
 
-    const findOneArgs: FindOneArgs = {
-      collection: collectionConfig.slug,
-      locale,
-      req,
-      where: combineQueries({ id: { equals: id } }, accessResults),
+    const where = { id: { equals: id } }
+
+    let fullWhere = combineQueries(where, accessResults)
+
+    const isTrashAttempt =
+      collectionConfig.trash &&
+      typeof data === 'object' &&
+      data !== null &&
+      'deletedAt' in data &&
+      data.deletedAt != null
+
+    if (isTrashAttempt && !overrideAccess) {
+      // Pass data so access function can check data.deletedAt to know it's a trash attempt
+      const deleteAccessResult = await executeAccess({ data, req }, collectionConfig.access.delete)
+      fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
-    const docWithLocales = await getLatestCollectionVersion({
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      locale: locale!,
+      req,
+      where: fullWhere,
+    }
+
+    const docWithLocales = await getLatestCollectionVersion<
+      RequiredDataFromCollectionSlug<TSlug> & TypeWithID
+    >({
       id,
       config: collectionConfig,
       payload,
@@ -143,6 +171,9 @@ export const updateByIDOperation = async <
     }
     if (!docWithLocales && hasWherePolicy) {
       throw new Forbidden(req.t)
+    }
+    if (!docWithLocales) {
+      throw new NotFound(req.t)
     }
 
     // /////////////////////////////////////
@@ -159,32 +190,47 @@ export const updateByIDOperation = async <
       throwOnMissingFile: false,
     })
 
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     // ///////////////////////////////////////////////
     // Update document, runs all document level hooks
     // ///////////////////////////////////////////////
 
     let result = await updateDocument<TSlug, TSelect>({
       id,
-      accessResults,
       autosave,
       collectionConfig,
       config,
       data: deepCopyObjectSimple(newFileData),
-      depth,
+      depth: depth!,
       docWithLocales,
       draftArg,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       filesToUpload,
-      locale,
-      overrideAccess,
-      overrideLock,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
+      overrideLock: overrideLock!,
       payload,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req,
-      select,
-      showHiddenFields,
+      select: select!,
+      showHiddenFields: showHiddenFields!,
+      unpublishAllLocales,
     })
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     await unlinkTempFiles({
       collectionConfig,
@@ -200,6 +246,7 @@ export const updateByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'updateByID',
+      overrideAccess,
       result,
     })) as TransformCollectionWithSelect<TSlug, TSelect>
 

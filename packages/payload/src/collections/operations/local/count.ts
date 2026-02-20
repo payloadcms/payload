@@ -1,12 +1,12 @@
-// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, Where } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countOperation } from '../count.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type CountOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -19,10 +19,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   /**
-   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
-   */
-  depth?: number
-  /**
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
@@ -32,7 +28,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -41,6 +37,16 @@ export type Options<TSlug extends CollectionSlug> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
+  /**
+   * When set to `true`, the query will include both normal and trashed documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -51,12 +57,17 @@ export type Options<TSlug extends CollectionSlug> = {
   where?: Where
 }
 
-// eslint-disable-next-line no-restricted-exports
-export default async function countLocal<TSlug extends CollectionSlug>(
+export async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<TSlug>,
+  options: CountOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
-  const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+  const {
+    collection: collectionSlug,
+    disableErrors,
+    overrideAccess = true,
+    trash = false,
+    where,
+  } = options
 
   const collection = payload.collections[collectionSlug]
 
@@ -70,7 +81,8 @@ export default async function countLocal<TSlug extends CollectionSlug>(
     collection,
     disableErrors,
     overrideAccess,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    trash,
     where,
   })
 }

@@ -1,11 +1,14 @@
-// @ts-strict-ignore
+import type { ClientTab } from '../admin/types.js'
 import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
 type Args = {
-  field: ClientField | Field | Tab | TabAsFieldClient
+  field: ClientField | ClientTab | Field | Tab | TabAsFieldClient
   index: number
   parentIndexPath: string
-  parentPath: string
+  /**
+   * Needed to generate data paths. Omit if you only need schema paths, e.g. within field schema maps.
+   */
+  parentPath?: string
   parentSchemaPath: string
 }
 
@@ -30,42 +33,19 @@ export function getFieldPaths({
   field,
   index,
   parentIndexPath,
-  parentPath,
-  parentSchemaPath,
-}: Args): FieldPaths {
-  if ('name' in field) {
-    return {
-      indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-      path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
-      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
-    }
-  }
-
-  const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
-
-  return {
-    indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-    path: `${parentPath ? parentPath + '.' : ''}${indexSuffix}`,
-    schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
-  }
-}
-
-export function getFieldPathsModified({
-  field,
-  index,
-  parentIndexPath,
-  parentPath,
+  parentPath = '',
   parentSchemaPath,
 }: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
 
-  const parentIsUnnamed = parentPathSegments[parentPathSegments.length - 1].startsWith('_index-')
+  const parentPathIsUnnamed =
+    parentPathSegments?.[parentPathSegments.length - 1]?.startsWith('_index-')
 
-  const parentWithoutIndex = parentIsUnnamed
+  const parentWithoutIndex = parentPathIsUnnamed
     ? parentPathSegments.slice(0, -1).join('.')
     : parentPath
 
-  const parentPathToUse = parentIsUnnamed ? parentWithoutIndex : parentPath
+  const parentPathToUse = parentPathIsUnnamed ? parentWithoutIndex : parentPath
 
   if ('name' in field) {
     return {
@@ -77,9 +57,16 @@ export function getFieldPathsModified({
 
   const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
 
+  const parentSchemaPathSegments = parentSchemaPath.split('.')
+
+  const parentSchemaPathIsUnnamed =
+    parentSchemaPathSegments?.[parentSchemaPathSegments.length - 1]?.startsWith('_index-')
+
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
     path: `${parentPathToUse ? parentPathToUse + '.' : ''}${indexSuffix}`,
-    schemaPath: `${!parentIsUnnamed && parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
+    schemaPath: parentSchemaPathIsUnnamed
+      ? `${parentSchemaPath}-${index}`
+      : `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
   }
 }

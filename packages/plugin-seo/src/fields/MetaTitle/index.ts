@@ -25,6 +25,6 @@ export const MetaTitleField: FieldFunction = ({ hasGenerateFn = false, overrides
       },
     },
     localized: true,
-    ...((overrides as unknown as TextField) ?? {}),
+    ...((overrides ?? {}) as { hasMany: boolean } & Partial<TextField>),
   }
 }

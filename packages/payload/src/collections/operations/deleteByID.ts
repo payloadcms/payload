@@ -1,29 +1,32 @@
-// @ts-strict-ignore
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
-import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
@@ -32,12 +35,12 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+  trash?: boolean
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
-  incomingArgs: Arguments,
+  incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
@@ -48,18 +51,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'delete',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'delete',
+      overrideAccess: args.overrideAccess!,
+    })
 
     const {
       id,
@@ -75,8 +72,9 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
+      trash = false,
     } = args
 
     // /////////////////////////////////////
@@ -107,11 +105,20 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // Retrieve document
     // /////////////////////////////////////
 
+    let where = combineQueries({ id: { equals: id } }, accessResults)
+
+    // Exclude trashed documents when trash: false
+    where = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where,
+    })
+
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      locale: req.locale,
+      locale: req.locale!,
       req,
-      where: combineQueries({ id: { equals: id } }, accessResults),
+      where,
     })
 
     if (!docToDelete && !hasWhereAccess) {
@@ -136,7 +143,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     await deleteAssociatedFiles({
       collectionConfig,
       config,
-      doc: docToDelete,
+      doc: docToDelete!,
       overrideDelete: true,
       req,
     })
@@ -157,7 +164,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     // Delete scheduled posts
     // /////////////////////////////////////
-    if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+    if (hasScheduledPublishEnabled(collectionConfig)) {
       await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,
@@ -165,6 +172,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         req,
       })
     }
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Delete document
@@ -176,6 +189,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       select,
       where: { id: { equals: id } },
     })
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
@@ -195,17 +216,17 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
-      draft: undefined,
-      fallbackLocale,
+      draft: undefined!,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
@@ -219,6 +240,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -249,6 +271,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
+      overrideAccess,
       result,
     })
 

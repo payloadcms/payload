@@ -2,6 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { useScrollInfo, useThrottledEffect, useTranslation } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
@@ -14,8 +15,8 @@ import type { FixedToolbarFeatureProps } from '../../server/index.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import './index.scss'
+import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 
 function ButtonGroupItem({
   anchorElem,
@@ -62,6 +63,7 @@ function ToolbarGroupComponent({
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
+
   const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
   const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
 
@@ -116,7 +118,11 @@ function ToolbarGroupComponent({
   )
 
   return (
-    <div className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`} key={group.key}>
+    <div
+      className={`fixed-toolbar__group fixed-toolbar__group-${group.key}`}
+      data-toolbar-group-key={group.key}
+      key={group.key}
+    >
       {group.type === 'dropdown' && group.items.length ? (
         DropdownIcon ? (
           <ToolbarDropdown
@@ -167,6 +173,7 @@ function FixedToolbar({
   parentWithFixedToolbar: EditorConfigContextType | false
 }): React.ReactNode {
   const currentToolbarRef = React.useRef<HTMLDivElement>(null)
+  const isEditable = useLexicalEditable()
 
   const { y } = useScrollInfo()
 
@@ -235,7 +242,7 @@ function FixedToolbar({
       }}
       ref={currentToolbarRef}
     >
-      {editor.isEditable() && (
+      {isEditable && (
         <React.Fragment>
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
@@ -274,6 +281,10 @@ const getParentEditorWithFixedToolbar = (
 export const FixedToolbarPlugin: PluginComponent<FixedToolbarFeatureProps> = ({ clientProps }) => {
   const [currentEditor] = useLexicalComposerContext()
   const editorConfigContext = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
+  if (!isEditable) {
+    return null
+  }
 
   const { editorConfig: currentEditorConfig } = editorConfigContext
 

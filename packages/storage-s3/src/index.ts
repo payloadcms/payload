@@ -5,11 +5,14 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
+import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+
+import type { SignedDownloadsConfig } from './staticHandler.js'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
@@ -21,8 +24,19 @@ export type S3StorageOptions = {
   /**
    * Access control list for uploaded files.
    */
-
   acl?: 'private' | 'public-read'
+
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
   /**
    * Bucket name to upload files to.
    *
@@ -32,14 +46,29 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
+   * Optional cache key to identify the S3 storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `s3:containerName`
+   */
+  clientCacheKey?: string
+
+  /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
    * Collection options to apply the S3 adapter to.
    */
-  collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
-
+  collections: Partial<
+    Record<
+      UploadCollectionSlug,
+      | ({
+          signedDownloads?: SignedDownloadsConfig
+        } & Omit<CollectionOptions, 'adapter'>)
+      | true
+    >
+  >
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *
@@ -60,21 +89,46 @@ export type S3StorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * Use pre-signed URLs for files downloading. Can be overriden per-collection.
+   */
+  signedDownloads?: SignedDownloadsConfig
 }
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
+const s3Clients = new Map<string, AWS.S3>()
+
+const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
+  httpAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+  httpsAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+}
+
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    let storageClient: AWS.S3 | null = null
+    const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
 
     const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) {
-        return storageClient
+      if (s3Clients.has(cacheKey)) {
+        return s3Clients.get(cacheKey)!
       }
-      storageClient = new AWS.S3(s3StorageOptions.config ?? {})
-      return storageClient
+
+      s3Clients.set(
+        cacheKey,
+        new AWS.S3({
+          requestHandler: defaultRequestHandlerOpts,
+          ...(s3StorageOptions.config ?? {}),
+        }),
+      )
+
+      return s3Clients.get(cacheKey)!
     }
 
     const isPluginDisabled = s3StorageOptions.enabled === false
@@ -98,6 +152,29 @@ export const s3Storage: S3StoragePlugin =
     })
 
     if (isPluginDisabled) {
+      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
+      if (s3StorageOptions.alwaysInsertFields) {
+        // Build collections with adapter: null since plugin is disabled
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          s3StorageOptions.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: {
+              ...(collOptions === true ? {} : collOptions),
+              adapter: null,
+            },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+        })(incomingConfig)
+      }
+
       return incomingConfig
     }
 
@@ -136,17 +213,37 @@ export const s3Storage: S3StoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }
 
 function s3StorageInternal(
   getStorageClient: () => AWS.S3,
-  { acl, bucket, config = {} }: S3StorageOptions,
+  {
+    acl,
+    bucket,
+    clientUploads,
+    collections,
+    config = {},
+    signedDownloads: topLevelSignedDownloads,
+  }: S3StorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
+    const collectionStorageConfig = collections[collection.slug]
+
+    let signedDownloads: null | SignedDownloadsConfig =
+      typeof collectionStorageConfig === 'object'
+        ? (collectionStorageConfig.signedDownloads ?? false)
+        : null
+
+    if (signedDownloads === null) {
+      signedDownloads = topLevelSignedDownloads ?? null
+    }
+
     return {
       name: 's3',
+      clientUploads,
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({
@@ -156,7 +253,12 @@ function s3StorageInternal(
         getStorageClient,
         prefix,
       }),
-      staticHandler: getHandler({ bucket, collection, getStorageClient }),
+      staticHandler: getHandler({
+        bucket,
+        collection,
+        getStorageClient,
+        signedDownloads: signedDownloads ?? false,
+      }),
     }
   }
 }

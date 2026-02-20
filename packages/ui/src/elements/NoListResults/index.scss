@@ -1,0 +1,30 @@
+.no-results {
+  padding-top: calc(var(--base) / 2);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border-radius: var(--style-radius-m);
+
+  h3 {
+    margin: 0;
+  }
+
+  p {
+    margin: calc(var(--base) / 2) 0 0 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    margin-top: var(--base);
+
+    .btn {
+      margin: 0;
+    }
+  }
+}

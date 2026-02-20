@@ -1,10 +1,10 @@
 {
   "name": "@tools/scripts",
   "version": "0.0.1",
-  "description": "",
+  "description": "Shared scripts for Payload internal tooling",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
@@ -13,9 +13,14 @@
   },
   "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
+    "generateTranslations:core": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/core.ts",
+    "generateTranslations:plugin-ecommerce": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-ecommerce.ts",
+    "generateTranslations:plugin-import-export": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-import-export.ts",
+    "generateTranslations:plugin-multi-tenant": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-multi-tenant.ts",
+    "license-check": "pnpm runts src/license-check.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-all-to-dest": "pnpm runts src/pack-all-to-dest.ts",
@@ -23,12 +28,22 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@swc-node/register": "1.10.9",
+    "@swc-node/register": "1.11.1",
     "@tools/constants": "workspace:*",
     "@tools/releaser": "workspace:*",
     "chalk": "^4.1.2",
     "changelogen": "^0.5.5",
     "create-payload-app": "workspace:*",
-    "open": "^10.1.0"
+    "csv-stringify": "^6.5.2",
+    "license-checker": "25.0.1",
+    "open": "^10.1.0",
+    "payload": "workspace:*"
+  },
+  "devDependencies": {
+    "@payloadcms/plugin-ecommerce": "workspace:*",
+    "@payloadcms/plugin-import-export": "workspace:*",
+    "@payloadcms/plugin-multi-tenant": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/translations": "workspace:*"
   }
 }

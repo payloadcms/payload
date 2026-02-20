@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { ValidationError } from 'payload'
 
-import { categoriesSlug, hiddenPostsSlug, postsSlug } from '../shared.js'
+import { categoriesSlug, hiddenPostsSlug, postsSlug, versionsSlug } from '../shared.js'
 import { singularSlug } from './Singular.js'
 
 export const Categories: CollectionConfig = {
@@ -55,9 +55,18 @@ export const Categories: CollectionConfig = {
           beforeInput: ['/components/BeforeInput.js#BeforeInput'],
           Description: '/components/CustomDescription/index.js#FieldDescriptionComponent',
         },
+        disableRowTypes: false,
       },
       collection: postsSlug,
       defaultSort: '-title',
+      defaultLimit: 5,
+      on: 'category',
+      maxDepth: 1,
+    },
+    {
+      name: 'noRowTypes',
+      type: 'join',
+      collection: postsSlug,
       defaultLimit: 5,
       on: 'category',
       maxDepth: 1,
@@ -95,6 +104,7 @@ export const Categories: CollectionConfig = {
           on: 'group.category',
           admin: {
             defaultColumns: ['id', 'createdAt', 'title'],
+            disableRowTypes: false,
           },
         },
         {
@@ -112,6 +122,12 @@ export const Categories: CollectionConfig = {
       on: 'array.category',
     },
     {
+      name: 'arrayHasManyPosts',
+      type: 'join',
+      collection: 'posts',
+      on: 'arrayHasMany.category',
+    },
+    {
       name: 'localizedArrayPosts',
       type: 'join',
       collection: 'posts',
@@ -122,6 +138,21 @@ export const Categories: CollectionConfig = {
       type: 'join',
       collection: 'posts',
       on: 'blocks.category',
+    },
+    {
+      name: 'polymorphicJoin',
+      type: 'join',
+      collection: [postsSlug, versionsSlug],
+      on: 'category',
+    },
+    {
+      name: 'polymorphicJoinNoRowTypes',
+      type: 'join',
+      collection: [postsSlug, versionsSlug],
+      on: 'category',
+      admin: {
+        disableRowTypes: true,
+      },
     },
     {
       name: 'polymorphic',
@@ -161,6 +192,12 @@ export const Categories: CollectionConfig = {
       where: {
         isFiltered: { not_equals: true },
       },
+    },
+    {
+      name: 'inTab',
+      type: 'join',
+      collection: postsSlug,
+      on: 'tab.category',
     },
     {
       name: 'joinWithError',

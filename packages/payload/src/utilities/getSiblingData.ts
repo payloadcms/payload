@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Data, FormState } from '../admin/types.js'
 
 import { reduceFieldsToValues } from './reduceFieldsToValues.js'
@@ -6,14 +5,14 @@ import { unflatten } from './unflatten.js'
 
 export const getSiblingData = (fields: FormState, path: string): Data => {
   if (!fields) {
-    return null
+    return null!
   }
 
   if (path.indexOf('.') === -1) {
     return reduceFieldsToValues(fields, true)
   }
 
-  const siblingFields = {}
+  const siblingFields: Record<string, any> = {}
 
   // Determine if the last segment of the path is an array-based row
   const pathSegments = path.split('.')
@@ -35,8 +34,8 @@ export const getSiblingData = (fields: FormState, path: string): Data => {
   }
 
   Object.keys(fields).forEach((fieldKey) => {
-    if (!fields[fieldKey].disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
-      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey].value
+    if (!fields[fieldKey]?.disableFormData && fieldKey.indexOf(parentFieldPath) === 0) {
+      siblingFields[fieldKey.replace(parentFieldPath, '')] = fields[fieldKey]?.value
     }
   })
 

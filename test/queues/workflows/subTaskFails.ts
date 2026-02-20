@@ -23,7 +23,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
               },
             })
 
-            await req.payload.update({
+            const updatedJob = await req.payload.update({
               collection: 'payload-jobs',
               data: {
                 input: {
@@ -38,6 +38,8 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
               },
               id: job.id,
             })
+            job.input = updatedJob.input as any
+
             return {
               output: {
                 newSimple,
@@ -48,7 +50,7 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
 
         await inlineTask('create doc 2 - fails', {
           task: async ({ req }) => {
-            await req.payload.update({
+            const updatedJob = await req.payload.update({
               collection: 'payload-jobs',
               data: {
                 input: {
@@ -63,6 +65,8 @@ export const subTaskFailsWorkflow: WorkflowConfig<'subTaskFails'> = {
               },
               id: job.id,
             })
+            job.input = updatedJob.input as any
+
             throw new Error('Failed on purpose')
           },
         })

@@ -3,7 +3,11 @@ import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate-v2'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import {
+  buildVersionCollectionFields,
+  buildVersionCompoundIndexes,
+  buildVersionGlobalFields,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel, GlobalModel } from './types.js'
@@ -14,12 +18,19 @@ import { buildSchema } from './models/buildSchema.js'
 import { getBuildQueryPlugin } from './queries/getBuildQueryPlugin.js'
 import { getDBName } from './utilities/getDBName.js'
 
-export const init: Init = function init(this: MongooseAdapter) {
+export const init: Init = async function init(this: MongooseAdapter) {
+  // Always create a scoped, **unopened** connection object
+  // (no URI here; models compile per-connection and do not require an open socket)
+  this.connection ??= mongoose.createConnection()
+
+  if (this.afterCreateConnection) {
+    await this.afterCreateConnection(this)
+  }
+
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]
 
     const schema = buildCollectionSchema(collection, this.payload, schemaOptions)
-
     if (collection.versions) {
       const versionModelName = getDBName({ config: collection, versions: true })
 
@@ -33,9 +44,10 @@ export const init: Init = function init(this: MongooseAdapter) {
           options: {
             minimize: false,
             timestamps: false,
+            ...schemaOptions,
           },
-          ...schemaOptions,
         },
+        compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
         configFields: versionCollectionFields,
         payload: this.payload,
       })
@@ -50,7 +62,7 @@ export const init: Init = function init(this: MongooseAdapter) {
       const versionCollectionName =
         this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
 
-      this.versions[collection.slug] = mongoose.model(
+      this.versions[collection.slug] = this.connection.model(
         versionModelName,
         versionSchema,
         versionCollectionName,
@@ -61,14 +73,14 @@ export const init: Init = function init(this: MongooseAdapter) {
     const collectionName =
       this.autoPluralization === true && !collection.dbName ? undefined : modelName
 
-    this.collections[collection.slug] = mongoose.model<any>(
+    this.collections[collection.slug] = this.connection.model<any>(
       modelName,
       schema,
       collectionName,
     ) as CollectionModel
   })
 
-  this.globals = buildGlobalModel(this.payload) as GlobalModel
+  this.globals = buildGlobalModel(this) as GlobalModel
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
@@ -96,7 +108,7 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      this.versions[global.slug] = mongoose.model<any>(
+      this.versions[global.slug] = this.connection.model<any>(
         versionModelName,
         versionSchema,
         versionModelName,

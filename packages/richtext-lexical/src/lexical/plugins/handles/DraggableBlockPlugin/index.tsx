@@ -4,13 +4,12 @@ import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { eventFiles } from '@lexical/rich-text'
-import { $getNearestNodeFromDOMNode, $getNodeByKey } from 'lexical'
+import { $getNearestNodeFromDOMNode, $getNodeByKey, isHTMLElement } from 'lexical'
 import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../../config/client/EditorConfigProvider.js'
-import { isHTMLElement } from '../../../utils/guard.js'
 import { Point } from '../../../utils/point.js'
 import { calculateDistanceFromScrollerElem } from '../utils/calculateDistanceFromScrollerElem.js'
 import { getNodeCloseToPoint } from '../utils/getNodeCloseToPoint.js'
@@ -71,7 +70,7 @@ function useDraggableBlockMenu(
 ): React.ReactElement {
   const scrollerElem = anchorElem.parentElement
 
-  const menuRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLButtonElement>(null)
   const targetLineRef = useRef<HTMLDivElement>(null)
   const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
@@ -397,7 +396,7 @@ function useDraggableBlockMenu(
     editorConfig?.admin?.hideGutter,
   ])
 
-  function onDragStart(event: ReactDragEvent<HTMLDivElement>): void {
+  function onDragStart(event: ReactDragEvent<HTMLButtonElement>): void {
     const dataTransfer = event.dataTransfer
     if (!dataTransfer || !draggableBlockElem) {
       return
@@ -423,15 +422,17 @@ function useDraggableBlockMenu(
 
   return createPortal(
     <React.Fragment>
-      <div
+      <button
+        aria-label="Drag to move"
         className="icon draggable-block-menu"
         draggable
         onDragEnd={onDragEnd}
         onDragStart={onDragStart}
         ref={menuRef}
+        type="button"
       >
         <div className={isEditable ? 'icon' : ''} />
-      </div>
+      </button>
       <div className="draggable-block-target-line" ref={targetLineRef} />
       <div className="debug-highlight" ref={debugHighlightRef} />
     </React.Fragment>,

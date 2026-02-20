@@ -1,12 +1,43 @@
-import type { FilterOptionsResult, SanitizedCollectionConfig } from 'payload'
+import type {
+  CollectionPreferences,
+  FilterOptionsResult,
+  ListQuery,
+  SanitizedCollectionConfig,
+} from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
 import type { ListDrawerContextProps } from './Provider.js'
 
+/**
+ * @internal - this may change in a minor release
+ */
+export type RenderListServerFnArgs = {
+  collectionSlug: string
+  disableActions?: boolean
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
+  disableQueryPresets?: boolean
+  drawerSlug?: string
+  enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
+  query: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
+}
+
+/**
+ * @internal - this may change in a minor release
+ */
+export type RenderListServerFnReturnType = {
+  List: React.ReactNode
+  preferences: CollectionPreferences
+}
+
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
   readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
+  readonly disableQueryPresets?: boolean
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult
@@ -28,10 +59,8 @@ export type UseListDrawer = (args: {
   selectedCollection?: SanitizedCollectionConfig['slug']
   uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<
-    Pick<ListDrawerProps, 'allowCreate' | 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>
-  >, // drawer
-  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled' | 'onClick'>>, // toggler
+  React.FC<Omit<ListDrawerProps, 'collectionSlugs'>>,
+  React.FC<Omit<ListTogglerProps, 'drawerSlug'>>,
   {
     closeDrawer: () => void
     collectionSlugs: SanitizedCollectionConfig['slug'][]

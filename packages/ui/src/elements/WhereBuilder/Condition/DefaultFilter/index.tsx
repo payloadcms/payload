@@ -8,7 +8,7 @@ import type {
 
 import React from 'react'
 
-import type { ReducedField } from '../../types.js'
+import type { ReducedField, Value } from '../../types.js'
 
 import { DateFilter } from '../Date/index.js'
 import { NumberFilter } from '../Number/index.js'
@@ -24,7 +24,7 @@ type Props = {
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
   options: Option[]
-  value: string
+  value: Value
 }
 
 export const DefaultFilter: React.FC<Props> = ({
@@ -46,7 +46,7 @@ export const DefaultFilter: React.FC<Props> = ({
         onChange={onChange}
         operator={operator}
         options={options}
-        value={value}
+        value={value as string}
       />
     )
   }
@@ -59,7 +59,7 @@ export const DefaultFilter: React.FC<Props> = ({
           field={internalField.field}
           onChange={onChange}
           operator={operator}
-          value={value}
+          value={value as Date | string}
         />
       )
     }
@@ -71,12 +71,25 @@ export const DefaultFilter: React.FC<Props> = ({
           field={internalField.field}
           onChange={onChange}
           operator={operator}
-          value={value}
+          value={value as number | number[]}
         />
       )
     }
 
     case 'relationship': {
+      return (
+        <RelationshipFilter
+          disabled={disabled}
+          field={internalField.field}
+          filterOptions={filterOptions}
+          onChange={onChange}
+          operator={operator}
+          value={value}
+        />
+      )
+    }
+
+    case 'upload': {
       return (
         <RelationshipFilter
           disabled={disabled}
@@ -96,7 +109,7 @@ export const DefaultFilter: React.FC<Props> = ({
           field={internalField?.field as TextFieldClient}
           onChange={onChange}
           operator={operator}
-          value={value}
+          value={value as string | string[]}
         />
       )
     }

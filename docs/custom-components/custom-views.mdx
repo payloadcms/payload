@@ -38,26 +38,31 @@ const config = buildConfig({
         // highlight-start
         dashboard: {
           Component: '/path/to/MyCustomDashboard',
-        }
+        },
         // highlight-end
-      }
-    }
-  }
+      },
+    },
+  },
 })
 ```
 
+<Banner type="success">
+  **Note:** The dashboard is a special case, where in addition to replacing the
+  default view, [you can add widgets modularly](../custom-components/dashboard).
+</Banner>
+
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
-| Property           | Description                                                                                                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Component` * | Pass in the component path that should be rendered when a user navigates to this route.                                                                                                         |
-| `path` *      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
-| `exact`        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
+| Property       | Description                                                                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Component` \* | Pass in the component path that should be rendered when a user navigates to this route.                                                                                             |
+| `path` \*      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).                       |
+| `exact`        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                |
 | `strict`       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| `sensitive`    | When true, will match if the path is case sensitive.|
-| `meta`         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
+| `sensitive`    | When true, will match if the path is case sensitive.                                                                                                                                |
+| `meta`         | Page metadata overrides to apply to this view within the Admin Panel. [More details](../admin/metadata).                                                                            |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ### Adding New Views
 
@@ -86,13 +91,11 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  **Note:**
-  Routes are cascading, so unless explicitly given the `exact` property, they will
-  match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
-  routes in your application. Alternatively, define your nested route _before_ your parent
-  route.
+  **Note:** Routes are cascading, so unless explicitly given the `exact`
+  property, they will match on URLs that simply _start_ with the route's path.
+  This is helpful when creating catch-all routes in your application.
+  Alternatively, define your nested route _before_ your parent route.
 </Banner>
-
 
 ## Building Custom Views
 
@@ -110,8 +113,8 @@ export const MyCollectionConfig: CollectionConfig = {
       views: {
         // highlight-start
         edit: {
-          Component: '/path/to/MyCustomView' // highlight-line
-        }
+          Component: '/path/to/MyCustomView', // highlight-line
+        },
         // highlight-end
       },
     },
@@ -123,20 +126,21 @@ export const MyCollectionConfig: CollectionConfig = {
 
 Your Custom Views will be provided with the following props:
 
-| Prop                      | Description                                                                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `initPageResult`      | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
-| `clientConfig`        | The Client Config object. [More details](./overview#accessing-the-payload-config).                                        |
-| `importMap`           | The import map object.                                                                                                             |
-| `params`              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
-| `searchParams`        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
-| `doc`                 | The document being edited. Only available in Document Views. [More details](./document-views).                                      |
-| `i18n`           |    The [i18n](../configuration/i18n) object.                                        |
-| `payload`        |    The [Payload](../local-api/overview) class.                                      |
+| Prop             | Description                                                                                                                        |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `initPageResult` | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
+| `clientConfig`   | The Client Config object. [More details](./overview#accessing-the-payload-config).                                                 |
+| `importMap`      | The import map object.                                                                                                             |
+| `params`         | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
+| `searchParams`   | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
+| `doc`            | The document being edited. Only available in Document Views. [More details](./document-views).                                     |
+| `i18n`           | The [i18n](../configuration/i18n) object.                                                                                          |
+| `payload`        | The [Payload](../local-api/overview) class.                                                                                        |
 
 <Banner type="warning">
-  **Note:**
-  Some views may receive additional props, such as [Collection Views](#collection-views) and [Global Views](#global-views). See the relevant section for more details.
+  **Note:** Some views may receive additional props, such as [Collection
+  Views](#collection-views) and [Global Views](#global-views). See the relevant
+  section for more details.
 </Banner>
 
 Here is an example of a Custom View component:
@@ -158,8 +162,8 @@ export function MyCustomView(props: AdminViewServerProps) {
 ```
 
 <Banner type="success">
-  **Tip:**
-  For consistent layout and navigation, you may want to wrap your Custom View with one of the built-in [Template](./overview#templates).
+  **Tip:** For consistent layout and navigation, you may want to wrap your
+  Custom View with one of the built-in [Templates](./overview#templates).
 </Banner>
 
 ### View Templates
@@ -212,13 +216,9 @@ import type { AdminViewServerProps } from 'payload'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-export function MyCustomView({
-  initPageResult
-}: AdminViewServerProps) {
+export function MyCustomView({ initPageResult }: AdminViewServerProps) {
   const {
-    req: {
-      user
-    }
+    req: { user },
   } = initPageResult
 
   if (!user) {
@@ -251,7 +251,7 @@ const config = buildConfig({
         // highlight-start
         dashboard: {
           Component: '/path/to/Dashboard',
-        }
+        },
         // highlight-end
         // Other options include:
         // - account
@@ -267,11 +267,11 @@ _For details on how to build Custom Views, including all available props, see [B
 
 The following options are available:
 
-| Property        | Description                                                                   |
-| --------------- | ----------------------------------------------------------------------------- |
-| `account`   | The Account view is used to show the currently logged in user's Account page. |
-| `dashboard` | The main landing page of the Admin Panel.                                     |
-| `[key]` | Any other key can be used to add a completely new Root View. [More details](#adding-new-views).                             |
+| Property    | Description                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| `account`   | The Account view is used to show the currently logged in user's Account page.                   |
+| `dashboard` | The main landing page of the Admin Panel.                                                       |
+| `[key]`     | Any other key can be used to add a completely new Root View. [More details](#adding-new-views). |
 
 ## Collection Views
 
@@ -291,8 +291,8 @@ export const MyCollectionConfig: CollectionConfig = {
         edit: {
           default: {
             Component: '/path/to/MyCustomCollectionView',
-          }
-        }
+          },
+        },
         // highlight-end
         // Other options include:
         // - list
@@ -305,17 +305,18 @@ export const MyCollectionConfig: CollectionConfig = {
 ```
 
 <Banner type="success">
-  **Reminder:**
-  The `edit` key is comprised of various nested views, known as Document Views, that relate to the same Collection Document. [More details](./document-views).
+  **Reminder:** The `edit` key is comprised of various nested views, known as
+  Document Views, that relate to the same Collection Document. [More
+  details](./document-views).
 </Banner>
 
 The following options are available:
 
-| Property   | Description                                                                                                                                                    |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `edit` | The Edit View corresponds to a single Document for any given Collection and consists of various nested views. [More details](./document-views). |
-| `list` | The List View is used to show a list of Documents for any given Collection. [More details](#list-view).                                                            |
-| `[key]` | Any other key can be used to add a completely new Collection View. [More details](#adding-new-views).                             |
+| Property | Description                                                                                                                                     |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `edit`   | The Edit View corresponds to a single Document for any given Collection and consists of various nested views. [More details](./document-views). |
+| `list`   | The List View is used to show a list of Documents for any given Collection. [More details](#list-view).                                         |
+| `[key]`  | Any other key can be used to add a completely new Collection View. [More details](#adding-new-views).                                           |
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
 
@@ -337,8 +338,8 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
         edit: {
           default: {
             Component: '/path/to/MyCustomGlobalView',
-          }
-        }
+          },
+        },
         // highlight-end
         // Other options include:
         // - [key: string]
@@ -350,15 +351,16 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
 ```
 
 <Banner type="success">
-  **Reminder:**
-  The `edit` key is comprised of various nested views, known as Document Views, that relate to the same Global Document. [More details](./document-views).
+  **Reminder:** The `edit` key is comprised of various nested views, known as
+  Document Views, that relate to the same Global Document. [More
+  details](./document-views).
 </Banner>
 
 The following options are available:
 
-| Property   | Description                                                                                                                                     |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `edit` | The Edit View represents a single Document for any given Global and consists of various nested views. [More details](./document-views). |
-| `[key]` | Any other key can be used to add a completely new Global View. [More details](#adding-new-views).                             |
+| Property | Description                                                                                                                             |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `edit`   | The Edit View represents a single Document for any given Global and consists of various nested views. [More details](./document-views). |
+| `[key]`  | Any other key can be used to add a completely new Global View. [More details](#adding-new-views).                                       |
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._

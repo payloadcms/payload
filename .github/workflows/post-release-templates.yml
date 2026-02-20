@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 22.6.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -19,7 +17,7 @@ jobs:
       release_tag: ${{ steps.determine_tag.outputs.release_tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           sparse-checkout: .github/workflows
@@ -50,45 +48,38 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
+        id: postgres
+        uses: ./.github/actions/start-database
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-          echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+          database: postgres
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
+        id: mongodb
+        uses: ./.github/actions/start-database
         with:
-          mongodb-version: 6.0
+          database: mongodb
+
+        # The template generation script runs import map generation which needs the built payload bin scripts
+      - run: pnpm run build:all
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+          POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
 
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
+        env:
+          POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.mongodb.outputs.MONGODB_URL }}
 
       - name: Commit and push changes
         id: commit

@@ -23,15 +23,17 @@ import { buildConfig } from 'payload'
 
 export default buildConfig({
   // ...
-  i18n: { // highlight-line
+  i18n: {
+    // highlight-line
     // ...
   },
 })
 ```
 
 <Banner type="success">
-  **Note:**
-  If there is a language that Payload does not yet support, we accept [code contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
+  **Note:** If there is a language that Payload does not yet support, we accept
+  [code
+  contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>
 
 ## Config Options
@@ -46,18 +48,18 @@ export default buildConfig({
   // highlight-start
   i18n: {
     fallbackLanguage: 'en', // default
-  }
+  },
   // highlight-end
 })
 ```
 
 The following options are available:
 
-| Option                | Description                                                                                                                                                                                                                   |
-| --------------------- | --------------------------------|
-| `fallbackLanguage`     | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                                                                                                                           |
-| `translations`    | An object containing the translations. The keys are the language codes and the values are the translations.                                                                                                                |
-| `supportedLanguages` | An object containing the supported languages. The keys are the language codes and the values are the translations.                                                                                                         |
+| Option               | Description                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `fallbackLanguage`   | The language to fall back to if the user's preferred language is not supported. Default is `'en'`.                 |
+| `translations`       | An object containing the translations. The keys are the language codes and the values are the translations.        |
+| `supportedLanguages` | An object containing the supported languages. The keys are the language codes and the values are the translations. |
 
 ## Adding Languages
 
@@ -81,8 +83,8 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
- **Tip:**
- It's best to only support the languages that you need so that the bundled JavaScript is kept to a minimum for your project.
+  **Tip:** It's best to only support the languages that you need so that the
+  bundled JavaScript is kept to a minimum for your project.
 </Banner>
 
 ### Custom Translations
@@ -163,7 +165,7 @@ export const Articles: CollectionConfig = {
         placeholder: {
           // highlight-start
           en: 'Enter title',
-          es: 'Introduce el título'
+          es: 'Introduce el título',
           // highlight-end
         },
       },
@@ -188,25 +190,29 @@ In order to use [Custom Translations](#custom-translations) in your project, you
 
 Here we create a shareable translations object. We will import this in both our custom components and in our Payload config.
 
+In this example we show how to extend English, but you can do the same for any language you want.
+
 ```ts
 // <rootDir>/custom-translations.ts
 
-import type { Config } from 'payload'
+import { enTranslations } from '@payloadcms/translations/languages/en'
 import type { NestedKeysStripped } from '@payloadcms/translations'
 
-export const customTranslations: Config['i18n']['translations'] = {
+export const customTranslations = {
   en: {
     general: {
       myCustomKey: 'My custom english translation',
     },
     fields: {
       addLabel: 'Add!',
-    }
+    },
   },
 }
 
-export type CustomTranslationsObject = typeof customTranslations.en
-export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
+export type CustomTranslationsObject = typeof customTranslations.en &
+  typeof enTranslations
+export type CustomTranslationsKeys =
+  NestedKeysStripped<CustomTranslationsObject>
 ```
 
 Import the shared translations object into our Payload config so they are available for use:
@@ -236,10 +242,16 @@ Import the shared translation types to use in your [Custom Component](../custom-
 import type React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
-import type { CustomTranslationsObject, CustomTranslationsKeys } from '../custom-translations'
+import type {
+  CustomTranslationsObject,
+  CustomTranslationsKeys,
+} from '../custom-translations'
 
 export const MyComponent: React.FC = () => {
-  const { i18n, t } = useTranslation<CustomTranslationsObject, CustomTranslationsKeys>() // These generics merge your custom translations with the default client translations
+  const { i18n, t } = useTranslation<
+    CustomTranslationsObject,
+    CustomTranslationsKeys
+  >() // These generics merge your custom translations with the default client translations
 
   return t('general:myCustomKey')
 }
@@ -250,7 +262,7 @@ Additionally, Payload exposes the `t` function in various places, for example in
 ```ts
 // <rootDir>/fields/myField.ts
 
-import type { DefaultTranslationKeys, TFunction } from '@payloadcms/translations'
+import type { TFunction } from '@payloadcms/translations'
 import type { Field } from 'payload'
 
 import { CustomTranslationsKeys } from '../custom-translations'
@@ -258,8 +270,9 @@ import { CustomTranslationsKeys } from '../custom-translations'
 const field: Field = {
   name: 'myField',
   type: 'text',
-  label: (
-    { t }: { t: TFunction<CustomTranslationsKeys | DefaultTranslationKeys> }, // The generic passed to TFunction does not automatically merge the custom translations with the default translations. We need to merge them ourselves here
-  ) => t('fields:addLabel'),
+  label: ({ t: defaultT }) => {
+    const t = defaultT as TFunction<CustomTranslationsKeys>
+    return t('fields:addLabel')
+  },
 }
 ```

@@ -5,14 +5,18 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { indexedFieldsSlug } from '../../slugs.js'
 
@@ -96,9 +100,10 @@ describe('Radio', () => {
     await page.click('#action-save', { delay: 200 })
 
     // toast error
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: uniqueText',
-    )
+    await assertToastErrors({
+      errors: ['uniqueText'],
+      page,
+    })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 
@@ -111,15 +116,18 @@ describe('Radio', () => {
     // nested in a group error
     await page.locator('#field-group__unique').fill(uniqueText)
 
-    await wait(1000)
+    // TODO: used because otherwise the toast locator resolves to 2 items
+    // at the same time. Instead we should uniquely identify each toast.
+    await wait(2000)
 
     // attempt to save
     await page.locator('#action-save').click()
 
     // toast error
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: group.unique',
-    )
+    await assertToastErrors({
+      errors: ['group.unique'],
+      page,
+    })
 
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('create')
 

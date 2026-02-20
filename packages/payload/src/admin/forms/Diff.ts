@@ -1,5 +1,3 @@
-// @ts-strict-ignore
-
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { ClientField, Field, FieldTypes, Tab } from '../../fields/config/types.js'
@@ -7,7 +5,7 @@ import type {
   ClientFieldWithOptionalType,
   PayloadRequest,
   SanitizedFieldPermissions,
-  TypedLocale,
+  SanitizedFieldsPermissions,
 } from '../../index.js'
 
 export type VersionTab = {
@@ -27,11 +25,13 @@ export type BaseVersionField = {
 
 export type VersionField = {
   field?: BaseVersionField
-  fieldByLocale?: Record<TypedLocale, BaseVersionField>
+  fieldByLocale?: Record<string, BaseVersionField>
 }
 
 /**
  * Taken from react-diff-viewer-continued
+ *
+ * @deprecated remove in 4.0 - react-diff-viewer-continued is no longer a dependency
  */
 export declare enum DiffMethod {
   CHARS = 'diffChars',
@@ -47,25 +47,29 @@ export declare enum DiffMethod {
 export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalType = ClientField> = {
   baseVersionField: BaseVersionField
   /**
-   * Field value from the version being compared
+   * Field value from the version being compared from
    */
-  comparisonValue: unknown
-  diffMethod: DiffMethod
+  comparisonValue: unknown // TODO: change to valueFrom in 4.0
+  /**
+   * @deprecated remove in 4.0. react-diff-viewer-continued is no longer a dependency
+   */
+  diffMethod: any
   field: TClientField
-  fieldPermissions:
-    | {
-        [key: string]: SanitizedFieldPermissions
-      }
-    | true
+  /**
+   * Permissions at this level of the field. If this field is unnamed, this will be `SanitizedFieldsPermissions` - if it is named, it will be `SanitizedFieldPermissions`
+   */
+  fieldPermissions: SanitizedFieldPermissions | SanitizedFieldsPermissions
   /**
    * If this field is localized, this will be the locale of the field
    */
   locale?: string
+  nestingLevel?: number
   parentIsLocalized: boolean
   /**
-   * Field value from the current version
+   * Field value from the version being compared to
+   *
    */
-  versionValue: unknown
+  versionValue: unknown // TODO: change to valueTo in 4.0
 }
 
 export type FieldDiffServerProps<

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -8,10 +7,9 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import { getDefaultValue } from '../../getDefaultValue.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
+import { getFallbackValue } from './getFallbackValue.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -274,31 +272,25 @@ export const promise = async <T>({
       }
     }
 
-    if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getDefaultValue({
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          req,
-          user: req.user,
-          value: siblingData[field.name],
-        })
-      }
+    // ensure the fallback value is only computed one time
+    // either here or when access control returns false
+    const fallbackResult: { executed: boolean; value: unknown } = {
+      executed: false,
+      value: undefined,
+    }
+    if (typeof siblingData[field.name!] === 'undefined') {
+      fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
+      fallbackResult.executed = true
     }
 
     // Execute hooks
-    if (field.hooks?.beforeValidate) {
+    if ('hooks' in field && field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
         const hookedValue = await hook({
           blockData,
           collection,
           context,
-          data,
+          data: data as Partial<T>,
           field,
           global,
           indexPath: indexPathSegments,
@@ -311,8 +303,11 @@ export const promise = async <T>({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
-          value: siblingData[field.name],
+          siblingFields: siblingFields!,
+          value:
+            typeof siblingData[field.name] === 'undefined'
+              ? fallbackResult.value
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
@@ -325,11 +320,24 @@ export const promise = async <T>({
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
+        : await field.access[operation]({
+            id,
+            blockData,
+            data: data as Partial<T>,
+            doc,
+            req,
+            siblingData,
+          })
 
       if (!result) {
-        delete siblingData[field.name]
+        delete siblingData[field.name!]
       }
+    }
+
+    if (typeof siblingData[field.name!] === 'undefined') {
+      siblingData[field.name!] = !fallbackResult.executed
+        ? await getFallbackValue({ field, req, siblingDoc })
+        : fallbackResult.value
     }
   }
 
@@ -339,7 +347,7 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           promises.push(
@@ -374,7 +382,7 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
@@ -445,16 +453,23 @@ export const promise = async <T>({
     }
 
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
-      }
+      let groupSiblingData = siblingData
+      let groupSiblingDoc = siblingDoc
 
-      if (typeof siblingDoc[field.name] !== 'object') {
-        siblingDoc[field.name] = {}
-      }
+      const isNamedGroup = fieldAffectsData(field)
 
-      const groupData = siblingData[field.name] as Record<string, unknown>
-      const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (isNamedGroup) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        if (typeof siblingDoc[field.name] !== 'object') {
+          siblingDoc[field.name] = {}
+        }
+
+        groupSiblingData = siblingData[field.name] as Record<string, unknown>
+        groupSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
+      }
 
       await traverseFields({
         id,
@@ -467,13 +482,13 @@ export const promise = async <T>({
         global,
         operation,
         overrideAccess,
-        parentIndexPath: '',
+        parentIndexPath: isNamedGroup ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
+        parentPath: isNamedGroup ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
-        siblingData: groupData as JsonObject,
-        siblingDoc: groupDoc as JsonObject,
+        siblingData: groupSiblingData,
+        siblingDoc: groupSiblingDoc,
       })
 
       break
@@ -495,7 +510,7 @@ export const promise = async <T>({
           const hookedValue = await hook({
             collection,
             context,
-            data,
+            data: data as Partial<T>,
             field,
             global,
             indexPath: indexPathSegments,

@@ -1,15 +1,16 @@
-import type { AdminViewServerProps } from 'payload'
+import type {
+  AdminViewServerProps,
+  SanitizedDocumentPermissions,
+  SanitizedFieldsPermissions,
+} from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import React from 'react'
 
 import { getDocPreferences } from '../Document/getDocPreferences.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
-import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { CreateFirstUserClient } from './index.client.js'
 import './index.scss'
-
-export { generateCreateFirstUserMetadata } from './meta.js'
 
 export async function CreateFirstUserView({ initPageResult }: AdminViewServerProps) {
   const {
@@ -45,24 +46,34 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
     user: req.user,
   })
 
-  // Get permissions
-  const { docPermissions } = await getDocumentPermissions({
-    collectionConfig,
-    data,
-    req,
-  })
+  const baseFields: SanitizedFieldsPermissions = Object.fromEntries(
+    collectionConfig.fields
+      .filter((f): f is { name: string } & typeof f => 'name' in f && typeof f.name === 'string')
+      .map((f) => [f.name, { create: true, read: true, update: true }]),
+  )
+
+  // In create-first-user we should always allow all fields
+  const docPermissionsForForm: SanitizedDocumentPermissions = {
+    create: true,
+    delete: true,
+    fields: baseFields,
+    read: true,
+    readVersions: true,
+    update: true,
+  }
 
   // Build initial form state from data
   const { state: formState } = await buildFormState({
     collectionSlug: collectionConfig.slug,
     data,
-    docPermissions,
+    docPermissions: docPermissionsForForm,
     docPreferences,
     locale: locale?.code,
     operation: 'create',
     renderAllFields: true,
     req,
     schemaPath: collectionConfig.slug,
+    skipClientConfigAuth: true,
     skipValidation: true,
   })
 
@@ -71,7 +82,7 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
       <h1>{req.t('general:welcome')}</h1>
       <p>{req.t('authentication:beginCreateFirstUser')}</p>
       <CreateFirstUserClient
-        docPermissions={docPermissions}
+        docPermissions={docPermissionsForForm}
         docPreferences={docPreferences}
         initialState={formState}
         loginWithUsername={loginWithUsername}

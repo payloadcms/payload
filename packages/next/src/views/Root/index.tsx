@@ -3,22 +3,31 @@ import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
+  CollectionPreferences,
   ImportMap,
+  SanitizedCollectionConfig,
   SanitizedConfig,
+  SanitizedGlobalConfig,
 } from 'payload'
 
+import { PageConfigProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import React, { Fragment } from 'react'
+import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
-import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
-
-export { generatePageMetadata } from './meta.js'
+import { getPreferences } from '../../utilities/getPreferences.js'
+import { handleAuthRedirect } from '../../utilities/handleAuthRedirect.js'
+import { initReq } from '../../utilities/initReq.js'
+import { isCustomAdminView } from '../../utilities/isCustomAdminView.js'
+import { isPublicAdminRoute } from '../../utilities/isPublicAdminRoute.js'
+import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getRouteData } from './getRouteData.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -56,43 +65,153 @@ export const RootPage = async ({
 
   const currentRoute = formatAdminURL({
     adminRoute,
-    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
+  const isCollectionRoute = segments[0] === 'collections'
+  const isGlobalRoute = segments[0] === 'globals'
+  let collectionConfig: SanitizedCollectionConfig = undefined
+  let globalConfig: SanitizedGlobalConfig = undefined
 
   const searchParams = await searchParamsPromise
 
+  // Redirect `${adminRoute}/collections` to `${adminRoute}`
+  if (isCollectionRoute) {
+    if (segments.length === 1) {
+      const { viewKey } = getCustomViewByRoute({
+        config,
+        currentRoute: '/collections',
+      })
+
+      // Only redirect if there's NO custom view configured for /collections
+      if (!viewKey) {
+        redirect(adminRoute)
+      }
+    }
+
+    if (segments[1]) {
+      collectionConfig = config.collections.find(({ slug }) => slug === segments[1])
+    }
+  }
+
+  // Redirect `${adminRoute}/globals` to `${adminRoute}`
+  if (isGlobalRoute) {
+    if (segments.length === 1) {
+      const { viewKey } = getCustomViewByRoute({
+        config,
+        currentRoute: '/globals',
+      })
+
+      // Only redirect if there's NO custom view configured for /globals
+      if (!viewKey) {
+        redirect(adminRoute)
+      }
+    }
+
+    if (segments[1]) {
+      globalConfig = config.globals.find(({ slug }) => slug === segments[1])
+    }
+  }
+
+  if ((isCollectionRoute && !collectionConfig) || (isGlobalRoute && !globalConfig)) {
+    return notFound()
+  }
+
+  const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
   const {
+    cookies,
+    locale,
+    permissions,
+    req,
+    req: { payload },
+  } = await initReq({
+    configPromise: config,
+    importMap,
+    key: 'initPage',
+    overrides: {
+      fallbackLocale: false,
+      req: {
+        query: qs.parse(queryString, {
+          depth: 10,
+          ignoreQueryPrefix: true,
+        }),
+      },
+      // intentionally omit `serverURL` to keep URL relative
+      urlSuffix: `${currentRoute}${searchParams ? queryString : ''}`,
+    },
+  })
+
+  if (
+    !permissions.canAccessAdmin &&
+    !isPublicAdminRoute({ adminRoute, config: payload.config, route: currentRoute }) &&
+    !isCustomAdminView({ adminRoute, config: payload.config, route: currentRoute })
+  ) {
+    redirect(
+      handleAuthRedirect({
+        config: payload.config,
+        route: currentRoute,
+        searchParams,
+        user: req.user,
+      }),
+    )
+  }
+
+  let collectionPreferences: CollectionPreferences = undefined
+
+  if (collectionConfig && segments.length === 2) {
+    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
+      await getPreferences<CollectionPreferences>(
+        `collection-${collectionConfig.slug}`,
+        req.payload,
+        req.user.id,
+        config.admin.user,
+      ).then((res) => {
+        if (res && res.value) {
+          collectionPreferences = res.value
+        }
+      })
+    }
+  }
+
+  const {
+    browseByFolderSlugs,
     DefaultView,
     documentSubViewType,
-    initPageOptions,
-    serverProps,
+    routeParams,
     templateClassName,
     templateType,
+    viewActions,
     viewType,
-  } = getViewFromConfig({
+  } = getRouteData({
     adminRoute,
-    config,
+    collectionConfig,
+    collectionPreferences,
     currentRoute,
-    importMap,
+    globalConfig,
+    payload,
     searchParams,
     segments,
   })
 
-  const initPageResult = await initPage(initPageOptions)
+  req.routeParams = routeParams
 
   const dbHasUser =
-    initPageResult.req.user ||
-    (await initPageResult?.req.payload.db
+    req.user ||
+    (await req.payload.db
       .findOne({
         collection: userSlug,
-        req: initPageResult?.req,
+        req,
       })
       ?.then((doc) => !!doc))
 
+  /**
+   * This function is responsible for handling the case where the view is not found.
+   * The current route did not match any default views or custom route views.
+   */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
-    if (initPageResult?.req?.user) {
+    if (req?.user) {
       notFound()
     }
 
@@ -101,27 +220,24 @@ export const RootPage = async ({
     }
   }
 
-  if (typeof initPageResult?.redirectTo === 'string') {
-    redirect(initPageResult.redirectTo)
+  const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
+  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
+
+  const createFirstUserRoute = formatAdminURL({
+    adminRoute,
+    path: _createFirstUserRoute,
+  })
+
+  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
+    redirect(adminRoute)
   }
 
-  if (initPageResult) {
-    const createFirstUserRoute = formatAdminURL({ adminRoute, path: _createFirstUserRoute })
+  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
+    redirect(createFirstUserRoute)
+  }
 
-    const collectionConfig = config.collections.find(({ slug }) => slug === userSlug)
-    const disableLocalStrategy = collectionConfig?.auth?.disableLocalStrategy
-
-    if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-      redirect(adminRoute)
-    }
-
-    if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-      redirect(createFirstUserRoute)
-    }
-
-    if (dbHasUser && currentRoute === createFirstUserRoute) {
-      redirect(adminRoute)
-    }
+  if (dbHasUser && currentRoute === createFirstUserRoute) {
+    redirect(adminRoute)
   }
 
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
@@ -130,59 +246,119 @@ export const RootPage = async ({
 
   const clientConfig = getClientConfig({
     config,
-    i18n: initPageResult?.req.i18n,
+    i18n: req.i18n,
     importMap,
+    user: viewType === 'createFirstUser' ? true : req.user,
   })
 
+  await applyLocaleFiltering({ clientConfig, config, req })
+
+  // Ensure locale on req is still valid after filtering locales
+  if (
+    clientConfig.localization &&
+    req.locale &&
+    !clientConfig.localization.localeCodes.includes(req.locale)
+  ) {
+    redirect(
+      `${currentRoute}${qs.stringify(
+        {
+          ...searchParams,
+          locale: clientConfig.localization.localeCodes.includes(
+            clientConfig.localization.defaultLocale,
+          )
+            ? clientConfig.localization.defaultLocale
+            : clientConfig.localization.localeCodes[0],
+        },
+        { addQueryPrefix: true },
+      )}`,
+    )
+  }
+
+  const visibleEntities = getVisibleEntities({ req })
+
+  const folderID = routeParams.folderID
+
   const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
+    clientProps: {
+      browseByFolderSlugs,
+      clientConfig,
+      documentSubViewType,
+      viewType,
+    } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
     importMap,
     serverProps: {
-      ...serverProps,
       clientConfig,
-      docID: initPageResult?.docID,
-      i18n: initPageResult?.req.i18n,
+      collectionConfig,
+      docID: routeParams.id,
+      folderID,
+      globalConfig,
+      i18n: req.i18n,
       importMap,
-      initPageResult,
+      initPageResult: {
+        collectionConfig,
+        cookies,
+        docID: routeParams.id,
+        globalConfig,
+        languageOptions: Object.entries(req.payload.config.i18n.supportedLanguages || {}).reduce(
+          (acc, [language, languageConfig]) => {
+            if (Object.keys(req.payload.config.i18n.supportedLanguages).includes(language)) {
+              acc.push({
+                label: languageConfig.translations.general.thisLanguage,
+                value: language,
+              })
+            }
+
+            return acc
+          },
+          [],
+        ),
+        locale,
+        permissions,
+        req,
+        translations: req.i18n.translations,
+        visibleEntities,
+      },
       params,
-      payload: initPageResult?.req.payload,
+      payload: req.payload,
       searchParams,
+      viewActions,
     } satisfies AdminViewServerPropsOnly,
   })
 
   return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
+    <PageConfigProvider config={clientConfig}>
+      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
         <DefaultTemplate
-          collectionSlug={initPageResult?.collectionConfig?.slug}
-          docID={initPageResult?.docID}
+          collectionSlug={collectionConfig?.slug}
+          docID={routeParams.id}
           documentSubViewType={documentSubViewType}
-          globalSlug={initPageResult?.globalConfig?.slug}
-          i18n={initPageResult?.req.i18n}
-          locale={initPageResult?.locale}
+          globalSlug={globalConfig?.slug}
+          i18n={req.i18n}
+          locale={locale}
           params={params}
-          payload={initPageResult?.req.payload}
-          permissions={initPageResult?.permissions}
+          payload={req.payload}
+          permissions={permissions}
+          req={req}
           searchParams={searchParams}
-          user={initPageResult?.req.user}
-          viewActions={serverProps.viewActions}
+          user={req.user}
+          viewActions={viewActions}
           viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult?.visibleEntities?.collections,
-            globals: initPageResult?.visibleEntities?.globals,
+            collections: visibleEntities?.collections,
+            globals: visibleEntities?.globals,
           }}
         >
           {RenderedView}
         </DefaultTemplate>
       )}
-    </Fragment>
+    </PageConfigProvider>
   )
 }

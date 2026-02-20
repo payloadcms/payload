@@ -2,9 +2,11 @@ import type { ArrayField, Payload, RelationshipField } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { Page } from './payload-types.js'
+import type { Page } from './payload-types.js'
+
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 
@@ -17,9 +19,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('seed', () => {
@@ -98,8 +98,8 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
 
-      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs as Page['breadcrumbs']
-      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs as Page['breadcrumbs']
+      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs
+      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs
 
       expect(firstUpdatedChildBreadcrumbs).toHaveLength(2)
       // @ts-ignore
@@ -180,19 +180,15 @@ describe('@payloadcms/plugin-nested-docs', () => {
         })
         .then(({ docs }) => docs[0])
 
-      if (!updatedChild) {
-        return
-      }
-
       // breadcrumbs should be updated
-      expect(updatedChild.breadcrumbs).toHaveLength(2)
+      expect(updatedChild!.breadcrumbs).toHaveLength(2)
 
-      expect(updatedChild.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
-      expect(updatedChild.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
+      expect(updatedChild!.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
+      expect(updatedChild!.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
 
       // no other data should be affected
-      expect(updatedChild.title).toEqual('child doc')
-      expect(updatedChild.slug).toEqual('child')
+      expect(updatedChild!.title).toEqual('child doc')
+      expect(updatedChild!.slug).toEqual('child')
     })
   })
 

@@ -1,5 +1,5 @@
 import type { I18n } from '@payloadcms/translations'
-import type { BasePayload, Config, LanguageOptions, User } from 'payload'
+import type { BasePayload, Config, LanguageOptions, TypedUser } from 'payload'
 
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
@@ -17,11 +17,9 @@ export const Settings: React.FC<{
   readonly languageOptions: LanguageOptions
   readonly payload: BasePayload
   readonly theme: Config['admin']['theme']
-  readonly user?: User
+  readonly user?: TypedUser
 }> = (props) => {
-  const { className, i18n, languageOptions, payload, theme, user } = props
-
-  const apiRoute = payload.config.routes.api
+  const { className, i18n, languageOptions, theme, user } = props
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -31,7 +29,7 @@ export const Settings: React.FC<{
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}
-      <ResetPreferences apiRoute={apiRoute} user={user} />
+      <ResetPreferences user={user} />
     </div>
   )
 }

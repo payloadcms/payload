@@ -63,7 +63,7 @@ export const syncExistingWithStripe: CollectionBeforeChangeHookWithArgs = async 
 
           try {
             // api version can only be the latest, stripe recommends ts ignoring it
-            const stripe = new Stripe(pluginConfig.stripeSecretKey || '', {
+            const stripe = new Stripe(pluginConfig?.stripeSecretKey || '', {
               apiVersion: '2022-08-01',
             })
 

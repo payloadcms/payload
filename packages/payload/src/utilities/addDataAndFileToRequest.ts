@@ -1,8 +1,7 @@
-// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/APIError.js'
-import { fetchAPIFileUpload } from '../uploads/fetchAPI-multipart/index.js'
+import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -13,23 +12,27 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
   const { body, headers, method, payload } = req
 
   if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
-    const [contentType] = (headers.get('Content-Type') || '').split(';')
+    const [contentType] = (headers.get('Content-Type') || '').split(';', 1)
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
       let data = {}
       try {
-        const text = await req.text()
+        const text = await req.text?.()
         data = text ? JSON.parse(text) : {}
       } catch (error) {
         req.payload.logger.error(error)
       } finally {
         req.data = data
+        // @ts-expect-error attach json method to request
         req.json = () => Promise.resolve(data)
       }
-    } else if (bodyByteSize && contentType.includes('multipart/')) {
-      const { error, fields, files } = await fetchAPIFileUpload({
-        options: payload.config.upload,
+    } else if (bodyByteSize && contentType?.includes('multipart/')) {
+      const { error, fields, files } = await processMultipartFormdata({
+        options: {
+          ...(payload.config.bodyParser || {}),
+          ...(payload.config.upload || {}),
+        },
         request: req as Request,
       })
 
@@ -49,7 +52,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         const { clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
           fields.file,
         )
-        const uploadConfig = req.payload.collections[collectionSlug].config.upload
+        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
         if (!uploadConfig.handlers) {
           throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
@@ -61,7 +64,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         for (const handler of uploadConfig.handlers) {
           try {
             const result = await handler(req, {
-              doc: null,
+              doc: null!,
               params: {
                 clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
                 collection: collectionSlug,
@@ -87,6 +90,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
 
         req.file = {
           name: filename,
+          clientUploadContext,
           data: Buffer.from(await response.arrayBuffer()),
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,

@@ -1,123 +1,186 @@
-import type { Config, Field, FilterOptionsProps, RelationshipField, SanitizedConfig } from 'payload'
+import type { Block, Config, Field, RelationshipField, SanitizedConfig } from 'payload'
 
-import { getCollectionIDType } from './getCollectionIDType.js'
-import { getTenantFromCookie } from './getTenantFromCookie.js'
+import type { MultiTenantPluginConfig } from '../types.js'
 
-type AddFilterOptionsToFieldsArgs = {
+import { defaults } from '../defaults.js'
+import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
+
+type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
+  blockReferencesWithFilters: string[]
   config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
 
-export function addFilterOptionsToFields({
+export function addFilterOptionsToFields<ConfigType = unknown>({
+  blockReferencesWithFilters,
   config,
   fields,
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
   tenantFieldName,
+  tenantsArrayFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
-}: AddFilterOptionsToFieldsArgs) {
-  fields.forEach((field) => {
-    if (field.type === 'relationship') {
+  userHasAccessToAllTenants,
+}: AddFilterOptionsToFieldsArgs<ConfigType>): Field[] {
+  const newFields = []
+  for (const field of fields) {
+    let newField: Field = { ...field }
+    if (newField.type === 'relationship') {
+      let hasTenantRelationsips = false
       /**
        * Adjusts relationship fields to filter by tenant
        * and ensures relationTo cannot be a tenant global collection
        */
-      if (typeof field.relationTo === 'string') {
-        if (tenantEnabledGlobalSlugs.includes(field.relationTo)) {
+      if (typeof newField.relationTo === 'string') {
+        if (tenantEnabledGlobalSlugs.includes(newField.relationTo)) {
           throw new Error(
-            `The collection ${field.relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
+            `The collection ${newField.relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
           )
         }
-        if (tenantEnabledCollectionSlugs.includes(field.relationTo)) {
-          addFilter({ field, tenantEnabledCollectionSlugs, tenantFieldName, tenantsCollectionSlug })
+        if (tenantEnabledCollectionSlugs.includes(newField.relationTo)) {
+          hasTenantRelationsips = true
         }
       } else {
-        field.relationTo.map((relationTo) => {
+        for (const relationTo of newField.relationTo) {
           if (tenantEnabledGlobalSlugs.includes(relationTo)) {
             throw new Error(
               `The collection ${relationTo} is a global collection and cannot be related to a tenant enabled collection.`,
             )
           }
           if (tenantEnabledCollectionSlugs.includes(relationTo)) {
-            addFilter({
-              field,
-              tenantEnabledCollectionSlugs,
-              tenantFieldName,
-              tenantsCollectionSlug,
-            })
+            hasTenantRelationsips = true
           }
+        }
+      }
+
+      if (hasTenantRelationsips) {
+        newField = addRelationshipFilter({
+          field: newField as RelationshipField,
+          tenantEnabledCollectionSlugs,
+          tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
       }
     }
 
     if (
-      field.type === 'row' ||
-      field.type === 'array' ||
-      field.type === 'collapsible' ||
-      field.type === 'group'
+      newField.type === 'row' ||
+      newField.type === 'array' ||
+      newField.type === 'collapsible' ||
+      newField.type === 'group'
     ) {
-      addFilterOptionsToFields({
+      newField.fields = addFilterOptionsToFields({
+        blockReferencesWithFilters,
         config,
-        fields: field.fields,
+        fields: newField.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
         tenantFieldName,
+        tenantsArrayFieldName,
+        tenantsArrayTenantFieldName,
         tenantsCollectionSlug,
+        userHasAccessToAllTenants,
       })
     }
 
-    if (field.type === 'blocks') {
-      ;(field.blockReferences ?? field.blocks).forEach((_block) => {
-        const block =
-          typeof _block === 'string'
-            ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-              config?.blocks?.find((b) => b.slug === _block)
-            : _block
+    if (newField.type === 'blocks') {
+      const newBlocks: Block[] = []
+      ;(newField.blockReferences ?? newField.blocks).forEach((_block) => {
+        let block: Block | undefined
+        let isReference = false
+
+        if (typeof _block === 'string') {
+          if (blockReferencesWithFilters.includes(_block)) {
+            return
+          }
+          isReference = true
+          block = config?.blocks?.find((b) => b.slug === _block)
+          blockReferencesWithFilters.push(_block)
+        } else {
+          // Create a shallow copy to avoid mutating the original block reference
+          block = { ..._block }
+        }
 
         if (block?.fields) {
-          addFilterOptionsToFields({
+          block.fields = addFilterOptionsToFields({
+            blockReferencesWithFilters,
             config,
             fields: block.fields,
             tenantEnabledCollectionSlugs,
             tenantEnabledGlobalSlugs,
             tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
             tenantsCollectionSlug,
+            userHasAccessToAllTenants,
           })
         }
+
+        if (block && !isReference) {
+          newBlocks.push(block)
+        }
       })
+      newField.blocks = newBlocks
     }
 
-    if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        addFilterOptionsToFields({
+    if (newField.type === 'tabs') {
+      newField.tabs = newField.tabs.map((tab) => {
+        const newTab = { ...tab }
+        newTab.fields = addFilterOptionsToFields({
+          blockReferencesWithFilters,
           config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
           tenantFieldName,
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
+          userHasAccessToAllTenants,
         })
+        return newTab
       })
     }
-  })
+
+    newFields.push(newField)
+  }
+
+  return newFields
 }
 
-type AddFilterArgs = {
+type AddFilterArgs<ConfigType = unknown> = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
+  tenantsArrayFieldName: string
+  tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
+  userHasAccessToAllTenants: Required<
+    MultiTenantPluginConfig<ConfigType>
+  >['userHasAccessToAllTenants']
 }
-function addFilter({
+function addRelationshipFilter<ConfigType = unknown>({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
+  tenantsArrayFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
-}: AddFilterArgs) {
+  userHasAccessToAllTenants,
+}: AddFilterArgs<ConfigType>): Field {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
@@ -135,14 +198,18 @@ function addFilter({
     }
 
     // Custom tenant filter
-    const tenantFilterResults = filterOptionsByTenant({
-      ...args,
-      tenantFieldName,
+    const tenantFilterResults = filterDocumentsByTenants({
+      docTenantID: args.data?.[tenantFieldName],
+      filterFieldName: tenantFieldName,
+      req: args.req,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       tenantsCollectionSlug,
+      userHasAccessToAllTenants,
     })
 
-    // If the tenant filter returns true, just use the original filter
-    if (tenantFilterResults === true) {
+    // If the tenant filter returns null, meaning no tenant filter, just use the original filter
+    if (tenantFilterResults === null) {
       return originalFilterResult
     }
 
@@ -155,40 +222,6 @@ function addFilter({
       and: [originalFilterResult, tenantFilterResults],
     }
   }
-}
 
-type Args = {
-  tenantFieldName?: string
-  tenantsCollectionSlug: string
-} & FilterOptionsProps
-const filterOptionsByTenant = ({
-  req,
-  tenantFieldName = 'tenant',
-  tenantsCollectionSlug,
-}: Args) => {
-  const idType = getCollectionIDType({
-    collectionSlug: tenantsCollectionSlug,
-    payload: req.payload,
-  })
-  const selectedTenant = getTenantFromCookie(req.headers, idType)
-  if (!selectedTenant) {
-    return true
-  }
-
-  return {
-    or: [
-      // ie a related collection that doesn't have a tenant field
-      {
-        [tenantFieldName]: {
-          exists: false,
-        },
-      },
-      // related collections that have a tenant field
-      {
-        [tenantFieldName]: {
-          equals: selectedTenant,
-        },
-      },
-    ],
-  }
+  return field
 }

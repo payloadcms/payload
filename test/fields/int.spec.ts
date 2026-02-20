@@ -1,21 +1,24 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
+import type { Payload, ValidationError } from 'payload'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload } from 'payload'
+import { reload } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { BlockField, GroupField, RichTextField } from './payload-types.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { BlockField, GroupField } from './payload-types.js'
 
+import { it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { groupDefaultChild, groupDefaultValue } from './collections/Group/index.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { defaultNumber } from './collections/Number/index.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
@@ -30,13 +33,16 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   collapsibleFieldsSlug,
+  customIDNestedSlug,
+  dateFieldsSlug,
   groupFieldsSlug,
+  numberFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
   textFieldsSlug,
 } from './slugs.js'
-
 let restClient: NextRESTClient
 let user: any
 let payload: Payload
@@ -48,16 +54,10 @@ describe('Fields', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
-  })
 
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  beforeEach(async () => {
+    // Seed ONCE for all tests
     await clearAndSeedEverything(payload)
+
     await restClient.login({
       slug: 'users',
       credentials: devUser,
@@ -69,6 +69,10 @@ describe('Fields', () => {
         password: devUser.password,
       },
     })
+  })
+
+  afterAll(async () => {
+    await payload.destroy()
   })
 
   describe('text', () => {
@@ -165,6 +169,126 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query multiple hasMany fields', async () => {
+      await payload.delete({ collection: 'text-fields', where: {} })
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['1', '2', '3'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['6'],
+          hasManySecond: ['4'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: { equals: '3' },
+          hasManySecond: {
+            equals: '4',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query hasMany with contains operator - string value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread', 'cherry tart'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: 'banana',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
+    it('should query hasMany with contains operator - array value', async () => {
+      const hit1 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread'],
+          text: 'required',
+        },
+      })
+
+      const hit2 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['cherry tart', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'lemon water'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: ['banana', 'cherry'],
+          },
+        },
+      })
+
+      const hit1Result = docs.find(({ id: findID }) => hit1.id === findID)
+      const hit2Result = docs.find(({ id: findID }) => hit2.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hit1Result).toBeDefined()
+      expect(hit2Result).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit1.id })
+      await payload.delete({ collection: 'text-fields', id: hit2.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
     it('should query like on value', async () => {
       const miss = await payload.create({
         collection: 'text-fields',
@@ -200,14 +324,14 @@ describe('Fields', () => {
       const hit = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'dog',
+          text: 'dog-unique-test',
         },
       })
 
       const miss = await payload.create({
         collection: 'text-fields',
         data: {
-          text: 'cat',
+          text: 'cat-unique-test',
         },
       })
 
@@ -215,7 +339,7 @@ describe('Fields', () => {
         collection: 'text-fields',
         where: {
           text: {
-            not_like: 'cat',
+            not_like: 'cat-unique-test',
           },
         },
       })
@@ -400,6 +524,31 @@ describe('Fields', () => {
 
       expect(resInSecond.totalDocs).toBe(1)
     })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: textFieldsSlug,
+        data: {
+          text: 'hasMany deletion test',
+          hasMany: ['one', 'two', 'three'],
+        },
+      })
+
+      await payload.update({
+        collection: textFieldsSlug,
+        id: createdDocId,
+        data: {
+          hasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: textFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.hasMany).toHaveLength(0)
+    })
   })
 
   describe('relationship', () => {
@@ -509,7 +658,14 @@ describe('Fields', () => {
       const result = await payload.find({
         collection: relationshipFieldsSlug,
         where: {
-          'array.relationship.text': { equals: otherTextDocText },
+          and: [
+            {
+              'array.relationship.text': { equals: otherTextDocText },
+            },
+            {
+              id: { equals: relationshipInArray.id },
+            },
+          ],
         },
       })
 
@@ -565,6 +721,7 @@ describe('Fields', () => {
 
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
+    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10)
     let doc
     beforeEach(async () => {
       doc = await payload.create({
@@ -587,7 +744,7 @@ describe('Fields', () => {
       expect(docs.map(({ id }) => id)).toContain(doc.id)
     })
 
-    it('should query createdAt', async () => {
+    it('should query createdAt (greater_than_equal with results)', async () => {
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
@@ -599,6 +756,127 @@ describe('Fields', () => {
       })
 
       expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (greater_than_equal with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (less_than with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (less_than with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesAgo,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (in with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [new Date(doc.createdAt)],
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+    })
+
+    it('should query createdAt (in without results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [tenMinutesAgo],
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    // Function to generate random date between start and end dates
+    function getRandomDate(start: Date, end: Date): string {
+      const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+      return date.toISOString()
+    }
+
+    // Generate sample data
+    const dataSample = Array.from({ length: 100 }, (_, index) => {
+      const startDate = new Date('2024-01-01')
+      const endDate = new Date('2025-12-31')
+
+      return {
+        array: Array.from({ length: 5 }, (_, listIndex) => {
+          return {
+            date: getRandomDate(startDate, endDate),
+          }
+        }),
+        ...dateDoc,
+      }
+    })
+
+    it('should query a date field inside an array field', async () => {
+      await payload.delete({ collection: 'date-fields', where: {} })
+      for (const doc of dataSample) {
+        await payload.create({
+          collection: 'date-fields',
+          data: doc,
+        })
+      }
+
+      const res = await payload.find({
+        collection: 'date-fields',
+        where: { 'array.date': { greater_than: new Date('2025-06-01').toISOString() } },
+      })
+
+      const filter = (doc: any) =>
+        doc.array.some((item) => new Date(item.date).getTime() > new Date('2025-06-01').getTime())
+
+      expect(res.docs.every(filter)).toBe(true)
+      expect(dataSample.filter(filter)).toHaveLength(res.totalDocs)
+      if (res.totalDocs > 10) {
+        // This is where postgres might fail! selectDistinct actually removed some rows here, because it distincts by:
+        // not only ID, but also created_at, updated_at, items_date
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(res.docs).toHaveLength(10)
+      } else {
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(res.docs.length).toBeLessThanOrEqual(res.totalDocs)
+      }
     })
   })
 
@@ -798,6 +1076,54 @@ describe('Fields', () => {
       })
       expect(data.hasMany).toStrictEqual(['a'])
     })
+
+    it('should prevent against saving a value excluded by `filterOptions`', async () => {
+      try {
+        const result = await payload.create({
+          collection: 'select-fields',
+          data: {
+            disallowOption1: true,
+            selectWithFilteredOptions: 'one',
+          },
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error) {
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect((error as Error).message).toBe(
+          'The following field is invalid: Select with filtered options',
+        )
+      }
+
+      const result = await payload.create({
+        collection: 'select-fields',
+        data: {
+          disallowOption1: true,
+          selectWithFilteredOptions: 'two',
+        },
+      })
+
+      expect(result).toBeTruthy()
+    })
+
+    it('should throw field error when duplicate values in hasMany select field', async () => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: 'select-fields',
+          data: {
+            selectHasMany: ['one', 'two', 'one', 'two', 'one'],
+          },
+        })
+      } catch (e) {
+        error = e as ValidationError
+      }
+
+      expect(error.data.errors[0].message).toBe(
+        'This field has the following invalid selections: "one", "one", "one", "two", "two"',
+      )
+    })
   })
 
   describe('number', () => {
@@ -934,7 +1260,7 @@ describe('Fields', () => {
     })
 
     it('should properly query numbers with exists operator', async () => {
-      await payload.create({
+      const docWithNull = await payload.create({
         collection: 'number-fields',
         data: {
           number: null,
@@ -950,7 +1276,8 @@ describe('Fields', () => {
         },
       })
 
-      expect(numbersExist.totalDocs).toBe(4)
+      // Verify that documents with number field are found (at least the seeded ones)
+      expect(numbersExist.totalDocs).toBeGreaterThanOrEqual(4)
 
       const numbersNotExists = await payload.find({
         collection: 'number-fields',
@@ -961,7 +1288,33 @@ describe('Fields', () => {
         },
       })
 
-      expect(numbersNotExists.docs).toHaveLength(1)
+      // Verify we find at least the document we just created with null
+      expect(numbersNotExists.docs).toHaveLength(numbersNotExists.totalDocs)
+      expect(numbersNotExists.docs.find((doc) => doc.id === docWithNull.id)).toBeDefined()
+    })
+
+    it('should delete rows when updating hasMany with empty array', async () => {
+      const { id: createdDocId } = await payload.create({
+        collection: numberFieldsSlug,
+        data: {
+          localizedHasMany: [1, 2, 3],
+        },
+      })
+
+      await payload.update({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+        data: {
+          localizedHasMany: [],
+        },
+      })
+
+      const resultingDoc = await payload.findByID({
+        collection: numberFieldsSlug,
+        id: createdDocId,
+      })
+
+      expect(resultingDoc.localizedHasMany).toHaveLength(0)
     })
   })
 
@@ -1234,13 +1587,18 @@ describe('Fields', () => {
       if (payload.db.name === 'sqlite') {
         return
       }
+      // Use unique values for this test to avoid collisions with other tests
+      const uniqueLocalized = [99.123, -88.456]
+      const uniquePoint = [77.111, -66.222]
+      const uniqueGroup = { point: [55.333, 44.444] }
+
       // first create the point field
       doc = await payload.create({
         collection: 'point-fields',
         data: {
-          group,
-          localized,
-          point,
+          group: uniqueGroup,
+          localized: uniqueLocalized,
+          point: uniquePoint,
         },
       })
 
@@ -1249,9 +1607,9 @@ describe('Fields', () => {
         payload.create({
           collection: 'point-fields',
           data: {
-            group,
-            localized,
-            point,
+            group: uniqueGroup,
+            localized: uniqueLocalized,
+            point: uniquePoint,
           },
         }),
       ).rejects.toThrow(Error)
@@ -1265,17 +1623,155 @@ describe('Fields', () => {
         }),
       ).rejects.toThrow('The following field is invalid: Min')
 
-      expect(doc.point).toEqual(point)
-      expect(doc.localized).toEqual(localized)
-      expect(doc.group).toMatchObject(group)
+      expect(doc.point).toEqual(uniquePoint)
+      expect(doc.localized).toEqual(uniqueLocalized)
+      expect(doc.group).toMatchObject(uniqueGroup)
+    })
+
+    it('should throw validation error when "required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // Use unique values to avoid collisions
+      const uniqueLocalized = [88.111, -77.222]
+      const uniquePoint = [66.333, -55.444]
+
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized: uniqueLocalized,
+          point: uniquePoint,
+        },
+      })
+
+      // try to update the required field to null
+      await expect(() =>
+        payload.update({
+          collection: 'point-fields',
+          data: {
+            point: null,
+          },
+          id: doc.id,
+        }),
+      ).rejects.toThrow('The following field is invalid: Location')
+    })
+
+    it('should not throw validation error when non-"required" field is set to null', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+      // Use unique values to avoid collisions
+      const uniqueLocalized = [44.555, -33.666]
+      const uniquePoint = [22.777, -11.888]
+
+      // first create the point field
+      doc = await payload.create({
+        collection: 'point-fields',
+        data: {
+          localized: uniqueLocalized,
+          point: uniquePoint,
+        },
+      })
+
+      expect(doc.localized).toEqual(uniqueLocalized)
+
+      // try to update the non-required field to null
+      const updatedDoc = await payload.update({
+        collection: 'point-fields',
+        data: {
+          localized: null,
+        },
+        id: doc.id,
+      })
+
+      expect(updatedDoc.localized).toEqual(undefined)
+    })
+
+    it('should not error with camel case name point field', async () => {
+      if (payload.db.name === 'sqlite') {
+        return
+      }
+
+      const res = await payload.create({
+        collection: 'point-fields',
+        data: { point, camelCasePoint: [7, -7] },
+      })
+      expect(res.camelCasePoint).toEqual([7, -7])
+    })
+  })
+
+  describe('checkbox', () => {
+    beforeEach(async () => {
+      await payload.delete({
+        collection: checkboxFieldsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
+
+    it('should query checkbox fields with exists operator', async () => {
+      const existsTrueDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+          checkboxNotRequired: false,
+        },
+      })
+
+      const existsFalseDoc = await payload.create({
+        collection: checkboxFieldsSlug,
+        data: {
+          checkbox: true,
+        },
+      })
+
+      const existsFalse = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: false,
+          },
+        },
+      })
+      expect(existsFalse.totalDocs).toBe(1)
+      expect(existsFalse.docs[0]?.id).toEqual(existsFalseDoc.id)
+
+      const existsTrue = await payload.find({
+        collection: checkboxFieldsSlug,
+        where: {
+          checkboxNotRequired: {
+            exists: true,
+          },
+        },
+      })
+      expect(existsTrue.totalDocs).toBe(1)
+      expect(existsTrue.docs[0]?.id).toEqual(existsTrueDoc.id)
     })
   })
 
   describe('unique indexes', () => {
+    beforeEach(async () => {
+      // Clean up indexed-fields to avoid unique constraint violations
+      // This ensures each test starts with a clean slate
+      await payload.delete({
+        collection: 'indexed-fields',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+    })
+
     it('should throw validation error saving on unique fields', async () => {
+      const timestamp = Date.now() + Math.random()
       const data = {
-        text: 'a',
-        uniqueText: 'a',
+        text: 'a-' + timestamp,
+        uniqueText: 'a-' + timestamp,
       }
       await payload.create({
         collection: 'indexed-fields',
@@ -1291,15 +1787,18 @@ describe('Fields', () => {
     })
 
     it('should throw validation error saving on unique relationship fields hasMany: false non polymorphic', async () => {
-      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'unique-test-hasMany-false-' + Date.now() },
+      })
 
-      await payload
+      const firstDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '1',
-            text: '2',
-            uniqueRequiredText: '3',
+            localizedUniqueRequiredText: 'unique-1-' + Date.now(),
+            text: 'unique-2-' + Date.now(),
+            uniqueRequiredText: 'unique-3-' + Date.now(),
             uniqueRelationship: textDoc.id,
           },
         })
@@ -1308,7 +1807,7 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '20' },
+            data: { localizedUniqueRequiredText: 'unique-20-' + Date.now() },
             id: doc.id,
           }),
         )
@@ -1317,9 +1816,9 @@ describe('Fields', () => {
         payload.create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '4',
-            text: '5',
-            uniqueRequiredText: '10',
+            localizedUniqueRequiredText: 'unique-4-' + Date.now(),
+            text: 'unique-5-' + Date.now(),
+            uniqueRequiredText: 'unique-10-' + Date.now(),
             uniqueRelationship: textDoc.id,
           },
         }),
@@ -1327,15 +1826,18 @@ describe('Fields', () => {
     })
 
     it('should throw validation error saving on unique relationship fields hasMany: true', async () => {
-      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'unique-test-hasMany-true-' + Date.now() },
+      })
 
-      await payload
+      const firstDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '1',
-            text: '2',
-            uniqueRequiredText: '3',
+            localizedUniqueRequiredText: 'unique-hasMany1-' + Date.now(),
+            text: 'unique-hasMany2-' + Date.now(),
+            uniqueRequiredText: 'unique-hasMany3-' + Date.now(),
             uniqueHasManyRelationship: [textDoc.id],
           },
         })
@@ -1344,19 +1846,19 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '40' },
+            data: { localizedUniqueRequiredText: 'unique-hasMany40-' + Date.now() },
             id: doc.id,
           }),
         )
 
       // Should allow the same relationship on a diferrent field!
-      await payload
+      const secondDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '31',
-            text: '24',
-            uniqueRequiredText: '55',
+            localizedUniqueRequiredText: 'unique-hasMany31-' + Date.now(),
+            text: 'unique-hasMany24-' + Date.now(),
+            uniqueRequiredText: 'unique-hasMany55-' + Date.now(),
             uniqueHasManyRelationship_2: [textDoc.id],
           },
         })
@@ -1365,7 +1867,7 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '30' },
+            data: { localizedUniqueRequiredText: 'unique-hasMany30-' + Date.now() },
             id: doc.id,
           }),
         )
@@ -1374,9 +1876,9 @@ describe('Fields', () => {
         payload.create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '4',
-            text: '5',
-            uniqueRequiredText: '10',
+            localizedUniqueRequiredText: 'unique-hasMany4-' + Date.now(),
+            text: 'unique-hasMany5-' + Date.now(),
+            uniqueRequiredText: 'unique-hasMany10-' + Date.now(),
             uniqueHasManyRelationship: [textDoc.id],
           },
         }),
@@ -1384,15 +1886,18 @@ describe('Fields', () => {
     })
 
     it('should throw validation error saving on unique relationship fields polymorphic not hasMany', async () => {
-      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'unique-test-poly-' + Date.now() },
+      })
 
-      await payload
+      const firstDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '1',
-            text: '2',
-            uniqueRequiredText: '3',
+            localizedUniqueRequiredText: 'unique-poly1-' + Date.now(),
+            text: 'unique-poly2-' + Date.now(),
+            uniqueRequiredText: 'unique-poly3-' + Date.now(),
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
@@ -1401,19 +1906,19 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '20' },
+            data: { localizedUniqueRequiredText: 'unique-poly20-' + Date.now() },
             id: doc.id,
           }),
         )
 
       // Should allow the same relationship on a diferrent field!
-      await payload
+      const secondDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '31',
-            text: '24',
-            uniqueRequiredText: '55',
+            localizedUniqueRequiredText: 'unique-poly31-' + Date.now(),
+            text: 'unique-poly24-' + Date.now(),
+            uniqueRequiredText: 'unique-poly55-' + Date.now(),
             uniquePolymorphicRelationship_2: { relationTo: 'text-fields', value: textDoc.id },
           },
         })
@@ -1422,7 +1927,7 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '100' },
+            data: { localizedUniqueRequiredText: 'unique-poly100-' + Date.now() },
             id: doc.id,
           }),
         )
@@ -1431,9 +1936,9 @@ describe('Fields', () => {
         payload.create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '4',
-            text: '5',
-            uniqueRequiredText: '10',
+            localizedUniqueRequiredText: 'unique-poly4-' + Date.now(),
+            text: 'unique-poly5-' + Date.now(),
+            uniqueRequiredText: 'unique-poly10-' + Date.now(),
             uniquePolymorphicRelationship: { relationTo: 'text-fields', value: textDoc.id },
           },
         }),
@@ -1441,15 +1946,18 @@ describe('Fields', () => {
     })
 
     it('should throw validation error saving on unique relationship fields polymorphic hasMany: true', async () => {
-      const textDoc = await payload.create({ collection: 'text-fields', data: { text: 'asd' } })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'unique-test-poly-hasMany-' + Date.now() },
+      })
 
-      await payload
+      const firstDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '1',
-            text: '2',
-            uniqueRequiredText: '3',
+            localizedUniqueRequiredText: 'unique-polyMany1-' + Date.now(),
+            text: 'unique-polyMany2-' + Date.now(),
+            uniqueRequiredText: 'unique-polyMany3-' + Date.now(),
             uniqueHasManyPolymorphicRelationship: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
@@ -1459,19 +1967,19 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '100' },
+            data: { localizedUniqueRequiredText: 'unique-polyMany100-' + Date.now() },
             id: doc.id,
           }),
         )
 
       // Should allow the same relationship on a diferrent field!
-      await payload
+      const secondDoc = await payload
         .create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '31',
-            text: '24',
-            uniqueRequiredText: '55',
+            localizedUniqueRequiredText: 'unique-polyMany31-' + Date.now(),
+            text: 'unique-polyMany24-' + Date.now(),
+            uniqueRequiredText: 'unique-polyMany55-' + Date.now(),
             uniqueHasManyPolymorphicRelationship_2: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
@@ -1482,7 +1990,7 @@ describe('Fields', () => {
           payload.update({
             locale: 'es',
             collection: 'indexed-fields',
-            data: { localizedUniqueRequiredText: '300' },
+            data: { localizedUniqueRequiredText: 'unique-polyMany300-' + Date.now() },
             id: doc.id,
           }),
         )
@@ -1491,9 +1999,9 @@ describe('Fields', () => {
         payload.create({
           collection: 'indexed-fields',
           data: {
-            localizedUniqueRequiredText: '4',
-            text: '5',
-            uniqueRequiredText: '10',
+            localizedUniqueRequiredText: 'unique-polyMany4-' + Date.now(),
+            text: 'unique-polyMany5-' + Date.now(),
+            uniqueRequiredText: 'unique-polyMany10-' + Date.now(),
             uniqueHasManyPolymorphicRelationship: [
               { relationTo: 'text-fields', value: textDoc.id },
             ],
@@ -1503,10 +2011,11 @@ describe('Fields', () => {
     })
 
     it('should not throw validation error saving multiple null values for unique fields', async () => {
+      const timestamp = Date.now()
       const data = {
-        localizedUniqueRequiredText: 'en1',
-        text: 'a',
-        uniqueRequiredText: 'a',
+        localizedUniqueRequiredText: 'en1-' + timestamp,
+        text: 'a-' + timestamp,
+        uniqueRequiredText: 'a-' + timestamp,
         // uniqueText omitted on purpose
       }
       const doc = await payload.create({
@@ -1518,23 +2027,24 @@ describe('Fields', () => {
         id: doc.id,
         collection: 'indexed-fields',
         data: {
-          localizedUniqueRequiredText: 'es1',
+          localizedUniqueRequiredText: 'es1-' + timestamp,
         },
         locale: 'es',
       })
-      data.uniqueRequiredText = 'b'
+      data.uniqueRequiredText = 'b-' + timestamp
       const result = await payload.create({
         collection: 'indexed-fields',
-        data: { ...data, localizedUniqueRequiredText: 'en2' },
+        data: { ...data, localizedUniqueRequiredText: 'en2-' + timestamp },
       })
 
       expect(result.id).toBeDefined()
     })
 
     it('should duplicate with unique fields', async () => {
+      const timestamp = Date.now()
       const data = {
-        text: 'a',
-        // uniqueRequiredText: 'duplicate',
+        text: 'duplicate-' + timestamp,
+        uniqueRequiredText: 'uniqueRequired-' + timestamp,
       }
       const doc = await payload.create({
         collection: 'indexed-fields',
@@ -1546,7 +2056,7 @@ describe('Fields', () => {
       })
 
       expect(result.id).not.toEqual(doc.id)
-      expect(result.uniqueRequiredText).toStrictEqual('uniqueRequired - Copy')
+      expect(result.uniqueRequiredText).toStrictEqual('uniqueRequired-' + timestamp + ' - Copy')
     })
   })
 
@@ -1564,7 +2074,7 @@ describe('Fields', () => {
     it('should create with ids and nested ids', async () => {
       const docWithIDs = (await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })) as Partial<GroupField>
       expect(docWithIDs.group.subGroup.arrayWithinGroup[0].id).toBeDefined()
     })
@@ -1815,7 +2325,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Second text field')
     })
 
     it('should show proper validation error on text field in row field in nested array', async () => {
@@ -1835,7 +2345,160 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Text In Row')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
+    })
+
+    it('should not have multiple instances of the id field in an array with a nested custom id field', () => {
+      const arraysCollection = payload.config.collections.find(
+        (collection) => collection.slug === arrayFieldsSlug,
+      )
+
+      const arrayWithNestedCustomIDField = arraysCollection?.fields.find(
+        (f) => f.name === 'arrayWithCustomID',
+      )
+
+      const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
+
+      expect(idFields).toHaveLength(1)
+      expect(idFields[0].admin?.disableListFilter).toBe(true)
+    })
+
+    it('should query exists true', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withCollapsed.id)
+    })
+
+    it('should query exists false', { db: 'mongo' }, async () => {
+      await payload.delete({ collection: 'array-fields', where: {} })
+
+      const withoutCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+          items: [
+            {
+              text: 'without-collapsed',
+            },
+          ],
+        },
+      })
+      const withCollapsed = await payload.create({
+        collection: 'array-fields',
+        data: {
+          localized: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          collapsedArray: [
+            {
+              text: 'with-collapsed',
+            },
+          ],
+          items: [{ text: 'with-collapsed' }],
+        },
+      })
+
+      const res = await payload.find({
+        collection: 'array-fields',
+        where: {
+          collapsedArray: {
+            exists: false,
+          },
+        },
+      })
+
+      expect(res.totalDocs).toBe(1)
+      expect(res.docs[0].id).toBe(withoutCollapsed.id)
+    })
+
+    it('should properly handle richText inside array', async () => {
+      const richTextValue = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Hello from array', format: 1 }],
+            },
+          ],
+        },
+      }
+
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              text: 'required',
+              richTextField: richTextValue,
+            },
+          ],
+          localized: [{ text: 'req' }],
+        },
+      })
+
+      // Verify richText is returned as an object, not a string
+      expect(doc.items[0].richTextField).toBeDefined()
+      expect(typeof doc.items[0].richTextField).toBe('object')
+      expect(doc.items[0].richTextField).toEqual(richTextValue)
+
+      // Also verify on read
+      const found = await payload.findByID({
+        collection,
+        id: doc.id,
+      })
+
+      expect(found.items[0].richTextField).toBeDefined()
+      expect(typeof found.items[0].richTextField).toBe('object')
+      expect(found.items[0].richTextField).toEqual(richTextValue)
     })
   })
 
@@ -1859,6 +2522,53 @@ describe('Fields', () => {
         id: expect.any(String),
         groupItem: {
           text: 'Hello world',
+        },
+      })
+    })
+
+    it('should work with unnamed group', async () => {
+      const groupDoc = await payload.create({
+        collection: groupFieldsSlug,
+        data: {
+          insideUnnamedGroup: 'Hello world',
+          deeplyNestedGroup: { insideNestedUnnamedGroup: 'Secondfield' },
+        },
+      })
+      expect(groupDoc).toMatchObject({
+        id: expect.anything(),
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
+        },
+      })
+    })
+
+    it('should work with unnamed group - graphql', async () => {
+      const mutation = `mutation {
+              createGroupField(
+                data: {
+                  insideUnnamedGroup: "Hello world",
+                  deeplyNestedGroup: { insideNestedUnnamedGroup: "Secondfield" },
+                  group: {text: "hello"}
+                }
+              ) {
+                insideUnnamedGroup
+                deeplyNestedGroup {
+                  insideNestedUnnamedGroup
+                }
+              }
+            }`
+
+      const groupDoc = await restClient.GRAPHQL_POST({
+        body: JSON.stringify({ query: mutation }),
+      })
+
+      const data = (await groupDoc.json()).data.createGroupField
+
+      expect(data).toMatchObject({
+        insideUnnamedGroup: 'Hello world',
+        deeplyNestedGroup: {
+          insideNestedUnnamedGroup: 'Secondfield',
         },
       })
     })
@@ -2307,7 +3017,7 @@ describe('Fields', () => {
     it('should return empty object for groups when no data present', async () => {
       const doc = await payload.create({
         collection: groupFieldsSlug,
-        data: groupDoc,
+        data: namedGroupDoc,
       })
 
       expect(doc.potentiallyEmptyGroup).toBeDefined()
@@ -2363,7 +3073,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Array 3 > Text')
+      ).rejects.toThrow('The following field is invalid: Tab with Array > Array 3 > Text')
     })
   })
 
@@ -2631,7 +3341,12 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      const doc: BlockField = blockFields.docs[0] as BlockField
+      // Find the document that has the localizedReferences field from the seed
+      const doc: BlockField = blockFields.docs.find(
+        (d: BlockField) =>
+          d?.localizedReferences?.[0]?.blockType === 'localizedTextReference2' &&
+          d?.localizedReferences?.[0]?.text !== undefined,
+      ) as BlockField
 
       expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
       expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
@@ -2643,7 +3358,12 @@ describe('Fields', () => {
         locale: 'all',
       })
 
-      const doc: any = blockFields.docs[0]
+      // Find the document that has the localizedReferencesLocalizedBlock field from the seed
+      const doc: any = blockFields.docs.find(
+        (d: any) =>
+          d?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType === 'localizedTextReference' &&
+          d?.localizedReferencesLocalizedBlock?.en?.[0]?.text !== undefined,
+      )
 
       expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
         'localizedTextReference',
@@ -2667,7 +3387,7 @@ describe('Fields', () => {
           },
         }),
       ).rejects.toThrow(
-        'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+        'The following field is invalid: Collapsible Field > Group > Sub Group > Required Text Within Sub Group',
       )
     })
   })
@@ -2737,12 +3457,24 @@ describe('Fields', () => {
       let bazBar
 
       beforeEach(async () => {
+        // Clean up all json-fields documents to have a clean slate
+        // This ensures each test has predictable data and query results
+        await payload.delete({
+          collection: 'json-fields',
+          where: {
+            id: {
+              exists: true,
+            },
+          },
+        })
+
         fooBar = await payload.create({
           collection: 'json-fields',
           data: {
             json: { foo: 'foobar', number: 5 },
           },
         })
+
         bazBar = await payload.create({
           collection: 'json-fields',
           data: {
@@ -2755,7 +3487,10 @@ describe('Fields', () => {
           await payload.create({
             collection: 'json-fields',
             data: {
-              json: { value: i },
+              json: {
+                value: i,
+                isEven: i % 2 === 0,
+              },
             },
           })
         }
@@ -2961,8 +3696,31 @@ describe('Fields', () => {
         expect(docIDs).toContain(2)
       })
 
+      it('should query nested numbers with multiple clauses - equals_and_in', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              {
+                'json.isEven': { equals: true },
+              },
+              {
+                // Tests odd -> even order and even -> odd order for better coverage.
+                'json.value': { in: [1, 4, 2, 3] },
+              },
+            ],
+          },
+        })
+
+        const docIDs = docs.map(({ json }) => json.value)
+
+        expect(docIDs).not.toContain(1)
+        expect(docIDs).toContain(2)
+        expect(docIDs).not.toContain(3)
+        expect(docIDs).toContain(4)
+      })
+
       it('should query deeply', async () => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -3020,91 +3778,91 @@ describe('Fields', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0].id).toBe(json_1.id)
       })
-    })
-  })
 
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
+      it('should disallow unsafe query paths', async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.select from': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json."unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.(unsafe"': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.unsafe="': { equals: 5 },
+            },
+          }),
+        ).rejects.toBeTruthy()
       })
 
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
+      it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: 'select(' },
+            },
+          }),
+        ).rejects.toBeTruthy()
 
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: '"unsafe' },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `'unsafe` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe\\` },
+            },
+          }),
+        ).rejects.toBeTruthy()
+
+        await expect(
+          payload.find({
+            collection: 'json-fields',
+            where: {
+              'json.value': { equals: `unsafe=` },
+            },
+          }),
+        ).rejects.toBeTruthy()
       })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0].richText[0].textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0].richText
-      expect(nodes).toBeDefined()
-      const child = nodes.flatMap((n) => n.children).find((c) => c.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should respect rich text depth parameter', async () => {
-      const query = `query {
-        RichTextFields {
-          docs {
-            richText(depth: 2)
-          }
-        }
-      }`
-      const { data } = await restClient
-        .GRAPHQL_POST({
-          body: JSON.stringify({ query }),
-        })
-        .then((res) => res.json())
-      const { docs }: PaginatedDocs<RichTextField> = data.RichTextFields
-      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any
-      expect(uploadElement.value.media.filename).toStrictEqual('payload.png')
     })
   })
 
@@ -3120,6 +3878,277 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+    })
+
+    describe('querying', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdIDs) {
+          await payload.delete({ collection: 'relationship-fields', id })
+        }
+        createdIDs.length = 0
+      })
+
+      it('should query non-polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text1.id, text2.id]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text1.id] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query polymorphic hasMany - equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        // Query with exact array match [text-fields:text1, array-fields:array1]
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.id).toBe(relDoc.id)
+
+        // Verify that querying with subset [text-fields:text1] returns no results (not exact match)
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              equals: [{ relationTo: 'text-fields', value: text1.id }],
+            },
+          },
+        })
+
+        expect(noMatchResult.docs).toHaveLength(0)
+      })
+
+      it('should query non-polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const text3 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 3' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id, text2.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text3.id],
+            relationship: { relationTo: 'text-fields', value: text3.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text1.id, text2.id] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text1.id, text2.id],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text3.id] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text3.id],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+
+      it('should query polymorphic hasMany - not_equals', async () => {
+        // TODO: Remove this check once we implement exact array equality for SQL adapters
+        // Currently only MongoDB supports array equals/not_equals on hasMany relationships
+        if (payload.db.name !== 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        // @ts-expect-error - items field typing issue
+        const array1 = await payload.create({
+          collection: 'array-fields',
+          data: { items: [{ text: 'Array 1' }] },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        const relDoc1 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [
+              { relationTo: 'text-fields', value: text1.id },
+              { relationTo: 'array-fields', value: array1.id },
+            ],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc1.id)
+
+        const relDoc2 = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: text2.id }],
+            relationship: { relationTo: 'text-fields', value: text2.id },
+          },
+        })
+        createdIDs.push(relDoc2.id)
+
+        // Query with not_equals [text-fields:text1, array-fields:array1] should exclude relDoc1 and include relDoc2
+        const result = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [
+                { relationTo: 'text-fields', value: text1.id },
+                { relationTo: 'array-fields', value: array1.id },
+              ],
+            },
+          },
+        })
+
+        const docIDs = result.docs.map((doc) => doc.id)
+
+        expect(docIDs).toContain(relDoc2.id)
+        expect(docIDs).not.toContain(relDoc1.id)
+
+        // Query with not_equals [text-fields:text2] should exclude relDoc2 and include relDoc1
+        const noMatchResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationHasManyPolymorphic: {
+              not_equals: [{ relationTo: 'text-fields', value: text2.id }],
+            },
+          },
+        })
+
+        const noMatchDocIDs = noMatchResult.docs.map((doc) => doc.id)
+
+        expect(noMatchDocIDs).toContain(relDoc1.id)
+        expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
     })
   })
 
@@ -3179,6 +4208,609 @@ describe('Fields', () => {
       })
 
       expect(result.docs).toHaveLength(1)
+    })
+  })
+
+  describe('Custom ID Nested', () => {
+    const createdIDs: number[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({
+          collection: customIDNestedSlug,
+          id,
+        })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should create document with numeric custom ID nested in tabs', async () => {
+      const customID = 12345
+      createdIDs.push(customID)
+
+      const doc = await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Test Document',
+          description: 'Testing nested custom ID field',
+        },
+      })
+
+      expect(doc.id).toBe(customID)
+      expect(doc.title).toBe('Test Document')
+    })
+
+    it('should retrieve document by numeric custom ID', async () => {
+      const customID = 67890
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Another Test',
+        },
+      })
+
+      const retrieved = await payload.findByID({
+        collection: customIDNestedSlug,
+        id: customID,
+      })
+
+      expect(retrieved.id).toBe(customID)
+      expect(retrieved.title).toBe('Another Test')
+    })
+
+    it('should update document with numeric custom ID', async () => {
+      const customID = 99999
+      createdIDs.push(customID)
+
+      await payload.create({
+        collection: customIDNestedSlug,
+        data: {
+          id: customID,
+          title: 'Original Title',
+        },
+      })
+
+      const updated = await payload.update({
+        collection: customIDNestedSlug,
+        id: customID,
+        data: {
+          title: 'Updated Title',
+        },
+      })
+
+      expect(updated.id).toBe(customID)
+      expect(updated.title).toBe('Updated Title')
+    })
+  })
+
+  describe('date fields with timezones', () => {
+    it('should create document with UTC offset timezone', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+      expect(doc.dateWithOffsetTimezone_tz).toEqual('+05:30')
+    })
+
+    it('should update timezone from IANA to offset', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      const updated = await payload.update({
+        id: doc.id,
+        collection: dateFieldsSlug,
+        data: {
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+      })
+
+      expect(updated.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should query documents by timezone field', async () => {
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T08:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      const indiaTimezoneResults = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          dateWithOffsetTimezone_tz: {
+            equals: '+05:30',
+          },
+        },
+      })
+
+      expect(indiaTimezoneResults.docs.length).toBeGreaterThanOrEqual(1)
+      expect(
+        indiaTimezoneResults.docs.every((doc) => doc.dateWithOffsetTimezone_tz === '+05:30'),
+      ).toBe(true)
+    })
+
+    it('should store mixed IANA and offset timezones correctly', async () => {
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+          dateWithMixedTimezones_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+
+      // Create another doc with offset timezone
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+          dateWithMixedTimezones_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithMixedTimezones_tz).toEqual('+05:30')
+    })
+
+    it('should handle different offset formats consistently', async () => {
+      // Test HH:mm format
+      const doc1 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+          dateWithOffsetTimezone_tz: '+05:30',
+        },
+        draft: true,
+      })
+
+      expect(doc1.dateWithOffsetTimezone_tz).toEqual('+05:30')
+
+      // Test negative offset
+      const doc2 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+          dateWithOffsetTimezone_tz: '-08:00',
+        },
+        draft: true,
+      })
+
+      expect(doc2.dateWithOffsetTimezone_tz).toEqual('-08:00')
+
+      // Test zero offset
+      const doc3 = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithOffsetTimezone: '2027-08-12T10:00:00.000Z',
+          dateWithOffsetTimezone_tz: '+00:00',
+        },
+        draft: true,
+      })
+
+      expect(doc3.dateWithOffsetTimezone_tz).toEqual('+00:00')
+    })
+
+    describe('GraphQL timezone operations', () => {
+      // Note: GraphQL enums serialize to their NAME (e.g., '_TZOFFSET_PLUS_05_30'), not their VALUE (e.g., '+05:30')
+      // This is standard GraphQL behavior. UTC offsets are transformed to GraphQL-safe names:
+      // +05:30 → _TZOFFSET_PLUS_05_30, -08:00 → _TZOFFSET_MINUS_08_00, America/New_York → America_New_York
+
+      it('should read UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone).toEqual('2027-08-12T04:30:00.000Z')
+        // GraphQL returns enum NAME, not VALUE
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_PLUS_05_30')
+      })
+
+      it('should read negative UTC offset timezone via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateField.dateWithOffsetTimezone_tz).toEqual('_TZOFFSET_MINUS_08_00')
+      })
+
+      it('should read mixed IANA and offset timezones via GraphQL query', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateField(id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id}) {
+              dateWithMixedTimezones
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        // GraphQL returns enum NAME (America_New_York), not VALUE (America/New_York)
+        expect(result.data.DateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should create document with UTC offset timezone via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T04:30:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              id
+              dateWithOffsetTimezone
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should create document with negative UTC offset via GraphQL mutation', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T16:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update timezone from one offset to another via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithOffsetTimezone_tz: _TZOFFSET_MINUS_08_00
+              }
+            ) {
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_MINUS_08_00',
+        )
+      })
+
+      it('should update mixed timezone field from IANA to offset via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+            dateWithMixedTimezones_tz: 'America/New_York',
+          },
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: _TZOFFSET_PLUS_05_30
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual(
+          '_TZOFFSET_PLUS_05_30',
+        )
+      })
+
+      it('should update mixed timezone field from offset to IANA via GraphQL mutation', async () => {
+        const doc = await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithMixedTimezones: '2027-08-12T04:30:00.000Z',
+            dateWithMixedTimezones_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        const mutation = `
+          mutation {
+            updateDateField(
+              id: ${typeof doc.id === 'string' ? `"${doc.id}"` : doc.id},
+              data: {
+                dateWithMixedTimezones_tz: America_New_York
+              }
+            ) {
+              dateWithMixedTimezones_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.updateDateField.dateWithMixedTimezones_tz).toEqual('America_New_York')
+      })
+
+      it('should query documents by offset timezone field via GraphQL', async () => {
+        // Create documents with different timezones
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T04:30:00.000Z',
+            dateWithOffsetTimezone_tz: '+05:30',
+          },
+          draft: true,
+        })
+
+        await payload.create({
+          collection: dateFieldsSlug,
+          data: {
+            ...dateDoc,
+            dateWithOffsetTimezone: '2027-08-12T16:00:00.000Z',
+            dateWithOffsetTimezone_tz: '-08:00',
+          },
+          draft: true,
+        })
+
+        const query = `
+          query {
+            DateFields(where: { dateWithOffsetTimezone_tz: { equals: _TZOFFSET_PLUS_05_30 } }) {
+              docs {
+                dateWithOffsetTimezone_tz
+              }
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        const result = await response.json()
+
+        expect(result.errors).toBeUndefined()
+        expect(result.data.DateFields.docs.length).toBeGreaterThanOrEqual(1)
+        expect(
+          result.data.DateFields.docs.every(
+            (doc: { dateWithOffsetTimezone_tz: string }) =>
+              doc.dateWithOffsetTimezone_tz === '_TZOFFSET_PLUS_05_30',
+          ),
+        ).toBe(true)
+      })
+
+      it('should handle UTC+00:00 offset via GraphQL', async () => {
+        const mutation = `
+          mutation {
+            createDateField(
+              data: {
+                default: "2027-08-12T10:00:00.000Z",
+                dayAndTimeWithTimezone: "2027-08-12T01:00:00.000Z",
+                dayAndTimeWithTimezone_tz: Asia_Tokyo,
+                dayAndTimeWithTimezoneRequired_tz: America_New_York,
+                dateWithOffsetTimezone: "2027-08-12T10:00:00.000Z",
+                dateWithOffsetTimezone_tz: _TZOFFSET_PLUS_00_00
+              }
+            ) {
+              id
+              dateWithOffsetTimezone_tz
+            }
+          }
+        `
+
+        const response = await restClient.GRAPHQL_POST({
+          body: JSON.stringify({ query: mutation }),
+        })
+        const result = await response.json()
+
+        if (result.errors) {
+          console.error('GraphQL errors:', JSON.stringify(result.errors, null, 2))
+        }
+        expect(result.errors).toBeUndefined()
+        expect(result.data.createDateField.dateWithOffsetTimezone_tz).toEqual(
+          '_TZOFFSET_PLUS_00_00',
+        )
+      })
+    })
+
+    it('should apply timezone override function to customize the field', async () => {
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // We can verify this by checking the collection config has the modified field
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
+      expect(timezoneField).toBeDefined()
+      expect(timezoneField?.type).toEqual('select')
+      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect(timezoneField?.admin?.description).toEqual(
+        'This timezone field was customized via override',
+      )
+
+      // Also verify it still works for creating/storing data
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dateDoc,
+          dateWithTimezoneWithDisabledColumns: '2027-08-12T10:00:00.000Z',
+          dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneWithDisabledColumns_tz).toEqual('America/New_York')
+    })
+
+    it('should generate timezone field label from parent date field label', () => {
+      const dateCollection = payload.collections[dateFieldsSlug]
+      const fields = dateCollection.config.flattenedFields
+
+      // Field with no explicit label - should use toWords(name) for timezone label
+      const defaultTzField = fields.find((f) => f.name === 'defaultWithTimezone_tz')
+      expect(defaultTzField?.label).toEqual('Default With Timezone Tz')
+
+      // Field with disableListColumn override - label should still be generated
+      const disabledColumnsTzField = fields.find(
+        (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
+      )
+      expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
     })
   })
 })

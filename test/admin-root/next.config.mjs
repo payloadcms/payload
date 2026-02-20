@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 
-import withPayload from '../../packages/next/src/withPayload.js'
+import { withPayload } from '../../packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -20,7 +20,11 @@ export default withBundleAnalyzer(
       ignoreBuildErrors: true,
     },
     images: {
-      domains: ['localhost'],
+      remotePatterns: [
+        {
+          hostname: 'localhost',
+        },
+      ],
     },
     env: {
       PAYLOAD_CORE_DEV: 'true',

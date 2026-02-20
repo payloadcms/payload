@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import type { CheckboxField, Field } from '../fields/config/types.js'
+import type { CheckboxField, Field, Option } from '../fields/config/types.js'
 
-export const statuses = [
+export const statuses: Option[] = [
   {
     label: ({ t }) => t('version:draft'),
     value: 'draft',
@@ -12,7 +12,7 @@ export const statuses = [
   },
 ]
 
-const baseVersionFields: Field[] = [
+export const baseVersionFields = ({ localized }: { localized: boolean }): Field[] => [
   {
     name: '_status',
     type: 'select',
@@ -25,6 +25,7 @@ const baseVersionFields: Field[] = [
     defaultValue: 'draft',
     index: true,
     label: ({ t }) => t('version:status'),
+    localized: Boolean(localized),
     options: statuses,
   },
 ]
@@ -43,5 +44,3 @@ export const versionSnapshotField: CheckboxField = {
   },
   index: true,
 }
-
-export default baseVersionFields

@@ -1,0 +1,121 @@
+{
+  "name": "@payloadcms/plugin-import-export",
+  "version": "3.77.0",
+  "description": "Import-Export plugin for Payload",
+  "keywords": [
+    "payload",
+    "cms",
+    "plugin",
+    "typescript",
+    "react",
+    "nextjs",
+    "import",
+    "export"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-import-export"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
+    },
+    "./translations/languages/all": {
+      "import": "./src/translations/index.ts",
+      "types": "./src/translations/index.ts",
+      "default": "./src/translations/index.ts"
+    },
+    "./translations/languages/*": {
+      "import": "./src/translations/languages/*.ts",
+      "types": "./src/translations/languages/*.ts",
+      "default": "./src/translations/languages/*.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@faceless-ui/modal": "3.0.0",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "csv-parse": "5.6.0",
+    "csv-stringify": "6.5.2",
+    "qs-esm": "7.0.2"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
+      },
+      "./translations/languages/all": {
+        "import": "./dist/translations/index.js",
+        "types": "./dist/translations/index.d.ts",
+        "default": "./dist/translations/index.js"
+      },
+      "./translations/languages/*": {
+        "import": "./dist/translations/languages/*.js",
+        "types": "./dist/translations/languages/*.d.ts",
+        "default": "./dist/translations/languages/*.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "homepage:": "https://payloadcms.com"
+}

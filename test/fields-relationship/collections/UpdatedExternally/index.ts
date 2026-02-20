@@ -19,7 +19,7 @@ export const RelationshipUpdatedExternally: CollectionConfig = {
           admin: {
             components: {
               Field: {
-                path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                path: '/PopulateFieldButton/index.js#PopulateFieldButton',
                 clientProps: {
                   hasMany: false,
                   hasMultipleRelations: false,
@@ -50,7 +50,7 @@ export const RelationshipUpdatedExternally: CollectionConfig = {
           admin: {
             components: {
               Field: {
-                path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                path: '/PopulateFieldButton/index.js#PopulateFieldButton',
                 clientProps: {
                   hasMultipleRelations: false,
                   targetFieldPath: 'relationHasMany',
@@ -80,7 +80,7 @@ export const RelationshipUpdatedExternally: CollectionConfig = {
           admin: {
             components: {
               Field: {
-                path: '/PrePopulateFieldUI/index.js#PrePopulateFieldUI',
+                path: '/PopulateFieldButton/index.js#PopulateFieldButton',
                 clientProps: {
                   hasMultipleRelations: true,
                   targetFieldPath: 'relationToManyHasMany',

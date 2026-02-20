@@ -2,13 +2,14 @@ import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, getLocalizedPaths } from 'payload'
+import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
+import { isObjectID } from '../utilities/isObjectID.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -20,7 +21,6 @@ type SearchParam = {
 
 const subQueryOptions = {
   lean: true,
-  limit: 50,
 }
 
 /**
@@ -42,7 +42,7 @@ export async function buildSearchParam({
   globalSlug?: string
   incomingPath: string
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   payload: Payload
   val: unknown
@@ -114,7 +114,7 @@ export async function buildSearchParam({
 
     const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
-    if (rawQuery) {
+    if (rawQuery && paths.length === 1) {
       return { value: rawQuery }
     }
 
@@ -138,7 +138,7 @@ export async function buildSearchParam({
           throw new APIError(`Collection with the slug ${collectionSlug} was not found.`)
         }
 
-        const { Model: SubModel } = getCollection({
+        const { collectionConfig, Model: SubModel } = getCollection({
           adapter: payload.db as MongooseAdapter,
           collectionSlug,
         })
@@ -154,22 +154,72 @@ export async function buildSearchParam({
             },
           })
 
-          const result = await SubModel.find(subQuery, subQueryOptions)
+          const field = paths[0].field
+
+          const select: Record<string, boolean> = {
+            _id: true,
+          }
+
+          let joinPath: null | string = null
+
+          if (field.type === 'join') {
+            const relationshipField = getFieldByPath({
+              fields: collectionConfig.flattenedFields,
+              path: field.on,
+            })
+            if (!relationshipField) {
+              throw new APIError('Relationship field was not found')
+            }
+
+            let path = relationshipField.localizedPath
+            if (relationshipField.pathHasLocalized && payload.config.localization) {
+              path = path.replace('<locale>', locale || payload.config.localization.defaultLocale)
+            }
+            select[path] = true
+
+            joinPath = path
+          }
+
+          if (joinPath) {
+            select[joinPath] = true
+          }
+
+          const result = await SubModel.find(subQuery).lean().select(select)
 
           const $in: unknown[] = []
 
-          result.forEach((doc) => {
-            const stringID = doc._id.toString()
-            $in.push(stringID)
+          result.forEach((doc: any) => {
+            if (joinPath) {
+              let ref = doc
 
-            if (Types.ObjectId.isValid(stringID)) {
-              $in.push(doc._id)
+              for (const segment of joinPath.split('.')) {
+                if (typeof ref === 'object' && ref) {
+                  ref = ref[segment]
+                }
+              }
+
+              if (Array.isArray(ref)) {
+                for (const item of ref) {
+                  if (isObjectID(item)) {
+                    $in.push(item)
+                  }
+                }
+              } else if (isObjectID(ref)) {
+                $in.push(ref)
+              }
+            } else {
+              const stringID = doc._id.toString()
+              $in.push(stringID)
+
+              if (Types.ObjectId.isValid(stringID)) {
+                $in.push(doc._id)
+              }
             }
           })
 
           if (pathsToQuery.length === 1) {
             return {
-              path,
+              path: joinPath ? '_id' : path,
               value: { $in },
             }
           }
@@ -196,10 +246,13 @@ export async function buildSearchParam({
             value: { $in },
           }
         } else {
-          relationshipQuery = {
-            value: {
-              _id: { $in },
-            },
+          const nextSubPath = pathsToQuery[i + 1]?.path
+          if (nextSubPath) {
+            relationshipQuery = {
+              value: {
+                [nextSubPath]: { $in },
+              },
+            }
           }
         }
       }
@@ -263,7 +316,7 @@ export async function buildSearchParam({
             $and: words.map((word) => ({
               [path]: {
                 $options: 'i',
-                $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                $regex: escapeRegExp(word),
               },
             })),
           },
@@ -281,7 +334,7 @@ export async function buildSearchParam({
               [path]: {
                 $not: {
                   $options: 'i',
-                  $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                  $regex: escapeRegExp(word),
                 },
               },
             })),

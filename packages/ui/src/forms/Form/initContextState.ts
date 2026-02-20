@@ -41,6 +41,7 @@ export const initContextState: Context = {
   getSiblingData,
   initializing: undefined,
   isValid: true,
+  moveFieldRow: () => undefined,
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,

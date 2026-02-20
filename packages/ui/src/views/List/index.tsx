@@ -4,32 +4,32 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import { formatFilesize, isNumber } from 'payload/shared'
-import React, { Fragment, useEffect, useState } from 'react'
+import { formatAdminURL, formatFilesize } from 'payload/shared'
+import React, { Fragment, useEffect } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
-import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
-import { Pagination } from '../../elements/Pagination/index.js'
-import { PerPage } from '../../elements/PerPage/index.js'
+import { NoListResults } from '../../elements/NoListResults/index.js'
+import { PageControls } from '../../elements/PageControls/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
+import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useAuth } from '../../providers/Auth/index.js'
+import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListHeader } from './ListHeader/index.js'
+import { ListSelection } from '../../views/List/ListSelection/index.js'
+import { CollectionListHeader } from './ListHeader/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
@@ -46,51 +46,43 @@ export function DefaultListView(props: ListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
+    hasDeletePermission,
+    hasTrashPermission,
     listMenuItems,
     newDocumentURL,
+    queryPreset,
+    queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
+    viewType,
   } = props
 
-  const [Table, setTable] = useState(InitialTable)
+  const [Table] = useControllableState(InitialTable)
 
-  const {
-    allowCreate,
-    createNewDrawerSlug,
-    drawerSlug: listDrawerSlug,
-    onBulkSelect,
-  } = useListDrawerContext()
+  const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
   const hasCreatePermission =
     allowCreate !== undefined
       ? allowCreate && hasCreatePermissionFromProps
       : hasCreatePermissionFromProps
 
-  useEffect(() => {
-    if (InitialTable) {
-      setTable(InitialTable)
-    }
-  }, [InitialTable])
-
-  const { user } = useAuth()
-
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { admin: adminRoute },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
   const router = useRouter()
 
-  const {
-    data,
-    defaultLimit: initialLimit,
-    handlePageChange,
-    handlePerPageChange,
-    query,
-  } = useListQuery()
+  const { data, isGroupingBy } = useListQuery()
 
   const { openModal } = useModal()
-  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
-  const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
+  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -100,11 +92,9 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const isBulkUploadEnabled = isUploadCollection && collectionConfig.upload.bulkUpload
 
-  const isInDrawer = Boolean(listDrawerSlug)
+  const isTrashEnabled = Boolean(collectionConfig.trash)
 
-  const { i18n, t } = useTranslation()
-
-  const drawerDepth = useEditDepth()
+  const { i18n } = useTranslation()
 
   const { setStepNav } = useStepNav()
 
@@ -121,65 +111,86 @@ export function DefaultListView(props: ListViewClientProps) {
         }
       })
     } else {
-      return data.docs
+      return data?.docs
     }
-  }, [data.docs, isUploadCollection])
+  }, [data?.docs, isUploadCollection])
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
-    setCurrentActivePath(collectionSlug)
     openModal(bulkUploadDrawerSlug)
-    setOnSuccess(collectionSlug, () => router.refresh())
-  }, [
-    router,
-    collectionSlug,
-    bulkUploadDrawerSlug,
-    openModal,
-    setCollectionSlug,
-    setCurrentActivePath,
-    setOnSuccess,
-  ])
+    setOnSuccess(() => router.refresh())
+  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
-    if (!drawerDepth) {
-      setStepNav([
-        {
-          label: labels?.plural,
-        },
-      ])
+    if (!isInDrawer) {
+      const baseLabel = {
+        label: getTranslation(labels?.plural, i18n),
+        url:
+          isTrashEnabled && viewType === 'trash'
+            ? formatAdminURL({
+                adminRoute,
+                path: `/collections/${collectionSlug}`,
+              })
+            : undefined,
+      }
+
+      const trashLabel = {
+        label: i18n.t('general:trash'),
+      }
+
+      const navItems =
+        isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+
+      setStepNav(navItems)
     }
-  }, [setStepNav, labels, drawerDepth])
+  }, [
+    adminRoute,
+    setStepNav,
+    serverURL,
+    labels,
+    isInDrawer,
+    isTrashEnabled,
+    viewType,
+    i18n,
+    collectionSlug,
+  ])
+
   return (
     <Fragment>
       <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
-          <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
+          <SelectionProvider docs={docs} totalDocs={data?.totalDocs}>
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
-              <ListHeader
+              <CollectionListHeader
                 collectionConfig={collectionConfig}
                 Description={
-                  <div className={`${baseClass}__sub-header`}>
-                    <RenderCustomComponent
-                      CustomComponent={Description}
-                      Fallback={
-                        <ViewDescription
-                          collectionSlug={collectionSlug}
-                          description={collectionConfig?.admin?.description}
-                        />
-                      }
-                    />
-                  </div>
+                  Description || collectionConfig?.admin?.description ? (
+                    <div className={`${baseClass}__sub-header`}>
+                      <RenderCustomComponent
+                        CustomComponent={Description}
+                        Fallback={
+                          <ViewDescription
+                            collectionSlug={collectionSlug}
+                            description={collectionConfig?.admin?.description}
+                          />
+                        }
+                      />
+                    </div>
+                  ) : undefined
                 }
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 hasCreatePermission={hasCreatePermission}
+                hasDeletePermission={hasDeletePermission}
+                hasTrashPermission={hasTrashPermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
+                isTrashEnabled={isTrashEnabled}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
-                t={t}
+                viewType={viewType}
               />
               <ListControls
                 beforeActions={
@@ -191,94 +202,101 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
+                disableQueryPresets={
+                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
+                }
                 listMenuItems={listMenuItems}
+                queryPreset={queryPreset}
+                queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
-              {docs.length === 0 && (
-                <div className={`${baseClass}__no-results`}>
-                  <p>
-                    {i18n.t('general:noResults', { label: getTranslation(labels?.plural, i18n) })}
-                  </p>
-                  {hasCreatePermission && newDocumentURL && (
-                    <Fragment>
-                      {isInDrawer ? (
-                        <Button el="button" onClick={() => openModal(createNewDrawerSlug)}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      ) : (
-                        <Button el="link" to={newDocumentURL}>
-                          {i18n.t('general:createNewLabel', {
-                            label: getTranslation(labels?.singular, i18n),
-                          })}
-                        </Button>
-                      )}
-                    </Fragment>
-                  )}
+              {docs?.length > 0 && (
+                <div className={`${baseClass}__tables`}>
+                  <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
               )}
+              {docs?.length === 0 && (
+                <NoListResults
+                  Actions={
+                    hasCreatePermission && newDocumentURL && viewType !== 'trash'
+                      ? [
+                          isInDrawer ? (
+                            <Button
+                              el="button"
+                              key="create"
+                              onClick={() => openModal(createNewDrawerSlug)}
+                            >
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ) : (
+                            <Button el="link" key="create" to={newDocumentURL}>
+                              {i18n.t('general:createNewLabel', {
+                                label: getTranslation(labels?.singular, i18n),
+                              })}
+                            </Button>
+                          ),
+                        ]
+                      : []
+                  }
+                  Message={
+                    viewType === 'trash' ? (
+                      <p>
+                        {i18n.t('general:noTrashResults', {
+                          label: getTranslation(labels?.plural, i18n),
+                        })}
+                      </p>
+                    ) : (
+                      <>
+                        <h3>{i18n.t('general:noResultsFound')}</h3>
+                        <p>{i18n.t('general:noResultsDescription')}</p>
+                      </>
+                    )
+                  }
+                />
+              )}
               {AfterListTable}
-              {docs.length > 0 && (
-                <div className={`${baseClass}__page-controls`}>
-                  <Pagination
-                    hasNextPage={data.hasNextPage}
-                    hasPrevPage={data.hasPrevPage}
-                    limit={data.limit}
-                    nextPage={data.nextPage}
-                    numberOfNeighbors={1}
-                    onChange={(page) => void handlePageChange(page)}
-                    page={data.page}
-                    prevPage={data.prevPage}
-                    totalPages={data.totalPages}
-                  />
-                  {data.totalDocs > 0 && (
-                    <Fragment>
-                      <div className={`${baseClass}__page-info`}>
-                        {data.page * data.limit - (data.limit - 1)}-
-                        {data.totalPages > 1 && data.totalPages !== data.page
-                          ? data.limit * data.page
-                          : data.totalDocs}{' '}
-                        {i18n.t('general:of')} {data.totalDocs}
-                      </div>
-                      <PerPage
-                        handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
-                        limits={collectionConfig?.admin?.pagination?.limits}
-                        resetPage={data.totalDocs <= data.pagingCounter}
-                      />
-                      {smallBreak && (
-                        <div className={`${baseClass}__list-selection`}>
-                          <ListSelection
-                            collectionConfig={collectionConfig}
-                            disableBulkDelete={disableBulkDelete}
-                            disableBulkEdit={disableBulkEdit}
-                            label={getTranslation(collectionConfig.labels.plural, i18n)}
-                          />
-                          <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
-                          </div>
+              {docs?.length > 0 && !isGroupingBy && (
+                <PageControls
+                  AfterPageControls={
+                    smallBreak ? (
+                      <div className={`${baseClass}__list-selection`}>
+                        <ListSelection
+                          collectionConfig={collectionConfig}
+                          disableBulkDelete={disableBulkDelete}
+                          disableBulkEdit={disableBulkEdit}
+                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          showSelectAllAcrossPages={!isGroupingBy}
+                        />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          {enableRowSelections && typeof onBulkSelect === 'function'
+                            ? beforeActions
+                              ? [
+                                  ...beforeActions,
+                                  <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                ]
+                              : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                            : beforeActions}
                         </div>
-                      )}
-                    </Fragment>
-                  )}
-                </div>
+                      </div>
+                    ) : null
+                  }
+                  collectionConfig={collectionConfig}
+                />
               )}
             </Gutter>
             {AfterList}
           </SelectionProvider>
         </div>
       </TableColumnsProvider>
+      {docs?.length > 0 && isGroupingBy && data.totalPages > 1 && (
+        <StickyToolbar>
+          <PageControls collectionConfig={collectionConfig} />
+        </StickyToolbar>
+      )}
     </Fragment>
   )
 }

@@ -9,8 +9,9 @@ keywords: authentication, config, configuration, documentation, Content Manageme
 Payload offers the ability to [Authenticate](./overview) via JSON Web Tokens (JWT). These can be read from the responses of `login`, `logout`, `refresh`, and `me` auth operations.
 
 <Banner type="success">
-  **Tip:**
-  You can access the logged-in user from within [Access Control](../access-control/overview) and [Hooks](../hooks/overview) through the `req.user` argument. [More details](./token-data).
+  **Tip:** You can access the logged-in user from within [Access
+  Control](../access-control/overview) and [Hooks](../hooks/overview) through
+  the `req.user` argument. [More details](./token-data).
 </Banner>
 
 ### Identifying Users Via The Authorization Header
@@ -22,11 +23,14 @@ Example:
 ```ts
 const user = await fetch('http://localhost:3000/api/users/login', {
   method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
   body: JSON.stringify({
     email: 'dev@payloadcms.com',
     password: 'password',
-  })
-}).then(req => await req.json())
+  }),
+}).then((req) => await req.json())
 
 const request = await fetch('http://localhost:3000', {
   headers: {
@@ -37,7 +41,7 @@ const request = await fetch('http://localhost:3000', {
 
 ### Omitting The Token
 
-In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponse` to `true` like so:
+In some cases you may want to prevent the token from being returned from the auth operations. You can do that by setting `removeTokenFromResponses` to `true` like so:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -45,7 +49,27 @@ import type { CollectionConfig } from 'payload'
 export const UsersWithoutJWTs: CollectionConfig = {
   slug: 'users-without-jwts',
   auth: {
-    removeTokenFromResponse: true, // highlight-line
+    removeTokenFromResponses: true, // highlight-line
   },
 }
 ```
+
+## External JWT Validation
+
+When validating Payload-generated JWT tokens in external services, use the processed secret rather than your original secret key:
+
+```ts
+import crypto from 'node:crypto'
+
+const secret = crypto
+  .createHash('sha256')
+  .update(process.env.PAYLOAD_SECRET)
+  .digest('hex')
+  .slice(0, 32)
+```
+
+<Banner type="info">
+  **Note:** Payload processes your secret using SHA-256 hash and takes the first
+  32 characters. This processed value is what's used for JWT operations, not
+  your original secret.
+</Banner>

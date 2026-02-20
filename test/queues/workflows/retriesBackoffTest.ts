@@ -45,13 +45,14 @@ export const retriesBackoffTestWorkflow: WorkflowConfig<'retriesBackoffTest'> = 
         // @ts-expect-error timeTried is new arbitrary data and not in the type
         job.input.timeTried[totalTried] = new Date().toISOString()
 
-        await req.payload.update({
+        const updated = await req.payload.update({
           collection: 'payload-jobs',
           data: {
             input: job.input,
           },
           id: job.id,
         })
+        job.input = updated.input as any
 
         if (totalTried < 4) {
           // Cleanup the post

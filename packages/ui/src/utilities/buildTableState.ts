@@ -2,18 +2,20 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  CollectionPreferences,
   Column,
   ErrorResult,
-  ListPreferences,
   PaginatedDocs,
   SanitizedCollectionConfig,
+  ServerFunction,
   Where,
 } from 'payload'
 
-import { APIError, formatErrors } from 'payload'
-import { isNumber } from 'payload/shared'
+import { APIError, canAccessAdmin, formatErrors } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
 import { upsertPreferences } from './upsertPreferences.js'
 
@@ -21,7 +23,7 @@ type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   data: PaginatedDocs
   errors?: never
-  preferences: ListPreferences
+  preferences: CollectionPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -41,9 +43,10 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
-export const buildTableStateHandler = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateResult> => {
+export const buildTableStateHandler: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateResult>
+> = async (args) => {
   const { req } = args
 
   try {
@@ -66,15 +69,18 @@ export const buildTableStateHandler = async (
   }
 }
 
-export const buildTableState = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateSuccessResult> => {
+const buildTableState: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateSuccessResult>
+> = async (args) => {
   const {
     collectionSlug,
-    columns,
-    docs: docsFromArgs,
+    columns: columnsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
+    orderableFieldName,
     parent,
+    permissions,
     query,
     renderRowTypes,
     req,
@@ -87,45 +93,16 @@ export const buildTableState = async (
     tableAppearance,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
@@ -139,27 +116,26 @@ export const buildTableState = async (
     }
   }
 
-  const listPreferences = await upsertPreferences<ListPreferences>({
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
     key: Array.isArray(collectionSlug)
       ? `${parent.collectionSlug}-${parent.joinPath}`
-      : `${collectionSlug}-list`,
+      : `collection-${collectionSlug}`,
     req,
     value: {
-      columns,
+      columns: columnsFromArgs,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
   })
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
+  if (!data?.docs || query) {
     if (Array.isArray(collectionSlug)) {
       if (!parent) {
-        throw new APIError('Unexpected array of collectionSlug, parent must be providen')
+        throw new APIError('Unexpected array of collectionSlug, parent must be provided')
       }
 
       const select = {}
@@ -202,7 +178,6 @@ export const buildTableState = async (
       for (let i = 0; i < segments.length; i++) {
         if (i === segments.length - 1) {
           data = parentDoc[segments[i]]
-          docs = data.docs
         } else {
           parentDoc = parentDoc[segments[i]]
         }
@@ -211,15 +186,15 @@ export const buildTableState = async (
       data = await payload.find({
         collection: collectionSlug,
         depth: 0,
-        limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+        draft: true,
+        limit: query?.limit,
         locale: req.locale,
         overrideAccess: false,
-        page: query?.page ? parseInt(query.page, 10) : undefined,
+        page: query?.page,
         sort: query?.sort,
         user: req.user,
         where: query?.where,
       })
-      docs = data.docs
     }
   }
 
@@ -228,13 +203,25 @@ export const buildTableState = async (
     clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
-    columnPreferences: Array.isArray(collectionSlug) ? listPreferences?.columns : undefined, // TODO, might not be neededcolumns,
-    columns,
-    docs,
+    columns: getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: columnsFromArgs,
+      i18n: req.i18n,
+      permissions,
+    }),
+    data,
     enableRowSelections,
+    fieldPermissions: Array.isArray(collectionSlug)
+      ? true
+      : permissions.collections[collectionSlug].fields,
     i18n: req.i18n,
+    orderableFieldName,
     payload,
+    query,
     renderRowTypes,
+    req,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)
       ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle
@@ -249,7 +236,7 @@ export const buildTableState = async (
 
   return {
     data,
-    preferences: listPreferences,
+    preferences: collectionPreferences,
     renderedFilters,
     state: columnState,
     Table,

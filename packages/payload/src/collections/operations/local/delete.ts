@@ -1,5 +1,10 @@
-// @ts-strict-ignore
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -8,6 +13,7 @@ import type {
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { BulkOperationResult, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
@@ -46,7 +52,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -65,19 +71,24 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
   showHiddenFields?: boolean
   /**
+   * When set to `true`, the operation will permanently delete both normal and trashed documents.
+   * By default (`false`), only normal (non-trashed) documents will be permanently deleted.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
@@ -150,6 +161,7 @@ async function deleteLocal<
     populate,
     select,
     showHiddenFields,
+    trash = false,
     where,
   } = options
 
@@ -169,16 +181,19 @@ async function deleteLocal<
     overrideAccess,
     overrideLock,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    trash,
     where,
   }
 
   if (options.id) {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return deleteByIDOperation<TSlug, TSelect>(args)
   }
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   return deleteOperation<TSlug, TSelect>(args)
 }
 
-export default deleteLocal
+export { deleteLocal }

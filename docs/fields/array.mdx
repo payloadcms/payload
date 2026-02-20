@@ -39,30 +39,30 @@ export const MyArrayField: Field = {
 
 ## Config Options
 
-| Option                 | Description                                                                                                                                                                                                                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
-| **`label`**            | Text used as the heading in the [Admin Panel](../admin/overview) or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                |
-| **`fields`** *        | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                       |
-| **`validate`**         | Provide a custom validation function that will be executed on both the [Admin Panel](../admin/overview) and the backend. [More](/docs/fields/overview#validation)                                                                                                                  |
-| **`minRows`**          | A number for the fewest allowed items during validation when a value is present.                                                                                                                                                                                                   |
-| **`maxRows`**          | A number for the most allowed items during validation when a value is present.                                                                                                                                                                                                     |
-| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                    |
-| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                              |
-| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                 |
-| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                   |
-| **`defaultValue`**     | Provide an array of row data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                                                                                                                               |
-| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this Array will be kept, so there is no need to specify each nested field as `localized`. |
-| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                |
-| **`labels`**           | Customize the row labels appearing in the Admin dashboard.                                                                                                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                      |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
-| **`interfaceName`**    | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                |
-| **`dbName`**           | Custom table name for the field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                    |
-| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                        |
-| **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                                                                                                                   |
+| Option                 | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                         |
+| **`label`**            | Text used as the heading in the [Admin Panel](../admin/overview) or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
+| **`fields`** \*        | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                                            |
+| **`validate`**         | Provide a custom validation function that will be executed on both the [Admin Panel](../admin/overview) and the backend. [More details](/docs/fields/overview#validation).                                                                                                                              |
+| **`minRows`**          | A number for the fewest allowed items during validation when a value is present.                                                                                                                                                                                                                        |
+| **`maxRows`**          | A number for the most allowed items during validation when a value is present.                                                                                                                                                                                                                          |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                                         |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                                                   |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                                      |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                                        |
+| **`defaultValue`**     | Provide an array of row data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                                                                                                           |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this Array will be kept, so there is no need to specify each nested field as `localized`.                      |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                                     |
+| **`labels`**           | Customize the row labels appearing in the Admin dashboard.                                                                                                                                                                                                                                              |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                                           |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
+| **`interfaceName`**    | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                                     |
+| **`dbName`**           | Custom table name for the field when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                                         |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -73,19 +73,20 @@ import type { Field } from 'payload'
 
 export const MyArrayField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Array Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
+The Array Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option                    | Description                                                                                                                                     |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`initCollapsed`**       | Set the initial collapsed state                                                                                                                 |
-| **`components.RowLabel`** | React component to be rendered as the label on the array row. [Example](#row-label)                                                             |
-| **`isSortable`**          | Disable order sorting by setting this value to `false`                                                                                          |
+| Option                    | Description                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| **`initCollapsed`**       | Set the initial collapsed state                                                     |
+| **`components.RowLabel`** | React component to be rendered as the label on the array row. [Example](#row-label) |
+| **`isSortable`**          | Disable order sorting by setting this value to `false`                              |
 
 ## Example
 
@@ -145,7 +146,7 @@ export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
   clientField,
   path,
   schemaPath,
-  permissions
+  permissions,
 }) => {
   return (
     <ArrayField
@@ -205,7 +206,7 @@ import React from 'react'
 
 export const CustomArrayFieldLabelClient: ArrayFieldLabelClientComponent = ({
   field,
-  path
+  path,
 }) => {
   return (
     <FieldLabel

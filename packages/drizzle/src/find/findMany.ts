@@ -3,11 +3,11 @@ import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 import { inArray } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
-import type { ChainedMethods } from './chainMethods.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
@@ -22,6 +22,7 @@ type Args = {
 export const findMany = async function find({
   adapter,
   collectionSlug,
+  draftsEnabled,
   fields,
   joins: joinQuery,
   limit: limitArg,
@@ -30,22 +31,21 @@ export const findMany = async function find({
   pagination,
   req,
   select,
-  skip,
   sort,
   tableName,
   versions,
   where: whereArg,
 }: Args) {
-  const db = await getTransaction(adapter, req)
   let limit = limitArg
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
-  const offset = skip || (page - 1) * limit
+  const offset = (page - 1) * limit
 
   if (limit === 0) {
+    pagination = false
     limit = undefined
   }
 
@@ -61,19 +61,11 @@ export const findMany = async function find({
   const orderedIDMap: Record<number | string, number> = {}
   let orderedIDs: (number | string)[]
 
-  const selectDistinctMethods: ChainedMethods = []
-
-  if (orderBy) {
-    selectDistinctMethods.push({
-      args: [() => orderBy.map(({ column, order }) => order(column))],
-      method: 'orderBy',
-    })
-  }
-
   const findManyArgs = buildFindManyArgs({
     adapter,
     collectionSlug,
     depth: 0,
+    draftsEnabled,
     fields,
     joinQuery,
     joins,
@@ -83,14 +75,37 @@ export const findMany = async function find({
     versions,
   })
 
-  selectDistinctMethods.push({ args: [offset], method: 'offset' })
-  selectDistinctMethods.push({ args: [limit], method: 'limit' })
+  if (orderBy) {
+    for (const key in selectFields) {
+      const column = selectFields[key]
+      if (!column || column.primary) {
+        continue
+      }
+
+      if (
+        !orderBy.some(
+          (col) =>
+            col.column.name === column.name &&
+            getNameFromDrizzleTable(col.column.table) === getNameFromDrizzleTable(column.table),
+        )
+      ) {
+        delete selectFields[key]
+      }
+    }
+  }
+
+  const db = await getTransaction(adapter, req)
 
   const selectDistinctResult = await selectDistinct({
     adapter,
-    chainedMethods: selectDistinctMethods,
     db,
     joins,
+    query: ({ query }) => {
+      if (orderBy) {
+        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+      }
+      return query.offset(offset).limit(limit)
+    },
     selectFields,
     tableName,
     where,
@@ -165,6 +180,7 @@ export const findMany = async function find({
       data,
       fields,
       joinQuery,
+      tableName,
     })
   })
 

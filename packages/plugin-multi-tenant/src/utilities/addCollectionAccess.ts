@@ -1,23 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
-import type { MultiTenantPluginConfig } from '../types.js'
+import type { AllAccessKeys, MultiTenantPluginConfig } from '../types.js'
 
 import { withTenantAccess } from './withTenantAccess.js'
 
-type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof Omit<
-  Required<CollectionConfig>['access'],
-  'admin'
->
-  ? keyof Omit<Required<CollectionConfig>['access'], 'admin'> extends T[number]
-    ? T
-    : never
-  : never
-
-const collectionAccessKeys: AllAccessKeys<
-  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
-> = ['create', 'read', 'update', 'delete', 'readVersions', 'unlock'] as const
+export const collectionAccessKeys: AllAccessKeys = [
+  'create',
+  'read',
+  'update',
+  'delete',
+  'readVersions',
+  'unlock',
+] as const
 
 type Args<ConfigType> = {
+  accessResultCallback?: MultiTenantPluginConfig<ConfigType>['usersAccessResultOverride']
   adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
@@ -33,6 +30,7 @@ type Args<ConfigType> = {
  * - constrains access a users assigned tenants
  */
 export const addCollectionAccess = <ConfigType>({
+  accessResultCallback,
   adminUsersSlug,
   collection,
   fieldName,
@@ -46,10 +44,11 @@ export const addCollectionAccess = <ConfigType>({
     }
     collection.access[key] = withTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
+      accessKey: key,
+      accessResultCallback,
       adminUsersSlug,
       collection,
       fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
-      operation: key,
       tenantsArrayFieldName,
       tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,

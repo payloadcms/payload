@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -42,7 +41,7 @@ export const afterChange = async <T extends JsonObject>({
     context,
     data,
     doc: incomingDoc,
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     operation,
     parentIndexPath: '',

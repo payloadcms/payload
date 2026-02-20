@@ -12,7 +12,6 @@ type Args = {
   password: string
   payload: Payload
   req: PayloadRequest
-  select?: SelectType
 }
 
 export const registerLocalStrategy = async ({
@@ -21,7 +20,6 @@ export const registerLocalStrategy = async ({
   password,
   payload,
   req,
-  select,
 }: Args): Promise<Record<string, unknown>> => {
   const loginWithUsername = collection?.auth?.loginWithUsername
 
@@ -95,6 +93,5 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
-    select,
   })
 }

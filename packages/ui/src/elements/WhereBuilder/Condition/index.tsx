@@ -1,12 +1,18 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { AddCondition, ReducedField, RemoveCondition, UpdateCondition } from '../types.js'
+import type {
+  AddCondition,
+  ReducedField,
+  RemoveCondition,
+  UpdateCondition,
+  Value,
+} from '../types.js'
 
 export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
-  readonly fieldName: string
+  readonly fieldPath: string
   readonly filterOptions: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
@@ -14,7 +20,7 @@ export type Props = {
   readonly removeCondition: RemoveCondition
   readonly RenderedFilter: React.ReactNode
   readonly updateCondition: UpdateCondition
-  readonly value: string
+  readonly value: Value
 }
 
 import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
@@ -27,6 +33,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
+import { getOperatorValueTypes } from './validOperators.js'
 import './index.scss'
 
 const baseClass = 'condition'
@@ -35,7 +42,7 @@ export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
     andIndex,
-    fieldName,
+    fieldPath,
     filterOptions,
     operator,
     orIndex,
@@ -48,9 +55,9 @@ export const Condition: React.FC<Props> = (props) => {
 
   const { t } = useTranslation()
 
-  const reducedField = reducedFields.find((field) => field.value === fieldName)
+  const reducedField = reducedFields.find((field) => field.value === fieldPath)
 
-  const [internalValue, setInternalValue] = useState<string>(value)
+  const [internalValue, setInternalValue] = useState<Value>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
 
@@ -67,14 +74,15 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
       await updateCondition({
+        type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null ? '' : debouncedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })
@@ -91,6 +99,7 @@ export const Condition: React.FC<Props> = (props) => {
     async (field: Option<string>) => {
       setInternalValue(undefined)
       await updateCondition({
+        type: 'field',
         andIndex,
         field: reducedFields.find((option) => option.value === field.value),
         operator,
@@ -103,12 +112,26 @@ export const Condition: React.FC<Props> = (props) => {
 
   const handleOperatorChange = useCallback(
     async (operator: Option<Operator>) => {
+      const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
+      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
+      const isValidValue =
+        validOperatorValue === 'any' ||
+        typeof value === validOperatorValue ||
+        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
+
+      if (!isValidValue) {
+        // if the current value is not valid for the new operator
+        // reset the value before passing it to updateCondition
+        setInternalValue(undefined)
+      }
+
       await updateCondition({
+        type: 'operator',
         andIndex,
         field: reducedField,
         operator: operator.value,
         orIndex,
-        value,
+        value: isValidValue ? value : undefined,
       })
     },
     [andIndex, reducedField, orIndex, updateCondition, value],
@@ -121,6 +144,11 @@ export const Condition: React.FC<Props> = (props) => {
           <div className={`${baseClass}__field`}>
             <ReactSelect
               disabled={disabled}
+              filterOption={(option, inputValue) =>
+                ((option?.data?.plainTextLabel as string) || option.label)
+                  .toLowerCase()
+                  .includes(inputValue.toLowerCase())
+              }
               isClearable={false}
               onChange={handleFieldChange}
               options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}

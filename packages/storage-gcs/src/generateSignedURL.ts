@@ -28,7 +28,11 @@ export const getGenerateSignedURLHandler = ({
       throw new APIError('Unreachable')
     }
 
-    const { collectionSlug, filename, mimeType } = await req.json()
+    const { collectionSlug, filename, mimeType } = (await req.json()) as {
+      collectionSlug: string
+      filename: string
+      mimeType: string
+    }
 
     const collectionS3Config = collections[collectionSlug]
     if (!collectionS3Config) {

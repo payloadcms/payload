@@ -1,9 +1,19 @@
 'use client'
 import type { ElementType, HTMLAttributes } from 'react'
 
-import React from 'react' // TODO: abstract this out to support all routers
+import React, { useEffect, useState } from 'react' // TODO: abstract this out to support all routers
 
 import { Link } from '../Link/index.js'
+
+export type PillStyle =
+  | 'always-white'
+  | 'dark'
+  | 'error'
+  | 'light'
+  | 'light-gray'
+  | 'success'
+  | 'warning'
+  | 'white'
 
 export type PillProps = {
   alignIcon?: 'left' | 'right'
@@ -20,7 +30,10 @@ export type PillProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: () => void
-  pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white'
+  /**
+   * @default 'light'
+   */
+  pillStyle?: PillStyle
   rounded?: boolean
   size?: 'medium' | 'small'
   to?: string
@@ -64,6 +77,7 @@ const DraggablePill: React.FC<PillProps> = (props) => {
 
 const StaticPill: React.FC<PillProps> = (props) => {
   const {
+    id,
     alignIcon = 'right',
     'aria-checked': ariaChecked,
     'aria-controls': ariaControls,
@@ -80,6 +94,14 @@ const StaticPill: React.FC<PillProps> = (props) => {
     size = 'medium',
     to,
   } = props
+
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const isButton = onClick && !to
 
   const classes = [
     baseClass,
@@ -98,9 +120,10 @@ const StaticPill: React.FC<PillProps> = (props) => {
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div'
 
-  if (onClick && !to) {
+  if (isButton) {
     Element = 'button'
   }
+
   if (to) {
     Element = Link
   }
@@ -113,9 +136,11 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
+      disabled={isButton ? !isHydrated : undefined}
       href={to || null}
+      id={id}
       onClick={onClick}
-      type={Element === 'button' ? 'button' : undefined}
+      type={isButton ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
       {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}
