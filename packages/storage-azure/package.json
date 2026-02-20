@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@azure/abort-controller": "^1.1.0",
+    "@azure/core-auth": "^1.9.0",
     "@azure/storage-blob": "^12.11.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },

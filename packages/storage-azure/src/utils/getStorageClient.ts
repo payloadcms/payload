@@ -8,7 +8,10 @@ import type { AzureStorageOptions } from '../index.js'
 const azureClients = new Map<string, ContainerClient>()
 
 export function getStorageClient(
-  options: Pick<AzureStorageOptions, 'clientCacheKey' | 'connectionString' | 'containerName'>,
+  options: Pick<
+    AzureStorageOptions,
+    'baseURL' | 'clientCacheKey' | 'connectionString' | 'containerName' | 'credentials'
+  >,
 ): ContainerClient {
   const cacheKey = options.clientCacheKey || `azure:${options.containerName}`
 
@@ -16,9 +19,19 @@ export function getStorageClient(
     return azureClients.get(cacheKey)!
   }
 
-  const { connectionString, containerName } = options
+  const { baseURL, connectionString, containerName, credentials } = options
 
-  const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+  let blobServiceClient: BlobServiceClient
+
+  if (credentials) {
+    blobServiceClient = new BlobServiceClient(baseURL, credentials)
+  } else if (connectionString) {
+    blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+  } else {
+    throw new Error(
+      'Azure Storage: Either provide a connectionString or credentials for authentication',
+    )
+  }
 
   azureClients.set(cacheKey, blobServiceClient.getContainerClient(containerName))
 
