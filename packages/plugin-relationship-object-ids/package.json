@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-relationship-object-ids",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
