@@ -25,7 +25,7 @@
     "pretest": "pnpm build",
     "reinstall": "pnpm clean:unix && pnpm install",
     "script:list-packages": "tsx ./scripts/list-packages.ts",
-    "script:release": "tsx ./scripts/release.ts",
+    "release": "tsx ./scripts/release.ts",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
     "test:e2e": "ts-node -T ./test/runE2E.ts",
