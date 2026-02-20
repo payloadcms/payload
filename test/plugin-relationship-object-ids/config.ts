@@ -4,6 +4,18 @@ import { relationshipsAsObjectID } from '../../packages/plugin-relationship-obje
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 
 export default buildConfigWithDefaults({
+  globals: [
+    {
+      slug: 'settings',
+      fields: [
+        {
+          name: 'featuredPost',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+      ],
+    },
+  ],
   collections: [
     {
       slug: 'uploads',

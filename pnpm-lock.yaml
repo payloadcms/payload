@@ -1255,8 +1255,8 @@ importers:
   packages/plugin-relationship-object-ids:
     dependencies:
       mongoose:
-        specifier: ^6.12.3
-        version: 6.13.8
+        specifier: ^8.0.0
+        version: 8.8.1(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -4671,10 +4671,6 @@ packages:
   bson-objectid@2.0.4:
     resolution: {integrity: sha512-vgnKAUzcDoa+AeyYwXCoHyF2q6u/8H46dxu5JN+4/TZeq/Dlinn0K6GvxsCLb3LHUJl0m/TLiEK31kUwtgocMQ==}
 
-  bson@4.7.2:
-    resolution: {integrity: sha512-Ry9wCtIZ5kGqkJoi6aD8KjxFZEx78guTQDnpXWiNthsxzrxAK/i8E6pCHAIZTbaEFWcOCvbecMukfK7XUvyLpQ==}
-    engines: {node: '>=6.9.0'}
-
   bson@5.5.1:
     resolution: {integrity: sha512-ix0EwukN2EpC0SRWIj/7B5+A6uQMQy6KMREI9qQqvgpkV2frH63T0UDVd1SYedL6dNCmDBYB3QtXi4ISk9YT+g==}
     engines: {node: '>=14.20.1'}
@@ -7249,10 +7245,6 @@ packages:
   jwt-decode@3.1.2:
     resolution: {integrity: sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==}
 
-  kareem@2.5.1:
-    resolution: {integrity: sha512-7jFxRVm+jD+rkq3kY0iZDJfsO2/t4BBPeEb2qKn2lR/9KhuksYk5hxzfRYWMPV8P/x2d0kHD306YyWLzjjH+uA==}
-    engines: {node: '>=12.0.0'}
-
   kareem@2.6.3:
     resolution: {integrity: sha512-C3iHfuGUXK2u8/ipq9LfjFfXFxAZMQJJq7vLS45r3D9Y2xQ/m4S8zaR4zMLFWh9AsNPXmcFfUDhTEO8UIC/V6Q==}
     engines: {node: '>=12.0.0'}
@@ -7626,10 +7618,6 @@ packages:
     resolution: {integrity: sha512-w/usKdYtby5EALERxmA0+et+D0brP0InH3a26shNDgGefXA61hgl6U0P3IfwqZlEGRZdkbZig3n57AHZgDiwvg==}
     engines: {node: '>=14.20.1'}
 
-  mongodb@4.17.2:
-    resolution: {integrity: sha512-mLV7SEiov2LHleRJPMPrK2PMyhXFZt2UQLC4VD4pnth3jMjYKHhtqfwwkkvS/NXuo/Fp3vbhaNcXrIDaLRb9Tg==}
-    engines: {node: '>=12.9.0'}
-
   mongodb@5.9.2:
     resolution: {integrity: sha512-H60HecKO4Bc+7dhOv4sJlgvenK4fQNqqUIlXxZYQNbfEWSALGAwGoyJd/0Qwk4TttFXUOHJ2ZJQe/52ScaUwtQ==}
     engines: {node: '>=14.20.1'}
@@ -7686,10 +7674,6 @@ packages:
     resolution: {integrity: sha512-kFxhot+yw9KmpAGSSrF/o+f00aC2uawgNUbhyaM0USS9L7dln1NA77/pLg4lgOaRgXMtfgCENamjqZwIM1Zrig==}
     engines: {node: '>=4.0.0'}
 
-  mongoose@6.13.8:
-    resolution: {integrity: sha512-JHKco/533CyVrqCbyQsnqMpLn8ZCiKrPDTd2mvo2W7ygIvhygWjX2wj+RPjn6upZZgw0jC6U51RD7kUsyK8NBg==}
-    engines: {node: '>=12.0.0'}
-
   mongoose@8.8.1:
     resolution: {integrity: sha512-l7DgeY1szT98+EKU8GYnga5WnyatAu+kOQ2VlVX1Mxif6A0Umt0YkSiksCiyGxzx8SPhGe9a53ND1GD4yVDrPA==}
     engines: {node: '>=16.20.1'}
@@ -7697,10 +7681,6 @@ packages:
   mpath@0.9.0:
     resolution: {integrity: sha512-ikJRQTk8hw5DEoFVxHG1Gn9T/xcjtdnOKIU1JTmGjZZlg9LST2mBLmcX3/ICIbgJydT2GOc15RnNy5mHmzfSew==}
     engines: {node: '>=4.0.0'}
-
-  mquery@4.0.3:
-    resolution: {integrity: sha512-J5heI+P08I6VJ2Ky3+33IpCdAvlYGTSUjwTPxkAr8i8EoduPMBX2OY/wa3IKZIQl7MU4SbFk8ndgSKyB/cl1zA==}
-    engines: {node: '>=12.0.0'}
 
   mquery@5.0.0:
     resolution: {integrity: sha512-iQMncpmEK8R8ncT8HJGsGc9Dsp8xcgYMVSbs5jgnm1lFHTZqMJTUWTDx1LBO8+mK3tPNZWFLBghQEIOULSTHZg==}
@@ -9251,9 +9231,6 @@ packages:
   side-channel@1.1.0:
     resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
     engines: {node: '>= 0.4'}
-
-  sift@16.0.1:
-    resolution: {integrity: sha512-Wv6BjQ5zbhW7VFefWusVP33T/EM0vYikCaQ2qR8yULbsilAT8/wQaXvuQ3ptGLpoKx+lihJE3y2UTgKDyyNHZQ==}
 
   sift@17.1.3:
     resolution: {integrity: sha512-Rtlj66/b0ICeFzYTuNvX/EF1igRbbnGSvEyT79McoZa/DeGhMyC5pWKOEsZKnpkqtSeovd5FL/bjHWC3CIIvCQ==}
@@ -15139,10 +15116,6 @@ snapshots:
 
   bson-objectid@2.0.4: {}
 
-  bson@4.7.2:
-    dependencies:
-      buffer: 5.7.1
-
   bson@5.5.1: {}
 
   bson@6.10.4: {}
@@ -18600,8 +18573,6 @@ snapshots:
 
   jwt-decode@3.1.2: {}
 
-  kareem@2.5.1: {}
-
   kareem@2.6.3: {}
 
   keyv@4.5.4:
@@ -18972,17 +18943,6 @@ snapshots:
       - snappy
       - supports-color
 
-  mongodb@4.17.2:
-    dependencies:
-      bson: 4.7.2
-      mongodb-connection-string-url: 2.6.0
-      socks: 2.8.3
-    optionalDependencies:
-      '@aws-sdk/credential-providers': 3.563.0
-      '@mongodb-js/saslprep': 1.1.5
-    transitivePeerDependencies:
-      - aws-crt
-
   mongodb@5.9.2(@aws-sdk/credential-providers@3.563.0):
     dependencies:
       bson: 5.5.1
@@ -19006,19 +18966,6 @@ snapshots:
 
   mongoose-paginate-v2@1.8.5: {}
 
-  mongoose@6.13.8:
-    dependencies:
-      bson: 4.7.2
-      kareem: 2.5.1
-      mongodb: 4.17.2
-      mpath: 0.9.0
-      mquery: 4.0.3
-      ms: 2.1.3
-      sift: 16.0.1
-    transitivePeerDependencies:
-      - aws-crt
-      - supports-color
-
   mongoose@8.8.1(@aws-sdk/credential-providers@3.563.0)(gcp-metadata@5.3.0)(socks@2.8.3):
     dependencies:
       bson: 6.10.4
@@ -19039,12 +18986,6 @@ snapshots:
       - supports-color
 
   mpath@0.9.0: {}
-
-  mquery@4.0.3:
-    dependencies:
-      debug: 4.3.4(supports-color@5.5.0)
-    transitivePeerDependencies:
-      - supports-color
 
   mquery@5.0.0:
     dependencies:
@@ -20751,8 +20692,6 @@ snapshots:
       side-channel-list: 1.0.0
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
-
-  sift@16.0.1: {}
 
   sift@17.1.3: {}
 
