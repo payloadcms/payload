@@ -1,21 +1,40 @@
-type FieldDefinition = {
-  description?: string
-  name: string
-  options?: { label: string; value: string }[]
-  position?: 'main' | 'sidebar'
-  required?: boolean
-  type: string
-}
+import type { FieldDefinition, FieldModification } from '../../types.js'
 
-type FieldModification = {
-  changes: {
-    description?: string
-    options?: { label: string; value: string }[]
-    position?: 'main' | 'sidebar'
-    required?: boolean
-    type?: string
+/**
+ * Generates the TypeScript source string for a single field definition block.
+ * Used when writing collection files to disk.
+ */
+export function generateFieldDefinitionString(field: FieldDefinition): string {
+  const lines: string[] = []
+  lines.push(`    {`)
+  lines.push(`      name: '${field.name}',`)
+  lines.push(`      type: '${field.type}',`)
+
+  if (field.required) {
+    lines.push(`      required: true,`)
   }
-  fieldName: string
+
+  if (field.description || field.position) {
+    lines.push(`      admin: {`)
+    if (field.description) {
+      lines.push(`        description: '${field.description}',`)
+    }
+    if (field.position) {
+      lines.push(`        position: '${field.position}',`)
+    }
+    lines.push(`      },`)
+  }
+
+  if (field.options && field.type === 'select') {
+    lines.push(`      options: [`)
+    field.options.forEach((option) => {
+      lines.push(`        { label: '${option.label}', value: '${option.value}' },`)
+    })
+    lines.push(`      ],`)
+  }
+
+  lines.push(`    },`)
+  return lines.join('\n')
 }
 
 /**
@@ -30,41 +49,7 @@ export function addFieldsToCollection(content: string, newFields: FieldDefinitio
     throw new Error('Could not find fields array in collection file')
   }
 
-  // Generate new field definitions
-  const newFieldDefinitions = newFields
-    .map((field) => {
-      const fieldConfig = []
-      fieldConfig.push(`    {`)
-      fieldConfig.push(`      name: '${field.name}',`)
-      fieldConfig.push(`      type: '${field.type}',`)
-
-      if (field.required) {
-        fieldConfig.push(`      required: true,`)
-      }
-
-      if (field.description || field.position) {
-        fieldConfig.push(`      admin: {`)
-        if (field.description) {
-          fieldConfig.push(`        description: '${field.description}',`)
-        }
-        if (field.position) {
-          fieldConfig.push(`        position: '${field.position}',`)
-        }
-        fieldConfig.push(`      },`)
-      }
-
-      if (field.options && field.type === 'select') {
-        fieldConfig.push(`      options: [`)
-        field.options.forEach((option: { label: string; value: string }) => {
-          fieldConfig.push(`        { label: '${option.label}', value: '${option.value}' },`)
-        })
-        fieldConfig.push(`      ],`)
-      }
-
-      fieldConfig.push(`    },`)
-      return fieldConfig.join('\n')
-    })
-    .join('\n')
+  const newFieldDefinitions = newFields.map(generateFieldDefinitionString).join('\n')
 
   // Add new fields before the closing bracket
   const existingFields = match[1] || ''
