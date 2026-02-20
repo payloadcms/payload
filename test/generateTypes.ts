@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process'
 import path from 'path'
 import { generateTypes } from 'payload/node'
 
-import { setTestEnvPaths } from './helpers/setTestEnvPaths.js'
+import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
 
 const [testConfigDir] = process.argv.slice(2)
 

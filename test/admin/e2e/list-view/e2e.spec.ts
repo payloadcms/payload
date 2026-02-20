@@ -12,9 +12,9 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   openColumnControls,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
@@ -39,27 +39,27 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
+import path from 'path'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+
 import {
   openListColumns,
   reorderColumns,
   sortColumn,
   toggleColumn,
   waitForColumnInURL,
-} from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
-import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
-import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
-import path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
-
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
+import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -325,7 +325,10 @@ describe('List View', () => {
       await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
-      await page.waitForURL(url)
+      // Use regex to allow for additional query params like depth=1
+      await page.waitForURL(
+        new RegExp(`${postsUrl.list.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?.*search=post1`),
+      )
     })
 
     test('search should not persist between navigation', async () => {
@@ -1597,6 +1600,8 @@ describe('List View', () => {
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
+      // Wait until only 1 row is visible
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])
@@ -1623,9 +1628,12 @@ describe('List View', () => {
       await page.goto(withListViewUrl.list)
 
       // Open the list drawer via the "Select posts" button
-      await page.locator('button:has-text("Select posts")').click()
+      const selectButton = page.locator('button:has-text("Select posts")')
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
@@ -1642,7 +1650,9 @@ describe('List View', () => {
       await expect(listDrawer).toBeHidden()
 
       // Reopen the drawer
-      await page.locator('button:has-text("Select posts")').click()
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
+      await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
       await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
@@ -1665,6 +1675,7 @@ describe('List View', () => {
 
     test('should sort', async () => {
       await page.reload()
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
@@ -1778,9 +1789,15 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
       // sort by title
-      await page.locator('#heading-title button.sort-column__asc').click()
+      const sortButton = page.locator('#heading-title button.sort-column__asc')
+      await sortButton.waitFor({ state: 'visible' })
+      await sortButton.click()
+      await page
+        .locator('#heading-title button.sort-column__asc.sort-column--active')
+        .waitFor({ state: 'visible' })
       await page.waitForURL(/sort=title/)
 
       // enable a column that is _not_ part of this collection's default columns

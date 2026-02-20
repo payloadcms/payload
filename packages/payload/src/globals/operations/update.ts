@@ -98,6 +98,7 @@ export const updateOperation = async <
             context: args.req.context,
             global: globalConfig,
             operation: 'update',
+            overrideAccess,
             req: args.req,
           })) || args
       }
@@ -215,6 +216,7 @@ export const updateOperation = async <
             data,
             global: globalConfig,
             originalDoc,
+            overrideAccess,
             req,
           })) || data
       }
@@ -232,6 +234,7 @@ export const updateOperation = async <
             data,
             global: globalConfig,
             originalDoc,
+            overrideAccess,
             req,
           })) || data
       }
@@ -428,6 +431,7 @@ export const updateOperation = async <
             context: req.context,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result
       }
@@ -460,6 +464,7 @@ export const updateOperation = async <
             data,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             previousDoc: originalDoc,
             req,
           })) || result

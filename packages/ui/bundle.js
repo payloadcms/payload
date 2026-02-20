@@ -83,7 +83,7 @@ async function build() {
 
   try {
     fs.renameSync('dist-styles/index.css', `${directoryArg}/styles.css`)
-    fs.rmdirSync('dist-styles', { recursive: true })
+    fs.rmSync('dist-styles', { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css and dist-styles: ${err}`)
     throw err

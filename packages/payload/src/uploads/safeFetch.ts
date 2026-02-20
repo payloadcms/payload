@@ -85,6 +85,7 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
     return await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
+      redirect: 'manual', // Prevent automatic redirects
     })
   } catch (error) {
     if (error instanceof Error) {

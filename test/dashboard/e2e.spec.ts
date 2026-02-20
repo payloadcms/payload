@@ -3,10 +3,10 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 
@@ -198,5 +198,34 @@ describe('Dashboard', () => {
       // The default 'collections' widget should use toWords fallback
       expect(labels).toContain('Collections')
     }).toPass({ timeout: 1000 })
+  })
+
+  test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('page query')
+    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.saveChangesAndValidate()
+
+    // Find the page-query widget
+    const pageQueryWidget = page.locator('.page-query-widget')
+    await expect(pageQueryWidget).toBeVisible()
+
+    // Initially, page should be 0 (default)
+    await expect(pageQueryWidget.getByText(/Current page from query: 0/)).toBeVisible()
+
+    // Click the increment button
+    const incrementButton = pageQueryWidget.getByRole('button', { name: /Increment Page/ })
+    await incrementButton.click()
+
+    // The page number should update to 1 without a page refresh
+    // This test will fail until the server component re-renders when query params change
+    await expect(pageQueryWidget.getByText(/Current page from query: 1/)).toBeVisible()
+
+    // Click again to increment to 2
+    await incrementButton.click()
+    await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
   })
 })

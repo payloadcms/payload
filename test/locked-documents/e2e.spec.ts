@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test'
 
-import {  expect,test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type {
   Config,
   Page as PageType,
@@ -22,17 +22,17 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe,beforeEach } = test
+const { beforeAll, describe, beforeEach } = test
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -157,8 +157,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
 
@@ -198,7 +196,9 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
       await expect(
         page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
@@ -224,7 +224,6 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk publish on unlocked documents on all pages', async () => {
-
       await mapAsync([...Array(9)], async () => {
         await createPostDoc({
           text: 'Ready for unpublish',
@@ -248,7 +247,7 @@ describe('Locked Documents', () => {
       await mapAsync([...Array(10)], async () => {
         await createPostDoc({
           text: 'Ready for publish',
-          _status: 'published'
+          _status: 'published',
         })
       })
 
@@ -267,14 +266,15 @@ describe('Locked Documents', () => {
       await mapAsync([...Array(8)], async () => {
         await createPostDoc({
           text: 'doc',
-          _status: 'draft'
+          _status: 'draft',
         })
       })
       await page.goto(postsUrl.list)
 
       const bulkText = 'Bulk update title'
-
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
@@ -306,8 +306,6 @@ describe('Locked Documents', () => {
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-10 .cell-text')).toContainText('hello locked')
-
-
     })
   })
 
@@ -379,8 +377,6 @@ describe('Locked Documents', () => {
 
       testDoc = await createTestDoc({ text: 'hello' })
     })
-
-
 
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
       await page.goto(testsUrl.list)
@@ -681,8 +677,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       await page.goto(postsUrl.list)
 
@@ -866,8 +860,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should update user data if incoming user takes over from document modal', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -978,8 +970,6 @@ describe('Locked Documents', () => {
       })
     })
 
-
-
     test('should update user data if incoming user takes over from within document', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -1065,7 +1055,6 @@ describe('Locked Documents', () => {
         },
       })
     })
-
 
     test('should show Document Take Over modal for previous user if taken over', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
@@ -1318,8 +1307,6 @@ describe('Locked Documents', () => {
         },
       })
     })
-
-
 
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)

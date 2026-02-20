@@ -12,7 +12,7 @@ import WebSocket from 'ws'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
-import type { Result as LoginResult } from './auth/operations/login.js'
+import type { LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
@@ -168,6 +168,7 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
+export * from './auth/index.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -321,13 +322,17 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ *
+ * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
+ * auth-enabled collections.
+ *
  * @todo rename to `User` in 4.0
  */
 export type TypedUser = PayloadTypes['user']
 
 export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
+export type AuthCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['auth']>
 
 export type TypedJobs = PayloadTypes['jobs']
 
@@ -595,7 +600,7 @@ export class BasePayload {
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
-  ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
+  ): Promise<LoginResult<TSlug>> => {
     return loginLocal<TSlug>(this, options)
   }
 
@@ -1244,11 +1249,11 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
+export type { LoginResult } from './auth/operations/login.js'
 export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
 export { logoutOperation } from './auth/operations/logout.js'
@@ -1781,6 +1786,7 @@ export {
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { dynamicImport } from './utilities/dynamicImport.js'
+export { escapeRegExp } from './utilities/escapeRegExp.js'
 export {
   findUp,
   findUpSync,

@@ -105,11 +105,24 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       ) {
         setSelectAll(SelectAllStatus.None)
       } else {
+        const shouldSelect = selectAll !== SelectAllStatus.Some
+
         docs.forEach(({ id, _isLocked, _userEditing }) => {
           if (!_isLocked || _userEditing?.id === user?.id) {
-            rows.set(id, selectAll !== SelectAllStatus.Some)
+            rows.set(id, shouldSelect)
           }
         })
+
+        // Set selectAll synchronously to avoid race conditions with useEffect
+        if (shouldSelect && rows.size > 0) {
+          if (rows.size === docs.length) {
+            setSelectAll(SelectAllStatus.AllInPage)
+          } else {
+            setSelectAll(SelectAllStatus.Some)
+          }
+        } else {
+          setSelectAll(SelectAllStatus.None)
+        }
       }
 
       setSelected(rows)

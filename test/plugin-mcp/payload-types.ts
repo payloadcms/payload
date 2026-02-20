@@ -75,6 +75,7 @@ export interface Config {
     rolls: Roll;
     'modified-prompts': ModifiedPrompt;
     'returned-resources': ReturnedResource;
+    pages: Page;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -90,6 +91,7 @@ export interface Config {
     rolls: RollsSelect<false> | RollsSelect<true>;
     'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -107,13 +109,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'en' | 'es' | 'fr';
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PayloadMcpApiKey & {
-        collection: 'payload-mcp-api-keys';
-      });
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -181,6 +177,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -219,6 +216,13 @@ export interface Post {
    * The author of the post
    */
   author?: (string | null) | User;
+  /**
+   * Geographic location coordinates
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -299,6 +303,38 @@ export interface ReturnedResource {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  title: string;
+  layout?:
+    | (
+        | HeroBlock
+        | {
+            body?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textContent';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -333,6 +369,24 @@ export interface PayloadMcpApiKey {
     update?: boolean | null;
     /**
      * Allow clients to delete products.
+     */
+    delete?: boolean | null;
+  };
+  pages?: {
+    /**
+     * Allow clients to find pages.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create pages.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update pages.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete pages.
      */
     delete?: boolean | null;
   };
@@ -405,6 +459,7 @@ export interface PayloadMcpApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -457,6 +512,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'returned-resources';
         value: string | ReturnedResource;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -565,6 +624,7 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   author?: T;
+  location?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -615,6 +675,37 @@ export interface ReturnedResourcesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        hero?: T | HeroBlockSelect<T>;
+        textContent?:
+          | T
+          | {
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock_select".
+ */
+export interface HeroBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -622,6 +713,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   label?: T;
   description?: T;
   products?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  pages?:
     | T
     | {
         find?: T;
@@ -760,6 +859,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

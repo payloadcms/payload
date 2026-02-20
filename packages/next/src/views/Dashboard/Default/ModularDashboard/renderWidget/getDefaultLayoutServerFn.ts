@@ -23,7 +23,7 @@ export type GetDefaultLayoutServerFnReturnType = {
 export const getDefaultLayoutHandler: ServerFunction<
   GetDefaultLayoutServerFnArgs,
   Promise<GetDefaultLayoutServerFnReturnType>
-> = async ({ req }) => {
+> = async ({ cookies, locale, permissions, req }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -40,6 +40,9 @@ export const getDefaultLayoutHandler: ServerFunction<
         Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
         importMap,
         serverProps: {
+          cookies,
+          locale,
+          permissions,
           req,
           widgetSlug,
         } satisfies WidgetServerProps,

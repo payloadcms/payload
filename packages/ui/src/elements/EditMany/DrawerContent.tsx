@@ -28,7 +28,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -180,7 +179,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
 
   const router = useRouter()
   const abortFormStateRef = React.useRef<AbortController>(null)
-  const { clearRouteCache } = useRouteCache()
   const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
@@ -273,12 +271,12 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       qs.stringify(
         {
           ...parseSearchParams(searchParams),
+          _r: Date.now(), // Cache buster to force fresh data fetch. Prevents an e2e race condition where sometimes the data is not updated.
           page: selectAll ? '1' : undefined,
         },
         { addQueryPrefix: true },
       ),
     )
-    clearRouteCache()
     closeModal(drawerSlug)
 
     if (typeof onSuccessFromProps === 'function') {
