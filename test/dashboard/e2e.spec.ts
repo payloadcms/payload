@@ -96,10 +96,13 @@ describe('Dashboard', () => {
   test('edit widget data', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
+    const secondWidget = d.widgetByPos(2)
+    const secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
     await d.editWidget(2, 'Open Tickets')
-    await expect(page.locator('.count-widget').first().getByText('Open Tickets')).toBeVisible()
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
     await d.saveChangesAndValidate()
-    await expect(page.locator('.count-widget').first().getByText('Open Tickets')).toBeVisible()
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
