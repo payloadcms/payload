@@ -30,6 +30,10 @@ export const deTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Zusammenfassung des Imports',
     importDocumentLabel: 'Importieren {{label}}',
     importResults: 'Ergebnisse importieren',
+    limitCapped: 'Limit auf maximal {{limit}} begrenzt',
+    limitExceededExport: 'Export begrenzt auf {{limit}} Dokumente',
+    limitExceededImport:
+      'Die Importdatei enthält {{count}} Dokumente, aber das Limit liegt bei {{limit}}.',
     matchBy: 'Übereinstimmung nach',
     mode: 'Modus',
     noDataToPreview: 'Keine Daten zur Vorschau',

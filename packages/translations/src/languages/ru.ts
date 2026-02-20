@@ -339,6 +339,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     items: 'предметы',
     language: 'Язык',
     lastModified: 'Последнее изменение',
+    layout: 'Макет',
     leaveAnyway: 'Все равно уйти',
     leaveWithoutSaving: 'Выход без сохранения',
     light: 'Светлая',
@@ -368,6 +369,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     noOptions: 'Нет вариантов',
     noResults:
       'Ничего не найдено. Возможно, {{label}} еще не существует или не соответствует указанным фильтрам.',
+    noResultsDescription:
+      'Либо они не существуют, либо не соответствуют указанным вами фильтрам выше.',
+    noResultsFound: 'Результатов не найдено.',
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noTrashResults: 'Нет {{label}} в корзине.',
@@ -403,6 +407,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     row: 'Строка',
     rows: 'Строки',
     save: 'Сохранить',
+    saveChanges: 'Сохранить изменения',
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
     searchBy: 'Искать по',

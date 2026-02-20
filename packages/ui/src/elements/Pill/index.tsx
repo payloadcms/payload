@@ -1,7 +1,7 @@
 'use client'
 import type { ElementType, HTMLAttributes } from 'react'
 
-import React from 'react' // TODO: abstract this out to support all routers
+import React, { useEffect, useState } from 'react' // TODO: abstract this out to support all routers
 
 import { Link } from '../Link/index.js'
 
@@ -95,6 +95,14 @@ const StaticPill: React.FC<PillProps> = (props) => {
     to,
   } = props
 
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const isButton = onClick && !to
+
   const classes = [
     baseClass,
     `${baseClass}--style-${pillStyle}`,
@@ -112,7 +120,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div'
 
-  if (onClick && !to) {
+  if (isButton) {
     Element = 'button'
   }
 
@@ -128,10 +136,11 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
+      disabled={isButton ? !isHydrated : undefined}
       href={to || null}
       id={id}
       onClick={onClick}
-      type={Element === 'button' ? 'button' : undefined}
+      type={isButton ? 'button' : undefined}
     >
       <span className={`${baseClass}__label`}>{children}</span>
       {Boolean(icon) && <span className={`${baseClass}__icon`}>{icon}</span>}

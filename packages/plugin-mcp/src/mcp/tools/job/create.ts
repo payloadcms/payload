@@ -401,10 +401,12 @@ export const createJobTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'createJob',
-    'Creates a new Payload job (task or workflow) with specified configuration',
-    toolSchemas.createJob.parameters.shape,
+    {
+      description: 'Creates a new Payload job (task or workflow) with specified configuration',
+      inputSchema: toolSchemas.createJob.parameters.shape,
+    },
     async (args) => {
       return tool(
         args.jobName,

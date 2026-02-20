@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const createResourceTool = (
   server: McpServer,
@@ -44,6 +49,13 @@ export const createResourceTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
@@ -176,10 +188,12 @@ ${JSON.stringify(result)}
         ),
     })
 
-    server.tool(
+    server.registerTool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
-      createResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
+        inputSchema: createResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const { depth, draft, fallbackLocale, locale, select, ...fieldData } = params
         const data = JSON.stringify(fieldData)

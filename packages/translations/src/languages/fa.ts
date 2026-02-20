@@ -330,6 +330,7 @@ export const faTranslations: DefaultTranslationsObject = {
     items: 'موارد',
     language: 'زبان',
     lastModified: 'آخرین تغییر',
+    layout: 'چیدمان',
     leaveAnyway: 'بله، خارج شو',
     leaveWithoutSaving: 'خروج بدون ذخیره',
     light: 'روشن',
@@ -358,6 +359,9 @@ export const faTranslations: DefaultTranslationsObject = {
     noOptions: 'گزینه‌ای وجود ندارد',
     noResults:
       'هیچ موردی برای "{{label}}" یافت نشد. یا موردی ایجاد نشده یا با فیلترهای شما مطابقت ندارد.',
+    noResultsDescription:
+      'هیچ کدام وجود ندارند یا هیچ کدام با فیلترهایی که در بالا مشخص کرده اید مطابقت ندارند.',
+    noResultsFound: 'نتیجه‌ای یافت نشد.',
     notFound: 'یافت نشد',
     nothingFound: 'موردی یافت نشد',
     noTrashResults: 'هیچ {{label}} در سطل زباله وجود ندارد.',
@@ -393,6 +397,7 @@ export const faTranslations: DefaultTranslationsObject = {
     row: 'ردیف',
     rows: 'ردیف‌ها',
     save: 'ذخیره',
+    saveChanges: 'ذخیره تغییرات',
     saving: 'در حال ذخیره...',
     schedulePublishFor: 'زمان‌بندی انتشار برای "{{title}}"',
     searchBy: 'جستجو بر اساس {{label}}',

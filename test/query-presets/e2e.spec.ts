@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
+import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
+import { openNav } from '__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
 import {
@@ -15,9 +16,9 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
@@ -402,13 +403,13 @@ describe('Query Presets', () => {
     await page.goto(postsURL.list)
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
-    await expect(drawer.locator('.collection-list__no-results')).toBeVisible()
+    await expect(drawer.locator('.no-results')).toBeVisible()
 
     // results on `pages` collection
     await page.goto(pagesUrl.list)
     await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
-    await drawer.locator('.collection-list__no-results').isHidden()
+    await drawer.locator('.no-results').isHidden()
   })
 
   test('should display single relationship value in query preset modal', async ({ page }) => {
@@ -621,6 +622,7 @@ describe('Query Presets', () => {
 
     // Create a preset without groupBy
     await page.goto(postsUrl.list)
+    await wait(1000)
 
     await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')

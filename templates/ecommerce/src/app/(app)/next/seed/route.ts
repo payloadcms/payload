@@ -3,7 +3,7 @@ import { seed } from '@/endpoints/seed'
 import config from '@payload-config'
 import { headers } from 'next/headers'
 
-export const maxDuration = 60 // This function can run for a maximum of 60 seconds
+export const maxDuration = 300 // This function can run for a maximum of 300 seconds
 
 export async function POST(): Promise<Response> {
   const payload = await getPayload({ config })

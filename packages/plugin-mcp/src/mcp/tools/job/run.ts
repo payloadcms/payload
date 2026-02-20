@@ -177,10 +177,12 @@ export const runJobTool = (server: McpServer, req: PayloadRequest, verboseLogs: 
     }
   }
 
-  server.tool(
+  server.registerTool(
     'runJob',
-    'Runs a Payload job with specified input data and queue options',
-    toolSchemas.runJob.parameters.shape,
+    {
+      description: 'Runs a Payload job with specified input data and queue options',
+      inputSchema: toolSchemas.runJob.parameters.shape,
+    },
     async (args) => {
       const { delay, input, jobSlug, priority, queue } = args
       return await tool(jobSlug, input, queue, priority, delay)

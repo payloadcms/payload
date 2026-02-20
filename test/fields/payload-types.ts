@@ -164,9 +164,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -244,6 +242,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -281,6 +280,21 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
+    richTextField?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     subArray?:
       | {
           text?: string | null;
@@ -2122,6 +2136,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         anotherText?: T;
         localizedText?: T;
+        richTextField?: T;
         subArray?:
           | T
           | {
@@ -3647,6 +3662,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

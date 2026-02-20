@@ -15,21 +15,22 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
 import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+} from '../../../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../__helpers/shared/assertToastErrors.js'
+import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
@@ -445,7 +446,7 @@ describe('lexicalBlocks', () => {
 
       await blockTextField.fill('invalid')
 
-      await saveDocAndAssert(page, '#action-save', 'error',{disableDismissAllToasts: true})
+      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
@@ -542,19 +543,17 @@ describe('lexicalBlocks', () => {
         .getByText('Some text below relationship node 1')
         .first()
       await expect(spanInSubEditor).toBeVisible()
-      await spanInSubEditor.click({delay: 100}) // Use click, because focus does not work
+      await spanInSubEditor.click({ delay: 100 }) // Use click, because focus does not work
 
       // Now go to the END of the span while selecting the text
       for (let i = 0; i < 18; i++) {
-        await page.keyboard.press('Shift+ArrowRight', {delay: 50})
+        await page.keyboard.press('Shift+ArrowRight', { delay: 50 })
       }
       // The following text should now be selectedelationship node 1
 
       const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
       await expect(floatingToolbar_formatSection).toBeVisible()
-
-      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
       const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
@@ -1276,8 +1275,12 @@ describe('lexicalBlocks', () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       await expect(
         page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields label.field-label'),
@@ -1295,12 +1298,15 @@ describe('lexicalBlocks', () => {
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
 
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
       await assertNetworkRequests(
         page,
         '/collections/LexicalInBlock/',
         async () => {
-          await page.locator('.cell-id a').first().click()
-          await page.waitForURL(`**/collections/LexicalInBlock/**`)
+          await goToFirstCell(page, serverURL)
+          await waitForFormReady(page)
 
           await expect(
             page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
@@ -1454,8 +1460,11 @@ describe('lexicalBlocks', () => {
     test('ensure inline blocks restore their state after undoing a removal', async () => {
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       // Wait for the page to be fully loaded and elements to be stable
       await page.waitForLoadState('domcontentloaded')

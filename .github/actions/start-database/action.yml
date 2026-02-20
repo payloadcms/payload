@@ -25,7 +25,7 @@ runs:
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
-        docker compose -f test/helpers/db/mongodb/docker-compose.yml up -d --wait
+        docker compose -f test/__helpers/shared/db/mongodb/docker-compose.yml up -d --wait
         echo "url=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
 
     - name: Start MongoDB Atlas Local
@@ -33,7 +33,7 @@ runs:
       if: inputs.database == 'mongodb-atlas'
       shell: bash
       run: |
-        docker compose -f test/helpers/db/mongodb-atlas/docker-compose.yml up -d --wait
+        docker compose -f test/__helpers/shared/db/mongodb-atlas/docker-compose.yml up -d --wait
         echo "url=mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
 
     - name: Start PostgreSQL
@@ -41,7 +41,7 @@ runs:
       if: startsWith(inputs.database, 'postgres')
       shell: bash
       run: |
-        docker compose -f test/helpers/db/postgres/docker-compose.yml up -d --wait
+        docker compose -f test/__helpers/shared/db/postgres/docker-compose.yml up -d --wait
         echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT
 
     - name: Configure PostgreSQL custom schema

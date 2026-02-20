@@ -344,6 +344,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
+    layout: 'Indeling',
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',
@@ -373,6 +374,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     noOptions: 'Geen opties',
     noResults:
       'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
+    noResultsDescription:
+      'Er bestaan er geen of er komen er geen overeen met de filters die u hierboven heeft opgegeven.',
+    noResultsFound: 'Geen resultaten.',
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
     noTrashResults: 'Geen {{label}} in prullenbak.',
@@ -410,6 +414,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',

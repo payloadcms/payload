@@ -1,5 +1,6 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from '@payloadcms/eslint-plugin'
+import mdxTextParser from '@payloadcms/eslint-plugin/customRules/mdx-text-parser.js'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -98,6 +99,19 @@ export default [
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',
+    },
+  },
+  // MDX/Markdown documentation linting for code block languages
+  {
+    files: ['docs/**/*.mdx', 'docs/**/*.md'],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    languageOptions: {
+      parser: mdxTextParser,
+    },
+    rules: {
+      'payload/valid-code-block-languages': 'error',
     },
   },
 ]
