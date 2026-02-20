@@ -8,7 +8,7 @@ export const runJob = async (
   req: PayloadRequest,
   verboseLogs: boolean,
   jobSlug: string,
-  input: Record<string, any>,
+  input: Record<string, unknown>,
   queue?: string,
   priority?: number,
   delay?: number,
@@ -143,49 +143,25 @@ ${JSON.stringify(input, null, 2)}
 }
 
 export const runJobTool = (server: McpServer, req: PayloadRequest, verboseLogs: boolean) => {
-  const tool = async (
-    jobSlug: string,
-    input: Record<string, any>,
-    queue?: string,
-    priority?: number,
-    delay?: number,
-  ) => {
-    if (verboseLogs) {
-      req.payload.logger.info(`[payload-mcp] Run Job Tool called with: ${jobSlug}`)
-    }
-
-    try {
-      const result = await runJob(req, verboseLogs, jobSlug, input, queue, priority, delay)
-
-      if (verboseLogs) {
-        req.payload.logger.info(`[payload-mcp] Run Job Tool completed successfully`)
-      }
-
-      return result
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      req.payload.logger.error(`[payload-mcp] Error in Run Job Tool: ${errorMessage}`)
-
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `❌ **Error in Run Job Tool**: ${errorMessage}`,
-          },
-        ],
-      }
-    }
-  }
-
   server.registerTool(
     'runJob',
     {
       description: 'Runs a Payload job with specified input data and queue options',
       inputSchema: toolSchemas.runJob.parameters.shape,
     },
-    async (args) => {
-      const { delay, input, jobSlug, priority, queue } = args
-      return await tool(jobSlug, input, queue, priority, delay)
+    async ({ delay, input, jobSlug, priority, queue }) => {
+      if (verboseLogs) {
+        req.payload.logger.info(`[payload-mcp] Run Job Tool called with: ${jobSlug}`)
+      }
+      return runJob(
+        req,
+        verboseLogs,
+        jobSlug,
+        input as Record<string, unknown>,
+        queue,
+        priority,
+        delay,
+      )
     },
   )
 }
