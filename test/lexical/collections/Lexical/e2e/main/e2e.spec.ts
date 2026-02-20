@@ -1014,7 +1014,7 @@ describe('lexicalMain', () => {
       .locator('.LexicalEditorTheme__link')
       .first()
       .getAttribute('data-link-id')
-    const urlInput = linkDrawer.locator(`#field-richText__${linkId}__url`)
+    const urlInput = linkDrawer.locator(`#field-lexicalRootEditor__${linkId}__url`)
 
     // Click on the input to focus it
     await urlInput.click()
@@ -1136,7 +1136,9 @@ describe('lexicalMain', () => {
     await radioInternalLink.click()
     await wait(200)
 
-    const docRelationshipInput = linkDrawer.locator(`#field-richText__${linkId}__doc`).first()
+    const docRelationshipInput = linkDrawer
+      .locator(`#field-lexicalRootEditor__${linkId}__doc`)
+      .first()
     await docRelationshipInput.click()
     await wait(200)
 
@@ -1250,7 +1252,11 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
     await expect(linkDrawer).toBeVisible()
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .last()
+      .getAttribute('data-link-id')
+    const urlInput = linkDrawer.locator(`#field-richText__${linkId}__url`).first()
 
     await expect(urlInput).toBeVisible()
   })
@@ -1276,7 +1282,11 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first()
     await expect(linkDrawer).toBeVisible()
 
-    const blockTextInput = linkDrawer.locator('#field-blocks__0__text').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+    const blockTextInput = linkDrawer.locator(`#field-richText__${linkId}__blocks__0__text`).first()
 
     await expect(blockTextInput).toBeVisible()
     await expect(blockTextInput).toBeEditable()
