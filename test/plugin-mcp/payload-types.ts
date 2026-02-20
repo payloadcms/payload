@@ -76,6 +76,7 @@ export interface Config {
     'modified-prompts': ModifiedPrompt;
     'returned-resources': ReturnedResource;
     pages: Page;
+    'field-types': FieldType;
     'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -92,6 +93,7 @@ export interface Config {
     'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
     'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -335,6 +337,102 @@ export interface HeroBlock {
   blockType: 'hero';
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-types".
+ */
+export interface FieldType {
+  id: string;
+  /**
+   * A simple text field
+   */
+  textField?: string | null;
+  /**
+   * A textarea field
+   */
+  textareaField?: string | null;
+  /**
+   * A number field
+   */
+  numberField?: number | null;
+  /**
+   * An email field
+   */
+  emailField?: string | null;
+  /**
+   * A checkbox field
+   */
+  checkboxField?: boolean | null;
+  /**
+   * A date field
+   */
+  dateField?: string | null;
+  /**
+   * A code field
+   */
+  codeField?: string | null;
+  /**
+   * A JSON field
+   */
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * A select field
+   */
+  selectField?: ('option1' | 'option2' | 'option3') | null;
+  /**
+   * A radio field
+   */
+  radioField?: ('radio1' | 'radio2' | 'radio3') | null;
+  /**
+   * An array field with nested items
+   */
+  arrayField?:
+    | {
+        item?: string | null;
+        itemNumber?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A group field with nested properties
+   */
+  groupField?: {
+    groupText?: string | null;
+    groupNumber?: number | null;
+  };
+  /**
+   * An upload field
+   */
+  uploadField?: (string | null) | Media;
+  /**
+   * Text field inside a collapsible container
+   */
+  collapsibleText?: string | null;
+  /**
+   * Text field inside a row container
+   */
+  rowText?: string | null;
+  namedTab?: {
+    /**
+     * Text field inside a named tab
+     */
+    namedTabText?: string | null;
+  };
+  /**
+   * Text field inside an unnamed tab
+   */
+  unnamedTabText?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * API keys control which collections, resources, tools, and prompts MCP clients can access
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -369,6 +467,24 @@ export interface PayloadMcpApiKey {
     update?: boolean | null;
     /**
      * Allow clients to delete products.
+     */
+    delete?: boolean | null;
+  };
+  fieldTypes?: {
+    /**
+     * Allow clients to find field-types.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to create field-types.
+     */
+    create?: boolean | null;
+    /**
+     * Allow clients to update field-types.
+     */
+    update?: boolean | null;
+    /**
+     * Allow clients to delete field-types.
      */
     delete?: boolean | null;
   };
@@ -516,6 +632,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'field-types';
+        value: string | FieldType;
       } | null)
     | ({
         relationTo: 'payload-mcp-api-keys';
@@ -706,6 +826,46 @@ export interface HeroBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-types_select".
+ */
+export interface FieldTypesSelect<T extends boolean = true> {
+  textField?: T;
+  textareaField?: T;
+  numberField?: T;
+  emailField?: T;
+  checkboxField?: T;
+  dateField?: T;
+  codeField?: T;
+  jsonField?: T;
+  selectField?: T;
+  radioField?: T;
+  arrayField?:
+    | T
+    | {
+        item?: T;
+        itemNumber?: T;
+        id?: T;
+      };
+  groupField?:
+    | T
+    | {
+        groupText?: T;
+        groupNumber?: T;
+      };
+  uploadField?: T;
+  collapsibleText?: T;
+  rowText?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+      };
+  unnamedTabText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
@@ -713,6 +873,14 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   label?: T;
   description?: T;
   products?:
+    | T
+    | {
+        find?: T;
+        create?: T;
+        update?: T;
+        delete?: T;
+      };
+  fieldTypes?:
     | T
     | {
         find?: T;
