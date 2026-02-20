@@ -24,7 +24,7 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "workspace:*",
-    "mongoose": "^6.12.3"
+    "mongoose": "^8.0.0"
   },
   "files": [
     "dist",

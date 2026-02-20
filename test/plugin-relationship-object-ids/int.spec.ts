@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 
-describe.skip('Relationship Object IDs Plugin', () => {
+describe('Relationship Object IDs Plugin', () => {
   let relations: any
   let posts: any
 
@@ -120,6 +120,62 @@ describe.skip('Relationship Object IDs Plugin', () => {
 
       // Should be an ObjectId, not a string
       expect(doc.hasOne instanceof mongoose.Types.ObjectId).toBe(true)
+    }
+  })
+
+  it('preserves ObjectIds on updates', async () => {
+    if (payload.db.name === 'mongoose') {
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: { title: 'Post 1 for update test' },
+      })
+
+      const post2 = await payload.create({
+        collection: 'posts',
+        data: { title: 'Post 2 for update test' },
+      })
+
+      // Create relation with post1
+      const relation = await payload.create({
+        collection: 'relations',
+        data: { hasOne: post1.id },
+        depth: 0,
+      })
+
+      // Update to point to post2
+      await payload.update({
+        collection: 'relations',
+        id: relation.id,
+        data: { hasOne: post2.id },
+        depth: 0,
+      })
+
+      const doc = await payload.db.collections.relations.findOne({ _id: relation.id })
+
+      // Should still be an ObjectId, not a string
+      expect(doc.hasOne instanceof mongoose.Types.ObjectId).toBe(true)
+      expect(doc.hasOne.toString()).toBe(post2.id)
+    }
+  })
+
+  it('stores global relationship values as ObjectIds', async () => {
+    if (payload.db.name === 'mongoose') {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'Featured Post' },
+      })
+
+      await payload.updateGlobal({
+        slug: 'settings',
+        data: { featuredPost: post.id },
+        depth: 0,
+      })
+
+      const doc = await payload.db.globals.findOne({ globalType: 'settings' })
+
+      // Should be an ObjectId, not a string
+      expect(doc.featuredPost instanceof mongoose.Types.ObjectId).toBe(true)
+      expect(doc.featuredPost.toString()).toBe(post.id)
     }
   })
 })
