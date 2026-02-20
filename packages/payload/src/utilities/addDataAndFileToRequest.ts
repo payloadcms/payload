@@ -21,7 +21,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         const text = await req.text?.()
         data = text ? JSON.parse(text) : {}
       } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new APIError('Invalid JSON', 400)
+        }
         req.payload.logger.error(error)
+        throw error
       } finally {
         req.data = data
         // @ts-expect-error attach json method to request
