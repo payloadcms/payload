@@ -19,6 +19,7 @@ export type DocToSync = {
 }
 
 export type BeforeSync = (args: {
+  collectionSlug: string
   originalDoc: {
     [key: string]: any
   }
