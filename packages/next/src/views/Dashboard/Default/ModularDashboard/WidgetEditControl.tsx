@@ -30,11 +30,14 @@ export function WidgetEditControl({
   const drawerID = useId()
   const drawerSlug = `widget-editor-${drawerID}`
 
+  if (!hasEditableFields) {
+    return null
+  }
+
   return (
     <>
       <button
         className="widget-wrapper__edit-btn"
-        disabled={!hasEditableFields}
         onClick={() => {
           openModal(drawerSlug)
         }}
@@ -45,14 +48,12 @@ export function WidgetEditControl({
         </span>
         <EditIcon />
       </button>
-      {widgetConfig?.fields?.length ? (
-        <WidgetConfigDrawer
-          drawerSlug={drawerSlug}
-          onSave={onSave}
-          widget={widgetConfig}
-          widgetData={widgetData}
-        />
-      ) : null}
+      <WidgetConfigDrawer
+        drawerSlug={drawerSlug}
+        onSave={onSave}
+        widget={widgetConfig}
+        widgetData={widgetData}
+      />
     </>
   )
 }

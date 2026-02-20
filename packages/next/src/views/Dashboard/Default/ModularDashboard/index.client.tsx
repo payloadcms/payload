@@ -269,12 +269,15 @@ function WidgetWidthDropdown({
 
   const isDisabled = validOptions.length <= 1
 
+  if (isDisabled) {
+    return null
+  }
+
   return (
     <Popup
       button={
         <button
           className="widget-wrapper__size-btn"
-          disabled={isDisabled}
           onPointerDown={(e) => e.stopPropagation()}
           type="button"
         >
@@ -283,7 +286,6 @@ function WidgetWidthDropdown({
         </button>
       }
       buttonType="custom"
-      disabled={isDisabled}
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {
