@@ -1,6 +1,7 @@
+import type { WidgetInstance } from 'payload'
+
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { type WidgetInstance } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Events } from './collections/Events.js'
@@ -33,7 +34,7 @@ export default buildConfigWithDefaults({
           },
           ...Array.from(
             { length: 4 },
-            (_value, index): WidgetInstance => ({
+            (_value, index): WidgetInstance<'count'> => ({
               data: {
                 collection: index % 2 === 0 ? 'tickets' : 'events',
                 title: index % 2 === 0 ? 'Tickets' : 'Events',

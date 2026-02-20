@@ -115,5 +115,5 @@ async function getItemsFromConfig(
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',
     }
-  })
+  }) as WidgetItem[]
 }

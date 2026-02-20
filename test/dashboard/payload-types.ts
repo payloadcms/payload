@@ -94,6 +94,13 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    count: CountWidget;
+    private: PrivateWidget;
+    revenue: RevenueWidget;
+    'page-query': PageQueryWidget;
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -373,6 +380,57 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "count_widget".
+ */
+export interface CountWidget {
+  data?: {
+    title?: string | null;
+    collection?: ('tickets' | 'events') | null;
+  };
+  width?: 'x-small' | 'small' | 'medium';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private_widget".
+ */
+export interface PrivateWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue_widget".
+ */
+export interface RevenueWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width?: 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-query_widget".
+ */
+export interface PageQueryWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width?: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

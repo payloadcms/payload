@@ -1,20 +1,17 @@
 /* eslint-disable no-restricted-exports */
 import { type WidgetServerProps } from 'payload'
 
-export default async function Count({ req, widgetData }: WidgetServerProps) {
+export default async function Count({ req, widgetData }: WidgetServerProps<'count'>) {
   let count = 0
   let error: null | string = null
 
-  const typedWidgetData = widgetData as { collection?: string; title?: string } | undefined
   const selectedCollection =
-    typeof typedWidgetData?.collection === 'string' && typedWidgetData.collection.length > 0
-      ? typedWidgetData.collection
+    typeof widgetData?.collection === 'string' && widgetData.collection.length > 0
+      ? widgetData.collection
       : 'tickets'
   const payload = req.payload
   const title =
-    typeof typedWidgetData?.title === 'string' && typedWidgetData.title
-      ? typedWidgetData.title
-      : 'Tickets'
+    typeof widgetData?.title === 'string' && widgetData.title ? widgetData.title : 'Tickets'
   const color = 'blue'
   const icon = '📊'
   const changePercent = 10
@@ -22,7 +19,6 @@ export default async function Count({ req, widgetData }: WidgetServerProps) {
 
   try {
     const result = await payload.count({
-      // @ts-expect-error - Dynamic collection counting
       collection: selectedCollection,
     })
     count = result.totalDocs
