@@ -14,9 +14,7 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
 
   const sanitized = sanitizeJsonSchema(schemaClone)
   const pointTransformed = transformPointFieldsForMCP(sanitized)
-  const simplifiedSchema = simplifyRelationshipFields(pointTransformed)
-
-  const zodSchemaAsString = jsonSchemaToZod(simplifiedSchema)
+  const zodSchemaAsString = jsonSchemaToZod(simplifyRelationshipFields(pointTransformed))
 
   // Transpile TypeScript to JavaScript
   const transpileResult = ts.transpileModule(zodSchemaAsString, {
