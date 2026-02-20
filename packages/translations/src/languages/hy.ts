@@ -338,6 +338,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     items: 'տեսականի',
     language: 'Լեզու',
     lastModified: 'Վերջին փոփոխություն',
+    layout: 'Տեսք',
     leaveAnyway: 'Այնուամենայնիվ հեռանալ',
     leaveWithoutSaving: 'Հեռանալ առանց պահպանելու',
     light: 'Լուսավոր',
@@ -367,6 +368,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     noOptions: 'Ընտրանքներ չկան',
     noResults:
       '{{label}}-ը չի գտնվել։ Կա՛մ դեռևս {{label}} չկա, կա՛մ ոչ մեկը չի համապատասխանում վերևում նշված ֆիլտրերին։',
+    noResultsDescription:
+      'Հավելյալ ոչ մեկը գոյություն չունի կամ ոչ մեկը չի համապատասխանում վերոնշյալ զտիչն',
+    noResultsFound: 'Արդյունքներ չկան։',
     notFound: 'Չի գտնվել',
     nothingFound: 'Ոչինչ չի գտնվել',
     noTrashResults: 'Ոչ մի {{label}} աղբարկղում:',
@@ -404,6 +408,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',
+    saveChanges: 'Պահպանել փոփոխությունները',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',

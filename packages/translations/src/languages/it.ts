@@ -340,6 +340,7 @@ export const itTranslations: DefaultTranslationsObject = {
     items: 'articoli',
     language: 'Lingua',
     lastModified: 'Ultima modifica',
+    layout: 'Layout',
     leaveAnyway: 'Esci comunque',
     leaveWithoutSaving: 'Esci senza salvare',
     light: 'Chiaro',
@@ -368,6 +369,9 @@ export const itTranslations: DefaultTranslationsObject = {
     noOptions: 'Nessuna opzione',
     noResults:
       'Nessun {{label}} trovato. Non esiste ancora nessun {{label}} oppure nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsDescription:
+      'O non ne esistono o nessuno corrisponde ai filtri che hai specificato sopra.',
+    noResultsFound: 'Nessun risultato.',
     notFound: 'Non Trovato',
     nothingFound: 'Non è stato trovato nulla',
     noTrashResults: 'Nessun {{label}} nel cestino.',
@@ -406,6 +410,7 @@ export const itTranslations: DefaultTranslationsObject = {
     row: 'Riga',
     rows: 'Righe',
     save: 'Salva',
+    saveChanges: 'Salva Modifiche',
     saving: 'Salvo...',
     schedulePublishFor: 'Pianifica la pubblicazione per {{title}}',
     searchBy: 'Cerca per {{label}}',

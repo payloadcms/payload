@@ -336,6 +336,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     items: 'предмети',
     language: 'Мова',
     lastModified: 'Востаннє змінено',
+    layout: 'Макет',
     leaveAnyway: 'Все одно вийти',
     leaveWithoutSaving: 'Вийти без збереження',
     light: 'Світла',
@@ -365,6 +366,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     noOptions: 'Немає варіантів',
     noResults:
       'Жодного {{label}} не знайдено. Або {{label}} ще не існує, або жоден з них не відповідає фільтрам, що ви задали више.',
+    noResultsDescription:
+      'Або жодних не існує, або жодні не відповідають фільтрам, які ви вказали вище.',
+    noResultsFound: 'Результатів не знайдено.',
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
     noTrashResults: 'Немає {{label}} у смітнику.',
@@ -400,6 +404,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     row: 'Рядок',
     rows: 'Рядки',
     save: 'Зберегти',
+    saveChanges: 'Зберегти зміни',
     saving: 'Збереження...',
     schedulePublishFor: 'Запланувати публікацію для {{title}}',
     searchBy: 'Шукати по {{label}}',

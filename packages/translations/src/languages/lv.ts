@@ -338,6 +338,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
+    layout: 'Izkārtojums',
     leaveAnyway: 'Pamest tāpat',
     leaveWithoutSaving: 'Pamest nesaglabājot',
     light: 'Gaišs',
@@ -367,6 +368,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     noOptions: 'Nav opciju',
     noResults:
       'Nav atrasts neviens {{label}}. Vai nu vēl nav izveidots, vai neviens neatbilst augstāk norādītajiem filtriem.',
+    noResultsDescription:
+      'Vai nu neviens neeksistē, vai neviens neatbilst jūsu iepriekš norādītajiem filtriem.',
+    noResultsFound: 'Nav rezultātu.',
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',
@@ -402,6 +406,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     row: 'Rinda',
     rows: 'Rindas',
     save: 'Saglabāt',
+    saveChanges: 'Saglabāt Izmaiņas',
     saving: 'Saglabā...',
     schedulePublishFor: 'Ieplānot publicēšanu priekš {{title}}',
     searchBy: 'Meklēt pēc {{label}}',

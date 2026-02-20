@@ -18,10 +18,10 @@ import { beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import { it } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
@@ -291,6 +291,51 @@ describe('Lexical', () => {
     expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(
       '[link to payload](https://payloadcms.com)',
     )
+  })
+
+  describe('upload markdown: Lexical → Markdown (export)', () => {
+    it('exports upload node to markdown placeholder when unpopulated', async () => {
+      const newLexicalDoc = await payload.create({
+        collection: lexicalFieldsSlug,
+        depth: 0,
+        data: {
+          title: 'Lexical Upload Markdown Unpopulated',
+          lexicalWithBlocks: {
+            root: {
+              type: 'root',
+              format: '',
+              indent: 0,
+              version: 1,
+              children: [
+                {
+                  format: '',
+                  type: 'upload',
+                  version: 2,
+                  relationTo: 'uploads',
+                  value: createdJPGDocID,
+                  fields: {},
+                },
+              ],
+              direction: 'ltr',
+            },
+          },
+        },
+      })
+
+      expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(`![uploads:${createdJPGDocID}]()`)
+    })
+
+    it('exported markdown contains upload placeholder in seeded doc', async () => {
+      const lexicalDoc = await payload.find({
+        collection: lexicalFieldsSlug,
+        depth: 0,
+        where: { title: { equals: lexicalDocData.title } },
+      })
+
+      const markdown = lexicalDoc.docs[0]?.lexicalWithBlocks_markdown as string
+      expect(markdown).toBeDefined()
+      expect(markdown).toContain(`![uploads:${createdJPGDocID}]()`)
+    })
   })
 
   describe('converters and migrations', () => {
@@ -834,6 +879,95 @@ describe('Lexical', () => {
           },
         }),
       ).rejects.toBeTruthy()
+    })
+  })
+
+  describe('Autosave', () => {
+    it('should populate previousValue in afterChange hooks for fields inside lexical', async () => {
+      const { autosaveHookLog, clearAutosaveHookLog } = await import(
+        './collections/LexicalAutosave/index.js'
+      )
+
+      clearAutosaveHookLog()
+
+      const doc = await payload.create({
+        collection: 'lexical-autosave',
+        data: {
+          title: 'Autosave test document',
+          cta: [
+            {
+              richText: {
+                root: {
+                  children: [
+                    {
+                      type: 'block',
+                      version: 2,
+                      format: '',
+                      fields: {
+                        id: 'block-id-1',
+                        blockName: '',
+                        blockTitle: 'Initial block title',
+                        blockType: 'textBlock',
+                      },
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      // Verify create operation has undefined previousValue (expected)
+      expect(autosaveHookLog.relationshipField?.operation).toBe('create')
+      expect(autosaveHookLog.relationshipField?.previousValue).toBeUndefined()
+      expect(autosaveHookLog.relationshipField?.value).toBe('Initial block title')
+
+      clearAutosaveHookLog()
+
+      // Simulate autosave by updating the document
+      await payload.update({
+        collection: 'lexical-autosave',
+        id: doc.id,
+        data: {
+          title: 'Updated via autosave',
+          cta: [
+            {
+              richText: {
+                root: {
+                  children: [
+                    {
+                      type: 'block',
+                      version: 2,
+                      format: '',
+                      fields: {
+                        id: 'block-id-1',
+                        blockName: '',
+                        blockTitle: 'Updated block title',
+                        blockType: 'textBlock',
+                      },
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'root',
+                  version: 1,
+                },
+              },
+            },
+          ],
+        },
+      })
+
+      expect(autosaveHookLog.relationshipField?.operation).toBe('update')
+      expect(autosaveHookLog.relationshipField?.previousValue).toBe('Initial block title')
+      expect(autosaveHookLog.relationshipField?.value).toBe('Updated block title')
     })
   })
 })

@@ -23,12 +23,6 @@ export type GetSchemaColumnsArgs = {
    * Available locale codes from config. Required when locale='all'.
    */
   localeCodes?: string[]
-  /**
-   * Set of auto-generated timezone companion field names (from collectTimezoneCompanionFields).
-   * These fields are excluded unless explicitly selected.
-   * If not provided, no timezone filtering is applied.
-   */
-  timezoneCompanionFields?: Set<string>
 }
 
 /**
@@ -49,38 +43,31 @@ export const getSchemaColumns = ({
   fields: selectedFields,
   locale,
   localeCodes,
-  timezoneCompanionFields,
 }: GetSchemaColumnsArgs): string[] => {
-  const hasVersions = Boolean(collectionConfig.versions)
-
-  // Determine if we need locale expansion
   const expandLocales = locale === 'all' && localeCodes && localeCodes.length > 0
 
-  // Get all possible columns from schema (excludes system fields like id, createdAt, updatedAt)
   let schemaColumns = getFlattenedFieldKeys(
     collectionConfig.flattenedFields,
     '',
     expandLocales ? { localeCodes } : {},
   )
 
-  // Add system fields that aren't in flattenedFields
-  const systemFields = ['id', 'createdAt', 'updatedAt']
-  schemaColumns = [...systemFields, ...schemaColumns]
-
-  // Filter to user-selected fields if specified
-  if (selectedFields && selectedFields.length > 0) {
-    schemaColumns = filterToSelectedFields(schemaColumns, selectedFields, timezoneCompanionFields)
+  // Add id if not present in schema
+  const hasIdField = schemaColumns.includes('id')
+  if (!hasIdField) {
+    schemaColumns = ['id', ...schemaColumns]
   }
 
-  // Remove disabled fields
+  if (selectedFields && selectedFields.length > 0) {
+    schemaColumns = filterToSelectedFields(schemaColumns, selectedFields)
+  }
+
   if (disabledFields.length > 0) {
     const disabledSet = new Set<string>()
     for (const path of disabledFields) {
-      // Convert dot notation to underscore and add to set
       disabledSet.add(path.replace(/\./g, '_'))
     }
     schemaColumns = schemaColumns.filter((col) => {
-      // Check if column matches any disabled path
       for (const disabled of disabledSet) {
         if (col === disabled || col.startsWith(`${disabled}_`)) {
           return false
@@ -90,42 +77,7 @@ export const getSchemaColumns = ({
     })
   }
 
-  // When user has selected specific fields, preserve their ordering
-  // filterToSelectedFields() already returns columns in user's specified order
-  if (selectedFields && selectedFields.length > 0) {
-    return schemaColumns
-  }
-
-  // No fields selected - apply default ordering (id first, timestamps last)
-  const orderedColumns: string[] = []
-
-  // 1. ID always first
-  if (schemaColumns.includes('id')) {
-    orderedColumns.push('id')
-  }
-
-  // 2. Status field for versioned collections
-  if (hasVersions) {
-    orderedColumns.push('_status')
-  }
-
-  // 3. All other fields (excluding id, timestamps, status)
-  const excludeFromMiddle = new Set(['_status', 'createdAt', 'id', 'updatedAt'])
-  for (const col of schemaColumns) {
-    if (!excludeFromMiddle.has(col)) {
-      orderedColumns.push(col)
-    }
-  }
-
-  // 4. Timestamps at the end
-  if (schemaColumns.includes('createdAt')) {
-    orderedColumns.push('createdAt')
-  }
-  if (schemaColumns.includes('updatedAt')) {
-    orderedColumns.push('updatedAt')
-  }
-
-  return orderedColumns
+  return schemaColumns
 }
 
 /**
@@ -138,13 +90,10 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
   const schemaSet = new Set(schemaColumns)
   const insertedDerived = new Map<string, string[]>()
 
-  // Add any data columns not in schema (preserves schema ordering, appends new ones)
   for (const col of dataColumns) {
     if (!schemaSet.has(col)) {
       let inserted = false
 
-      // Check if this is a derived column from a schema column (e.g., field_id, field_email)
-      // Pattern: schemaCol_suffix where suffix is NOT a number (array indices are handled separately)
       for (const schemaCol of schemaColumns) {
         if (col.startsWith(`${schemaCol}_`)) {
           const suffix = col.slice(schemaCol.length + 1)
@@ -183,7 +132,6 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
           }
         }
 
-        // Otherwise append at the end (before timestamps)
         const createdAtIdx = result.indexOf('createdAt')
         if (createdAtIdx !== -1) {
           result.splice(createdAtIdx, 0, col)
@@ -195,19 +143,29 @@ export const mergeColumns = (schemaColumns: string[], dataColumns: string[]): st
     }
   }
 
+  // Remove schema columns that were fully replaced by toCSV-derived columns (e.g. "user" → "user_id", "user_email")
+  for (const [schemaCol, derivedCols] of insertedDerived) {
+    if (!dataColumns.includes(schemaCol) && derivedCols.length > 0) {
+      const idx = result.indexOf(schemaCol)
+      if (idx !== -1) {
+        result.splice(idx, 1)
+      }
+    }
+  }
+
   return result
 }
 
 /**
  * Filters schema columns to only include those matching user-selected fields.
  * Preserves the order specified by the user in selectedFields.
- * Handles nested field selection (e.g., 'group.value' includes 'group_value' and 'group_value_*')
+ *
+ * Container fields (groups, arrays, blocks) don't produce their own column, so we prefix-expand
+ * to find their children (e.g., 'group' → 'group_name', 'group_age').
+ * Leaf fields (date, text, select) produce an exact column, so we only match exactly to avoid
+ * including siblings with similar prefixes (e.g., 'dateWithTimezone' won't pull 'dateWithTimezone_tz').
  */
-function filterToSelectedFields(
-  columns: string[],
-  selectedFields: string[],
-  timezoneCompanionFields?: Set<string>,
-): string[] {
+export function filterToSelectedFields(columns: string[], selectedFields: string[]): string[] {
   const result: string[] = []
   const columnsSet = new Set(columns)
 
@@ -221,33 +179,21 @@ function filterToSelectedFields(
     }
   })
 
-  // Track which timezone companion fields were explicitly selected
-  const explicitlySelectedTzFields = new Set(
-    selectedFields
-      .filter((f) => {
-        const underscored = f.replace(/\./g, '_')
-        return timezoneCompanionFields?.has(underscored)
-      })
-      .map((f) => f.replace(/\./g, '_')),
-  )
-
   // Iterate through user-specified fields in order to preserve their ordering
   for (const pattern of patterns) {
-    // First add the exact match if it exists and not already added
-    // (it may have been added as a nested field of a previous pattern)
-    if (columnsSet.has(pattern.exact) && !result.includes(pattern.exact)) {
+    const hasExactColumn = columnsSet.has(pattern.exact)
+
+    if (hasExactColumn && !result.includes(pattern.exact)) {
       result.push(pattern.exact)
     }
 
-    // Then add any columns with the prefix (nested fields)
-    for (const column of columns) {
-      if (column !== pattern.exact && column.startsWith(pattern.prefix)) {
-        // Skip auto-generated timezone companion fields unless explicitly selected
-        if (timezoneCompanionFields?.has(column) && !explicitlySelectedTzFields.has(column)) {
-          continue
-        }
-        if (!result.includes(column)) {
-          result.push(column)
+    // Only prefix-expand if no exact column match exists (containers need expansion, leaves don't)
+    if (!hasExactColumn) {
+      for (const column of columns) {
+        if (column.startsWith(pattern.prefix)) {
+          if (!result.includes(column)) {
+            result.push(column)
+          }
         }
       }
     }
