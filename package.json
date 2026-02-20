@@ -135,6 +135,7 @@
     "test:e2e:prod:ci:noturbo": "pnpm prepare-run-test-against-prod:ci && pnpm test:e2e:prod:run:noturbo",
     "test:e2e:prod:run": "pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:run:noturbo": "pnpm runts ./test/runE2E.ts --prod --no-turbo",
+    "test:eval": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 vitest run --project eval",
     "test:int": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest --project int",
     "test:int:firestore": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=firestore DISABLE_LOGGING=true vitest --project int",
     "test:int:postgres": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 PAYLOAD_DATABASE=postgres DISABLE_LOGGING=true vitest --project int",
@@ -156,6 +157,7 @@
     "README.md": "sh -c 'cp ./README.md ./packages/payload/README.md'"
   },
   "devDependencies": {
+    "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "16.2.0-canary.29",
@@ -175,6 +177,7 @@
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
     "@types/shelljs": "0.8.15",
+    "ai": "6.0.95",
     "axe-core": "4.11.0",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
@@ -217,7 +220,8 @@
     "turbo": "^2.5.4",
     "typescript": "5.7.3",
     "vitest": "4.0.15",
-    "wrangler": "~4.61.1"
+    "wrangler": "~4.61.1",
+    "zod": "4.3.6"
   },
   "packageManager": "pnpm@10.27.0",
   "engines": {
