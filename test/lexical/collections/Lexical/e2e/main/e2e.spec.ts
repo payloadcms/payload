@@ -1010,7 +1010,12 @@ describe('lexicalMain', () => {
     await expect(linkDrawer).toBeVisible()
     await wait(500)
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+    const urlInput = linkDrawer.locator(`#field-richText__${linkId}__url`)
+
     // Click on the input to focus it
     await urlInput.click()
     // should be https:// value
@@ -1117,6 +1122,11 @@ describe('lexicalMain', () => {
     // Check if has text "Internal Link"
     await expect(linkDrawer.locator('.radio-input').nth(1)).toContainText('Internal Link')
 
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+
     // Get radio button for internal link with text "Internal Link"
     const radioInternalLink = linkDrawer
       .locator('.radio-input')
@@ -1126,17 +1136,15 @@ describe('lexicalMain', () => {
     await radioInternalLink.click()
     await wait(200)
 
-    const internalLinkSelect = linkDrawer
-      .locator('#field-doc .rs__control .value-container')
-      .first()
-    await internalLinkSelect.click()
+    const docRelationshipInput = linkDrawer.locator(`#field-richText__${linkId}__doc`).first()
+    await docRelationshipInput.click()
     await wait(200)
 
     await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
 
-    await expect(internalLinkSelect).toContainText('Rich Text')
+    await expect(docRelationshipInput).toContainText('Rich Text')
     await wait(1000)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
@@ -1513,7 +1521,14 @@ describe('lexicalMain', () => {
     await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
 
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(1)
-    await richTextField.locator('#field-someTextRequired').first().fill('test')
+    const blockId = await richTextField
+      .locator('.LexicalEditorTheme__block')
+      .first()
+      .getAttribute('data-block-id')
+    await richTextField
+      .locator(`#field-lexicalRootEditor__${blockId}__someTextRequired`)
+      .first()
+      .fill('test')
 
     await saveDocAndAssert(page)
 
