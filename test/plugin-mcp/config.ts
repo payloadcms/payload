@@ -1,18 +1,25 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Media } from './collections/Media.js'
+import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
+import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { Products } from './collections/Products.js'
+import { ReturnedResources } from './collections/ReturnedResources.js'
+import { Rolls } from './collections/Rolls.js'
 import { Users } from './collections/Users.js'
+import { SiteSettings } from './globals/SiteSettings.js'
 import { seed } from './seed/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
   admin: {
@@ -20,10 +27,60 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Products],
+  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources, Pages],
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: [
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'es',
+        label: 'Spanish',
+      },
+      {
+        code: 'fr',
+        label: 'French',
+      },
+    ],
+  },
+  globals: [SiteSettings],
   onInit: seed,
   plugins: [
     mcpPlugin({
+      /**
+       * Override the authentication method.
+       * This allows you to use a custom authentication method instead of the default API key authentication.
+       * @param req - The request object.
+       * @returns The MCP access settings.
+       */
+      // overrideAuth: (req) => {
+      //   const { payload } = req
+
+      //   payload.logger.info('[Override MCP auth]:')
+
+      //   return {
+      //     posts: {
+      //       find: true,
+      //     },
+      //     products: {
+      //       find: true,
+      //       update: true,
+      //     },
+      //     'payload-mcp-tool': {
+      //       diceRoll: true,
+      //     },
+      //     'payload-mcp-prompt': {
+      //       echo: true,
+      //     },
+      //     'payload-mcp-resource': {
+      //       data: true,
+      //       dataByID: true,
+      //     },
+      //   } as MCPAccessSettings
+      // },
       overrideApiKeyCollection: (collection) => {
         collection.fields.push({
           name: 'override',
@@ -39,20 +96,23 @@ export default buildConfigWithDefaults({
         [Products.slug]: {
           enabled: true,
         },
+        pages: {
+          enabled: {
+            find: true,
+            create: true,
+            update: true,
+            delete: true,
+          },
+          description: 'Pages with block-based layouts.',
+        },
         posts: {
           enabled: {
             find: true,
             create: true,
+            update: true,
+            delete: true,
           },
           description: 'This is a Payload collection with Post documents.',
-          override: (original: Record<string, unknown>, req) => {
-            const updatedOriginal = {
-              ...original,
-              title: `Title Override: ${original?.title as string}`,
-            }
-            req.payload.logger.info('[Override MCP call for Posts]:')
-            return updatedOriginal
-          },
           overrideResponse: (response, doc, req) => {
             req.payload.logger.info('[Override MCP response for Posts]:')
             response.content.push({
@@ -72,10 +132,22 @@ export default buildConfigWithDefaults({
           description: 'This is a Payload collection with Media documents.',
         },
       },
+      globals: {
+        'site-settings': {
+          enabled: {
+            find: true,
+            update: true,
+          },
+          description: 'Site-wide configuration settings.',
+        },
+      },
       mcp: {
         handlerOptions: {
           verboseLogs: true,
           maxDuration: 60,
+          onEvent: (event: unknown) => {
+            capturedMcpEvents.push(event)
+          },
         },
         serverOptions: {
           serverInfo: {
@@ -87,9 +159,28 @@ export default buildConfigWithDefaults({
           {
             name: 'diceRoll',
             description: 'Rolls a virtual dice with a specified number of sides',
-            handler: (args: Record<string, unknown>) => {
+            handler: async (args: Record<string, unknown>, req) => {
               const sides = (args.sides as number) || 6
               const result = Math.floor(Math.random() * sides) + 1
+              const payload = req.payload
+
+              payload.logger.info(
+                `Dice Roll MCP Tool rolled a ${args.sides} sided die and got a ${result}`,
+              )
+
+              await payload.create({
+                collection: 'rolls',
+                data: {
+                  sides,
+                  result,
+                  user: req.user?.id,
+                },
+                req,
+                overrideAccess: false,
+                user: req.user,
+                draft: true,
+              })
+
               return Promise.resolve({
                 content: [
                   {
@@ -117,17 +208,45 @@ export default buildConfigWithDefaults({
             argsSchema: { message: z.string() },
             description: 'Creates a prompt to process a message',
             title: 'Echo Prompt',
-            handler: ({ message }: { message: string }) => ({
-              messages: [
-                {
-                  content: {
-                    type: 'text',
-                    text: `Please process this message: ${message}`,
-                  },
-                  role: 'user',
+            handler: async ({ message }, req) => {
+              const { payload } = req
+
+              payload.logger.info(`Echo Prompt was sent: ${message}`)
+
+              const modifiedPrompt = `This prompt was sent: ${message}`
+
+              await payload.create({
+                collection: 'modified-prompts',
+                data: {
+                  original: message as string,
+                  modified: modifiedPrompt,
+                  user: req.user?.id,
                 },
-              ],
-            }),
+                req,
+                overrideAccess: false,
+                user: req.user,
+                draft: true,
+              })
+
+              return {
+                messages: [
+                  {
+                    content: {
+                      type: 'text',
+                      text: modifiedPrompt,
+                    },
+                    role: 'user',
+                  },
+                  {
+                    content: {
+                      type: 'text',
+                      text: `This prompt was sent by userId: ${req.user?.id}`,
+                    },
+                    role: 'assistant',
+                  },
+                ],
+              }
+            },
           },
         ],
         resources: [
@@ -135,14 +254,38 @@ export default buildConfigWithDefaults({
           {
             name: 'data',
             description: 'Data is a resource that contains special data.',
-            handler: (uri) => ({
-              contents: [
-                {
+            handler: async (uri, req) => {
+              const payload = req.payload
+
+              payload.logger.info(`Data resource was requested`)
+
+              const text = 'My special data.'
+              await payload.create({
+                collection: 'returned-resources',
+                data: {
                   uri: uri.href,
-                  text: 'My special data.',
+                  content: text,
+                  user: req.user?.id,
                 },
-              ],
-            }),
+                req,
+                overrideAccess: false,
+                user: req.user,
+                draft: true,
+              })
+
+              return {
+                contents: [
+                  {
+                    uri: uri.href,
+                    text,
+                  },
+                  {
+                    uri: uri.href,
+                    text: `This was requested by user: ${req.user?.id}`,
+                  },
+                ],
+              }
+            },
             mimeType: 'text/plain',
             title: 'Data',
             uri: 'data://app',
@@ -151,14 +294,38 @@ export default buildConfigWithDefaults({
           {
             name: 'dataByID',
             description: 'Data is a resource that contains special data.',
-            handler: (uri, { id }) => ({
-              contents: [
-                {
+            handler: async (uri, { id }, req) => {
+              const payload = req.payload
+
+              payload.logger.info(`Data by ID resource was requested`)
+
+              const text = `My special data for ID: ${id}`
+              await payload.create({
+                collection: 'returned-resources',
+                data: {
                   uri: uri.href,
-                  text: `My special data for ID: ${id}`,
+                  content: text,
+                  user: req.user?.id,
                 },
-              ],
-            }),
+                req,
+                overrideAccess: false,
+                user: req.user,
+                draft: true,
+              })
+
+              return {
+                contents: [
+                  {
+                    uri: uri.href,
+                    text,
+                  },
+                  {
+                    uri: uri.href,
+                    text: `This was requested by user: ${req.user?.id}`,
+                  },
+                ],
+              }
+            },
             mimeType: 'text/plain',
             title: 'Data By ID',
             uri: new ResourceTemplate('data://app/{id}', { list: undefined }),

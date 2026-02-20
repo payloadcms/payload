@@ -15,7 +15,7 @@ export const OrderItem: React.FC<Props> = ({ order }) => {
   return (
     <div className="bg-card border rounded-lg px-4 py-2 md:px-6 md:py-4 flex flex-col sm:flex-row gap-12 sm:items-center sm:justify-between">
       <div className="flex flex-col gap-4">
-        <h3 className="text-sm uppercase font-mono tracking-[0.1em] text-primary/50 truncate max-w-[8rem] sm:max-w-none">{`#${order.id}`}</h3>
+        <h3 className="text-sm uppercase font-mono tracking-widest text-primary/50 truncate max-w-32 sm:max-w-none">{`#${order.id}`}</h3>
 
         <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-6">
           <p className="text-xl">

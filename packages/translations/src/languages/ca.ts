@@ -79,6 +79,11 @@ export const caTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
+  dashboard: {
+    addWidget: 'Afegeix Widget',
+    deleteWidget: 'Esborra el widget {{id}}',
+    searchWidgets: 'Cerca de ginys...',
+  },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',
     autosaving: "Hi ha hagut un problema mentre s'estava desant automàticament aquest document.",
@@ -117,6 +122,7 @@ export const caTranslations: DefaultTranslationsObject = {
     problemUploadingFile: "Hi ha hagut un problema mentre es carregava l'arxiu.",
     restoringTitle:
       'Hi ha hagut un error en restaurar {{title}}. Si us plau, comproveu la vostra connexió i torneu-ho a provar.',
+    revertingDocument: 'Hi ha hagut un problema en revertir aquest document.',
     tokenInvalidOrExpired: 'El token és invàlid o ha caducat.',
     tokenNotProvided: "No s'ha proporcionat cap token.",
     unableToCopy: 'No es pot copiar.',
@@ -332,6 +338,7 @@ export const caTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Idioma',
     lastModified: 'Última modificació',
+    layout: 'Disseny',
     leaveAnyway: 'Deixa-ho de totes maneres',
     leaveWithoutSaving: 'Deixa sense desar',
     light: 'Clar',
@@ -339,6 +346,7 @@ export const caTranslations: DefaultTranslationsObject = {
     loading: 'Carregant',
     locale: 'Idioma',
     locales: 'Idiomes',
+    lock: 'Bloqueig',
     menu: 'Menu',
     moreOptions: 'Més opcions',
     move: 'Mou-te',
@@ -360,6 +368,9 @@ export const caTranslations: DefaultTranslationsObject = {
     noOptions: 'Sense opcions',
     noResults:
       "No s'ha trobat cap {{label}}. O no n'hi ha cap encara o cap coincideix amb els filtres que has especificat anteriorment.",
+    noResultsDescription:
+      'O bé no en existeix cap o cap coincideix amb els filtres que heu especificat anteriorment.',
+    noResultsFound: 'Sense resultats.',
     notFound: 'No trobat',
     nothingFound: 'Res trobat',
     noTrashResults: 'No hi ha cap {{label}} a la paperera.',
@@ -397,6 +408,7 @@ export const caTranslations: DefaultTranslationsObject = {
     row: 'Fila',
     rows: 'Files',
     save: 'Desa',
+    saveChanges: 'Desa els canvis',
     saving: 'Desant...',
     schedulePublishFor: 'Programa la publicacio {{title}}',
     searchBy: 'Cerca per {{label}}',
@@ -430,6 +442,7 @@ export const caTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: "{{count}} {{label}} s'ha mogut a la paperera.",
     true: 'Veritat',
     unauthorized: 'No autoritzat',
+    unlock: 'Desbloqueja',
     unsavedChanges: 'Tens canvis no desats. Vols continuar sense desar?',
     unsavedChangesDuplicate: 'Tens canvis no desats. Vols duplicar sense desar?',
     untitled: 'Sense titol',
@@ -551,6 +564,7 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       "Estàs a punt de revertir els canvis d'aquest document a l'estat publicat. Estàs segur?",
     aboutToUnpublish: 'Estàs a punt de despublicar aquest document. Estàs segur?',
+    aboutToUnpublishIn: "Estàs a punt de despublicar aquest document en {{locale}}. N'estàs segur?",
     aboutToUnpublishSelection:
       'Estàs a punt de despublicar tots els {{label}} de la selecció. Estàs segur?',
     autosave: 'Desa automàticament',
@@ -572,6 +586,7 @@ export const caTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Actualment veient',
     currentPublishedVersion: 'Versió publicada actual',
     draft: 'Borrador',
+    draftHasPublishedVersion: 'Esborrany (té versió publicada)',
     draftSavedSuccessfully: 'Borrador desat amb èxit.',
     lastSavedAgo: 'Últim desament fa {{distance}}',
     modifiedOnly: 'Només modificat',
@@ -597,6 +612,7 @@ export const caTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurant...',
     reverting: 'Revertint...',
     revertToPublished: 'Revertir a publicat',
+    revertUnsuccessful: "No s'ha pogut revertir. No s'ha trobat cap versió publicada anteriorment.",
     saveDraft: 'Desar borrador',
     scheduledSuccessfully: 'Programat amb èxit.',
     schedulePublish: 'Programar publicació',
@@ -607,6 +623,9 @@ export const caTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versió Específica',
     status: 'Estat',
     unpublish: 'Despublicar',
+    unpublished: 'Inèdit',
+    unpublishedSuccessfully: 'Despublicat amb èxit.',
+    unpublishIn: 'Despublica a {{locale}}',
     unpublishing: 'Despublicant...',
     version: 'Versió',
     versionAgo: 'fa {{distance}}',

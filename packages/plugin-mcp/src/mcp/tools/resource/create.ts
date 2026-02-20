@@ -1,11 +1,18 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
+
+import { z } from 'zod'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const createResourceTool = (
   server: McpServer,
@@ -18,6 +25,11 @@ export const createResourceTool = (
 ) => {
   const tool = async (
     data: string,
+    depth: number = 0,
+    draft: boolean,
+    locale?: string,
+    fallbackLocale?: string,
+    select?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -27,7 +39,9 @@ export const createResourceTool = (
     const payload = req.payload
 
     if (verboseLogs) {
-      payload.logger.info(`[payload-mcp] Creating resource in collection: ${collectionSlug}`)
+      payload.logger.info(
+        `[payload-mcp] Creating resource in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
+      )
     }
 
     try {
@@ -35,6 +49,13 @@ export const createResourceTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
@@ -47,12 +68,37 @@ export const createResourceTool = (
         }
       }
 
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // Create the resource
       const result = await payload.create({
         collection: collectionSlug,
-        // TODO: Move the override to a `beforeChange` hook and extend the payloadAPI context req to include MCP request info.
-        data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+        data: parsedData,
+        depth,
+        draft,
+        overrideAccess: false,
+        req,
         user,
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
+        ...(selectClause && { select: selectClause }),
       })
 
       if (verboseLogs) {
@@ -108,13 +154,57 @@ ${JSON.stringify(result, null, 2)}
   if (collections?.[collectionSlug]?.enabled) {
     const convertedFields = convertCollectionSchemaToZod(schema)
 
-    server.tool(
+    // Create a new schema that combines the converted fields with create-specific parameters
+    const createResourceSchema = z.object({
+      ...convertedFields.shape,
+      depth: z
+        .number()
+        .int()
+        .min(0)
+        .max(10)
+        .optional()
+        .default(0)
+        .describe('How many levels deep to populate relationships in response'),
+      draft: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe('Whether to create the document as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
+        ),
+    })
+
+    server.registerTool(
       `create${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.createResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
-      convertedFields.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.createResource.description.trim()}`,
+        inputSchema: createResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
-        const data = JSON.stringify(params)
-        return await tool(data)
+        const { depth, draft, fallbackLocale, locale, select, ...fieldData } = params
+        const data = JSON.stringify(fieldData)
+        return await tool(
+          data,
+          depth as number,
+          draft as boolean,
+          locale as string | undefined,
+          fallbackLocale as string | undefined,
+          select as string | undefined,
+        )
       },
     )
   }

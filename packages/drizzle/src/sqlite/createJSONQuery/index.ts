@@ -1,5 +1,7 @@
 import type { CreateJSONQueryArgs } from '../../types.js'
 
+import { escapeSQLValue } from '../../utilities/escapeSQLValue.js'
+
 type FromArrayArgs = {
   isRoot?: true
   operator: string
@@ -81,7 +83,7 @@ const createConstraint = ({
     )`
   }
 
-  let formattedValue = value
+  let formattedValue = escapeSQLValue(value)
   let formattedOperator = operator
   if (['contains', 'like'].includes(operator)) {
     formattedOperator = 'like'

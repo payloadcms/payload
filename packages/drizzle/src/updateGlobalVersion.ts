@@ -27,7 +27,6 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     where: whereArg,
   }: UpdateGlobalVersionArgs<T>,
 ): Promise<TypeWithVersion<T>> {
-  const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )
@@ -47,12 +46,15 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     where: whereToUse,
   })
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
     data: versionData,
     db,
     fields,
+    globalSlug: global,
     ignoreResult: returning === false,
     operation: 'update',
     req,

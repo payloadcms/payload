@@ -39,9 +39,10 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
     const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
     const urlToUse =
-      req?.url || req.payload?.config?.serverURL
+      req?.url ||
+      (req.payload?.config?.serverURL
         ? `${req.payload?.config.serverURL}${urlSuffix || ''}`
-        : fallbackURL
+        : fallbackURL)
 
     try {
       urlObject = new URL(urlToUse)
@@ -86,6 +87,7 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: strin
 
 export type CreateLocalReqOptions = {
   context?: RequestContext
+  depth?: number
   fallbackLocale?: false | TypedLocale
   locale?: string
   req?: Partial<PayloadRequest>
@@ -96,7 +98,15 @@ export type CreateLocalReqOptions = {
 type CreateLocalReq = (options: CreateLocalReqOptions, payload: Payload) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
+  {
+    context,
+    depth,
+    fallbackLocale,
+    locale: localeArg,
+    req = {} as PayloadRequest,
+    urlSuffix,
+    user,
+  },
   payload,
 ): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
@@ -123,7 +133,6 @@ export const createLocalReq: CreateLocalReq = async (
     (await getLocalI18n({ config: payload.config, language: payload.config.i18n.fallbackLanguage }))
 
   if (!req.headers) {
-    // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.headers = new Headers()
   }
 
@@ -133,9 +142,20 @@ export const createLocalReq: CreateLocalReq = async (
   req.i18n = i18n
   req.t = i18n.t
   req.user = user || req?.user || null
+
+  // Ensure user.collection is set for auth-related access control
+  // TODO (4.0): Instead of silently falling back, throw an error if user.collection is missing
+  if (req.user && !req.user.collection) {
+    req.user = { ...req.user, collection: payload.config.admin.user }
+  }
+
   req.payloadDataLoader = req?.payloadDataLoader || getDataLoader(req as PayloadRequest)
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}
+
+  if (typeof depth !== 'undefined') {
+    req.query.depth = depth
+  }
 
   attachFakeURLProperties(req, urlSuffix)
 

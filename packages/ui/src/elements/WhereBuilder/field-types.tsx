@@ -143,7 +143,7 @@ export const fieldTypeConditions: {
     operators: [...base, like, notLike, contains],
   },
   upload: {
-    component: 'Text',
+    component: 'Relationship',
     operators: [...base],
   },
 }

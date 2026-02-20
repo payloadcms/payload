@@ -52,7 +52,13 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: SQLiteSchemaHook[]
+  /**
+   * Maximum time in milliseconds to wait when the database is locked.
+   * @default 0
+   */
+  busyTimeout?: number
   client: Config
+  wal?: boolean | Partial<WalConfig>
 } & BaseSQLiteArgs
 
 export type GenericColumns = {
@@ -122,10 +128,34 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle = { $client: Client } & LibSQLDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
 
+export type WalConfig = {
+  /**
+   * Maximum size of the WAL file before it is written back to the main database.
+   * @default 67108864 (64MB)
+   */
+  journalSizeLimit: number
+
+  /**
+   * Controls how often data is synced to disk:
+   * - 'EXTRA': Highest data safety
+   * - 'FULL': Safe and balanced
+   * - 'NORMAL': Moderate safety, better performance
+   * - 'OFF': Fastest, but risk of data loss
+   *
+   * @default 'FULL'
+   */
+  synchronous: 'EXTRA' | 'FULL' | 'NORMAL' | 'OFF'
+}
+
 export type SQLiteAdapter = {
+  busyTimeout: number
   client: Client
   clientConfig: Args['client']
   drizzle: Drizzle
+  /**
+   * Write-Ahead Logging (WAL) configuration. If false or not set, WAL mode is disabled.
+   */
+  wal: false | WalConfig
 } & BaseSQLiteAdapter &
   SQLiteDrizzleAdapter
 
@@ -199,6 +229,7 @@ declare module 'payload' {
     extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     beginTransaction: (options?: SQLiteTransactionConfig) => Promise<null | number | string>
+    busyTimeout: number
     drizzle: Drizzle
     /**
      * An object keyed on each table, with a key value pair where the constraint name is the key, followed by the dot-notation field name

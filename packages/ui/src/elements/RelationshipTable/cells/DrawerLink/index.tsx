@@ -21,7 +21,7 @@ export const DrawerLink: React.FC<{
       <button
         className="drawer-link__doc-drawer-toggler"
         onClick={() => {
-          onDrawerOpen(cellProps.rowData.id)
+          onDrawerOpen(cellProps.rowData.id, cellProps.collectionSlug)
         }}
         type="button"
       >

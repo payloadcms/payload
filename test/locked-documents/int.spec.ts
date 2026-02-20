@@ -1,4 +1,5 @@
 import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
+import { describe, beforeAll, afterAll, afterEach, it, expect } from 'vitest'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'
@@ -8,7 +9,7 @@ import { fileURLToPath } from 'url'
 import type { Post, User } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 

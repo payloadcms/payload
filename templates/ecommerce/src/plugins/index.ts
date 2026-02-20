@@ -10,11 +10,11 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { ProductsCollection } from '@/collections/Products'
-import { adminOrCustomerOwner } from '@/access/adminOrCustomerOwner'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
-import { adminOnly } from '@/access/adminOnly'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
+import { isAdmin } from '@/access/isAdmin'
+import { isDocumentOwner } from '@/access/isDocumentOwner'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -67,11 +67,11 @@ export const plugins: Plugin[] = [
   }),
   ecommercePlugin({
     access: {
-      adminOnly,
       adminOnlyFieldAccess,
-      adminOrCustomerOwner,
       adminOrPublishedStatus,
       customerOnlyFieldAccess,
+      isAdmin,
+      isDocumentOwner,
     },
     customers: {
       slug: 'users',

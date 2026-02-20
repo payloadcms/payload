@@ -202,14 +202,14 @@ function getWorkflowConfig(importedModule: Record<string, unknown>): undefined |
  * Validate collection configuration structure
  */
 function validateCollectionConfig(config: CollectionConfig): ValidationResult<CollectionConfig> {
-  if (!config || typeof config !== 'object') {
+  if (!config) {
     return {
       error: 'Collection config is not a valid object',
       success: false,
     }
   }
 
-  if (!config.slug || typeof config.slug !== 'string') {
+  if (!config.slug) {
     return {
       error: 'Collection config must have a valid slug property',
       success: false,
@@ -220,7 +220,7 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
   if (config.fields) {
     for (let i = 0; i < config.fields.length; i++) {
       const field = config.fields[i] as Record<string, unknown>
-      if (!field || typeof field !== 'object') {
+      if (!field) {
         return {
           error: `Field at index ${i} is not a valid object`,
           success: false,
@@ -228,7 +228,7 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
       }
 
       // Check if field has type property
-      if ('type' in field && field.type && typeof field.type !== 'string') {
+      if ('type' in field && field.type) {
         return {
           error: `Field at index ${i} has invalid type property`,
           success: false,
@@ -244,21 +244,21 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
  * Validate task configuration structure
  */
 function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
-  if (!config || typeof config !== 'object') {
+  if (!config) {
     return {
       error: 'Task config is not a valid object',
       success: false,
     }
   }
 
-  if (!config.slug || typeof config.slug !== 'string') {
+  if (!config.slug) {
     return {
       error: 'Task config must have a valid slug property',
       success: false,
     }
   }
 
-  if (!config.handler || typeof config.handler !== 'function') {
+  if (!config.handler) {
     return {
       error: 'Task config must have a valid handler function',
       success: false,
@@ -266,7 +266,7 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
   }
 
   // Validate optional properties
-  if (config.retries !== undefined && (typeof config.retries !== 'number' || config.retries < 0)) {
+  if (config.retries !== undefined && config.retries < 0) {
     return {
       error: 'Task config retries must be a non-negative number',
       success: false,
@@ -277,21 +277,21 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
   if (config.inputSchema && Array.isArray(config.inputSchema)) {
     for (let i = 0; i < config.inputSchema.length; i++) {
       const field = config.inputSchema[i]
-      if (!field || typeof field !== 'object') {
+      if (!field) {
         return {
           error: `Input schema field at index ${i} is not a valid object`,
           success: false,
         }
       }
 
-      if (!field.name || typeof field.name !== 'string') {
+      if (!field.name) {
         return {
           error: `Input schema field at index ${i} must have a valid name property`,
           success: false,
         }
       }
 
-      if (!field.type || typeof field.type !== 'string') {
+      if (!field.type) {
         return {
           error: `Input schema field at index ${i} must have a valid type property`,
           success: false,
@@ -303,21 +303,21 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
   if (config.outputSchema && Array.isArray(config.outputSchema)) {
     for (let i = 0; i < config.outputSchema.length; i++) {
       const field = config.outputSchema[i]
-      if (!field || typeof field !== 'object') {
+      if (!field) {
         return {
           error: `Output schema field at index ${i} is not a valid object`,
           success: false,
         }
       }
 
-      if (!field.name || typeof field.name !== 'string') {
+      if (!field.name) {
         return {
           error: `Output schema field at index ${i} must have a valid name property`,
           success: false,
         }
       }
 
-      if (!field.type || typeof field.type !== 'string') {
+      if (!field.type) {
         return {
           error: `Output schema field at index ${i} must have a valid type property`,
           success: false,
@@ -333,21 +333,21 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
  * Validate workflow configuration structure
  */
 function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<WorkflowConfig> {
-  if (!config || typeof config !== 'object') {
+  if (!config) {
     return {
       error: 'Workflow config is not a valid object',
       success: false,
     }
   }
 
-  if (!config.slug || typeof config.slug !== 'string') {
+  if (!config.slug) {
     return {
       error: 'Workflow config must have a valid slug property',
       success: false,
     }
   }
 
-  if (!config.handler || typeof config.handler !== 'function') {
+  if (!config.handler) {
     return {
       error: 'Workflow config must have a valid handler function',
       success: false,
@@ -355,14 +355,14 @@ function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<Workfl
   }
 
   // Validate optional properties
-  if (config.queue && typeof config.queue !== 'string') {
+  if (config.queue) {
     return {
       error: 'Workflow config queue must be a string',
       success: false,
     }
   }
 
-  if (config.retries !== undefined && (typeof config.retries !== 'number' || config.retries < 0)) {
+  if (config.retries !== undefined && config.retries < 0) {
     return {
       error: 'Workflow config retries must be a non-negative number',
       success: false,
@@ -373,21 +373,21 @@ function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<Workfl
   if (config.inputSchema && Array.isArray(config.inputSchema)) {
     for (let i = 0; i < config.inputSchema.length; i++) {
       const field = config.inputSchema[i]
-      if (!field || typeof field !== 'object') {
+      if (!field) {
         return {
           error: `Input schema field at index ${i} is not a valid object`,
           success: false,
         }
       }
 
-      if (!field.name || typeof field.name !== 'string') {
+      if (!field.name) {
         return {
           error: `Input schema field at index ${i} must have a valid name property`,
           success: false,
         }
       }
 
-      if (!field.type || typeof field.type !== 'string') {
+      if (!field.type) {
         return {
           error: `Input schema field at index ${i} must have a valid type property`,
           success: false,

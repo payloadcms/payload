@@ -78,6 +78,11 @@ export const taTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
+  dashboard: {
+    addWidget: 'விக்கெட் சேர்',
+    deleteWidget: '{{id}} விட்ஜெடை நீக்கு',
+    searchWidgets: 'தேடல் கருவிகள்...',
+  },
   error: {
     accountAlreadyActivated: 'இந்த கணக்கு ஏற்கனவே செயல்படுத்தப்பட்டுள்ளது.',
     autosaving: 'இந்த ஆவணத்தை தானாகச் சேமிக்கும் போது ஒரு பிரச்சனை ஏற்பட்டது.',
@@ -115,6 +120,7 @@ export const taTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'கோப்பைப் பதிவேற்றும்போது பிரச்சனை ஏற்பட்டது.',
     restoringTitle:
       '{{title}}-ஐ மீட்டமைக்கும் போது பிழை ஏற்பட்டது. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.',
+    revertingDocument: 'இந்த ஆவணத்தை மீளமைக்கும் போது ஏதோ ஒரு பிரச்சனை ஏற்பட்டுள்ளது.',
     tokenInvalidOrExpired: 'டோக்கன் தவறானது அல்லது காலாவதியானது.',
     tokenNotProvided: 'டோக்கன் வழங்கப்படவில்லை.',
     unableToCopy: 'நகலெடுக்க முடியவில்லை.',
@@ -329,6 +335,7 @@ export const taTranslations: DefaultTranslationsObject = {
     items: 'உருப்படிகள்',
     language: 'மொழி',
     lastModified: 'கடைசியாக மாற்றப்பட்டது',
+    layout: 'தளவமைப்பு',
     leaveAnyway: 'எப்படியும் விட்டு செல்',
     leaveWithoutSaving: 'சேமிக்காமல் விட்டு செல்',
     light: 'ஒளி',
@@ -336,6 +343,7 @@ export const taTranslations: DefaultTranslationsObject = {
     loading: 'ஏற்றுகிறது',
     locale: 'மொழி அமைவு',
     locales: 'மொழி அமைவுகள்',
+    lock: 'பூட்டு',
     menu: 'மெனு',
     moreOptions: 'மேலும் விருப்பங்கள்',
     move: 'நகர்த்து',
@@ -357,6 +365,9 @@ export const taTranslations: DefaultTranslationsObject = {
     noOptions: 'விருப்பங்கள் எதுவும் இல்லை',
     noResults:
       'எந்த {{label}} கிடைக்கவில்லை. இன்னும் {{label}} இல்லை அல்லது நீங்கள் தேர்ந்தெடுத்த வடிகட்டுகளுக்கு பொருந்தவில்லை.',
+    noResultsDescription:
+      'உங்கள் மேலே குறிப்பிட்டுள்ள வடிகட்டுகளுக்கு ஏற்ப எந்தவொரு பொருளும் இல்லை அல்லது இல்லை.',
+    noResultsFound: 'முடிவுகள் இல்லை.',
     notFound: 'கிடைக்கவில்லை',
     nothingFound: 'எதுவும் கிடைக்கவில்லை',
     noTrashResults: 'குப்பையில் {{label}} எதுவும் இல்லை.',
@@ -393,6 +404,7 @@ export const taTranslations: DefaultTranslationsObject = {
     row: 'வரிசை',
     rows: 'வரிசைகள்',
     save: 'சேமி',
+    saveChanges: 'மாற்றங்களை சேமி',
     saving: 'சேமிக்கிறது...',
     schedulePublishFor: '{{title}} வெளியீட்டை திட்டமிடு',
     searchBy: '{{label}} மூலம் தேடு',
@@ -426,6 +438,7 @@ export const taTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} குப்பைக்குச் செலுத்தப்பட்டது.',
     true: 'உண்மை',
     unauthorized: 'அனுமதி இல்லை',
+    unlock: 'திறக்க',
     unsavedChanges:
       'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. தொடருவதற்கு முன் சேமிக்கவும் அல்லது நிராகரிக்கவும்.',
     unsavedChangesDuplicate: 'சேமிக்கப்படாத மாற்றங்கள் உள்ளன. நகலெடுக்கத் தொடர விரும்புகிறீர்களா?',
@@ -548,6 +561,8 @@ export const taTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'இந்த ஆவணத்தின் மாற்றங்களை வெளியிடப்பட்ட நிலைக்கு மாற்றப்போகிறீர்கள். உறுதியா?',
     aboutToUnpublish: 'இந்த ஆவணத்தை வெளியிடாமல் செய்யப் போகிறீர்கள். உறுதியா?',
+    aboutToUnpublishIn:
+      'நீங்கள் இந்த ஆவணத்தை {{locale}} இல் வெளியீட்டில் இருந்து அகற்ற உள்ளீர்கள். நீங்கள் நிச்சயமாக உள்ளீர்களா?',
     aboutToUnpublishSelection:
       'நீங்கள் தேர்வில் உள்ள அனைத்து {{label}}-ஐ வெளியிடாமல் செய்யப் போகிறீர்கள். உறுதியா?',
     autosave: 'தானியங்க சேமிப்பு',
@@ -569,6 +584,7 @@ export const taTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'தற்போது காணப்படுகிறது',
     currentPublishedVersion: 'தற்போதைய வெளியிடப்பட்ட பதிப்பு',
     draft: 'வரைவு',
+    draftHasPublishedVersion: 'வரைவு (வெளியிடப்பட்ட பதிப்பு உள்ளது)',
     draftSavedSuccessfully: 'வரைவு வெற்றிகரமாக சேமிக்கப்பட்டது.',
     lastSavedAgo: 'கடைசியாக {{distance}} முன்பு சேமிக்கப்பட்டது',
     modifiedOnly: 'மாற்றப்பட்டவை மட்டும்',
@@ -594,6 +610,8 @@ export const taTranslations: DefaultTranslationsObject = {
     restoring: 'மீட்டமைக்கப்படுகிறது...',
     reverting: 'மாற்றப்படுகிறது...',
     revertToPublished: 'வெளியிடப்பட்ட நிலைக்கு மாற்று',
+    revertUnsuccessful:
+      'மீளமைப்பு வெற்றிகரமாக செயல்படவில்லை. முன்புவே வெளியிடப்பட்ட பதிப்புகள் எதுவும் காணப்படவில்லை.',
     saveDraft: 'வரைவை சேமிக்கவும்',
     scheduledSuccessfully: 'அட்டவணைப்படுத்தப்பட்டது வெற்றிகரமாக.',
     schedulePublish: 'வெளியீட்டை அட்டவணைப்படுத்தவும்',
@@ -604,6 +622,9 @@ export const taTranslations: DefaultTranslationsObject = {
     specificVersion: 'குறிப்பிட்ட பதிப்பு',
     status: 'நிலை',
     unpublish: 'வெளியீட்டை நீக்கு',
+    unpublished: 'வெளியிடப்படாதது',
+    unpublishedSuccessfully: 'வெளியிடப்படாமல் வெற்றிகரமாக முடிந்தது.',
+    unpublishIn: '{{locale}}ல் வெளியீட்டை நிறுத்து',
     unpublishing: 'வெளியீடு நீக்கப்படுகிறது...',
     version: 'பதிப்பு',
     versionAgo: '{{distance}} முன்பு',

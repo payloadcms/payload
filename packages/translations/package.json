@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.62.0",
+  "version": "3.77.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -47,21 +47,20 @@
   ],
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "date-fns": "4.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@swc/core": "1.11.29",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "dotenv": "16.4.7",
     "prettier": "3.5.3",
     "typescript": "5.7.3"

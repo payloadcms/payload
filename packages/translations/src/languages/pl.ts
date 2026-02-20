@@ -79,6 +79,11 @@ export const plTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
+  dashboard: {
+    addWidget: 'Dodaj Widżet',
+    deleteWidget: 'Usuń widget {{id}}',
+    searchWidgets: 'Szukaj widgetów...',
+  },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',
     autosaving: 'Wystąpił problem podczas automatycznego zapisywania tego dokumentu.',
@@ -115,6 +120,7 @@ export const plTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Wystąpił problem podczas przesyłania pliku.',
     restoringTitle:
       'Wystąpił błąd podczas przywracania {{title}}. Sprawdź swoje połączenie i spróbuj ponownie.',
+    revertingDocument: 'Wystąpił problem podczas przywracania tego dokumentu.',
     tokenInvalidOrExpired: 'Token jest nieprawidłowy lub wygasł.',
     tokenNotProvided: 'Token nie został dostarczony.',
     unableToCopy: 'Nie można skopiować.',
@@ -330,6 +336,7 @@ export const plTranslations: DefaultTranslationsObject = {
     items: 'przedmioty',
     language: 'Język',
     lastModified: 'Ostatnio zmodyfikowany',
+    layout: 'Układ',
     leaveAnyway: 'Wyjdź mimo to',
     leaveWithoutSaving: 'Wyjdź bez zapisywania',
     light: 'Jasny',
@@ -337,6 +344,7 @@ export const plTranslations: DefaultTranslationsObject = {
     loading: 'Ładowanie',
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
+    lock: 'Zamek',
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
@@ -358,6 +366,9 @@ export const plTranslations: DefaultTranslationsObject = {
     noOptions: 'Brak opcji',
     noResults:
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
+    noResultsDescription:
+      'Albo żadne nie istnieją, albo żadne nie spełniają filtrów, które określiłeś powyżej.',
+    noResultsFound: 'Brak wyników.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',
@@ -393,6 +404,7 @@ export const plTranslations: DefaultTranslationsObject = {
     row: 'Wiersz',
     rows: 'Wiersze',
     save: 'Zapisz',
+    saveChanges: 'Zapisz Zmiany',
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
     searchBy: 'Szukaj według',
@@ -426,6 +438,7 @@ export const plTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} przeniesiono do kosza.',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',
+    unlock: 'Odblokuj',
     unsavedChanges: 'Masz niezapisane zmiany. Zapisz lub odrzuć, zanim kontynuujesz.',
     unsavedChangesDuplicate: 'Masz niezapisane zmiany. Czy chcesz kontynuować duplikowanie?',
     untitled: 'Bez nazwy',
@@ -545,6 +558,7 @@ export const plTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Zamierzasz przywrócić zmiany w tym dokumencie do stanu opublikowanego. Jesteś pewien?',
     aboutToUnpublish: 'Zamierzasz cofnąć publikację tego dokumentu. Jesteś pewien?',
+    aboutToUnpublishIn: 'Za chwilę wycofasz publikację tego dokumentu w {{locale}}. Jesteś pewien?',
     aboutToUnpublishSelection:
       'Zamierzasz cofnąć publikację wszystkich {{label}} w zaznaczeniu. Jesteś pewny?',
     autosave: 'Autozapis',
@@ -566,6 +580,7 @@ export const plTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Obecnie przeglądasz',
     currentPublishedVersion: 'Aktualna Opublikowana Wersja',
     draft: 'Szkic',
+    draftHasPublishedVersion: 'Szkic (ma opublikowaną wersję)',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
     modifiedOnly: 'Tylko zmodyfikowany',
@@ -591,6 +606,7 @@ export const plTranslations: DefaultTranslationsObject = {
     restoring: 'Przywracanie...',
     reverting: 'Cofanie...',
     revertToPublished: 'Przywróć do opublikowanego',
+    revertUnsuccessful: 'Cofnij nieudane. Nie znaleziono wcześniej opublikowanej wersji.',
     saveDraft: 'Zapisz szkic',
     scheduledSuccessfully: 'Zaplanowano pomyślnie.',
     schedulePublish: 'Zaplanuj publikację',
@@ -601,6 +617,9 @@ export const plTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkretna Wersja',
     status: 'Status',
     unpublish: 'Cofnij publikację',
+    unpublished: 'Nieopublikowane',
+    unpublishedSuccessfully: 'Pomyślnie wycofano publikację.',
+    unpublishIn: 'Cofnij publikację w {{locale}}',
     unpublishing: 'Cofanie publikacji...',
     version: 'Wersja',
     versionAgo: '{{distance}} temu',

@@ -104,7 +104,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
     // Merge current formData values into the cached form state
     // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    return Object.fromEntries(
+    const mergedState = Object.fromEntries(
       Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
         fieldName,
         fieldName in formData
@@ -116,6 +116,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
           : fieldState,
       ]),
     )
+
+    // Manually add blockName, as it's not part of cachedFormState
+    mergedState.blockName = {
+      initialValue: formData.blockName,
+      passesCondition: true,
+      valid: true,
+      value: formData.blockName,
+    }
+
+    return mergedState
   })
 
   const hasMounted = useRef(false)
@@ -157,7 +167,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: formData,
         operation: 'update',
@@ -176,7 +188,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         }
 
         const newFormStateData: BlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state),
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
           true,
         ) as BlockFields
 
@@ -254,7 +266,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
@@ -275,7 +289,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
       const newFormStateData: BlockFields = reduceFieldsToValues(
         removeEmptyArrayValues({
-          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
         }),
         true,
       ) as BlockFields

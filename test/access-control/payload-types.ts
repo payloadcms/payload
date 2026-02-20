@@ -79,7 +79,7 @@ export interface Config {
     'fully-restricted': FullyRestricted;
     'read-only-collection': ReadOnlyCollection;
     'user-restricted-collection': UserRestrictedCollection;
-    'create-not-update-collection': CreateNotUpdateCollection;
+    'can-create-not-update-collection': CanCreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
     'restricted-versions-admin-panel': RestrictedVersionsAdminPanel;
     'sibling-data': SiblingDatum;
@@ -97,6 +97,13 @@ export interface Config {
     hooks: Hook;
     'auth-collection': AuthCollection;
     'read-restricted': ReadRestricted;
+    'differentiated-trash': DifferentiatedTrash;
+    'restricted-trash': RestrictedTrash;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDatum;
+    'where-cache-same': WhereCacheSame;
+    'where-cache-unique': WhereCacheUnique;
+    'async-parent': AsyncParent;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -111,7 +118,7 @@ export interface Config {
     'fully-restricted': FullyRestrictedSelect<false> | FullyRestrictedSelect<true>;
     'read-only-collection': ReadOnlyCollectionSelect<false> | ReadOnlyCollectionSelect<true>;
     'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
-    'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
+    'can-create-not-update-collection': CanCreateNotUpdateCollectionSelect<false> | CanCreateNotUpdateCollectionSelect<true>;
     'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
     'restricted-versions-admin-panel': RestrictedVersionsAdminPanelSelect<false> | RestrictedVersionsAdminPanelSelect<true>;
     'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
@@ -129,6 +136,13 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'read-restricted': ReadRestrictedSelect<false> | ReadRestrictedSelect<true>;
+    'differentiated-trash': DifferentiatedTrashSelect<false> | DifferentiatedTrashSelect<true>;
+    'restricted-trash': RestrictedTrashSelect<false> | RestrictedTrashSelect<true>;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDataSelect<false> | FieldRestrictedUpdateBasedOnDataSelect<true>;
+    'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
+    'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
+    'async-parent': AsyncParentSelect<false> | AsyncParentSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -136,6 +150,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     settings: Setting;
     test: Test;
@@ -151,16 +166,7 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      })
-    | (AuthCollection & {
-        collection: 'auth-collection';
-      });
+  user: User | PublicUser | AuthCollection;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -254,6 +260,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -278,6 +285,7 @@ export interface PublicUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -301,8 +309,12 @@ export interface Post {
 export interface Unrestricted {
   id: string;
   name?: string | null;
+  info?: {
+    title?: string | null;
+    description?: string | null;
+  };
   userRestrictedDocs?: (string | UserRestrictedCollection)[] | null;
-  createNotUpdateDocs?: (string | CreateNotUpdateCollection)[] | null;
+  createNotUpdateDocs?: (string | CanCreateNotUpdateCollection)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -318,9 +330,9 @@ export interface UserRestrictedCollection {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "create-not-update-collection".
+ * via the `definition` "can-create-not-update-collection".
  */
-export interface CreateNotUpdateCollection {
+export interface CanCreateNotUpdateCollection {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -818,6 +830,7 @@ export interface AuthCollection {
         expiresAt: string;
       }[]
     | null;
+  collection: 'auth-collection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -831,6 +844,8 @@ export interface ReadRestricted {
     email?: string | null;
     secretPhone?: string | null;
     publicPhone?: string | null;
+    virtualContactName?: string | null;
+    restrictedVirtualContactInfo?: string | null;
   };
   visibleInRow?: string | null;
   restrictedInRow?: string | null;
@@ -865,8 +880,110 @@ export interface ReadRestricted {
     visibleAdvanced?: string | null;
     restrictedAdvanced?: string | null;
   };
+  unrestricted?: (string | null) | Unrestricted;
+  unrestrictedVirtualFieldName?: string | null;
+  unrestrictedVirtualGroupInfo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  restrictedVirtualField?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash".
+ */
+export interface DifferentiatedTrash {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-trash".
+ */
+export interface RestrictedTrash {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data".
+ */
+export interface FieldRestrictedUpdateBasedOnDatum {
+  id: string;
+  restricted?: string | null;
+  doesNothing?: boolean | null;
+  isRestricted?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-same".
+ */
+export interface WhereCacheSame {
+  id: string;
+  title: string;
+  userRole: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-unique".
+ */
+export interface WhereCacheUnique {
+  id: string;
+  title: string;
+  readRole: string;
+  updateRole: string;
+  deleteRole: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "async-parent".
+ */
+export interface AsyncParent {
+  id: string;
+  title: string;
+  parentField?: {
+    childField1?: string | null;
+    childField2?: string | null;
+    nestedGroup?: {
+      deepChild1?: string | null;
+      deepChild2?: number | null;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -908,8 +1025,8 @@ export interface PayloadLockedDocument {
         value: string | UserRestrictedCollection;
       } | null)
     | ({
-        relationTo: 'create-not-update-collection';
-        value: string | CreateNotUpdateCollection;
+        relationTo: 'can-create-not-update-collection';
+        value: string | CanCreateNotUpdateCollection;
       } | null)
     | ({
         relationTo: 'restricted-versions';
@@ -978,6 +1095,30 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'read-restricted';
         value: string | ReadRestricted;
+      } | null)
+    | ({
+        relationTo: 'differentiated-trash';
+        value: string | DifferentiatedTrash;
+      } | null)
+    | ({
+        relationTo: 'restricted-trash';
+        value: string | RestrictedTrash;
+      } | null)
+    | ({
+        relationTo: 'field-restricted-update-based-on-data';
+        value: string | FieldRestrictedUpdateBasedOnDatum;
+      } | null)
+    | ({
+        relationTo: 'where-cache-same';
+        value: string | WhereCacheSame;
+      } | null)
+    | ({
+        relationTo: 'where-cache-unique';
+        value: string | WhereCacheUnique;
+      } | null)
+    | ({
+        relationTo: 'async-parent';
+        value: string | AsyncParent;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1106,6 +1247,12 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface UnrestrictedSelect<T extends boolean = true> {
   name?: T;
+  info?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
   userRestrictedDocs?: T;
   createNotUpdateDocs?: T;
   updatedAt?: T;
@@ -1150,9 +1297,9 @@ export interface UserRestrictedCollectionSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "create-not-update-collection_select".
+ * via the `definition` "can-create-not-update-collection_select".
  */
-export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
+export interface CanCreateNotUpdateCollectionSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1497,6 +1644,8 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
         email?: T;
         secretPhone?: T;
         publicPhone?: T;
+        virtualContactName?: T;
+        restrictedVirtualContactInfo?: T;
       };
   visibleInRow?: T;
   restrictedInRow?: T;
@@ -1541,8 +1690,101 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
         visibleAdvanced?: T;
         restrictedAdvanced?: T;
       };
+  unrestricted?: T;
+  unrestrictedVirtualFieldName?: T;
+  unrestrictedVirtualGroupInfo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  restrictedVirtualField?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash_select".
+ */
+export interface DifferentiatedTrashSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-trash_select".
+ */
+export interface RestrictedTrashSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data_select".
+ */
+export interface FieldRestrictedUpdateBasedOnDataSelect<T extends boolean = true> {
+  restricted?: T;
+  doesNothing?: T;
+  isRestricted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-same_select".
+ */
+export interface WhereCacheSameSelect<T extends boolean = true> {
+  title?: T;
+  userRole?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-unique_select".
+ */
+export interface WhereCacheUniqueSelect<T extends boolean = true> {
+  title?: T;
+  readRole?: T;
+  updateRole?: T;
+  deleteRole?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "async-parent_select".
+ */
+export interface AsyncParentSelect<T extends boolean = true> {
+  title?: T;
+  parentField?:
+    | T
+    | {
+        childField1?: T;
+        childField2?: T;
+        nestedGroup?:
+          | T
+          | {
+              deepChild1?: T;
+              deepChild2?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

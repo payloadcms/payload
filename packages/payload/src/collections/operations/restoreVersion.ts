@@ -3,6 +3,7 @@ import { status as httpStatus } from 'http-status'
 import type { FindOneArgs } from '../../database/types.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { Collection, TypeWithID } from '../config/types.js'
+import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -14,13 +15,14 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
+import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
-import { buildAfterOperation } from './utils.js'
-
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 export type Arguments = {
   collection: Collection
   currentDepth?: number
@@ -32,9 +34,8 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const restoreVersionOperation = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
@@ -61,18 +62,12 @@ export const restoreVersionOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'restoreVersion',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'restoreVersion',
+      overrideAccess,
+    })
 
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
@@ -244,8 +239,7 @@ export const restoreVersionOperation = async <
       operation: 'update',
       overrideAccess,
       req,
-      skipValidation:
-        draftArg && collectionConfig.versions.drafts && !collectionConfig.versions.drafts.validate,
+      skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
     // /////////////////////////////////////
@@ -262,13 +256,15 @@ export const restoreVersionOperation = async <
     result.updatedAt = new Date().toISOString()
     // Ensure status respects restoreAsDraft arg
     result._status = draftArg ? 'draft' : result._status
-    result = await req.payload.db.updateOne({
-      id: parentDocID,
-      collection: collectionConfig.slug,
-      data: result,
-      req,
-      select,
-    })
+    if (!draftArg) {
+      result = await req.payload.db.updateOne({
+        id: parentDocID,
+        collection: collectionConfig.slug,
+        data: result,
+        req,
+        select,
+      })
+    }
 
     // /////////////////////////////////////
     // Save restored doc as a new version
@@ -318,6 +314,7 @@ export const restoreVersionOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -351,6 +348,7 @@ export const restoreVersionOperation = async <
             data: result,
             doc: result,
             operation: 'update',
+            overrideAccess,
             previousDoc: prevDocWithLocales,
             req,
           })) || result
@@ -365,6 +363,7 @@ export const restoreVersionOperation = async <
       args,
       collection: collectionConfig,
       operation: 'restoreVersion',
+      overrideAccess,
       result,
     })
 

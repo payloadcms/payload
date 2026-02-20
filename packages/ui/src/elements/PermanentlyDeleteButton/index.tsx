@@ -65,12 +65,20 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
 
   const handleDelete = useCallback(async () => {
     try {
-      const url = `${serverURL}${api}/${collectionSlug}?${qs.stringify({
-        trash: true,
-        where: {
-          and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
-        },
-      })}`
+      const url = formatAdminURL({
+        apiRoute: api,
+        path: `/${collectionSlug}${qs.stringify(
+          {
+            trash: true,
+            where: {
+              and: [{ id: { equals: id } }, { deletedAt: { exists: true } }],
+            },
+          },
+          {
+            addQueryPrefix: true,
+          },
+        )}`,
+      })
 
       const res = await requests.delete(url, {
         headers: {
@@ -95,6 +103,7 @@ export const PermanentlyDeleteButton: React.FC<Props> = (props) => {
               formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}/trash`,
+                serverURL,
               }),
             ),
           )
