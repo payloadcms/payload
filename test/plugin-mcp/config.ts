@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
+import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { Products } from './collections/Products.js'
 import { ReturnedResources } from './collections/ReturnedResources.js'
@@ -26,7 +27,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources],
+  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources, Pages],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -94,6 +95,15 @@ export default buildConfigWithDefaults({
       collections: {
         [Products.slug]: {
           enabled: true,
+        },
+        pages: {
+          enabled: {
+            find: true,
+            create: true,
+            update: true,
+            delete: true,
+          },
+          description: 'Pages with block-based layouts.',
         },
         posts: {
           enabled: {
