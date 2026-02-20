@@ -24,8 +24,8 @@ importers:
         specifier: 0.14.0
         version: 0.14.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@next/bundle-analyzer':
-        specifier: 16.2.0-canary.53
-        version: 16.2.0-canary.53(bufferutil@4.1.0)
+        specifier: 16.2.0-canary.54
+        version: 16.2.0-canary.54(bufferutil@4.1.0)
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:packages/db-postgres
@@ -43,7 +43,7 @@ importers:
         version: 1.58.2
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/node':
         specifier: ^8.33.1
         version: 8.55.0
@@ -130,10 +130,10 @@ importers:
         version: 1.2.8
       mongoose:
         specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 8.15.1(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       next:
-        specifier: 16.2.0-canary.53
-        version: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
+        specifier: 16.2.0-canary.54
+        version: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
       node-gyp:
         specifier: 12.2.0
         version: 12.2.0
@@ -328,7 +328,7 @@ importers:
     dependencies:
       mongoose:
         specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 8.15.1(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       mongoose-paginate-v2:
         specifier: 1.8.5
         version: 1.8.5
@@ -344,7 +344,7 @@ importers:
         version: link:../eslint-config
       '@types/mongoose-aggregate-paginate-v2':
         specifier: 1.0.12
-        version: 1.0.12(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 1.0.12(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       '@types/prompts':
         specifier: ^2.4.5
         version: 2.4.9
@@ -353,10 +353,10 @@ importers:
         version: 10.0.0
       mongodb:
         specifier: 6.16.0
-        version: 6.16.0(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 6.16.0(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       mongodb-memory-server:
         specifier: 10.1.4
-        version: 10.1.4(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 10.1.4(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -791,7 +791,7 @@ importers:
         version: 2.1.0
       next:
         specifier: '>=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0'
-        version: 16.2.0-canary.53(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
+        version: 16.2.0-canary.54(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       path-to-regexp:
         specifier: 6.3.0
         version: 6.3.0
@@ -821,8 +821,8 @@ importers:
         specifier: 7.27.1
         version: 7.27.1(@babel/core@7.27.3)
       '@next/eslint-plugin-next':
-        specifier: 16.2.0-canary.53
-        version: 16.2.0-canary.53
+        specifier: 16.2.0-canary.54
+        version: 16.2.0-canary.54
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -1015,16 +1015,16 @@ importers:
     dependencies:
       '@aws-sdk/client-cognito-identity':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@aws-sdk/credential-providers':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@aws-sdk/lib-storage':
         specifier: ^3.614.0
-        version: 3.994.0(@aws-sdk/client-s3@3.994.0)
+        version: 3.995.0(@aws-sdk/client-s3@3.995.0)
       '@payloadcms/email-nodemailer':
         specifier: workspace:*
         version: link:../email-nodemailer
@@ -1272,7 +1272,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/types':
         specifier: ^8.33.1
         version: 8.55.0
@@ -1635,13 +1635,13 @@ importers:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@aws-sdk/lib-storage':
         specifier: ^3.614.0
-        version: 3.994.0(@aws-sdk/client-s3@3.994.0)
+        version: 3.995.0(@aws-sdk/client-s3@3.995.0)
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
         version: link:../plugin-cloud-storage
@@ -1747,7 +1747,7 @@ importers:
         version: 2.3.0
       next:
         specifier: '>=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0'
-        version: 16.2.0-canary.53(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
+        version: 16.2.0-canary.54(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
@@ -2295,7 +2295,7 @@ importers:
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
-        version: 3.994.0
+        version: 3.995.0
       '@azure/storage-blob':
         specifier: ^12.11.0
         version: 12.31.0
@@ -2315,11 +2315,11 @@ importers:
         specifier: ^1.17.2
         version: 1.25.2(hono@4.12.0)(zod@3.25.76)
       '@next/env':
-        specifier: 16.2.0-canary.53
-        version: 16.2.0-canary.53
+        specifier: 16.2.0-canary.54
+        version: 16.2.0-canary.54
       '@opennextjs/cloudflare':
         specifier: 1.16.1
-        version: 1.16.1(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))
+        version: 1.16.1(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))
       '@payloadcms/admin-bar':
         specifier: workspace:*
         version: link:../packages/admin-bar
@@ -2445,7 +2445,7 @@ importers:
         version: link:../packages/ui
       '@sentry/nextjs':
         specifier: ^8.33.1
-        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
+        version: 8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
       '@sentry/react':
         specifier: ^7.77.0
         version: 7.120.4(react@19.2.4)
@@ -2508,10 +2508,10 @@ importers:
         version: 4.0.0
       mongoose:
         specifier: 8.15.1
-        version: 8.15.1(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+        version: 8.15.1(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       next:
-        specifier: 16.2.0-canary.53
-        version: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
+        specifier: 16.2.0-canary.54
+        version: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       nodemailer:
         specifier: 7.0.12
         version: 7.0.12
@@ -2800,28 +2800,28 @@ packages:
     resolution: {integrity: sha512-nLgMW2drTzv+dTo3ORCcotQPcrUaTQ+xoaDTdSaUXdZO7zbbVyk7ysE5GDTnJdZWcUjHOSB8xfNQhOTTNVPhFw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-cognito-identity@3.994.0':
-    resolution: {integrity: sha512-j9Ujsq74ecVDASoZbzdcVbxwsRlr4YwOFVRskY+htpTLQUlkmhrcfiSq5q2V7VRqVRrus+OXTW5nAcdm5FOWMg==}
+  '@aws-sdk/client-cognito-identity@3.995.0':
+    resolution: {integrity: sha512-CBGYQb6v6uIxvbID+ZzuYk/eGYGBVyXNUY8eu890WimzfahtyF/eLhvQTQJI0GrtKl8inSLKPqZOQ4tnrVAofQ==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-dynamodb@3.994.0':
-    resolution: {integrity: sha512-rXN+Y5y9J2i/5xqZfE/gneyuvi6c9voSr52n36q3vDcFIa/9p5VbXO2pQUWVgJfcK7W8hOzg7lqVtsQEE4CAbQ==}
+  '@aws-sdk/client-dynamodb@3.995.0':
+    resolution: {integrity: sha512-JDg3O4w8qi8XIHhPf1AMmquqlrpQJ6z22z0h3Z2rUmzrS+cNj3aUnXrZVRvRlHbvEMzTgVcpcfdRcy4RvDcamw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-lambda@3.994.0':
-    resolution: {integrity: sha512-B+Q33iuTrFEdeV2Bug8QxhM4OjeV10luut5GshkihN2rpG6b4PtMZpNJ11SGjfZPp4lyUDWuXEr2Lgi9euk6lg==}
+  '@aws-sdk/client-lambda@3.995.0':
+    resolution: {integrity: sha512-udxiVZs+l84PKrlmYelLNwxLLEJWK1bQLdt6zZdwOdzuv+39KkRaGkAH8fFhrH1S7QM19usV0l6GOE+Zzx40aQ==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-s3@3.994.0':
-    resolution: {integrity: sha512-zIVQt/XfE2zTFrcPEf8R+KRaRD1++XHMPRhxXM2kVA6NA6Aq/cFCUyYOYYwSbWLF/XeToaX1auYGn3IoZKruPQ==}
+  '@aws-sdk/client-s3@3.995.0':
+    resolution: {integrity: sha512-r+t8qrQ0m9zoovYOH+wilp/glFRB/E+blsDyWzq2C+9qmyhCAQwaxjLaHM8T/uluAmhtZQIYqOH9ILRnvWtRNw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-sesv2@3.994.0':
-    resolution: {integrity: sha512-lKV9J4VDOXd5BHZZF9ciVkVTRbvoBmfmt/MALiqUiyn1xb/CpF86Tmf1S+888zXI3GOJau6qpdRymo4fs7yDXw==}
+  '@aws-sdk/client-sesv2@3.995.0':
+    resolution: {integrity: sha512-1u89bS3IiAK6uiJsurwz2W8EMANkuHr/TwdTwVLZfttnZlM3WU3IOW9DY9hfM16GwvruRnzPlhzPpaxcW3eMjQ==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/client-sqs@3.994.0':
-    resolution: {integrity: sha512-TxoW6/qpXewOAp9c45Rvw3m0IrfAkvzPIqPlGiooDLV0TCGUcSRKX1D73d70JgaqP9MpA+2bYkTyaa5EraJqIg==}
+  '@aws-sdk/client-sqs@3.995.0':
+    resolution: {integrity: sha512-vGE9tY5m+eCarVFRHo4Me/49531+Tp3qpTV8Ka4/AOwv/zWkJNG+zQhBUHHibnxepZcTkpoPRMro4wk7fCA9og==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/client-sso@3.398.0':
@@ -2904,8 +2904,8 @@ packages:
     resolution: {integrity: sha512-8LnfS76nHXoEc9aRRiMMpxZxJeDG0yusdyo3NvPhCgESmBUgpMa4luhGbClW5NoX/qRcGxxM6Z/esqANSNMTow==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/credential-providers@3.994.0':
-    resolution: {integrity: sha512-Qzv78Qg33C/JB4j0sTO1Gc1mMMrJjrnB6OPKRBnBEO5J2PZ7iN/Nbd4sSL/NEO1W8KPhJm3XD3BiYB0Bu4RR2A==}
+  '@aws-sdk/credential-providers@3.995.0':
+    resolution: {integrity: sha512-ezDBjl3Z+IDAz6WjP6b4Vr0kfGJGmkOSOBkFZRoEpRr3uWNDJ4f9ZajRW1mfmnT6eR5HX2UF9F+9fvH/4jSJIw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/dynamodb-codec@3.972.12':
@@ -2916,11 +2916,11 @@ packages:
     resolution: {integrity: sha512-3L7mwqSLJ6ouZZKtCntoNF0HTYDNs1FDQqkGjoPWXcv1p0gnLotaDmLq1rIDqfu4ucOit0Re3ioLyYDUTpSroA==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/lib-storage@3.994.0':
-    resolution: {integrity: sha512-+mGR5i2vF5+pNREvLTRuxedCyccYX/O+n5y6pHGerS9BVT6INmajv9FjmvesV2u8ciZ7ielnaqv1NKbeUqh1Uw==}
+  '@aws-sdk/lib-storage@3.995.0':
+    resolution: {integrity: sha512-gzWRrmTVfrVfgZ8GS4VwOzHKKODcLwbgyzRW7GpVmvazBDIbvKv2HIpLwZNxxa2sjkBFDjS2NAN1bvTrCXFT6Q==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
-      '@aws-sdk/client-s3': ^3.994.0
+      '@aws-sdk/client-s3': ^3.995.0
 
   '@aws-sdk/middleware-bucket-endpoint@3.972.3':
     resolution: {integrity: sha512-fmbgWYirF67YF1GfD7cg5N6HHQ96EyRNx/rDIrTF277/zTWVuPI2qS/ZHgofwR1NZPe/NWvoppflQY01LrbVLg==}
@@ -2998,20 +2998,20 @@ packages:
     resolution: {integrity: sha512-iOq86f2H67924kQUIPOAvlmMaOAvOLoDOIb66I2YqSUpMYB6ufiuJW3RlREgskxv86S5qKzMnfy/X6CqMjK6XQ==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/nested-clients@3.994.0':
-    resolution: {integrity: sha512-12Iv+U3qPBiKT6A2QKe0obkubxyGH90hyJIrht1KLxoz5OcIdWYafD7FtVGMwTtYRO73lvnVAsAkNkauZeupGQ==}
+  '@aws-sdk/nested-clients@3.995.0':
+    resolution: {integrity: sha512-7gq9gismVhESiRsSt0eYe1y1b6jS20LqLk+e/YSyPmGi9yHdndHQLIq73RbEJnK/QPpkQGFqq70M1mI46M1HGw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/region-config-resolver@3.972.3':
     resolution: {integrity: sha512-v4J8qYAWfOMcZ4MJUyatntOicTzEMaU7j3OpkRCGGFSL2NgXQ5VbxauIyORA+pxdKZ0qQG2tCQjQjZDlXEC3Ow==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/s3-request-presigner@3.994.0':
-    resolution: {integrity: sha512-g/jYc++IunLJZpeyLJrbC39XAf57BYjWjKkxRQlwj5fC90Scg4t/2FS0BV2u/U9UZX5HqpQQahI60tPEN84JqQ==}
+  '@aws-sdk/s3-request-presigner@3.995.0':
+    resolution: {integrity: sha512-+eJYJcB6XkViGbSAoWl7sQx3izt2y64Oy6SWec/HY2a6ibd5RtUJbEIkvoS2RUu7drm4yu2WyLgSNMQg/7nt0g==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/signature-v4-multi-region@3.994.0':
-    resolution: {integrity: sha512-8y04Lv497KKd7f2TVlm2RaKQaNfnY17ZH8d3m+7sW/3R3BhZvHgWQZyqTb/vcN2ERz1YAnWx6woJyB3ZNFvakw==}
+  '@aws-sdk/signature-v4-multi-region@3.995.0':
+    resolution: {integrity: sha512-9Qx5JcAucnxnomREPb2D6L8K8GLG0rknt3+VK/BU3qTUynAcV4W21DQ04Z2RKDw+DYpW88lsZpXbVetWST2WUg==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/token-providers@3.398.0':
@@ -3046,8 +3046,8 @@ packages:
     resolution: {integrity: sha512-j6vioBeRZ4eHX4SWGvGPpwGg/xSOcK7f1GL0VM+rdf3ZFTIsUEhCFmD78B+5r2PgztcECSzEfvHQX01k8dPQPw==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-sdk/util-endpoints@3.994.0':
-    resolution: {integrity: sha512-L2obUBw4ACMMd1F/SG5LdfPyZ0xJNs9Maifwr3w0uWO+4YvHmk9FfRskfSfE/SLZ9S387oSZ+1xiP7BfVCP/Og==}
+  '@aws-sdk/util-endpoints@3.995.0':
+    resolution: {integrity: sha512-aym/pjB8SLbo9w2nmkrDdAAVKVlf7CM71B9mKhjDbJTzwpSFBPHqJIMdDyj0mLumKC0aIVDr1H6U+59m9GvMFw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/util-format-url@3.972.3':
@@ -3073,8 +3073,8 @@ packages:
       aws-crt:
         optional: true
 
-  '@aws-sdk/util-user-agent-node@3.972.9':
-    resolution: {integrity: sha512-JNswdsLdQemxqaSIBL2HRhsHPUBBziAgoi5RQv6/9avmE5g5RSdt1hWr3mHJ7OxqRYf+KeB11ExWbiqfrnoeaA==}
+  '@aws-sdk/util-user-agent-node@3.972.10':
+    resolution: {integrity: sha512-LVXzICPlsheET+sE6tkcS47Q5HkSTrANIlqL1iFxGAY/wRQ236DX/PCAK56qMh9QJoXAfXfoRW0B0Og4R+X7Nw==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       aws-crt: '>=1.0.0'
@@ -5510,8 +5510,8 @@ packages:
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
 
-  '@next/bundle-analyzer@16.2.0-canary.53':
-    resolution: {integrity: sha512-LrIpK7jssNYiGSC92saIwu/1QDJ0vgOmwIheEHqK+INceM2ZKIZ+2GF0QYO9ePguEzNuKnhOPyoh7bt+NAA8cw==}
+  '@next/bundle-analyzer@16.2.0-canary.54':
+    resolution: {integrity: sha512-vbW5a9fAfDgT0vVvJVRm2TswrDA9vEX0cnIog4JRZiNFXzF+3ThXtDmy6t36L0ybcIwbtYh6IVoCy7TxwHDGCA==}
 
   '@next/env@13.5.11':
     resolution: {integrity: sha512-fbb2C7HChgM7CemdCY+y3N1n8pcTKdqtQLbC7/EQtPdLvlMUT9JX/dBYl8MMZAtYG4uVMyPFHXckb68q/NRwqg==}
@@ -5522,8 +5522,8 @@ packages:
   '@next/env@15.5.12':
     resolution: {integrity: sha512-pUvdJN1on574wQHjaBfNGDt9Mz5utDSZFsIIQkMzPgNS8ZvT4H2mwOrOIClwsQOb6EGx5M76/CZr6G8i6pSpLg==}
 
-  '@next/env@16.2.0-canary.53':
-    resolution: {integrity: sha512-pyYfbC4m0wG7tjRr1zvkwIs8w/kGuKf+zO8LfXhfMofnI0+TKriaQy1sOTuaqwjRrIZcNX22hewoQ9WaUi64Og==}
+  '@next/env@16.2.0-canary.54':
+    resolution: {integrity: sha512-PID17p0/BLDRfKDtK6MZOxp25ZhH3bxj00b96hD7DRMYRw6HsqAAVjjvXnqXQWsktIZKsFeLQvqj2KcTNwILTg==}
 
   '@next/eslint-plugin-next@15.1.0':
     resolution: {integrity: sha512-+jPT0h+nelBT6HC9ZCHGc7DgGVy04cv4shYdAe6tKlEbjQUtwU3LzQhzbDHQyY2m6g39m6B0kOFVuLGBrxxbGg==}
@@ -5534,8 +5534,8 @@ packages:
   '@next/eslint-plugin-next@15.5.12':
     resolution: {integrity: sha512-+ZRSDFTv4aC96aMb5E41rMjysx8ApkryevnvEYZvPZO52KvkqP5rNExLUXJFr9P4s0f3oqNQR6vopCZsPWKDcQ==}
 
-  '@next/eslint-plugin-next@16.2.0-canary.53':
-    resolution: {integrity: sha512-TUwnF0EPpwKRzd19i04VtmSKWZtSLLaZfGuO0C1Ef15PaaqpSwC8idg4MHizIZUr4kM+KpNxdW/eY6tq+WRSLQ==}
+  '@next/eslint-plugin-next@16.2.0-canary.54':
+    resolution: {integrity: sha512-XuIFE0fZfJoYnYgPexfqbxUaJ9+cF8u79h50zMMVrR1+8hXkTKooWH4dMCbd8n+/EQl8Hz9h9rHilS0q0TH8zQ==}
 
   '@next/swc-darwin-arm64@15.4.8':
     resolution: {integrity: sha512-Pf6zXp7yyQEn7sqMxur6+kYcywx5up1J849psyET7/8pG2gQTVMjU3NzgIt8SeEP5to3If/SaWmaA6H6ysBr1A==}
@@ -5543,8 +5543,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@next/swc-darwin-arm64@16.2.0-canary.53':
-    resolution: {integrity: sha512-0IOPpv9YEWPgw/vTj+jDg9qXpUToOV0N+S1rUv1wA2Aib8OwS2x1Isx3ziYZ33Ox/zVtv6hKNtLrUEoTxHhD8A==}
+  '@next/swc-darwin-arm64@16.2.0-canary.54':
+    resolution: {integrity: sha512-8F4bSyMiYKbr8pZeQc3Hura+/ZOV6KaCZFy9nHhg4fkV4zW+TtyvwEsbhmoYAq7YiST5KUBO7FKAO8tcvi3NXg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -5555,8 +5555,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@next/swc-darwin-x64@16.2.0-canary.53':
-    resolution: {integrity: sha512-6tvUS4N6AkyXFU4Jer+USk2KDT1P9BHo9pFr9xLheoX3iisVpsM+EgywxlFfdEFvjX6j4bcJlMQcY2g5JRut0w==}
+  '@next/swc-darwin-x64@16.2.0-canary.54':
+    resolution: {integrity: sha512-ZX92a2JgbasZeKjpR8Ck3WQJnQMmowEadTlYH0oaEOzVuQ6/Jq1m0dx4qq741eOaKhbUCy5J7U8RlNO8tk0oYg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -5567,8 +5567,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-arm64-gnu@16.2.0-canary.53':
-    resolution: {integrity: sha512-IisFXJWAJZDSvamiyx8+LbhyTRIxYAtPTAZgHA1zyjN5eAEuBsAWfpgaySHiLE3X/8u5kTTlun2LmiZH7dWZmg==}
+  '@next/swc-linux-arm64-gnu@16.2.0-canary.54':
+    resolution: {integrity: sha512-Qn17cKiv1dqN6EwveT8rU8+24ldAWSgR/zI/CButtClnnAQqcM341MN41lGqbsuGvvPNwp3J74A+tUuW629aaw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -5579,8 +5579,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@next/swc-linux-arm64-musl@16.2.0-canary.53':
-    resolution: {integrity: sha512-dfwywncEQ+6wk0mfthOCmkWZHDSNapnmh0y89/l4lhl9tBbLC3JLMmH+EcUuGLmY4VFkeVErJmgdTwYorZNkuA==}
+  '@next/swc-linux-arm64-musl@16.2.0-canary.54':
+    resolution: {integrity: sha512-kipr3lCVrPXP3G5NhsTlfZvzWGezvue10MvhG26+dDLaomm7oq70sGCnt2xPcd5yCgaL4ccg/iAozQ7nLikjWw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -5591,8 +5591,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-linux-x64-gnu@16.2.0-canary.53':
-    resolution: {integrity: sha512-Dby6hpPxw7Mh1z1SpBcrUmH8h4kQK03C+k1mNMpSVE3YBp1jQ0OfFDZ3Eh4iUmjTbrQrZIBCmxjPGW66VBLtoQ==}
+  '@next/swc-linux-x64-gnu@16.2.0-canary.54':
+    resolution: {integrity: sha512-jPaYr/g6Jss5NIaRIhFO/uzLds5XJBHMqpydRGfphmpUKAVVI2o8HjKdCtwA6otaZMe2PVGHkFq3L6TW3pepmQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -5603,8 +5603,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@next/swc-linux-x64-musl@16.2.0-canary.53':
-    resolution: {integrity: sha512-hI8guyGSsDfouL7JN6JzAwjkmewI0BC+ovhnj1KIIkrGgSLCHbCgE/8uGUqw3rGOjS3MDzz/LR4K9/dZdG6zMQ==}
+  '@next/swc-linux-x64-musl@16.2.0-canary.54':
+    resolution: {integrity: sha512-0/+Me/5VUvzlcOg2JJIfk7NPwWMOpOa4LhcJpXpbGCadzLeW2ZEQN+rCjN12dR1lsBCvXf6zLOqwM3Gtmzc2OQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -5615,8 +5615,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@next/swc-win32-arm64-msvc@16.2.0-canary.53':
-    resolution: {integrity: sha512-cRE20IzQMwIduJQvuQ5NF4Tr6pImfzNoUoGKAqRL6Vue8QItb/DzSk/iqEOBmQ/2njcNz1CAkM+LCyJp0+9nlg==}
+  '@next/swc-win32-arm64-msvc@16.2.0-canary.54':
+    resolution: {integrity: sha512-wSJdmp0LW+rIhAqDw9TwNw5BkpNCL2/VXB0wEzb37IKAJSk/2/68bXhUGGcikyt3UJdOM9i8tTVAIRjBUUGmCA==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
@@ -5627,8 +5627,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@next/swc-win32-x64-msvc@16.2.0-canary.53':
-    resolution: {integrity: sha512-aytvSmqioYHS93cPAUuwKXdObtUOA8Zx7uTeBJ3FM2XSrYR9YQUQbEEoukHHPVBdW8Be7WcIIfR35lt5o8tklQ==}
+  '@next/swc-win32-x64-msvc@16.2.0-canary.54':
+    resolution: {integrity: sha512-FkXgnys9LKSm1O4uOgMDubPJEb6nDa4mYfTnSXIZeFF+UHrkr+G3MNJ7khNCZ0a4JZjsO+mGrNcCQ0XU1CN7VQ==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -11667,8 +11667,8 @@ packages:
       sass:
         optional: true
 
-  next@16.2.0-canary.53:
-    resolution: {integrity: sha512-BJqYsTzldoBKUTvsom+tyyIDo3vmj2/eRnhfDwQb5XFXAbJs0ambJ1VGjVGO1FN9H+faJGZhokwZFFe4WoYUbQ==}
+  next@16.2.0-canary.54:
+    resolution: {integrity: sha512-+1ODN30JDVQKfWDZfIwbVBF79+y8voRDYVAYrC3M4NOFTX0LH6itqcaDNW1riZKfqNYO095Le/1lzxFWId+f4g==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -14582,7 +14582,7 @@ snapshots:
       '@aws-sdk/types': 3.973.1
       '@aws-sdk/util-endpoints': 3.980.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -14612,7 +14612,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cognito-identity@3.994.0':
+  '@aws-sdk/client-cognito-identity@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14624,9 +14624,9 @@ snapshots:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -14656,7 +14656,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-dynamodb@3.994.0':
+  '@aws-sdk/client-dynamodb@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14670,9 +14670,9 @@ snapshots:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -14703,7 +14703,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-lambda@3.994.0':
+  '@aws-sdk/client-lambda@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14715,9 +14715,9 @@ snapshots:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/eventstream-serde-browser': 4.2.8
@@ -14752,7 +14752,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-s3@3.994.0':
+  '@aws-sdk/client-s3@3.995.0':
     dependencies:
       '@aws-crypto/sha1-browser': 5.2.0
       '@aws-crypto/sha256-browser': 5.2.0
@@ -14770,11 +14770,11 @@ snapshots:
       '@aws-sdk/middleware-ssec': 3.972.3
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
-      '@aws-sdk/signature-v4-multi-region': 3.994.0
+      '@aws-sdk/signature-v4-multi-region': 3.995.0
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/eventstream-serde-browser': 4.2.8
@@ -14812,7 +14812,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sesv2@3.994.0':
+  '@aws-sdk/client-sesv2@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14823,11 +14823,11 @@ snapshots:
       '@aws-sdk/middleware-recursion-detection': 3.972.3
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
-      '@aws-sdk/signature-v4-multi-region': 3.994.0
+      '@aws-sdk/signature-v4-multi-region': 3.995.0
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -14857,7 +14857,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-sqs@3.994.0':
+  '@aws-sdk/client-sqs@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -14870,9 +14870,9 @@ snapshots:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -14954,7 +14954,7 @@ snapshots:
       '@aws-sdk/types': 3.973.1
       '@aws-sdk/util-endpoints': 3.993.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -15226,9 +15226,9 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/credential-providers@3.994.0':
+  '@aws-sdk/credential-providers@3.995.0':
     dependencies:
-      '@aws-sdk/client-cognito-identity': 3.994.0
+      '@aws-sdk/client-cognito-identity': 3.995.0
       '@aws-sdk/core': 3.973.11
       '@aws-sdk/credential-provider-cognito-identity': 3.972.3
       '@aws-sdk/credential-provider-env': 3.972.9
@@ -15239,7 +15239,7 @@ snapshots:
       '@aws-sdk/credential-provider-process': 3.972.9
       '@aws-sdk/credential-provider-sso': 3.972.9
       '@aws-sdk/credential-provider-web-identity': 3.972.9
-      '@aws-sdk/nested-clients': 3.994.0
+      '@aws-sdk/nested-clients': 3.995.0
       '@aws-sdk/types': 3.973.1
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
@@ -15265,9 +15265,9 @@ snapshots:
       mnemonist: 0.38.3
       tslib: 2.8.1
 
-  '@aws-sdk/lib-storage@3.994.0(@aws-sdk/client-s3@3.994.0)':
+  '@aws-sdk/lib-storage@3.995.0(@aws-sdk/client-s3@3.995.0)':
     dependencies:
-      '@aws-sdk/client-s3': 3.994.0
+      '@aws-sdk/client-s3': 3.995.0
       '@smithy/abort-controller': 4.2.8
       '@smithy/middleware-endpoint': 4.4.16
       '@smithy/smithy-client': 4.11.5
@@ -15446,7 +15446,7 @@ snapshots:
       '@aws-sdk/types': 3.973.1
       '@aws-sdk/util-endpoints': 3.993.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -15476,7 +15476,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/nested-clients@3.994.0':
+  '@aws-sdk/nested-clients@3.995.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
@@ -15487,9 +15487,9 @@ snapshots:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/region-config-resolver': 3.972.3
       '@aws-sdk/types': 3.973.1
-      '@aws-sdk/util-endpoints': 3.994.0
+      '@aws-sdk/util-endpoints': 3.995.0
       '@aws-sdk/util-user-agent-browser': 3.972.3
-      '@aws-sdk/util-user-agent-node': 3.972.9
+      '@aws-sdk/util-user-agent-node': 3.972.10
       '@smithy/config-resolver': 4.4.6
       '@smithy/core': 3.23.2
       '@smithy/fetch-http-handler': 5.3.9
@@ -15527,9 +15527,9 @@ snapshots:
       '@smithy/types': 4.12.0
       tslib: 2.8.1
 
-  '@aws-sdk/s3-request-presigner@3.994.0':
+  '@aws-sdk/s3-request-presigner@3.995.0':
     dependencies:
-      '@aws-sdk/signature-v4-multi-region': 3.994.0
+      '@aws-sdk/signature-v4-multi-region': 3.995.0
       '@aws-sdk/types': 3.973.1
       '@aws-sdk/util-format-url': 3.972.3
       '@smithy/middleware-endpoint': 4.4.16
@@ -15538,7 +15538,7 @@ snapshots:
       '@smithy/types': 4.12.0
       tslib: 2.8.1
 
-  '@aws-sdk/signature-v4-multi-region@3.994.0':
+  '@aws-sdk/signature-v4-multi-region@3.995.0':
     dependencies:
       '@aws-sdk/middleware-sdk-s3': 3.972.11
       '@aws-sdk/types': 3.973.1
@@ -15634,7 +15634,7 @@ snapshots:
       '@smithy/util-endpoints': 3.2.8
       tslib: 2.8.1
 
-  '@aws-sdk/util-endpoints@3.994.0':
+  '@aws-sdk/util-endpoints@3.995.0':
     dependencies:
       '@aws-sdk/types': 3.973.1
       '@smithy/types': 4.12.0
@@ -15674,7 +15674,7 @@ snapshots:
       '@smithy/types': 2.12.0
       tslib: 2.8.1
 
-  '@aws-sdk/util-user-agent-node@3.972.9':
+  '@aws-sdk/util-user-agent-node@3.972.10':
     dependencies:
       '@aws-sdk/middleware-user-agent': 3.972.11
       '@aws-sdk/types': 3.973.1
@@ -18082,7 +18082,7 @@ snapshots:
     dependencies:
       '@types/pg': 8.11.6
 
-  '@next/bundle-analyzer@16.2.0-canary.53(bufferutil@4.1.0)':
+  '@next/bundle-analyzer@16.2.0-canary.54(bufferutil@4.1.0)':
     dependencies:
       webpack-bundle-analyzer: 4.10.1(bufferutil@4.1.0)
     transitivePeerDependencies:
@@ -18095,7 +18095,7 @@ snapshots:
 
   '@next/env@15.5.12': {}
 
-  '@next/env@16.2.0-canary.53': {}
+  '@next/env@16.2.0-canary.54': {}
 
   '@next/eslint-plugin-next@15.1.0':
     dependencies:
@@ -18109,56 +18109,56 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/eslint-plugin-next@16.2.0-canary.53':
+  '@next/eslint-plugin-next@16.2.0-canary.54':
     dependencies:
       fast-glob: 3.3.1
 
   '@next/swc-darwin-arm64@15.4.8':
     optional: true
 
-  '@next/swc-darwin-arm64@16.2.0-canary.53':
+  '@next/swc-darwin-arm64@16.2.0-canary.54':
     optional: true
 
   '@next/swc-darwin-x64@15.4.8':
     optional: true
 
-  '@next/swc-darwin-x64@16.2.0-canary.53':
+  '@next/swc-darwin-x64@16.2.0-canary.54':
     optional: true
 
   '@next/swc-linux-arm64-gnu@15.4.8':
     optional: true
 
-  '@next/swc-linux-arm64-gnu@16.2.0-canary.53':
+  '@next/swc-linux-arm64-gnu@16.2.0-canary.54':
     optional: true
 
   '@next/swc-linux-arm64-musl@15.4.8':
     optional: true
 
-  '@next/swc-linux-arm64-musl@16.2.0-canary.53':
+  '@next/swc-linux-arm64-musl@16.2.0-canary.54':
     optional: true
 
   '@next/swc-linux-x64-gnu@15.4.8':
     optional: true
 
-  '@next/swc-linux-x64-gnu@16.2.0-canary.53':
+  '@next/swc-linux-x64-gnu@16.2.0-canary.54':
     optional: true
 
   '@next/swc-linux-x64-musl@15.4.8':
     optional: true
 
-  '@next/swc-linux-x64-musl@16.2.0-canary.53':
+  '@next/swc-linux-x64-musl@16.2.0-canary.54':
     optional: true
 
   '@next/swc-win32-arm64-msvc@15.4.8':
     optional: true
 
-  '@next/swc-win32-arm64-msvc@16.2.0-canary.53':
+  '@next/swc-win32-arm64-msvc@16.2.0-canary.54':
     optional: true
 
   '@next/swc-win32-x64-msvc@15.4.8':
     optional: true
 
-  '@next/swc-win32-x64-msvc@16.2.0-canary.53':
+  '@next/swc-win32-x64-msvc@16.2.0-canary.54':
     optional: true
 
   '@nicolo-ribaudo/chokidar-2@2.1.8-no-fsevents.3':
@@ -18215,14 +18215,14 @@ snapshots:
     dependencies:
       semver: 7.7.4
 
-  '@opennextjs/aws@3.9.14(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))':
+  '@opennextjs/aws@3.9.14(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))':
     dependencies:
       '@ast-grep/napi': 0.40.0
       '@aws-sdk/client-cloudfront': 3.398.0
-      '@aws-sdk/client-dynamodb': 3.994.0
-      '@aws-sdk/client-lambda': 3.994.0
-      '@aws-sdk/client-s3': 3.994.0
-      '@aws-sdk/client-sqs': 3.994.0
+      '@aws-sdk/client-dynamodb': 3.995.0
+      '@aws-sdk/client-lambda': 3.995.0
+      '@aws-sdk/client-s3': 3.995.0
+      '@aws-sdk/client-sqs': 3.995.0
       '@node-minify/core': 8.0.6
       '@node-minify/terser': 8.0.6
       '@tsconfig/node18': 1.0.3
@@ -18231,7 +18231,7 @@ snapshots:
       cookie: 1.1.1
       esbuild: 0.25.4
       express: 5.2.1
-      next: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
+      next: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       path-to-regexp: 6.3.0
       urlpattern-polyfill: 10.1.0
       yaml: 2.8.2
@@ -18239,15 +18239,15 @@ snapshots:
       - aws-crt
       - supports-color
 
-  '@opennextjs/cloudflare@1.16.1(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))':
+  '@opennextjs/cloudflare@1.16.1(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(wrangler@4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6))':
     dependencies:
       '@ast-grep/napi': 0.40.0
       '@dotenvx/dotenvx': 1.31.0
-      '@opennextjs/aws': 3.9.14(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))
+      '@opennextjs/aws': 3.9.14(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))
       cloudflare: 4.5.0(encoding@0.1.13)
       enquirer: 2.4.1
       glob: 12.0.0
-      next: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
+      next: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       ts-tqdm: 0.8.6
       wrangler: 4.61.1(@cloudflare/workers-types@4.20260218.0)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       yargs: 18.0.0
@@ -19323,7 +19323,7 @@ snapshots:
       '@sentry/utils': 7.120.4
       localforage: 1.10.0
 
-  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))':
+  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -19336,7 +19336,7 @@ snapshots:
       '@sentry/vercel-edge': 8.55.0
       '@sentry/webpack-plugin': 2.22.7(encoding@0.1.13)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
       chalk: 3.0.0
-      next: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
+      next: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.11
@@ -19350,7 +19350,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))':
+  '@sentry/nextjs@8.55.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3))(react@19.2.4)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -19363,7 +19363,7 @@ snapshots:
       '@sentry/vercel-edge': 8.55.0
       '@sentry/webpack-plugin': 2.22.7(encoding@0.1.13)(webpack@5.105.2(@swc/core@1.15.3)(esbuild@0.25.12))
       chalk: 3.0.0
-      next: 16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
+      next: 16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3)
       resolve: 1.22.8
       rollup: 3.29.5
       stacktrace-parser: 0.1.11
@@ -20476,10 +20476,10 @@ snapshots:
 
   '@types/minimist@1.2.5': {}
 
-  '@types/mongoose-aggregate-paginate-v2@1.0.12(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)':
+  '@types/mongoose-aggregate-paginate-v2@1.0.12(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)':
     dependencies:
       '@types/node': 22.19.9
-      mongoose: 8.15.1(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+      mongoose: 8.15.1(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
       - '@mongodb-js/zstd'
@@ -20515,7 +20515,7 @@ snapshots:
 
   '@types/nodemailer@7.0.2':
     dependencies:
-      '@aws-sdk/client-sesv2': 3.994.0
+      '@aws-sdk/client-sesv2': 3.995.0
       '@types/node': 22.19.9
     transitivePeerDependencies:
       - aws-crt
@@ -25027,7 +25027,7 @@ snapshots:
       '@types/whatwg-url': 11.0.5
       whatwg-url: 14.2.0
 
-  mongodb-memory-server-core@10.1.4(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7):
+  mongodb-memory-server-core@10.1.4(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7):
     dependencies:
       async-mutex: 0.5.0
       camelcase: 6.3.0
@@ -25035,7 +25035,7 @@ snapshots:
       find-cache-dir: 3.3.2
       follow-redirects: 1.15.11(debug@4.4.3)
       https-proxy-agent: 7.0.6
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+      mongodb: 6.16.0(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       new-find-package-json: 2.0.0
       semver: 7.7.4
       tar-stream: 3.1.7
@@ -25053,9 +25053,9 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb-memory-server@10.1.4(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7):
+  mongodb-memory-server@10.1.4(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7):
     dependencies:
-      mongodb-memory-server-core: 10.1.4(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+      mongodb-memory-server-core: 10.1.4(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -25069,22 +25069,22 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb@6.16.0(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7):
+  mongodb@6.16.0(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7):
     dependencies:
       '@mongodb-js/saslprep': 1.4.6
       bson: 6.10.4
       mongodb-connection-string-url: 3.0.2
     optionalDependencies:
-      '@aws-sdk/credential-providers': 3.994.0
+      '@aws-sdk/credential-providers': 3.995.0
       socks: 2.8.7
 
   mongoose-paginate-v2@1.8.5: {}
 
-  mongoose@8.15.1(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7):
+  mongoose@8.15.1(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7):
     dependencies:
       bson: 6.10.4
       kareem: 2.6.3
-      mongodb: 6.16.0(@aws-sdk/credential-providers@3.994.0)(socks@2.8.7)
+      mongodb: 6.16.0(@aws-sdk/credential-providers@3.995.0)(socks@2.8.7)
       mpath: 0.9.0
       mquery: 5.0.0
       ms: 2.1.3
@@ -25174,9 +25174,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.0-canary.53(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4):
+  next@16.2.0-canary.54(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4):
     dependencies:
-      '@next/env': 16.2.0-canary.53
+      '@next/env': 16.2.0-canary.54
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001770
@@ -25185,14 +25185,14 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       styled-jsx: 5.1.6(@babel/core@7.27.3)(react@19.2.4)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.0-canary.53
-      '@next/swc-darwin-x64': 16.2.0-canary.53
-      '@next/swc-linux-arm64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-arm64-musl': 16.2.0-canary.53
-      '@next/swc-linux-x64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-x64-musl': 16.2.0-canary.53
-      '@next/swc-win32-arm64-msvc': 16.2.0-canary.53
-      '@next/swc-win32-x64-msvc': 16.2.0-canary.53
+      '@next/swc-darwin-arm64': 16.2.0-canary.54
+      '@next/swc-darwin-x64': 16.2.0-canary.54
+      '@next/swc-linux-arm64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-arm64-musl': 16.2.0-canary.54
+      '@next/swc-linux-x64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-x64-musl': 16.2.0-canary.54
+      '@next/swc-win32-arm64-msvc': 16.2.0-canary.54
+      '@next/swc-win32-x64-msvc': 16.2.0-canary.54
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.58.2
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25202,9 +25202,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.0-canary.53(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3):
+  next@16.2.0-canary.54(@babel/core@7.27.3)(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3):
     dependencies:
-      '@next/env': 16.2.0-canary.53
+      '@next/env': 16.2.0-canary.54
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001770
@@ -25213,14 +25213,14 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       styled-jsx: 5.1.6(@babel/core@7.27.3)(react@19.2.4)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.0-canary.53
-      '@next/swc-darwin-x64': 16.2.0-canary.53
-      '@next/swc-linux-arm64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-arm64-musl': 16.2.0-canary.53
-      '@next/swc-linux-x64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-x64-musl': 16.2.0-canary.53
-      '@next/swc-win32-arm64-msvc': 16.2.0-canary.53
-      '@next/swc-win32-x64-msvc': 16.2.0-canary.53
+      '@next/swc-darwin-arm64': 16.2.0-canary.54
+      '@next/swc-darwin-x64': 16.2.0-canary.54
+      '@next/swc-linux-arm64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-arm64-musl': 16.2.0-canary.54
+      '@next/swc-linux-x64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-x64-musl': 16.2.0-canary.54
+      '@next/swc-win32-arm64-msvc': 16.2.0-canary.54
+      '@next/swc-win32-x64-msvc': 16.2.0-canary.54
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.58.2
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25230,9 +25230,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4):
+  next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4):
     dependencies:
-      '@next/env': 16.2.0-canary.53
+      '@next/env': 16.2.0-canary.54
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001770
@@ -25241,14 +25241,14 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.4)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.0-canary.53
-      '@next/swc-darwin-x64': 16.2.0-canary.53
-      '@next/swc-linux-arm64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-arm64-musl': 16.2.0-canary.53
-      '@next/swc-linux-x64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-x64-musl': 16.2.0-canary.53
-      '@next/swc-win32-arm64-msvc': 16.2.0-canary.53
-      '@next/swc-win32-x64-msvc': 16.2.0-canary.53
+      '@next/swc-darwin-arm64': 16.2.0-canary.54
+      '@next/swc-darwin-x64': 16.2.0-canary.54
+      '@next/swc-linux-arm64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-arm64-musl': 16.2.0-canary.54
+      '@next/swc-linux-x64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-x64-musl': 16.2.0-canary.54
+      '@next/swc-win32-arm64-msvc': 16.2.0-canary.54
+      '@next/swc-win32-x64-msvc': 16.2.0-canary.54
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.58.2
       babel-plugin-react-compiler: 19.1.0-rc.3
@@ -25258,9 +25258,9 @@ snapshots:
       - '@babel/core'
       - babel-plugin-macros
 
-  next@16.2.0-canary.53(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3):
+  next@16.2.0-canary.54(@opentelemetry/api@1.9.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.97.3):
     dependencies:
-      '@next/env': 16.2.0-canary.53
+      '@next/env': 16.2.0-canary.54
       '@swc/helpers': 0.5.15
       baseline-browser-mapping: 2.10.0
       caniuse-lite: 1.0.30001770
@@ -25269,14 +25269,14 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
       styled-jsx: 5.1.6(@babel/core@7.29.0)(react@19.2.4)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.2.0-canary.53
-      '@next/swc-darwin-x64': 16.2.0-canary.53
-      '@next/swc-linux-arm64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-arm64-musl': 16.2.0-canary.53
-      '@next/swc-linux-x64-gnu': 16.2.0-canary.53
-      '@next/swc-linux-x64-musl': 16.2.0-canary.53
-      '@next/swc-win32-arm64-msvc': 16.2.0-canary.53
-      '@next/swc-win32-x64-msvc': 16.2.0-canary.53
+      '@next/swc-darwin-arm64': 16.2.0-canary.54
+      '@next/swc-darwin-x64': 16.2.0-canary.54
+      '@next/swc-linux-arm64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-arm64-musl': 16.2.0-canary.54
+      '@next/swc-linux-x64-gnu': 16.2.0-canary.54
+      '@next/swc-linux-x64-musl': 16.2.0-canary.54
+      '@next/swc-win32-arm64-msvc': 16.2.0-canary.54
+      '@next/swc-win32-x64-msvc': 16.2.0-canary.54
       '@opentelemetry/api': 1.9.0
       '@playwright/test': 1.58.2
       sass: 1.97.3
