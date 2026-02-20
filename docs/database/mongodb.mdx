@@ -28,6 +28,66 @@ export default buildConfig({
 })
 ```
 
+## Adding the MongoDB URI
+When using Payload with MongoDB, the ``DATABASE_URI`` must be configured to point to your MongoDB database. This URI can either be set during the installation or defined in the ``.env`` file in your project folder.
+
+Payload supports Mongoose as the MongoDB adapter, making it easy to manage MongoDB connections efficiently. 
+
+### **Ways to Set the MongoDB URI**
+
+***1. Locally***
+
+To connect to a locally hosted MongoDB instance, use the following URI format in your `.env` file:
+
+```ts
+DATABASE_URI=mongodb://localhost:27017/payload
+```
+
+- `localhost` refers to your local machine.
+- `27017` is the default MongoDB port.
+- `payload` is the name of the database [you can change this as needed].
+
+***2. MongoDB Atlas***
+
+To connect to a MongoDB Atlas cluster:
+
+1. Create an Atlas Cluster:
+- Sign in to MongoDB Atlas.
+- Create a new cluster.
+
+2. Get the Connection String:
+- In the Atlas dashboard, go to Database Deployments and click "Get connection string".
+- Copy the provided connection string, which should look like this:
+```ts
+mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database-name>?retryWrites=true&w=majority&appName=<app-name>
+```
+- Replace the placeholders:
+  - `<username>` : Your MongoDB Atlas username.
+  - `<password>` : Your MongoDB Atlas password (URL-encoded if it contains special characters).
+  - `<database-name>` : The name of your database.
+  - `<app-name>` : The name of your application (optional).
+
+  Note on Password Encoding
+
+  If your password contains special symbols, they must be replaced with their URL-encoded equivalents. Below is a reference table for common symbols:
+
+  | Symbol                      | URL Encoded Value                 |
+  | --------------------------- | --------------------------------- |  
+  | @                           | %40                               |
+  | #                           | %23                               |
+  | $                           | %24                               |
+  | /                           | %2f                               |
+  | :                           | %3a                               |
+  | ?                           | %3f                               |
+  | .                           | %2e                               |
+  | +                           | %2b                               |
+
+  Example
+
+  If your MongoDB Atlas *username* is `admin` and your *password* is `P@ssw0rd!`, your URI would look like this:
+
+  `DATABASE_URI=mongodb+srv://admin:P%40ssw0rd%21@cluster0.mongodb.net/myDatabase?retryWrites=true&w=majorityappName=<app-name>`
+
 ## Options
 
 | Option                            | Description                                                                                                                                                                                                                                                                                                  |
