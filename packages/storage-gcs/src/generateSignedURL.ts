@@ -3,6 +3,7 @@ import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types
 import type { PayloadHandler } from 'payload'
 
 import path from 'path'
+import sanitize from 'sanitize-filename'
 import { APIError, Forbidden } from 'payload'
 
 import type { GcsStorageOptions } from './index.js'
@@ -16,6 +17,12 @@ interface Args {
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
+
+function getSafeFilename(name: string): string {
+  const base = sanitize(name.substring(0, name.lastIndexOf('.')) || name)
+  const ext = name.includes('.') ? name.split('.').pop()?.split('?')[0] : ''
+  return ext ? `${base}.${ext}` : base
+}
 
 export const getGenerateSignedURLHandler = ({
   access = defaultAccess,
@@ -45,7 +52,8 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const fileKey = path.posix.join(prefix, filename)
+    const safeFilename = getSafeFilename(filename)
+    const fileKey = path.posix.join(prefix, safeFilename)
 
     const [url] = await getStorageClient()
       .bucket(bucket)
