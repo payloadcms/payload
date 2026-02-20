@@ -1,0 +1,65 @@
+name: Start Database
+description: Starts the required database for tests
+
+inputs:
+  database:
+    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
+    required: true
+
+outputs:
+  POSTGRES_URL:
+    description: PostgreSQL connection URL
+    value: ${{ steps.postgres.outputs.url }}
+  MONGODB_URL:
+    description: MongoDB connection URL
+    value: ${{ steps.mongodb.outputs.url }}
+  MONGODB_ATLAS_URL:
+    description: MongoDB Atlas connection URL
+    value: ${{ steps.mongodb-atlas.outputs.url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Start MongoDB
+      id: mongodb
+      if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
+      shell: bash
+      run: |
+        docker compose -f test/__helpers/shared/db/mongodb/docker-compose.yml up -d --wait
+        echo "url=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
+
+    - name: Start MongoDB Atlas Local
+      id: mongodb-atlas
+      if: inputs.database == 'mongodb-atlas'
+      shell: bash
+      run: |
+        docker compose -f test/__helpers/shared/db/mongodb-atlas/docker-compose.yml up -d --wait
+        echo "url=mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
+
+    - name: Start PostgreSQL
+      id: postgres
+      if: startsWith(inputs.database, 'postgres')
+      shell: bash
+      run: |
+        docker compose -f test/__helpers/shared/db/postgres/docker-compose.yml up -d --wait
+        echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT
+
+    - name: Configure PostgreSQL custom schema
+      if: inputs.database == 'postgres-custom-schema'
+      shell: bash
+      run: |
+        docker exec postgres-payload-test psql -U payload -d payload -c "CREATE SCHEMA custom;"
+
+    - name: Start Supabase
+      id: supabase
+      if: inputs.database == 'supabase'
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+
+    - name: Initialize Supabase
+      if: inputs.database == 'supabase'
+      shell: bash
+      run: |
+        supabase init
+        supabase start

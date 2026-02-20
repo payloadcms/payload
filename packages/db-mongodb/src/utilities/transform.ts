@@ -494,6 +494,10 @@ const stripFields = ({
   }
 }
 
+/**
+ * A function that transforms Payload <-> MongoDB data.
+ * @internal - this function may be removed or receive breaking changes in minor releases.
+ */
 export const transform = ({
   $addToSet,
   $inc,

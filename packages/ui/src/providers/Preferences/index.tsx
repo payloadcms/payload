@@ -1,5 +1,6 @@
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
 
 import type { Preferences } from '../../forms/Form/types.js'
@@ -40,7 +41,6 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
   const {
     routes: { api },
-    serverURL,
   } = config
 
   useEffect(() => {
@@ -60,12 +60,18 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
       const promise = new Promise((resolve: (value: T) => void) => {
         void (async () => {
-          const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
+          const request = await requests.get(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/payload-preferences/${key}`,
+            }),
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             },
-          })
+          )
 
           let value = null
 
@@ -84,7 +90,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
 
       return promise
     },
-    [i18n.language, api, preferencesRef, serverURL],
+    [i18n.language, api, preferencesRef],
   )
 
   const setPreference = useCallback(
@@ -93,7 +99,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         preferencesRef.current[key] = value
 
         await requests.post(
-          `${serverURL}${api}/payload-preferences/${key}`,
+          formatAdminURL({
+            apiRoute: api,
+            path: `/payload-preferences/${key}`,
+          }),
           requestOptions(value, i18n.language),
         )
 
@@ -141,7 +150,10 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         preferencesRef.current[key] = pendingUpdate.current[key]
 
         await requests.post(
-          `${serverURL}${api}/payload-preferences/${key}`,
+          formatAdminURL({
+            apiRoute: api,
+            path: `/payload-preferences/${key}`,
+          }),
           requestOptions(preferencesRef.current[key], i18n.language),
         )
 
@@ -154,7 +166,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         void updatePreference()
       })
     },
-    [api, getPreference, i18n.language, pendingUpdate, serverURL],
+    [api, getPreference, i18n.language, pendingUpdate],
   )
 
   contextRef.current.getPreference = getPreference

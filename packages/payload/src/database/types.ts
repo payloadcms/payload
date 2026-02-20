@@ -21,6 +21,14 @@ export interface BaseDatabaseAdapter {
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction: BeginTransaction
+  /**
+   * When true, bulk operations will process documents one at a time
+   * in separate transactions instead of all at once in a single transaction.
+   * Useful for avoiding transaction limitations with large datasets.
+   *
+   * @default false
+   */
+  bulkOperationsSingleTransaction?: boolean
 
   /**
    * Persist the changes made since the start of the transaction.
@@ -234,6 +242,9 @@ export type FindArgs = {
   projection?: Record<string, unknown>
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
@@ -269,6 +280,9 @@ type BaseVersionArgs = {
   pagination?: boolean
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
@@ -493,6 +507,7 @@ export type UpdateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateArgs = {
   collection: CollectionSlug
+  customID?: number | string
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
@@ -710,8 +725,15 @@ export type DBIdentifierName =
     }) => string)
   | string
 
+export type DynamicMigrationTemplate = (args: { filePath: string; payload: Payload }) => Promise<{
+  downSQL?: string
+  imports?: string
+  upSQL?: string
+}>
+
 export type MigrationTemplateArgs = {
   downSQL?: string
+  dynamic?: DynamicMigrationTemplate
   imports?: string
   packageName?: string
   upSQL?: string

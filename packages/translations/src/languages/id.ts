@@ -80,6 +80,11 @@ export const idTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
+  dashboard: {
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Hapus widget {{id}}',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
     autosaving: 'Terjadi masalah saat menyimpan otomatis dokumen ini.',
@@ -117,6 +122,7 @@ export const idTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Terjadi masalah saat mengunggah file.',
     restoringTitle:
       'Terjadi kesalahan saat memulihkan {{title}}. Harap periksa koneksi Anda dan coba lagi.',
+    revertingDocument: 'Ada masalah saat mengembalikan dokumen ini.',
     tokenInvalidOrExpired: 'Token tidak valid atau telah kedaluwarsa.',
     tokenNotProvided: 'Token tidak disediakan.',
     unableToCopy: 'Tidak dapat menyalin.',
@@ -332,6 +338,7 @@ export const idTranslations: DefaultTranslationsObject = {
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',
+    layout: 'Tata Letak',
     leaveAnyway: 'Tetap pergi',
     leaveWithoutSaving: 'Pergi tanpa menyimpan',
     light: 'Terang',
@@ -339,6 +346,7 @@ export const idTranslations: DefaultTranslationsObject = {
     loading: 'Memuat',
     locale: 'Lokal',
     locales: 'Lokal',
+    lock: 'Kunci',
     menu: 'Menu',
     moreOptions: 'Opsi lainnya',
     move: 'Pindah',
@@ -360,6 +368,9 @@ export const idTranslations: DefaultTranslationsObject = {
     noOptions: 'Tidak ada opsi',
     noResults:
       'Tidak ada {{label}} yang ditemukan. Entah belum ada {{label}} atau tidak ada yang cocok dengan filter yang Anda tentukan di atas.',
+    noResultsDescription:
+      'Baik tidak ada yang ada atau tidak ada yang cocok dengan filter yang telah Anda tentukan di atas.',
+    noResultsFound: 'Tidak Ada Hasil.',
     notFound: 'Tidak Ditemukan',
     nothingFound: 'Tidak ada yang ditemukan',
     noTrashResults: 'Tidak ada {{label}} di tempat sampah.',
@@ -396,6 +407,7 @@ export const idTranslations: DefaultTranslationsObject = {
     row: 'Baris',
     rows: 'Baris',
     save: 'Simpan',
+    saveChanges: 'Simpan Perubahan',
     saving: 'Menyimpan...',
     schedulePublishFor: 'Jadwalkan publikasi untuk {{title}}',
     searchBy: 'Cari berdasarkan {{label}}',
@@ -429,6 +441,7 @@ export const idTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} dipindahkan ke tempat sampah.',
     true: 'Benar',
     unauthorized: 'Tidak Sah',
+    unlock: 'Buka Kunci',
     unsavedChanges:
       'Anda memiliki perubahan yang belum disimpan. Simpan atau buang sebelum melanjutkan.',
     unsavedChangesDuplicate:
@@ -548,6 +561,8 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',
     aboutToUnpublish: 'Anda akan membatalkan publikasi dokumen ini. Apakah Anda yakin?',
+    aboutToUnpublishIn:
+      'Anda akan menonaktifkan publikasi dokumen ini dalam {{locale}}. Apakah Anda yakin?',
     aboutToUnpublishSelection:
       'Anda akan membatalkan publikasi semua {{label}} dalam pilihan. Apakah Anda yakin?',
     autosave: 'Simpan Otomatis',
@@ -595,6 +610,8 @@ export const idTranslations: DefaultTranslationsObject = {
     restoring: 'Memulihkan...',
     reverting: 'Mengembalikan...',
     revertToPublished: 'Kembali ke yang dipublikasikan',
+    revertUnsuccessful:
+      'Pengembalian gagal. Tidak ada versi yang sebelumnya dipublikasikan ditemukan.',
     saveDraft: 'Simpan Draf',
     scheduledSuccessfully: 'Berhasil dijadwalkan.',
     schedulePublish: 'Jadwalkan Publikasi',
@@ -605,6 +622,9 @@ export const idTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublished: 'Belum dipublikasikan',
+    unpublishedSuccessfully: 'Berhasil tidak diterbitkan.',
+    unpublishIn: 'Batalkan Publikasi dalam {{locale}}',
     unpublishing: 'Membatalkan publikasi...',
     version: 'Versi',
     versionAgo: '{{distance}} yang lalu',

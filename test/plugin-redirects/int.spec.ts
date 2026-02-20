@@ -1,11 +1,12 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Page } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { pagesSlug } from './shared.js'
 
 let payload: Payload

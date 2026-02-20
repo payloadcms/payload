@@ -61,7 +61,9 @@ In order to ensure the Payload Config is fully Node.js compatible and as lightwe
 
 Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.importMap.baseDir`.
 
-Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, this can be omitted.
+Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, the `#` and export name can be omitted.
+
+**Both default exports and named exports are fully supported.** Choose the pattern that works best for your codebase.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -86,6 +88,22 @@ const config = buildConfig({
 ```
 
 In this example, we set the base directory to the `src` directory, and omit the `/src/` part of our component path string.
+
+**Examples of component path syntax:**
+
+```ts
+// Named export using hash syntax
+Button: '/components/Logout#MyComponent'
+
+// Default export (no hash needed)
+Button: '/components/Logout'
+
+// Named export using exportName property
+Button: {
+  path: '/components/Logout',
+  exportName: 'MyComponent',
+}
+```
 
 ### Component Config
 
@@ -553,3 +571,31 @@ const MyComponent: TextFieldClientComponent = ({ path }) => {
   // ...
 }
 ```
+
+### Imports best practices
+
+When building Custom Components it's important to be mindful of your bundle sizes sent to the client which are primarily affected by your imports. Generally speaking you can import third party packages as needed though it's best to avoid large packages that bloat your bundle size.
+
+The most common issue is importing from our `@payloadcms/ui` package in the wrong context. So here are the simple rules to follow:
+
+- In the **admin panel UI** you always want to import everything from `@payloadcms/ui` to ensure there's no package mismatch issues.
+- In the **frontend application** you must always import components and utilities from `@payloadcms/ui/path/to` for example `import { Button } from '@payloadcms/ui/elements/Button'` to ensure tree shaking is effective and your bundle sizes are minimized otherwise it will include the entire library with your frontend code and greatly bloat your bundle size.
+
+<Banner type="success">
+  See the [Performance](../performance/overview) documentation for more tips and
+  best practices.
+</Banner>
+
+### Troubleshooting
+
+#### 'Assignment cannot be destructured' or 'value ... of useConfig is undefined'
+
+There's a few variations of this error that hint at the same problem, sometimes it will error on `useConfig` hook or any other Payload UI hook like `useAuth`, `useLocale` with the error message that the value being destructured is `undefined`.
+
+See [Troubleshooting Common Issues in Payload](../troubleshooting/troubleshooting#dependency-mismatches) for more details on resolving dependency mismatches.
+
+<Banner type="info">
+  Generally we recommend pinning Payload packages to the exact same version in
+  order to ensure that your package manager installs the same versions across
+  all Payload packages.
+</Banner>

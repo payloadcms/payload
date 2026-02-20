@@ -80,6 +80,11 @@ export const ptTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
+  dashboard: {
+    addWidget: 'Adicionar Widget',
+    deleteWidget: 'Excluir widget {{id}}',
+    searchWidgets: 'Pesquisar widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',
     autosaving: 'Ocorreu um problema ao salvar automaticamente esse documento.',
@@ -117,6 +122,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ocorreu um problema ao carregar o arquivo.',
     restoringTitle:
       'Ocorreu um erro ao restaurar {{title}}. Por favor, verifique sua conexão e tente novamente.',
+    revertingDocument: 'Ocorreu um problema ao reverter este documento.',
     tokenInvalidOrExpired: 'Token expirado ou inválido.',
     tokenNotProvided: 'Token não fornecido.',
     unableToCopy: 'Não é possível copiar.',
@@ -332,6 +338,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     items: 'itens',
     language: 'Idioma',
     lastModified: 'Última modificação',
+    layout: 'Layout',
     leaveAnyway: 'Sair mesmo assim',
     leaveWithoutSaving: 'Sair sem salvar',
     light: 'Claro',
@@ -339,6 +346,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     loading: 'Carregando',
     locale: 'Local',
     locales: 'Localizações',
+    lock: 'Bloquear',
     menu: 'Cardápio',
     moreOptions: 'Mais opções',
     move: 'Mova',
@@ -360,6 +368,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     noOptions: 'Sem opções',
     noResults:
       'Nenhum {{label}} encontrado. Ou nenhum(a) {{label}} existe ainda, ou nenhum(a) corresponde aos filtros que você especificou acima.',
+    noResultsDescription:
+      'Ou nenhum existe ou nenhum corresponde aos filtros que você especificou acima.',
+    noResultsFound: 'Sem Resultados.',
     notFound: 'Não Encontrado',
     nothingFound: 'Nada encontrado',
     noTrashResults: 'Não há {{label}} no lixo.',
@@ -397,6 +408,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',
+    saveChanges: 'Salvar Alterações',
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
     searchBy: 'Buscar por {{label}}',
@@ -430,6 +442,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} movido para o lixo.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
+    unlock: 'Desbloquear',
     unsavedChanges: 'Você tem alterações não salvas. Salve ou descarte antes de continuar.',
     unsavedChangesDuplicate: 'Você tem mudanças não salvas. Você gostaria de continuar a duplicar?',
     untitled: 'Sem título',
@@ -549,6 +562,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Você está prestes a reverter as alterações desse documento para seu estado de publicação. Tem certeza?',
     aboutToUnpublish: 'Você está prestes a despublicar esse documento. Tem certeza?',
+    aboutToUnpublishIn: 'Está prestes a não publicar este documento em {{locale}}. Tem a certeza?',
     aboutToUnpublishSelection:
       'Você está prestes a cancelar a publicação de todos os {{label}} na seleção. Tem certeza?',
     autosave: 'Salvamento automático',
@@ -596,6 +610,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     restoring: 'Restaurando...',
     reverting: 'Revertendo...',
     revertToPublished: 'Reverter para publicado',
+    revertUnsuccessful:
+      'Reversão não bem-sucedida. Nenhuma versão publicada anteriormente encontrada.',
     saveDraft: 'Salvar rascunho',
     scheduledSuccessfully: 'Agendado com sucesso.',
     schedulePublish: 'Agendar Publicação',
@@ -606,6 +622,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versão Específica',
     status: 'Status',
     unpublish: 'Despublicar',
+    unpublished: 'Não publicado',
+    unpublishedSuccessfully: 'Não publicado com sucesso.',
+    unpublishIn: 'Despublicar em {{locale}}',
     unpublishing: 'Despublicando...',
     version: 'Versão',
     versionAgo: 'há {{distance}}',

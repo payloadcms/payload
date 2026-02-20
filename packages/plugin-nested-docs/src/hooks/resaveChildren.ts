@@ -9,7 +9,7 @@ import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 export const resaveChildren =
   (pluginConfig: NestedDocsPluginConfig): CollectionAfterChangeHook =>
   async ({ collection, doc, req }) => {
-    if (collection.versions.drafts && doc._status !== 'published') {
+    if (collection?.versions?.drafts && doc._status !== 'published') {
       // If the parent is a draft, don't resave children
       return
     }

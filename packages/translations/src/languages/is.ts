@@ -80,6 +80,11 @@ export const isTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
+  dashboard: {
+    addWidget: 'Bæta við smáforriti',
+    deleteWidget: 'Eyða græju {{id}}',
+    searchWidgets: 'Leita að græjum...',
+  },
   error: {
     accountAlreadyActivated: 'Þessi aðgangur hefur þegar verið virkjaður.',
     autosaving: 'Villa kom upp við sjálfvirka vistun á færslu.',
@@ -117,6 +122,7 @@ export const isTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Vandamál kom upp við að hlaða upp skránni.',
     restoringTitle:
       'Villa kom upp við að endurheimta {{title}}. Vinsamlegast athugaðu tenginguna þína og reyndu aftur.',
+    revertingDocument: 'Það kom upp vandamál við að endurheimta þetta skjal.',
     tokenInvalidOrExpired: 'Token er annað hvort ógilt eða útrunnið.',
     tokenNotProvided: 'Token var gefið upp.',
     unableToCopy: 'Ekki hægt að afrita.',
@@ -329,6 +335,7 @@ export const isTranslations: DefaultTranslationsObject = {
     items: 'hlutir',
     language: 'Tungumál',
     lastModified: 'Síðast breytt',
+    layout: 'Útlag',
     leaveAnyway: 'Fara samt',
     leaveWithoutSaving: 'Fara án þess að vista',
     light: 'Ljóst',
@@ -336,6 +343,7 @@ export const isTranslations: DefaultTranslationsObject = {
     loading: 'Hleð',
     locale: 'Staðfærsla',
     locales: 'Staðfærslur',
+    lock: 'Lás',
     menu: 'Valmynd',
     moreOptions: 'Fleiri valkostir',
     move: 'Færa',
@@ -356,6 +364,9 @@ export const isTranslations: DefaultTranslationsObject = {
     noOptions: 'Engir valkostir',
     noResults:
       'Engar {{label}} fundust. Annað hvort er engin {{label}} til eða ekkert passar við síu sem þú hefur valið fyrir ofan.',
+    noResultsDescription:
+      'Það eru hvorki neinar til eða neinar sem passa við síurnar sem þú skilgreindir að ofan.',
+    noResultsFound: 'Engin niðurstöður.',
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
@@ -392,6 +403,7 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveChanges: 'Vista breytingar',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',
@@ -425,6 +437,7 @@ export const isTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} færð í rusl.',
     true: 'Satt',
     unauthorized: 'Óheimilt',
+    unlock: 'Opnaðu',
     unsavedChanges:
       'Þú ert með óvistaðar breytingar. Vistaðu eða hættu við áður en þú heldur áfram.',
     unsavedChangesDuplicate: 'Þú ert með óvistaðar breytingar. Viltu halda áfram við að tvöfalda?',
@@ -545,6 +558,7 @@ export const isTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Þú munt endursetja breytingar á þessari færslu í útgefna stöðu. Ertu viss?',
     aboutToUnpublish: 'Þú munt taka þessa færslu úr birtingu. Ertu viss?',
+    aboutToUnpublishIn: 'Þú ert að fara að afbirta þetta skjal í {{locale}}. Ertu viss?',
     aboutToUnpublishSelection: 'Þú munt taka úr birtingu allar valdar {{label}}. Ertu viss?',
     autosave: 'Sjálfvirk vistun',
     autosavedSuccessfully: 'Sjálfvirk vistun tókst.',
@@ -591,6 +605,7 @@ export const isTranslations: DefaultTranslationsObject = {
     restoring: 'Endurheimti...',
     reverting: 'Sný til baka...',
     revertToPublished: 'Snúa til baka í útgefið',
+    revertUnsuccessful: 'Endurheimt ekki hægt. Engin fyrri útgáfu fannst.',
     saveDraft: 'Vista drög',
     scheduledSuccessfully: 'Áætlað.',
     schedulePublish: 'Áætla útgáfu',
@@ -601,6 +616,9 @@ export const isTranslations: DefaultTranslationsObject = {
     specificVersion: 'Tiltekin útgáfa',
     status: 'Staða',
     unpublish: 'Taka úr birtingu',
+    unpublished: 'Óútgefið',
+    unpublishedSuccessfully: 'Tókst að afturkalla útgáfu.',
+    unpublishIn: 'Óútgefið í {{locale}}',
     unpublishing: 'Tek úr birtingu...',
     version: 'Útgáfa',
     versionAgo: '{{distance}} síðan',

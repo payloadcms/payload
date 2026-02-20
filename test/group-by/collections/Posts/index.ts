@@ -11,6 +11,7 @@ export const PostsCollection: CollectionConfig = {
     groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
+  enableQueryPresets: true,
   trash: true,
   fields: [
     {

@@ -3,13 +3,19 @@ import type { Payload } from 'payload'
 import path from 'path'
 import { AuthenticationError } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
+import {
+  beforeOperationSlug,
+  clearLastOperation,
+  getLastOperation,
+} from './collections/BeforeOperation/index.js'
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
 import { contextHooksSlug } from './collections/ContextHooks/index.js'
 import { dataHooksSlug } from './collections/Data/index.js'
@@ -22,10 +28,9 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import { valueHooksSlug } from './collections/Value/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
-import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
+import { afterReadSlug, beforeValidateSlug, overrideAccessSlug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -363,6 +368,111 @@ describe('Hooks', () => {
 
       expect(updatedDoc).toBeDefined()
     })
+
+    it('should populate previousValue in Lexical nested afterChange hooks', async () => {
+      const relationID = await payload.create({
+        collection: 'relations',
+        data: {
+          title: 'Relation for nested afterChange',
+        },
+      })
+
+      // this collection will throw an error if previousValue is not defined in nested afterChange hook
+      const nestedAfterChangeDoc = await payload.create({
+        collection: nestedAfterChangeHooksSlug,
+        data: {
+          text: 'initial',
+          group: {
+            array: [
+              {
+                nestedAfterChange: 'initial',
+              },
+            ],
+          },
+          lexical: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      children: [
+                        {
+                          detail: 0,
+                          format: 0,
+                          mode: 'normal',
+                          style: '',
+                          text: 'link',
+                          type: 'text',
+                          version: 1,
+                        },
+                      ],
+                      direction: null,
+                      format: '',
+                      indent: 0,
+                      type: 'link',
+                      version: 3,
+                      fields: {
+                        linkBlocks: [
+                          {
+                            id: '693ade72068ea07ba13edcab',
+                            blockType: 'nestedLinkBlock',
+                            nestedRelationship: relationID.id,
+                          },
+                        ],
+                      },
+                      id: '693ade70068ea07ba13edca9',
+                    },
+                  ],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+                {
+                  type: 'block',
+                  version: 2,
+                  format: '',
+                  fields: {
+                    id: '693adf3c068ea07ba13edcae',
+                    blockName: '',
+                    nestedAfterChange: 'test',
+                    blockType: 'nestedBlock',
+                  },
+                },
+                {
+                  children: [],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      await expect(
+        payload.update({
+          collection: 'nested-after-change-hooks',
+          id: nestedAfterChangeDoc.id,
+          data: {
+            text: 'updated',
+          },
+        }),
+      ).resolves.not.toThrow()
+    })
   })
 
   describe('auth collection hooks', () => {
@@ -408,6 +518,47 @@ describe('Hooks', () => {
 
       expect(user).toBeDefined()
       expect(user.afterLoginHook).toStrictEqual(true)
+      expect(result.afterLoginHook).toStrictEqual(true)
+    })
+
+    it('should call afterLogin hook on password reset', async () => {
+      const resetUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email: 'reset-test@payloadcms.com',
+          password: devUser.password,
+          roles: ['admin'],
+          afterLoginHook: false,
+        },
+      })
+
+      expect(resetUser.afterLoginHook).toStrictEqual(false)
+
+      const token = await payload.forgotPassword({
+        collection: hooksUsersSlug,
+        data: {
+          email: resetUser.email,
+        },
+        disableEmail: true,
+      })
+
+      const { user } = await payload.resetPassword({
+        collection: hooksUsersSlug,
+        overrideAccess: true,
+        data: {
+          password: 'newPassword123',
+          token,
+        },
+      })
+
+      expect(user).toBeDefined()
+      expect(user.afterLoginHook).toStrictEqual(true)
+
+      const result = await payload.findByID({
+        id: user.id,
+        collection: hooksUsersSlug,
+      })
+
       expect(result.afterLoginHook).toStrictEqual(true)
     })
 
@@ -555,119 +706,6 @@ describe('Hooks', () => {
 
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
     })
-
-    it('should pass correct field paths through field hooks', async () => {
-      const formatExpectedFieldPaths = (
-        fieldIdentifier: string,
-        {
-          path,
-          schemaPath,
-        }: {
-          path: string[]
-          schemaPath: string[]
-        },
-      ) => ({
-        [`${fieldIdentifier}_beforeValidate_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_beforeChange_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_afterRead_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-        [`${fieldIdentifier}_beforeDuplicate_FieldPaths`]: {
-          path,
-          schemaPath,
-        },
-      })
-
-      const originalDoc = await payload.create({
-        collection: fieldPathsSlug,
-        data: {
-          topLevelNamedField: 'Test',
-          array: [
-            {
-              fieldWithinArray: 'Test',
-              nestedArray: [
-                {
-                  fieldWithinNestedArray: 'Test',
-                  fieldWithinNestedRow: 'Test',
-                },
-              ],
-            },
-          ],
-          fieldWithinRow: 'Test',
-          fieldWithinUnnamedTab: 'Test',
-          namedTab: {
-            fieldWithinNamedTab: 'Test',
-          },
-          fieldWithinNestedUnnamedTab: 'Test',
-        },
-      })
-
-      // duplicate the doc to ensure that the beforeDuplicate hook is run
-      const doc = await payload.duplicate({
-        id: originalDoc.id,
-        collection: fieldPathsSlug,
-      })
-
-      expect(doc).toMatchObject({
-        ...formatExpectedFieldPaths('topLevelNamedField', {
-          path: ['topLevelNamedField'],
-          schemaPath: ['topLevelNamedField'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinArray', {
-          path: ['array', '0', 'fieldWithinArray'],
-          schemaPath: ['array', 'fieldWithinArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNestedArray', {
-          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
-          schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinRowWithinArray', {
-          path: ['array', '0', 'fieldWithinRowWithinArray'],
-          schemaPath: ['array', '_index-2', 'fieldWithinRowWithinArray'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinRow', {
-          path: ['fieldWithinRow'],
-          schemaPath: ['_index-2', 'fieldWithinRow'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinUnnamedTab', {
-          path: ['fieldWithinUnnamedTab'],
-          schemaPath: ['_index-3-0', 'fieldWithinUnnamedTab'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNestedUnnamedTab', {
-          path: ['fieldWithinNestedUnnamedTab'],
-          schemaPath: ['_index-3-0-1-0', 'fieldWithinNestedUnnamedTab'],
-        }),
-        ...formatExpectedFieldPaths('fieldWithinNamedTab', {
-          path: ['namedTab', 'fieldWithinNamedTab'],
-          schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
-        }),
-      })
-    })
-
-    it('should assign value properly when missing in data', async () => {
-      const doc = await payload.create({
-        collection: valueHooksSlug,
-        data: {
-          slug: 'test',
-        },
-      })
-
-      const updatedDoc = await payload.update({
-        id: doc.id,
-        collection: valueHooksSlug,
-        data: {},
-      })
-
-      expect(updatedDoc.beforeValidate_value).toEqual('test')
-      expect(updatedDoc.beforeChange_value).toEqual('test')
-    })
   })
 
   describe('config level after error hook', () => {
@@ -700,6 +738,400 @@ describe('Hooks', () => {
       })
 
       expect(updateResult).toBeDefined()
+    })
+  })
+
+  describe('beforeOperation', () => {
+    afterEach(() => {
+      clearLastOperation()
+    })
+
+    it('should pass correct operation arg on create', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('create')
+    })
+
+    it('should pass correct operation arg on update', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('update')
+    })
+
+    it('should pass correct operation arg on updateByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      expect(getLastOperation()).toEqual('update')
+    })
+
+    it('should pass correct operation arg on read (findByID)', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.findByID({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on read (find)', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      clearLastOperation()
+
+      await payload.find({
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on readDistinct (findDistinct)', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test1' },
+      })
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test2' },
+      })
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'test1' },
+      })
+
+      await payload.findDistinct({
+        collection: beforeOperationSlug,
+        field: 'category',
+      })
+
+      expect(getLastOperation()).toEqual('readDistinct')
+    })
+
+    it('should pass correct operation arg on delete', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.delete({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('delete')
+    })
+
+    it('should pass correct operation arg on deleteByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.delete({
+        id: doc.id,
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('delete')
+    })
+
+    it('should pass correct operation arg on count', async () => {
+      await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.count({
+        collection: beforeOperationSlug,
+      })
+
+      expect(getLastOperation()).toEqual('count')
+    })
+
+    it('should pass correct operation arg on countVersions', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.countVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(getLastOperation()).toEqual('countVersions')
+    })
+
+    it('should pass correct operation arg on findVersions', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: {},
+      })
+
+      await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on findVersionByID', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'v1' },
+      })
+
+      // Update to create a version
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: { category: 'v2' },
+      })
+
+      const versions = await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(versions.docs.length).toBeGreaterThan(0)
+
+      await payload.findVersionByID({
+        collection: beforeOperationSlug,
+        id: versions.docs[0]!.id,
+      })
+
+      expect(getLastOperation()).toEqual('read')
+    })
+
+    it('should pass correct operation arg on restoreVersion', async () => {
+      const doc = await payload.create({
+        collection: beforeOperationSlug,
+        data: { category: 'v1' },
+      })
+
+      // Update to create a version
+      await payload.update({
+        id: doc.id,
+        collection: beforeOperationSlug,
+        data: { category: 'v2' },
+      })
+
+      const versions = await payload.findVersions({
+        collection: beforeOperationSlug,
+        where: {
+          parent: {
+            equals: doc.id,
+          },
+        },
+      })
+
+      expect(versions.docs.length).toBeGreaterThan(0)
+
+      await payload.restoreVersion({
+        collection: beforeOperationSlug,
+        id: versions.docs[0]!.id,
+      })
+
+      expect(getLastOperation()).toEqual('restoreVersion')
+    })
+  })
+
+  describe('afterRead', () => {
+    it('should return same for find and findByID', async () => {
+      const createdDoc = await payload.create({
+        collection: afterReadSlug,
+        data: {
+          title: 'test',
+        },
+      })
+
+      const docFromFind = await payload.findByID({
+        collection: afterReadSlug,
+        id: createdDoc.id,
+      })
+
+      const { docs } = await payload.find({
+        collection: afterReadSlug,
+        where: {
+          id: {
+            equals: createdDoc.id,
+          },
+        },
+      })
+
+      const docFromFindMany = docs[0]
+
+      expect(docFromFind.title).toEqual('afterRead')
+      expect(docFromFindMany.title).toEqual('afterRead')
+      expect(docFromFind.title).toEqual(docFromFindMany.title)
+    })
+  })
+
+  describe('overrideAccess in hooks', () => {
+    const createdIDs: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: overrideAccessSlug, id })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should pass overrideAccess: false to hooks when not overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+        overrideAccess: false,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
+    })
+
+    it('should pass overrideAccess: true to hooks when overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+        overrideAccess: true,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
+    })
+
+    it('should pass overrideAccess to hooks in find operation', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Find' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const { docs } = await payload.find({
+        collection: overrideAccessSlug,
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+        overrideAccess: true,
+      })
+
+      const result = docs[0]
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
+    })
+
+    it('should pass overrideAccess: false to hooks in find operation when not overriding', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Find No Override' },
+        overrideAccess: true,
+      })
+
+      createdIDs.push(doc.id)
+
+      const { docs } = await payload.find({
+        collection: overrideAccessSlug,
+        where: {
+          id: {
+            equals: doc.id,
+          },
+        },
+        overrideAccess: false,
+      })
+
+      const result = docs[0]
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(false)
+      expect(result.afterReadOverrideAccess).toBe(false)
+    })
+
+    it('should default to true when overrideAccess is not specified in Local API', async () => {
+      const doc = await payload.create({
+        collection: overrideAccessSlug,
+        data: { title: 'Test Default' },
+      })
+
+      createdIDs.push(doc.id)
+
+      const result = await payload.findByID({
+        collection: overrideAccessSlug,
+        id: doc.id,
+      })
+
+      expect(result.beforeReadCalled).toBe(true)
+      expect(result.afterReadCalled).toBe(true)
+      expect(result.beforeReadOverrideAccess).toBe(true)
+      expect(result.afterReadOverrideAccess).toBe(true)
     })
   })
 })

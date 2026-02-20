@@ -1,16 +1,16 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { copyPasteField } from 'helpers/e2e/copyPasteField.js'
+import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
 import {
   addBlock,
   addBlockBelow,
   duplicateBlock,
   openBlocksDrawer,
   reorderBlocks,
-} from 'helpers/e2e/fields/blocks/index.js'
-import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
-import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
+} from '__helpers/e2e/fields/blocks/index.js'
+import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -20,13 +20,13 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -160,8 +160,7 @@ describe('Block fields', () => {
 
     expect(rowCount).toEqual(5)
 
-    await page.click('#action-save')
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await saveDocAndAssert(page)
   })
 
   test('should initialize block rows with collapsed state', async () => {
@@ -290,7 +289,6 @@ describe('Block fields', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -322,6 +320,20 @@ describe('Block fields', () => {
     await expect(blocksFieldWithLabels.locator('.blocks-field__drawer-toggler')).toHaveText(
       'Add Account',
     )
+  })
+
+  test('should only apply error styling to block with error', async () => {
+    await page.goto(url.create)
+
+    const firstBlockTextInput = page.locator('#field-blocks__0__text')
+    await firstBlockTextInput.fill('')
+
+    await page.click('#action-save')
+
+    const blockNameInput = page.locator('#blocks-row-1 input#blocks\\.1\\.blockName').first()
+
+    await expect(blockNameInput).toHaveValue('Second block')
+    await expect(blockNameInput).not.toHaveCSS('color', 'rgb(123, 41, 39)')
   })
 
   describe('row manipulation', () => {
@@ -488,7 +500,7 @@ describe('Block fields', () => {
       )
       await popupBtn.click()
       const disabledCopyBtn = page.locator(
-        '#field-i18nBlocks .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Copy Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Copy Field")',
       )
       await expect(disabledCopyBtn).toBeVisible()
     })
@@ -505,7 +517,7 @@ describe('Block fields', () => {
       await expect(popupBtn).toBeVisible()
       await popupBtn.click()
       const disabledPasteBtn = page.locator(
-        '#field-readOnly .popup.clipboard-action__popup .popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
       )
       await expect(disabledPasteBtn).toBeVisible()
     })

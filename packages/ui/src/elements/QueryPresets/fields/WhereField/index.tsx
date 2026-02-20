@@ -23,9 +23,13 @@ const transformWhereToNaturalLanguage = (
   }
 
   const renderCondition = (condition: any): React.ReactNode => {
+    if (!condition || typeof condition !== 'object') {
+      return 'No where query'
+    }
+
     const key = Object.keys(condition)[0]
 
-    if (!condition[key]) {
+    if (!key || !condition[key] || typeof condition[key] !== 'object') {
       return 'No where query'
     }
 

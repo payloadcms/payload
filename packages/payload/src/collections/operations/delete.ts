@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -21,13 +21,15 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -37,11 +39,10 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
   where: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const deleteOperation = async <
   TSlug extends CollectionSlug,
@@ -57,18 +58,12 @@ export const deleteOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'delete',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'delete',
+      overrideAccess: args.overrideAccess!,
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -147,6 +142,12 @@ export const deleteOperation = async <
       const { id } = doc
 
       try {
+        // Each document gets its own transaction when singleTransaction is enabled
+        let docShouldCommit = false
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          docShouldCommit = await initTransaction(req)
+        }
+
         // /////////////////////////////////////
         // Handle potentially locked documents
         // /////////////////////////////////////
@@ -198,7 +199,7 @@ export const deleteOperation = async <
         // /////////////////////////////////////
         // Delete scheduled posts
         // /////////////////////////////////////
-        if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+        if (hasScheduledPublishEnabled(collectionConfig)) {
           await deleteScheduledPublishJobs({
             id,
             slug: collectionConfig.slug,
@@ -244,6 +245,14 @@ export const deleteOperation = async <
         })
 
         // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          result = { ...result, collection: collectionConfig.slug }
+        }
+
+        // /////////////////////////////////////
         // afterRead - Collection
         // /////////////////////////////////////
 
@@ -254,6 +263,7 @@ export const deleteOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: result || doc,
+                overrideAccess,
                 req,
               })) || result
           }
@@ -279,11 +289,17 @@ export const deleteOperation = async <
         // /////////////////////////////////////
         // 8. Return results
         // /////////////////////////////////////
+        if (docShouldCommit) {
+          await commitTransaction(req)
+        }
 
         return result
       } catch (error) {
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
+        if (req.payload.db.bulkOperationsSingleTransaction) {
+          await killTransaction(req)
+        }
         errors.push({
           id: doc.id,
           isPublic,
@@ -293,7 +309,17 @@ export const deleteOperation = async <
       return null
     })
 
-    const awaitedDocs = await Promise.all(promises)
+    // Process sequentially when using single transaction mode to avoid shared state issues
+    // Process in parallel when using one transaction for better performance
+    let awaitedDocs
+    if (req.payload.db.bulkOperationsSingleTransaction) {
+      awaitedDocs = []
+      for (const promise of promises) {
+        awaitedDocs.push(await promise)
+      }
+    } else {
+      awaitedDocs = await Promise.all(promises)
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
@@ -319,6 +345,7 @@ export const deleteOperation = async <
       args,
       collection: collectionConfig,
       operation: 'delete',
+      overrideAccess,
       result,
     })
 

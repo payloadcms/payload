@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-r2",
-  "version": "3.64.0",
+  "version": "3.77.0",
   "description": "Payload storage adapter for Cloudflare R2",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -39,17 +39,18 @@
   "scripts": {
     "build": "pnpm build:types && pnpm build:swc",
     "build:clean": "find . \\( -type d \\( -name build -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} + && pnpm build",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20260218.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

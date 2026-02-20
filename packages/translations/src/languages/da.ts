@@ -78,6 +78,11 @@ export const daTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
+  dashboard: {
+    addWidget: 'Tilføj Widget',
+    deleteWidget: 'Slet widget {{id}}',
+    searchWidgets: 'Søg widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne konto er allerede blevet aktiveret.',
     autosaving: 'Der opstod et problem under autosaving af dette dokument.',
@@ -115,6 +120,7 @@ export const daTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Der opstod et problem under uploadingen af filen.',
     restoringTitle:
       'Der opstod en fejl under genoprettelsen af {{title}}. Kontroller venligst din forbindelse og prøv igen.',
+    revertingDocument: 'Der var et problem med at gendanne dette dokument.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller udløbet.',
     tokenNotProvided: 'Token ikke angivet.',
     unableToCopy: 'Kan ikke kopiere.',
@@ -329,6 +335,7 @@ export const daTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Sprog',
     lastModified: 'Sidst ændret',
+    layout: 'Layout',
     leaveAnyway: 'Forlad alligevel',
     leaveWithoutSaving: 'Forlad uden at gemme',
     light: 'Lys',
@@ -336,6 +343,7 @@ export const daTranslations: DefaultTranslationsObject = {
     loading: 'Loader',
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
+    lock: 'Lås',
     menu: 'Menu',
     moreOptions: 'Flere muligheder',
     move: 'Flyt',
@@ -357,6 +365,9 @@ export const daTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen muligheder',
     noResults:
       'No {{label}} fundet. Enten findes der endnu ingen {{label}}, eller også matcher ingen af de filtre angivet ovenfor.',
+    noResultsDescription:
+      'Enten findes der ingen, eller ingen matcher de filtre, du har angivet ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke fundet',
     nothingFound: 'Intet fundet',
     noTrashResults: 'Ingen {{label}} i papirkurven.',
@@ -394,6 +405,7 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
+    saveChanges: 'Gem ændringer',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',
@@ -427,6 +439,7 @@ export const daTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til papirkurven.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
+    unlock: 'Oplås',
     unsavedChanges: 'Du har ikke gemte ændringer. Gem eller kassér før fortsættelse.',
     unsavedChangesDuplicate: 'Du har ikke-gemte ændringer. Vil du fortsætte med at duplikere?',
     untitled: 'Uden titel',
@@ -546,6 +559,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du er ved at tilbagerulle dette dokuments ændringer til dets offentliggjorte tilstand. Er du sikker?',
     aboutToUnpublish: 'Du er ved at afpublicere dette dokument. Er du sikker?',
+    aboutToUnpublishIn: 'Du er ved at afpublicere dette dokument i {{locale}}. Er du sikker?',
     aboutToUnpublishSelection:
       'Du er ved at afpublicere alt {{label}} i denne sektion. Er du sikker?',
     autosave: 'Autosave',
@@ -593,6 +607,7 @@ export const daTranslations: DefaultTranslationsObject = {
     restoring: 'Gendanner...',
     reverting: 'Tilbageruller...',
     revertToPublished: 'Tilbagerul til offentliggjort',
+    revertUnsuccessful: 'Gendan mislykkedes. Ingen tidligere offentliggjort version fundet.',
     saveDraft: 'Gem kladde',
     scheduledSuccessfully: 'Planlagt med succes.',
     schedulePublish: 'Planlæg offentliggørelse',
@@ -603,6 +618,9 @@ export const daTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifik Version',
     status: 'Status',
     unpublish: 'Afpublicer',
+    unpublished: 'Upubliceret',
+    unpublishedSuccessfully: 'Upubliceret med succes.',
+    unpublishIn: 'Fjern offentliggørelse i {{locale}}',
     unpublishing: 'Afpublicerer...',
     version: 'Version',
     versionAgo: '{{distance}} siden',

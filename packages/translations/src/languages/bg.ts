@@ -79,6 +79,11 @@ export const bgTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
+  dashboard: {
+    addWidget: 'Добави джаджа',
+    deleteWidget: 'Изтрийте джаджа {{id}}',
+    searchWidgets: 'Търсене на джаджи...',
+  },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
     autosaving: 'Имаше проблем в автоматичното запазване на този документ.',
@@ -116,6 +121,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Имаше проблем при качването на файла.',
     restoringTitle:
       'Възникна грешка при възстановяването на {{title}}. Моля, проверете връзката си и опитайте отново.',
+    revertingDocument: 'Възникна проблем при връщане на този документ.',
     tokenInvalidOrExpired: 'Ключът е невалиден или изтекъл.',
     tokenNotProvided: 'Токенът не е предоставен.',
     unableToCopy: 'Неуспешно копиране.',
@@ -330,6 +336,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     items: 'артикули',
     language: 'Език',
     lastModified: 'Последно променено',
+    layout: 'Оформление',
     leaveAnyway: 'Напусни въпреки това',
     leaveWithoutSaving: 'Напусни без да запазиш',
     light: 'Светла',
@@ -337,6 +344,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     loading: 'Зарежда се',
     locale: 'Локализация',
     locales: 'Локализации',
+    lock: 'Заключване',
     menu: 'Меню',
     moreOptions: 'Повече опции',
     move: 'Премести',
@@ -358,6 +366,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     noOptions: 'Няма опции',
     noResults:
       '{{label}} не е открит. {{label}} не съществува или никой не отговаря на зададените филтри.',
+    noResultsDescription:
+      'Или не съществува такава, или никоя не отговаря на филтрите, които сте посочили по-горе.',
+    noResultsFound: 'Няма резултати.',
     notFound: 'Няма открит',
     nothingFound: 'Нищо не беше открито',
     noTrashResults: 'Няма {{label}} в кошчето.',
@@ -394,6 +405,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     row: 'ред',
     rows: 'Редове',
     save: 'Запази',
+    saveChanges: 'Запази промените',
     saving: 'Запазване...',
     schedulePublishFor: 'Планирано публикуване за {{title}}',
     searchBy: 'Търси по {{label}}',
@@ -427,6 +439,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} преместени в кошчето.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',
+    unlock: 'Отключете',
     unsavedChanges: 'Имате незапазени промени. Запазете или отхвърлете преди да продължите.',
     unsavedChangesDuplicate: 'Имаш незапазени промени. Искаш ли да продължиш да дупликираш?',
     untitled: 'Неозаглавен',
@@ -547,6 +560,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'На път си да възстановиш промените на този документ до публикуваното му състояние. Сигурен ли си?',
     aboutToUnpublish: 'На път си да скриеш този документ. Сигурен ли си?',
+    aboutToUnpublishIn:
+      'Предстои да премахнете публикацията на този документ в {{locale}}. Сигурни ли сте?',
     aboutToUnpublishSelection: 'На път си да скриеш всички избрани {{label}}. Сигурен ли си?',
     autosave: 'Автоматично запазване',
     autosavedSuccessfully: 'Успешно автоматично запазване.',
@@ -593,6 +608,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     restoring: 'Възстановяване...',
     reverting: 'Връщане..',
     revertToPublished: 'Върни се до публикуваното',
+    revertUnsuccessful: 'Връщане неуспешно. Не е намерена предишно публикувана версия.',
     saveDraft: 'Запази чернова',
     scheduledSuccessfully: 'Успешно насрочено.',
     schedulePublish: 'Планирано публикуване',
@@ -603,6 +619,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     specificVersion: 'Специфична версия',
     status: 'Статус',
     unpublish: 'Скрий',
+    unpublished: 'Непубликувано',
+    unpublishedSuccessfully: 'Успешно не е публикувано.',
+    unpublishIn: 'Отмяна на публикуване в {{locale}}',
     unpublishing: 'Скриване...',
     version: 'Версия',
     versionAgo: 'преди {{distance}}',

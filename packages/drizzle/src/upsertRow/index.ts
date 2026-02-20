@@ -3,7 +3,6 @@ import type { SelectedFields } from 'drizzle-orm/sqlite-core'
 import type { TypeWithID } from 'payload'
 
 import { and, desc, eq, isNull, or } from 'drizzle-orm'
-import { ValidationError } from 'payload'
 
 import type { BlockRowToInsert } from '../transform/write/types.js'
 import type { Args } from './types.js'
@@ -22,6 +21,7 @@ import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
+import { handleUpsertError } from './handleUpsertError.js'
 import { insertArrays } from './insertArrays.js'
 import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
 
@@ -35,13 +35,16 @@ import { shouldUseOptimizedUpsertRow } from './shouldUseOptimizedUpsertRow.js'
 export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>({
   id,
   adapter,
+  collectionSlug,
   data,
   db,
   fields,
+  globalSlug,
   ignoreResult,
   // TODO:
   // When we support joins for write operations (create/update) - pass collectionSlug to the buildFindManyArgs
   // Make a new argument in upsertRow.ts and pass the slug from every operation.
+  customID,
   joinQuery: _joinQuery,
   operation,
   path = '',
@@ -57,65 +60,116 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
-    const transformedForWrite = transformForWrite({
-      adapter,
-      data,
-      enableAtomicWrites: true,
-      fields,
-      tableName,
-    })
-    const { row } = transformedForWrite
-    const { arraysToPush } = transformedForWrite
-
-    const drizzle = db as LibSQLDatabase
-
-    // First, handle $push arrays
-
-    if (arraysToPush && Object.keys(arraysToPush)?.length) {
-      await insertArrays({
+    try {
+      const transformedForWrite = transformForWrite({
         adapter,
-        arrays: [arraysToPush],
-        db,
-        parentRows: [insertedRow],
-        uuidMap: {},
+        data,
+        enableAtomicWrites: true,
+        fields,
+        tableName,
       })
-    }
+      const { row } = transformedForWrite
+      const { arraysToPush } = transformedForWrite
 
-    // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
-    // disable triggering hasDataToUpdate.
-    if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
-      delete row.updatedAt
-    }
+      const drizzle = db as LibSQLDatabase
 
-    const hasDataToUpdate = row && Object.keys(row)?.length
+      // First, handle $push arrays
 
-    // Then, handle regular row update
-    if (ignoreResult) {
-      if (hasDataToUpdate) {
-        // Only update row if there is something to update.
-        // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
-        await drizzle
+      if (arraysToPush && Object.keys(arraysToPush)?.length) {
+        await insertArrays({
+          adapter,
+          arrays: [arraysToPush],
+          db,
+          parentRows: [insertedRow],
+          uuidMap: {},
+        })
+      }
+
+      // If row.updatedAt is not set, delete it to avoid triggering hasDataToUpdate. `updatedAt` may be explicitly set to null to
+      // disable triggering hasDataToUpdate.
+      if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
+        delete row.updatedAt
+      }
+
+      const hasDataToUpdate = row && Object.keys(row)?.length
+
+      // Then, handle regular row update
+      if (ignoreResult) {
+        if (hasDataToUpdate) {
+          // Only update row if there is something to update.
+          // Example: if the data only consists of a single $push, calling insertArrays is enough - we don't need to update the row.
+          await drizzle
+            .update(adapter.tables[tableName])
+            .set(row)
+            .where(eq(adapter.tables[tableName].id, id))
+        }
+        return ignoreResult === 'idOnly' ? ({ id } as T) : null
+      }
+
+      const findManyArgs = buildFindManyArgs({
+        adapter,
+        depth: 0,
+        fields,
+        joinQuery: false,
+        select,
+        tableName,
+      })
+
+      const findManyKeysLength = Object.keys(findManyArgs).length
+      const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+
+      if (!hasDataToUpdate) {
+        // Nothing to update => just fetch current row and return
+        findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+
+        const doc = await db.query[tableName].findFirst(findManyArgs)
+
+        return transform<T>({
+          adapter,
+          config: adapter.payload.config,
+          data: doc,
+          fields,
+          joinQuery: false,
+          tableName,
+        })
+      }
+
+      if (findManyKeysLength === 0 || hasOnlyColumns) {
+        // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
+        // without complex fields that live in separate tables like blocks, arrays, relationships, etc.
+
+        const selectedFields: SelectedFields = {}
+        if (hasOnlyColumns) {
+          for (const [column, enabled] of Object.entries(findManyArgs.columns)) {
+            if (enabled) {
+              selectedFields[column] = adapter.tables[tableName][column]
+            }
+          }
+        }
+
+        const docs = await drizzle
           .update(adapter.tables[tableName])
           .set(row)
           .where(eq(adapter.tables[tableName].id, id))
+          .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
+
+        return transform<T>({
+          adapter,
+          config: adapter.payload.config,
+          data: docs[0],
+          fields,
+          joinQuery: false,
+          tableName,
+        })
       }
-      return ignoreResult === 'idOnly' ? ({ id } as T) : null
-    }
 
-    const findManyArgs = buildFindManyArgs({
-      adapter,
-      depth: 0,
-      fields,
-      joinQuery: false,
-      select,
-      tableName,
-    })
+      // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
 
-    const findManyKeysLength = Object.keys(findManyArgs).length
-    const hasOnlyColumns = Object.keys(findManyArgs.columns || {}).length > 0
+      await drizzle
+        .update(adapter.tables[tableName])
+        .set(row)
+        .where(eq(adapter.tables[tableName].id, id))
 
-    if (!hasDataToUpdate) {
-      // Nothing to update => just fetch current row and return
       findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
       const doc = await db.query[tableName].findFirst(findManyArgs)
@@ -128,56 +182,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         joinQuery: false,
         tableName,
       })
+    } catch (error) {
+      handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
     }
-
-    if (findManyKeysLength === 0 || hasOnlyColumns) {
-      // Optimization - No need for joins => can simply use returning(). This is optimal for very simple collections
-      // without complex fields that live in separate tables like blocks, arrays, relationships, etc.
-
-      const selectedFields: SelectedFields = {}
-      if (hasOnlyColumns) {
-        for (const [column, enabled] of Object.entries(findManyArgs.columns)) {
-          if (enabled) {
-            selectedFields[column] = adapter.tables[tableName][column]
-          }
-        }
-      }
-
-      const docs = await drizzle
-        .update(adapter.tables[tableName])
-        .set(row)
-        .where(eq(adapter.tables[tableName].id, id))
-        .returning(Object.keys(selectedFields).length ? selectedFields : undefined)
-
-      return transform<T>({
-        adapter,
-        config: adapter.payload.config,
-        data: docs[0],
-        fields,
-        joinQuery: false,
-        tableName,
-      })
-    }
-
-    // DB Update that needs the result, potentially with joins => need to update first, then find. returning() does not work with joins.
-
-    await drizzle
-      .update(adapter.tables[tableName])
-      .set(row)
-      .where(eq(adapter.tables[tableName].id, id))
-
-    findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
-
-    const doc = await db.query[tableName].findFirst(findManyArgs)
-
-    return transform<T>({
-      adapter,
-      config: adapter.payload.config,
-      data: doc,
-      fields,
-      joinQuery: false,
-      tableName,
-    })
   }
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
@@ -189,6 +196,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     path,
     tableName,
   })
+
+  if (customID) {
+    rowToInsert.row.id = customID
+  }
 
   // First, we insert the main row
   try {
@@ -717,86 +728,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         })
       }
     }
-
-    // //////////////////////////////////
-    // Error Handling
-    // //////////////////////////////////
-  } catch (caughtError) {
-    // Unique constraint violation error
-    // '23505' is the code for PostgreSQL, and 'SQLITE_CONSTRAINT_UNIQUE' is for SQLite
-
-    let error = caughtError
-    if (typeof caughtError === 'object' && 'cause' in caughtError) {
-      error = caughtError.cause
-    }
-
-    if (error.code === '23505' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      let fieldName: null | string = null
-      // We need to try and find the right constraint for the field but if we can't we fallback to a generic message
-      if (error.code === '23505') {
-        // For PostgreSQL, we can try to extract the field name from the error constraint
-        if (adapter.fieldConstraints?.[tableName]?.[error.constraint]) {
-          fieldName = adapter.fieldConstraints[tableName]?.[error.constraint]
-        } else {
-          const replacement = `${tableName}_`
-
-          if (error.constraint.includes(replacement)) {
-            const replacedConstraint = error.constraint.replace(replacement, '')
-
-            if (replacedConstraint && adapter.fieldConstraints[tableName]?.[replacedConstraint]) {
-              fieldName = adapter.fieldConstraints[tableName][replacedConstraint]
-            }
-          }
-        }
-
-        if (!fieldName) {
-          // Last case scenario we extract the key and value from the detail on the error
-          const detail = error.detail
-          const regex = /Key \(([^)]+)\)=\(([^)]+)\)/
-          const match: string[] = detail.match(regex)
-
-          if (match && match[1]) {
-            const key = match[1]
-
-            fieldName = key
-          }
-        }
-      } else if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        /**
-         * For SQLite, we can try to extract the field name from the error message
-         * The message typically looks like:
-         * "UNIQUE constraint failed: table_name.field_name"
-         */
-        const regex = /UNIQUE constraint failed: ([^.]+)\.([^.]+)/
-        const match: string[] = error.message.match(regex)
-
-        if (match && match[2]) {
-          if (adapter.fieldConstraints[tableName]) {
-            fieldName = adapter.fieldConstraints[tableName][`${match[2]}_idx`]
-          }
-
-          if (!fieldName) {
-            fieldName = match[2]
-          }
-        }
-      }
-
-      throw new ValidationError(
-        {
-          id,
-          errors: [
-            {
-              message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
-              path: fieldName,
-            },
-          ],
-          req,
-        },
-        req?.t,
-      )
-    } else {
-      throw error
-    }
+  } catch (error) {
+    handleUpsertError({ id, adapter, collectionSlug, error, globalSlug, req, tableName })
   }
 
   if (ignoreResult === 'idOnly') {

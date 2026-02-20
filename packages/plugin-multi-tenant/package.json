@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.64.0",
+  "version": "3.77.0",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
@@ -81,14 +81,14 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "pack:plugin": "pnpm prepublishOnly && pnpm copyfiles && pnpm pack",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "pack:plugin": "pnpm build && pnpm pack"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -98,7 +98,6 @@
   },
   "peerDependencies": {
     "@payloadcms/ui": "workspace:*",
-    "next": "^15.2.3",
     "payload": "workspace:*"
   },
   "publishConfig": {
