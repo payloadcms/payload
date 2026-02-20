@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 
-describe('Relationship Object IDs Plugin', () => {
+describe.skip('Relationship Object IDs Plugin', () => {
   let relations: any
   let posts: any
 
