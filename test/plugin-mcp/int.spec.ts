@@ -1060,7 +1060,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('"content": null')
+      expect(json.result.content[0].text).toContain('"content":null')
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
@@ -1350,9 +1350,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
       expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('"title": "Hero Page"')
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"heading": "Welcome to our site"')
+      expect(json.result.content[0].text).toContain('"title":"Hero Page"')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"heading":"Welcome to our site"')
 
       const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
       if (jsonMatch) {
@@ -1397,10 +1397,10 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
-      expect(json.result.content[0].text).toContain('"heading": "Page Hero"')
-      expect(json.result.content[0].text).toContain('"body": "This is the body text."')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(json.result.content[0].text).toContain('"heading":"Page Hero"')
+      expect(json.result.content[0].text).toContain('"body":"This is the body text."')
 
       const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
       if (jsonMatch) {
@@ -1454,10 +1454,10 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"heading": "Updated Hero Heading"')
-      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
-      expect(json.result.content[0].text).toContain('"body": "Updated body text."')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"heading":"Updated Hero Heading"')
+      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(json.result.content[0].text).toContain('"body":"Updated body text."')
 
       const updatedPage = await payload.findByID({
         collection: 'pages',
@@ -1545,7 +1545,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain(
         'Resource created successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('"title": "Virtual Field Create Test"')
+      expect(json.result.content[0].text).toContain('"title":"Virtual Field Create Test"')
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
 
       // Clean up
@@ -1588,7 +1588,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title": "Virtual Field Updated Title"')
+      expect(json.result.content[0].text).toContain('"title":"Virtual Field Updated Title"')
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
 
       await payload.delete({ id: post.id, collection: 'posts' })
