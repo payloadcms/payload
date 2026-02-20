@@ -36,7 +36,7 @@ It's often best practice to write your Globals in separate files and then import
 Here is what a simple Global Config might look like:
 
 ```ts
-import { GlobalConfig } from 'payload'
+import type { GlobalConfig } from 'payload'
 
 export const Nav: GlobalConfig = {
   slug: 'nav',
@@ -107,7 +107,7 @@ The behavior of Globals within the [Admin Panel](../admin/overview) can be fully
 To configure Admin Options for Globals, use the `admin` property in your Global Config:
 
 ```ts
-import { GlobalConfig } from 'payload'
+import type { GlobalConfig } from 'payload'
 
 export const MyGlobal: GlobalConfig = {
   // ...
