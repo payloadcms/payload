@@ -5,9 +5,9 @@ import type {
   DashboardConfig,
   PayloadRequest,
   TypedUser,
-  Widget,
   WidgetInstance,
   WidgetServerProps,
+  WidgetWidth,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -45,9 +45,8 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
           locale,
           permissions,
           req,
+          widgetData: layoutItem.data || {},
           widgetSlug,
-          // TODO: widgets will support state in the future
-          // widgetData: layoutItem.data,
         } satisfies WidgetServerProps,
       }),
       item: layoutItem,
@@ -56,7 +55,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   // Resolve function labels to static labels for client components
   const clientWidgets: ClientWidget[] = widgets.map((widget) => {
-    const { ComponentPath: _, label, ...rest } = widget
+    const { ComponentPath: _, fields: __, label, ...rest } = widget
     return {
       ...rest,
       label: typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
@@ -93,7 +92,11 @@ async function getItemsFromPreferences(
 async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
-  widgets: Widget[],
+  widgets: Array<{
+    maxWidth?: WidgetWidth
+    minWidth?: WidgetWidth
+    slug: string
+  }>,
 ): Promise<WidgetItem[]> {
   // Handle function format
   let widgetInstances: WidgetInstance[]
@@ -107,6 +110,7 @@ async function getItemsFromConfig(
     const widget = widgets.find((widget) => widget.slug === widgetInstance.widgetSlug)
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
+      data: widgetInstance.data,
       maxWidth: widget?.maxWidth ?? 'full',
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',

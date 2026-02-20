@@ -191,6 +191,17 @@ export class DashboardHelper {
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }
 
+  editWidget = async (position: number, title: string) => {
+    const widget = this.widgetByPos(position)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = this.page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+    await drawer.getByLabel('Title').fill(title)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+  }
+
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
     const confirmButton = this.page.locator('#confirm-action')

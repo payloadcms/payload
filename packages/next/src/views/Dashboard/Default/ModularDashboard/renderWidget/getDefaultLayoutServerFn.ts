@@ -44,6 +44,7 @@ export const getDefaultLayoutHandler: ServerFunction<
           locale,
           permissions,
           req,
+          widgetData: layoutItem.data || {},
           widgetSlug,
         } satisfies WidgetServerProps,
       }),
@@ -71,6 +72,7 @@ async function getItemsFromConfig(
     const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
+      data: widgetInstance.data,
       maxWidth: widget?.maxWidth ?? 'full',
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',

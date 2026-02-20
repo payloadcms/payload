@@ -15,12 +15,12 @@ export const RenderWidget: React.FC<{
   /**
    * Instance-specific data for this widget
    */
-  // TODO: widgetData?: Record<string, unknown>
+  widgetData?: Record<string, unknown>
   /**
    * Unique ID for this widget instance (format: "slug-timestamp")
    */
   widgetId: string
-}> = ({ /* widgetData, */ widgetId }) => {
+}> = ({ widgetData, widgetId }) => {
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const { serverFunction } = useServerFunctions()
 
@@ -32,14 +32,13 @@ export const RenderWidget: React.FC<{
         const result = (await serverFunction({
           name: 'render-widget',
           args: {
-            // TODO: widgets will support state in the future
-            // widgetData,
+            widgetData,
             widgetSlug,
           } as RenderWidgetServerFnArgs,
         })) as RenderWidgetServerFnReturnType
 
         setComponent(result.component)
-      } catch (error) {
+      } catch (_error) {
         // Log error but don't expose details to console in production
 
         // Fallback error component
@@ -62,7 +61,7 @@ export const RenderWidget: React.FC<{
       }
     }
     void render()
-  }, [serverFunction, widgetId /* widgetData, */])
+  }, [serverFunction, widgetData, widgetId])
 
   const mounted = useRef(false)
 

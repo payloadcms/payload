@@ -17,14 +17,17 @@ export const getSchemaMap = cache(
     config: SanitizedConfig
     globalSlug?: string
     i18n: I18nClient
+    widgetSlug?: string
   }): FieldSchemaMap => {
-    const { collectionSlug, config, globalSlug, i18n } = args
+    const { collectionSlug, config, globalSlug, i18n, widgetSlug } = args
 
     if (!cachedSchemaMap || global._payload_doNotCacheSchemaMap) {
       cachedSchemaMap = new Map()
     }
 
-    let cachedEntityFieldMap = cachedSchemaMap.get(collectionSlug || globalSlug)
+    const cacheKey =
+      collectionSlug || globalSlug || (widgetSlug ? `widget:${widgetSlug}` : undefined)
+    let cachedEntityFieldMap = cachedSchemaMap.get(cacheKey)
 
     if (cachedEntityFieldMap) {
       return cachedEntityFieldMap
@@ -37,9 +40,10 @@ export const getSchemaMap = cache(
       config,
       globalSlug,
       i18n: i18n as I18n,
+      widgetSlug,
     })
 
-    cachedSchemaMap.set(collectionSlug || globalSlug, entityFieldMap)
+    cachedSchemaMap.set(cacheKey, entityFieldMap)
 
     global._payload_schemaMap = cachedSchemaMap
 

@@ -207,6 +207,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     validRelationships.push(config.folders!.slug)
   }
 
+  if (config.admin?.dashboard?.widgets?.length) {
+    for (const widget of config.admin.dashboard.widgets) {
+      if (widget.fields?.length) {
+        widget.fields = await sanitizeFields({
+          config: config as unknown as Config,
+          existingFieldNames: new Set(),
+          fields: widget.fields,
+          parentIsLocalized: false,
+          richTextSanitizationPromises,
+          validRelationships,
+        })
+      }
+    }
+  }
+
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
    * to be populated with the sanitized blocks

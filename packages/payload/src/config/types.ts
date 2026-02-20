@@ -43,7 +43,9 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  ClientField,
   DefaultDocumentIDType,
+  Field,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
@@ -749,6 +751,7 @@ export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x
 
 export type Widget = {
   ComponentPath: string
+  fields?: Field[]
   /**
    * Human-friendly label for the widget.
    * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
@@ -758,8 +761,6 @@ export type Widget = {
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
@@ -768,6 +769,7 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
@@ -775,8 +777,7 @@ export type ClientWidget = {
 }
 
 export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
+  data?: Record<string, unknown>
   widgetSlug: string
   width?: WidgetWidth
 }

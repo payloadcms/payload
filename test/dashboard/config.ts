@@ -33,12 +33,20 @@ export default buildConfigWithDefaults({
           },
           ...Array.from(
             { length: 4 },
-            (): WidgetInstance => ({
+            (_value, index): WidgetInstance => ({
+              data: {
+                collection: index % 2 === 0 ? 'tickets' : 'events',
+                title: index % 2 === 0 ? 'Tickets' : 'Events',
+              },
               widgetSlug: 'count',
               width: 'x-small',
             }),
           ),
           {
+            data: {
+              timeframe: 'monthly',
+              title: 'Revenue (Monthly)',
+            },
             widgetSlug: 'revenue',
             width: 'full',
           },
@@ -56,12 +64,31 @@ export default buildConfigWithDefaults({
         {
           slug: 'count',
           ComponentPath: './components/Count.tsx#default',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+            {
+              name: 'collection',
+              type: 'select',
+              options: [
+                {
+                  label: 'Tickets',
+                  value: 'tickets',
+                },
+                {
+                  label: 'Events',
+                  value: 'events',
+                },
+              ],
+            },
+          ],
           label: {
             en: 'Count Widget',
             es: 'Widget de Conteo',
           },
           maxWidth: 'medium',
-          // fields: []
         },
         {
           slug: 'private',

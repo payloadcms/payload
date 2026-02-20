@@ -74,7 +74,8 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         return (
           !initialWidget ||
           widget.item.id !== initialWidget.item.id ||
-          widget.item.width !== initialWidget.item.width
+          widget.item.width !== initialWidget.item.width ||
+          JSON.stringify(widget.item.data || {}) !== JSON.stringify(initialWidget.item.data || {})
         )
       })
 
@@ -111,11 +112,13 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
         component: React.createElement(RenderWidget, {
+          widgetData: {},
           widgetId,
           // TODO: widgetData can be added here for custom props
         }),
         item: {
           id: widgetId,
+          data: {},
           maxWidth: widget?.maxWidth ?? 'full',
           minWidth: widget?.minWidth ?? 'x-small',
           width: widget?.minWidth ?? 'x-small',
@@ -180,6 +183,32 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     [isEditing],
   )
 
+  const updateWidgetData = useCallback(
+    (widgetId: string, data: Record<string, unknown>) => {
+      if (!isEditing) {
+        return
+      }
+
+      setCurrentLayout((prev) =>
+        prev.map((item) =>
+          item.item.id === widgetId
+            ? {
+                component: React.createElement(RenderWidget, {
+                  widgetData: data,
+                  widgetId,
+                }),
+                item: {
+                  ...item.item,
+                  data,
+                } satisfies WidgetItem,
+              }
+            : item,
+        ),
+      )
+    },
+    [isEditing],
+  )
+
   const cancelModal = React.createElement(ConfirmationModal, {
     body: 'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
     confirmLabel: 'Discard',
@@ -200,6 +229,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     resizeWidget,
     saveLayout,
     setIsEditing,
+    updateWidgetData,
   }
 }
 

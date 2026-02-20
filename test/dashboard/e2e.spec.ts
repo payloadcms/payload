@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 
@@ -91,6 +91,15 @@ describe('Dashboard', () => {
     await d.assertWidget(6, 'private', 'full')
     await expect(d.widgets).toHaveCount(6)
     await d.saveChangesAndValidate()
+  })
+
+  test('edit widget data', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.editWidget(2, 'Open Tickets')
+    await expect(page.locator('.count-widget').first().getByText('Open Tickets')).toBeVisible()
+    await d.saveChangesAndValidate()
+    await expect(page.locator('.count-widget').first().getByText('Open Tickets')).toBeVisible()
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
