@@ -50,7 +50,11 @@ describe('Lexical Link Feature', () => {
 
     await linkButton.click()
 
-    const customField = lexical.drawer.locator('#field-someText')
+    const linkId = await lexical.editor
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+    const customField = lexical.drawer.locator(`#field-richText__${linkId}__someText`)
 
     await expect(customField).toBeVisible()
   })
@@ -66,7 +70,9 @@ describe('Lexical Link Feature', () => {
 
     await linkButton.click()
 
-    const checkboxField = lexical.drawer.locator(`[id^="field-newTab"]`)
+    const checkboxField = lexical.drawer.locator(
+      '.checkbox-input:has-text("Open in new tab") input',
+    )
 
     await expect(checkboxField).toBeChecked()
   })
