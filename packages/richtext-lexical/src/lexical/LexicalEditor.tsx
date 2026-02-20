@@ -119,6 +119,9 @@ export const LexicalEditor: React.FC<
         <SelectAllPlugin />
         {isEditable && (
           <OnChangePlugin
+            // Must be false so that field-sync updates (tagged 'history-merge'
+            // by RenderLexicalFields) still propagate to the parent form state.
+            ignoreHistoryMergeTagChange={false}
             // Selection changes can be ignored here, reducing the
             // frequency that the FieldComponent and Payload receive updates.
             // Selection changes are only needed if you are saving selection state
