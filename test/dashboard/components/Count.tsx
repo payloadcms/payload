@@ -1,7 +1,9 @@
 /* eslint-disable no-restricted-exports */
 import { type WidgetServerProps } from 'payload'
 
-export default async function Count({ req, widgetData }: WidgetServerProps<'count'>) {
+import type { CountWidget } from '../payload-types.js'
+
+export default async function Count({ req, widgetData }: WidgetServerProps<CountWidget>) {
   let count = 0
   let error: null | string = null
 

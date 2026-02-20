@@ -1,20 +1,21 @@
-import type { DataFromWidgetSlug, InitReqResult, WidgetSlug } from '../../index.js'
+import type { InitReqResult } from '../../index.js'
 
 export enum EntityType {
   collection = 'collections',
   global = 'globals',
 }
 
-type WidgetDataFromSlug<TSlug extends WidgetSlug> =
-  DataFromWidgetSlug<TSlug> extends {
-    data?: infer TData
-  }
-    ? TData
-    : DataFromWidgetSlug<TSlug>
+type WidgetDataFromWidget<TWidget> = TWidget extends {
+  data?: infer TData
+}
+  ? TData
+  : never
 
-export type WidgetServerProps<TSlug extends WidgetSlug = WidgetSlug> = {
-  widgetData?: WidgetDataFromSlug<TSlug> extends Record<string, unknown>
-    ? WidgetDataFromSlug<TSlug>
+export type WidgetServerProps<
+  TWidget extends { data?: unknown } = { data?: Record<string, unknown> },
+> = {
+  widgetData?: WidgetDataFromWidget<TWidget> extends Record<string, unknown>
+    ? WidgetDataFromWidget<TWidget>
     : Record<string, unknown>
-  widgetSlug: TSlug
+  widgetSlug: string
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>

@@ -4,13 +4,15 @@
 import { type WidgetServerProps } from 'payload'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
+import type { RevenueWidget } from '../payload-types.js'
+
 interface RevenueData {
   amount: number
   date: string
   period: string
 }
 
-export default function Revenue({ widgetData }: WidgetServerProps<'revenue'>) {
+export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>) {
   const timeframe =
     typeof widgetData?.timeframe === 'string' && widgetData.timeframe
       ? widgetData.timeframe
