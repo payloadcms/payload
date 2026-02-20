@@ -4,7 +4,7 @@ import type { CollectionConfig } from 'payload'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 
-import type { R2Bucket } from './types.js'
+import type { R2Bucket, R2ObjectBody } from './types.js'
 
 interface Args {
   bucket: R2Bucket
@@ -15,7 +15,7 @@ interface Args {
 const isMiniflare = process.env.NODE_ENV === 'development'
 
 export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { filename } }) => {
+  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
       const key = path.posix.join(prefix, filename)
 
@@ -26,6 +26,11 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
       }
 
       const fileSize = headObj.size
+
+      // Don't return large file uploads back to the client, or the Worker will run out of memory
+      if (fileSize > 50 * 1024 * 1024 && clientUploadContext) {
+        return new Response(null, { status: 200 })
+      }
 
       // Handle range request
       const rangeHeader = req.headers.get('range')
@@ -51,7 +56,7 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
             })
           : await bucket?.get(key)
 
-      if (obj?.body == undefined) {
+      if (!obj || obj.body == undefined) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
@@ -63,8 +68,32 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
       }
 
       // Add R2-specific headers
-      if (!isMiniflare) {
+      if (isMiniflare) {
+        // In development with Miniflare, manually set headers from httpMetadata
+        const metadata = obj.httpMetadata
+        if (metadata?.cacheControl) {
+          headers.set('Cache-Control', metadata.cacheControl)
+        }
+        if (metadata?.contentDisposition) {
+          headers.set('Content-Disposition', metadata.contentDisposition)
+        }
+        if (metadata?.contentEncoding) {
+          headers.set('Content-Encoding', metadata.contentEncoding)
+        }
+        if (metadata?.contentLanguage) {
+          headers.set('Content-Language', metadata.contentLanguage)
+        }
+        if (metadata?.contentType) {
+          headers.set('Content-Type', metadata.contentType)
+        }
+      } else {
         obj.writeHttpMetadata(headers)
+      }
+
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      const contentType = headers.get('Content-Type')
+      if (contentType === 'image/svg+xml') {
+        headers.set('Content-Security-Policy', "script-src 'none'")
       }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

@@ -97,6 +97,8 @@ export interface Config {
     hooks: Hook;
     'auth-collection': AuthCollection;
     'read-restricted': ReadRestricted;
+    'differentiated-trash': DifferentiatedTrash;
+    'restricted-trash': RestrictedTrash;
     'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDatum;
     'where-cache-same': WhereCacheSame;
     'where-cache-unique': WhereCacheUnique;
@@ -134,6 +136,8 @@ export interface Config {
     hooks: HooksSelect<false> | HooksSelect<true>;
     'auth-collection': AuthCollectionSelect<false> | AuthCollectionSelect<true>;
     'read-restricted': ReadRestrictedSelect<false> | ReadRestrictedSelect<true>;
+    'differentiated-trash': DifferentiatedTrashSelect<false> | DifferentiatedTrashSelect<true>;
+    'restricted-trash': RestrictedTrashSelect<false> | RestrictedTrashSelect<true>;
     'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDataSelect<false> | FieldRestrictedUpdateBasedOnDataSelect<true>;
     'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
     'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
@@ -162,16 +166,7 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      })
-    | (AuthCollection & {
-        collection: 'auth-collection';
-      });
+  user: User | PublicUser | AuthCollection;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -265,6 +260,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -289,6 +285,7 @@ export interface PublicUser {
       }[]
     | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -833,6 +830,7 @@ export interface AuthCollection {
         expiresAt: string;
       }[]
     | null;
+  collection: 'auth-collection';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -891,6 +889,30 @@ export interface ReadRestricted {
   restrictedVirtualField?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash".
+ */
+export interface DifferentiatedTrash {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-trash".
+ */
+export interface RestrictedTrash {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1073,6 +1095,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'read-restricted';
         value: string | ReadRestricted;
+      } | null)
+    | ({
+        relationTo: 'differentiated-trash';
+        value: string | DifferentiatedTrash;
+      } | null)
+    | ({
+        relationTo: 'restricted-trash';
+        value: string | RestrictedTrash;
       } | null)
     | ({
         relationTo: 'field-restricted-update-based-on-data';
@@ -1671,6 +1701,28 @@ export interface ReadRestrictedSelect<T extends boolean = true> {
   restrictedVirtualField?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash_select".
+ */
+export interface DifferentiatedTrashSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-trash_select".
+ */
+export interface RestrictedTrashSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

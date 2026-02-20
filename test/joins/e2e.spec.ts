@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -15,13 +15,13 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { reorderColumns } from '../helpers/e2e/columns/index.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { RESTClient } from '../helpers/rest.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reorderColumns } from '../__helpers/e2e/columns/index.js'
+import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -261,6 +261,19 @@ describe('Join Field', () => {
       await expect(element).toBeVisible()
       await expect(element).toHaveText('Post')
     }
+  })
+
+  test('should not break editing via drawer for polymorphic relationships', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-polymorphicJoin.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
+    const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
+    await toggler.click()
+
+    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(drawer).toBeHidden()
   })
 
   test('should not render collection type in polymorphic relationship table with disableRowTypes true', async () => {

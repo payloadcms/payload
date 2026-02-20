@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
+import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { Products } from './collections/Products.js'
 import { ReturnedResources } from './collections/ReturnedResources.js'
@@ -18,13 +19,15 @@ import { seed } from './seed/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+export const capturedMcpEvents: unknown[] = []
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources],
+  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources, Pages],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -93,6 +96,15 @@ export default buildConfigWithDefaults({
         [Products.slug]: {
           enabled: true,
         },
+        pages: {
+          enabled: {
+            find: true,
+            create: true,
+            update: true,
+            delete: true,
+          },
+          description: 'Pages with block-based layouts.',
+        },
         posts: {
           enabled: {
             find: true,
@@ -133,6 +145,9 @@ export default buildConfigWithDefaults({
         handlerOptions: {
           verboseLogs: true,
           maxDuration: 60,
+          onEvent: (event: unknown) => {
+            capturedMcpEvents.push(event)
+          },
         },
         serverOptions: {
           serverInfo: {
