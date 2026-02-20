@@ -51,6 +51,12 @@ async function parseStreamResponse(response: Response): Promise<any> {
   }
 }
 
+function extractJsonBlock(text: string): any {
+  const match = text.match(/```json\n([\s\S]*?)\n```/)
+  expect(match).toBeDefined()
+  return JSON.parse(match![1]!)
+}
+
 const getApiKey = async (
   enableUpdate: boolean = false,
   enableDelete: boolean = false,
@@ -1103,9 +1109,7 @@ describe('@payloadcms/plugin-mcp', () => {
         'Document updated successfully in collection "posts"!',
       )
 
-      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
-      expect(jsonMatch).toBeDefined()
-      const updatedDoc = JSON.parse(jsonMatch[1])
+      const updatedDoc = extractJsonBlock(json.result.content[0].text)
       expect(updatedDoc.author).toBe(userId)
 
       await payload.delete({ id: post.id, collection: 'posts' })
@@ -1230,9 +1234,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain('Resource created successfully')
 
-      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
-      expect(jsonMatch).toBeDefined()
-      const createdDoc = JSON.parse(jsonMatch[1])
+      const createdDoc = extractJsonBlock(json.result.content[0].text)
 
       expect(createdDoc.location).toEqual([-74.006, 40.7128])
 
@@ -1284,9 +1286,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain('Document updated successfully')
 
-      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
-      expect(jsonMatch).toBeDefined()
-      const updatedDoc = JSON.parse(jsonMatch[1])
+      const updatedDoc = extractJsonBlock(json.result.content[0].text)
 
       expect(updatedDoc.location).toEqual([-0.1278, 51.5074])
 
@@ -1354,10 +1354,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('"blockType": "hero"')
       expect(json.result.content[0].text).toContain('"heading": "Welcome to our site"')
 
-      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
-      if (jsonMatch) {
-        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
-      }
+      createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
     })
 
     it('should create a page with multiple block types', async () => {
@@ -1402,10 +1399,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('"heading": "Page Hero"')
       expect(json.result.content[0].text).toContain('"body": "This is the body text."')
 
-      const jsonMatch = json.result.content[0].text.match(/```json\n([\s\S]*?)\n```/)
-      if (jsonMatch) {
-        createdPageIds.push(JSON.parse(jsonMatch[1]).id)
-      }
+      createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
     })
 
     it('should update a page layout that contains blocks', async () => {
@@ -2062,6 +2056,853 @@ describe('@payloadcms/plugin-mcp', () => {
         '"title": "English Only Title (MCP Hook Override)"',
       )
       expect(json.result.content[0].text).toContain('"content": "Hello World."')
+    })
+  })
+
+  describe('Field Types', () => {
+    const createdFieldTypeIds: (number | string)[] = []
+
+    const getFieldTypesApiKey = async (enableUpdate = false, enableDelete = false) => {
+      const doc = await payload.create({
+        collection: 'payload-mcp-api-keys',
+        data: {
+          enableAPIKey: true,
+          label: 'Field Types API Key',
+          fieldTypes: {
+            create: true,
+            find: true,
+            update: enableUpdate,
+            delete: enableDelete,
+          },
+          apiKey: randomUUID(),
+          user: userId,
+        },
+      })
+      return doc.apiKey as string
+    }
+
+    describe('Schema validation', () => {
+      it('should not include ui field in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result.tools).toBeDefined()
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        expect(createTool).toBeDefined()
+
+        const inputProps = createTool.inputSchema.properties
+        expect(inputProps).not.toHaveProperty('uiField')
+      })
+
+      it('should include group field as nested object in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        expect(inputProps.groupField).toBeDefined()
+        expect(inputProps.groupField.type).toBe('object')
+        expect(inputProps.groupField.properties).toBeDefined()
+        expect(inputProps.groupField.properties.groupText).toBeDefined()
+        expect(inputProps.groupField.properties.groupNumber).toBeDefined()
+      })
+
+      it('should include collapsible children as top-level fields in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        // Children of collapsible appear at the top level, not under a `collapsible` key
+        expect(inputProps.collapsibleText).toBeDefined()
+        expect(inputProps.collapsibleText.type).toContain('string')
+      })
+
+      it('should include row children as top-level fields in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        // Children of row appear at the top level, not under a `row` key
+        expect(inputProps.rowText).toBeDefined()
+        expect(inputProps.rowText.type).toContain('string')
+      })
+
+      it('should include named tab as nested object and unnamed tab children at top level in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        // Named tab appears as a nested object
+        expect(inputProps.namedTab).toBeDefined()
+        expect(inputProps.namedTab.type).toBe('object')
+        expect(inputProps.namedTab.properties).toBeDefined()
+        expect(inputProps.namedTab.properties.namedTabText).toBeDefined()
+
+        // Unnamed tab children appear at the top level
+        expect(inputProps.unnamedTabText).toBeDefined()
+        expect(inputProps.unnamedTabText.type).toContain('string')
+      })
+
+      it('should include select field with enum values in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        expect(inputProps.selectField).toBeDefined()
+        expect(inputProps.selectField.enum).toBeDefined()
+        expect(inputProps.selectField.enum).toContain('option1')
+        expect(inputProps.selectField.enum).toContain('option2')
+        expect(inputProps.selectField.enum).toContain('option3')
+      })
+
+      it('should include radio field with enum values in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        expect(inputProps.radioField).toBeDefined()
+        expect(inputProps.radioField.enum).toBeDefined()
+        expect(inputProps.radioField.enum).toContain('radio1')
+        expect(inputProps.radioField.enum).toContain('radio2')
+        expect(inputProps.radioField.enum).toContain('radio3')
+      })
+
+      it('should include array field with item schema in create tool schema', async () => {
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/list',
+            params: {},
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+        const createTool = json.result.tools.find((t: any) => t.name === 'createFieldTypes')
+        const inputProps = createTool.inputSchema.properties
+
+        expect(inputProps.arrayField).toBeDefined()
+        expect(inputProps.arrayField.type).toContain('array')
+        expect(inputProps.arrayField.items).toBeDefined()
+        expect(inputProps.arrayField.items.properties).toBeDefined()
+        expect(inputProps.arrayField.items.properties.item).toBeDefined()
+        expect(inputProps.arrayField.items.properties.itemNumber).toBeDefined()
+      })
+    })
+
+    describe('Create + round-trip', () => {
+      it('should create and find document with atomic data fields (text, textarea, number, email, checkbox)', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Hello MCP',
+                textareaField: 'Multi-line\ntext content',
+                numberField: 42,
+                emailField: 'test@example.com',
+                checkboxField: true,
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+        expect(json.result.content[0].type).toBe('text')
+        expect(json.result.content[0].text).toContain(
+          'Resource created successfully in collection "field-types"!',
+        )
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.textField).toBe('Hello MCP')
+        expect(doc.textareaField).toBe('Multi-line\ntext content')
+        expect(doc.numberField).toBe(42)
+        expect(doc.emailField).toBe('test@example.com')
+        expect(doc.checkboxField).toBe(true)
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with date, code, and json fields', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const testDate = '2024-01-15T10:30:00.000Z'
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Date/Code/JSON test',
+                dateField: testDate,
+                codeField: 'const x = 42;',
+                jsonField: { key: 'value', nested: { count: 1 } },
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.codeField).toBe('const x = 42;')
+        expect(doc.jsonField).toMatchObject({ key: 'value', nested: { count: 1 } })
+        expect(doc.dateField).toBeDefined()
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with select field', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Select test',
+                selectField: 'option2',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.selectField).toBe('option2')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with radio field', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Radio test',
+                radioField: 'radio3',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.radioField).toBe('radio3')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with group field (nested object)', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Group test',
+                groupField: {
+                  groupText: 'Inside the group',
+                  groupNumber: 99,
+                },
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.groupField).toBeDefined()
+        expect(doc.groupField.groupText).toBe('Inside the group')
+        expect(doc.groupField.groupNumber).toBe(99)
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with collapsible children at top level', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Collapsible test',
+                collapsibleText: 'Text inside collapsible',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        // collapsibleText is stored at the top level of the document
+        expect(doc.collapsibleText).toBe('Text inside collapsible')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with row children at top level', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Row test',
+                rowText: 'Text inside row',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        // rowText is stored at the top level of the document
+        expect(doc.rowText).toBe('Text inside row')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with tabs fields (named tab as object, unnamed tab children at top level)', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Tabs test',
+                namedTab: {
+                  namedTabText: 'Inside named tab',
+                },
+                unnamedTabText: 'Inside unnamed tab',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        // Named tab stored as nested object
+        expect(doc.namedTab).toBeDefined()
+        expect(doc.namedTab.namedTabText).toBe('Inside named tab')
+
+        // Unnamed tab child stored at document top level
+        expect(doc.unnamedTabText).toBe('Inside unnamed tab')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create document with array field', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'Array test',
+                arrayField: [
+                  { item: 'First item', itemNumber: 1 },
+                  { item: 'Second item', itemNumber: 2 },
+                ],
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.arrayField).toHaveLength(2)
+        expect(doc.arrayField[0].item).toBe('First item')
+        expect(doc.arrayField[0].itemNumber).toBe(1)
+        expect(doc.arrayField[1].item).toBe('Second item')
+        expect(doc.arrayField[1].itemNumber).toBe(2)
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should find documents in field-types collection', async () => {
+        const created = await (payload as any).create({
+          collection: 'field-types',
+          data: { textField: 'Findable doc', numberField: 7 },
+        })
+        createdFieldTypeIds.push(created.id)
+
+        const apiKey = await getFieldTypesApiKey()
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'findFieldTypes',
+              arguments: {
+                where: '{"textField": {"equals": "Findable doc"}}',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+        expect(json.result.content[0].text).toContain('Collection: "field-types"')
+        expect(json.result.content[0].text).toContain('"textField": "Findable doc"')
+        expect(json.result.content[0].text).toContain('"numberField": 7')
+      })
+    })
+
+    describe('Update', () => {
+      it('should update document with group field', async () => {
+        const created = await (payload as any).create({
+          collection: 'field-types',
+          data: {
+            textField: 'Group update test',
+            groupField: { groupText: 'Original', groupNumber: 1 },
+          },
+        })
+        createdFieldTypeIds.push(created.id)
+
+        const apiKey = await getFieldTypesApiKey(true, false)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'updateFieldTypes',
+              arguments: {
+                id: created.id,
+                groupField: {
+                  groupText: 'Updated group text',
+                  groupNumber: 100,
+                },
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+        expect(json.result.content[0].text).toContain(
+          'Document updated successfully in collection "field-types"!',
+        )
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.groupField.groupText).toBe('Updated group text')
+        expect(doc.groupField.groupNumber).toBe(100)
+      })
+
+      it('should update document with collapsible field (children at top level)', async () => {
+        const created = await (payload as any).create({
+          collection: 'field-types',
+          data: {
+            textField: 'Collapsible update test',
+            collapsibleText: 'Original collapsible text',
+          },
+        })
+        createdFieldTypeIds.push(created.id)
+
+        const apiKey = await getFieldTypesApiKey(true, false)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'updateFieldTypes',
+              arguments: {
+                id: created.id,
+                collapsibleText: 'Updated collapsible text',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.collapsibleText).toBe('Updated collapsible text')
+      })
+
+      it('should update document with array field', async () => {
+        const created = await (payload as any).create({
+          collection: 'field-types',
+          data: {
+            textField: 'Array update test',
+            arrayField: [{ item: 'Original item', itemNumber: 0 }],
+          },
+        })
+        createdFieldTypeIds.push(created.id)
+
+        const apiKey = await getFieldTypesApiKey(true, false)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'updateFieldTypes',
+              arguments: {
+                id: created.id,
+                arrayField: [
+                  { item: 'Updated item A', itemNumber: 10 },
+                  { item: 'Updated item B', itemNumber: 20 },
+                  { item: 'Updated item C', itemNumber: 30 },
+                ],
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        expect(doc.arrayField).toHaveLength(3)
+        expect(doc.arrayField[0].item).toBe('Updated item A')
+        expect(doc.arrayField[2].itemNumber).toBe(30)
+      })
+    })
+
+    describe('Display field safety', () => {
+      it('should create document with ui field present without errors and ui field absent from response', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+
+        // Create a doc without passing any `uiField` value (it has no stored data)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'UI field safety test',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+        expect(json.result.content[0].text).toContain('Resource created successfully')
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        // uiField has no stored data and should not appear in the document
+        expect(doc).not.toHaveProperty('uiField')
+
+        createdFieldTypeIds.push(doc.id)
+      })
+
+      it('should create and find document with all structural layout fields populated', async () => {
+        const apiKey = await getFieldTypesApiKey(false, true)
+        const response = await restClient.POST('/mcp', {
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            params: {
+              name: 'createFieldTypes',
+              arguments: {
+                textField: 'All layout fields test',
+                groupField: { groupText: 'Group value', groupNumber: 5 },
+                collapsibleText: 'Collapsible value',
+                rowText: 'Row value',
+                namedTab: { namedTabText: 'Named tab value' },
+                unnamedTabText: 'Unnamed tab value',
+              },
+            },
+          }),
+          headers: {
+            Accept: 'application/json, text/event-stream',
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        const json = await parseStreamResponse(response)
+
+        expect(json.result).toBeDefined()
+        expect(json.result.isError).toBeFalsy()
+
+        const doc = extractJsonBlock(json.result.content[0].text)
+
+        // All data fields are stored correctly regardless of their container type
+        expect(doc.groupField.groupText).toBe('Group value')
+        expect(doc.groupField.groupNumber).toBe(5)
+        expect(doc.collapsibleText).toBe('Collapsible value')
+        expect(doc.rowText).toBe('Row value')
+        expect(doc.namedTab.namedTabText).toBe('Named tab value')
+        expect(doc.unnamedTabText).toBe('Unnamed tab value')
+
+        // UI field is never present in stored documents
+        expect(doc).not.toHaveProperty('uiField')
+
+        createdFieldTypeIds.push(doc.id)
+      })
     })
   })
 })
