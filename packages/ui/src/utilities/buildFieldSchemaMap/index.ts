@@ -83,15 +83,16 @@ export const buildFieldSchemaMap = (args: {
     const matchedWidget = config.admin?.dashboard?.widgets?.find(
       (widget) => widget.slug === widgetSlug,
     )
+    const widgetFields = matchedWidget?.fields as Field[] | undefined
 
-    if (matchedWidget?.fields?.length) {
+    if (widgetFields?.length) {
       schemaMap.set(widgetSlug, {
-        fields: matchedWidget.fields,
+        fields: widgetFields,
       })
 
       traverseFields({
         config,
-        fields: matchedWidget.fields,
+        fields: widgetFields,
         i18n,
         parentIndexPath: '',
         parentSchemaPath: widgetSlug,
