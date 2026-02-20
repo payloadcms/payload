@@ -1,4 +1,6 @@
 /* eslint-disable jest/no-if */
+import mongoose from 'mongoose'
+
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 
@@ -98,6 +100,26 @@ describe.skip('Relationship Object IDs Plugin', () => {
       })
 
       expect(totalDocs).toStrictEqual(1)
+    }
+  })
+
+  it('stores relationship values as ObjectIds not strings', async () => {
+    if (payload.db.name === 'mongoose') {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'Test Post' },
+      })
+
+      const relation = await payload.create({
+        collection: 'relations',
+        data: { hasOne: post.id },
+        depth: 0,
+      })
+
+      const doc = await payload.db.collections.relations.findOne({ _id: relation.id })
+
+      // Should be an ObjectId, not a string
+      expect(doc.hasOne instanceof mongoose.Types.ObjectId).toBe(true)
     }
   })
 })
