@@ -219,8 +219,8 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
   // Validate each field has required properties
   if (config.fields) {
     for (let i = 0; i < config.fields.length; i++) {
-      const field = config.fields[i] as Record<string, unknown>
-      if (!field) {
+      const field = config.fields[i]
+      if (!field || typeof field !== 'object') {
         return {
           error: `Field at index ${i} is not a valid object`,
           success: false,
@@ -329,6 +329,13 @@ function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<Workfl
   if (!config.handler) {
     return {
       error: 'Workflow config must have a valid handler function',
+      success: false,
+    }
+  }
+
+  if (config.queue !== undefined && typeof config.queue !== 'string') {
+    return {
+      error: 'Workflow config queue must be a string if provided',
       success: false,
     }
   }

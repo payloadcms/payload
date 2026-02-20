@@ -1,5 +1,14 @@
 import type { FieldDefinition, FieldModification } from '../../types.js'
 
+/** Escapes a value for safe embedding inside a single-quoted TypeScript string literal. */
+function escapeSingleQuotedString(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')
+}
+
 /**
  * Generates the TypeScript source string for a single field definition block.
  * Used when writing collection files to disk.
@@ -7,8 +16,8 @@ import type { FieldDefinition, FieldModification } from '../../types.js'
 export function generateFieldDefinitionString(field: FieldDefinition): string {
   const lines: string[] = []
   lines.push(`    {`)
-  lines.push(`      name: '${field.name}',`)
-  lines.push(`      type: '${field.type}',`)
+  lines.push(`      name: '${escapeSingleQuotedString(field.name)}',`)
+  lines.push(`      type: '${escapeSingleQuotedString(field.type)}',`)
 
   if (field.required) {
     lines.push(`      required: true,`)
@@ -17,10 +26,10 @@ export function generateFieldDefinitionString(field: FieldDefinition): string {
   if (field.description || field.position) {
     lines.push(`      admin: {`)
     if (field.description) {
-      lines.push(`        description: '${field.description}',`)
+      lines.push(`        description: '${escapeSingleQuotedString(field.description)}',`)
     }
     if (field.position) {
-      lines.push(`        position: '${field.position}',`)
+      lines.push(`        position: '${escapeSingleQuotedString(field.position)}',`)
     }
     lines.push(`      },`)
   }
@@ -28,7 +37,9 @@ export function generateFieldDefinitionString(field: FieldDefinition): string {
   if (field.options && field.type === 'select') {
     lines.push(`      options: [`)
     field.options.forEach((option) => {
-      lines.push(`        { label: '${option.label}', value: '${option.value}' },`)
+      lines.push(
+        `        { label: '${escapeSingleQuotedString(option.label)}', value: '${escapeSingleQuotedString(option.value)}' },`,
+      )
     })
     lines.push(`      ],`)
   }
