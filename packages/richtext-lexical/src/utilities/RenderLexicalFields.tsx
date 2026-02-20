@@ -5,6 +5,8 @@ import { FieldChangeNotifierProvider, RenderFields } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback } from 'react'
 
+import { PAYLOAD_FIELD_SYNC_TAG } from '../lexical/LexicalEditor.js'
+
 interface NodeWithSubFields {
   setSubFieldValue: (args: { path: string; value: unknown }) => void
 }
@@ -37,7 +39,7 @@ export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
             ;(node as NodeWithSubFields).setSubFieldValue({ path: relativePath, value })
           }
         },
-        { tag: 'history-merge' },
+        { tag: ['history-merge', PAYLOAD_FIELD_SYNC_TAG] },
       )
     },
     [editor, nodeKey, parentPath],

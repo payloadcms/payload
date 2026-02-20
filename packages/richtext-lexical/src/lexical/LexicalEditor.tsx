@@ -1,4 +1,6 @@
 'use client'
+import type { EditorState, LexicalEditor as LexicalEditorType } from 'lexical'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary.js'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin.js'
@@ -25,6 +27,36 @@ import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
+
+export const PAYLOAD_FIELD_SYNC_TAG = 'payload-field-sync'
+
+/**
+ * Listens for editor updates tagged with `payload-field-sync` and forwards
+ * them to the parent Field's onChange handler. This is separate from
+ * OnChangePlugin because OnChangePlugin ignores history-merge tagged updates
+ * (which we need for undo merging), but we still need those updates to
+ * propagate to the form state for server-side validation.
+ */
+function FieldSyncPlugin({
+  onChange,
+}: {
+  onChange:
+    | ((editorState: EditorState, editor: LexicalEditorType, tags: Set<string>) => void)
+    | null
+}) {
+  const [editor] = useLexicalComposerContext()
+  useEffect(() => {
+    if (!onChange) {
+      return
+    }
+    return editor.registerUpdateListener(({ editorState, tags }) => {
+      if (tags.has(PAYLOAD_FIELD_SYNC_TAG)) {
+        onChange(editorState, editor, tags)
+      }
+    })
+  }, [editor, onChange])
+  return null
+}
 
 export const LexicalEditor: React.FC<
   {
@@ -119,9 +151,6 @@ export const LexicalEditor: React.FC<
         <SelectAllPlugin />
         {isEditable && (
           <OnChangePlugin
-            // Must be false so that field-sync updates (tagged 'history-merge'
-            // by RenderLexicalFields) still propagate to the parent form state.
-            ignoreHistoryMergeTagChange={false}
             // Selection changes can be ignored here, reducing the
             // frequency that the FieldComponent and Payload receive updates.
             // Selection changes are only needed if you are saving selection state
@@ -136,6 +165,7 @@ export const LexicalEditor: React.FC<
             }}
           />
         )}
+        <FieldSyncPlugin onChange={onChange} />
         {floatingAnchorElem && (
           <React.Fragment>
             {!isSmallWidthViewport && isEditable && (
