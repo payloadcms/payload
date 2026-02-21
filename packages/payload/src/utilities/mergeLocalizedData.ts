@@ -156,7 +156,7 @@ export function mergeLocalizedData({
                       ? (existingValue[index] as JsonObject)
                       : {}
 
-                  return mergeLocalizedData({
+                  const merged = mergeLocalizedData({
                     configBlockReferences,
                     dataWithLocales: newBlockData,
                     docWithLocales: blockData,
@@ -164,6 +164,20 @@ export function mergeLocalizedData({
                     parentIsLocalized,
                     selectedLocales,
                   })
+
+                  // Preserve block metadata not in block.fields
+                  // (blockType, id, blockName are set by Payload internally)
+                  if (newBlockData.blockType) {
+                    merged.blockType = newBlockData.blockType
+                  }
+                  if (newBlockData.id) {
+                    merged.id = newBlockData.id
+                  }
+                  if (newBlockData.blockName !== undefined) {
+                    merged.blockName = newBlockData.blockName
+                  }
+
+                  return merged
                 }
 
                 return newBlockData
