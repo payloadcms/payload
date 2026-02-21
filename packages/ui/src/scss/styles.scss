@@ -1,11 +1,11 @@
-@import 'vars';
-@import 'z-index';
+@use 'vars';
+@use 'z-index';
 
 //////////////////////////////
 // IMPORT OVERRIDES
 //////////////////////////////
 
-@import 'type';
-@import 'queries';
-@import 'resets';
-@import 'svg';
+@use 'type';
+@use 'queries';
+@use 'resets';
+@use 'svg';
