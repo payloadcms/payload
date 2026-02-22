@@ -183,6 +183,7 @@ async function processImportBatch({
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
           draftOption = !isPublished
+          createData._status = statusValue
 
           if (req.payload.config.debug) {
             req.payload.logger.info({
@@ -192,8 +193,7 @@ async function processImportBatch({
               willSetDraft: draftOption,
             })
           }
-
-          // Remove _status from data - it's controlled via draft option
+        } else {
           delete createData._status
         }
 
@@ -453,14 +453,13 @@ async function processImportBatch({
             delete createData.id
           }
 
-          // Only handle _status for versioned collections
           let draftOption: boolean | undefined
           if (collectionHasVersions) {
-            // Use defaultVersionStatus from config if _status not provided
             const statusValue = createData._status || options.defaultVersionStatus
             const isPublished = statusValue !== 'draft'
             draftOption = !isPublished
-            // Remove _status from data - it's controlled via draft option
+            createData._status = statusValue
+          } else {
             delete createData._status
           }
 
