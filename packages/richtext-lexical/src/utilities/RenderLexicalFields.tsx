@@ -3,7 +3,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { FieldChangeNotifierProvider, RenderFields } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
 import { PAYLOAD_FIELD_SYNC_TAG } from '../lexical/LexicalEditor.js'
 
@@ -26,21 +26,50 @@ export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
   const [editor] = useLexicalComposerContext()
   const { parentPath } = renderFieldsProps
 
+  const pendingChanges = useRef<Map<string, unknown>>(new Map())
+  const rafRef = useRef<null | ReturnType<typeof requestAnimationFrame>>(null)
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [])
+
   const handleFieldChange = useCallback(
     ({ path, value }: { path: string; value: unknown }) => {
       const relativePath = path.slice(parentPath.length + 1)
       if (relativePath.includes('.')) {
         return
       }
-      editor.update(
-        () => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && 'setSubFieldValue' in node) {
-            ;(node as NodeWithSubFields).setSubFieldValue({ path: relativePath, value })
-          }
-        },
-        { tag: ['history-merge', PAYLOAD_FIELD_SYNC_TAG] },
-      )
+
+      pendingChanges.current.set(relativePath, value)
+
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
+
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null
+        const changes = new Map(pendingChanges.current)
+        pendingChanges.current.clear()
+
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && 'setSubFieldValue' in node) {
+              for (const [fieldPath, fieldValue] of changes) {
+                ;(node as NodeWithSubFields).setSubFieldValue({
+                  path: fieldPath,
+                  value: fieldValue,
+                })
+              }
+            }
+          },
+          { tag: ['history-merge', PAYLOAD_FIELD_SYNC_TAG] },
+        )
+      })
     },
     [editor, nodeKey, parentPath],
   )
