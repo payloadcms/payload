@@ -101,6 +101,9 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
+          } else {
+            // Reject unknown operators to prevent injection attacks
+            errors.push({ path: `${path}.${operator}` })
           }
         }
       }
