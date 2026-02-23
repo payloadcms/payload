@@ -13,6 +13,7 @@ const buttonStyles = [
   'icon-label',
   'transparent',
   'subtle',
+  'dashed',
   'error',
   'tab',
   'none',
