@@ -214,6 +214,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                 </div>
               }
               hasCreatePermission={hasCreatePermission}
+              HierarchyIcon={HierarchyIcon}
               i18n={i18n}
             />
 

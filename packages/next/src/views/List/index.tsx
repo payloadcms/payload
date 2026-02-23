@@ -392,7 +392,7 @@ export const renderListView = async (
       })
 
       if (ResolvedIcon) {
-        HierarchyIcon = <ResolvedIcon />
+        HierarchyIcon = <ResolvedIcon key={iconPath} />
       }
     }
   }

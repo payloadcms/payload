@@ -26,6 +26,8 @@ export type HierarchyListHeaderProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   hasCreatePermission: boolean
+  /** Icon to display in the move drawer */
+  HierarchyIcon?: React.ReactNode
   i18n: I18nClient
 }
 
@@ -37,6 +39,7 @@ export function HierarchyListHeader({
   disableBulkDelete,
   disableBulkEdit,
   hasCreatePermission,
+  HierarchyIcon,
   i18n,
 }: HierarchyListHeaderProps) {
   const { labels } = collectionConfig
@@ -49,6 +52,7 @@ export function HierarchyListHeader({
         <DocumentListSelection
           disableBulkDelete={disableBulkDelete}
           disableBulkEdit={disableBulkEdit}
+          hierarchyIcon={HierarchyIcon}
           hierarchySlug={collectionConfig.slug}
           key="document-list-selection"
         />,

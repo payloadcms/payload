@@ -20,7 +20,6 @@ export type ColumnProps = {
   collectionSlug: string
   expandedId: null | number | string
   hasNextPage: boolean
-  Icon?: React.ReactNode
   isLoading: boolean
   items: ColumnItemData[]
   onDocumentCreated: (doc: ColumnItemData) => void
@@ -48,7 +47,6 @@ export type ColumnState = {
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
-  Icon?: React.ReactNode
   onSelect: (id: number | string) => void
   parentFieldName: string
   selectedIds: Set<number | string>

@@ -134,7 +134,6 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         <HierarchyColumnBrowser
           ancestorsWithSelections={ancestorsWithSelections}
           collectionSlug={collectionSlug}
-          Icon={Icon}
           onSelect={handleSelect}
           parentFieldName={parentFieldName}
           selectedIds={selectedIds}

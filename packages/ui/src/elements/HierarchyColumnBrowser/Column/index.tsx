@@ -23,7 +23,6 @@ export const Column: React.FC<ColumnProps> = ({
   collectionSlug,
   expandedId,
   hasNextPage,
-  Icon,
   isLoading,
   items,
   onDocumentCreated,

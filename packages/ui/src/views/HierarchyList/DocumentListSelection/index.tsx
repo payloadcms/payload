@@ -17,12 +17,15 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 export type DocumentListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  /** Icon to display in the move drawer */
+  hierarchyIcon?: React.ReactNode
   hierarchySlug?: string
 }
 
 export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
+  hierarchyIcon,
   hierarchySlug,
 }) => {
   const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
@@ -122,6 +125,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
         hierarchySlug && (
           <MoveMany
             hierarchySlug={hierarchySlug}
+            Icon={hierarchyIcon}
             key="bulk-move"
             modalPrefix="hierarchy-list"
             onSuccess={handleActionSuccess}
