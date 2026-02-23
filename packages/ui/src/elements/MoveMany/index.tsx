@@ -24,6 +24,8 @@ export const baseClass = 'move-many'
 type MoveManyProps = {
   /** The hierarchy collection slug (e.g., 'folders') */
   hierarchySlug: string
+  /** Icon to display in the hierarchy drawer */
+  Icon?: React.ReactNode
   /** When multiple MoveMany components are rendered on the page, this will differentiate them */
   modalPrefix?: string
   /** Callback after successful move */
@@ -84,7 +86,13 @@ function getParentFieldName(collectionSlug: string, hierarchySlug: string): stri
   return getHierarchyFieldName(hierarchySlug)
 }
 
-export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: MoveManyProps) {
+export function MoveMany({
+  hierarchySlug,
+  Icon,
+  modalPrefix,
+  onSuccess,
+  selections,
+}: MoveManyProps) {
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
   const { openModal } = useModal()
@@ -102,13 +110,11 @@ export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: 
 
   const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
 
-  // Get useAsTitle from hierarchy collection config
   const hierarchyConfig = collections.find((c) => c.slug === hierarchySlug)
-  const useAsTitle = hierarchyConfig?.admin?.useAsTitle
 
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
-    useAsTitle,
+    Icon,
   })
 
   // Calculate total count and label

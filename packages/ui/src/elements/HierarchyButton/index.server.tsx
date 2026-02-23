@@ -10,7 +10,6 @@ export type HierarchyButtonServerProps = {
   collectionSlug: string
   fieldName: string
   hasMany?: boolean
-  parentFieldName?: string
   payload: Payload
 }
 
@@ -18,7 +17,6 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
   collectionSlug,
   fieldName,
   hasMany,
-  parentFieldName,
   payload,
 }) => {
   const hierarchyCollectionConfig = payload.config.collections.find(
@@ -50,7 +48,6 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
       fieldName={fieldName}
       hasMany={hasMany}
       Icon={<Icon />}
-      parentFieldName={parentFieldName}
     />
   )
 }

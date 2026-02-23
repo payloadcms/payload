@@ -16,7 +16,6 @@ export const HierarchyField: RelationshipFieldServerComponent = (props) => {
       ? hierarchyCollectionConfig.hierarchy
       : undefined
   const iconPath = hierarchyConfig?.admin?.components?.Icon
-  const parentFieldName = hierarchyConfig?.parentFieldName
 
   let Icon: React.ComponentType = TagIcon
 
@@ -36,7 +35,6 @@ export const HierarchyField: RelationshipFieldServerComponent = (props) => {
     <HierarchyFieldClient
       field={clientField}
       Icon={<Icon />}
-      parentFieldName={parentFieldName}
       path={props.path}
       permissions={props.permissions}
       readOnly={props.readOnly}

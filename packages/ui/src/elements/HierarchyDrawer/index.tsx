@@ -11,6 +11,7 @@ import type {
 
 export * from './types.js'
 
+import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { DrawerToggler } from '../Drawer/index.js'
 import { baseClass, HierarchyDrawer } from './Drawer/index.js'
@@ -64,12 +65,17 @@ export const HierarchyDrawerToggler: React.FC<HierarchyDrawerTogglerProps> = ({
  * )
  * ```
  */
-export const useHierarchyDrawer: UseHierarchyDrawer = ({
-  collectionSlug,
-  Icon,
-  parentFieldName = HIERARCHY_PARENT_FIELD,
-  useAsTitle,
-}) => {
+export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon }) => {
+  const { getEntityConfig } = useConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const useAsTitle = collectionConfig?.admin?.useAsTitle
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
+
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()

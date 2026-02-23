@@ -1,5 +1,5 @@
 'use client'
-import { formatAdminURL, HIERARCHY_PARENT_FIELD } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
@@ -19,7 +19,6 @@ export type HierarchyButtonClientProps = {
   fieldName: string
   hasMany?: boolean
   Icon?: React.ReactNode
-  parentFieldName?: string
   readOnly?: boolean
 }
 
@@ -28,7 +27,6 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   fieldName,
   hasMany = false,
   Icon,
-  parentFieldName = HIERARCHY_PARENT_FIELD,
   readOnly,
 }) => {
   const { t } = useTranslation()
@@ -48,8 +46,6 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug,
     Icon,
-    parentFieldName,
-    useAsTitle,
   })
 
   // Fetch item name when currentId changes

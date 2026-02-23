@@ -11,8 +11,6 @@ export type SelectionWithPath = {
 export type UseHierarchyDrawerArgs = {
   collectionSlug: string
   Icon?: React.ReactNode
-  parentFieldName?: string
-  useAsTitle?: string
 }
 
 export type HierarchyDrawerProps = {

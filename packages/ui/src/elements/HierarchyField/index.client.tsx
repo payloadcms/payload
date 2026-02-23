@@ -3,7 +3,6 @@ import type { RelationshipFieldClientProps } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { HIERARCHY_PARENT_FIELD } from 'payload/shared'
 import { useCallback, useMemo } from 'react'
 
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
@@ -28,7 +27,6 @@ type Value = (number | string)[] | null | (number | string)
 
 export type HierarchyFieldClientProps = {
   Icon?: React.ReactNode
-  parentFieldName?: string
 } & RelationshipFieldClientProps
 
 export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props) => {
@@ -43,7 +41,6 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       required,
     },
     Icon,
-    parentFieldName = HIERARCHY_PARENT_FIELD,
     path: pathFromProps,
     readOnly,
     validate,
@@ -55,7 +52,6 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   const { i18n, t } = useTranslation()
 
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchySlug })
-  const useAsTitle = collectionConfig?.admin?.useAsTitle
 
   const memoizedValidate = useCallback(
     (value: Value, validationOptions: Parameters<typeof validate>[1]) => {
@@ -110,8 +106,6 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
     Icon,
-    parentFieldName,
-    useAsTitle,
   })
 
   const handleDrawerSave = useCallback(
