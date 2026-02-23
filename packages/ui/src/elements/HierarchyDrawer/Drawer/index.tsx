@@ -22,8 +22,10 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   hasMany = false,
   Icon,
   initialSelections,
+  onMoveToRoot,
   onSave,
   parentFieldName,
+  showMoveToRoot,
   useAsTitle,
 }) => {
   const { i18n, t } = useTranslation()
@@ -104,6 +106,19 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
           <h4>{collectionLabel}</h4>
         </div>
         <div className={`${baseClass}__subheader-right`}>
+          {showMoveToRoot && onMoveToRoot && (
+            <button
+              className={`${baseClass}__move-to-root`}
+              onClick={() => {
+                onMoveToRoot()
+                closeModal(drawerSlug)
+                closeDrawer()
+              }}
+              type="button"
+            >
+              {t('folder:moveToRoot')}
+            </button>
+          )}
           {selectionCount > 0 && (
             <>
               <span className={`${baseClass}__selection-info`}>{selectionCount} selected</span>

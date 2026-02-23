@@ -154,6 +154,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'folder:moveItemsToRootConfirmation',
   'folder:moveItemToFolderConfirmation',
   'folder:moveItemToRootConfirmation',
+  'folder:moveToRoot',
   'folder:noFolder',
   'folder:newFolder',
   'folder:renameFolder',

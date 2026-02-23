@@ -18,7 +18,9 @@ export type UseHierarchyDrawerArgs = {
 export type HierarchyDrawerProps = {
   readonly hasMany?: boolean
   readonly initialSelections?: (number | string)[]
+  readonly onMoveToRoot?: () => void
   readonly onSave: (selections: Map<number | string, SelectionWithPath>) => void
+  readonly showMoveToRoot?: boolean
 }
 
 export type HierarchyDrawerInternalProps = {
