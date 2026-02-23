@@ -103,7 +103,7 @@ export const FindOrderForm: React.FC<Props> = ({ initialEmail }) => {
         </FormItem>
         {submitError && <FormError message={submitError} />}
         <Button type="submit" className="self-start" variant="default" disabled={isSubmitting}>
-          {isSubmitting ? 'Sending...' : 'Send access link'}
+          {isSubmitting ? 'Sending...' : 'Find order'}
         </Button>
       </form>
     </Fragment>
