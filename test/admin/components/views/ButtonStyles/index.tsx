@@ -1,7 +1,10 @@
 'use client'
 
 import { Button } from '@payloadcms/ui'
+import LinkImport from 'next/link.js'
 import React from 'react'
+
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const buttonStyles = [
   'primary',
@@ -21,10 +24,13 @@ const sizes = ['large', 'medium', 'small', 'xsmall'] as const
 
 export const ButtonStyles: React.FC = () => {
   return (
-    <div style={{ marginTop: 'calc(var(--base) * 2)', padding: 'var(--gutter-h)' }}>
-      <h1>Button Styles</h1>
+    <div style={{ padding: 'var(--gutter-h)' }}>
+      <Link href="/admin">Dashboard</Link>
+      <h1 style={{ marginTop: 'var(--base)' }}>Buttons</h1>
 
-      <h2 style={{ marginTop: 'calc(var(--base) * 2)' }}>Styles × Sizes</h2>
+      <h2 style={{ marginBottom: 'calc(var(--base) * 1)', marginTop: 'calc(var(--base) * 2)' }}>
+        Styles × Sizes
+      </h2>
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr>
@@ -78,7 +84,9 @@ export const ButtonStyles: React.FC = () => {
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: 'calc(var(--base) * 3)' }}>With Icons</h2>
+      <h2 style={{ marginBottom: 'calc(var(--base) * 1)', marginTop: 'calc(var(--base) * 3)' }}>
+        With Icons
+      </h2>
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr>
@@ -122,7 +130,7 @@ export const ButtonStyles: React.FC = () => {
                   key={size}
                   style={{ borderBottom: '1px solid var(--theme-elevation-100)', padding: '8px' }}
                 >
-                  <Button buttonStyle={style} icon="plus" size={size}>
+                  <Button buttonStyle={style} icon="plus" margin={false} size={size}>
                     Button
                   </Button>
                 </td>
@@ -176,7 +184,13 @@ export const ButtonStyles: React.FC = () => {
                   key={size}
                   style={{ borderBottom: '1px solid var(--theme-elevation-100)', padding: '8px' }}
                 >
-                  <Button aria-label="Add" buttonStyle={style} icon="plus" size={size} />
+                  <Button
+                    aria-label="Add"
+                    buttonStyle={style}
+                    icon="plus"
+                    margin={false}
+                    size={size}
+                  />
                 </td>
               ))}
             </tr>
@@ -184,19 +198,14 @@ export const ButtonStyles: React.FC = () => {
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: 'calc(var(--base) * 3)' }}>Disabled States</h2>
+      <h2 style={{ marginBottom: 'calc(var(--base) * 1)', marginTop: 'calc(var(--base) * 3)' }}>
+        Disabled States
+      </h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {buttonStyles.map((style) => (
-          <Button buttonStyle={style} disabled key={style}>
+          <Button buttonStyle={style} disabled key={style} margin={false}>
             {style}
           </Button>
-        ))}
-      </div>
-
-      <h2 style={{ marginTop: 'calc(var(--base) * 3)' }}>Round Buttons</h2>
-      <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        {sizes.map((size) => (
-          <Button aria-label="Add" icon="plus" key={size} round size={size} />
         ))}
       </div>
     </div>
