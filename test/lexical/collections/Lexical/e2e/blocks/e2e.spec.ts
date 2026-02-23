@@ -119,21 +119,13 @@ describe('lexicalBlocks', () => {
         await editDrawer.locator('.rs__option').nth(1).click()
       },
       {
-        allowedNumberOfRequests: 2,
+        allowedNumberOfRequests: 1,
       },
     )
 
     // Click button with text Save changes
-    await assertNetworkRequests(
-      page,
-      '/admin/collections/lexical-fields',
-      async () => {
-        await editDrawer.locator('button').getByText('Save changes').click()
-      },
-      {
-        allowedNumberOfRequests: 1,
-      },
-    )
+    await editDrawer.locator('button').getByText('Save changes').click()
+
     await expect(editDrawer).toBeHidden()
 
     await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data: value2')
@@ -1660,29 +1652,41 @@ async function createBlock({
   newBlock: Locator
   slashMenuPopover: Locator
 }> {
-  const lastParagraph = richTextField.locator('p').last()
-  await lastParagraph.scrollIntoViewIfNeeded()
-  await expect(lastParagraph).toBeVisible()
+  let slashMenuPopover: Locator
 
-  await lastParagraph.click()
+  await assertNetworkRequests(
+    page,
+    '/admin/collections/lexical-fields',
+    async () => {
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
 
-  if (afterLastParagraphClick) {
-    await afterLastParagraphClick({ lastParagraph })
-  }
+      await lastParagraph.click()
 
-  await page.keyboard.press('/')
-  await page.keyboard.type(name.toLocaleLowerCase().replace(/ /g, ''))
+      if (afterLastParagraphClick) {
+        await afterLastParagraphClick({ lastParagraph })
+      }
 
-  // CreateBlock
-  const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
-  await expect(slashMenuPopover).toBeVisible()
+      await page.keyboard.press('/')
+      await page.keyboard.type(name.toLocaleLowerCase().replace(/ /g, ''))
 
-  // Click 1. Button and ensure it's the block creation button (it should be! Otherwise, sorting wouldn't work)
-  const blockSelectButton = slashMenuPopover.locator('button').first()
-  await expect(blockSelectButton).toBeVisible()
-  await expect(blockSelectButton).toContainText(name)
-  await blockSelectButton.click()
-  await expect(slashMenuPopover).toBeHidden()
+      // CreateBlock
+      slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      // Click 1. Button and ensure it's the block creation button (it should be! Otherwise, sorting wouldn't work)
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await expect(blockSelectButton).toContainText(name)
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+    },
+    {
+      allowedNumberOfRequests: 2,
+      minimumNumberOfRequests: 1,
+    },
+  )
 
   const newBlock = richTextField
     .locator(
@@ -1690,7 +1694,7 @@ async function createBlock({
     )
     .nth(8) // The :not(.LexicalEditorTheme__block .LexicalEditorTheme__block) makes sure this does not select sub-blocks
   await newBlock.scrollIntoViewIfNeeded()
-  return { newBlock, slashMenuPopover }
+  return { newBlock, slashMenuPopover: slashMenuPopover! }
 }
 
 async function assertLexicalDoc({

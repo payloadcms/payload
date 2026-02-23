@@ -18,6 +18,7 @@ import {
   useConfig,
   useDocumentInfo,
   useEditDepth,
+  useForm,
   useFormFields,
   useModal,
   useTranslation,
@@ -58,6 +59,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { closeModal } = useModal()
 
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
+  const { dispatchFields } = useForm()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
 
@@ -286,6 +288,22 @@ export const BlockComponent: React.FC<Props> = (props) => {
     ],
   )
 
+  const handleDrawerSave = useCallback(() => {
+    const componentsState = blockFormState['_components']
+    if (componentsState) {
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState: {
+          [`${blockFieldsPath}._components`]: {
+            ...componentsState,
+            lastRenderedPath: undefined,
+          },
+        },
+      })
+    }
+    closeModal(drawerSlug)
+  }, [blockFormState, blockFieldsPath, closeModal, dispatchFields, drawerSlug])
+
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
@@ -305,12 +323,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
             permissions={true}
             readOnly={!isEditable}
           />
-          <Button onClick={() => closeModal(drawerSlug)}>{t('fields:saveChanges')}</Button>
+          <Button onClick={handleDrawerSave}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
     ),
     [
-      closeModal,
       drawerSlug,
       id,
       blockDisplayName,
@@ -320,6 +337,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       blockFieldsSchemaPath,
       blockFieldsPath,
       nodeKey,
+      handleDrawerSave,
     ],
   )
 

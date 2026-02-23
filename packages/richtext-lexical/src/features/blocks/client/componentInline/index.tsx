@@ -5,6 +5,9 @@ import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
+
+import './index.scss'
+
 import {
   Button,
   Drawer,
@@ -13,13 +16,11 @@ import {
   ShimmerEffect,
   useConfig,
   useEditDepth,
+  useForm,
   useFormFields,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
-
-import './index.scss'
-
 import { $getNodeByKey } from 'lexical'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 
@@ -70,6 +71,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
   const { closeModal } = useModal()
+  const { dispatchFields } = useForm()
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const { config } = useConfig()
@@ -189,6 +191,22 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [CustomLabel, clientBlock?.labels, i18n])
 
+  const handleDrawerSave = useCallback(() => {
+    const componentsState = blockFormState['_components']
+    if (componentsState) {
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState: {
+          [`${blockFieldsPath}._components`]: {
+            ...componentsState,
+            lastRenderedPath: undefined,
+          },
+        },
+      })
+    }
+    closeModal(drawerSlug)
+  }, [blockFormState, blockFieldsPath, closeModal, dispatchFields, drawerSlug])
+
   if (!clientBlock) {
     return (
       <InlineBlockContainer className={`${baseClass}-not-found`}>
@@ -229,7 +247,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             permissions={true}
             readOnly={!isEditable}
           />
-          <Button onClick={() => closeModal(drawerSlug)}>{t('fields:saveChanges')}</Button>
+          <Button onClick={handleDrawerSave}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
