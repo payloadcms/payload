@@ -15,6 +15,11 @@ export const PREFERENCE_KEYS = {
   DASHBOARD_LAYOUT: 'dashboard-layout',
 
   /**
+   * Stores folder tree expand/collapse state per collection
+   */
+  FOLDER_TREE: 'folder-tree',
+
+  /**
    * Stores navigation group collapse/expand state and nav open/closed state
    */
   NAV: 'nav',

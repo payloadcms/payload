@@ -1,125 +1,61 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Field, Option, SelectField } from '../fields/config/types.js'
+import type { FolderConfig } from './types.js'
 
-import { defaultAccess } from '../auth/defaultAccess.js'
-import { buildFolderField } from './buildFolderField.js'
-import { deleteSubfoldersBeforeDelete } from './hooks/deleteSubfoldersAfterDelete.js'
-import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
-import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
-import { reparentChildFolder } from './hooks/reparentChildFolder.js'
+/**
+ * Options for creating a folder collection.
+ * Same as CollectionConfig but with `folder` and `useAsTitle` required.
+ */
+export type CreateFolderCollectionOptions = {
+  /**
+   * Folder configuration (required)
+   */
+  folder: FolderConfig
+  /**
+   * Field name to use as the display title in the folder tree.
+   * Required to ensure folders display meaningful names.
+   */
+  useAsTitle: string
+} & Omit<CollectionConfig, 'admin' | 'folder'> &
+  Partial<Pick<CollectionConfig, 'admin'>>
 
-type CreateFolderCollectionArgs = {
-  collectionSpecific: boolean
-  debug?: boolean
-  folderEnabledCollections: CollectionConfig[]
-  folderFieldName: string
-  slug: string
-}
-export const createFolderCollection = ({
-  slug,
-  collectionSpecific,
-  debug,
-  folderEnabledCollections,
-  folderFieldName,
-}: CreateFolderCollectionArgs): CollectionConfig => {
-  const { collectionOptions, collectionSlugs } = folderEnabledCollections.reduce(
-    (acc, collection: CollectionConfig) => {
-      acc.collectionSlugs.push(collection.slug)
-      acc.collectionOptions.push({
-        label: collection.labels?.plural || collection.slug,
-        value: collection.slug,
-      })
-
-      return acc
-    },
-    {
-      collectionOptions: [] as Option[],
-      collectionSlugs: [] as string[],
-    },
-  )
+/**
+ * Creates a collection config for a folder collection.
+ *
+ * This helper provides:
+ * - Required `folder` property with proper typing
+ * - Required `useAsTitle` to ensure folders display meaningful names
+ * - `admin.group: false` by default to hide from collections list
+ *   (folder collections are accessed via their dedicated sidebar tab)
+ *
+ * @example
+ * import { createFolderCollection, createFolderField } from 'payload'
+ *
+ * const Folders = createFolderCollection({
+ *   slug: 'folders',
+ *   useAsTitle: 'name',
+ *   folder: {},
+ *   fields: [
+ *     { name: 'name', type: 'text', required: true },
+ *   ],
+ * })
+ *
+ * // Then in related collections:
+ * const Posts: CollectionConfig = {
+ *   slug: 'posts',
+ *   fields: [
+ *     createFolderField({ folderSlug: 'folders' }),
+ *   ],
+ * }
+ */
+export function createFolderCollection(options: CreateFolderCollectionOptions): CollectionConfig {
+  const { admin: adminOverrides, useAsTitle, ...rest } = options
 
   return {
-    slug,
-    access: {
-      create: defaultAccess,
-      delete: defaultAccess,
-      read: defaultAccess,
-      readVersions: defaultAccess,
-      update: defaultAccess,
-    },
+    ...rest,
     admin: {
-      hidden: !debug,
-      useAsTitle: 'name',
-    },
-    fields: [
-      {
-        name: 'name',
-        type: 'text',
-        index: true,
-        required: true,
-      },
-      buildFolderField({
-        collectionSpecific,
-        folderFieldName,
-        folderSlug: slug,
-        overrides: {
-          admin: {
-            hidden: !debug,
-          },
-        },
-      }),
-      {
-        name: 'documentsAndFolders',
-        type: 'join',
-        admin: {
-          hidden: !debug,
-        },
-        collection: [slug, ...collectionSlugs],
-        hasMany: true,
-        on: folderFieldName,
-      },
-      ...(collectionSpecific
-        ? [
-            {
-              name: 'folderType',
-              type: 'select',
-              admin: {
-                components: {
-                  Field: {
-                    path: '@payloadcms/next/client#FolderTypeField',
-                  },
-                },
-                position: 'sidebar',
-              },
-              hasMany: true,
-              options: collectionOptions,
-            } satisfies SelectField,
-          ]
-        : ([] as Field[])),
-    ],
-    hooks: {
-      afterChange: [
-        reparentChildFolder({
-          folderFieldName,
-        }),
-      ],
-      afterDelete: [
-        dissasociateAfterDelete({
-          collectionSlugs,
-          folderFieldName,
-        }),
-      ],
-      beforeDelete: [deleteSubfoldersBeforeDelete({ folderFieldName, folderSlug: slug })],
-      beforeValidate: [
-        ...(collectionSpecific ? [ensureSafeCollectionsChange({ foldersSlug: slug })] : []),
-      ],
-    },
-    labels: {
-      plural: 'Folders',
-      singular: 'Folder',
-    },
-    typescript: {
-      interface: 'FolderInterface',
+      group: false,
+      ...adminOverrides,
+      useAsTitle,
     },
   }
 }

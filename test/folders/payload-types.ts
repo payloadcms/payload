@@ -67,6 +67,8 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    folders: Folder;
+    tags: Tag;
     posts: Post;
     media: Media;
     drafts: Draft;
@@ -75,24 +77,14 @@ export interface Config {
     'translated-labels': TranslatedLabel;
     'payload-kv': PayloadKv;
     users: User;
-    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'payload-folders': {
-      documentsAndFolders:
-        | 'payload-folders'
-        | 'posts'
-        | 'media'
-        | 'drafts'
-        | 'autosave'
-        | 'omitted-from-browse-by'
-        | 'translated-labels';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
@@ -101,7 +93,6 @@ export interface Config {
     'translated-labels': TranslatedLabelsSelect<false> | TranslatedLabelsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -143,6 +134,33 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  parent?: (string | null) | Folder;
+  name: string;
+  folderSlug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: string;
+  parent?: (string | null) | Tag;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -150,7 +168,8 @@ export interface Post {
   title?: string | null;
   heroImage?: (string | null) | Media;
   relatedAutosave?: (string | null) | Autosave;
-  folder?: (string | null) | FolderInterface;
+  _f_folders?: (string | null) | Folder;
+  _t_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -162,7 +181,8 @@ export interface Post {
 export interface Media {
   id: string;
   testAdminThumbnail?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _f_folders?: (string | null) | Folder;
+  _t_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -177,50 +197,15 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
+ * via the `definition` "autosave".
  */
-export interface FolderInterface {
+export interface Autosave {
   id: string;
-  name: string;
-  folder?: (string | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: string | FolderInterface;
-        }
-      | {
-          relationTo?: 'posts';
-          value: string | Post;
-        }
-      | {
-          relationTo?: 'media';
-          value: string | Media;
-        }
-      | {
-          relationTo?: 'drafts';
-          value: string | Draft;
-        }
-      | {
-          relationTo?: 'autosave';
-          value: string | Autosave;
-        }
-      | {
-          relationTo?: 'omitted-from-browse-by';
-          value: string | OmittedFromBrowseBy;
-        }
-      | {
-          relationTo?: 'translated-labels';
-          value: string | TranslatedLabel;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by' | 'translated-labels')[] | null;
-  folderSlug?: string | null;
+  title?: string | null;
+  _f_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -229,19 +214,7 @@ export interface FolderInterface {
 export interface Draft {
   id: string;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave".
- */
-export interface Autosave {
-  id: string;
-  title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _f_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -253,7 +226,7 @@ export interface Autosave {
 export interface OmittedFromBrowseBy {
   id: string;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _f_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -264,7 +237,7 @@ export interface OmittedFromBrowseBy {
 export interface TranslatedLabel {
   id: string;
   title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _f_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -318,6 +291,14 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string | Tag;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -344,10 +325,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-folders';
-        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -393,13 +370,39 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  folderSlug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   relatedAutosave?: T;
-  folder?: T;
+  _f_folders?: T;
+  _t_tags?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -410,7 +413,8 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   testAdminThumbnail?: T;
-  folder?: T;
+  _f_folders?: T;
+  _t_tags?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -429,7 +433,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface DraftsSelect<T extends boolean = true> {
   title?: T;
-  folder?: T;
+  _f_folders?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -440,7 +444,7 @@ export interface DraftsSelect<T extends boolean = true> {
  */
 export interface AutosaveSelect<T extends boolean = true> {
   title?: T;
-  folder?: T;
+  _f_folders?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -451,7 +455,7 @@ export interface AutosaveSelect<T extends boolean = true> {
  */
 export interface OmittedFromBrowseBySelect<T extends boolean = true> {
   title?: T;
-  folder?: T;
+  _f_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -461,7 +465,7 @@ export interface OmittedFromBrowseBySelect<T extends boolean = true> {
  */
 export interface TranslatedLabelsSelect<T extends boolean = true> {
   title?: T;
-  folder?: T;
+  _f_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -494,19 +498,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders_select".
- */
-export interface PayloadFoldersSelect<T extends boolean = true> {
-  name?: T;
-  folder?: T;
-  documentsAndFolders?: T;
-  folderType?: T;
-  folderSlug?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

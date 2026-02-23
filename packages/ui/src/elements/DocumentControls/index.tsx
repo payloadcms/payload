@@ -24,7 +24,6 @@ import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
-import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
@@ -174,24 +173,15 @@ export const DocumentControls: React.FC<{
       globalConfig.versions.drafts.autosave.showSaveDraftButton === true)
   const showCopyToLocale = localization && !collectionConfig?.admin?.disableCopyToLocale
 
-  const showFolderMetaIcon = collectionConfig && collectionConfig.folders
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          {showLockedMetaIcon || showFolderMetaIcon ? (
+          {showLockedMetaIcon ? (
             <div className={`${baseClass}__meta-icons`}>
-              {showLockedMetaIcon && (
-                <Locked className={`${baseClass}__locked-controls`} user={user} />
-              )}
-              {showFolderMetaIcon && config.folders && !isTrashed && (
-                <MoveDocToFolder
-                  folderCollectionSlug={config.folders.slug}
-                  folderFieldName={config.folders.fieldName}
-                />
-              )}
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
             </div>
           ) : null}
           <ul className={`${baseClass}__meta`}>
@@ -277,11 +267,11 @@ export const DocumentControls: React.FC<{
                     {(unsavedDraftWithValidations ||
                       !autosaveEnabled ||
                       (autosaveEnabled && showSaveDraftButton)) && (
-                        <RenderCustomComponent
-                          CustomComponent={CustomSaveDraftButton}
-                          Fallback={<SaveDraftButton />}
-                        />
-                      )}
+                      <RenderCustomComponent
+                        CustomComponent={CustomSaveDraftButton}
+                        Fallback={<SaveDraftButton />}
+                      />
+                    )}
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}

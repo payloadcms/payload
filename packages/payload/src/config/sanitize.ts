@@ -20,8 +20,8 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { addFolderCollection } from '../folders/addFolderCollection.js'
-import { addFolderFieldToCollection } from '../folders/addFolderFieldToCollection.js'
+import { addFolderSidebarTabs } from '../folders/addFolderSidebarTab.js'
+import { validateFolderFields } from '../folders/validateFolderFields.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
@@ -205,10 +205,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     preferencesCollectionSlug,
   ]
 
-  if (config.folders !== false) {
-    validRelationships.push(config.folders!.slug)
-  }
-
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
    * to be populated with the sanitized blocks
@@ -245,8 +241,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  const folderEnabledCollections: SanitizedCollectionConfig[] = []
-
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -268,25 +262,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }
     }
 
-    if (config.folders !== false && config.collections![i]!.folders) {
-      addFolderFieldToCollection({
-        collection: config.collections![i]!,
-        collectionSpecific: config.folders!.collectionSpecific,
-        folderFieldName: config.folders!.fieldName,
-        folderSlug: config.folders!.slug,
-      })
-    }
-
     config.collections![i] = await sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
     )
-
-    if (config.folders !== false && config.collections![i]!.folders) {
-      folderEnabledCollections.push(config.collections![i]!)
-    }
   }
 
   if (config.globals!.length > 0) {
@@ -306,6 +287,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   // Validate taxonomy fields exist in related collections and build sanitized config
   validateTaxonomyFields(config as unknown as Config)
+
+  // Validate folder fields exist in related collections and inject collectionSpecific validation
+  validateFolderFields(config as unknown as Config)
 
   // Add sidebar tabs for taxonomy collections
   addTaxonomySidebarTabs(config as unknown as Config)
@@ -381,15 +365,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ;(config.collections ??= []).push(sanitizedJobsCollection)
   }
 
-  if (config.folders !== false && folderEnabledCollections.length) {
-    await addFolderCollection({
-      collectionSpecific: config.folders!.collectionSpecific,
-      config: config as unknown as Config,
-      folderEnabledCollections,
-      richTextSanitizationPromises,
-      validRelationships,
-    })
-  }
+  // Add sidebar tabs for folder collections
+  addFolderSidebarTabs(config as unknown as Config)
 
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
 

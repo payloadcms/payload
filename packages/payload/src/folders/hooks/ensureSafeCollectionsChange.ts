@@ -3,10 +3,20 @@ import { extractID } from '../../utilities/extractID.js'
 import { getTranslatedLabel } from '../../utilities/getTranslatedLabel.js'
 
 export const ensureSafeCollectionsChange =
-  ({ foldersSlug }: { foldersSlug: CollectionSlug }): CollectionBeforeValidateHook =>
+  ({
+    folderFieldName,
+    foldersSlug,
+    parentFieldName = 'folder',
+  }: {
+    folderFieldName: string
+    foldersSlug: CollectionSlug
+    parentFieldName?: string
+  }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
     const currentFolderID = extractID(originalDoc || {})
-    const parentFolderID = extractID(data?.folder || originalDoc?.folder || {})
+    const parentFolderID = extractID(
+      data?.[parentFieldName] || originalDoc?.[parentFieldName] || {},
+    )
     if (Array.isArray(data?.folderType) && data.folderType.length > 0) {
       const folderType = data.folderType as string[]
       const currentlyAssignedCollections: string[] | undefined =
@@ -30,61 +40,49 @@ export const ensureSafeCollectionsChange =
           folderType
 
       if (newCollections && newCollections.length > 0) {
-        let hasDependentDocuments = false
+        let dependentCollection: null | string = null
+
         if (typeof currentFolderID === 'string' || typeof currentFolderID === 'number') {
-          const childDocumentsResult = await req.payload.findByID({
-            id: currentFolderID,
-            collection: foldersSlug,
-            joins: {
-              documentsAndFolders: {
-                limit: 100_000_000,
-                where: {
-                  or: [
-                    {
-                      relationTo: {
-                        in: newCollections,
-                      },
-                    },
-                  ],
-                },
+          // Check each collection being removed for dependent documents
+          for (const collectionSlug of newCollections) {
+            const result = await req.payload.find({
+              collection: collectionSlug,
+              limit: 1,
+              overrideAccess: true,
+              req,
+              where: {
+                [folderFieldName]: { equals: currentFolderID },
               },
-            },
-            overrideAccess: true,
-            req,
-          })
+            })
 
-          hasDependentDocuments = childDocumentsResult.documentsAndFolders.docs.length > 0
+            if (result.totalDocs > 0) {
+              dependentCollection = collectionSlug
+              break
+            }
+          }
+
+          // Also check for child folders with these types
+          if (!dependentCollection) {
+            const childFoldersResult = await req.payload.find({
+              collection: foldersSlug,
+              limit: 1,
+              overrideAccess: true,
+              req,
+              where: {
+                and: [
+                  { folderType: { in: newCollections } },
+                  { [parentFieldName]: { equals: currentFolderID } },
+                ],
+              },
+            })
+
+            if (childFoldersResult.totalDocs > 0) {
+              dependentCollection = foldersSlug
+            }
+          }
         }
 
-        // matches folders that are directly related to the removed collections
-        let hasDependentFolders = false
-        if (
-          !hasDependentDocuments &&
-          (typeof currentFolderID === 'string' || typeof currentFolderID === 'number')
-        ) {
-          const childFoldersResult = await req.payload.find({
-            collection: foldersSlug,
-            limit: 1,
-            req,
-            where: {
-              and: [
-                {
-                  folderType: {
-                    in: newCollections,
-                  },
-                },
-                {
-                  folder: {
-                    equals: currentFolderID,
-                  },
-                },
-              ],
-            },
-          })
-          hasDependentFolders = childFoldersResult.totalDocs > 0
-        }
-
-        if (hasDependentDocuments || hasDependentFolders) {
+        if (dependentCollection) {
           const translatedLabels = newCollections.map((collectionSlug) => {
             if (req.payload.collections[collectionSlug]?.config.labels.singular) {
               return getTranslatedLabel(
@@ -95,11 +93,13 @@ export const ensureSafeCollectionsChange =
             return collectionSlug
           })
 
+          const isFolder = dependentCollection === foldersSlug
           throw new APIError(
-            `The folder "${data.name || originalDoc.name}" contains ${hasDependentDocuments ? 'documents' : 'folders'} that still belong to the following collections: ${translatedLabels.join(', ')}`,
+            `The folder "${data.name || originalDoc.name}" contains ${isFolder ? 'folders' : 'documents'} that still belong to the following collections: ${translatedLabels.join(', ')}`,
             400,
           )
         }
+
         return data
       }
     } else if (

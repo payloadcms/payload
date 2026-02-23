@@ -1,63 +1,43 @@
-import type { Document, PayloadRequest } from '../../types/index.js'
+import type { CollectionSlug } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { FolderBreadcrumb } from '../types.js'
 
+import { getAncestors } from '../../hierarchy/index.js'
+
 type GetFolderBreadcrumbsArgs = {
-  breadcrumbs?: FolderBreadcrumb[]
+  /**
+   * The slug of the folder collection
+   */
+  collectionSlug: CollectionSlug
+  /**
+   * The folder ID to get breadcrumbs for
+   */
   folderID?: number | string
   req: PayloadRequest
 }
+
 /**
- * Builds breadcrumbs up from child folder
- * all the way up to root folder
+ * Builds breadcrumbs up from child folder all the way up to root folder.
+ * Uses the shared hierarchy getAncestors utility for efficient caching.
  */
 export const getFolderBreadcrumbs = async ({
-  breadcrumbs = [],
+  collectionSlug,
   folderID,
   req,
 }: GetFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[] | null> => {
-  const { payload, user } = req
-  if (folderID && payload.config.folders) {
-    const folderFieldName: string = payload.config.folders.fieldName
-    const folderQuery = await payload.find({
-      collection: payload.config.folders.slug,
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      req,
-      select: {
-        name: true,
-        [folderFieldName]: true,
-        folderType: true,
-      },
-      user,
-      where: {
-        id: {
-          equals: folderID,
-        },
-      },
-    })
-
-    const folder = folderQuery.docs[0] as Document
-
-    if (folder) {
-      breadcrumbs.push({
-        id: folder.id,
-        name: folder.name,
-        folderType: folder.folderType,
-      })
-      if (folder[folderFieldName]) {
-        return getFolderBreadcrumbs({
-          breadcrumbs,
-          folderID:
-            typeof folder[folderFieldName] === 'number' ||
-            typeof folder[folderFieldName] === 'string'
-              ? folder[folderFieldName]
-              : folder[folderFieldName].id,
-          req,
-        })
-      }
-    }
+  if (!folderID) {
+    return null
   }
 
-  return breadcrumbs.reverse()
+  const ancestors = await getAncestors({
+    id: folderID,
+    collectionSlug,
+    req,
+  })
+
+  // Map Ancestor format to FolderBreadcrumb format for backward compatibility
+  return ancestors.map((ancestor) => ({
+    id: ancestor.id,
+    name: ancestor.title,
+  }))
 }

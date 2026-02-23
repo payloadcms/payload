@@ -6,7 +6,6 @@ import type {
   DocumentPreferences,
   DocumentSlots,
   FormState,
-  GetFolderResultsComponentAndDataArgs,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
@@ -24,7 +23,6 @@ import type {
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
-import type { getFolderResultsComponentAndDataHandler } from '../../utilities/getFolderResultsComponentAndData.js'
 import type {
   schedulePublishHandler,
   SchedulePublishHandlerArgs,
@@ -104,19 +102,12 @@ type GetDocumentSlots = (args: {
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 
-type GetFolderResultsComponentAndDataClient = (
-  args: {
-    signal?: AbortSignal
-  } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
-) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
-
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
 
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
-  getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   renderDocument: RenderDocumentServerFunctionHookFn
@@ -272,26 +263,6 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getFolderResultsComponentAndData = useCallback<GetFolderResultsComponentAndDataClient>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
-
-      try {
-        const result = (await serverFunction({
-          name: 'get-folder-results-component-and-data',
-          args: rest,
-        })) as Awaited<ReturnType<typeof getFolderResultsComponentAndDataHandler>>
-
-        if (!remoteSignal?.aborted) {
-          return result
-        }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
-      }
-    },
-    [serverFunction],
-  )
-
   const _internal_renderField = useCallback<RenderFieldClient>(
     async (args) => {
       try {
@@ -332,7 +303,6 @@ export const ServerFunctionsProvider: React.FC<{
         _internal_renderField,
         copyDataFromLocale,
         getDocumentSlots,
-        getFolderResultsComponentAndData,
         getFormState,
         getTableState,
         renderDocument,

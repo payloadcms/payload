@@ -587,10 +587,8 @@ export type DocumentSlots = {
 }
 
 export type {
-  BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
-  GetFolderResultsComponentAndDataArgs,
   InitReqResult,
   ListQuery,
   ServerFunction,
@@ -648,26 +646,6 @@ export type {
   EditViewProps,
   RenderDocumentVersionsProperties,
 } from './views/document.js'
-
-export type {
-  AfterFolderListClientProps,
-  AfterFolderListServerProps,
-  AfterFolderListServerPropsOnly,
-  AfterFolderListTableClientProps,
-  AfterFolderListTableServerProps,
-  AfterFolderListTableServerPropsOnly,
-  BeforeFolderListClientProps,
-  BeforeFolderListServerProps,
-  BeforeFolderListServerPropsOnly,
-  BeforeFolderListTableClientProps,
-  BeforeFolderListTableServerProps,
-  BeforeFolderListTableServerPropsOnly,
-  FolderListViewClientProps,
-  FolderListViewServerProps,
-  FolderListViewServerPropsOnly,
-  FolderListViewSlots,
-  FolderListViewSlotSharedClientProps,
-} from './views/folderList.js'
 
 export type {
   AdminViewClientProps,

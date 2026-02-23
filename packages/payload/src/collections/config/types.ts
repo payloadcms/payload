@@ -41,7 +41,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type { FolderConfig, SanitizedFolderConfig } from '../../folders/types.js'
 import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
@@ -619,9 +619,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Enables folders for this collection
+   * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   * Set to false to explicitly disable folder functionality.
    */
-  folders?: boolean | CollectionFoldersConfiguration
+  folder?: false | FolderConfig
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -824,6 +825,7 @@ export interface SanitizedCollectionConfig
     | 'auth'
     | 'endpoints'
     | 'fields'
+    | 'folder'
     | 'folders'
     | 'hierarchy'
     | 'slug'
@@ -841,9 +843,12 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
+   * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   */
+  folder?: false | SanitizedFolderConfig
+  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   hierarchy: false | SanitizedHierarchyConfig
   joins: SanitizedJoins
   /**

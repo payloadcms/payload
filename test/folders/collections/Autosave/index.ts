@@ -1,16 +1,20 @@
 import type { CollectionConfig } from 'payload'
 
+import { createFolderField } from 'payload'
+
+import { folderSlug } from '../../shared.js'
+
 export const Autosave: CollectionConfig = {
   slug: 'autosave',
   admin: {
     useAsTitle: 'title',
   },
-  folders: true,
   fields: [
     {
       name: 'title',
       type: 'text',
     },
+    createFolderField({ folderSlug }),
   ],
   versions: {
     drafts: {

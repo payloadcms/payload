@@ -1664,9 +1664,20 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+export {
+  createFolderCollection,
+  createFolderField,
+  DEFAULT_FOLDER_TREE_LIMIT,
+  FOLDER_PARENT_FIELD,
+  getFolderFieldName,
+} from './folders/index.js'
+export type {
+  CreateFolderCollectionOptions,
+  CreateFolderFieldOptions,
+  FolderConfig,
+} from './folders/index.js'
 export type { FolderSortKeys } from './folders/types.js'
 
-export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1686,13 +1697,13 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
+
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
-export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 
+export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 // Hierarchy
 export type { Ancestor, HierarchyConfig, SanitizedHierarchyConfig } from './hierarchy/index.js'

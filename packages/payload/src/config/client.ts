@@ -242,18 +242,6 @@ export const createClientConfig = ({
 
         break
 
-      case 'folders':
-        if (config.folders) {
-          clientConfig.folders = {
-            slug: config.folders.slug,
-            browseByFolder: config.folders.browseByFolder,
-            debug: config.folders.debug,
-            fieldName: config.folders.fieldName,
-          }
-        }
-
-        break
-
       case 'globals':
         ;(clientConfig.globals as ClientGlobalConfig[]) = createClientGlobalConfigs({
           defaultIDType: config.db.defaultIDType,

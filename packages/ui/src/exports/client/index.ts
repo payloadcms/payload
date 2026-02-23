@@ -152,11 +152,7 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 export { UnpublishButton } from '../../elements/UnpublishButton/index.js'
 
 // folder elements
-export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { BrowseByFolderButton } from '../../elements/FolderView/BrowseByFolderButton/index.js'
-export { FolderTypeField } from '../../elements/FolderView/FolderTypeField/index.js'
-export { FolderFileTable } from '../../elements/FolderView/FolderFileTable/index.js'
-export { ItemCardGrid } from '../../elements/FolderView/ItemCardGrid/index.js'
+export { FolderProvider, useFolder } from '../../providers/Folder/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
@@ -194,10 +190,6 @@ export { PreviewSizes } from '../../elements/PreviewSizes/index.js'
 export { PreviewButton } from '../../elements/PreviewButton/index.js'
 export { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 export { TimezonePicker } from '../../elements/TimezonePicker/index.js'
-export {
-  MoveDocToFolder,
-  MoveDocToFolderButton,
-} from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { BlocksDrawer } from '../../fields/Blocks/BlocksDrawer/index.js'
 export { BlockSelector } from '../../fields/Blocks/BlockSelector/index.js'
@@ -398,8 +390,6 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 export { TaxonomyListView } from '../../views/TaxonomyList/index.js'
-export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
-export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
 
 export type {
   /**
