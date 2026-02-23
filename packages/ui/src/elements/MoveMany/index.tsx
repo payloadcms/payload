@@ -3,7 +3,7 @@ import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, HIERARCHY_PARENT_FIELD } from 'payload/shared'
+import { formatAdminURL, getHierarchyFieldName, HIERARCHY_PARENT_FIELD } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -31,9 +31,6 @@ type MoveManyProps = {
   /** Selections grouped by collection slug */
   selections: Record<string, { ids: (number | string)[] }>
 }
-
-/** Generate a hierarchy field name from a hierarchy slug (e.g., 'folders' -> '_h_folders') */
-const getHierarchyFieldName = (hierarchySlug: string): string => `_h_${hierarchySlug}`
 
 /**
  * Determines if items from a collection can be moved within a hierarchy.
@@ -168,6 +165,9 @@ export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: 
       return
     }
 
+    let totalMoved = 0
+    let hasErrors = false
+
     try {
       for (const [collectionSlug, { ids }] of Object.entries(selections)) {
         const collectionConfig = collections.find((c) => c.slug === collectionSlug)
@@ -194,26 +194,58 @@ export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: 
           path: `/${collectionSlug}${queryString}`,
         })
 
-        await requests.patch(url, {
+        const response = await requests.patch(url, {
           body: JSON.stringify({ [fieldName]: destination.id }),
           headers: {
             'Accept-Language': i18n.language,
             'Content-Type': 'application/json',
           },
         })
+
+        const json = await response.json()
+
+        if (response.status >= 400) {
+          hasErrors = true
+
+          if (json?.errors?.length > 0) {
+            toast.error(json.message || t('error:unknown'), {
+              description: json.errors
+                .map((error: { message: string }) => error.message)
+                .join('\n'),
+            })
+          } else {
+            toast.error(json?.message || t('error:unknown'))
+          }
+
+          continue
+        }
+
+        const movedCount = json?.docs?.length || 0
+        totalMoved += movedCount
+
+        if (json?.errors?.length > 0) {
+          hasErrors = true
+          toast.error(json.message, {
+            description: json.errors.map((error: { message: string }) => error.message).join('\n'),
+          })
+        }
       }
 
-      const successKey =
-        destination.id === null ? 'folder:itemsMovedToRoot' : 'folder:itemsMovedToFolder'
+      if (totalMoved > 0) {
+        const successKey =
+          destination.id === null ? 'folder:itemsMovedToRoot' : 'folder:itemsMovedToFolder'
 
-      toast.success(
-        t(successKey, {
-          folderName: destination.title,
-          title: label,
-        }),
-      )
+        toast.success(
+          t(successKey, {
+            folderName: destination.title,
+            title: label,
+          }),
+        )
+      }
 
-      onSuccess?.()
+      if (!hasErrors || totalMoved > 0) {
+        onSuccess?.()
+      }
     } catch (_err) {
       toast.error(t('error:unknown'))
     } finally {

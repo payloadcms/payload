@@ -49,7 +49,7 @@ export {
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 
 export * from '../fields/validations.js'
-export { HIERARCHY_PARENT_FIELD } from '../hierarchy/constants.js'
+export { getHierarchyFieldName, HIERARCHY_PARENT_FIELD } from '../hierarchy/constants.js'
 
 export type { FolderBreadcrumb } from '../hierarchy/types.js'
 
