@@ -1567,17 +1567,40 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface TaskCreateCollectionExport {
   input: {
-    name?: string | null;
+    id: string;
+    name: string;
+    batchSize?: number | null;
+    collectionSlug:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-s3-export'
+      | 'posts-with-limits-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-s3-import'
+      | 'posts-with-limits-import';
+    drafts?: ('yes' | 'no') | null;
+    exportCollection: string;
+    fields?: string[] | null;
     format: 'csv' | 'json';
     limit?: number | null;
+    locale?: string | null;
+    maxLimit?: number | null;
     page?: number | null;
     sort?: string | null;
-    sortOrder?: ('asc' | 'desc') | null;
-    locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('yes' | 'no') | null;
-    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-    fields?: string[] | null;
-    collectionSlug: string;
+    userCollection?: string | null;
+    userID?: string | null;
     where?:
       | {
           [k: string]: unknown;
@@ -1587,12 +1610,6 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
-    id?: string | null;
-    batchSize?: number | null;
-    userID?: string | null;
-    userCollection?: string | null;
-    exportCollection?: string | null;
-    maxLimit?: number | null;
   };
   output?: unknown;
 }

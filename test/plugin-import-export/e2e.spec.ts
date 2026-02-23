@@ -246,6 +246,20 @@ test.describe('Import Export Plugin', () => {
       test('should export documents with custom IDs through UI', async () => {
         const uniqueId = Date.now()
 
+        // Clean up any pending jobs and old exports to avoid conflicts
+        await payload.delete({
+          collection: 'payload-jobs' as any,
+          where: {
+            'input.collectionSlug': { equals: 'custom-id-pages' },
+          },
+        })
+        await payload.delete({
+          collection: 'exports' as any,
+          where: {
+            collectionSlug: { equals: 'custom-id-pages' },
+          },
+        })
+
         await payload.create({
           collection: 'custom-id-pages' as any,
           data: {
@@ -328,6 +342,8 @@ test.describe('Import Export Plugin', () => {
           const exportFilename = page.locator('.file-details__main-detail')
           await expect(exportFilename).toBeVisible()
           await expect(exportFilename).toContainText('.csv')
+          // Verify we're downloading from the correct collection export
+          await expect(exportFilename).toContainText('custom-id-pages')
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         const downloadLink = page.locator('.file-details__main-detail a')
