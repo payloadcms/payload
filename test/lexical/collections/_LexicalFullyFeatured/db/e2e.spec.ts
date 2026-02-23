@@ -17,7 +17,7 @@ import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
-import { LexicalHelpers, type PasteMode } from '../../utils.js'
+import { blockFieldID, LexicalHelpers, type PasteMode } from '../../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -136,8 +136,8 @@ describe('Lexical Fully Featured - database', () => {
       const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
       await expect(blockEl).toBeVisible()
 
-      const blockId = await blockEl.getAttribute('data-block-id')
-      const someTextField = page.locator(`#field-richText__${blockId}__someText`)
+      const fieldID = await blockFieldID(blockEl, 'richText')
+      const someTextField = page.locator(fieldID('someText'))
 
       /**
        * Test on create
@@ -253,9 +253,12 @@ describe('Lexical Fully Featured - database', () => {
 
   test('ensure block name can be saved and loaded', async ({ page }) => {
     await lexical.slashCommand('myblock')
-    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+    const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
+    await expect(blockEl).toBeVisible()
 
-    const blockNameInput = lexical.editor.locator('#blockName')
+    const blockId = await blockEl.getAttribute('data-block-id')
+
+    const blockNameInput = lexical.editor.locator(`#richText__${blockId}__blockName`)
 
     /**
      * Test on create

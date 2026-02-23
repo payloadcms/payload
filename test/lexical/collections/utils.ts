@@ -30,6 +30,20 @@ async function readAsBase64(filePath: string): Promise<string> {
   return Buffer.from(buf).toString('base64')
 }
 
+/**
+ * Returns a function that builds `#field-*` selectors for fields inside a lexical block,
+ * prefixed with the parent richtext field name and the block's unique ID.
+ *
+ * @example
+ * const fieldID = await blockFieldID(blockEl, 'lexicalWithBlocks')
+ * page.locator(fieldID('text'))        // => #field-lexicalWithBlocks__<blockId>__text
+ * page.locator(fieldID('group__name')) // => #field-lexicalWithBlocks__<blockId>__group__name
+ */
+export async function blockFieldID(blockEl: Locator, richTextFieldName: string) {
+  const blockId = await blockEl.getAttribute('data-block-id')
+  return (fieldPath: string) => `#field-${richTextFieldName}__${blockId}__${fieldPath}`
+}
+
 export class LexicalHelpers {
   page: Page
   constructor(page: Page) {

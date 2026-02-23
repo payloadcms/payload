@@ -223,7 +223,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
                         </Pill>
                       )}
                       {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
-                        <SectionTitle path="blockName" readOnly={!isEditable} />
+                        <SectionTitle
+                          path={`${blockFieldsPath.replace('.', '__')}__blockName`}
+                          readOnly={!isEditable}
+                        />
                       )}
 
                       {fieldHasErrors && (
