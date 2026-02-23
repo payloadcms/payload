@@ -61,6 +61,7 @@ export function createTagsCollection(options: CreateTagsCollectionOptions): Coll
   return {
     ...rest,
     admin: {
+      group: false,
       ...adminOverrides,
       useAsTitle,
     },
