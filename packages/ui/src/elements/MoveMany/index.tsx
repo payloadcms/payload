@@ -102,8 +102,13 @@ export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: 
 
   const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
 
+  // Get useAsTitle from hierarchy collection config
+  const hierarchyConfig = collections.find((c) => c.slug === hierarchySlug)
+  const useAsTitle = hierarchyConfig?.admin?.useAsTitle
+
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
+    useAsTitle,
   })
 
   // Calculate total count and label
