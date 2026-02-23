@@ -13,14 +13,8 @@ interface RevenueData {
 }
 
 export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>) {
-  const timeframe =
-    typeof widgetData?.timeframe === 'string' && widgetData.timeframe
-      ? widgetData.timeframe
-      : 'monthly'
-  const title =
-    typeof widgetData?.title === 'string' && widgetData.title
-      ? widgetData.title
-      : 'Revenue Statistics'
+  const timeframe = typeof widgetData?.timeframe === 'string' ? widgetData.timeframe : 'monthly'
+  const title = typeof widgetData?.title === 'string' ? widgetData.title : 'Revenue Statistics'
   // Mock data for now - in real implementation, this would come from props or server-side fetch
   const mockData: RevenueData[] = [
     { amount: 20000, date: '2024-01', period: 'Jan' },
