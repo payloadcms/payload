@@ -95,7 +95,7 @@ You should have access to the Playwright MCP server. This MCP server enables LLM
 
 **Key tools (not exhaustive):**
 
-- `browser_navigate` - Navigate to a URL
+- `browser_navigate` - Navigate to a URL. If this times out, close the browser and try again.
 - `browser_snapshot` - Get accessibility snapshot of current page
 - `browser_click` - Click elements (requires `ref` from snapshot)
 - `browser_fill_form` - Fill form fields
@@ -119,7 +119,7 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 **Usage flow:**
 
 1. Ensure dev server is running on `localhost:3000`
-2. Call `browser_navigate` to open a page
+2. Call `browser_navigate` to open a page. If this times out, close the browser and try again.
 3. Call `browser_snapshot` to get element refs
 4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
 

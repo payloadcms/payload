@@ -1490,6 +1490,7 @@ export {
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
 
+export { addBlockMetaToFormState } from './fields/baseFields/addBlockMetaToFormState.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'

@@ -154,6 +154,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           for (const block of blockConfigs) {
             const blockFields = [...block.fields]
 
+            // Lexical blocks aren't rows of a blocks field, so the normal renderFieldFn pipeline
+            // that attaches custom components to row metadata doesn't run. This synthetic UI field
+            // piggybacks on iterateFields → renderFieldFn to get RSC components into form state.
             if (block?.admin?.components) {
               const uiComponents: Record<string, PayloadComponent | undefined> = {}
               if (block.admin.components.Block) {
@@ -173,9 +176,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
                 })
               }
             }
+            // Flat field list for iterateFields / RenderFields
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
               fields: blockFields,
             })
+            // Synthetic blocks-type entry so that we have access to the ClientBlock
+            // in order to get the labels
             schemaMap.set(`lexical_blocks.${block.slug}`, {
               name: `lexical_blocks_${block.slug}`,
               type: 'blocks',
@@ -185,10 +191,10 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         }
 
         if (inlineBlockConfigs?.length) {
-          // To generate block schemaMap which generates things like the componentMap for admin.Label
           for (const block of inlineBlockConfigs) {
             const blockFields = [...block.fields]
 
+            // Same synthetic UI field pattern as regular blocks above
             if (block?.admin?.components) {
               const uiComponents: Record<string, PayloadComponent | undefined> = {}
               if (block.admin.components.Block) {
