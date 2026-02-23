@@ -1744,7 +1744,20 @@ describe('lexicalMain', () => {
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
-    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
+    // Clicking on a field label will focus the input field (assuming htmlFor is correct), which should not
+    // select the decorator node
+    await expect(decoratorLocator).toBeHidden()
+
+    // Focus on block node again for delete test
+    const blockWithText2 = page
+      .locator('.LexicalEditorTheme__block', {
+        hasText: 'Text2',
+      })
+      .first()
+
+    await blockWithText2.click()
+    await expect(decoratorLocator).toBeVisible()
+    await expect(blockWithText2).toHaveClass('LexicalEditorTheme__block decorator-selected')
 
     // TEST DELETE!
     await page.keyboard.press('Backspace')
