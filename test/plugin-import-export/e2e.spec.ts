@@ -78,7 +78,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(exportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
-      const formatField = page.locator('#field-format .rs__control')
+      const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
       await page.locator('.rs__menu .rs__option:has-text("json")').click()
@@ -168,7 +168,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.export-preview')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      const formatField = page.locator('#field-format')
+      const formatField = page.locator('.format-field')
       await expect(formatField).toBeVisible()
 
       const formatControl = formatField.locator('.rs__control')

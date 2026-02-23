@@ -571,7 +571,7 @@ export interface PostsExport {
 export interface PostsNoJobsQueueExport {
   id: string;
   name?: string | null;
-  format: 'csv';
+  format: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
