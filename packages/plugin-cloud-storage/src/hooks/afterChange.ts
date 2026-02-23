@@ -76,6 +76,10 @@ export const getAfterChangeHook =
             }
             req.context.skipCloudStorage = true
 
+            // Clear to prevent re-processing
+            req.file = undefined
+            req.payloadUploadSizes = undefined
+
             await req.payload.update({
               id: doc.id,
               collection: collection.slug,

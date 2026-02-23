@@ -4,6 +4,7 @@ import type { PayloadRequest } from 'payload'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
+import { toCamelCase } from '../../../utils/camelCase.js'
 import { validatePayloadFile } from '../../helpers/fileValidation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -271,12 +272,12 @@ ${jobContent}
 
 // Helper function to generate task content
 function generateTaskContent(
-  jobName: string,
+  _jobName: string,
   jobSlug: string,
   description: string,
   inputSchema: any,
   outputSchema: any,
-  jobData: Record<string, any>,
+  _jobData: Record<string, any>,
 ): string {
   const camelCaseJobSlug = toCamelCase(jobSlug)
 
@@ -307,12 +308,12 @@ export const ${camelCaseJobSlug}Task: Task = {
 
 // Helper function to generate workflow content
 function generateWorkflowContent(
-  jobName: string,
+  _jobName: string,
   jobSlug: string,
   description: string,
   inputSchema: any,
   outputSchema: any,
-  jobData: Record<string, any>,
+  _jobData: Record<string, any>,
 ): string {
   const camelCaseJobSlug = toCamelCase(jobSlug)
 
@@ -337,13 +338,6 @@ export const ${camelCaseJobSlug}Workflow: Workflow = {
   ],
 }
 `
-}
-
-// Helper function to convert to camel case
-function toCamelCase(str: string): string {
-  return str
-    .replace(/[-_\s]+(.)?/g, (_, chr) => (chr ? chr.toUpperCase() : ''))
-    .replace(/^(.)/, (_, chr) => chr.toLowerCase())
 }
 
 export const createJobTool = (
@@ -401,10 +395,12 @@ export const createJobTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'createJob',
-    'Creates a new Payload job (task or workflow) with specified configuration',
-    toolSchemas.createJob.parameters.shape,
+    {
+      description: 'Creates a new Payload job (task or workflow) with specified configuration',
+      inputSchema: toolSchemas.createJob.parameters.shape,
+    },
     async (args) => {
       return tool(
         args.jobName,

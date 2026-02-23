@@ -335,6 +335,7 @@ export const daTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Sprog',
     lastModified: 'Sidst ændret',
+    layout: 'Layout',
     leaveAnyway: 'Forlad alligevel',
     leaveWithoutSaving: 'Forlad uden at gemme',
     light: 'Lys',
@@ -364,6 +365,9 @@ export const daTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen muligheder',
     noResults:
       'No {{label}} fundet. Enten findes der endnu ingen {{label}}, eller også matcher ingen af de filtre angivet ovenfor.',
+    noResultsDescription:
+      'Enten findes der ingen, eller ingen matcher de filtre, du har angivet ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke fundet',
     nothingFound: 'Intet fundet',
     noTrashResults: 'Ingen {{label}} i papirkurven.',
@@ -401,6 +405,7 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
+    saveChanges: 'Gem ændringer',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',

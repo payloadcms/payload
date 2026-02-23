@@ -337,6 +337,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Språk',
     lastModified: 'Sist endret',
+    layout: 'Utforming',
     leaveAnyway: 'Forlat likevel',
     leaveWithoutSaving: 'Forlat uten å lagre',
     light: 'Lys',
@@ -366,6 +367,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen alternativer',
     noResults:
       'Ingen {{label}} funnet. Enten finnes det ingen {{label}} enda eller ingen matcher filterne du har spesifisert ovenfor.',
+    noResultsDescription:
+      'Enten finnes det ingen, eller ingen samsvarer med filtrene du har spesifisert ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke funnet',
     nothingFound: 'Ingenting funnet',
     noTrashResults: 'Ingen {{label}} i søppelkassen.',
@@ -403,6 +407,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
+    saveChanges: 'Lagre endringer',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',

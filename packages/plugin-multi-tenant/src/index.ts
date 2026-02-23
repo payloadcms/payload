@@ -52,7 +52,7 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
         actions: [],
-        beforeNavLinks: [],
+        beforeNav: [],
         providers: [],
       }
     }
@@ -62,8 +62,8 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin.components?.actions) {
       incomingConfig.admin.components.actions = []
     }
-    if (!incomingConfig.admin.components?.beforeNavLinks) {
-      incomingConfig.admin.components.beforeNavLinks = []
+    if (!incomingConfig.admin.components?.beforeNav) {
+      incomingConfig.admin.components.beforeNav = []
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
@@ -392,7 +392,7 @@ export const multiTenantPlugin =
     /**
      * Add tenant selector to admin UI
      */
-    incomingConfig.admin.components.beforeNavLinks.push({
+    incomingConfig.admin.components.beforeNav.push({
       clientProps: {
         enabledSlugs: [
           ...collectionSlugs,

@@ -63,6 +63,7 @@ export type ListViewClientProps = {
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
+  hasTrashPermission?: boolean
   /**
    * Hierarchy view data - present when viewing a hierarchy collection with a parent selected
    */
@@ -91,6 +92,7 @@ export type ListViewSlotSharedClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
+  hasTrashPermission?: boolean
   newDocumentURL: string
 }
 

@@ -1,35 +1,35 @@
 import type { CollectionConfig, FieldHook, ImageSize } from 'payload'
 
-import type { GeneratedAdapter } from '../types.js'
+import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 interface Args {
   adapter: GeneratedAdapter
   collection: CollectionConfig
   disablePayloadAccessControl?: boolean
+  generateFileURL?: GenerateFileURL
   size?: ImageSize
 }
 
 export const getBeforeChangeHook =
-  ({ adapter, collection, disablePayloadAccessControl, size }: Args): FieldHook =>
+  ({ adapter, collection, disablePayloadAccessControl, generateFileURL, size }: Args): FieldHook =>
   async ({ data, originalDoc, value }) => {
-    // Only handle the disablePayloadAccessControl: true case here
-    // When false, let the core beforeChange hook from getBaseFields handle it
-    if (!disablePayloadAccessControl) {
-      return value
-    }
-
-    const filename = size ? data?.sizes?.[size.name]?.filename : data?.filename
-
-    if (!filename) {
-      return value
-    }
-
+    const newFilename = size ? data?.sizes?.[size.name]?.filename : data?.filename
+    const originalFilename = size
+      ? originalDoc?.sizes?.[size.name]?.filename
+      : originalDoc?.filename
+    const filename = newFilename || originalFilename
     const prefix = data?.prefix
+    let url = value
 
-    // Store the full URL in the database so files can be accessed directly
-    // from the storage provider without going through Payload's API
-    if (adapter.generateURL) {
-      return await adapter.generateURL({
+    if (generateFileURL && filename) {
+      url = await generateFileURL({
+        collection,
+        filename,
+        prefix,
+        size,
+      })
+    } else if (disablePayloadAccessControl && filename && adapter.generateURL) {
+      url = await adapter.generateURL({
         collection,
         data: data || originalDoc,
         filename,
@@ -37,5 +37,5 @@ export const getBeforeChangeHook =
       })
     }
 
-    return value
+    return url
   }

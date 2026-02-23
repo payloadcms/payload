@@ -415,7 +415,13 @@ export const renderListView = async (
   })
 
   const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
-  const hasDeletePermission = permissions?.collections?.[collectionSlug]?.delete
+
+  const { hasDeletePermission, hasTrashPermission } = await getDocumentPermissions({
+    collectionConfig,
+    // Empty object serves as base for computing differentiated trash/delete permissions
+    data: {},
+    req,
+  })
 
   // Check if there's a notFound query parameter (document ID that wasn't found)
   const notFoundDocId = typeof searchParams?.notFound === 'string' ? searchParams.notFound : null
@@ -440,6 +446,7 @@ export const renderListView = async (
       collectionSlug,
       hasCreatePermission,
       hasDeletePermission,
+      hasTrashPermission,
       newDocumentURL,
     },
     collectionConfig,
@@ -455,7 +462,7 @@ export const renderListView = async (
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
   query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
-  const listContent = RenderServerComponent({
+  const RenderedListViewComponent = RenderServerComponent({
     clientProps: {
       ...listViewSlots,
       collectionSlug,
@@ -466,6 +473,7 @@ export const renderListView = async (
       enableRowSelections,
       hasCreatePermission,
       hasDeletePermission,
+      hasTrashPermission,
       hierarchyData,
       HierarchyIcon,
       listPreferences: collectionPreferences,
@@ -505,7 +513,7 @@ export const renderListView = async (
                   : undefined
               }
             />
-            {listContent}
+            {RenderedListViewComponent}
           </Fragment>
         ) : (
           <ListQueryProvider
@@ -515,7 +523,7 @@ export const renderListView = async (
             orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
             query={query}
           >
-            {listContent}
+            {RenderedListViewComponent}
           </ListQueryProvider>
         )}
       </Fragment>
