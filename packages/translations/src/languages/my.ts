@@ -210,10 +210,12 @@ export const myTranslations: DefaultTranslationsObject = {
       'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
     moveItemToRootConfirmation:
       'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
     newFolder: 'Folder Baru',
     noFolder: 'ဖိုလ်ဒါမရှိပါ',
     renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
     selectFolderForItem: 'Pilih folder untuk {{title}}',
   },

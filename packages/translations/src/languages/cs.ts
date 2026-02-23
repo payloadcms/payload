@@ -210,10 +210,12 @@ export const csTranslations: DefaultTranslationsObject = {
       'Chystáte se přesunout <1>{{title}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
     moveItemToRootConfirmation:
       'Chystáte se přesunout <1>{{title}}</1> do kořenové složky. Jste si jistý?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Přesunutí {{title}} z {{fromFolder}}',
     newFolder: 'Nová složka',
     noFolder: 'Žádná složka',
     renameFolder: 'Přejmenovat složku',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Vyhledat podle jména v {{folderName}}',
     selectFolderForItem: 'Vyberte složku pro {{title}}',
   },

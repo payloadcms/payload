@@ -209,10 +209,12 @@ export const viTranslations: DefaultTranslationsObject = {
       'Bạn sắp chuyển <1>{{title}}</1> đến <2>{{toFolder}}</2>. Bạn có chắc không?',
     moveItemToRootConfirmation:
       'Bạn đang chuẩn bị di chuyển <1>{{title}}</1> đến thư mục gốc. Bạn có chắc chắn không?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Di chuyển {{title}} từ {{fromFolder}}',
     newFolder: 'Thư mục mới',
     noFolder: 'Không có Thư mục',
     renameFolder: 'Đổi tên thư mục',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Tìm kiếm theo Tên trong {{folderName}}',
     selectFolderForItem: 'Chọn thư mục cho {{title}}',
   },

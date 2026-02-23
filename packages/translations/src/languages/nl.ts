@@ -212,10 +212,12 @@ export const nlTranslations: DefaultTranslationsObject = {
       'U staat op het punt om <1>{{title}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
     moveItemToRootConfirmation:
       'U staat op het punt om <1>{{title}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Verplaatsen van {{title}} uit {{fromFolder}}',
     newFolder: 'Nieuwe Map',
     noFolder: 'Geen Map',
     renameFolder: 'Hernoem Map',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Zoeken op naam in {{folderName}}',
     selectFolderForItem: 'Selecteer map voor {{title}}',
   },

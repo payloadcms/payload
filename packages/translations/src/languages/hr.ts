@@ -211,10 +211,12 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Upravo ćete premjestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
     moveItemToRootConfirmation:
       'Upravo ćete premjestiti <1>{{title}}</1> u osnovnu mapu. Jeste li sigurni?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Premještanje {{title}} iz {{fromFolder}}',
     newFolder: 'Nova mapa',
     noFolder: 'Nema mape',
     renameFolder: 'Preimenuj mapu',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Pretraživanje po imenu u {{folderName}}',
     selectFolderForItem: 'Odaberite mapu za {{title}}',
   },

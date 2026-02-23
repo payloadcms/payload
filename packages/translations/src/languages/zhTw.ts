@@ -199,10 +199,12 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       '您即將移動 <1>{{title}}</1> 到 <2>{{toFolder}}</2>。確定要繼續？',
     moveItemToRootConfirmation: '您即將移動 <1>{{title}}</1> 到根資料夾。確定要繼續？',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '正在從 {{fromFolder}} 移動 {{title}}',
     newFolder: '新增資料夾',
     noFolder: '無資料夾',
     renameFolder: '重新命名資料夾',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '在 {{folderName}} 中依名稱搜尋',
     selectFolderForItem: '為 {{title}} 選取資料夾',
   },

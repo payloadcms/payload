@@ -210,10 +210,12 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs gatavojaties pārvietot <1>{{title}}</1> uz <2>{{toFolder}}</2>. Vai esat pārliecināts?',
     moveItemToRootConfirmation:
       'Jūs gatavojaties pārvietot <1>{{title}}</1> uz saknes mapi. Vai esat pārliecināts?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Pārvietojot {{title}} no {{fromFolder}}',
     newFolder: 'Jauna Mape',
     noFolder: 'Nav mapes',
     renameFolder: 'Pārdēvēt mapi',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Meklēšana pēc vārda mapē {{folderName}}',
     selectFolderForItem: 'Izvēlieties mapi priekš {{title}}',
   },

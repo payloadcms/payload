@@ -208,10 +208,12 @@ export const etTranslations: DefaultTranslationsObject = {
       'Te olete umbes liigutamas <1>{{title}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
     moveItemToRootConfirmation:
       'Te olete peaaegu liigutanud <1>{{title}}</1> juurkausta. Kas olete kindel?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Liigutan {{title}} kaustast {{fromFolder}}',
     newFolder: 'Uus kaust',
     noFolder: 'Pole kausta',
     renameFolder: 'Nimeta kaust ümber',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Otsi nime järgi kaustas {{folderName}}',
     selectFolderForItem: 'Valige kaust {{title}} jaoks',
   },

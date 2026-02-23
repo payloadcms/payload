@@ -211,10 +211,12 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি <1>{{title}}</1> কে <2>{{toFolder}}</2> এ সরাতে চলেছেন। আপনি কি নিশ্চিত?',
     moveItemToRootConfirmation:
       'আপনি <1>{{title}}</1> কে মূল ফোল্ডারে সরাতে চলেছেন। আপনি কি নিশ্চিত?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}} কে {{fromFolder}} থেকে সরানো হচ্ছে',
     newFolder: 'নতুন ফোল্ডার',
     noFolder: 'কোনো ফোল্ডার নেই',
     renameFolder: 'ফোল্ডারের নাম পরিবর্তন করুন',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '{{folderName}} এ নাম দ্বারা অনুসন্ধান করুন',
     selectFolderForItem: '{{title}} এর জন্য ফোল্ডার নির্বাচন করুন',
   },

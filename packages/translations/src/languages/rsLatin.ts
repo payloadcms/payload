@@ -211,10 +211,12 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Upravo ćete premestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
     moveItemToRootConfirmation:
       'Upravo ćete premestiti <1>{{title}}</1> u glavnu fasciklu. Da li ste sigurni?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Premestanje {{title}} iz {{fromFolder}}',
     newFolder: 'Novi Folder',
     noFolder: 'Nema foldera',
     renameFolder: 'Preimenuj folder',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Pretraga po imenu u {{folderName}}',
     selectFolderForItem: 'Izaberite fasciklu za {{title}}',
   },

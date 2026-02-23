@@ -210,10 +210,12 @@ export const idTranslations: DefaultTranslationsObject = {
       'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Apakah Anda yakin?',
     moveItemToRootConfirmation:
       'Anda akan memindahkan <1>{{title}}</1> ke folder root. Apakah Anda yakin?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
     newFolder: 'Folder Baru',
     noFolder: 'Tidak Ada Folder',
     renameFolder: 'Ganti Nama Folder',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Cari berdasarkan Nama di {{folderName}}',
     selectFolderForItem: 'Pilih folder untuk {{title}}',
   },

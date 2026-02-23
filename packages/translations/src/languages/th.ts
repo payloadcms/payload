@@ -205,10 +205,12 @@ export const thTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'คุณกำลังจะย้าย <1>{{title}}</1> ไปยัง <2>{{toFolder}}</2> คุณแน่ใจหรือไม่?',
     moveItemToRootConfirmation: 'คุณกำลังจะย้าย <1>{{title}}</1> ไปยังโฟลเดอร์ราก คุณแน่ใจหรือไม่?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'ย้าย {{title}} จาก {{fromFolder}}',
     newFolder: 'โฟลเดอร์ใหม่',
     noFolder: 'ไม่มีโฟลเดอร์',
     renameFolder: 'เปลี่ยนชื่อโฟลเดอร์',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'ค้นหาด้วยชื่อใน {{folderName}}',
     selectFolderForItem: 'เลือกโฟลเดอร์สำหรับ {{title}}',
   },

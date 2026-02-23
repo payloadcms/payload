@@ -209,10 +209,12 @@ export const taTranslations: DefaultTranslationsObject = {
       'நீங்கள் <1>{{title}}</1>-ஐ <2>{{toFolder}}</2>-க்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
     moveItemToRootConfirmation:
       'நீங்கள் <1>{{title}}</1>-ஐ மூல (root) கோப்புறைக்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{fromFolder}}-இருந்து {{title}} நகர்த்தப்படுகிறது',
     newFolder: 'புதிய கோப்புறை',
     noFolder: 'கோப்புறை இல்லை',
     renameFolder: 'கோப்புறை பெயரை மாற்றவும்',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '{{folderName}}-இல் பெயரால் தேடவும்',
     selectFolderForItem: '{{title}}-க்கான கோப்புறையை தேர்வு செய்யவும்',
   },

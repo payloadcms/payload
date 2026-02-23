@@ -212,10 +212,12 @@ export const trTranslations: DefaultTranslationsObject = {
       '<1>{{title}}</1> ögesini <2>{{toFolder}}</2> konumuna taşımak üzeresiniz. Emin misiniz?',
     moveItemToRootConfirmation:
       '<1>{{title}}</1> öğesini ana klasöre taşımak üzeresiniz. Emin misiniz?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}} öğesinin {{fromFolder}} klasöründen taşınması',
     newFolder: 'Yeni Klasör',
     noFolder: 'Klasör Yok',
     renameFolder: 'Klasörü Yeniden Adlandır',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: "{{folderName}}'da İsme Göre Ara",
     selectFolderForItem: '{{title}} için klasör seçin',
   },

@@ -204,10 +204,12 @@ export const arTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'أنت على وشك نقل <1>{{title}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
     moveItemToRootConfirmation: 'أنت على وشك نقل <1>{{title}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'نقل {{title}} من {{fromFolder}}',
     newFolder: 'مجلد جديد',
     noFolder: 'لا يوجد مجلد',
     renameFolder: 'إعادة تسمية المجلد',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'البحث عن طريق الاسم في {{folderName}}',
     selectFolderForItem: 'اختر المجلد لـ {{title}}',
   },

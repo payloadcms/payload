@@ -209,10 +209,12 @@ export const isTranslations: DefaultTranslationsObject = {
       'Þú ert að fara að færa <1>{{title}}</1> í <2>{{toFolder}}</2>. Ertu viss?',
     moveItemToRootConfirmation:
       'Þú ert að fara að færa <1>{{title}}</1> í rótarmöppuna. Ertu viss?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Færi {{title}} úr {{fromFolder}}',
     newFolder: 'Ný mappa',
     noFolder: 'Engin mappa',
     renameFolder: 'Endurnefna möppu',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Leita eftir nafni í {{folderName}}',
     selectFolderForItem: 'Veldu möppu fyrir {{title}}',
   },

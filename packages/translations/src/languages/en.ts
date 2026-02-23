@@ -210,10 +210,12 @@ export const enTranslations = {
       'You are about to move <1>{{title}}</1> to <2>{{toFolder}}</2>. Are you sure?',
     moveItemToRootConfirmation:
       'You are about to move <1>{{title}}</1> to the root folder. Are you sure?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Moving {{title}} from {{fromFolder}}',
     newFolder: 'New Folder',
     noFolder: 'No Folder',
     renameFolder: 'Rename Folder',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Search by Name in {{folderName}}',
     selectFolderForItem: 'Select folder for {{title}}',
   },

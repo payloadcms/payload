@@ -209,10 +209,12 @@ export const azTranslations: DefaultTranslationsObject = {
       'Siz <1>{{title}}</1>-i <2>{{toFolder}}</2>ə köçürmək barədəsiniz. Eminsinizmi?',
     moveItemToRootConfirmation:
       "Siz <1>{{title}}</1>'i kök qovluğa köçürmək barədəsindəsiniz. Əminsiniz?",
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}}-i {{fromFolder}}-dən köçürmək',
     newFolder: 'Yeni Qovluq',
     noFolder: 'Qovluq Yoxdur',
     renameFolder: 'Qovluğun adını dəyişdirin',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '{{folderName}} qovluğunda adla axtarış',
     selectFolderForItem: '{{title}} üçün qovluğu seçin',
   },

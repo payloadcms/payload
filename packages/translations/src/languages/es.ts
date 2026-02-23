@@ -214,10 +214,12 @@ export const esTranslations: DefaultTranslationsObject = {
       'Estás a punto de mover <1>{{title}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
     moveItemToRootConfirmation:
       'Estás a punto de mover <1>{{title}}</1> a la carpeta raíz. ¿Estás seguro?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Moviendo {{title}} desde {{fromFolder}}',
     newFolder: 'Nueva Carpeta',
     noFolder: 'Sin Carpeta',
     renameFolder: 'Renombrar carpeta',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Buscar por nombre en {{folderName}}',
     selectFolderForItem: 'Seleccione la carpeta para {{title}}',
   },

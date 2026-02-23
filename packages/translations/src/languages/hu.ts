@@ -212,10 +212,12 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ön készül áthelyezni <1>{{title}}</1>-t <2>{{toFolder}}</2>-be. Biztos benne?',
     moveItemToRootConfirmation:
       'Arra készül, hogy a <1>{{title}}</1> elemet a gyökérmappába helyezi. Biztos benne?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}} áthelyezése a(z) {{fromFolder}} mappából',
     newFolder: 'Új Mappa',
     noFolder: 'Nincs mappa',
     renameFolder: 'Mappa átnevezése',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Keresés név alapján a(z) {{folderName}} mappában',
     selectFolderForItem: 'Válassz mappát a {{title}} számára',
   },

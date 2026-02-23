@@ -216,10 +216,12 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de déplacer <1>{{title}}</1> dans <2>{{toFolder}}</2>. Êtes-vous sûr ?',
     moveItemToRootConfirmation:
       'Vous êtes sur le point de déplacer <1>{{title}}</1> vers le dossier racine. Êtes-vous sûr ?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Déplacement de {{title}} de {{fromFolder}}',
     newFolder: 'Nouveau Dossier',
     noFolder: 'Pas de dossier',
     renameFolder: 'Renommer le dossier',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Recherche par nom dans {{folderName}}',
     selectFolderForItem: 'Sélectionnez le dossier pour {{title}}',
   },

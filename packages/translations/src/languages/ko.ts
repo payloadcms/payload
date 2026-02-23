@@ -208,10 +208,12 @@ export const koTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       '<1>{{title}}</1>을(를) <2>{{toFolder}}</2>(으)로 이동하려고 합니다. 확실하신가요?',
     moveItemToRootConfirmation: '<1>{{title}}</1>을 루트 폴더로 이동하려고 합니다. 확실합니까?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}}를 {{fromFolder}}에서 이동합니다',
     newFolder: '새 폴더',
     noFolder: '폴더 없음',
     renameFolder: '폴더 이름 변경',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '{{folderName}}에서 이름으로 검색하세요.',
     selectFolderForItem: '{{title}}에 대한 폴더 선택',
   },

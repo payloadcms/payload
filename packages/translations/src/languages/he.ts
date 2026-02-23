@@ -202,10 +202,12 @@ export const heTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       'אתה עומד להעביר <1>{{title}}</1> ל-<2>{{toFolder}}</2>. האם אתה בטוח?',
     moveItemToRootConfirmation: 'אתה עומד להעביר <1>{{title}}</1> לתיקייה הראשית. האם אתה בטוח?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'מזיז {{title}} מ-{{fromFolder}}',
     newFolder: 'תיקייה חדשה',
     noFolder: 'אין תיקייה',
     renameFolder: 'שנה שם לתיקיה',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'חיפוש לפי שם ב{{folderName}}',
     selectFolderForItem: 'בחר תיקייה עבור {{title}}',
   },

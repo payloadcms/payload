@@ -209,10 +209,12 @@ export const svTranslations: DefaultTranslationsObject = {
       'Du håller på att flytta <1>{{title}}</1> till <2>{{toFolder}}</2>. Är du säker?',
     moveItemToRootConfirmation:
       'Du är på väg att flytta <1>{{title}}</1> till rotmappen. Är du säker?',
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Flyttar {{title}} från {{fromFolder}}',
     newFolder: 'Ny mapp',
     noFolder: 'Ingen mapp',
     renameFolder: 'Byt namn på mapp',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Sök efter namn i {{folderName}}',
     selectFolderForItem: 'Välj mapp för {{title}}',
   },

@@ -200,10 +200,12 @@ export const zhTranslations: DefaultTranslationsObject = {
     moveItemToFolderConfirmation:
       '您即将把 <1>{{title}}</1> 移动至 <2>{{toFolder}}</2>。您确定吗？',
     moveItemToRootConfirmation: '您即将把 <1>{{title}}</1> 移动到根文件夹。您确定吗？',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '正在从 {{fromFolder}} 文件夹中移出 {{title}}',
     newFolder: '新文件夹',
     noFolder: '没有文件夹',
     renameFolder: '重命名文件夹',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '在 {{folderName}} 中按名称搜索',
     selectFolderForItem: '为 {{title}} 选择文件夹',
   },

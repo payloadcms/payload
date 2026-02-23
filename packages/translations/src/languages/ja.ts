@@ -211,10 +211,12 @@ export const jaTranslations: DefaultTranslationsObject = {
       '<1>{{title}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
     moveItemToRootConfirmation:
       'あなたは<1>{{title}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
+    moveToRoot: 'Move to Root',
     movingFromFolder: '{{title}}を{{fromFolder}}から移動します',
     newFolder: '新しいフォルダー',
     noFolder: 'フォルダーなし',
     renameFolder: 'フォルダーの名前を変更する',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: '{{folderName}}で名前を検索する',
     selectFolderForItem: '{{title}}のためのフォルダーを選択してください。',
   },

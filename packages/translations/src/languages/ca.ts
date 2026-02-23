@@ -211,10 +211,12 @@ export const caTranslations: DefaultTranslationsObject = {
       "Estàs a punt de moure <1>{{title}}</1> a <2>{{toFolder}}</2>. N'estàs segur?",
     moveItemToRootConfirmation:
       "Estàs a punt de moure <1>{{title}}</1> a la carpeta arrel. N'estàs segur?",
+    moveToRoot: 'Move to Root',
     movingFromFolder: 'Movent {{title}} de {{fromFolder}}',
     newFolder: 'Nova carpeta',
     noFolder: 'No hi ha carpeta',
     renameFolder: 'Anomena carpeta',
+    rootFolder: 'Root Folder',
     searchByNameInFolder: 'Cerca per Nom en {{folderName}}',
     selectFolderForItem: 'Selecciona la carpeta per a {{title}}',
   },
