@@ -211,10 +211,12 @@ export const findCollectionTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'findCollections',
-    toolSchemas.findCollections.description,
-    toolSchemas.findCollections.parameters.shape,
+    {
+      description: toolSchemas.findCollections.description,
+      inputSchema: toolSchemas.findCollections.parameters.shape,
+    },
     ({ collectionName, includeContent, includeCount }) => {
       return tool(collectionName, includeContent, includeCount)
     },

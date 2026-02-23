@@ -749,5 +749,178 @@ describe('mergeLocalizedData', () => {
         es: 'Spanish Description',
       })
     })
+
+    it('should not lose other locale data when processing unnamed groups', () => {
+      // https://github.com/payloadcms/payload/issues/15642
+      const fields: Field[] = [
+        {
+          name: 'textFieldRoot',
+          type: 'text',
+        },
+        {
+          name: 'textFieldRootLocalized',
+          type: 'text',
+          localized: true,
+        },
+        // Unnamed group - fields at same data level as root
+        {
+          type: 'group',
+          fields: [
+            {
+              name: 'textFieldNested',
+              type: 'text',
+            },
+            {
+              name: 'textFieldNestedLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ]
+
+      // Document already has English data published
+      const docWithLocales = {
+        textFieldRoot: 'Root Value',
+        textFieldRootLocalized: {
+          en: 'English Root Localized',
+          es: 'Spanish Root Localized',
+        },
+        textFieldNested: 'Nested Value',
+        textFieldNestedLocalized: {
+          en: 'English Nested Localized',
+          es: 'Spanish Nested Localized',
+        },
+      }
+
+      // Publishing only English locale with updated data
+      const dataWithLocales = {
+        textFieldRoot: 'Updated Root Value',
+        textFieldRootLocalized: {
+          en: 'Updated English Root Localized',
+        },
+        textFieldNested: 'Updated Nested Value',
+        textFieldNestedLocalized: {
+          en: 'Updated English Nested Localized',
+        },
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      // Root non-localized field should be updated
+      expect(result.textFieldRoot).toBe('Updated Root Value')
+
+      // Root localized field should merge: update en, preserve es
+      expect(result.textFieldRootLocalized).toEqual({
+        en: 'Updated English Root Localized',
+        es: 'Spanish Root Localized',
+      })
+
+      // Nested non-localized field should be updated
+      expect(result.textFieldNested).toBe('Updated Nested Value')
+
+      // Nested localized field should merge: update en, preserve es
+      // This is the bug - es data is lost
+      expect(result.textFieldNestedLocalized).toEqual({
+        en: 'Updated English Nested Localized',
+        es: 'Spanish Nested Localized',
+      })
+    })
+
+    it('should not lose other locale data when processing row fields', () => {
+      const fields: Field[] = [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'rowFieldLocalized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ]
+
+      const docWithLocales = {
+        rowFieldLocalized: {
+          en: 'English Value',
+          es: 'Spanish Value',
+        },
+      }
+
+      const dataWithLocales = {
+        rowFieldLocalized: {
+          en: 'Updated English Value',
+        },
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      expect(result.rowFieldLocalized).toEqual({
+        en: 'Updated English Value',
+        es: 'Spanish Value',
+      })
+    })
+
+    it('should preserve other locale data when updating through unnamed tabs', () => {
+      const fields: Field[] = [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab 1',
+              fields: [
+                {
+                  name: 'tabFieldLocalized',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+      ]
+
+      // Document has both en and es data
+      const docWithLocales = {
+        tabFieldLocalized: {
+          en: 'English Value',
+          es: 'Spanish Value',
+        },
+      }
+
+      // Only updating en
+      const dataWithLocales = {
+        tabFieldLocalized: {
+          en: 'Updated English Value',
+        },
+      }
+
+      const result = mergeLocalizedData({
+        configBlockReferences: [],
+        dataWithLocales,
+        docWithLocales,
+        fields,
+        selectedLocales: ['en'],
+      })
+
+      // es should be preserved
+      expect(result.tabFieldLocalized).toEqual({
+        en: 'Updated English Value',
+        es: 'Spanish Value',
+      })
+    })
   })
 })

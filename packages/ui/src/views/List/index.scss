@@ -62,17 +62,6 @@
       }
     }
 
-    &__no-results {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--base);
-
-      & > * {
-        margin: 0;
-      }
-    }
-
     &__list-selection {
       position: fixed;
       bottom: 0;

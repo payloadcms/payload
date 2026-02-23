@@ -336,6 +336,7 @@ export const plTranslations: DefaultTranslationsObject = {
     items: 'przedmioty',
     language: 'Język',
     lastModified: 'Ostatnio zmodyfikowany',
+    layout: 'Układ',
     leaveAnyway: 'Wyjdź mimo to',
     leaveWithoutSaving: 'Wyjdź bez zapisywania',
     light: 'Jasny',
@@ -365,6 +366,9 @@ export const plTranslations: DefaultTranslationsObject = {
     noOptions: 'Brak opcji',
     noResults:
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
+    noResultsDescription:
+      'Albo żadne nie istnieją, albo żadne nie spełniają filtrów, które określiłeś powyżej.',
+    noResultsFound: 'Brak wyników.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',
@@ -400,6 +404,7 @@ export const plTranslations: DefaultTranslationsObject = {
     row: 'Wiersz',
     rows: 'Wiersze',
     save: 'Zapisz',
+    saveChanges: 'Zapisz Zmiany',
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
     searchBy: 'Szukaj według',

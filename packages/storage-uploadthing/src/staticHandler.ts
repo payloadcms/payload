@@ -125,6 +125,11 @@ export const getHandler = ({ utApi }: Args): StaticHandler => {
         headers.append('ETag', objectEtag)
       }
 
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (contentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
+
       if (
         collectionConfig?.upload &&
         typeof collectionConfig.upload === 'object' &&

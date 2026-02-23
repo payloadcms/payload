@@ -16,14 +16,13 @@ export const parseCSV = async ({ data, req }: ParseCSVArgs): Promise<Record<stri
     const records: Record<string, unknown>[] = []
 
     const parser = parse({
+      bom: true,
       cast: (value, _context) => {
-        // Empty strings should be undefined (field not present in update)
-        // This preserves existing data instead of overwriting with null
+        // Empty strings become undefined to preserve existing data during updates
         if (value === '') {
           return undefined
         }
 
-        // Handle booleans
         if (value === 'true') {
           return true
         }
@@ -31,27 +30,23 @@ export const parseCSV = async ({ data, req }: ParseCSVArgs): Promise<Record<stri
           return false
         }
 
-        // Handle explicit null - user must type "null" to set field to null
+        // Explicit null requires typing "null" or "NULL"
         if (value === 'null' || value === 'NULL') {
           return null
         }
 
-        // Don't auto-convert to numbers if the value contains a comma
-        // This allows hasMany fields to use comma-separated values
+        // Keep comma-separated values as strings for hasMany fields
         if (value.includes(',')) {
-          return value // Keep as string for comma-separated values
+          return value
         }
 
-        // Handle numbers (only after checking for commas)
         if (!isNaN(Number(value)) && value !== '') {
           const num = Number(value)
-
           if (String(num) === value || value.includes('.')) {
             return num
           }
         }
 
-        // Return as string
         return value
       },
       columns: true,

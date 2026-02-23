@@ -336,6 +336,7 @@ export const slTranslations: DefaultTranslationsObject = {
     items: 'predmeti',
     language: 'Jezik',
     lastModified: 'Zadnja sprememba',
+    layout: 'Postavitev',
     leaveAnyway: 'Vseeno zapusti',
     leaveWithoutSaving: 'Zapusti brez shranjevanja',
     light: 'Svetlo',
@@ -365,6 +366,9 @@ export const slTranslations: DefaultTranslationsObject = {
     noOptions: 'Ni možnosti',
     noResults:
       'Ni najdenih {{label}}. Ali {{label}} še ne obstajajo ali pa ne ustrezajo filtrom, ki ste jih določili zgoraj.',
+    noResultsDescription:
+      'Bodisi ne obstajajo ali pa nobeden ne ustreza filtri, ki ste jih določili zgoraj.',
+    noResultsFound: 'Ni rezultatov.',
     notFound: 'Ni najdeno',
     nothingFound: 'Nič ni najdeno',
     noTrashResults: 'Ni {{label}} v smetnjaku.',
@@ -401,6 +405,7 @@ export const slTranslations: DefaultTranslationsObject = {
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',
+    saveChanges: 'Shrani Spremembe',
     saving: 'Shranjevanje...',
     schedulePublishFor: 'Načrtujte objavo za {{naslov}}',
     searchBy: 'Išči po {{label}}',

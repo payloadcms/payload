@@ -676,7 +676,7 @@ export type FetchAPIFileUploadOptions = {
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
    * in the current working directory.
    * You can use trailing slash, but it is not necessary.
-   * @default './tmp'
+   * @default 'tmp'
    */
   tempFileDir?: string | undefined
   /**
@@ -852,6 +852,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -863,6 +867,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */

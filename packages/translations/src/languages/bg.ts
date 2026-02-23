@@ -336,6 +336,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     items: 'артикули',
     language: 'Език',
     lastModified: 'Последно променено',
+    layout: 'Оформление',
     leaveAnyway: 'Напусни въпреки това',
     leaveWithoutSaving: 'Напусни без да запазиш',
     light: 'Светла',
@@ -365,6 +366,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     noOptions: 'Няма опции',
     noResults:
       '{{label}} не е открит. {{label}} не съществува или никой не отговаря на зададените филтри.',
+    noResultsDescription:
+      'Или не съществува такава, или никоя не отговаря на филтрите, които сте посочили по-горе.',
+    noResultsFound: 'Няма резултати.',
     notFound: 'Няма открит',
     nothingFound: 'Нищо не беше открито',
     noTrashResults: 'Няма {{label}} в кошчето.',
@@ -401,6 +405,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     row: 'ред',
     rows: 'Редове',
     save: 'Запази',
+    saveChanges: 'Запази промените',
     saving: 'Запазване...',
     schedulePublishFor: 'Планирано публикуване за {{title}}',
     searchBy: 'Търси по {{label}}',

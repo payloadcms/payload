@@ -1,21 +1,20 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { GeneratedTypes } from 'helpers/sdk/types.js'
+import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { addBlock } from 'helpers/e2e/fields/blocks/addBlock.js'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { upsertPreferences } from 'helpers/e2e/preferences.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { RESTClient } from 'helpers/rest.js'
+import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { addBlock } from '__helpers/e2e/fields/blocks/addBlock.js'
+import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '__helpers/e2e/openDocControls.js'
+import { upsertPreferences } from '__helpers/e2e/preferences.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
+import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, LocalizedPost } from './payload-types.js'
 
 import {
@@ -29,9 +28,10 @@ import {
   saveDocAndAssert,
   throttleTest,
   waitForFormReady,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { blocksCollectionSlug } from './collections/Blocks/index.js'
@@ -44,6 +44,7 @@ import {
   defaultLocale,
   englishTitle,
   hungarianLocale,
+  localeRestrictedSlug,
   localizedDraftsSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
@@ -85,6 +86,7 @@ let payload: PayloadTestSDK<Config>
 let client: RESTClient
 let serverURL: string
 let richTextURL: AdminUrlUtil
+let urlLocaleRestricted: AdminUrlUtil
 let context: BrowserContext
 
 describe('Localization', () => {
@@ -103,6 +105,7 @@ describe('Localization', () => {
     noLocalizedFieldsURL = new AdminUrlUtil(serverURL, noLocalizedFieldsCollectionSlug)
     urlBlocks = new AdminUrlUtil(serverURL, blocksCollectionSlug)
     urlAllFieldsLocalized = new AdminUrlUtil(serverURL, allFieldsLocalizedSlug)
+    urlLocaleRestricted = new AdminUrlUtil(serverURL, localeRestrictedSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -541,6 +544,27 @@ describe('Localization', () => {
       await copyButton.click()
 
       await expect(page.locator('.payload-toast-container')).toContainText('unsaved')
+    })
+
+    test('should show error when copying to locale without update access', async () => {
+      await changeLocale(page, spanishLocale)
+      await page.goto(urlLocaleRestricted.create)
+      await page.locator('#field-title').fill('Spanish title')
+      await saveDocAndAssert(page)
+
+      // Try to copy to English (no access)
+      await openCopyToLocaleDrawer(page)
+
+      const toLocaleDropdown = page.locator('#field-toLocale')
+      await toLocaleDropdown.click()
+      await page.locator('.rs__option').filter({ hasText: 'English' }).click()
+      const copyButton = page
+        .locator('.copy-locale-data__sub-header button')
+        .filter({ hasText: 'Copy' })
+      await copyButton.click()
+
+      // Should show error
+      await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
     })
   })
 

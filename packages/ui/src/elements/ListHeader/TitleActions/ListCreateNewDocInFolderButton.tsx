@@ -17,12 +17,25 @@ const baseClass = 'create-new-doc-in-folder'
 
 export function ListCreateNewDocInFolderButton({
   buttonLabel,
+  buttonSize = 'small',
+  buttonStyle = 'pill',
   collectionSlugs,
   folderAssignedCollections,
   onCreateSuccess,
   slugPrefix,
 }: {
   buttonLabel: string
+  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
+  buttonStyle?:
+    | 'error'
+    | 'icon-label'
+    | 'none'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
+    | 'subtle'
+    | 'tab'
+    | 'transparent'
   collectionSlugs: CollectionSlug[]
   folderAssignedCollections: CollectionSlug[]
   onCreateSuccess: (args: {
@@ -60,7 +73,7 @@ export function ListCreateNewDocInFolderButton({
       {enabledCollections.length === 1 ? (
         // If there is only 1 option, do not render a popup
         <Button
-          buttonStyle="pill"
+          buttonStyle={buttonStyle}
           className={`${baseClass}__button`}
           el="div"
           onClick={() => {
@@ -71,7 +84,7 @@ export function ListCreateNewDocInFolderButton({
               openModal(newDocInFolderDrawerSlug)
             }
           }}
-          size="small"
+          size={buttonSize}
         >
           {buttonLabel}
         </Button>
@@ -79,11 +92,11 @@ export function ListCreateNewDocInFolderButton({
         <Popup
           button={
             <Button
-              buttonStyle="pill"
+              buttonStyle={buttonStyle}
               className={`${baseClass}__popup-button`}
               el="div"
               icon="chevron"
-              size="small"
+              size={buttonSize}
             >
               {buttonLabel}
             </Button>

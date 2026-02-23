@@ -7,13 +7,13 @@ import { reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
+import { it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { isMongoose } from '../helpers/isMongoose.js'
-import { it } from '../helpers/vitest.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
@@ -204,6 +204,89 @@ describe('Fields', () => {
 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
+    })
+
+    it('should query hasMany with contains operator - string value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread', 'cherry tart'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: 'banana',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
+    it('should query hasMany with contains operator - array value', async () => {
+      const hit1 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread'],
+          text: 'required',
+        },
+      })
+
+      const hit2 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['cherry tart', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'lemon water'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: ['banana', 'cherry'],
+          },
+        },
+      })
+
+      const hit1Result = docs.find(({ id: findID }) => hit1.id === findID)
+      const hit2Result = docs.find(({ id: findID }) => hit2.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hit1Result).toBeDefined()
+      expect(hit2Result).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit1.id })
+      await payload.delete({ collection: 'text-fields', id: hit2.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
     })
 
     it('should query like on value', async () => {
@@ -2374,6 +2457,48 @@ describe('Fields', () => {
 
       expect(res.totalDocs).toBe(1)
       expect(res.docs[0].id).toBe(withoutCollapsed.id)
+    })
+
+    it('should properly handle richText inside array', async () => {
+      const richTextValue = {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [{ type: 'text', text: 'Hello from array', format: 1 }],
+            },
+          ],
+        },
+      }
+
+      const doc = await payload.create({
+        collection,
+        data: {
+          items: [
+            {
+              text: 'required',
+              richTextField: richTextValue,
+            },
+          ],
+          localized: [{ text: 'req' }],
+        },
+      })
+
+      // Verify richText is returned as an object, not a string
+      expect(doc.items[0].richTextField).toBeDefined()
+      expect(typeof doc.items[0].richTextField).toBe('object')
+      expect(doc.items[0].richTextField).toEqual(richTextValue)
+
+      // Also verify on read
+      const found = await payload.findByID({
+        collection,
+        id: doc.id,
+      })
+
+      expect(found.items[0].richTextField).toBeDefined()
+      expect(typeof found.items[0].richTextField).toBe('object')
+      expect(found.items[0].richTextField).toEqual(richTextValue)
     })
   })
 
