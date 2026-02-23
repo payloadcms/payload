@@ -14,7 +14,7 @@ export const OmittedFromBrowseBy: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-    createFolderField({ fieldName: 'folder', relationTo: folderSlug }),
+    createFolderField({ relationTo: folderSlug }),
   ],
   labels: {
     plural: 'Omitted From Browse By',
