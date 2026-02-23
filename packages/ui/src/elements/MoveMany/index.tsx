@@ -266,7 +266,12 @@ export function MoveMany({ hierarchySlug, modalPrefix, onSuccess, selections }: 
       >
         {t('general:move')}
       </ListSelectionButton>
-      <HierarchyDrawer hasMany={false} onSave={handleDrawerSave} />
+      <HierarchyDrawer
+        hasMany={false}
+        onMoveToRoot={handleMoveToRoot}
+        onSave={handleDrawerSave}
+        showMoveToRoot
+      />
       <ConfirmationModal
         body={
           <p>
