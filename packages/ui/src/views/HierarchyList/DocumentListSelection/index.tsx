@@ -6,6 +6,7 @@ import { DeleteMany_v4 } from '../../../elements/DeleteMany/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { EditMany_v4 } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
+import { MoveMany } from '../../../elements/MoveMany/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -115,6 +116,15 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
             afterDelete={handleActionSuccess}
             key="bulk-delete"
             modalPrefix="hierarchy-list"
+            selections={groupedSelections}
+          />
+        ),
+        hierarchySlug && (
+          <MoveMany
+            hierarchySlug={hierarchySlug}
+            key="bulk-move"
+            modalPrefix="hierarchy-list"
+            onSuccess={handleActionSuccess}
             selections={groupedSelections}
           />
         ),
