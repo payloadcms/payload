@@ -1,0 +1,165 @@
+---
+title: Button
+label: Button
+order: 20
+desc: The Button component is a simple button element with a few variations.
+keywords: button, ui, component, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/ui/button.png"
+  srcDark="https://payloadcms.com/images/docs/ui/button-dark.png"
+  alt="Array field with two Rows in Payload Admin Panel"
+  caption="Admin Panel screenshot of an Array field with two Rows"
+/>
+
+To use the Button component, import it from `@payloadcms/ui`:
+```ts
+import { Button } from '@payloadcms/ui'
+```
+
+Then, use the Button component in your custom component:
+```tsx
+<Button>Button</Button>
+```
+
+## Props
+
+| Prop                      | Description                                                                                                                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`SubMenuPopupContent`** | `(props: { close: () => void }) => React.ReactNode`                                                                                                                                                                         |
+| **`aria-label`**          | `string`                                                                                                                                                                                                                    |
+| **`buttonId`**            | `string`                                                                                                                                                                                                                    |
+| **`buttonStyle`**         | `'error' \| 'icon-label' \| 'none' \| 'pill' \| 'primary' \| 'secondary' \| 'transparent'`                                                                                                                                  |
+| **`children`**            | `React.ReactNode`                                                                                                                                                                                                           |
+| **`className`**           | `string`                                                                                                                                                                                                                    |
+| **`disabled`**            | `boolean`                                                                                                                                                                                                                   |
+| **`el`**                  | `'anchor' \| 'link' \| ElementType`                                                                                                                                                                                         |
+| **`enableSubMenu`**       | `boolean` Note: Setting to `true` will allow the submenu to be opened when the button is disabled                                                                                                                           |
+| **`icon`**                | `['chevron' \| 'edit' \| 'plus' \| 'x'] \| React.ReactNode`                                                                                                                                                                 |
+| **`iconPosition`**        | `'left' \| 'right'`                                                                                                                                                                                                         |
+| **`iconStyle`**           | `'none' \| 'with-border' \| 'without-border'`                                                                                                                                                                               |
+| **`id`**                  | `string`                                                                                                                                                                                                                    |
+| **`newTab`**              | `boolean`                                                                                                                                                                                                                   |
+| **`onClick`**             | `(event: MouseEvent) => void`                                                                                                                                                                                               |
+| **`onMouseDown`**         | `(event: MouseEvent) => void`                                                                                                                                                                                               |
+| **`programmaticSubmit`**  | `boolean` Enables form submission via an onClick handler. This is only needed if type="submit" does not trigger form submission, e.g. if the button DOM element is not a direct child of the form element. Default: `false` |
+| **`ref`**                 | `React.RefObject<HTMLAnchorElement \| HTMLButtonElement \| null>`                                                                                                                                                           |
+| **`round`**               | `boolean`                                                                                                                                                                                                                   |
+| **`secondaryActions`**    | `secondaryAction | secondaryAction[]`                                                                                                                                                                                       |
+| **`size`**                | 'large' \| 'medium' \| 'small'                                                                                                                                                                                              | 
+| **`to`**                  | `string`                                                                                                                                                                                                                    |
+| **`tooltip`**             | `string`                                                                                                                                                                                                                    |
+| **`type`**                | `'button' \| 'submit'`                                                                                                                                                                                                      |
+| **`url`**                 | `string`                                                                                                                                                                                                                    |
+
+_* An asterisk denotes that a property is required._
+
+## Examples
+
+
+### Using as a regular button
+
+In this example, we have a simple custom component that uses the Button component:
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function RegularButtonExample() {
+  return (
+    <Button onClick={() => alert('Clicked!')}>
+      Regular Button
+    </Button>
+  )
+}
+```
+
+### Using as a link or anchor
+
+![Button as a link or anchor](https://i.imgur.com/OJ3IgGW.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function AnchorButtonExample() {
+  return (
+    <>
+      <Button
+        el="anchor"
+        url="https://www.example.com"
+        buttonStyle="secondary"
+        newTab
+        icon="link"
+      >
+        External Link
+      </Button>
+      <Button
+        el="link"
+        to="/some-page"
+        buttonStyle="primary"
+      >
+        Internal Link
+      </Button>
+    </>
+  )
+}
+```
+
+### Additional Usage Examples
+
+Below is an example illustrating how to use different styles and props:
+
+![Button with different styles](https://i.imgur.com/jXiM50j.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function AnotherExample() {
+  return (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Button buttonStyle="error" onClick={() => alert('Error!')}>
+        Error Button
+      </Button>
+      <Button buttonStyle="secondary" icon="plus" onClick={() => alert('Added!')}>
+        Add
+      </Button>
+    </div>
+  )
+}
+```
+
+You can even combine icons, tooltips, and submenu popups together:
+
+![Button with icon, tooltip, and submenu popup](https://i.imgur.com/LRBX6z2.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function ComplexExample() {
+  return (
+    <Button
+      icon="edit"
+      tooltip="Edit this item"
+      SubMenuPopupContent={({ close }) => (
+        <div style={{ padding: 10 }}>
+          <p>Edit options</p>
+          <Button onClick={close} type="button">
+            Close
+          </Button>
+        </div>
+      )}
+    >
+      Edit
+    </Button>
+  )
+}
+```
