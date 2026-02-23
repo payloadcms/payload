@@ -263,18 +263,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
         )
       },
     [
+      baseClass,
+      blockType,
+      CustomLabel,
+      blockDisplayName,
+      clientBlock?.admin?.disableBlockName,
+      blockFieldsPath,
+      isEditable,
+      i18n,
       CustomBlock,
       EditButton,
       RemoveButton,
-      blockDisplayName,
-      baseClass,
-      clientBlock?.admin?.disableBlockName,
-      blockType,
-      CustomLabel,
-      i18n,
       isCollapsed,
       onCollapsedChange,
-      isEditable,
     ],
   )
 

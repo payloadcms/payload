@@ -258,7 +258,7 @@ describe('Lexical Fully Featured - database', () => {
 
     const blockId = await blockEl.getAttribute('data-block-id')
 
-    const blockNameInput = lexical.editor.locator(`#richText__${blockId}__blockName`)
+    const blockNameInput = lexical.editor.locator(`[name="${`richText.${blockId}.blockName`}"]`)
 
     /**
      * Test on create
@@ -291,8 +291,8 @@ describe('Lexical Fully Featured - database', () => {
         await blockNameInput.fill('Updated blockname')
       },
       {
-        minimumNumberOfRequests: 2,
-        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 1,
+        allowedNumberOfRequests: 1,
       },
     )
     await expect(blockNameInput).toHaveValue('Updated blockname')
