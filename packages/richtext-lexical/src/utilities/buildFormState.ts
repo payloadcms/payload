@@ -1,6 +1,8 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type { FieldSchemaMap, RichTextAdapter } from 'payload'
 
+import { addBlockMetaToFormState } from 'payload'
+
 import type { SanitizedServerFeatures } from '../features/typesServer.js'
 
 export const getGetCalculateDefaultValues =
@@ -160,6 +162,23 @@ async function walkLexicalNodes({
     }
 
     const nodeFieldData = getNodeFieldData(node, parentData, nodeId, features)
+    const nodePath = `${path}.${nodeId}`
+
+    if (nodeFieldData.blockType) {
+      const addedByServer =
+        !iterateFieldsArgs.renderAllFields &&
+        !iterateFieldsArgs.previousFormState?.[`${nodePath}.blockType`]
+
+      addBlockMetaToFormState({
+        addedByServer: addedByServer || undefined,
+        blockFields: schemaEntry.fields,
+        blockName: nodeFieldData.blockName,
+        blockType: nodeFieldData.blockType,
+        includeSchema: iterateFieldsArgs.includeSchema,
+        path: nodePath,
+        state: iterateFieldsArgs.state,
+      })
+    }
 
     promises.push(
       iterateFields({
@@ -169,7 +188,7 @@ async function walkLexicalNodes({
         fields: schemaEntry.fields,
         parentIndexPath: '',
         parentPassesCondition: true,
-        parentPath: `${path}.${nodeId}`,
+        parentPath: nodePath,
         parentSchemaPath: schemaFieldsPath,
         permissions: true,
       }),

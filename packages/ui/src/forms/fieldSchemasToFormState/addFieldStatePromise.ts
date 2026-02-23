@@ -20,7 +20,12 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
+import {
+  addBlockMetaToFormState,
+  getBlockSelect,
+  stripUnselectedFields,
+  validateBlocksFilterOptions,
+} from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -491,39 +496,15 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                     : undefined
                 }
 
-                // Handle `blockType` field
-                const fieldKey = rowPath + '.blockType'
-
-                state[fieldKey] = {
-                  initialValue: row.blockType,
-                  value: row.blockType,
-                }
-
-                if (addedByServer) {
-                  state[fieldKey].addedByServer = addedByServer
-                }
-
-                if (includeSchema) {
-                  state[fieldKey].fieldSchema = block.fields.find(
-                    (blockField) => 'name' in blockField && blockField.name === 'blockType',
-                  )
-                }
-
-                // Handle `blockName` field
-                const blockNameKey = rowPath + '.blockName'
-
-                state[blockNameKey] = {}
-
-                if (row.blockName) {
-                  state[blockNameKey].initialValue = row.blockName
-                  state[blockNameKey].value = row.blockName
-                }
-
-                if (includeSchema) {
-                  state[blockNameKey].fieldSchema = block.fields.find(
-                    (blockField) => 'name' in blockField && blockField.name === 'blockName',
-                  )
-                }
+                addBlockMetaToFormState({
+                  addedByServer: addedByServer || undefined,
+                  blockFields: block.fields,
+                  blockName: row.blockName,
+                  blockType: row.blockType,
+                  includeSchema,
+                  path: rowPath,
+                  state,
+                })
               }
 
               acc.promises.push(
