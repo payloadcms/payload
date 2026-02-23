@@ -2,8 +2,8 @@ import type {
   DashboardConfig,
   PayloadRequest,
   ServerFunction,
+  Widget,
   WidgetServerProps,
-  WidgetWidth,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -58,13 +58,8 @@ export const getDefaultLayoutHandler: ServerFunction<
 async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
-  widgets: Array<{
-    maxWidth?: WidgetWidth
-    minWidth?: WidgetWidth
-    slug: string
-  }>,
+  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
 ): Promise<WidgetItem[]> {
-  // Handle function format
   let widgetInstances
   if (typeof defaultLayout === 'function') {
     widgetInstances = await defaultLayout({ req })

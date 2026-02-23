@@ -114,7 +114,6 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         component: React.createElement(RenderWidget, {
           widgetData: {},
           widgetId,
-          // TODO: widgetData can be added here for custom props
         }),
         item: {
           id: widgetId,

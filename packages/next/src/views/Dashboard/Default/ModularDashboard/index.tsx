@@ -5,9 +5,9 @@ import type {
   DashboardConfig,
   PayloadRequest,
   TypedUser,
+  Widget,
   WidgetInstance,
   WidgetServerProps,
-  WidgetWidth,
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -92,13 +92,8 @@ async function getItemsFromPreferences(
 async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
-  widgets: Array<{
-    maxWidth?: WidgetWidth
-    minWidth?: WidgetWidth
-    slug: string
-  }>,
+  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
 ): Promise<WidgetItem[]> {
-  // Handle function format
   let widgetInstances: WidgetInstance[]
   if (typeof defaultLayout === 'function') {
     widgetInstances = await defaultLayout({ req })
@@ -107,7 +102,7 @@ async function getItemsFromConfig(
   }
 
   return widgetInstances.map((widgetInstance, index) => {
-    const widget = widgets.find((widget) => widget.slug === widgetInstance.widgetSlug)
+    const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
       data: widgetInstance.data,
@@ -115,5 +110,5 @@ async function getItemsFromConfig(
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',
     }
-  }) as WidgetItem[]
+  })
 }

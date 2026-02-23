@@ -141,15 +141,6 @@
         background: var(--theme-elevation-900);
       }
 
-      &:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-
-        &:hover {
-          background: var(--theme-text);
-        }
-      }
-
       svg {
         pointer-events: none;
       }

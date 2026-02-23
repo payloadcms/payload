@@ -91,7 +91,6 @@ export function WidgetConfigDrawer({
       onChangeAbortControllerRef.current = controller
 
       const { state } = await getFormState({
-        data: widgetData ?? {},
         docPermissions: {
           fields: true,
         },
@@ -109,7 +108,7 @@ export function WidgetConfigDrawer({
 
       return state
     },
-    [getFormState, widget.slug, widgetData],
+    [getFormState, widget.slug],
   )
 
   useEffect(() => {
