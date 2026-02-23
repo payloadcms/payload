@@ -13,9 +13,7 @@ const buttonStyles = [
   'icon-label',
   'transparent',
   'subtle',
-  'dashed',
   'error',
-  'muted-text',
   'tab',
   'none',
 ] as const
@@ -130,7 +128,7 @@ export const ButtonStyles: React.FC = () => {
                   key={size}
                   style={{ borderBottom: '1px solid var(--theme-elevation-100)', padding: '8px' }}
                 >
-                  <Button buttonStyle={style} icon="plus" margin={false} size={size}>
+                  <Button buttonStyle={style} icon="edit" margin={false} size={size}>
                     Button
                   </Button>
                 </td>
@@ -185,9 +183,9 @@ export const ButtonStyles: React.FC = () => {
                   style={{ borderBottom: '1px solid var(--theme-elevation-100)', padding: '8px' }}
                 >
                   <Button
-                    aria-label="Add"
+                    aria-label="Edit"
                     buttonStyle={style}
-                    icon="plus"
+                    icon="edit"
                     margin={false}
                     size={size}
                   />
