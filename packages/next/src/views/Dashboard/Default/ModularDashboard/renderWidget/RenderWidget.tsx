@@ -23,9 +23,12 @@ export const RenderWidget: React.FC<{
 }> = ({ widgetData, widgetId }) => {
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const { serverFunction } = useServerFunctions()
+  const requestIDRef = useRef(0)
 
   const renderWidget = useCallback(() => {
     async function render() {
+      const requestID = ++requestIDRef.current
+
       try {
         const widgetSlug = widgetId.slice(0, widgetId.lastIndexOf('-'))
 
@@ -37,8 +40,16 @@ export const RenderWidget: React.FC<{
           } as RenderWidgetServerFnArgs,
         })) as RenderWidgetServerFnReturnType
 
+        if (requestID !== requestIDRef.current) {
+          return
+        }
+
         setComponent(result.component)
       } catch (_error) {
+        if (requestID !== requestIDRef.current) {
+          return
+        }
+
         // Log error but don't expose details to console in production
 
         // Fallback error component
@@ -63,13 +74,8 @@ export const RenderWidget: React.FC<{
     void render()
   }, [serverFunction, widgetData, widgetId])
 
-  const mounted = useRef(false)
-
   useEffect(() => {
-    if (mounted.current) {
-      return
-    }
-    mounted.current = true
+    setComponent(null)
     void renderWidget()
   }, [renderWidget])
 

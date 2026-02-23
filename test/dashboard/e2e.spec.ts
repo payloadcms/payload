@@ -93,16 +93,44 @@ describe('Dashboard', () => {
     await d.saveChangesAndValidate()
   })
 
-  test('edit widget data', async ({ page }) => {
+  test('edit widget data is reverted when dashboard editing is canceled', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    let secondWidget = d.widgetByPos(2)
+    let secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
+
+    await d.editWidget(2, 'Open Tickets')
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+
+    await d.cancelEditing()
+
+    secondWidget = d.widgetByPos(2)
+    secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
+  })
+
+  test('edit widget data persists after dashboard save and reload', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     const secondWidget = d.widgetByPos(2)
     const secondWidgetTitle = secondWidget.locator('.count-widget h3')
     await expect(secondWidgetTitle).toHaveText('Tickets')
+
     await d.editWidget(2, 'Open Tickets')
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
-    await d.saveChangesAndValidate()
+
+    await d.stepNavLast.locator('button').nth(1).click()
     await expect(secondWidgetTitle).toHaveText('Open Tickets')
+
+    // Re-enter edit mode without page refresh and edit again.
+    await d.setEditing()
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(2, 'Title changed again')
+    await expect(secondWidgetTitle).toHaveText('Title changed again')
+
+    await d.saveChangesAndValidate()
+    await expect(secondWidgetTitle).toHaveText('Title changed again')
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {

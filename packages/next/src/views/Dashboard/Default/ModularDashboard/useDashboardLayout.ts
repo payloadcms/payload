@@ -31,7 +31,9 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     if (!isEditing) {
       setCurrentLayout(initialLayout)
     }
-  }, [initialLayout, isEditing])
+    // do not sync while editing. Depending on `isEditing` in this effect causes an
+    // unintended rollback when toggling from editing -> view mode after save.
+  }, [initialLayout])
 
   const saveLayout = useCallback(async () => {
     try {

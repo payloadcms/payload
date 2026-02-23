@@ -202,6 +202,7 @@ export class DashboardHelper {
     await expect(titleInput).toBeVisible({ timeout: 60000 })
     await titleInput.fill(title)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
   }
 
   cancelEditing = async () => {
