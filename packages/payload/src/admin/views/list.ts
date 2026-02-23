@@ -10,9 +10,9 @@ import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
-import type { RelatedDocumentsGrouped } from './taxonomyList.js'
+import type { RelatedDocumentsGrouped } from './hierarchyList.js'
 
-export type TaxonomyViewData = {
+export type HierarchyViewData = {
   /** Breadcrumb trail to the current parent */
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
@@ -64,6 +64,14 @@ export type ListViewClientProps = {
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   /**
+   * Hierarchy view data - present when viewing a hierarchy collection with a parent selected
+   */
+  hierarchyData?: HierarchyViewData
+  /**
+   * Resolved icon component for hierarchy collections
+   */
+  HierarchyIcon?: React.ReactNode
+  /**
    * @deprecated
    */
   listPreferences?: CollectionPreferences
@@ -76,10 +84,6 @@ export type ListViewClientProps = {
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
-  /**
-   * Taxonomy view data - present when viewing a taxonomy collection with a parent selected
-   */
-  taxonomyData?: TaxonomyViewData
   viewType: ViewTypes
 } & ListViewSlots
 

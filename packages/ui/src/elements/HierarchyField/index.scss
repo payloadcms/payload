@@ -1,0 +1,21 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .hierarchy-field {
+    &__content {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.75);
+    }
+
+    &__manage-button {
+      align-self: flex-start;
+    }
+
+    &--read-only {
+      .hierarchy-field__content {
+        opacity: 0.75;
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ import React, { useCallback } from 'react'
 
 import type { HierarchyInitialData } from './types.js'
 
-import { HydrateTaxonomyProvider } from '../../elements/HydrateTaxonomyProvider/index.js'
+import { HydrateHierarchyProvider } from '../../elements/HydrateHierarchyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { HierarchyTree } from './index.js'
 
@@ -55,7 +55,7 @@ export const HierarchySidebarTab: React.FC<
 
   return (
     <>
-      <HydrateTaxonomyProvider
+      <HydrateHierarchyProvider
         collectionSlug={collectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}

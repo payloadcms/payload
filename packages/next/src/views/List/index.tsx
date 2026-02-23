@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  HierarchyViewData,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
@@ -10,14 +11,13 @@ import type {
   PayloadComponent,
   QueryPreset,
   SanitizedCollectionPermission,
-  TaxonomyViewData,
 } from 'payload'
 
 import {
   DefaultListView,
   HierarchyListView,
   HydrateAuthProvider,
-  HydrateTaxonomyProvider,
+  HydrateHierarchyProvider,
   ListQueryProvider,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -27,6 +27,7 @@ import {
   appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
+  getFromImportMap,
   isNumber,
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
@@ -37,7 +38,7 @@ import React, { Fragment } from 'react'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
-import { handleTaxonomy } from './handleTaxonomy.js'
+import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
@@ -263,23 +264,23 @@ export const renderListView = async (
     select,
   })
 
-  // Check for taxonomy parent param
-  const isTaxonomyCollection = Boolean(collectionConfig.taxonomy)
-  let taxonomyParentId: null | number | string = null
+  // Check for hierarchy parent param
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  let hierarchyParentId: null | number | string = null
 
-  if (isTaxonomyCollection) {
+  if (isHierarchyCollection) {
     if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
-      taxonomyParentId = null
+      hierarchyParentId = null
     } else if (typeof searchParams?.parent === 'string') {
-      taxonomyParentId =
+      hierarchyParentId =
         payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
           ? Number(searchParams.parent)
           : searchParams.parent
     }
   }
 
-  // Taxonomy data for client-side rendering
-  let taxonomyData: TaxonomyViewData | undefined
+  // Hierarchy data for client-side rendering
+  let hierarchyData: HierarchyViewData | undefined
 
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
@@ -362,19 +363,38 @@ export const renderListView = async (
     }
   }
 
-  // Fetch taxonomy data for taxonomy collections
-  if (isTaxonomyCollection) {
-    taxonomyData = await handleTaxonomy({
+  // Fetch hierarchy data for hierarchy collections
+  let HierarchyIcon: React.ReactNode | undefined
+
+  if (isHierarchyCollection) {
+    hierarchyData = await handleHierarchy({
       collectionConfig,
       collectionSlug,
-      parentId: taxonomyParentId,
+      parentId: hierarchyParentId,
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
       user,
     })
 
-    data = taxonomyData.childrenData
+    data = hierarchyData.childrenData
+
+    // Resolve hierarchy icon from collection config
+    const hierarchyConfig =
+      typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+    const iconPath = hierarchyConfig?.admin?.components?.Icon
+
+    if (iconPath) {
+      const ResolvedIcon = getFromImportMap<React.ComponentType>({
+        importMap: payload.importMap,
+        PayloadComponent: iconPath,
+        schemaPath: '',
+      })
+
+      if (ResolvedIcon) {
+        HierarchyIcon = <ResolvedIcon />
+      }
+    }
   }
 
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
@@ -446,6 +466,8 @@ export const renderListView = async (
       enableRowSelections,
       hasCreatePermission,
       hasDeletePermission,
+      hierarchyData,
+      HierarchyIcon,
       listPreferences: collectionPreferences,
       newDocumentURL,
       queryPreset,
@@ -453,11 +475,10 @@ export const renderListView = async (
       renderedFilters,
       resolvedFilterOptions,
       Table,
-      taxonomyData,
       viewType,
     } satisfies ListViewClientProps,
     Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-    Fallback: isTaxonomyCollection ? HierarchyListView : DefaultListView,
+    Fallback: isHierarchyCollection ? HierarchyListView : DefaultListView,
     importMap: payload.importMap,
     serverProps,
   })
@@ -466,15 +487,23 @@ export const renderListView = async (
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
-        {isTaxonomyCollection ? (
+        {isHierarchyCollection ? (
           <Fragment>
-            <HydrateTaxonomyProvider
+            <HydrateHierarchyProvider
               collectionSlug={collectionSlug}
-              expandedNodes={taxonomyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
-              parentFieldName={collectionConfig.taxonomy?.parentFieldName}
-              selectedParentId={taxonomyParentId}
+              expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parentFieldName={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.parentFieldName
+                  : undefined
+              }
+              selectedParentId={hierarchyParentId}
               tableData={data}
-              treeLimit={collectionConfig.taxonomy?.treeLimit}
+              treeLimit={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.admin?.treeLimit
+                  : undefined
+              }
             />
             {listContent}
           </Fragment>

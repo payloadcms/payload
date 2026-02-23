@@ -1,10 +1,7 @@
 /**
- * beforeChange Hook Responsibilities:
- * - Validate circular references when parent changes
- *
- * Does NOT handle:
- * - Tree structure (no stored tree anymore)
- * - Path computation (done in afterRead)
+ * beforeDelete Hook Responsibilities:
+ * - Delete child folders when parent is deleted (cascade delete)
+ * - Set context flag for deletion tracking
  */
 
 import type { CollectionBeforeDeleteHook } from '../../index.js'
@@ -18,8 +15,18 @@ type Args = {
 
 export const hierarchyCollectionBeforeDelete =
   ({ parentFieldName }: Args): CollectionBeforeDeleteHook =>
-  ({ req }) => {
+  async ({ id, collection, req }) => {
     req.context = req.context || {}
     req.context.isDeleting = true
-    return
+
+    // Delete all child folders (cascade delete)
+    await req.payload.delete({
+      collection: collection.slug,
+      req,
+      where: {
+        [parentFieldName]: {
+          equals: id,
+        },
+      },
+    })
   }

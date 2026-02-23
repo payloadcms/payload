@@ -27,6 +27,7 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -34,7 +35,6 @@ import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
-import { TaxonomyProvider } from '../Taxonomy/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
@@ -106,7 +106,7 @@ export const RootProvider: React.FC<Props> = ({
                           <CloseModalOnRouteChange />
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
-                              <TaxonomyProvider>
+                              <HierarchyProvider>
                                 <ThemeProvider theme={theme}>
                                   <ParamsProvider>
                                     <LocaleProvider locale={locale}>
@@ -130,7 +130,7 @@ export const RootProvider: React.FC<Props> = ({
                                     </LocaleProvider>
                                   </ParamsProvider>
                                 </ThemeProvider>
-                              </TaxonomyProvider>
+                              </HierarchyProvider>
                             </PreferencesProvider>
                             <ModalContainer />
                             <StayLoggedInModal />

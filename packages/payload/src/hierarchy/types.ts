@@ -32,10 +32,26 @@ export type HierarchyConfig = {
   allowHasMany?: boolean
   /**
    * Whether this hierarchy is scoped to specific collections
-   * When true, hierarchy items can be restricted to certain collections
+   * When true or an object, hierarchy items can be restricted to certain collections
    * @default false
    */
-  collectionSpecific?: boolean
+  collectionSpecific?:
+    | {
+        /**
+         * Name of the select field for specifying allowed collections
+         * @default 'hierarchyType'
+         */
+        fieldName?: string
+      }
+    | boolean
+  /**
+   * Configure a join field to query all children (nested hierarchy items and related documents)
+   * If not set, no join field is created
+   */
+  joinField?: {
+    /** Name of the join field */
+    fieldName: string
+  }
   /**
    * Name of the field that references the parent document
    * Will automatically create this field if it does not exist
@@ -71,7 +87,17 @@ export type SanitizedHierarchyConfig = {
     treeLimit: number
   }
   allowHasMany: boolean
-  collectionSpecific: boolean
+  collectionSpecific:
+    | {
+        fieldName: string
+      }
+    | false
+  /**
+   * Join field configuration, or undefined if not enabled
+   */
+  joinField?: {
+    fieldName: string
+  }
   parentFieldName: string
   /**
    * Auto-populated during validation - maps collection slug to field info
@@ -88,4 +114,18 @@ export type SanitizedHierarchyConfig = {
 export type SanitizedHierarchyRelatedCollection = {
   fieldName: string
   hasMany: boolean
+}
+
+/**
+ * Client-safe hierarchy configuration (excludes functions that can't cross server-client boundary)
+ */
+export type ClientHierarchyConfig = Omit<SanitizedHierarchyConfig, 'slugify'>
+
+/**
+ * Breadcrumb item for folder hierarchies
+ * @deprecated Use hierarchy breadcrumbs instead
+ */
+export type FolderBreadcrumb = {
+  id: number | string
+  name: string
 }

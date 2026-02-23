@@ -1,6 +1,6 @@
 'use client'
 
-import { DEFAULT_TAXONOMY_TREE_LIMIT } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload'
 import React, { useCallback, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'
@@ -12,7 +12,7 @@ import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
 import { useChildren } from '../useChildren.js'
 import './index.scss'
 
-const baseClass = 'taxonomy-tree-node'
+const baseClass = 'hierarchy-tree-node'
 
 const getDocumentTitle = (doc: Record<string, unknown>, useAsTitle: string | undefined): string => {
   const docId: number | string = doc.id as number | string
@@ -34,7 +34,7 @@ export const TreeNode = ({
   collectionSlug,
   depth = 0,
   expandedNodes,
-  limit = DEFAULT_TAXONOMY_TREE_LIMIT,
+  limit = DEFAULT_HIERARCHY_TREE_LIMIT,
   node,
   onSelect,
   onToggle,
@@ -134,7 +134,7 @@ export const TreeNode = ({
     <div
       className={baseClass}
       ref={nodeRef}
-      style={{ '--taxonomy-tree-depth': depth } as React.CSSProperties}
+      style={{ '--hierarchy-tree-depth': depth } as React.CSSProperties}
     >
       <div
         className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]

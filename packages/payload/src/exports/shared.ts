@@ -47,9 +47,11 @@ export {
 } from '../fields/config/types.js'
 
 export { getFieldPaths } from '../fields/getFieldPaths.js'
-export * from '../fields/validations.js'
 
-export type { FolderBreadcrumb } from '../folders/types.js'
+export * from '../fields/validations.js'
+export { HIERARCHY_PARENT_FIELD } from '../hierarchy/constants.js'
+
+export type { FolderBreadcrumb } from '../hierarchy/types.js'
 
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 

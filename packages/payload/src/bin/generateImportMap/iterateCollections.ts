@@ -37,6 +37,7 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.Description)
 
     addToImportMap(collection.admin?.components?.edit?.beforeDocumentControls)
+    addToImportMap(collection.admin?.components?.edit?.BeforeDocumentMeta)
     addToImportMap(collection.admin?.components?.edit?.editMenuItems)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)

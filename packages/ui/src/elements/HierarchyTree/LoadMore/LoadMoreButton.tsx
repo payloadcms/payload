@@ -23,7 +23,7 @@ export const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ id, onLoadMore }
 
   return (
     <button
-      className="taxonomy-tree__load-more-button"
+      className="hierarchy-tree__load-more-button"
       onClick={handleClick}
       onFocus={handleFocus}
       ref={buttonRef}

@@ -33,11 +33,13 @@ export type HierarchyTableProps = {
   collections?: CollectionOption[]
   collectionSlug: string
   hasCreatePermission?: boolean
+  /** Resolved hierarchy icon component */
+  HierarchyIcon?: React.ReactNode
+  hierarchyLabel: string
   parentFieldName?: string
   parentId: null | number | string
   relatedGroups: RelatedGroup[]
   search?: string
-  taxonomyLabel: string
   useAsTitle: string
 }
 
@@ -46,11 +48,12 @@ export function HierarchyTable({
   collections,
   collectionSlug,
   hasCreatePermission,
+  HierarchyIcon,
+  hierarchyLabel,
   parentFieldName,
   parentId,
   relatedGroups,
   search,
-  taxonomyLabel,
   useAsTitle,
 }: HierarchyTableProps) {
   const { i18n, t } = useTranslation()
@@ -175,7 +178,7 @@ export function HierarchyTable({
       }))
 
       try {
-        // Field name is always _t_{taxonomySlug} by convention
+        // Field name is always _t_{hierarchySlug} by convention
         const fieldName = `_t_${collectionSlug}`
 
         // "in" operator works for both hasMany and single relationship fields
@@ -241,6 +244,7 @@ export function HierarchyTable({
     id: doc.id,
     _collectionSlug: collectionSlug,
     _hasChildren: Boolean(doc._hasChildren),
+    _hierarchyIcon: HierarchyIcon,
   }))
 
   const hasChildren = childTotal > 0
@@ -266,14 +270,14 @@ export function HierarchyTable({
             ? [
                 <CreateDocumentButton
                   collections={collections}
-                  drawerSlug={`taxonomy-create-empty-${collectionSlug}`}
+                  drawerSlug={`hierarchy-create-empty-${collectionSlug}`}
                   key="create"
                   onSave={clearRouteCache}
                 />,
               ]
             : undefined
         }
-        Message={<p>{t('general:noResults', { label: taxonomyLabel })}</p>}
+        Message={<p>{t('general:noResults', { label: hierarchyLabel })}</p>}
       />
     )
   }
@@ -284,7 +288,7 @@ export function HierarchyTable({
       {hasChildren && (
         <Collapsible
           className={`${baseClass}__section`}
-          header={<h3 className={`${baseClass}__section-title`}>{taxonomyLabel}</h3>}
+          header={<h3 className={`${baseClass}__section-title`}>{hierarchyLabel}</h3>}
           key={`${collectionSlug}-${parentId}`}
         >
           <div>

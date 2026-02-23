@@ -1692,11 +1692,13 @@ export { findVersionsOperation as findVersionsOperationGlobal } from './globals/
 
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
 export {
-  createFolderCollection,
   createFolderField,
-  createTagCollection,
+  createFoldersCollection,
   createTagField,
+  createTagsCollection,
   DEFAULT_ALLOW_HAS_MANY,
   DEFAULT_HIERARCHY_TREE_LIMIT,
   getAncestors,
@@ -1709,10 +1711,10 @@ export {
 } from './hierarchy/index.js'
 export type {
   Ancestor,
-  CreateFolderCollectionOptions,
   CreateFolderFieldOptions,
-  CreateTagCollectionOptions,
+  CreateFoldersCollectionOptions,
   CreateTagFieldOptions,
+  CreateTagsCollectionOptions,
   HierarchyConfig,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,

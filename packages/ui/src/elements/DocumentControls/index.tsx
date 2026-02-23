@@ -34,16 +34,17 @@ import { PublishButton } from '../PublishButton/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
-import './index.scss'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
+import './index.scss'
 
 const baseClass = 'doc-controls'
 
 export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly BeforeDocumentControls?: React.ReactNode
+  readonly BeforeDocumentMeta?: React.ReactNode
   readonly customComponents?: {
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
@@ -82,6 +83,7 @@ export const DocumentControls: React.FC<{
     id,
     slug,
     BeforeDocumentControls,
+    BeforeDocumentMeta,
     customComponents: {
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
@@ -128,7 +130,6 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -179,11 +180,14 @@ export const DocumentControls: React.FC<{
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          {showLockedMetaIcon ? (
-            <div className={`${baseClass}__meta-icons`}>
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
+          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
+            <div className={`${baseClass}__before-meta`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
+              )}
+              {BeforeDocumentMeta}
             </div>
-          ) : null}
+          )}
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>

@@ -20,8 +20,9 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { addFolderSidebarTabs } from '../folders/addFolderSidebarTab.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import { addHierarchySidebarTabs as addFolderSidebarTabs } from '../hierarchy/addHierarchySidebarTabs.js'
+import { addTagSidebarTabs as addHierarchySidebarTabs } from '../hierarchy/addTagSidebarTabs.js'
 import { validateHierarchyFields } from '../hierarchy/validateHierarchyFields.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
@@ -32,7 +33,6 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import { addHierarchySidebarTabs } from '../taxonomy/addHierarchySidebarTab.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -287,7 +287,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   // Validate hierarchy fields exist in related collections and build sanitized config
   validateHierarchyFields(config as unknown as Config)
 
-  // Add sidebar tabs for hierarchy collections (tags/taxonomy)
+  // Add sidebar tabs for hierarchy collections (tags/folders)
   addHierarchySidebarTabs(config as unknown as Config)
 
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {

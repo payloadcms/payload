@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { createFolderField } from 'payload'
+
 export const FolderPoly1: CollectionConfig = {
   slug: 'folderPoly1',
   fields: [
@@ -7,6 +9,6 @@ export const FolderPoly1: CollectionConfig = {
       name: 'folderPoly1Title',
       type: 'text',
     },
+    createFolderField({ relationTo: 'folders' }),
   ],
-  folders: true,
 }

@@ -1,10 +1,29 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { createFolderField, createFoldersCollection } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { Posts } from './collections/Posts/index.js'
+import { postSlug } from './shared.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+const folderSlug = 'payload-folders'
+
+const Posts = {
+  slug: postSlug,
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+    createFolderField({ fieldName: 'folder', relationTo: folderSlug }),
+  ],
+} as const
 
 export default buildConfigWithDefaults({
   admin: {
@@ -12,16 +31,18 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  folders: {
-    // debug: true,
-    collectionOverrides: [
-      ({ collection }) => {
-        return collection
+  collections: [
+    createFoldersCollection({
+      slug: folderSlug,
+      fields: [{ name: 'name', type: 'text', required: true }],
+      useAsTitle: 'name',
+      hierarchy: {
+        joinField: { fieldName: 'documentsAndFolders' },
+        parentFieldName: 'folder',
       },
-    ],
-    browseByFolder: false,
-  },
-  collections: [Posts],
+    }),
+    Posts,
+  ],
   globals: [
     {
       slug: 'global',
@@ -41,7 +62,6 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-    // await seed(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

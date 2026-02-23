@@ -1,6 +1,7 @@
 /**
  * beforeChange Hook Responsibilities:
  * - Validate circular references when parent changes
+ * - Prevent moving a folder into its own subfolder
  *
  * Does NOT handle:
  * - Tree structure (no stored tree anymore)
@@ -45,8 +46,8 @@ export const hierarchyCollectionBeforeChange =
         throw new Error('Document cannot be its own parent')
       }
 
-      // Prevent circular references by walking up the parent chain
-      // Parent is always from the same collection (self-referential)
+      // Check for true circular references (loops in the chain), but allow
+      // moving into a child - that will be handled by afterChange reparenting
       await validateNoCircularReference({
         collection,
         currentDocId: originalDoc?.id,
@@ -59,8 +60,9 @@ export const hierarchyCollectionBeforeChange =
   }
 
 /**
- * Walks up the parent chain to detect circular references
- * Hierarchies are always self-referential, so we only check within the same collection
+ * Walks up the parent chain to detect true circular references (loops).
+ * Does NOT throw when moving into a child - that case is handled by afterChange
+ * which will automatically reparent the child.
  */
 async function validateNoCircularReference({
   collection,
@@ -85,16 +87,14 @@ async function validateNoCircularReference({
     // Create unique key for this node
     const nodeKey = `${collection.slug}:${ancestorId}`
 
-    // Check if we've visited this node (circular reference)
+    // Check if we've visited this node before (true loop in the chain)
     if (visitedNodes.has(nodeKey)) {
       throw new Error(`Circular reference detected: the parent chain contains a loop`)
     }
 
-    // Check if we've looped back to the current document
+    // If we've reached the current document, this means we're trying to move into a child
     if (ancestorId === currentDocId) {
-      throw new Error(
-        'Circular reference detected: the new parent is a descendant of this document',
-      )
+      throw new Error('Cannot move folder into its own subfolder')
     }
 
     // Add this node to visited set

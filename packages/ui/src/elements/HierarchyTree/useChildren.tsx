@@ -2,7 +2,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { TaxonomyDocument, TaxonomyInitialData } from './types.js'
+import type { HierarchyDocument, HierarchyInitialData } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 
@@ -10,24 +10,24 @@ type UseChildrenArgs = {
   cache?: React.MutableRefObject<Map<string, CachedChildren>>
   collectionSlug: string
   enabled?: boolean
-  initialData?: null | TaxonomyInitialData
+  initialData?: HierarchyInitialData | null
   limit?: number
   parentFieldName: string
   parentId: number | string
 }
 
 type CachedChildren = {
-  children: TaxonomyDocument[]
+  children: HierarchyDocument[]
   hasMore: boolean
   page: number
   totalDocs: number
 }
 
 type UseChildrenReturn = {
-  children: null | TaxonomyDocument[]
+  children: HierarchyDocument[] | null
   hasMore: boolean
   isLoading: boolean
-  loadMore: () => Promise<TaxonomyDocument[]>
+  loadMore: () => Promise<HierarchyDocument[]>
   totalDocs: number
 }
 
@@ -56,7 +56,7 @@ export const useChildren = ({
       })
     : null
 
-  const [children, setChildren] = useState<null | TaxonomyDocument[]>(
+  const [children, setChildren] = useState<HierarchyDocument[] | null>(
     initialDocsForParent || cachedData?.children || null,
   )
   const [isLoading, setIsLoading] = useState(!hasInitialData && !cachedData && enabled)
@@ -74,8 +74,8 @@ export const useChildren = ({
   const fetchPage = useCallback(
     async (
       pageToFetch: number,
-      currentChildren: null | TaxonomyDocument[],
-    ): Promise<TaxonomyDocument[]> => {
+      currentChildren: HierarchyDocument[] | null,
+    ): Promise<HierarchyDocument[]> => {
       setIsLoading(true)
 
       try {
@@ -127,7 +127,7 @@ export const useChildren = ({
         return newDocs
       } catch {
         if (pageToFetch === 1) {
-          const emptyChildren: TaxonomyDocument[] = []
+          const emptyChildren: HierarchyDocument[] = []
           setChildren(emptyChildren)
           setHasMore(false)
 
@@ -167,7 +167,7 @@ export const useChildren = ({
     void fetchPage(page, children)
   }, [enabled, page, cachedData, fetchPage, children])
 
-  const loadMore = useCallback(async (): Promise<TaxonomyDocument[]> => {
+  const loadMore = useCallback(async (): Promise<HierarchyDocument[]> => {
     if (isLoading || !hasMore) {
       return []
     }

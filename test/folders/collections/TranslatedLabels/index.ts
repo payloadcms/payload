@@ -14,7 +14,7 @@ export const TranslatedLabels: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-    createFolderField({ folderSlug }),
+    createFolderField({ fieldName: 'folder', relationTo: folderSlug }),
   ],
   labels: {
     plural: ({ t }) => t('general:documents'),

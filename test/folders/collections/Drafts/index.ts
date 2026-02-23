@@ -14,7 +14,7 @@ export const Drafts: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-    createFolderField({ folderSlug }),
+    createFolderField({ fieldName: 'folder', relationTo: folderSlug }),
   ],
   versions: {
     drafts: true,

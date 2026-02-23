@@ -1,6 +1,6 @@
 import type { SidebarTabServerProps } from 'payload'
 
-import { getInitialTreeData } from 'payload'
+import { getInitialTreeData, HIERARCHY_PARENT_FIELD } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
@@ -32,7 +32,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     selectedNodeId = searchParams?.parent ? String(searchParams.parent) : null
 
     // STEP 1: Load user's expanded node preferences
-    const preferenceKey = `${PREFERENCE_KEYS.TAXONOMY_TREE}-${collectionSlug}`
+    const preferenceKey = `${PREFERENCE_KEYS.HIERARCHY_TREE}-${collectionSlug}`
 
     const { docs: preferenceDocs } = await payload.find({
       collection: 'payload-preferences',
@@ -56,8 +56,11 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
     // STEP 2: Get collection config
     const collectionConfig = payload.collections[collectionSlug]?.config
-    const hierarchyConfig = collectionConfig?.hierarchy
-    parentFieldName = hierarchyConfig?.parentFieldName || 'parent'
+    const hierarchyConfig =
+      collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+        ? collectionConfig.hierarchy
+        : undefined
+    parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
     treeLimit = hierarchyConfig?.admin?.treeLimit
     useAsTitle = collectionConfig?.admin?.useAsTitle
 

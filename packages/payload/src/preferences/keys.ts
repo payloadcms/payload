@@ -5,19 +5,14 @@
 
 export const PREFERENCE_KEYS = {
   /**
-   * Stores browse by folder view state
-   */
-  BROWSE_BY_FOLDER: 'browse-by-folder',
-
-  /**
    * Stores dashboard layout configuration
    */
   DASHBOARD_LAYOUT: 'dashboard-layout',
 
   /**
-   * Stores folder tree expand/collapse state per collection
+   * Stores hierarchy tree expand/collapse state per collection
    */
-  FOLDER_TREE: 'folder-tree',
+  HIERARCHY_TREE: 'hierarchy-tree',
 
   /**
    * Stores navigation group collapse/expand state and nav open/closed state
@@ -28,9 +23,4 @@ export const PREFERENCE_KEYS = {
    * Stores active sidebar tab selection
    */
   NAV_SIDEBAR_ACTIVE_TAB: 'nav-sidebar-active-tab',
-
-  /**
-   * Stores taxonomy tree expand/collapse state per collection
-   */
-  TAXONOMY_TREE: 'taxonomy-tree',
 } as const

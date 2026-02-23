@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { createFolderCollection, createTaxonomyCollection } from 'payload'
+import { createFoldersCollection, createTagsCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -11,7 +11,7 @@ import { OmittedFromBrowseBy } from './collections/OmittedFromBrowseBy/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { TranslatedLabels } from './collections/TranslatedLabels/index.js'
 import { seed } from './seed.js'
-import { folderSlug, taxonomySlug } from './shared.js'
+import { folderSlug, tagsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,22 +23,30 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
-    createFolderCollection({
+    createFoldersCollection({
       slug: folderSlug,
       useAsTitle: 'name',
       fields: [
         { name: 'name', type: 'text', required: true },
         { name: 'folderSlug', type: 'text' },
       ],
-      folder: {
-        collectionSpecific: false,
+      hierarchy: {
+        collectionSpecific: { fieldName: 'folderType' },
+        joinField: { fieldName: 'documentsAndFolders' },
+        parentFieldName: 'folder',
       },
     }),
-    createTaxonomyCollection({
-      slug: taxonomySlug,
+    createTagsCollection({
+      slug: tagsSlug,
       useAsTitle: 'name',
       fields: [{ name: 'name', type: 'text', required: true }],
-      taxonomy: {},
+      hierarchy: {
+        admin: {
+          components: {
+            Icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+          },
+        },
+      },
     }),
     Posts,
     Media,

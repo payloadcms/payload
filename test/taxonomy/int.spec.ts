@@ -28,15 +28,15 @@ describe('Taxonomy', () => {
   })
 
   describe('Collection Configuration', () => {
-    it('should enable taxonomy on tags collection', () => {
+    it('should enable hierarchy on tags collection', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
 
       expect(tagsCollection).toBeDefined()
-      expect((tagsCollection as any)?.taxonomy).toBeDefined()
-      expect((tagsCollection as any)?.taxonomy).toBeTypeOf('object')
+      expect((tagsCollection as any)?.hierarchy).toBeDefined()
+      expect((tagsCollection as any)?.hierarchy).toBeTypeOf('object')
     })
 
-    it('should enable hierarchy when taxonomy is enabled', () => {
+    it('should have parentFieldName in hierarchy config', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
 
       expect((tagsCollection as any)?.hierarchy).not.toBe(false)
@@ -46,7 +46,7 @@ describe('Taxonomy', () => {
     it('should add parent field to taxonomy collection', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
       const parentField = tagsCollection?.fields.find(
-        (f: any) => f.name === 'parent' && f.type === 'relationship',
+        (f: any) => f.name === '_h_parent' && f.type === 'relationship',
       )
 
       expect(parentField).toBeDefined()
@@ -66,7 +66,7 @@ describe('Taxonomy', () => {
       )
 
       expect(parentField).toBeDefined()
-      expect((categoriesCollection as any)?.taxonomy).toHaveProperty(
+      expect((categoriesCollection as any)?.hierarchy).toHaveProperty(
         'parentFieldName',
         'parentCategory',
       )
@@ -94,7 +94,7 @@ describe('Taxonomy', () => {
       createdIDs.push(tag.id)
 
       expect(tag).toHaveProperty('name', 'Technology')
-      expect(tag.parent).toBeUndefined()
+      expect(tag._h_parent).toBeUndefined()
     })
 
     it('should create a child taxonomy item', async () => {
@@ -111,7 +111,7 @@ describe('Taxonomy', () => {
         collection: tagsSlug as any,
         data: {
           name: 'JavaScript',
-          parent: parent.id,
+          _h_parent: parent.id,
         } as any,
       })
 
@@ -119,7 +119,7 @@ describe('Taxonomy', () => {
 
       expect(child).toHaveProperty('name', 'JavaScript')
       // Parent is populated at depth > 0, so check the ID within the object
-      const parentValue = child.parent
+      const parentValue = child._h_parent
       const parentId = typeof parentValue === 'object' ? parentValue?.id : parentValue
       expect(parentId).toBe(parent.id)
     })
@@ -138,7 +138,7 @@ describe('Taxonomy', () => {
         collection: tagsSlug as any,
         data: {
           name: 'Tag 2',
-          parent: tag1.id,
+          _h_parent: tag1.id,
         } as any,
       })
 
@@ -149,7 +149,7 @@ describe('Taxonomy', () => {
           id: tag1.id,
           collection: tagsSlug as any,
           data: {
-            parent: tag2.id,
+            _h_parent: tag2.id,
           } as any,
         }),
       ).rejects.toThrow(/circular/i)
@@ -170,7 +170,7 @@ describe('Taxonomy', () => {
           id: tag.id,
           collection: tagsSlug as any,
           data: {
-            parent: tag.id,
+            _h_parent: tag.id,
           } as any,
         }),
       ).rejects.toThrow(/own parent/i)
@@ -205,16 +205,16 @@ describe('Taxonomy', () => {
       const post = await payload.create({
         collection: postsSlug as any,
         data: {
-          _t_tags: [tag.id],
+          _h_tags: [tag.id],
           title: 'Getting Started with TypeScript',
         } as any,
       })
 
       createdPostIDs.push(post.id)
 
-      expect(post._t_tags).toHaveLength(1)
+      expect(post._h_tags).toHaveLength(1)
       // Tags are populated at depth > 0, so check the ID within the object
-      const tagValue = post._t_tags[0]
+      const tagValue = post._h_tags[0]
       const tagId = typeof tagValue === 'object' ? tagValue?.id : tagValue
       expect(tagId).toBe(tag.id)
     })
@@ -232,7 +232,7 @@ describe('Taxonomy', () => {
       const post1 = await payload.create({
         collection: postsSlug as any,
         data: {
-          _t_tags: [tag.id],
+          _h_tags: [tag.id],
           title: 'React Hooks',
         } as any,
       })
@@ -242,7 +242,7 @@ describe('Taxonomy', () => {
       const post2 = await payload.create({
         collection: postsSlug as any,
         data: {
-          _t_tags: [tag.id],
+          _h_tags: [tag.id],
           title: 'React Components',
         } as any,
       })
@@ -252,7 +252,7 @@ describe('Taxonomy', () => {
       const results = await payload.find({
         collection: postsSlug as any,
         where: {
-          _t_tags: {
+          _h_tags: {
             equals: tag.id,
           },
         },

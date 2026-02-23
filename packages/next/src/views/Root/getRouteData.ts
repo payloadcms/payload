@@ -212,7 +212,7 @@ export const getRouteData = ({
         // --> /collections/:collectionSlug'
         routeParams.collection = collectionConfig.slug
 
-        // Regular list view - handles taxonomy collections via handleTaxonomy when ?parent= is present
+        // Regular list view - handles hierarchy collections via handleHierarchy when ?parent= is present
         ViewToRender = {
           Component: ListView,
         }

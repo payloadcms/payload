@@ -52,6 +52,7 @@ export function DefaultListView(props: ListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
+    hierarchyData,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -59,7 +60,6 @@ export function DefaultListView(props: ListViewClientProps) {
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
-    taxonomyData,
     viewType,
   } = props
 
@@ -135,7 +135,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
               })
-            : taxonomyData
+            : hierarchyData
               ? formatAdminURL({
                   adminRoute,
                   path: `/collections/${collectionSlug}`,
@@ -149,10 +149,10 @@ export function DefaultListView(props: ListViewClientProps) {
 
       let navItems = isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
 
-      // Add taxonomy breadcrumbs
-      if (taxonomyData?.breadcrumbs) {
-        const taxonomyBreadcrumbs = taxonomyData.breadcrumbs.map((crumb, index) => {
-          const isLast = index === taxonomyData.breadcrumbs.length - 1
+      // Add hierarchy breadcrumbs
+      if (hierarchyData?.breadcrumbs) {
+        const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
+          const isLast = index === hierarchyData.breadcrumbs.length - 1
           return {
             label: crumb.title,
             url: isLast
@@ -163,7 +163,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 }),
           }
         })
-        navItems = [...navItems, ...taxonomyBreadcrumbs]
+        navItems = [...navItems, ...hierarchyBreadcrumbs]
       }
 
       setStepNav(navItems)
@@ -178,7 +178,7 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
     i18n,
     collectionSlug,
-    taxonomyData,
+    hierarchyData,
     collectionLabel,
   ])
 
@@ -236,23 +236,24 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {taxonomyData ? (
+              {hierarchyData ? (
                 <DocumentSelectionProvider
                   collectionData={{
-                    [collectionSlug]: { docs: taxonomyData.childrenData.docs },
+                    [collectionSlug]: { docs: hierarchyData.childrenData.docs },
                     ...Object.fromEntries(
-                      Object.entries(taxonomyData.relatedDocumentsByCollection).map(
+                      Object.entries(hierarchyData.relatedDocumentsByCollection).map(
                         ([slug, related]) => [slug, { docs: related.result.docs }],
                       ),
                     ),
                   }}
                 >
                   <HierarchyTable
-                    childrenData={taxonomyData.childrenData}
+                    childrenData={hierarchyData.childrenData}
                     collectionSlug={collectionSlug}
-                    key={taxonomyData.parentId}
-                    parentId={taxonomyData.parentId}
-                    relatedGroups={Object.entries(taxonomyData.relatedDocumentsByCollection).map(
+                    hierarchyLabel={collectionLabel}
+                    key={hierarchyData.parentId}
+                    parentId={hierarchyData.parentId}
+                    relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
                       ([slug, related]) => ({
                         collectionSlug: slug,
                         data: related.result,
@@ -260,7 +261,6 @@ export function DefaultListView(props: ListViewClientProps) {
                         label: related.label,
                       }),
                     )}
-                    taxonomyLabel={collectionLabel}
                     useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
                   />
                   <DocumentListSelection

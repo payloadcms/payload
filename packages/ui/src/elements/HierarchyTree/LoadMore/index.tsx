@@ -23,11 +23,11 @@ export const LoadMore: React.FC<LoadMoreProps> = ({
 }) => {
   return (
     <LoadMoreRow
-      className="taxonomy-tree__load-more"
+      className="hierarchy-tree__load-more"
       currentCount={currentCount}
       hasMore={currentCount < totalDocs}
       loadMoreButton={<LoadMoreButton id={id} onLoadMore={onLoadMore} />}
-      style={{ '--taxonomy-tree-depth': depth } as React.CSSProperties}
+      style={{ '--hierarchy-tree-depth': depth } as React.CSSProperties}
       totalDocs={totalDocs}
     />
   )

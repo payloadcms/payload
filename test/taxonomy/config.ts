@@ -6,7 +6,7 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import { createTaxonomyCollection, createTaxonomyField } from 'payload'
+import { createTagField, createTagsCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -18,8 +18,8 @@ export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
 export const categoriesSlug = 'categories'
 
-// Categories taxonomy with custom configuration
-export const Categories = createTaxonomyCollection({
+// Categories hierarchy with custom configuration
+export const Categories = createTagsCollection({
   slug: categoriesSlug,
   useAsTitle: 'name',
   fields: [
@@ -29,15 +29,19 @@ export const Categories = createTaxonomyCollection({
       required: true,
     },
   ],
-  taxonomy: {
-    icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+  hierarchy: {
+    admin: {
+      components: {
+        Icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+      },
+    },
     parentFieldName: 'parentCategory',
     // relatedCollections auto-discovered from fields
   },
 })
 
-// Tags taxonomy collection
-export const Tags = createTaxonomyCollection({
+// Tags hierarchy collection
+export const Tags = createTagsCollection({
   slug: tagsSlug,
   useAsTitle: 'name',
   fields: [
@@ -51,9 +55,7 @@ export const Tags = createTaxonomyCollection({
       type: 'textarea',
     },
   ],
-  taxonomy: {
-    // relatedCollections auto-discovered from fields
-  },
+  // relatedCollections auto-discovered from fields
 })
 
 // Posts collection that references tags and categories
@@ -72,8 +74,8 @@ export const Posts: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug, label: 'Tags' }),
-    createTaxonomyField({ taxonomySlug: categoriesSlug, label: 'Categories' }),
+    createTagField({ hasMany: true, relationTo: tagsSlug, label: 'Tags' }),
+    createTagField({ relationTo: categoriesSlug, label: 'Categories' }),
   ],
 }
 
@@ -93,7 +95,7 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTaxonomyField({ hasMany: false, taxonomySlug: tagsSlug }),
+    createTagField({ hasMany: false, relationTo: tagsSlug }),
   ],
 }
 
@@ -109,7 +111,7 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    createTaxonomyField({ hasMany: true, taxonomySlug: tagsSlug }),
+    createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
   upload: true,
 }

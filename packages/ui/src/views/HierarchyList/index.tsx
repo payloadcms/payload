@@ -4,6 +4,7 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { HIERARCHY_PARENT_FIELD } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect } from 'react'
@@ -20,8 +21,8 @@ import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
-import { useTaxonomy } from '../../providers/Taxonomy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
@@ -36,7 +37,8 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     Description,
     hasCreatePermission: hasCreatePermissionFromProps,
-    taxonomyData,
+    hierarchyData,
+    HierarchyIcon,
   } = props
 
   const router = useRouter()
@@ -64,7 +66,7 @@ export function HierarchyListView(props: ListViewClientProps) {
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
   const { setStepNav } = useStepNav()
-  const { selectedParentId } = useTaxonomy()
+  const { selectedParentId } = useHierarchy()
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -97,19 +99,19 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   // Get current item title from breadcrumbs (last item is the current one)
   const currentItemTitle =
-    taxonomyData?.breadcrumbs && taxonomyData.breadcrumbs.length > 0
-      ? taxonomyData.breadcrumbs[taxonomyData.breadcrumbs.length - 1].title
+    hierarchyData?.breadcrumbs && hierarchyData.breadcrumbs.length > 0
+      ? hierarchyData.breadcrumbs[hierarchyData.breadcrumbs.length - 1].title
       : undefined
 
   useEffect(() => {
     if (!isInDrawer) {
       // Breadcrumbs exclude the last item (current item) since it's shown in the header
-      const ancestorBreadcrumbs = taxonomyData?.breadcrumbs?.slice(0, -1) || []
+      const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
         label: (
           <div className={`${baseClass}__step-nav-icon-label`}>
-            <TagIcon color="muted" />
+            {HierarchyIcon || <TagIcon color="muted" />}
             {collectionLabel}
           </div>
         ),
@@ -124,14 +126,14 @@ export function HierarchyListView(props: ListViewClientProps) {
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
-        const taxonomyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
+        const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
           url: formatAdminURL({
             adminRoute,
             path: `/collections/${collectionSlug}?parent=${crumb.id}`,
           }),
         }))
-        navItems = [...navItems, ...taxonomyBreadcrumbs]
+        navItems = [...navItems, ...hierarchyBreadcrumbs]
       }
 
       setStepNav(navItems)
@@ -141,45 +143,49 @@ export function HierarchyListView(props: ListViewClientProps) {
     setStepNav,
     isInDrawer,
     collectionSlug,
-    taxonomyData,
+    hierarchyData,
     collectionLabel,
     currentItemTitle,
     selectedParentId,
+    HierarchyIcon,
   ])
 
-  const parentFieldName = collectionConfig?.taxonomy?.parentFieldName || 'parent'
-  const parentId = taxonomyData?.parentId ?? null
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentId = hierarchyData?.parentId ?? null
 
   // Build collections array for create button
   const collections: CollectionOption[] = []
 
-  // Add taxonomy collection (for creating child taxonomy items)
+  // Add hierarchy collection (for creating child hierarchy items)
   collections.push({
     collectionSlug,
     initialData: parentId !== null ? { [parentFieldName]: parentId } : {},
   })
 
-  // Add related collections (for creating documents that reference this taxonomy)
-  // Use taxonomyConfig.relatedCollections to show ALL related collections, not just ones with documents
-  const taxonomyFieldName = `_t_${collectionSlug}`
-  for (const slug of Object.keys(collectionConfig.taxonomy?.relatedCollections || {})) {
+  // Add related collections (for creating documents that reference this hierarchy)
+  // Use hierarchyConfig.relatedCollections to show ALL related collections, not just ones with documents
+  const hierarchyFieldName = `_h_${collectionSlug}`
+  for (const slug of Object.keys(hierarchyConfig?.relatedCollections || {})) {
     collections.push({
       collectionSlug: slug,
       // Always use array - Payload normalizes for single relationship fields
-      initialData: parentId !== null ? { [taxonomyFieldName]: [parentId] } : {},
+      initialData: parentId !== null ? { [hierarchyFieldName]: [parentId] } : {},
     })
   }
 
-  const filteredChildrenData = taxonomyData?.childrenData
+  const filteredChildrenData = hierarchyData?.childrenData
 
-  const collectionData = taxonomyData
+  const collectionData = hierarchyData
     ? {
-        [collectionSlug]: { docs: taxonomyData.childrenData.docs },
+        [collectionSlug]: { docs: hierarchyData.childrenData.docs },
         ...Object.fromEntries(
-          Object.entries(taxonomyData.relatedDocumentsByCollection || {}).map(([slug, related]) => [
-            slug,
-            { docs: related.result.docs },
-          ]),
+          Object.entries(hierarchyData.relatedDocumentsByCollection || {}).map(
+            ([slug, related]) => [slug, { docs: related.result.docs }],
+          ),
         ),
       }
     : {}
@@ -226,14 +232,16 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
+              HierarchyIcon={HierarchyIcon}
+              hierarchyLabel={collectionLabel}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${filteredChildrenData?.totalDocs}-${Object.entries(
-                taxonomyData?.relatedDocumentsByCollection || {},
+                hierarchyData?.relatedDocumentsByCollection || {},
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)
                 .join(',')}`}
               parentFieldName={parentFieldName}
               parentId={parentId}
-              relatedGroups={Object.entries(taxonomyData?.relatedDocumentsByCollection || {}).map(
+              relatedGroups={Object.entries(hierarchyData?.relatedDocumentsByCollection || {}).map(
                 ([slug, related]) => ({
                   collectionSlug: slug,
                   data: related.result,
@@ -242,7 +250,6 @@ export function HierarchyListView(props: ListViewClientProps) {
                 }),
               )}
               search={searchFromURL}
-              taxonomyLabel={collectionLabel}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
           </Gutter>

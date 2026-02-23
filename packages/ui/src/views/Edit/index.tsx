@@ -55,6 +55,7 @@ export type OnSaveContext = {
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
   BeforeDocumentControls,
+  BeforeDocumentMeta,
   Description,
   EditMenuItems,
   LivePreview: CustomLivePreview,
@@ -544,7 +545,11 @@ export function DefaultEditView({
     !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
-  const isFolderCollection = Boolean(collectionConfig?.folder)
+  const isFolderCollection = Boolean(
+    collectionConfig?.hierarchy &&
+      typeof collectionConfig.hierarchy === 'object' &&
+      collectionConfig.hierarchy.allowHasMany === false,
+  )
 
   return (
     <main
@@ -638,6 +643,7 @@ export function DefaultEditView({
           <DocumentControls
             apiURL={apiURL}
             BeforeDocumentControls={BeforeDocumentControls}
+            BeforeDocumentMeta={BeforeDocumentMeta}
             customComponents={{
               PreviewButton,
               PublishButton,

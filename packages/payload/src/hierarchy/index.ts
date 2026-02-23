@@ -7,15 +7,16 @@ export {
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
 } from './constants.js'
-export { createFolderCollection } from './createFolderCollection.js'
-export type { CreateFolderCollectionOptions } from './createFolderCollection.js'
 export { createFolderField } from './createFolderField.js'
 export type { CreateFolderFieldOptions } from './createFolderField.js'
-export { createTagCollection } from './createTagCollection.js'
-export type { CreateTagCollectionOptions } from './createTagCollection.js'
+export { createFoldersCollection } from './createFoldersCollection.js'
+export type { CreateFoldersCollectionOptions } from './createFoldersCollection.js'
 export { createTagField } from './createTagField.js'
 export type { CreateTagFieldOptions } from './createTagField.js'
+export { createTagsCollection } from './createTagsCollection.js'
+export type { CreateTagsCollectionOptions } from './createTagsCollection.js'
 export type {
+  ClientHierarchyConfig,
   HierarchyConfig,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,

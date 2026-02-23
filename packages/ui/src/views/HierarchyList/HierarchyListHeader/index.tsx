@@ -49,8 +49,8 @@ export function HierarchyListHeader({
         <DocumentListSelection
           disableBulkDelete={disableBulkDelete}
           disableBulkEdit={disableBulkEdit}
+          hierarchySlug={collectionConfig.slug}
           key="document-list-selection"
-          taxonomySlug={collectionConfig.slug}
         />,
       ]}
       AfterListHeaderContent={Description}
@@ -61,8 +61,8 @@ export function HierarchyListHeader({
           ? [
               <CreateDocumentButton
                 collections={collections}
-                drawerSlug={`taxonomy-create-${collectionConfig.slug}`}
-                key="taxonomy-create-button"
+                drawerSlug={`hierarchy-create-${collectionConfig.slug}`}
+                key="hierarchy-create-button"
                 onSave={clearRouteCache}
               />,
             ]

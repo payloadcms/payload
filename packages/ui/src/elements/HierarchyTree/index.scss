@@ -1,6 +1,6 @@
 @import '../../scss/styles.scss';
 
-.taxonomy-sidebar-tab {
+.hierarchy-sidebar-tab {
   padding: 0;
   margin: 0;
   overflow-y: auto;
@@ -10,15 +10,15 @@
   margin-inline: calc(var(--nav-padding-inline-start) * -1);
 }
 
-.taxonomy-tree {
+.hierarchy-tree {
   // CSS variables for customization - defined once at the top level
-  --taxonomy-tree-indent: 20px;
-  --taxonomy-tree-chevron-width: 16px;
-  --taxonomy-tree-chevron-spacing: 8px;
-  --taxonomy-tree-node-padding-y: calc(var(--base) / 4); // 4px
-  --taxonomy-tree-node-content-height: 24px;
-  --taxonomy-tree-row-gap: 8px;
-  --taxonomy-tree-font-size: 13px;
+  --hierarchy-tree-indent: 20px;
+  --hierarchy-tree-chevron-width: 16px;
+  --hierarchy-tree-chevron-spacing: 8px;
+  --hierarchy-tree-node-padding-y: calc(var(--base) / 4); // 4px
+  --hierarchy-tree-node-content-height: 24px;
+  --hierarchy-tree-row-gap: 8px;
+  --hierarchy-tree-font-size: 13px;
 
   padding: 0;
   margin: 0;
@@ -35,6 +35,6 @@
   &__empty {
     padding: 12px 16px;
     color: var(--theme-elevation-500);
-    font-size: var(--taxonomy-tree-font-size);
+    font-size: var(--hierarchy-tree-font-size);
   }
 }

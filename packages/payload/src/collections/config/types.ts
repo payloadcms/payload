@@ -41,7 +41,6 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { FolderConfig, SanitizedFolderConfig } from '../../folders/types.js'
 import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
@@ -55,7 +54,6 @@ import type {
   TypedCollectionSelect,
   TypedLocale,
 } from '../../index.js'
-import type { SanitizedTaxonomyConfig, TaxonomyConfig } from '../../taxonomy/types.js'
 import type {
   PayloadRequest,
   SelectIncludeType,
@@ -405,6 +403,10 @@ export type CollectionAdminOptions = {
        */
       beforeDocumentControls?: CustomComponent[]
       /**
+       * Inject custom components before the document metadata (left of status/timestamps)
+       */
+      BeforeDocumentMeta?: CustomComponent[]
+      /**
        * Inject custom components within the 3-dot menu dropdown
        */
       editMenuItems?: CustomComponent[]
@@ -619,11 +621,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Configuration for folder collections. When present, this collection is treated as a folder collection.
-   * Set to false to explicitly disable folder functionality.
-   */
-  folder?: false | FolderConfig
-  /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
   forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
@@ -732,25 +729,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
-   * Enable taxonomy functionality for this collection.
-   * Taxonomies are hierarchical collections that can be referenced by other collections.
-   * Automatically enables hierarchy with parent-child relationships.
-   *
-   * @example
-   * // Enable with defaults
-   * taxonomy: true
-   *
-   * @example
-   * // Customize related collections and hierarchy settings
-   * taxonomy: {
-   *   relatedCollections: ['posts', 'pages'],
-   *   parentFieldName: 'parent'
-   * }
-   *
-   * @experimental This is a beta feature and its behavior may be refined in future releases.
-   */
-  taxonomy?: TaxonomyConfig
-  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -829,7 +807,6 @@ export interface SanitizedCollectionConfig
     | 'folders'
     | 'hierarchy'
     | 'slug'
-    | 'taxonomy'
     | 'upload'
     | 'versions'
   > {
@@ -843,13 +820,12 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
-   * Configuration for folder collections. When present, this collection is treated as a folder collection.
+   * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
    */
-  folder?: false | SanitizedFolderConfig
+  hierarchy: false | SanitizedHierarchyConfig
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  hierarchy: false | SanitizedHierarchyConfig
   joins: SanitizedJoins
   /**
    * List of all polymorphic join fields
@@ -860,7 +836,6 @@ export interface SanitizedCollectionConfig
 
   slug: CollectionSlug
 
-  taxonomy?: SanitizedTaxonomyConfig
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

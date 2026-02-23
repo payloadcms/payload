@@ -573,6 +573,7 @@ export type FieldRow = {
 
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
+  BeforeDocumentMeta?: React.ReactNode
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   LivePreview?: React.ReactNode
@@ -647,6 +648,8 @@ export type {
   RenderDocumentVersionsProperties,
 } from './views/document.js'
 
+export type { RelatedDocumentsGrouped } from './views/hierarchyList.js'
+
 export type {
   AdminViewClientProps,
   /**
@@ -686,15 +689,13 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  HierarchyViewData,
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
-  TaxonomyViewData,
 } from './views/list.js'
-
-export type { RelatedDocumentsGrouped } from './views/taxonomyList.js'
 
 type SchemaPath = {} & string
 export type FieldSchemaMap = Map<

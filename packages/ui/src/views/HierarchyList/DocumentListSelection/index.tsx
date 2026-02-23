@@ -16,13 +16,13 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 export type DocumentListSelectionProps = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  taxonomySlug?: string
+  hierarchySlug?: string
 }
 
 export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
-  taxonomySlug,
+  hierarchySlug,
 }) => {
   const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
   const { clearRouteCache } = useRouteCache()
@@ -42,14 +42,14 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
 
   const ids = singleCollectionSelected ? groupedSelections[singleCollectionSlug]?.ids || [] : []
 
-  // Check if single taxonomy item is selected (for direct edit)
-  // Only available when taxonomySlug is provided
-  const singleTaxonomySelected =
-    taxonomySlug && singleCollectionSlug === taxonomySlug && ids.length === 1 ? ids[0] : null
+  // Check if single hierarchy item is selected (for direct edit)
+  // Only available when hierarchySlug is provided
+  const singleHierarchySelected =
+    hierarchySlug && singleCollectionSlug === hierarchySlug && ids.length === 1 ? ids[0] : null
 
-  const [TaxonomyDocDrawer, , { openDrawer }] = useDocumentDrawer({
-    id: singleTaxonomySelected ?? undefined,
-    collectionSlug: taxonomySlug || singleCollectionSlug || '',
+  const [HierarchyDocDrawer, , { openDrawer }] = useDocumentDrawer({
+    id: singleHierarchySelected ?? undefined,
+    collectionSlug: hierarchySlug || singleCollectionSlug || '',
   })
 
   if (count === 0) {
@@ -70,16 +70,16 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
         </ListSelectionButton>,
       ]}
       SelectionActions={[
-        // Single taxonomy item selected - show direct edit button
-        singleTaxonomySelected && (
+        // Single hierarchy item selected - show direct edit button
+        singleHierarchySelected && (
           <Fragment key="single-edit">
             <ListSelectionButton onClick={openDrawer}>{t('general:edit')}</ListSelectionButton>
-            <TaxonomyDocDrawer onSave={handleActionSuccess} />
+            <HierarchyDocDrawer onSave={handleActionSuccess} />
           </Fragment>
         ),
-        // Multiple items or non-taxonomy items - show bulk actions
+        // Multiple items or non-hierarchy items - show bulk actions
         !disableBulkEdit &&
-          !singleTaxonomySelected &&
+          !singleHierarchySelected &&
           singleCollectionSelected &&
           collectionConfig &&
           ids.length > 0 && (
@@ -88,7 +88,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
                 collection={collectionConfig}
                 count={ids.length}
                 ids={ids}
-                modalPrefix="taxonomy-list"
+                modalPrefix="hierarchy-list"
                 onSuccess={handleActionSuccess}
                 selectAll={false}
               />
@@ -96,7 +96,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
                 collection={collectionConfig}
                 count={ids.length}
                 ids={ids}
-                modalPrefix="taxonomy-list"
+                modalPrefix="hierarchy-list"
                 onSuccess={handleActionSuccess}
                 selectAll={false}
               />
@@ -104,7 +104,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
                 collection={collectionConfig}
                 count={ids.length}
                 ids={ids}
-                modalPrefix="taxonomy-list"
+                modalPrefix="hierarchy-list"
                 onSuccess={handleActionSuccess}
                 selectAll={false}
               />
@@ -114,7 +114,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
           <DeleteMany_v4
             afterDelete={handleActionSuccess}
             key="bulk-delete"
-            modalPrefix="taxonomy-list"
+            modalPrefix="hierarchy-list"
             selections={groupedSelections}
           />
         ),

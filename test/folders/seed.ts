@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { folderSlug, postSlug, taxonomySlug } from './shared.js'
+import { folderSlug, postSlug, tagsSlug } from './shared.js'
 
 export const seed = async (payload: Payload): Promise<void> => {
   // ============================================
@@ -26,109 +26,109 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Documents children
   const reports = await payload.create({
     collection: folderSlug,
-    data: { name: 'Reports', parent: documents.id },
+    data: { name: 'Reports', folder: documents.id },
   })
 
   const contracts = await payload.create({
     collection: folderSlug,
-    data: { name: 'Contracts', parent: documents.id },
+    data: { name: 'Contracts', folder: documents.id },
   })
 
   const invoices = await payload.create({
     collection: folderSlug,
-    data: { name: 'Invoices', parent: documents.id },
+    data: { name: 'Invoices', folder: documents.id },
   })
 
   // Reports children
   const quarterlyReports = await payload.create({
     collection: folderSlug,
-    data: { name: 'Quarterly Reports', parent: reports.id },
+    data: { name: 'Quarterly Reports', folder: reports.id },
   })
 
   const annualReports = await payload.create({
     collection: folderSlug,
-    data: { name: 'Annual Reports', parent: reports.id },
+    data: { name: 'Annual Reports', folder: reports.id },
   })
 
   // Projects children
   const clientA = await payload.create({
     collection: folderSlug,
-    data: { name: 'Client A', parent: projects.id },
+    data: { name: 'Client A', folder: projects.id },
   })
 
   const clientB = await payload.create({
     collection: folderSlug,
-    data: { name: 'Client B', parent: projects.id },
+    data: { name: 'Client B', folder: projects.id },
   })
 
   const internal = await payload.create({
     collection: folderSlug,
-    data: { name: 'Internal', parent: projects.id },
+    data: { name: 'Internal', folder: projects.id },
   })
 
   // Client A children
   const clientADesigns = await payload.create({
     collection: folderSlug,
-    data: { name: 'Designs', parent: clientA.id },
+    data: { name: 'Designs', folder: clientA.id },
   })
 
   const clientADocs = await payload.create({
     collection: folderSlug,
-    data: { name: 'Documentation', parent: clientA.id },
+    data: { name: 'Documentation', folder: clientA.id },
   })
 
   // Client B children
   const clientBDesigns = await payload.create({
     collection: folderSlug,
-    data: { name: 'Designs', parent: clientB.id },
+    data: { name: 'Designs', folder: clientB.id },
   })
 
   const clientBDocs = await payload.create({
     collection: folderSlug,
-    data: { name: 'Documentation', parent: clientB.id },
+    data: { name: 'Documentation', folder: clientB.id },
   })
 
   // Internal children
   const internalMeetings = await payload.create({
     collection: folderSlug,
-    data: { name: 'Meeting Notes', parent: internal.id },
+    data: { name: 'Meeting Notes', folder: internal.id },
   })
 
   const internalPolicies = await payload.create({
     collection: folderSlug,
-    data: { name: 'Policies', parent: internal.id },
+    data: { name: 'Policies', folder: internal.id },
   })
 
   // Archive children
   const archive2023 = await payload.create({
     collection: folderSlug,
-    data: { name: '2023', parent: archive.id },
+    data: { name: '2023', folder: archive.id },
   })
 
   const archive2024 = await payload.create({
     collection: folderSlug,
-    data: { name: '2024', parent: archive.id },
+    data: { name: '2024', folder: archive.id },
   })
 
   // Deep nesting example
   const archive2023Q1 = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q1', parent: archive2023.id },
+    data: { name: 'Q1', folder: archive2023.id },
   })
 
   const archive2023Q2 = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q2', parent: archive2023.id },
+    data: { name: 'Q2', folder: archive2023.id },
   })
 
   const archive2023Q3 = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q3', parent: archive2023.id },
+    data: { name: 'Q3', folder: archive2023.id },
   })
 
   const archive2023Q4 = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q4', parent: archive2023.id },
+    data: { name: 'Q4', folder: archive2023.id },
   })
 
   // More root folders
@@ -153,138 +153,138 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   // Root tags
   const status = await payload.create({
-    collection: taxonomySlug,
+    collection: tagsSlug,
     data: { name: 'Status' },
   })
 
   const priority = await payload.create({
-    collection: taxonomySlug,
+    collection: tagsSlug,
     data: { name: 'Priority' },
   })
 
   const department = await payload.create({
-    collection: taxonomySlug,
+    collection: tagsSlug,
     data: { name: 'Department' },
   })
 
   const type = await payload.create({
-    collection: taxonomySlug,
+    collection: tagsSlug,
     data: { name: 'Type' },
   })
 
   // Status children
   const draft = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Draft', parent: status.id },
+    collection: tagsSlug,
+    data: { name: 'Draft', _h_parent: status.id },
   })
 
   const inReview = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'In Review', parent: status.id },
+    collection: tagsSlug,
+    data: { name: 'In Review', _h_parent: status.id },
   })
 
   const approved = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Approved', parent: status.id },
+    collection: tagsSlug,
+    data: { name: 'Approved', _h_parent: status.id },
   })
 
   const published = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Published', parent: status.id },
+    collection: tagsSlug,
+    data: { name: 'Published', _h_parent: status.id },
   })
 
   const archived = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Archived', parent: status.id },
+    collection: tagsSlug,
+    data: { name: 'Archived', _h_parent: status.id },
   })
 
   // Priority children
   const urgent = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Urgent', parent: priority.id },
+    collection: tagsSlug,
+    data: { name: 'Urgent', _h_parent: priority.id },
   })
 
   const high = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'High', parent: priority.id },
+    collection: tagsSlug,
+    data: { name: 'High', _h_parent: priority.id },
   })
 
   const medium = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Medium', parent: priority.id },
+    collection: tagsSlug,
+    data: { name: 'Medium', _h_parent: priority.id },
   })
 
   const low = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Low', parent: priority.id },
+    collection: tagsSlug,
+    data: { name: 'Low', _h_parent: priority.id },
   })
 
   // Department children
   const engineering = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Engineering', parent: department.id },
+    collection: tagsSlug,
+    data: { name: 'Engineering', _h_parent: department.id },
   })
 
   const design = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Design', parent: department.id },
+    collection: tagsSlug,
+    data: { name: 'Design', _h_parent: department.id },
   })
 
   const marketing = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Marketing', parent: department.id },
+    collection: tagsSlug,
+    data: { name: 'Marketing', _h_parent: department.id },
   })
 
   const sales = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Sales', parent: department.id },
+    collection: tagsSlug,
+    data: { name: 'Sales', _h_parent: department.id },
   })
 
   const hr = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'HR', parent: department.id },
+    collection: tagsSlug,
+    data: { name: 'HR', _h_parent: department.id },
   })
 
   // Type children
   const blogPost = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Blog Post', parent: type.id },
+    collection: tagsSlug,
+    data: { name: 'Blog Post', _h_parent: type.id },
   })
 
   const tutorial = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Tutorial', parent: type.id },
+    collection: tagsSlug,
+    data: { name: 'Tutorial', _h_parent: type.id },
   })
 
   const announcement = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Announcement', parent: type.id },
+    collection: tagsSlug,
+    data: { name: 'Announcement', _h_parent: type.id },
   })
 
   const caseStudy = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Case Study', parent: type.id },
+    collection: tagsSlug,
+    data: { name: 'Case Study', _h_parent: type.id },
   })
 
   const documentation = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Documentation', parent: type.id },
+    collection: tagsSlug,
+    data: { name: 'Documentation', _h_parent: type.id },
   })
 
   // Nested under Engineering
   const frontend = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Frontend', parent: engineering.id },
+    collection: tagsSlug,
+    data: { name: 'Frontend', _h_parent: engineering.id },
   })
 
   const backend = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'Backend', parent: engineering.id },
+    collection: tagsSlug,
+    data: { name: 'Backend', _h_parent: engineering.id },
   })
 
   const devops = await payload.create({
-    collection: taxonomySlug,
-    data: { name: 'DevOps', parent: engineering.id },
+    collection: tagsSlug,
+    data: { name: 'DevOps', _h_parent: engineering.id },
   })
 
   // ============================================
@@ -294,8 +294,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: quarterlyReports.id,
-      _t_tags: [published.id, high.id],
+      folder: quarterlyReports.id,
+      _h_tags: [published.id, high.id],
       title: 'Q1 2023 Financial Report',
     },
   })
@@ -303,8 +303,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: annualReports.id,
-      _t_tags: [published.id, urgent.id],
+      folder: annualReports.id,
+      _h_tags: [published.id, urgent.id],
       title: 'Annual Report 2023',
     },
   })
@@ -312,8 +312,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: clientADocs.id,
-      _t_tags: [approved.id, engineering.id],
+      folder: clientADocs.id,
+      _h_tags: [approved.id, engineering.id],
       title: 'Client A Project Kickoff',
     },
   })
@@ -321,8 +321,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: clientADesigns.id,
-      _t_tags: [inReview.id, design.id, frontend.id],
+      folder: clientADesigns.id,
+      _h_tags: [inReview.id, design.id, frontend.id],
       title: 'Client A Design System',
     },
   })
@@ -330,8 +330,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: clientBDocs.id,
-      _t_tags: [draft.id, backend.id, documentation.id],
+      folder: clientBDocs.id,
+      _h_tags: [draft.id, backend.id, documentation.id],
       title: 'Client B API Documentation',
     },
   })
@@ -339,8 +339,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: internalMeetings.id,
-      _t_tags: [archived.id, low.id],
+      folder: internalMeetings.id,
+      _h_tags: [archived.id, low.id],
       title: 'Team Meeting Notes - January',
     },
   })
@@ -348,8 +348,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: internalPolicies.id,
-      _t_tags: [published.id, hr.id],
+      folder: internalPolicies.id,
+      _h_tags: [published.id, hr.id],
       title: 'Remote Work Policy',
     },
   })
@@ -357,8 +357,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: contracts.id,
-      _t_tags: [approved.id, sales.id],
+      folder: contracts.id,
+      _h_tags: [approved.id, sales.id],
       title: 'Service Agreement Template',
     },
   })
@@ -366,8 +366,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: invoices.id,
-      _t_tags: [archived.id],
+      folder: invoices.id,
+      _h_tags: [archived.id],
       title: 'Invoice #2023-001',
     },
   })
@@ -375,8 +375,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: drafts.id,
-      _t_tags: [draft.id, devops.id, blogPost.id],
+      folder: drafts.id,
+      _h_tags: [draft.id, devops.id, blogPost.id],
       title: 'Blog Post Draft: DevOps Best Practices',
     },
   })
@@ -384,8 +384,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: shared.id,
-      _t_tags: [inReview.id, marketing.id, high.id],
+      folder: shared.id,
+      _h_tags: [inReview.id, marketing.id, high.id],
       title: 'Marketing Campaign Q2',
     },
   })
@@ -393,8 +393,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: shared.id,
-      _t_tags: [published.id, announcement.id, engineering.id],
+      folder: shared.id,
+      _h_tags: [published.id, announcement.id, engineering.id],
       title: 'New Feature Announcement',
     },
   })
@@ -402,8 +402,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: templates.id,
-      _t_tags: [published.id, tutorial.id, frontend.id],
+      folder: templates.id,
+      _h_tags: [published.id, tutorial.id, frontend.id],
       title: 'React Tutorial: Getting Started',
     },
   })
@@ -411,8 +411,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: clientBDocs.id,
-      _t_tags: [approved.id, caseStudy.id, sales.id],
+      folder: clientBDocs.id,
+      _h_tags: [approved.id, caseStudy.id, sales.id],
       title: 'Case Study: Client B Success Story',
     },
   })
@@ -420,8 +420,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: postSlug,
     data: {
-      _f_folders: archive2023Q1.id,
-      _t_tags: [archived.id],
+      folder: archive2023Q1.id,
+      _h_tags: [archived.id],
       title: 'Archived Q1 Notes',
     },
   })

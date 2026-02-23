@@ -1,0 +1,63 @@
+@use '../../../scss/type.scss';
+
+.hierarchy-column {
+  width: 360px;
+  min-width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--theme-elevation-100);
+  height: 100%;
+  background: var(--theme-bg);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(var(--base) * 0.5);
+    padding: calc(var(--base) * 0.5) calc(var(--base) * 1.4);
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--theme-elevation-100);
+  }
+
+  &__add-button {
+    flex-shrink: 0;
+    padding-right: 0;
+  }
+
+  &__header-checkbox {
+    flex-shrink: 0;
+  }
+
+  &__header-title {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) * 0.5);
+    font-weight: 500;
+    color: var(--theme-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__items {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    margin: 0 calc(var(--base));
+    gap: 4px;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--base);
+  }
+
+  &__load-more {
+    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.8);
+  }
+}
