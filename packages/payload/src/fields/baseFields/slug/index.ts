@@ -85,18 +85,21 @@ export type SlugFieldClientProps = SlugFieldClientPropsOnly & TextFieldClientPro
  *
  * @experimental This field is experimental and may change or be removed in the future. Use at your own risk.
  */
-export const slugField: SlugField = ({
-  name: slugFieldName = 'slug',
-  checkboxName = 'generateSlug',
-  fieldToUse,
-  localized,
-  overrides,
-  position = 'sidebar',
-  required = true,
-  slugify,
-  useAsSlug: useAsSlugFromArgs = 'title',
-} = {}) => {
+export const slugField: SlugField = (options = {}) => {
+  const {
+    name: slugFieldName = 'slug',
+    checkboxName = 'generateSlug',
+    fieldToUse,
+    localized,
+    overrides,
+    position: providedPosition,
+    required = true,
+    slugify,
+    useAsSlug: useAsSlugFromArgs = 'title',
+  } = options
+
   const useAsSlug = fieldToUse || useAsSlugFromArgs
+  const position = 'position' in options ? providedPosition : 'sidebar'
 
   const baseField: RowField = {
     type: 'row',
