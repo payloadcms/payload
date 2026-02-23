@@ -25,8 +25,7 @@ export const getSchemaMap = cache(
       cachedSchemaMap = new Map()
     }
 
-    const cacheKey =
-      collectionSlug || globalSlug || (widgetSlug ? `widget:${widgetSlug}` : undefined)
+    const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
     let cachedEntityFieldMap = cachedSchemaMap.get(cacheKey)
 
     if (cachedEntityFieldMap) {
