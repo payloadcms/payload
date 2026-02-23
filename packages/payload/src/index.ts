@@ -1,3 +1,5 @@
+// This file exports empty interfaces that are meant to be module-augmented => disable no-empty-object-type
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
@@ -1246,7 +1248,6 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'
