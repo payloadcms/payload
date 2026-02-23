@@ -54,6 +54,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [editor] = useLexicalComposerContext()
   const [linkNode, setLinkNode] = useState<LinkNode>()
   const [linkNodeId, setLinkNodeId] = useState<string | undefined>()
+  const [linkNodeKey, setLinkNodeKey] = useState<string | undefined>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const selectedNodeRectRef = useRef<DOMRect | null>(null)
@@ -96,6 +97,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setLinkLabel(null)
     setSelectedNodes([])
     setLinkNodeId(undefined)
+    setLinkNodeKey(undefined)
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {
@@ -132,6 +134,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setLinkNode(focusLinkParent)
     const nodeId = focusLinkParent.getID()
     setLinkNodeId(nodeId)
+    setLinkNodeKey(focusLinkParent.getKey())
 
     const fields = focusLinkParent.getFields()
 
@@ -314,7 +317,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
+      editor.registerUpdateListener(({ editorState, tags }) => {
+        if (tags.has('history-merge')) {
+          return
+        }
         editorState.read(() => {
           void $updateLinkEditor()
         })
@@ -451,6 +457,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
           })
         }}
         nodeId={linkNodeId}
+        nodeKey={linkNodeKey}
         schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />

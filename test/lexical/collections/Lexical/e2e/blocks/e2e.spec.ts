@@ -33,6 +33,7 @@ import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayl
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { blockFieldID } from '../../../utils.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -195,13 +196,14 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page)
 
+      const fieldID = await blockFieldID(newBlock, 'lexicalWithBlocks')
       const topLevelDocTextField = page.locator('#field-title').first()
-      const blockTextField = newBlock.locator('#field-text').first()
-      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+      const blockTextField = page.locator(fieldID('text')).first()
+      const blockGroupTextField = page.locator(fieldID('group__groupText')).first()
 
-      const dependsOnDocData = newBlock.locator('#field-group__dependsOnDocData').first()
-      const dependsOnSiblingData = newBlock.locator('#field-group__dependsOnSiblingData').first()
-      const dependsOnBlockData = newBlock.locator('#field-group__dependsOnBlockData').first()
+      const dependsOnDocData = page.locator(fieldID('group__dependsOnDocData')).first()
+      const dependsOnSiblingData = page.locator(fieldID('group__dependsOnSiblingData')).first()
+      const dependsOnBlockData = page.locator(fieldID('group__dependsOnBlockData')).first()
 
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -366,15 +368,14 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page)
 
+      const fieldID = await blockFieldID(newBlock, 'lexicalWithBlocks')
       const topLevelDocTextField = page.locator('#field-title').first()
-      const blockTextField = newBlock.locator('#field-text').first()
-      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+      const blockTextField = page.locator(fieldID('text')).first()
+      const blockGroupTextField = page.locator(fieldID('group__groupText')).first()
 
-      const dependsOnDocData = newBlock.locator('#field-group__textDependsOnDocData').first()
-      const dependsOnSiblingData = newBlock
-        .locator('#field-group__textDependsOnSiblingData')
-        .first()
-      const dependsOnBlockData = newBlock.locator('#field-group__textDependsOnBlockData').first()
+      const dependsOnDocData = page.locator(fieldID('group__textDependsOnDocData')).first()
+      const dependsOnSiblingData = page.locator(fieldID('group__textDependsOnSiblingData')).first()
+      const dependsOnBlockData = page.locator(fieldID('group__textDependsOnBlockData')).first()
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       return {
@@ -474,8 +475,9 @@ describe('lexicalBlocks', () => {
       name: 'Async Hooks Block',
     })
 
-    await newBlock.locator('#field-test1').fill('text1')
-    await newBlock.locator('#field-test2').fill('text2')
+    const fieldID = await blockFieldID(newBlock, 'lexicalWithBlocks')
+    await page.locator(fieldID('test1')).fill('text1')
+    await page.locator(fieldID('test2')).fill('text2')
 
     await wait(300)
 
@@ -486,8 +488,8 @@ describe('lexicalBlocks', () => {
     // Reload page
     await page.reload()
 
-    await expect(newBlock.locator('#field-test1')).toHaveValue('TEXT1')
-    await expect(newBlock.locator('#field-test2')).toHaveValue('TEXT2')
+    await expect(page.locator(fieldID('test1'))).toHaveValue('TEXT1')
+    await expect(page.locator(fieldID('test2'))).toHaveValue('TEXT2')
   })
 
   describe('nested lexical editor in block', () => {
@@ -1205,7 +1207,8 @@ describe('lexicalBlocks', () => {
       await expect(tabsBlock).toBeVisible()
       await wait(300)
 
-      const tab1Text1Field = tabsBlock.locator('#field-tab1__text1')
+      const fieldID = await blockFieldID(tabsBlock, 'lexicalWithBlocks')
+      const tab1Text1Field = page.locator(fieldID('tab1__text1'))
       await tab1Text1Field.scrollIntoViewIfNeeded()
       await expect(tab1Text1Field).toBeVisible()
       await expect(tab1Text1Field).toHaveValue('Some text1')
@@ -1218,7 +1221,7 @@ describe('lexicalBlocks', () => {
       await tab2Button.click()
       await wait(300)
 
-      const tab2Text1Field = tabsBlock.locator('#field-tab2__text2')
+      const tab2Text1Field = page.locator(fieldID('tab2__text2'))
       await tab2Text1Field.scrollIntoViewIfNeeded()
       await expect(tab2Text1Field).toBeVisible()
       await expect(tab2Text1Field).toHaveValue('Some text2')

@@ -5,8 +5,6 @@ import { FieldChangeNotifierProvider, RenderFields } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import { PAYLOAD_FIELD_SYNC_TAG } from '../lexical/LexicalEditor.js'
-
 interface NodeWithSubFields {
   setSubFieldValue: (args: { path: string; value: unknown }) => void
 }
@@ -18,6 +16,11 @@ type RenderLexicalFieldsProps = {
 /**
  * Drop-in replacement for `RenderFields` that automatically syncs field value
  * changes back into the Lexical node via `node.setSubFieldValue()`.
+ *
+ * Changes are batched via `requestAnimationFrame` to avoid triggering Lexical
+ * reconciliation synchronously during input events (which would reset cursor
+ * position). On unmount, pending changes are flushed synchronously so drawers
+ * closing don't lose the last edit.
  */
 export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
   nodeKey,
@@ -29,13 +32,38 @@ export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
   const pendingChanges = useRef<Map<string, unknown>>(new Map())
   const rafRef = useRef<null | ReturnType<typeof requestAnimationFrame>>(null)
 
+  const flushPendingChanges = useCallback(() => {
+    if (pendingChanges.current.size === 0) {
+      return
+    }
+    const changes = new Map(pendingChanges.current)
+    pendingChanges.current.clear()
+
+    editor.update(
+      () => {
+        const node = $getNodeByKey(nodeKey)
+        if (node && 'setSubFieldValue' in node) {
+          for (const [fieldPath, fieldValue] of changes) {
+            ;(node as NodeWithSubFields).setSubFieldValue({
+              path: fieldPath,
+              value: fieldValue,
+            })
+          }
+        }
+      },
+      { tag: 'history-merge' },
+    )
+  }, [editor, nodeKey])
+
   useEffect(() => {
     return () => {
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
       }
+      flushPendingChanges()
     }
-  }, [])
+  }, [flushPendingChanges])
 
   const handleFieldChange = useCallback(
     ({ path, value }: { path: string; value: unknown }) => {
@@ -52,26 +80,10 @@ export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
 
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null
-        const changes = new Map(pendingChanges.current)
-        pendingChanges.current.clear()
-
-        editor.update(
-          () => {
-            const node = $getNodeByKey(nodeKey)
-            if (node && 'setSubFieldValue' in node) {
-              for (const [fieldPath, fieldValue] of changes) {
-                ;(node as NodeWithSubFields).setSubFieldValue({
-                  path: fieldPath,
-                  value: fieldValue,
-                })
-              }
-            }
-          },
-          { tag: ['history-merge', PAYLOAD_FIELD_SYNC_TAG] },
-        )
+        flushPendingChanges()
       })
     },
-    [editor, nodeKey, parentPath],
+    [parentPath, flushPendingChanges],
   )
 
   return (

@@ -215,6 +215,11 @@ export class LinkNode extends ElementNode {
     return writable
   }
 
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
+  }
+
   override updateDOM(prevNode: this, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
