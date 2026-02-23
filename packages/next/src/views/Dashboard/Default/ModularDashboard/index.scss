@@ -54,8 +54,8 @@
     transition: opacity 0.2s ease;
   }
 
-  .widget:focus,
-  .widget:focus-within {
+  .widget:focus-visible,
+  .widget:has(:focus-visible) {
     .widget-wrapper__controls {
       opacity: 1;
     }
