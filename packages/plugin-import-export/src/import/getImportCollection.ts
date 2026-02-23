@@ -6,7 +6,7 @@ import type {
 
 import { FileRetrievalError } from 'payload'
 
-import type { ImportConfig, ImportExportPluginConfig, Limit } from '../types.js'
+import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
 import { getFileFromDoc } from '../utilities/getFileFromDoc.js'
@@ -118,12 +118,13 @@ export const getImportCollection = ({
         }
 
         const targetCollection = req.payload.collections[doc.collectionSlug]
-        const importLimitConfig: Limit | undefined =
-          targetCollection?.config.custom?.['plugin-import-export']?.importLimit
+        const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
         const maxLimit = await resolveLimit({
-          limit: importLimitConfig,
+          limit: targetPluginConfig?.importLimit,
           req,
         })
+        const targetDefaultVersionStatus =
+          targetPluginConfig?.defaultVersionStatus ?? defaultVersionStatus
 
         const result = await createImport({
           id: doc.id,
@@ -131,7 +132,7 @@ export const getImportCollection = ({
           batchSize,
           collectionSlug: doc.collectionSlug,
           debug,
-          defaultVersionStatus,
+          defaultVersionStatus: targetDefaultVersionStatus,
           file: {
             name: doc.filename,
             data: fileData,
@@ -262,18 +263,19 @@ export const getImportCollection = ({
       try {
         // Resolve maxLimit ahead of time since it may involve async config resolution
         const targetCollection = req.payload.collections[doc.collectionSlug]
-        const importLimitConfig: Limit | undefined =
-          targetCollection?.config.custom?.['plugin-import-export']?.importLimit
+        const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
         const maxLimit = await resolveLimit({
-          limit: importLimitConfig,
+          limit: targetPluginConfig?.importLimit,
           req,
         })
+        const targetDefaultVersionStatus =
+          targetPluginConfig?.defaultVersionStatus ?? defaultVersionStatus
 
         // Only pass minimal data to the job - the handler will fetch the file from storage
         const input: ImportTaskInput = {
           batchSize,
           debug: pluginConfig.debug,
-          defaultVersionStatus,
+          defaultVersionStatus: targetDefaultVersionStatus,
           importCollection: collectionConfig.slug,
           importId: doc.id,
           maxLimit,

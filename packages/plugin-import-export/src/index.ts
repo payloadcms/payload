@@ -144,6 +144,7 @@ export const importExportPlugin =
       const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
+      const importDefaultVersionStatus = importConfig?.defaultVersionStatus
 
       // Store disabled field accessors and export format in the admin config for use in the UI
       // Note: limits are stored in collection.custom (server-only) because they can be functions
@@ -156,14 +157,21 @@ export const importExportPlugin =
         },
       }
 
-      // Store limits in collection.custom (server-only) since they can be functions
-      if (exportLimit !== undefined || importLimit !== undefined) {
+      // Store limits and defaultVersionStatus in collection.custom (server-only) since they can be functions
+      if (
+        exportLimit !== undefined ||
+        importLimit !== undefined ||
+        importDefaultVersionStatus !== undefined
+      ) {
         collection.custom = {
           ...(collection.custom || {}),
           'plugin-import-export': {
             ...(collection.custom?.['plugin-import-export'] || {}),
             ...(exportLimit !== undefined && { exportLimit }),
             ...(importLimit !== undefined && { importLimit }),
+            ...(importDefaultVersionStatus !== undefined && {
+              defaultVersionStatus: importDefaultVersionStatus,
+            }),
           },
         }
       }
@@ -235,6 +243,12 @@ declare module 'payload' {
 
   export interface CollectionCustom {
     'plugin-import-export'?: {
+      /**
+       * Default version status for imported documents when _status field is not provided.
+       * Only applies to collections with versions enabled.
+       * @default 'published'
+       */
+      defaultVersionStatus?: 'draft' | 'published'
       /**
        * Maximum number of documents that can be exported from this collection.
        * Set to 0 for unlimited (default). Can be a number or function.
