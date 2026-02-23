@@ -127,7 +127,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
         setDocFieldPreferences(parentLexicalRichTextField.name, {
           collapsed: newCollapsed,
-          hello: 'hi',
         })
       })
     },
