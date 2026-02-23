@@ -446,34 +446,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
             let { value } = args
 
-            // Merge flat node field data back into the tree.
-            // After reduceFieldsToValues + unflatten, value may contain:
-            //   { root: { children: [...] }, abc123: { text: "current" }, ... }
-            // Merge each nodeId entry back into the corresponding node and remove it from the root.
-            if (value && typeof value === 'object' && value.root?.children) {
-              const nodeIDMap: Record<string, SerializedLexicalNode> = {}
-              recurseNodeTree({ nodeIDMap, nodes: value.root.children })
-
-              for (const [key, nodeData] of Object.entries(value)) {
-                if (key === 'root') {
-                  continue
-                }
-                if (typeof nodeData === 'object' && nodeData !== null && nodeIDMap[key]) {
-                  const node = nodeIDMap[key]
-                  const getSubFieldsDataFn =
-                    finalSanitizedEditorConfig.features.getSubFieldsData?.get(node.type)
-
-                  if (getSubFieldsDataFn) {
-                    const existingFields = getSubFieldsDataFn({ node, req })
-                    if (existingFields && typeof existingFields === 'object') {
-                      Object.assign(existingFields, nodeData)
-                    }
-                  }
-                  delete (value as Record<string, unknown>)[key]
-                }
-              }
-            }
-
             if (finalSanitizedEditorConfig?.features?.hooks?.beforeChange?.length) {
               for (const hook of finalSanitizedEditorConfig.features.hooks.beforeChange) {
                 value = await hook(args)
@@ -666,6 +638,35 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             } = args
 
             let { value } = args
+
+            // Merge flat node field data back into the tree before validation.
+            // After reduceFieldsToValues + unflatten, value may contain:
+            //   { root: { children: [...] }, abc123: { text: "current" }, ... }
+            // Merge each nodeId entry back into the corresponding node and remove it.
+            if (value && typeof value === 'object' && value.root?.children) {
+              const flatMergeNodeIDMap: Record<string, SerializedLexicalNode> = {}
+              recurseNodeTree({ nodeIDMap: flatMergeNodeIDMap, nodes: value.root.children })
+
+              for (const [key, nodeData] of Object.entries(value)) {
+                if (key === 'root') {
+                  continue
+                }
+                if (typeof nodeData === 'object' && nodeData !== null && flatMergeNodeIDMap[key]) {
+                  const node = flatMergeNodeIDMap[key]
+                  const getSubFieldsDataFn =
+                    finalSanitizedEditorConfig.features.getSubFieldsData?.get(node.type)
+
+                  if (getSubFieldsDataFn) {
+                    const existingFields = getSubFieldsDataFn({ node, req })
+                    if (existingFields && typeof existingFields === 'object') {
+                      Object.assign(existingFields, nodeData)
+                    }
+                  }
+                  delete (value as Record<string, unknown>)[key]
+                }
+              }
+            }
+
             if (finalSanitizedEditorConfig?.features?.hooks?.beforeValidate?.length) {
               for (const hook of finalSanitizedEditorConfig.features.hooks.beforeValidate) {
                 value = await hook(args)
