@@ -719,6 +719,102 @@ test.describe('Import Export Plugin', () => {
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
     })
 
+    test('should import documents as published by default', async () => {
+      const csvContent =
+        'title,excerpt\n"E2E Published Status Test 1","Test excerpt 1"\n"E2E Published Status Test 2","Test excerpt 2"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-published-status-test.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Published Status Test')
+
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(
+        'e2e-published-status-test.csv',
+      )
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("Pages")').click()
+
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E Published Status Test' },
+        },
+        draft: false,
+      })
+
+      expect(importedDocs.docs.length).toBe(2)
+      importedDocs.docs.forEach((doc) => {
+        expect(doc._status).toBe('published')
+      })
+    })
+
+    test('should respect explicit _status column values in CSV', async () => {
+      const csvContent =
+        'title,excerpt,_status\n"E2E Explicit Draft Test","Draft excerpt","draft"\n"E2E Explicit Published Test","Published excerpt","published"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-explicit-status-test.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Explicit Draft Test')
+      createdPageTitlePatterns.push('E2E Explicit Published Test')
+
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(
+        'e2e-explicit-status-test.csv',
+      )
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("Pages")').click()
+
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const draftDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { equals: 'E2E Explicit Draft Test' },
+        },
+        draft: true,
+      })
+
+      expect(draftDocs.docs.length).toBe(1)
+      expect(draftDocs.docs[0]?._status).toBe('draft')
+
+      const publishedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { equals: 'E2E Explicit Published Test' },
+        },
+        draft: false,
+      })
+
+      expect(publishedDocs.docs.length).toBe(1)
+      expect(publishedDocs.docs[0]?._status).toBe('published')
+    })
+
     test.describe('Custom ID Imports', () => {
       test('should show custom IDs in import preview', async () => {
         const csvContent = `id,title\ncustom-preview-1,Preview Custom Page 1\ncustom-preview-2,Preview Custom Page 2`

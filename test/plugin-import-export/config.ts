@@ -135,6 +135,7 @@ export default buildConfigWithDefaults({
           slug: 'posts-imports-only',
           export: false,
           import: {
+            defaultVersionStatus: 'draft',
             disableJobsQueue: true,
           },
         },
