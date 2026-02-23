@@ -135,45 +135,52 @@ export const importExportPlugin =
           ? collectionPluginConfig.export
           : undefined
       const exportFormat = exportConfig?.format
+      const exportDisableJobsQueue = exportConfig?.disableJobsQueue
+      const exportBatchSize = exportConfig?.batchSize
+      const exportDisableSave = exportConfig?.disableSave
+      const exportDisableDownload = exportConfig?.disableDownload
 
       const importConfig =
         typeof collectionPluginConfig?.import === 'object'
           ? collectionPluginConfig.import
           : undefined
+      const importDisableJobsQueue = importConfig?.disableJobsQueue
+      const importBatchSize = importConfig?.batchSize
 
       const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
       const importDefaultVersionStatus = importConfig?.defaultVersionStatus
 
-      // Store disabled field accessors and export format in the admin config for use in the UI
-      // Note: limits are stored in collection.custom (server-only) because they can be functions
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
           ...(collection.admin.custom?.['plugin-import-export'] || {}),
           disabledFields: disabledFieldAccessors,
           ...(exportFormat !== undefined && { exportFormat }),
+          ...(exportDisableSave !== undefined && { disableSave: exportDisableSave }),
+          ...(exportDisableDownload !== undefined && { disableDownload: exportDisableDownload }),
         },
       }
 
-      // Store limits and defaultVersionStatus in collection.custom (server-only) since they can be functions
-      if (
-        exportLimit !== undefined ||
-        importLimit !== undefined ||
-        importDefaultVersionStatus !== undefined
-      ) {
-        collection.custom = {
-          ...(collection.custom || {}),
-          'plugin-import-export': {
-            ...(collection.custom?.['plugin-import-export'] || {}),
-            ...(exportLimit !== undefined && { exportLimit }),
-            ...(importLimit !== undefined && { importLimit }),
-            ...(importDefaultVersionStatus !== undefined && {
-              defaultVersionStatus: importDefaultVersionStatus,
-            }),
-          },
-        }
+      collection.custom = {
+        ...(collection.custom || {}),
+        'plugin-import-export': {
+          ...(collection.custom?.['plugin-import-export'] || {}),
+          ...(exportLimit !== undefined && { exportLimit }),
+          ...(exportDisableJobsQueue !== undefined && {
+            exportDisableJobsQueue,
+          }),
+          ...(exportBatchSize !== undefined && { exportBatchSize }),
+          ...(importLimit !== undefined && { importLimit }),
+          ...(importDisableJobsQueue !== undefined && {
+            importDisableJobsQueue,
+          }),
+          ...(importBatchSize !== undefined && { importBatchSize }),
+          ...(importDefaultVersionStatus !== undefined && {
+            defaultVersionStatus: importDefaultVersionStatus,
+          }),
+        },
       }
 
       collection.admin.components = components
@@ -234,6 +241,14 @@ declare module 'payload' {
        */
       disabledFields?: string[]
       /**
+       * If true, disables the download button in the export preview UI.
+       */
+      disableDownload?: boolean
+      /**
+       * If true, disables the save button in the export preview UI.
+       */
+      disableSave?: boolean
+      /**
        * When set, forces exports from this collection to use this format.
        * This value is read from the plugin config's `export.format` option.
        */
@@ -250,11 +265,31 @@ declare module 'payload' {
        */
       defaultVersionStatus?: 'draft' | 'published'
       /**
+       * Number of documents to process in each batch during export.
+       * @default 100
+       */
+      exportBatchSize?: number
+      /**
+       * If true, disables the jobs queue for exports and runs them synchronously.
+       * @default false
+       */
+      exportDisableJobsQueue?: boolean
+      /**
        * Maximum number of documents that can be exported from this collection.
        * Set to 0 for unlimited (default). Can be a number or function.
        * Stored in collection.custom (server-only) since functions cannot be serialized to client.
        */
       exportLimit?: Limit
+      /**
+       * Number of documents to process in each batch during import.
+       * @default 100
+       */
+      importBatchSize?: number
+      /**
+       * If true, disables the jobs queue for imports and runs them synchronously.
+       * @default false
+       */
+      importDisableJobsQueue?: boolean
       /**
        * Maximum number of documents that can be imported to this collection.
        * Set to 0 for unlimited (default). Can be a number or function.

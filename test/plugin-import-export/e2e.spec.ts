@@ -199,6 +199,49 @@ test.describe('Import Export Plugin', () => {
       expect(responseBody.errors[0].message).toContain('format')
     })
 
+    test('should enforce format restriction for collection without overrideCollection', async () => {
+      // This tests the dynamic config lookup for format when using the base export collection
+      // posts-exports-only has format: 'csv' but no overrideCollection, so it uses base 'exports' collection
+      const postsExportsOnlyURL = new AdminUrlUtil(serverURL, 'posts-exports-only')
+      await page.goto(postsExportsOnlyURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Verify format field is disabled and shows only CSV
+      const formatField = page.locator('.format-field')
+      await expect(formatField).toBeVisible()
+
+      const formatControl = formatField.locator('.rs__control')
+      await expect(formatControl).toHaveClass(/rs__control--is-disabled/)
+      await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
+
+      // Verify other fields are NOT disabled
+      const nameField = page.locator('input[name="name"]')
+      await expect(nameField).toBeVisible()
+      await expect(nameField).toBeEnabled()
+
+      const limitField = page.locator('input[name="limit"]')
+      await expect(limitField).toBeVisible()
+      await expect(limitField).toBeEnabled()
+
+      // Verify the collection field shows Posts Exports Only and is disabled (readonly because opened from that collection)
+      const collectionField = page.locator('#field-collectionSlug')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts Exports Only')
+    })
+
     test.describe('Custom ID Exports', () => {
       test('should export documents with custom IDs through UI', async () => {
         const uniqueId = Date.now()
