@@ -87,6 +87,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
   })
   const isLoading = Object.keys(blockFormState).length === 0
 
+  const errorCount = useMemo(
+    () =>
+      Object.values(blockFormState).filter(
+        (field) => field && field.valid === false && field.errorMessage,
+      ).length,
+    [blockFormState],
+  )
+
   const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
   const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
 
@@ -278,15 +286,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     ],
   )
 
-  const blockID = id
-
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
         <Drawer
-          className={''}
           slug={drawerSlug}
-          title={t(`lexical:blocks:inlineBlocks:${blockID ? 'edit' : 'create'}`, {
+          title={t(`lexical:blocks:inlineBlocks:${id ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
@@ -307,7 +312,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [
       closeModal,
       drawerSlug,
-      blockID,
+      id,
       blockDisplayName,
       t,
       isEditable,
@@ -343,7 +348,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       Collapsible={BlockCollapsible}
       CustomBlock={CustomBlock}
       EditButton={EditButton}
-      errorCount={0}
+      errorCount={errorCount}
       formSchema={clientBlock?.fields ?? []}
       nodeKey={nodeKey}
       parentPath={blockFieldsPath}

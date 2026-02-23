@@ -78,9 +78,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const blockFieldsSchemaPath = `${blockSchemaPath}.fields`
   const blockFieldsPath = `${path}.${id}`
 
-  const blocksField: BlocksFieldClient = featureClientSchemaMap?.blocks?.[
+  const blocksField: BlocksFieldClient | undefined = featureClientSchemaMap?.blocks?.[
     blockSchemaPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
   const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
     ? typeof blocksField?.blockReferences?.[0] === 'string'
@@ -214,7 +214,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     <>
       <EditDepthProvider>
         <Drawer
-          className={''}
           slug={drawerSlug}
           title={t(`lexical:blocks:inlineBlocks:${id ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
