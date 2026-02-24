@@ -15,18 +15,140 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.join(__dirname, 'fixtures')
 
 /**
- * Runs codegen evals using the three-step pipeline:
- *   1. LLM modifies a per-case starter payload.config.ts
+ * Runs the full codegen pipeline for a single eval case:
+ *   1. LLM modifies the per-case starter payload.config.ts
  *   2. TypeScript compiler validates the result (hard check)
  *   3. LLM scorer compares before/after and names the precise change (soft check)
+ *
+ * Results are cached by a hash of the inputs. Pass label for logging context.
+ */
+export async function runCodegenCase(
+  testCase: CodegenEvalCase,
+  label: string,
+  options: RunCodegenDatasetOptions = {},
+): Promise<EvalResult> {
+  const { runnerModel = DEFAULT_RUNNER_MODEL, scorerModel = DEFAULT_SCORER_MODEL } = options
+
+  const m = runnerModel as { modelId?: string; provider?: string }
+  const runnerModelId = `${m.provider ?? 'unknown'}/${m.modelId ?? 'unknown'}`
+
+  const starterConfig = readFileSync(
+    path.join(fixturesDir, testCase.fixturePath, 'payload.config.ts'),
+    'utf-8',
+  )
+
+  const key = codegenKey({
+    expected: testCase.expected,
+    fixtureContent: starterConfig,
+    input: testCase.input,
+    modelId: runnerModelId,
+  })
+
+  const bypassCache = isCacheBypassed()
+  const cached = !bypassCache && getCachedResult(key)
+  if (cached) {
+    const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
+    console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
+    console.log(`  Task: ${cached.question}`)
+    return cached
+  }
+
+  const { confidence, modifiedConfig } = await runCodegenEval(testCase.input, starterConfig, {
+    model: runnerModel,
+  })
+
+  const { errors: tscErrors, valid } = await validateConfigTypes(
+    modifiedConfig,
+    testCase.fixturePath,
+  )
+
+  if (!valid) {
+    const result: EvalResult = {
+      answer: modifiedConfig,
+      category: testCase.category,
+      confidence,
+      pass: false,
+      question: testCase.input,
+      reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
+      tscErrors,
+    }
+    setCachedResult(key, result)
+    writeFailedCodegenAssertion({
+      category: testCase.category,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      label,
+      modifiedConfig,
+      question: testCase.input,
+      reasoning: result.reasoning,
+      starterConfig,
+      tscErrors,
+    })
+    console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.fixturePath}`)
+    for (const err of tscErrors) {
+      console.log(`  TSC: ${err}`)
+    }
+    return result
+  }
+
+  const { changeDescription, completeness, correctness, pass, reasoning, score } =
+    await scoreConfigChange(testCase.input, testCase.expected, starterConfig, modifiedConfig, {
+      model: scorerModel,
+    })
+
+  const result: EvalResult = {
+    answer: modifiedConfig,
+    category: testCase.category,
+    changeDescription,
+    completeness,
+    confidence,
+    correctness,
+    pass,
+    question: testCase.input,
+    reasoning,
+    score,
+  }
+
+  setCachedResult(key, result)
+
+  if (!pass) {
+    writeFailedCodegenAssertion({
+      category: testCase.category,
+      changeDescription,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      label,
+      modifiedConfig,
+      question: testCase.input,
+      reasoning,
+      starterConfig,
+    })
+  }
+
+  const status = pass ? '✓ PASS' : '✗ FAIL'
+  console.log(
+    `[${result.category}] ${status}  score: ${score.toFixed(2)}  (correctness: ${correctness.toFixed(2)} · completeness: ${completeness.toFixed(2)})`,
+  )
+  console.log(`  Task: ${result.question}`)
+  if (changeDescription) {
+    console.log(`  Change: ${changeDescription}`)
+  }
+  if (!pass) {
+    console.log(`  Reason: ${reasoning}`)
+  }
+
+  return result
+}
+
+/**
+ * Runs codegen evals for an entire dataset and returns aggregate accuracy.
+ * Delegates per-case work to runCodegenCase.
  */
 export async function runCodegenDataset(
   dataset: CodegenEvalCase[],
   label: string,
   options: RunCodegenDatasetOptions = {},
 ): Promise<{ accuracy: number; results: EvalResult[] }> {
-  const { runnerModel = DEFAULT_RUNNER_MODEL, scorerModel = DEFAULT_SCORER_MODEL } = options
-
   const categories = [...new Set(dataset.map((c) => c.category))]
   console.log(`\n=== ${label} Eval Results (${dataset.length} cases) ===`)
   console.log(`  Categories: ${categories.join(', ')}`)
@@ -34,128 +156,20 @@ export async function runCodegenDataset(
     console.log(`  · ${c.fixturePath}`)
   }
 
-  const bypassCache = isCacheBypassed()
-  if (bypassCache) {
+  if (isCacheBypassed()) {
     console.log('  [cache] EVAL_NO_CACHE=true — cache reads skipped')
   }
 
-  // LanguageModel is a broad union type; v1 spec objects expose provider and modelId at runtime.
-  const m = runnerModel as { modelId?: string; provider?: string }
-  const runnerModelId = `${m.provider ?? 'unknown'}/${m.modelId ?? 'unknown'}`
-
   const results = await Promise.all(
-    dataset.map(async (testCase): Promise<EvalResult> => {
-      const starterConfig = readFileSync(
-        path.join(fixturesDir, testCase.fixturePath, 'payload.config.ts'),
-        'utf-8',
-      )
-
-      const key = codegenKey({
-        input: testCase.input,
-        expected: testCase.expected,
-        fixtureContent: starterConfig,
-        modelId: runnerModelId,
-      })
-
-      const cached = getCachedResult(key)
-      if (cached) {
-        console.log(
-          `[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached) (confidence: ${cached.confidence.toFixed(2)})`,
-        )
-        console.log(`  Task: ${cached.question}`)
-        return cached
-      }
-
-      const { modifiedConfig, confidence } = await runCodegenEval(testCase.input, starterConfig, {
-        model: runnerModel,
-      })
-
-      const { valid, errors: tscErrors } = await validateConfigTypes(
-        modifiedConfig,
-        testCase.fixturePath,
-      )
-
-      if (!valid) {
-        const result: EvalResult = {
-          question: testCase.input,
-          category: testCase.category,
-          answer: modifiedConfig,
-          confidence,
-          pass: false,
-          reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
-          tscErrors,
-        }
-        setCachedResult(key, result)
-        writeFailedCodegenAssertion({
-          label,
-          fixturePath: testCase.fixturePath,
-          question: testCase.input,
-          category: testCase.category,
-          confidence,
-          starterConfig,
-          modifiedConfig,
-          tscErrors,
-          reasoning: result.reasoning,
-        })
-        console.log(`[${result.category}] ✗ FAIL [TSC FAIL] (confidence: ${confidence.toFixed(2)})`)
-        console.log(`  Task: ${result.question}`)
-        for (const err of tscErrors) {
-          console.log(`  TSC: ${err}`)
-        }
-        return result
-      }
-
-      const { pass, reasoning, changeDescription } = await scoreConfigChange(
-        testCase.input,
-        testCase.expected,
-        starterConfig,
-        modifiedConfig,
-        { model: scorerModel },
-      )
-
-      const result: EvalResult = {
-        question: testCase.input,
-        category: testCase.category,
-        answer: modifiedConfig,
-        confidence,
-        pass,
-        reasoning,
-        changeDescription,
-      }
-
-      setCachedResult(key, result)
-
-      if (!pass) {
-        writeFailedCodegenAssertion({
-          label,
-          fixturePath: testCase.fixturePath,
-          question: testCase.input,
-          category: testCase.category,
-          confidence,
-          starterConfig,
-          modifiedConfig,
-          reasoning,
-          changeDescription,
-        })
-      }
-
-      const status = pass ? '✓ PASS' : '✗ FAIL'
-      console.log(`[${result.category}] ${status} (confidence: ${confidence.toFixed(2)})`)
-      console.log(`  Task: ${result.question}`)
-      if (changeDescription) {
-        console.log(`  Change: ${changeDescription}`)
-      }
-      if (!pass) {
-        console.log(`  Reason: ${reasoning}`)
-      }
-
-      return result
-    }),
+    dataset.map((testCase) => runCodegenCase(testCase, label, options)),
   )
 
-  const { accuracy, passed, failed } = accuracySummary(results)
+  const { accuracy, averageScore, failed, passed } = accuracySummary(results)
 
-  console.log(`\nAccuracy: ${passed.length}/${results.length} (${(accuracy * 100).toFixed(0)}%)`)
+  const avgScoreStr = averageScore != null ? `  avg score: ${averageScore.toFixed(2)}` : ''
+  console.log(
+    `\nAccuracy: ${passed.length}/${results.length} (${(accuracy * 100).toFixed(0)}%)${avgScoreStr}`,
+  )
 
   if (failed.length > 0) {
     console.log('\nFailed cases:')

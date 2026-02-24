@@ -19,9 +19,9 @@ export async function runDataset(
   options: RunDatasetOptions = {},
 ): Promise<{ accuracy: number; results: EvalResult[] }> {
   const {
-    systemPromptKey = 'qa',
     runnerModel = DEFAULT_RUNNER_MODEL,
     scorerModel = DEFAULT_SCORER_MODEL,
+    systemPromptKey = 'qa',
   } = options
 
   const categories = [...new Set(dataset.map((c) => c.category))]
@@ -54,33 +54,42 @@ export async function runDataset(
       }
 
       const key = qaKey({
-        input: testCase.input,
         expected: testCase.expected,
         fixturePath: testCase.fixturePath,
-        systemPromptKey,
+        input: testCase.input,
         modelId: runnerModelId,
+        systemPromptKey,
       })
 
       const cached = getCachedResult(key)
       if (cached) {
+        const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
         console.log(
-          `[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached) (confidence: ${cached.confidence.toFixed(2)})`,
+          `[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
         )
         console.log(`  Q: ${cached.question}`)
         return cached
       }
 
       const run = await runEval(prompt, { model: runnerModel, systemPromptKey })
-      const { pass, reasoning } = await scoreAnswer(testCase.input, testCase.expected, run.answer, {
-        model: scorerModel,
-      })
+      const { completeness, correctness, pass, reasoning, score } = await scoreAnswer(
+        testCase.input,
+        testCase.expected,
+        run.answer,
+        {
+          model: scorerModel,
+        },
+      )
       const result: EvalResult = {
-        question: testCase.input,
-        category: testCase.category,
         answer: run.answer,
+        category: testCase.category,
+        completeness,
         confidence: run.confidence,
+        correctness,
         pass,
+        question: testCase.input,
         reasoning,
+        score,
       }
 
       setCachedResult(key, result)
@@ -88,12 +97,12 @@ export async function runDataset(
       if (!pass) {
         writeFailedQAAssertion(
           {
-            label,
-            question: testCase.input,
+            answer: run.answer,
             category: testCase.category,
             confidence: run.confidence,
             expected: testCase.expected,
-            answer: run.answer,
+            label,
+            question: testCase.input,
             reasoning,
             starterConfig,
           },
@@ -102,7 +111,9 @@ export async function runDataset(
       }
 
       const status = pass ? '✓ PASS' : '✗ FAIL'
-      console.log(`[${result.category}] ${status} (confidence: ${result.confidence.toFixed(2)})`)
+      console.log(
+        `[${result.category}] ${status}  score: ${score.toFixed(2)}  (correctness: ${correctness.toFixed(2)} · completeness: ${completeness.toFixed(2)})`,
+      )
       console.log(`  Q: ${result.question}`)
       console.log(`  A: ${result.answer}`)
       if (!pass) {
@@ -113,9 +124,12 @@ export async function runDataset(
     }),
   )
 
-  const { accuracy, passed, failed } = accuracySummary(results)
+  const { accuracy, averageScore, failed, passed } = accuracySummary(results)
 
-  console.log(`\nAccuracy: ${passed.length}/${results.length} (${(accuracy * 100).toFixed(0)}%)`)
+  const avgScoreStr = averageScore != null ? `  avg score: ${averageScore.toFixed(2)}` : ''
+  console.log(
+    `\nAccuracy: ${passed.length}/${results.length} (${(accuracy * 100).toFixed(0)}%)${avgScoreStr}`,
+  )
 
   if (failed.length > 0) {
     console.log('\nFailed cases:')

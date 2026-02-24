@@ -14,7 +14,9 @@ const fixturesDir = path.join(__dirname, 'fixtures')
 const tscBin = path.resolve(__dirname, '..', '..', 'node_modules', '.bin', 'tsc')
 
 /**
- * Serializes all tsc invocations so only one compiler process runs at a time.
+ * Serializes all tsc invocations within this worker so only one compiler process runs at a time.
+ * Cross-worker parallelism is bounded by maxForks in vitest.config.ts (set to 4),
+ * so the effective maximum of concurrent tsc processes across the full suite is 4.
  * LLM calls remain fully parallel (network I/O); only this CPU-heavy step is gated.
  */
 class Semaphore {
@@ -60,7 +62,7 @@ const tscSemaphore = new Semaphore(1)
  * up automatically; the .ts file is intentionally kept for review.
  *
  * @param configContent - The LLM-generated payload.config.ts source
- * @param name - A path-like identifier matching the fixture (e.g. "collections/codegen/01-posts-title-content")
+ * @param name - A path-like identifier matching the fixture (e.g. "collections/codegen/posts-title-content")
  */
 export async function validateConfigTypes(
   configContent: string,
@@ -71,14 +73,12 @@ export async function validateConfigTypes(
 
   const baseName = path.basename(name)
   const configFileName = `${baseName}.ts`
-  // Unique per invocation so concurrent spec files (eval.spec.ts + eval.low-power.spec.ts)
-  // don't collide on the same tsconfig path and trigger TS5058 false-negatives.
+  // Unique per invocation so concurrent spec files don't collide on the same tsconfig path.
   const invocationId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
   const tsconfigFileName = `${baseName}.${invocationId}.tsconfig.json`
   const configFilePath = path.join(outputDir, configFileName)
   const tsconfigFilePath = path.join(outputDir, tsconfigFileName)
 
-  // Compute the relative path from outputDir back to fixtures/tsconfig.json
   const relToFixtures = path.relative(outputDir, fixturesDir).replace(/\\/g, '/')
   const tsconfig = {
     extends: `${relToFixtures}/tsconfig.json`,
