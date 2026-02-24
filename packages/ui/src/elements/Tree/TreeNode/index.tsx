@@ -62,6 +62,7 @@ export const TreeNode = ({
     limit,
     parentFieldName,
     parentId: node.id,
+    useAsTitle,
   })
 
   const handleLoadMore = React.useCallback(async () => {
@@ -141,7 +142,6 @@ export const TreeNode = ({
         className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]
           .filter(Boolean)
           .join(' ')}
-        onClick={handleSelectClick}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
         ref={contentRef}
@@ -162,7 +162,8 @@ export const TreeNode = ({
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
         )}
-        <span className={`${baseClass}__title`} title={node.title}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
+        <span className={`${baseClass}__title`} onClick={handleSelectClick} title={node.title}>
           {node.title}
         </span>
         {isLoading && expanded && (
