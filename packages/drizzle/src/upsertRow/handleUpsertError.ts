@@ -73,6 +73,16 @@ export const handleUpsertError = ({
       }
     }
 
+    // Compose path with optional provided block path
+    let path = fieldName
+    if (
+      typeof caughtError === 'object' &&
+      '_blockPath' in caughtError &&
+      typeof caughtError._blockPath === 'string'
+    ) {
+      path = `${caughtError._blockPath}${path}`
+    }
+
     throw new ValidationError(
       {
         id,
@@ -80,7 +90,7 @@ export const handleUpsertError = ({
         errors: [
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
-            path: fieldName,
+            path,
           },
         ],
         global: globalSlug,
