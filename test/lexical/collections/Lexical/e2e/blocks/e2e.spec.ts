@@ -377,6 +377,9 @@ describe('lexicalBlocks', () => {
       const dependsOnBlockData = newBlock.locator(fieldID('group__textDependsOnBlockData')).first()
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
+      await newBlock.scrollIntoViewIfNeeded()
+      await expect(newBlock).toBeVisible()
+
       return {
         blockGroupTextField,
         blockTextField,
