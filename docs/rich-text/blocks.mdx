@@ -175,7 +175,18 @@ For regular blocks, use the `admin.components.Block` property to provide a custo
 }
 ```
 
-Your custom component can use composable primitives from `@payloadcms/richtext-lexical/client`. These components automatically receive block data from context, so you can use them to recreate the default block UI or arrange them in custom layouts:
+Your custom component can use composable primitives from `@payloadcms/richtext-lexical/client`. These components automatically receive block data from context, so you can use them to recreate the default block UI or arrange them in custom layouts.
+
+#### Accessing Block Fields
+
+Lexical block fields are stored in the parent document's form state under a path prefix unique to each block instance. To read field values, use the `useBlockComponentContext()` hook (or `useInlineBlockComponentContext()` for inline blocks) to get the `parentPath`, then pass it to `useFormFields`:
+
+```tsx
+const { parentPath } = useBlockComponentContext()
+const myField = useFormFields(([fields]) => fields[`${parentPath}.myField`])
+```
+
+Here is a full example:
 
 ```tsx
 'use client'
@@ -185,11 +196,13 @@ import {
   BlockCollapsible,
   BlockEditButton,
   BlockRemoveButton,
+  useBlockComponentContext,
 } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyBlockComponent: React.FC<LexicalBlockClientProps> = () => {
-  const style = useFormFields(([fields]) => fields.style)
+  const { parentPath } = useBlockComponentContext()
+  const style = useFormFields(([fields]) => fields[`${parentPath}.style`])
 
   return (
     <BlockCollapsible removeButton={false}>
@@ -219,11 +232,13 @@ import type { LexicalBlockClientProps } from '@payloadcms/richtext-lexical'
 import {
   BlockEditButton,
   BlockRemoveButton,
+  useBlockComponentContext,
 } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
 export const BlockComponent: React.FC<LexicalBlockClientProps> = () => {
-  const content = useFormFields(([fields]) => fields.content)
+  const { parentPath } = useBlockComponentContext()
+  const content = useFormFields(([fields]) => fields[`${parentPath}.content`])
 
   return (
     <div
@@ -297,13 +312,15 @@ import type { LexicalInlineBlockClientProps } from '@payloadcms/richtext-lexical
 import {
   InlineBlockEditButton,
   InlineBlockRemoveButton,
+  useInlineBlockComponentContext,
 } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyInlineBlockComponent: React.FC<
   LexicalInlineBlockClientProps
 > = () => {
-  const username = useFormFields(([fields]) => fields.username)
+  const { parentPath } = useInlineBlockComponentContext()
+  const username = useFormFields(([fields]) => fields[`${parentPath}.username`])
 
   return (
     <div
@@ -339,10 +356,12 @@ You can also customize the label shown in the block header using `admin.componen
 'use client'
 import type { LexicalBlockLabelClientProps } from '@payloadcms/richtext-lexical'
 
+import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyBlockLabel: React.FC<LexicalBlockLabelClientProps> = () => {
-  const title = useFormFields(([fields]) => fields.title)
+  const { parentPath } = useBlockComponentContext()
+  const title = useFormFields(([fields]) => fields[`${parentPath}.title`])
 
   return (
     <div style={{ backgroundColor: 'lightgreen', color: 'black' }}>
@@ -360,12 +379,14 @@ export const MyBlockLabel: React.FC<LexicalBlockLabelClientProps> = () => {
 'use client'
 import type { LexicalInlineBlockLabelClientProps } from '@payloadcms/richtext-lexical'
 
+import { useInlineBlockComponentContext } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 
 export const MyInlineBlockLabel: React.FC<
   LexicalInlineBlockLabelClientProps
 > = () => {
-  const name = useFormFields(([fields]) => fields.name)
+  const { parentPath } = useInlineBlockComponentContext()
+  const name = useFormFields(([fields]) => fields[`${parentPath}.name`])
 
   return (
     <span style={{ backgroundColor: 'lightgreen', color: 'black' }}>

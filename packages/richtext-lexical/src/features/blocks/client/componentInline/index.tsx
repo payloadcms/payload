@@ -250,29 +250,31 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           <Button onClick={handleDrawerSave}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
-      {CustomBlock ? (
-        <InlineBlockComponentContext
-          value={{
-            EditButton,
-            InlineBlockContainer,
-            Label,
-            nodeKey,
-            RemoveButton,
-          }}
-        >
-          {CustomBlock}
-        </InlineBlockComponentContext>
-      ) : (
-        <InlineBlockContainer>
-          <Label />
-          {isEditable ? (
-            <div className={`${baseClass}__actions`}>
-              <EditButton />
-              <RemoveButton />
-            </div>
-          ) : null}
-        </InlineBlockContainer>
-      )}
+      <InlineBlockComponentContext
+        value={{
+          EditButton,
+          InlineBlockContainer,
+          Label,
+          nodeKey,
+          parentPath: blockFieldsPath,
+          parentSchemaPath: blockFieldsSchemaPath,
+          RemoveButton,
+        }}
+      >
+        {CustomBlock ? (
+          CustomBlock
+        ) : (
+          <InlineBlockContainer>
+            <Label />
+            {isEditable ? (
+              <div className={`${baseClass}__actions`}>
+                <EditButton />
+                <RemoveButton />
+              </div>
+            ) : null}
+          </InlineBlockContainer>
+        )}
+      </InlineBlockComponentContext>
     </>
   )
 }
