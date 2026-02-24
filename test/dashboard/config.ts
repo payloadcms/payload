@@ -69,6 +69,7 @@ export default buildConfigWithDefaults({
             {
               name: 'title',
               type: 'text',
+              required: true,
             },
             {
               name: 'collection',
