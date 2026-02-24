@@ -335,7 +335,7 @@ export const MyInlineBlockComponent: React.FC<
       }}
     >
       @{(username?.value as string) || 'username'}
-      <div style={{ color: 'white', fill: 'inline-flex' }}>
+      <div style={{ color: 'white', display: 'inline-flex' }}>
         <InlineBlockEditButton />
         <InlineBlockRemoveButton />
       </div>
@@ -434,6 +434,17 @@ import type {
 | **`LexicalInlineBlockServerProps`**      | Server component for inline `admin.components.Block` |
 | **`LexicalInlineBlockLabelClientProps`** | Client component for inline `admin.components.Label` |
 | **`LexicalInlineBlockLabelServerProps`** | Server component for inline `admin.components.Label` |
+
+#### Context Hooks
+
+Client components can access block context via hooks exported from `@payloadcms/richtext-lexical/client`:
+
+| Hook                                   | Use Case                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **`useBlockComponentContext()`**       | Access `parentPath`, `parentSchemaPath`, `nodeKey`, and composable UI components for blocks        |
+| **`useInlineBlockComponentContext()`** | Access `parentPath`, `parentSchemaPath`, `nodeKey`, and composable UI components for inline blocks |
+
+The `parentPath` from these hooks is essential for reading block field values from form state — see [Accessing Block Fields](#accessing-block-fields).
 
 ## Rendering Blocks
 
