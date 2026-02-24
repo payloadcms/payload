@@ -36,11 +36,22 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formSubmissionOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
     },
     formOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        create: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
