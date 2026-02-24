@@ -730,7 +730,10 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             /**
              * Now that the maps for all hooks are set up, we can run the validate hook
              */
-            if (!finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size) {
+            if (
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
+            ) {
               return value
             }
             const nodeIDMap: {
@@ -745,7 +748,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeValidateHooks =
-                finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
+                finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate
               const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
               if (beforeValidateHooksForNode) {
                 for (const hook of beforeValidateHooksForNode) {
