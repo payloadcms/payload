@@ -1,0 +1,8 @@
+export { registerBuildingPluginsSuite } from './building-plugins.js'
+export { registerCollectionsSuite } from './collections.js'
+export { registerConfigSuite } from './config.js'
+export { registerConventionsSuite } from './conventions.js'
+export { registerFieldsSuite } from './fields.js'
+export { registerNegativeSuite } from './negative.js'
+export { registerOfficialPluginsSuite } from './official-plugins.js'
+export type { SuiteOptions } from './types.js'
