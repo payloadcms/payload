@@ -1546,20 +1546,42 @@ export type Block = {
     singularName?: string
   }
   /**
-   * Icon alt text for the block icon displayed in Lexical editor menus and toolbars (20x20px).
+   * @deprecated Use `images` instead.
    */
-  iconImageAltText?: string
-  /**
-   * Icon image URL for the block displayed in Lexical editor menus and toolbars.
-   * This image will be scaled to 20x20px. Use square images for best results.
-   * Falls back to imageURL if not provided, then to default block icon.
-   */
-  iconImageURL?: string
   imageAltText?: string
   /**
-   * Thumbnail image URL for the block displayed in the Admin UI block selection drawer.
-   * Preferred aspect ratio of the image is 3:2 (e.g., 480x320, 600x400, 900x600).
-   * Images are displayed using object-fit: cover and will be cropped if aspect ratio doesn't match.
+   * Custom images for the block displayed in different UI contexts.
+   *
+   * @example
+   * // Using string URLs (simplest form)
+   * images: {
+   *   icon: 'https://example.com/icon.svg',
+   *   thumbnail: 'https://example.com/thumbnail.jpg',
+   * }
+   *
+   * @example
+   * // Using objects with alt text
+   * images: {
+   *   icon: { url: 'https://example.com/icon.svg', alt: 'Quote icon' },
+   *   thumbnail: { url: 'https://example.com/thumb.jpg', alt: 'Quote block thumbnail' },
+   * }
+   */
+  images?: {
+    /**
+     * Icon image for the block in Lexical editor menus and toolbars (displayed at 20x20px).
+     * Use square images or SVGs for best results.
+     * Can be a URL string or an object with `url` and optional `alt` properties.
+     */
+    icon?: { alt?: string; url: string } | string
+    /**
+     * Thumbnail image for the block in the Admin UI block selection drawer.
+     * Preferred aspect ratio is 3:2 (e.g., 480x320, 600x400).
+     * Can be a URL string or an object with `url` and optional `alt` properties.
+     */
+    thumbnail?: { alt?: string; url: string } | string
+  }
+  /**
+   * @deprecated Use `images` instead. Preferred aspect ratio of the image is 3:2.
    */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
@@ -1579,7 +1601,7 @@ export type ClientBlock = {
   admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
-} & Pick<Block, 'iconImageAltText' | 'iconImageURL' | 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
+} & Pick<Block, 'imageAltText' | 'images' | 'imageURL' | 'jsx' | 'slug'>
 
 export type BlocksField = {
   admin?: {

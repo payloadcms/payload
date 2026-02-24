@@ -104,14 +104,11 @@ export const createClientBlocks = ({
       slug: block.slug,
       fields: [],
     }
+    if (block.images) {
+      clientBlock.images = block.images
+    }
     if (block.imageAltText) {
       clientBlock.imageAltText = block.imageAltText
-    }
-    if (block.iconImageAltText) {
-      clientBlock.iconImageAltText = block.iconImageAltText
-    }
-    if (block.iconImageURL) {
-      clientBlock.iconImageURL = block.iconImageURL
     }
     if (block.imageURL) {
       clientBlock.imageURL = block.imageURL

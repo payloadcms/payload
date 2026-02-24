@@ -63,6 +63,13 @@ const getItemSlug = (item: DrawerItem): string => {
 }
 
 const getItemImageInfo = (item: DrawerItem) => {
+  if ('images' in item && item.images?.thumbnail) {
+    const thumbnail = item.images.thumbnail
+    return {
+      imageAltText: typeof thumbnail === 'string' ? undefined : thumbnail.alt,
+      imageURL: typeof thumbnail === 'string' ? thumbnail : thumbnail.url,
+    }
+  }
   if ('imageURL' in item) {
     return {
       imageAltText: item.imageAltText,

@@ -1,37 +1,44 @@
+import type { ClientBlock } from 'payload'
+
 import React from 'react'
 
 import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 
 /**
  * Get the appropriate icon component for a block in Lexical editor menus/toolbars.
- * Priority: iconImageURL > imageURL > default BlockIcon
  *
- * @param iconImageURL - Preferred icon image (20x20px, typically square)
- * @param iconImageAltText - Alt text for icon image
- * @param imageURL - Fallback thumbnail image (3:2 aspect ratio)
- * @param imageAltText - Alt text for thumbnail image (used as fallback for iconImageAltText)
+ * Priority for URL: images.icon > images.thumbnail > imageURL (deprecated)
+ * Priority for alt: images.icon.alt > images.thumbnail.alt > imageAltText (deprecated)
  */
-export function getBlockImageComponent(
-  iconImageURL?: string,
-  iconImageAltText?: string,
-  imageURL?: string,
-  imageAltText?: string,
-) {
-  // Use iconImageURL if available, otherwise fall back to imageURL
-  const displayImageURL = iconImageURL || imageURL
+export function getBlockImageComponent(block: ClientBlock) {
+  const { imageAltText, images, imageURL } = block
 
-  if (!displayImageURL) {
+  let displayURL: string | undefined
+  let displayAlt: string | undefined
+
+  if (images?.icon) {
+    displayURL = typeof images.icon === 'string' ? images.icon : images.icon.url
+    displayAlt = typeof images.icon === 'string' ? undefined : images.icon.alt
+  } else if (images?.thumbnail) {
+    displayURL = typeof images.thumbnail === 'string' ? images.thumbnail : images.thumbnail.url
+    displayAlt = typeof images.thumbnail === 'string' ? undefined : images.thumbnail.alt
+  } else {
+    // Deprecated fallback
+    displayURL = imageURL
+    displayAlt = imageAltText
+  }
+
+  if (!displayURL) {
     return BlockIcon
   }
 
-  // Prefer iconImageAltText, fall back to imageAltText
-  const displayAltText = iconImageAltText || imageAltText || 'Block Image'
+  const alt = displayAlt ?? 'Block Image'
 
   return () => (
     <img
-      alt={displayAltText}
+      alt={alt}
       className="lexical-block-custom-image"
-      src={displayImageURL}
+      src={displayURL}
       style={{ maxHeight: 20, maxWidth: 20 }}
     />
   )

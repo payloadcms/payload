@@ -85,12 +85,7 @@ export const BlocksFeatureClient = createClientFeature(
             ? {
                 items: clientBlocks.map((block) => {
                   return {
-                    Icon: getBlockImageComponent(
-                      block.iconImageURL,
-                      block.iconImageAltText,
-                      block.imageURL,
-                      block.imageAltText,
-                    ),
+                    Icon: getBlockImageComponent(block),
                     key: 'block-' + block.slug,
                     keywords: ['block', 'blocks', block.slug],
                     label: ({ i18n }) => {
@@ -156,12 +151,7 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: BlockIcon,
                 items: clientBlocks.map((block, index) => {
                   return {
-                    ChildComponent: getBlockImageComponent(
-                      block.iconImageURL,
-                      block.iconImageAltText,
-                      block.imageURL,
-                      block.imageAltText,
-                    ),
+                    ChildComponent: getBlockImageComponent(block),
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                     key: 'block-' + block.slug,
                     label: ({ i18n }) => {
@@ -190,14 +180,12 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: InlineBlocksIcon,
                 items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
-                    ChildComponent: inlineBlock.iconImageURL || inlineBlock.imageURL
-                      ? getBlockImageComponent(
-                          inlineBlock.iconImageURL,
-                          inlineBlock.iconImageAltText,
-                          inlineBlock.imageURL,
-                          inlineBlock.imageAltText,
-                        )
-                      : InlineBlocksIcon,
+                    ChildComponent:
+                      inlineBlock.images?.icon ||
+                      inlineBlock.images?.thumbnail ||
+                      inlineBlock.imageURL
+                        ? getBlockImageComponent(inlineBlock)
+                        : InlineBlocksIcon,
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
                     label: ({ i18n }) => {

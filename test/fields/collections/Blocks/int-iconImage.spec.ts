@@ -1,13 +1,13 @@
-import { expect, it, describe, beforeAll, afterAll } from 'vitest'
-
 import type { Payload } from 'payload'
+
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../../../__helpers/shared/initPayloadInt.js'
 import { blockFieldsSlug } from '../../slugs.js'
 
 let payload: Payload
 
-describe('Block iconImageURL', () => {
+describe('Block images', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(__dirname))
   })
@@ -18,7 +18,7 @@ describe('Block iconImageURL', () => {
     }
   })
 
-  it('should include iconImageURL and iconImageAltText in block schema', async () => {
+  it('should include images config in block schema', () => {
     const config = payload.config
     const blockField = config.collections
       .find((c) => c.slug === blockFieldsSlug)
@@ -30,20 +30,25 @@ describe('Block iconImageURL', () => {
     const withIconBlock = blockField.blocks.find((b) => b.slug === 'withIcon')
 
     expect(withIconBlock).toBeDefined()
-    expect(withIconBlock.iconImageURL).toBe('/api/uploads/file/payload20x20.png')
-    expect(withIconBlock.iconImageAltText).toBe('Block icon')
-    expect(withIconBlock.imageURL).toBe('/api/uploads/file/payload480x320.jpg')
-    expect(withIconBlock.imageAltText).toBe('Block thumbnail')
+    expect(withIconBlock.images).toBeDefined()
+    expect(withIconBlock.images.icon).toEqual({
+      url: '/api/uploads/file/payload20x20.png',
+      alt: 'Block icon',
+    })
+    expect(withIconBlock.images.thumbnail).toEqual({
+      url: '/api/uploads/file/payload480x320.jpg',
+      alt: 'Block thumbnail',
+    })
   })
 
-  it('should allow blocks with only iconImageURL', async () => {
+  it('should allow blocks with images config', async () => {
     const result = await payload.create({
       collection: blockFieldsSlug,
       data: {
         blocks: [
           {
             blockType: 'withIcon',
-            title: 'Test block with icon',
+            title: 'Test block with images',
           },
         ],
       },
@@ -51,7 +56,7 @@ describe('Block iconImageURL', () => {
 
     expect(result.blocks).toHaveLength(1)
     expect(result.blocks[0].blockType).toBe('withIcon')
-    expect(result.blocks[0].title).toBe('Test block with icon')
+    expect(result.blocks[0].title).toBe('Test block with images')
 
     await payload.delete({
       collection: blockFieldsSlug,
@@ -59,7 +64,7 @@ describe('Block iconImageURL', () => {
     })
   })
 
-  it('should support backwards compatibility - blocks without iconImageURL', async () => {
+  it('should support backwards compatibility - blocks without images', async () => {
     const result = await payload.create({
       collection: blockFieldsSlug,
       data: {

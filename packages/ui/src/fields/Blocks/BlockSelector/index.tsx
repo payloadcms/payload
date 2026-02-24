@@ -104,7 +104,17 @@ export const BlockSelector: React.FC<Props> = (props) => {
                   {groupBlocks.map((_block, index) => {
                     const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
-                    const { slug, imageAltText, imageURL, labels: blockLabels } = block
+                    const { slug, imageAltText, images, imageURL, labels: blockLabels } = block
+
+                    const thumbnailURL = images?.thumbnail
+                      ? typeof images.thumbnail === 'string'
+                        ? images.thumbnail
+                        : images.thumbnail.url
+                      : imageURL
+                    const thumbnailAlt =
+                      images?.thumbnail && typeof images.thumbnail !== 'string'
+                        ? images.thumbnail.alt
+                        : imageAltText
 
                     return (
                       <li className={`${baseClass}__block`} key={index}>
@@ -118,8 +128,8 @@ export const BlockSelector: React.FC<Props> = (props) => {
                           }}
                           thumbnail={
                             <div className={`${baseClass}__default-image`}>
-                              {imageURL ? (
-                                <img alt={imageAltText} src={imageURL} />
+                              {thumbnailURL ? (
+                                <img alt={thumbnailAlt} src={thumbnailURL} />
                               ) : (
                                 <DefaultBlockImage />
                               )}
