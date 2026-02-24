@@ -69,7 +69,7 @@ async function walkLexicalNodes(
       continue
     }
 
-    const schemaEntry = fieldSchemaMap.get(schemaFieldsPath)
+    const schemaEntry = fieldSchemaMap?.get(schemaFieldsPath)
     if (!schemaEntry || !('fields' in schemaEntry) || !schemaEntry.fields) {
       continue
     }
