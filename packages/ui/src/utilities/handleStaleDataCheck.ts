@@ -30,20 +30,26 @@ export const handleStaleDataCheck = async ({
         collection: collectionSlug,
         depth: 0,
         overrideAccess: false,
+        select: {
+          updatedAt: true,
+        },
         user: req.user,
       })
 
-      currentUpdatedAt = currentDoc?.updatedAt
+      currentUpdatedAt = currentDoc?.updatedAt as string
     } else if (globalSlug) {
       // Fetch current global to compare updatedAt
       const currentGlobal = await req.payload.findGlobal({
         slug: globalSlug,
         depth: 0,
         overrideAccess: false,
+        select: {
+          updatedAt: true,
+        },
         user: req.user,
       })
 
-      currentUpdatedAt = currentGlobal?.updatedAt
+      currentUpdatedAt = currentGlobal?.updatedAt as string
     }
 
     // Compare timestamps
