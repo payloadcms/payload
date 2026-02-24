@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, FormState, JsonObject } from 'payload'
+import type { ClientField, Data, FormState, JsonObject } from 'payload'
 
 import { Drawer, EditDepthProvider, useModal } from '@payloadcms/ui'
 import React from 'react'
@@ -8,6 +8,11 @@ import { DrawerContent } from './DrawerContent.js'
 
 export type FieldsDrawerProps = {
   readonly className?: string
+  /**
+   * Initial data for the drawer fields. Only used when `nodeId` is not provided,
+   * i.e. the drawer manages its own isolated form.
+   */
+  readonly data?: Data
   readonly drawerSlug: string
   readonly drawerTitle?: string
   readonly featureKey: string
@@ -35,6 +40,7 @@ export type FieldsDrawerProps = {
  */
 export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   className,
+  data,
   drawerSlug,
   drawerTitle,
   featureKey,
@@ -51,6 +57,7 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
     <EditDepthProvider>
       <Drawer className={className} slug={drawerSlug} title={drawerTitle ?? ''}>
         <DrawerContent
+          data={data}
           featureKey={featureKey}
           fieldMapOverride={fieldMapOverride}
           handleDrawerSubmit={(args, args2) => {
