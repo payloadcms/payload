@@ -11,17 +11,17 @@ import {
   useField,
   useFormFields,
 } from '@payloadcms/ui'
-import { formatAdminURL, HIERARCHY_PARENT_FIELD } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 type HierarchyTypeFieldProps = {
   options: Option[]
-  parentFieldName?: string
+  parentFieldName: string
 } & SelectFieldClientProps
 
 export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
   options: allSelectOptions,
-  parentFieldName = HIERARCHY_PARENT_FIELD,
+  parentFieldName,
   ...props
 }) => {
   const {

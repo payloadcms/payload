@@ -67,6 +67,10 @@ export function createFoldersCollection(options: CreateFoldersCollectionOptions)
   const parentFieldName = hierarchyOverrides?.parentFieldName ?? getHierarchyFieldName(slug)
 
   return {
+    labels: {
+      plural: 'Folders',
+      singular: 'Folder',
+    },
     ...rest,
     admin: {
       group: false,

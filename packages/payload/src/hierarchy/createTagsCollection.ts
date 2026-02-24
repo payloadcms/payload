@@ -59,6 +59,10 @@ export function createTagsCollection(options: CreateTagsCollectionOptions): Coll
   const { admin: adminOverrides, hierarchy: hierarchyOverrides, useAsTitle, ...rest } = options
 
   return {
+    labels: {
+      plural: 'Tags',
+      singular: 'Tag',
+    },
     ...rest,
     admin: {
       group: false,
