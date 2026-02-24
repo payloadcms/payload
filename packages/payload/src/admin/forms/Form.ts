@@ -1,10 +1,14 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
-import type { SanitizedDocumentPermissions } from '../../auth/types.js'
+import type {
+  SanitizedDocumentPermissions,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+} from '../../auth/types.js'
 import type { Field, Option, TabAsField, Validate } from '../../fields/config/types.js'
-import type { TypedLocale } from '../../index.js'
+import type { ClientFieldSchemaMap, FieldSchemaMap, TypedLocale, TypedUser } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
+import type { Operation, PayloadRequest, SelectMode, SelectType, Where } from '../../types/index.js'
 
 export type Data = {
   [key: string]: any
@@ -172,3 +176,175 @@ export type BuildFormStateArgs = {
       globalSlug: string
     }
 )
+
+export type RenderFieldArgs = {
+  clientFieldSchemaMap?: ClientFieldSchemaMap
+  collectionSlug: string
+  data: Data
+  fieldConfig: Field
+  fieldSchemaMap: FieldSchemaMap
+  fieldState: FieldState
+  /**
+   * If set to true, it will force creating a clientField based on the passed fieldConfig instead of pulling
+   * the client field from the clientFieldSchemaMap. This is useful if the passed fieldConfig differs from the one in the schema map,
+   * e.g. when calling the render-field server function and passing a field config override.
+   */
+  forceCreateClientField?: boolean
+  formState: FormState
+  id?: number | string
+  indexPath: string
+  lastRenderedPath: string
+  mockRSCs?: boolean
+  operation: Operation
+  parentPath: string
+  parentSchemaPath: string
+  path: string
+  permissions: SanitizedFieldPermissions
+  preferences: DocumentPreferences
+  previousFieldState: FieldState
+  readOnly?: boolean
+  renderAllFields: boolean
+  req: PayloadRequest
+  schemaPath: string
+  siblingData: Data
+}
+
+export type RenderFieldMethod = (args: RenderFieldArgs) => void
+
+export type AddFieldStatePromiseArgs<TField extends Field | TabAsField = Field | TabAsField> = {
+  addErrorPathToParent: (fieldPath: string) => void
+  /**
+   * if all parents are localized, then the field is localized
+   */
+  anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
+  clientFieldSchemaMap?: ClientFieldSchemaMap
+  collectionSlug?: string
+  data: Data
+  field: TField
+  fieldIndex: number
+  fieldSchemaMap: FieldSchemaMap
+  /**
+   * You can use this to filter down to only `localized` fields that require translation (type: text, textarea, etc.). Another plugin might want to look for only `point` type fields to do some GIS function. With the filter function you can go in like a surgeon.
+   */
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
+  /**
+   * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
+   */
+  forceFullValue?: boolean
+  fullData: Data
+  id: number | string
+  /**
+   * Whether the field schema should be included in the state
+   */
+  includeSchema?: boolean
+  indexPath: string
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
+  /**
+   * Whether to omit parent fields in the state. @default false
+   */
+  omitParents?: boolean
+  operation: 'create' | 'update'
+  parentIndexPath: string
+  parentPath: string
+  parentPermissions: SanitizedFieldsPermissions
+  parentSchemaPath: string
+  passesCondition: boolean
+  path: string
+  preferences: DocumentPreferences
+  previousFormState: FormState
+  readOnly?: boolean
+  renderAllFields: boolean
+  renderFieldFn: RenderFieldMethod
+  /**
+   * Req is used for validation and defaultValue calculation. If you don't need validation,
+   * just create your own req and pass in the locale and the user
+   */
+  req: PayloadRequest
+  schemaPath: string
+  select?: SelectType
+  selectMode?: SelectMode
+  /**
+   * Whether to skip checking the field's condition. @default false
+   */
+  skipConditionChecks?: boolean
+  /**
+   * Whether to skip validating the field. @default false
+   */
+  skipValidation?: boolean
+  state: FormStateWithoutComponents
+}
+
+export type CalculateDefaultValuesIterateFieldsArgs<TData> = {
+  data: TData
+  fields: (Field | TabAsField)[]
+  id?: number | string
+  locale: string | undefined
+  req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
+  siblingData: Data
+  user: TypedUser
+}
+
+export type FormStateIterateFieldsArgs = {
+  addErrorPathToParent: (fieldPath: string) => void
+  /**
+   * if any parents is localized, then the field is localized. @default false
+   */
+  anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
+  clientFieldSchemaMap?: ClientFieldSchemaMap
+  collectionSlug?: string
+  data: Data
+  fields: (Field | TabAsField)[]
+  fieldSchemaMap: FieldSchemaMap
+  filter?: (args: AddFieldStatePromiseArgs) => boolean
+  /**
+   * Force the value of fields like arrays or blocks to be the full value instead of the length @default false
+   */
+  forceFullValue?: boolean
+  fullData: Data
+  id?: number | string
+  /**
+   * Whether the field schema should be included in the state. @default false
+   */
+  includeSchema?: boolean
+  mockRSCs?: BuildFormStateArgs['mockRSCs']
+  /**
+   * Whether to omit parent fields in the state. @default false
+   */
+  omitParents?: boolean
+  /**
+   * operation is only needed for validation
+   */
+  operation: 'create' | 'update'
+  parentIndexPath: string
+  parentPassesCondition?: boolean
+  parentPath: string
+  parentSchemaPath: string
+  permissions: SanitizedFieldsPermissions
+  preferences?: DocumentPreferences
+  previousFormState: FormState
+  readOnly?: boolean
+  renderAllFields: boolean
+  renderFieldFn: RenderFieldMethod
+  req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
+  /**
+   * Whether to skip checking the field's condition. @default false
+   */
+  skipConditionChecks?: boolean
+  /**
+   * Whether to skip validating the field. @default false
+   */
+  skipValidation?: boolean
+  state?: FormStateWithoutComponents
+}

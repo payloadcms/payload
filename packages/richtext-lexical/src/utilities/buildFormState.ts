@@ -1,147 +1,60 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { FieldSchemaMap, RichTextAdapter } from 'payload'
+import type { RichTextAdapter, RichTextField } from 'payload'
+import type { AddFieldStatePromiseArgs, FormStateIterateFieldsArgs } from 'payload/internal'
 
 import { addBlockMetaToFormState } from 'payload'
 
 import type { SanitizedServerFeatures } from '../features/typesServer.js'
 
-export const getGetCalculateDefaultValues =
-  (args: { features: SanitizedServerFeatures }): RichTextAdapter['calculateDefaultValues'] =>
-  async ({ id, data, iterateFields, locale, req, user }) => {
-    if (!data?.root?.children?.length) {
-      return
-    }
-
-    await walkForDefaults({
-      id,
-      features: args.features,
-      iterateFields,
-      locale,
-      nodes: data.root.children as SerializedLexicalNode[],
-      req,
-      user,
-    })
-  }
-
 export const getGetBuildFormState =
   (args: { features: SanitizedServerFeatures }): RichTextAdapter['buildFormState'] =>
-  async ({ data, fieldSchemaMap, iterateFields, iterateFieldsArgs, path, schemaPath }) => {
-    if (!data?.root?.children?.length) {
+  async (buildFormStateArgs) => {
+    const { data: documentData, field } = buildFormStateArgs
+    const value = documentData[field.name]
+
+    if (!value?.root?.children?.length) {
       return
     }
 
     await walkLexicalNodes({
+      ...buildFormStateArgs,
       features: args.features,
-      fieldSchemaMap,
-      iterateFields,
-      iterateFieldsArgs,
-      nodes: data.root.children as SerializedLexicalNode[],
-      parentData: data,
-      path,
-      schemaPath,
+      nodes: value.root.children as SerializedLexicalNode[],
+      parentData: value,
     })
   }
 
-async function walkForDefaults({
-  id,
-  features,
-  iterateFields,
-  locale,
-  nodes,
-  req,
-  user,
-}: {
-  features: SanitizedServerFeatures
-  id?: number | string
-  iterateFields: Parameters<
-    NonNullable<RichTextAdapter['calculateDefaultValues']>
-  >[0]['iterateFields']
-  locale: string | undefined
-  nodes: SerializedLexicalNode[]
-  req: Parameters<NonNullable<RichTextAdapter['calculateDefaultValues']>>[0]['req']
-  user: Parameters<NonNullable<RichTextAdapter['calculateDefaultValues']>>[0]['user']
-}): Promise<void> {
-  const promises: Promise<void>[] = []
-
-  for (const node of nodes) {
-    if ('children' in node && Array.isArray((node as any).children)) {
-      promises.push(
-        walkForDefaults({
-          id,
-          features,
-          iterateFields,
-          locale,
-          nodes: (node as any).children as SerializedLexicalNode[],
-          req,
-          user,
-        }),
-      )
-    }
-
-    const getSubFieldsFn = features.getSubFields?.get(node.type)
-    const getSubFieldsDataFn = features.getSubFieldsData?.get(node.type)
-    if (!getSubFieldsFn || !getSubFieldsDataFn) {
-      continue
-    }
-
-    const fields = getSubFieldsFn({ node, req })
-    if (!fields?.length) {
-      continue
-    }
-
-    const nodeData = getSubFieldsDataFn({ node, req }) ?? {}
-
-    promises.push(
-      iterateFields({
-        id,
-        data: nodeData,
-        fields,
-        locale,
-        req,
-        siblingData: nodeData,
-        user,
-      }),
-    )
-  }
-
-  await Promise.all(promises)
-}
-
-async function walkLexicalNodes({
-  features,
-  fieldSchemaMap,
-  iterateFields,
-  iterateFieldsArgs,
-  nodes,
-  parentData,
-  path,
-  schemaPath,
-}: {
-  features: SanitizedServerFeatures
-  fieldSchemaMap: FieldSchemaMap
-  iterateFields: Parameters<NonNullable<RichTextAdapter['buildFormState']>>[0]['iterateFields']
-  iterateFieldsArgs: Parameters<
-    NonNullable<RichTextAdapter['buildFormState']>
-  >[0]['iterateFieldsArgs']
-  nodes: SerializedLexicalNode[]
-  parentData: any
-  path: string
-  schemaPath: string
-}): Promise<void> {
+async function walkLexicalNodes(
+  args: {
+    features: SanitizedServerFeatures
+    iterateFields: (args: FormStateIterateFieldsArgs) => Promise<void>
+    nodes: SerializedLexicalNode[]
+    parentData: any
+  } & AddFieldStatePromiseArgs<RichTextField>,
+): Promise<void> {
+  const {
+    features,
+    fieldSchemaMap,
+    includeSchema,
+    iterateFields,
+    nodes,
+    parentData,
+    parentPermissions,
+    passesCondition,
+    path,
+    previousFormState,
+    renderAllFields,
+    schemaPath,
+    state,
+  } = args
   const promises: Promise<void>[] = []
 
   for (const node of nodes) {
     if ('children' in node && Array.isArray((node as any).children)) {
       promises.push(
         walkLexicalNodes({
-          features,
-          fieldSchemaMap,
-          iterateFields,
-          iterateFieldsArgs,
+          ...args,
           nodes: (node as any).children as SerializedLexicalNode[],
-          parentData,
-          path,
-          schemaPath,
         }),
       )
     }
@@ -165,32 +78,30 @@ async function walkLexicalNodes({
     const nodePath = `${path}.${nodeId}`
 
     if (nodeFieldData.blockType) {
-      const addedByServer =
-        !iterateFieldsArgs.renderAllFields &&
-        !iterateFieldsArgs.previousFormState?.[`${nodePath}.blockType`]
+      const addedByServer = !renderAllFields && !previousFormState?.[`${nodePath}.blockType`]
 
       addBlockMetaToFormState({
         addedByServer: addedByServer || undefined,
         blockFields: schemaEntry.fields,
         blockName: nodeFieldData.blockName,
         blockType: nodeFieldData.blockType,
-        includeSchema: iterateFieldsArgs.includeSchema,
+        includeSchema,
         path: nodePath,
-        state: iterateFieldsArgs.state,
+        state,
       })
     }
 
     promises.push(
       iterateFields({
-        ...iterateFieldsArgs,
+        ...args,
         blockData: nodeFieldData,
         data: nodeFieldData,
         fields: schemaEntry.fields,
         parentIndexPath: '',
-        parentPassesCondition: true,
+        parentPassesCondition: passesCondition,
         parentPath: nodePath,
         parentSchemaPath: schemaFieldsPath,
-        permissions: true,
+        permissions: parentPermissions, // TODO: verify if this is correct
       }),
     )
   }

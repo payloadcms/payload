@@ -9,7 +9,6 @@ import {
   beforeValidateTraverseFields,
   checkDependencies,
   deepMergeSimple,
-  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -20,7 +19,8 @@ import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider }
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
-import { getGetBuildFormState, getGetCalculateDefaultValues } from './utilities/buildFormState.js'
+import { getGetBuildFormState } from './utilities/buildFormState.js'
+import { getGetCalculateDefaultValues } from './utilities/calculateDefaultValues.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
