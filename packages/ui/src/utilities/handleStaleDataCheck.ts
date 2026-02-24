@@ -1,5 +1,7 @@
 import type { PayloadRequest } from 'payload'
 
+import { hasDraftsEnabled } from 'payload/shared'
+
 type Args = {
   collectionSlug?: string
   globalSlug?: string
@@ -24,11 +26,15 @@ export const handleStaleDataCheck = async ({
 
   try {
     if (collectionSlug && id) {
+      const collection = req.payload.config.collections.find((c) => c.slug === collectionSlug)
+      const collectionHasDrafts = collection ? hasDraftsEnabled(collection) : false
+
       // Fetch current document to compare updatedAt
       const currentDoc = await req.payload.findByID({
         id,
         collection: collectionSlug,
         depth: 0,
+        draft: collectionHasDrafts,
         overrideAccess: false,
         select: {
           updatedAt: true,
@@ -38,10 +44,14 @@ export const handleStaleDataCheck = async ({
 
       currentUpdatedAt = currentDoc?.updatedAt as string
     } else if (globalSlug) {
+      const global = req.payload.config.globals.find((g) => g.slug === globalSlug)
+      const globalHasDrafts = global ? hasDraftsEnabled(global) : false
+
       // Fetch current global to compare updatedAt
       const currentGlobal = await req.payload.findGlobal({
         slug: globalSlug,
         depth: 0,
+        draft: globalHasDrafts,
         overrideAccess: false,
         select: {
           updatedAt: true,
