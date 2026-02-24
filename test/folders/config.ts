@@ -40,6 +40,10 @@ export default buildConfigWithDefaults({
       slug: categoriesSlug,
       useAsTitle: 'name',
       fields: [{ name: 'name', type: 'text', required: true }],
+      labels: {
+        singular: 'Category',
+        plural: 'Categories',
+      },
       hierarchy: {
         admin: {
           components: {

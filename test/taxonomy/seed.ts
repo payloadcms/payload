@@ -17,7 +17,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Programming',
       description: 'Programming languages and tools',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -26,7 +26,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'JavaScript',
       description: 'JavaScript ecosystem',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -35,7 +35,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'React',
       description: 'React framework',
-      _h_parent: javascript.id,
+      [`_h_${tagsSlug}`]: javascript.id,
     } as any,
   })
 
@@ -44,7 +44,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'TypeScript',
       description: 'TypeScript language',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -53,7 +53,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Python',
       description: 'Python programming',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -62,7 +62,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Go',
       description: 'Go programming language',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -71,7 +71,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Rust',
       description: 'Rust systems programming',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -80,7 +80,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Java',
       description: 'Java programming',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -89,7 +89,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'C#',
       description: 'C# and .NET',
-      _h_parent: programming.id,
+      [`_h_${tagsSlug}`]: programming.id,
     } as any,
   })
 
@@ -99,7 +99,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Cloud Computing',
       description: 'Cloud platforms and services',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -108,7 +108,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'AWS',
       description: 'Amazon Web Services',
-      _h_parent: cloud.id,
+      [`_h_${tagsSlug}`]: cloud.id,
     } as any,
   })
 
@@ -117,7 +117,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Azure',
       description: 'Microsoft Azure',
-      _h_parent: cloud.id,
+      [`_h_${tagsSlug}`]: cloud.id,
     } as any,
   })
 
@@ -126,7 +126,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Google Cloud',
       description: 'Google Cloud Platform',
-      _h_parent: cloud.id,
+      [`_h_${tagsSlug}`]: cloud.id,
     } as any,
   })
 
@@ -136,7 +136,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Databases',
       description: 'Database systems',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -145,7 +145,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'MongoDB',
       description: 'NoSQL document database',
-      _h_parent: databases.id,
+      [`_h_${tagsSlug}`]: databases.id,
     } as any,
   })
 
@@ -154,7 +154,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'PostgreSQL',
       description: 'Relational database',
-      _h_parent: databases.id,
+      [`_h_${tagsSlug}`]: databases.id,
     } as any,
   })
 
@@ -163,7 +163,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Redis',
       description: 'In-memory data store',
-      _h_parent: databases.id,
+      [`_h_${tagsSlug}`]: databases.id,
     } as any,
   })
 
@@ -173,7 +173,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'DevOps',
       description: 'Development operations',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -182,7 +182,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Docker',
       description: 'Container platform',
-      _h_parent: devops.id,
+      [`_h_${tagsSlug}`]: devops.id,
     } as any,
   })
 
@@ -191,7 +191,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Kubernetes',
       description: 'Container orchestration',
-      _h_parent: devops.id,
+      [`_h_${tagsSlug}`]: devops.id,
     } as any,
   })
 
@@ -200,7 +200,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'CI/CD',
       description: 'Continuous integration and deployment',
-      _h_parent: devops.id,
+      [`_h_${tagsSlug}`]: devops.id,
     } as any,
   })
 
@@ -210,7 +210,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Mobile Development',
       description: 'Mobile app development',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -219,7 +219,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'iOS',
       description: 'iOS development',
-      _h_parent: mobile.id,
+      [`_h_${tagsSlug}`]: mobile.id,
     } as any,
   })
 
@@ -228,7 +228,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Android',
       description: 'Android development',
-      _h_parent: mobile.id,
+      [`_h_${tagsSlug}`]: mobile.id,
     } as any,
   })
 
@@ -237,7 +237,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'React Native',
       description: 'Cross-platform mobile development',
-      _h_parent: mobile.id,
+      [`_h_${tagsSlug}`]: mobile.id,
     } as any,
   })
 
@@ -247,7 +247,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Security',
       description: 'Cybersecurity and best practices',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -256,7 +256,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Encryption',
       description: 'Data encryption methods',
-      _h_parent: security.id,
+      [`_h_${tagsSlug}`]: security.id,
     } as any,
   })
 
@@ -265,7 +265,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Authentication',
       description: 'User authentication systems',
-      _h_parent: security.id,
+      [`_h_${tagsSlug}`]: security.id,
     } as any,
   })
 
@@ -275,7 +275,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'AI & Machine Learning',
       description: 'Artificial intelligence and ML',
-      _h_parent: technology.id,
+      [`_h_${tagsSlug}`]: technology.id,
     } as any,
   })
 
@@ -284,7 +284,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'TensorFlow',
       description: 'ML framework',
-      _h_parent: aiml.id,
+      [`_h_${tagsSlug}`]: aiml.id,
     } as any,
   })
 
@@ -293,7 +293,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'PyTorch',
       description: 'Deep learning framework',
-      _h_parent: aiml.id,
+      [`_h_${tagsSlug}`]: aiml.id,
     } as any,
   })
 
@@ -302,7 +302,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'NLP',
       description: 'Natural Language Processing',
-      _h_parent: aiml.id,
+      [`_h_${tagsSlug}`]: aiml.id,
     } as any,
   })
 
@@ -319,7 +319,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'UI/UX',
       description: 'User interface and experience',
-      _h_parent: design.id,
+      [`_h_${tagsSlug}`]: design.id,
     } as any,
   })
 
@@ -328,7 +328,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: {
       name: 'Web Design',
       description: 'Website design',
-      _h_parent: design.id,
+      [`_h_${tagsSlug}`]: design.id,
     } as any,
   })
 
@@ -361,7 +361,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Learn the basics of React development',
-      _h_tags: [react.id, javascript.id, programming.id],
+      [`_h_${tagsSlug}`]: [react.id, javascript.id, programming.id],
       title: 'Getting Started with React',
     } as any,
   })
@@ -370,7 +370,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Best practices for TypeScript development',
-      _h_tags: [typescript.id, programming.id],
+      [`_h_${tagsSlug}`]: [typescript.id, programming.id],
       title: 'TypeScript Best Practices',
     } as any,
   })
@@ -379,7 +379,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Understanding React hooks',
-      _h_tags: [react.id, javascript.id],
+      [`_h_${tagsSlug}`]: [react.id, javascript.id],
       title: 'React Hooks Deep Dive',
     } as any,
   })
@@ -388,7 +388,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Using Python for data analysis',
-      _h_tags: [python.id, programming.id],
+      [`_h_${tagsSlug}`]: [python.id, programming.id],
       title: 'Python for Data Science',
     } as any,
   })
@@ -397,7 +397,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postsSlug as any,
     data: {
       content: 'Key principles of modern web design',
-      _h_tags: [webdesign.id, design.id],
+      [`_h_${tagsSlug}`]: [webdesign.id, design.id],
       title: 'Modern Web Design Principles',
     } as any,
   })
@@ -407,7 +407,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Comprehensive React documentation and guides',
-      _h_tags: [react.id, javascript.id],
+      [`_h_${tagsSlug}`]: [react.id, javascript.id],
       title: 'React Documentation',
     } as any,
   })
@@ -416,7 +416,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Curated list of UI/UX resources',
-      _h_tags: [uiux.id, design.id],
+      [`_h_${tagsSlug}`]: [uiux.id, design.id],
       title: 'UI/UX Resources',
     } as any,
   })
@@ -425,7 +425,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Complete TypeScript reference',
-      _h_tags: [typescript.id],
+      [`_h_${tagsSlug}`]: [typescript.id],
       title: 'TypeScript Handbook',
     } as any,
   })
@@ -434,7 +434,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: pagesSlug as any,
     data: {
       content: 'Core JavaScript concepts',
-      _h_tags: [javascript.id, programming.id],
+      [`_h_${tagsSlug}`]: [javascript.id, programming.id],
       title: 'JavaScript Fundamentals',
     } as any,
   })
