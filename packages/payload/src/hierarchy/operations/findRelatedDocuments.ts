@@ -5,8 +5,6 @@ import type {
   Where,
 } from '../../index.js'
 
-import { HIERARCHY_PARENT_FIELD } from '../../hierarchy/constants.js'
-
 type RelatedDocumentsResult = {
   [collectionSlug: string]: PaginatedDocs
 }
@@ -43,9 +41,13 @@ export async function findRelatedDocuments({
   // Get the parent field name from hierarchy config
   const hierarchyConfig = collection.hierarchy
   const parentFieldName =
-    (hierarchyConfig && typeof hierarchyConfig === 'object'
+    hierarchyConfig && typeof hierarchyConfig === 'object'
       ? hierarchyConfig.parentFieldName
-      : undefined) ?? HIERARCHY_PARENT_FIELD
+      : undefined
+
+  if (!parentFieldName) {
+    return results
+  }
 
   // 1. Query child hierarchy items (same collection)
   results[collection.slug] = await payload.find({

@@ -11,7 +11,7 @@ import { OmittedFromBrowseBy } from './collections/OmittedFromBrowseBy/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { TranslatedLabels } from './collections/TranslatedLabels/index.js'
 import { seed } from './seed.js'
-import { folderSlug, tagsSlug } from './shared.js'
+import { categoriesSlug, folderSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,13 +37,13 @@ export default buildConfigWithDefaults({
       },
     }),
     createTagsCollection({
-      slug: tagsSlug,
+      slug: categoriesSlug,
       useAsTitle: 'name',
       fields: [{ name: 'name', type: 'text', required: true }],
       hierarchy: {
         admin: {
           components: {
-            Icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
+            Icon: './components/CategoriesTabIcon.js#CategoriesTabIcon',
           },
         },
       },

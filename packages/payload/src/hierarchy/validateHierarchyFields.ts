@@ -209,7 +209,11 @@ export const validateHierarchyFields = (config: Config): void => {
           admin: {
             components: {
               Field: {
-                path: '@payloadcms/next/client#HierarchyTypeField',
+                path: '@payloadcms/next/rsc#HierarchyTypeFieldServer',
+                serverProps: {
+                  collectionOptions,
+                  parentFieldName: hierarchyConfig.parentFieldName,
+                },
               },
             },
             position: 'sidebar',

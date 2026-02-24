@@ -1,7 +1,5 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { HIERARCHY_PARENT_FIELD } from 'payload'
-
 export type HierarchyAncestryItem = {
   id: number | string
   path: Array<{ id: number | string; title: string }>
@@ -43,7 +41,7 @@ export async function getHierarchyAncestry({
     throw new Error(`Collection "${hierarchySlug}" is not a hierarchy`)
   }
 
-  const parentFieldName = hierarchyConfig.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentFieldName = hierarchyConfig.parentFieldName
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
   // Cache for already-fetched items to avoid redundant queries

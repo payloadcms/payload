@@ -1,7 +1,7 @@
 import type { TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import { DEFAULT_HIERARCHY_TREE_LIMIT, HIERARCHY_PARENT_FIELD } from '../hierarchy/constants.js'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from '../hierarchy/constants.js'
 
 export type GetInitialTreeDataArgs = {
   collectionSlug: string
@@ -35,7 +35,8 @@ export const getInitialTreeData = async ({
   }
 
   const hierarchyConfig = collectionConfig.hierarchy
-  const parentFieldName = hierarchyConfig.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentFieldName = hierarchyConfig.parentFieldName
+  const useAsTitle = collectionConfig.admin?.useAsTitle ?? 'id'
 
   // Use limit from config if not provided, fallback to config's treeLimit
   const effectiveLimit = limit ?? hierarchyConfig.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
@@ -74,6 +75,7 @@ export const getInitialTreeData = async ({
         overrideAccess: false,
         page: currentPage,
         req,
+        sort: useAsTitle,
         user: req.user,
         where: whereClause,
       })

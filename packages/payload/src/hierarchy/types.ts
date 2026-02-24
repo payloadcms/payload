@@ -55,7 +55,7 @@ export type HierarchyConfig = {
   /**
    * Name of the field that references the parent document
    * Will automatically create this field if it does not exist
-   * @default HIERARCHY_PARENT_FIELD ('_h_parent')
+   * @default '_h_${collectionSlug}' (e.g., '_h_folders' for a collection with slug 'folders')
    */
   parentFieldName: string
   /**

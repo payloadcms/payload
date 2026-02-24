@@ -60,13 +60,11 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   }, [closeModal, closeDrawer, drawerSlug])
 
   const handleSave = useCallback(() => {
-    onSave(selections)
-    closeModal(drawerSlug)
-    closeDrawer()
-  }, [onSave, selections, closeModal, closeDrawer, drawerSlug])
+    onSave(selections, closeDrawer)
+  }, [onSave, selections, closeDrawer])
 
   const handleSelect = useCallback(
-    (id: number | string) => {
+    (id: number | string, path: Array<{ id: number | string; title: string }>) => {
       setSelections((prev) => {
         const next = new Map(prev)
 
@@ -77,7 +75,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
             // Single select: clear previous selections
             next.clear()
           }
-          next.set(id, { id, path: [] })
+          next.set(id, { id, path })
         }
 
         return next
@@ -107,15 +105,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         </div>
         <div className={`${baseClass}__subheader-right`}>
           {showMoveToRoot && onMoveToRoot && (
-            <button
-              className={`${baseClass}__move-to-root`}
-              onClick={() => {
-                onMoveToRoot()
-                closeModal(drawerSlug)
-                closeDrawer()
-              }}
-              type="button"
-            >
+            <button className={`${baseClass}__move-to-root`} onClick={onMoveToRoot} type="button">
               {t('folder:moveToRoot')}
             </button>
           )}

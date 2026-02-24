@@ -1,9 +1,9 @@
 'use client'
-import type { ClientCollectionConfig, ClientField } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, getHierarchyFieldName, HIERARCHY_PARENT_FIELD } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -17,6 +17,7 @@ import { requests } from '../../utilities/api.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useHierarchyDrawer } from '../HierarchyDrawer/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
+import { Translation } from '../Translation/index.js'
 import './index.scss'
 
 export const baseClass = 'move-many'
@@ -35,55 +36,16 @@ type MoveManyProps = {
 }
 
 /**
- * Determines if items from a collection can be moved within a hierarchy.
- * Returns true if:
- * - The collection IS the hierarchy collection (moving within tree)
- * - The collection has a hasMany:false relationship to the hierarchy
+ * Gets the parent field name from the hierarchy config.
  */
-function canMoveCollection(
-  collectionConfig: ClientCollectionConfig | undefined,
-  hierarchySlug: string,
-): boolean {
-  if (!collectionConfig) {
-    return false
-  }
-
-  // Hierarchy items can always be moved within their tree
-  if (collectionConfig.slug === hierarchySlug) {
-    return true
-  }
-
-  // Check for hasMany:false hierarchy relationship
-  const hasMovableRelationship = collectionConfig.fields.some((field: ClientField) => {
-    if (field.type !== 'relationship') {
-      return false
-    }
-
-    const relationTo = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
-
-    if (!relationTo.includes(hierarchySlug)) {
-      return false
-    }
-
-    if (field.hasMany) {
-      return false
-    }
-
-    return field.admin?.custom?.hierarchy === true
-  })
-
-  return hasMovableRelationship
-}
-
-/**
- * Gets the parent field name for a collection within a hierarchy.
- */
-function getParentFieldName(collectionSlug: string, hierarchySlug: string): string {
-  if (collectionSlug === hierarchySlug) {
-    return HIERARCHY_PARENT_FIELD
-  }
-
-  return getHierarchyFieldName(hierarchySlug)
+function getParentFieldName(
+  hierarchyConfig: ClientCollectionConfig | undefined,
+): string | undefined {
+  const config =
+    hierarchyConfig?.hierarchy && typeof hierarchyConfig.hierarchy === 'object'
+      ? hierarchyConfig.hierarchy
+      : undefined
+  return config?.parentFieldName
 }
 
 export function MoveMany({
@@ -110,9 +72,7 @@ export function MoveMany({
 
   const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
 
-  const hierarchyConfig = collections.find((c) => c.slug === hierarchySlug)
-
-  const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
+  const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
     Icon,
   })
@@ -131,7 +91,7 @@ export function MoveMany({
           ids.length > 1 ? config.labels.plural : config.labels.singular,
           i18n,
         )
-        labels.push(`${ids.length} ${collectionLabel}`)
+        labels.push(collectionLabel)
       }
     }
 
@@ -141,13 +101,11 @@ export function MoveMany({
     }
   }, [selections, collections, i18n])
 
-  // Check if all selected items can be moved
-  const allCanMove = useMemo(() => {
-    return Object.keys(selections).every((collectionSlug) => {
-      const config = collections.find((c) => c.slug === collectionSlug)
-      return canMoveCollection(config, hierarchySlug)
-    })
-  }, [selections, collections, hierarchySlug])
+  const hierarchyCollectionConfig = collections.find((c) => c.slug === hierarchySlug)
+  const parentFieldName = getParentFieldName(hierarchyCollectionConfig)
+
+  // Check if hierarchy has a valid parentFieldName
+  const canMove = parentFieldName !== undefined
 
   const handleDrawerSave = useCallback(
     (selectionsMap: Map<number | string, SelectionWithPath>) => {
@@ -181,17 +139,10 @@ export function MoveMany({
 
     try {
       for (const [collectionSlug, { ids }] of Object.entries(selections)) {
-        const collectionConfig = collections.find((c) => c.slug === collectionSlug)
-
-        if (!collectionConfig || !canMoveCollection(collectionConfig, hierarchySlug)) {
-          continue
-        }
-
         if (ids.length === 0) {
           continue
         }
 
-        const fieldName = getParentFieldName(collectionSlug, hierarchySlug)
         const queryString = qs.stringify(
           {
             locale,
@@ -206,10 +157,11 @@ export function MoveMany({
         })
 
         const response = await requests.patch(url, {
-          body: JSON.stringify({ [fieldName]: destination.id }),
+          body: JSON.stringify({ [parentFieldName]: destination.id }),
           headers: {
             'Accept-Language': i18n.language,
             'Content-Type': 'application/json',
+            credentials: 'include',
           },
         })
 
@@ -255,6 +207,7 @@ export function MoveMany({
       }
 
       if (!hasErrors || totalMoved > 0) {
+        closeDrawer()
         onSuccess?.()
       }
     } catch (_err) {
@@ -262,9 +215,20 @@ export function MoveMany({
     } finally {
       setDestination(null)
     }
-  }, [destination, selections, collections, hierarchySlug, locale, api, i18n, t, label, onSuccess])
+  }, [
+    closeDrawer,
+    destination,
+    selections,
+    parentFieldName,
+    locale,
+    api,
+    i18n,
+    t,
+    label,
+    onSuccess,
+  ])
 
-  if (count === 0 || !allCanMove) {
+  if (count === 0 || !canMove) {
     return null
   }
 
@@ -286,13 +250,32 @@ export function MoveMany({
       <ConfirmationModal
         body={
           <p>
-            {destination?.id === null
-              ? t('folder:moveItemsToRootConfirmation', { count, label })
-              : t('general:moveConfirm', {
+            {destination?.id === null ? (
+              <Translation
+                elements={{
+                  '1': ({ children }) => <strong>{children}</strong>,
+                }}
+                i18nKey="folder:moveItemsToRootConfirmation"
+                t={t}
+                variables={{
+                  count,
+                  label,
+                }}
+              />
+            ) : (
+              <Translation
+                elements={{
+                  '1': ({ children }) => <strong>{children}</strong>,
+                }}
+                i18nKey="general:moveConfirm"
+                t={t}
+                variables={{
                   count,
                   destination: destination?.title || '',
                   label,
-                })}
+                }}
+              />
+            )}
           </p>
         }
         confirmingLabel={t('general:moving')}

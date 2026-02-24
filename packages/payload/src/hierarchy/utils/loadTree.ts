@@ -1,15 +1,12 @@
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, TypeWithID } from '../../types/index.js'
 
-import { HIERARCHY_PARENT_FIELD } from '../constants.js'
-
 type LoadTreeArgs = {
   collection: string
   /**
    * Name of the parent field
-   * @default HIERARCHY_PARENT_FIELD ('_h_parent')
    */
-  parentFieldName?: string
+  parentFieldName: string
   req: PayloadRequest
   /**
    * Optional root ID to load only direct children of a specific node
@@ -39,7 +36,7 @@ type LoadTreeArgs = {
  */
 export async function loadTree({
   collection,
-  parentFieldName = HIERARCHY_PARENT_FIELD,
+  parentFieldName,
   req,
   rootId = null,
 }: LoadTreeArgs): Promise<PaginatedDocs<TypeWithID>> {
@@ -69,15 +66,15 @@ type TreeNode<T> = { children: TreeNode<T>[] } & T
 
 /**
  * Builds a nested tree structure from flat array of documents.
- * Documents must have an 'id' and a parent field (defaults to '_h_parent').
+ * Documents must have an 'id' and a parent field.
  *
  * @example
  * const allDocs = await payload.find({ collection: 'folders', limit: 0 })
- * const nested = buildNestedTree(allDocs.docs, '_h_parent')
+ * const nested = buildNestedTree(allDocs.docs, '_h_folders')
  */
 export function buildNestedTree<T extends { [key: string]: any; id: number | string }>(
   documents: T[],
-  parentFieldName: string = HIERARCHY_PARENT_FIELD,
+  parentFieldName: string,
 ): TreeNode<T>[] {
   const docMap = new Map<number | string, TreeNode<T>>()
   const roots: TreeNode<T>[] = []

@@ -288,11 +288,29 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
     })
   }, [])
 
+  // Build path for each column based on parent info
+  const getPathToColumn = (columnIndex: number) => {
+    const path: Array<{ id: number | string; title: string }> = []
+
+    for (let i = 1; i <= columnIndex; i++) {
+      const col = columns[i]
+      if (col?.parentId !== null && col?.parentId !== undefined) {
+        path.push({
+          id: col.parentId,
+          title: col.parentTitle || String(col.parentId),
+        })
+      }
+    }
+
+    return path
+  }
+
   return (
     <div className={baseClass} ref={containerRef}>
       {columns.map((column, index) => {
         const isLastColumn = index === columns.length - 1
         const expandedId = expandedPath[index] ?? null
+        const pathToColumn = getPathToColumn(index)
 
         return (
           <div
@@ -314,6 +332,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
               parentFieldName={parentFieldName}
               parentId={column.parentId}
               parentTitle={column.parentTitle}
+              pathToColumn={pathToColumn}
               selectedIds={selectedIds}
               totalDocs={column.totalDocs}
               useAsTitle={useAsTitle}
@@ -325,4 +344,4 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   )
 }
 
-export type { ColumnItemData, HierarchyColumnBrowserProps } from './types.js'
+export type { ColumnItemData, HierarchyColumnBrowserProps, PathSegment } from './types.js'

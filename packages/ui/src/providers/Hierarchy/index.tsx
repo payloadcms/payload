@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation.js'
-import { DEFAULT_HIERARCHY_TREE_LIMIT, HIERARCHY_PARENT_FIELD } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useState } from 'react'
@@ -32,8 +32,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
   const [selectedParentId, setSelectedParentId] = useState<null | number | string>(null)
-  const [parentFieldName, setParentFieldName] = useState<string>(HIERARCHY_PARENT_FIELD)
+  const [parentFieldName, setParentFieldName] = useState<string>('')
   const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_HIERARCHY_TREE_LIMIT)
+  const [useAsTitle, setUseAsTitle] = useState<null | string>(null)
 
   const [treeCache, setTreeCache] = useState<Map<string, HierarchyTreeCacheEntry>>(() => new Map())
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
@@ -72,6 +73,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       selectedParentId: newSelectedParentId,
       treeData,
       treeLimit: newTreeLimit,
+      useAsTitle: newUseAsTitle,
     } = data
 
     setCollectionSlug(slug)
@@ -86,6 +88,10 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
     if (newSelectedParentId !== undefined) {
       setSelectedParentId(newSelectedParentId)
+    }
+
+    if (newUseAsTitle !== undefined) {
+      setUseAsTitle(newUseAsTitle)
     }
 
     if (treeData) {
@@ -216,7 +222,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit: treeLimit, page: nextPage, where },
+          { limit: treeLimit, page: nextPage, sort: useAsTitle ?? 'id', where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -264,14 +270,24 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         setLoadingNodeId(null)
       }
     },
-    [api, collectionSlug, isLoadingMore, parentFieldName, serverURL, treeCache, treeLimit],
+    [
+      api,
+      collectionSlug,
+      isLoadingMore,
+      parentFieldName,
+      serverURL,
+      treeCache,
+      treeLimit,
+      useAsTitle,
+    ],
   )
 
   const reset = useCallback(() => {
     setCollectionSlug(null)
     setSelectedParentId(null)
-    setParentFieldName(HIERARCHY_PARENT_FIELD)
+    setParentFieldName('')
     setTreeLimit(DEFAULT_HIERARCHY_TREE_LIMIT)
+    setUseAsTitle(null)
     setTreeCache(new Map())
     setExpandedNodesByCollection(new Map())
     setIsLoadingMore(false)
@@ -297,6 +313,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     selectParent,
     toggleNode,
     treeLimit,
+    useAsTitle,
   }
 
   return <HierarchyContext value={value}>{children}</HierarchyContext>

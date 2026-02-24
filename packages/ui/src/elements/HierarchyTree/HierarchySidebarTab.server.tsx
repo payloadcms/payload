@@ -1,6 +1,6 @@
 import type { SidebarTabServerProps } from 'payload'
 
-import { getInitialTreeData, HIERARCHY_PARENT_FIELD } from 'payload'
+import { getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
@@ -60,7 +60,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
         ? collectionConfig.hierarchy
         : undefined
-    parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
+    parentFieldName = hierarchyConfig?.parentFieldName
     treeLimit = hierarchyConfig?.admin?.treeLimit
     useAsTitle = collectionConfig?.admin?.useAsTitle
 

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { HierarchyConfig } from './types.js'
 
-import { HIERARCHY_PARENT_FIELD } from './constants.js'
+import { getHierarchyFieldName } from './constants.js'
 
 /**
  * Hierarchy options for tag collections - all fields optional since defaults are applied.
@@ -75,7 +75,7 @@ export function createTagsCollection(options: CreateTagsCollectionOptions): Coll
           ...hierarchyOverrides?.admin?.components,
         },
       },
-      parentFieldName: hierarchyOverrides?.parentFieldName ?? HIERARCHY_PARENT_FIELD,
+      parentFieldName: hierarchyOverrides?.parentFieldName ?? getHierarchyFieldName(rest.slug),
     },
   }
 }

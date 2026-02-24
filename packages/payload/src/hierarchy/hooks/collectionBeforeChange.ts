@@ -15,8 +15,6 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
-import { HIERARCHY_PARENT_FIELD } from '../constants.js'
-
 type Args = {
   /**
    * The name of the field that contains the parent document ID
@@ -78,7 +76,13 @@ async function validateNoCircularReference({
   const parentFieldName =
     collection.hierarchy && collection.hierarchy !== true
       ? collection.hierarchy.parentFieldName
-      : HIERARCHY_PARENT_FIELD
+      : undefined
+
+  if (!parentFieldName) {
+    return
+  }
+
+  const fieldName = parentFieldName
 
   async function checkAncestor(
     ancestorId: number | string,
@@ -107,11 +111,11 @@ async function validateNoCircularReference({
         depth: 0,
         req,
         select: {
-          [parentFieldName]: true,
+          [fieldName]: true,
         },
       })) as JsonObject
 
-      const nextParent = ancestor?.[parentFieldName]
+      const nextParent = ancestor?.[fieldName]
 
       if (!nextParent) {
         return // No parent, end of chain

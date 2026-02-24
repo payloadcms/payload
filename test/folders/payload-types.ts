@@ -68,7 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     'payload-folders': PayloadFolder;
-    tags: Tag;
+    categories: Category;
     posts: Post;
     media: Media;
     drafts: Draft;
@@ -95,7 +95,7 @@ export interface Config {
   };
   collectionsSelect: {
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
-    tags: TagsSelect<false> | TagsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
@@ -202,7 +202,7 @@ export interface Post {
   heroImage?: (string | null) | Media;
   relatedAutosave?: (string | null) | Autosave;
   folder?: (string | null) | PayloadFolder;
-  _h_parent?: (string | Tag)[] | null;
+  _h_categories?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -215,7 +215,7 @@ export interface Media {
   id: string;
   testAdminThumbnail?: string | null;
   folder?: (string | null) | PayloadFolder;
-  _h_parent?: (string | Tag)[] | null;
+  _h_categories?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -230,11 +230,11 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags".
+ * via the `definition` "categories".
  */
-export interface Tag {
+export interface Category {
   id: string;
-  _h_parent?: (string | null) | Tag;
+  _h_categories?: (string | null) | Category;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -341,8 +341,8 @@ export interface PayloadLockedDocument {
         value: string | PayloadFolder;
       } | null)
     | ({
-        relationTo: 'tags';
-        value: string | Tag;
+        relationTo: 'categories';
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'posts';
@@ -431,10 +431,10 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tags_select".
+ * via the `definition` "categories_select".
  */
-export interface TagsSelect<T extends boolean = true> {
-  _h_parent?: T;
+export interface CategoriesSelect<T extends boolean = true> {
+  _h_categories?: T;
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -450,7 +450,7 @@ export interface PostsSelect<T extends boolean = true> {
   heroImage?: T;
   relatedAutosave?: T;
   folder?: T;
-  _h_parent?: T;
+  _h_categories?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -462,7 +462,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   testAdminThumbnail?: T;
   folder?: T;
-  _h_parent?: T;
+  _h_categories?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

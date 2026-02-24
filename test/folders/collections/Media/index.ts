@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { createFolderField, createTagField } from 'payload'
 
-import { folderSlug, tagsSlug } from '../../shared.js'
+import { categoriesSlug, folderSlug } from '../../shared.js'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -12,7 +12,7 @@ export const Media: CollectionConfig = {
       type: 'text',
     },
     createFolderField({ relationTo: folderSlug }),
-    createTagField({ relationTo: tagsSlug, hasMany: true }),
+    createTagField({ relationTo: categoriesSlug, hasMany: true }),
   ],
   upload: {
     adminThumbnail: ({ doc }) => {

@@ -86,7 +86,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   }, [currentId, collectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
 
   const handleDrawerSave = useCallback(
-    (selections: Map<number | string, SelectionWithPath>) => {
+    (selections: Map<number | string, SelectionWithPath>, closeDrawer: () => void) => {
       const ids = Array.from(selections.keys())
       const newValue = hasMany ? ids : (ids[0] ?? null)
 
@@ -98,6 +98,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         })
         setModified(true)
       }
+      closeDrawer()
     },
     [currentFieldValue?.value, dispatchField, fieldName, hasMany, setModified],
   )

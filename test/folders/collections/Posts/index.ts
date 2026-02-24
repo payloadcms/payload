@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { createFolderField, createTagField } from 'payload'
 
-import { folderSlug, postSlug, tagsSlug } from '../../shared.js'
+import { categoriesSlug, folderSlug, postSlug } from '../../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postSlug,
@@ -25,7 +25,7 @@ export const Posts: CollectionConfig = {
       relationTo: 'autosave',
     },
     createFolderField({ relationTo: folderSlug }),
-    createTagField({ relationTo: tagsSlug, hasMany: true }),
+    createTagField({ relationTo: categoriesSlug, hasMany: true }),
   ],
   trash: true,
 }

@@ -7,7 +7,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getAncestors, HIERARCHY_PARENT_FIELD } from 'payload'
+import { getAncestors } from 'payload'
 
 /**
  * Fetches hierarchy data for a collection with a selected parent.
@@ -39,7 +39,7 @@ export const handleHierarchy = async ({
     throw new Error('Collection is not a hierarchy')
   }
 
-  const parentFieldName = hierarchyConfig.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentFieldName = hierarchyConfig.parentFieldName
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
