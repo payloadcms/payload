@@ -4,7 +4,6 @@ import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { HIERARCHY_PARENT_FIELD } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect } from 'react'
@@ -154,7 +153,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
-  const parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentFieldName = hierarchyConfig?.parentFieldName
   const parentId = hierarchyData?.parentId ?? null
 
   // Build collections array for create button
