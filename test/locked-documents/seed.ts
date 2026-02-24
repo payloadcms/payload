@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 
-import { devUser, regularUser } from '../credentials.js'
 import { executePromises } from '../__helpers/shared/executePromises.js'
-import { pagesSlug, postsSlug } from './slugs.js'
+import { devUser, regularUser } from '../credentials.js'
+import { pagesSlug, postsSlug, simpleSlug } from './slugs.js'
 
 export const seed = async (_payload: Payload) => {
   await executePromises(
@@ -39,6 +39,14 @@ export const seed = async (_payload: Payload) => {
           collection: postsSlug,
           data: {
             text: 'example post',
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: simpleSlug,
+          data: {
+            fieldA: 'Initial value A',
+            fieldB: 'Initial value B',
           },
         }),
     ],

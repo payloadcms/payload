@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     posts: Post;
     'server-components': ServerComponent;
+    simple: Simple;
     tests: Test;
     users: User;
     'payload-kv': PayloadKv;
@@ -82,6 +83,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'server-components': ServerComponentsSelect<false> | ServerComponentsSelect<true>;
+    simple: SimpleSelect<false> | SimpleSelect<true>;
     tests: TestsSelect<false> | TestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -191,6 +193,18 @@ export interface ServerComponent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tests".
  */
 export interface Test {
@@ -258,6 +272,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'server-components';
         value: string | ServerComponent;
+      } | null)
+    | ({
+        relationTo: 'simple';
+        value: string | Simple;
       } | null)
     | ({
         relationTo: 'tests';
@@ -340,6 +358,17 @@ export interface ServerComponentsSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_select".
+ */
+export interface SimpleSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

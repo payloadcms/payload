@@ -2,6 +2,8 @@ export const pagesSlug = 'pages'
 
 export const postsSlug = 'posts'
 
+export const simpleSlug = 'simple'
+
 export const usersSlug = 'users'
 
-export const collectionSlugs = [pagesSlug, postsSlug, usersSlug]
+export const collectionSlugs = [pagesSlug, postsSlug, simpleSlug, usersSlug]
