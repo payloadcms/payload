@@ -438,7 +438,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 1, minimumNumberOfRequests: 1 },
       )
 
       await saveDocAndAssert(page)
@@ -462,7 +462,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 1, minimumNumberOfRequests: 1 },
       )
 
       await saveDocAndAssert(page)
@@ -628,7 +628,7 @@ describe('lexicalBlocks', () => {
       const drawerContent = page.locator('.drawer__content').first()
       await expect(drawerContent).toBeVisible()
 
-      const urlField = drawerContent.locator('input#field-url').first()
+      const urlField = drawerContent.locator('input[id$="__url"]').first()
       await expect(urlField).toBeVisible()
       await expect(urlField).toHaveValue('https://')
       await wait(1000)
