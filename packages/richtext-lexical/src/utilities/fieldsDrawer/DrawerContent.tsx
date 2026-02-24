@@ -21,7 +21,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 }) => {
   const { t } = useTranslation()
   const isEditable = useLexicalEditable()
-  const { fields: formFields, getDataByPath } = useForm()
+  const { fields: formFields, getData, getDataByPath } = useForm()
 
   const {
     fieldProps: { featureClientSchemaMap, path },
@@ -36,9 +36,9 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const parentPath = nodeId ? `${path}.${nodeId}` : ''
 
   const onClick = useCallback(() => {
-    const data = nodeId ? (getDataByPath(parentPath) ?? {}) : {}
+    const data = parentPath ? (getDataByPath(parentPath) ?? {}) : getData()
     handleDrawerSubmit(formFields, data)
-  }, [nodeId, parentPath, getDataByPath, formFields, handleDrawerSubmit])
+  }, [parentPath, getDataByPath, getData, formFields, handleDrawerSubmit])
 
   const fieldProps = {
     fields: Array.isArray(fields) ? fields : [],
