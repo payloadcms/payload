@@ -31,6 +31,7 @@ const {
   _: args,
   bail,
   'fully-parallel': fullyParallel,
+  grep,
   part,
   shard,
   workers,
@@ -74,7 +75,7 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    executePlaywright(file, baseTestFolder, bail)
+    executePlaywright(file, baseTestFolder, bail, undefined, undefined, undefined, undefined, grep)
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -115,6 +116,7 @@ if (!suiteName) {
     shard,
     fullyParallel,
     workers,
+    grep,
   )
 }
 
@@ -135,6 +137,7 @@ function executePlaywright(
   shardArg?: string,
   fullyParallelArg?: boolean,
   workersArg?: number,
+  grepArg?: string,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -169,8 +172,9 @@ function executePlaywright(
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
