@@ -523,7 +523,6 @@ export function DefaultEditView({
       // Handle stale data detection
       if (staleDataState?.isStale) {
         setShowStaleDataModal(true)
-        router.refresh()
       }
 
       abortOnChangeRef.current = null
@@ -543,7 +542,6 @@ export function DefaultEditView({
       operation,
       schemaPathSegments,
       handleDocumentLocking,
-      router,
     ],
   )
 
