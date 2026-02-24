@@ -10,6 +10,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }
