@@ -1456,7 +1456,7 @@ describe('Locked Documents', () => {
       // Stale data modal should appear for user 2
       const modalContainer = user2Page.locator('.payload__modal-container')
       await expect(modalContainer).toBeVisible()
-      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document Modified')
+      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
     })
 
     test('should reload document and show latest data when clicking reload button', async () => {

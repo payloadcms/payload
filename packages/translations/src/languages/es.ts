@@ -307,6 +307,9 @@ export const esTranslations: DefaultTranslationsObject = {
     document: 'Documento',
     documentIsTrashed: 'Esta {{label}} está en la papelera y es de solo lectura.',
     documentLocked: 'Documento bloqueado',
+    documentModified: 'Documento modificado',
+    documentOutOfDate:
+      'Este documento ha sido actualizado recientemente por otro usuario. Su vista está desactualizada.',
     documents: 'Documentos',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sin guardar cambios',
@@ -398,6 +401,7 @@ export const esTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas las {{collections}}.',
+    reloadDocument: 'Recargar documento',
     remove: 'Eliminar',
     rename: 'Renombrar',
     reset: 'Restablecer',

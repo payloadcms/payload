@@ -305,6 +305,9 @@ export const itTranslations: DefaultTranslationsObject = {
     document: 'Documento',
     documentIsTrashed: 'Questo {{label}} è stato cestinato ed è in sola lettura.',
     documentLocked: 'Documento bloccato',
+    documentModified: 'Documento modificato',
+    documentOutOfDate:
+      'Questo documento è stato recentemente aggiornato da un altro utente. La tua visualizzazione non è aggiornata.',
     documents: 'Documenti',
     duplicate: 'Duplica',
     duplicateWithoutSaving: 'Duplica senza salvare le modifiche',
@@ -395,6 +398,7 @@ export const itTranslations: DefaultTranslationsObject = {
     previous: 'Precedente',
     reindex: 'Reindicizza',
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",
+    reloadDocument: 'Ricarica documento',
     remove: 'Rimuovi',
     rename: 'Rinomina',
     reset: 'Ripristina',

@@ -303,6 +303,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     document: 'Documento',
     documentIsTrashed: 'Este {{label}} está na lixeira e é somente para leitura.',
     documentLocked: 'Documento bloqueado',
+    documentModified: 'Documento modificado',
+    documentOutOfDate:
+      'Este documento foi recentemente atualizado por outro usuário. Sua visualização está desatualizada.',
     documents: 'Documentos',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sem salvar alterações',
@@ -393,6 +396,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas as {{collections}}.',
+    reloadDocument: 'Recarregar documento',
     remove: 'Remover',
     rename: 'Renomear',
     reset: 'Redefinir',

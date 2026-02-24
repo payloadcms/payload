@@ -307,6 +307,9 @@ export const roTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Acest {{label}} este la gunoi și poate fi doar citit.',
     documentLocked: 'Document blocat',
+    documentModified: 'Document modificat',
+    documentOutOfDate:
+      'Acest document a fost actualizat recent de un alt utilizator. Vizualizarea dvs. este depășită.',
     documents: 'Documente',
     duplicate: 'Duplicați',
     duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
@@ -397,6 +400,7 @@ export const roTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexare',
     reindexingAll: 'Reindexarea tuturor {{collections}}.',
+    reloadDocument: 'Reîncarcă documentul',
     remove: 'Eliminați',
     rename: 'Redenumire',
     reset: 'Resetare',

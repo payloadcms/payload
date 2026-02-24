@@ -311,6 +311,9 @@ export const deTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Dieses {{label}} wurde gelöscht und ist nur lesbar.',
     documentLocked: 'Dokument gesperrt',
+    documentModified: 'Dokument geändert',
+    documentOutOfDate:
+      'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Ihre Ansicht ist veraltet.',
     documents: 'Dokumente',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',
@@ -401,6 +404,7 @@ export const deTranslations: DefaultTranslationsObject = {
     previous: 'Vorherige',
     reindex: 'Neuindizieren',
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',
+    reloadDocument: 'Dokument neu laden',
     remove: 'Entfernen',
     rename: 'Umbenennen',
     reset: 'Zurücksetzen',

@@ -305,6 +305,9 @@ export const trTranslations: DefaultTranslationsObject = {
     document: 'Belge',
     documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
     documentLocked: 'Belge kilitlendi',
+    documentModified: 'Belge değiştirildi',
+    documentOutOfDate:
+      'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
@@ -395,6 +398,7 @@ export const trTranslations: DefaultTranslationsObject = {
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
+    reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     reset: 'Sıfırla',

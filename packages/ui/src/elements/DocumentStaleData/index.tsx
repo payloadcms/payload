@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Modal, useModal } from '../Modal/index.js'
 import './index.scss'
@@ -16,6 +17,7 @@ export const DocumentStaleData: React.FC<{
 }> = ({ isActive, onReload }) => {
   const { closeModal, openModal } = useModal()
   const { clearRouteCache } = useRouteCache()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isActive) {
@@ -29,8 +31,8 @@ export const DocumentStaleData: React.FC<{
     <Modal className={baseClass} closeOnBlur={false} slug={modalSlug}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          <h1>Document Modified</h1>
-          <p>This document was recently updated by another user. Your view is out of date.</p>
+          <h1>{t('general:documentModified')}</h1>
+          <p>{t('general:documentOutOfDate')}</p>
         </div>
         <div className={`${baseClass}__controls`}>
           <Button
@@ -44,7 +46,7 @@ export const DocumentStaleData: React.FC<{
             }}
             size="medium"
           >
-            Reload document
+            {t('general:reloadDocument')}
           </Button>
         </div>
       </div>
