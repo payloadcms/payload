@@ -39,10 +39,11 @@ Apply the requested change to the config and output the complete modified TypeSc
 Rules:
 - Output ONLY the full TypeScript file content — no prose, no markdown code fences, no explanation
 - Preserve all existing imports, collections, fields, and settings unless the task requires changing them
+- This is Payload CMS v3. Always import types from "payload" — never from "payload/types" (that is the old v2 path)
 - Use correct Payload types: CollectionConfig, Plugin, Config from "payload"
 - Field types: text, textarea, number, checkbox, select, relationship, richText, array, group, blocks, date, email, upload
 - Access control functions receive ({ req }) and return boolean or Promise<boolean>
 - Hooks live in a hooks object with arrays: beforeChange, afterRead, beforeDelete, etc.
-- Plugins are functions in the plugins array that receive and return a Config
+- Plugins are functions that receive a Config and must return a Config — always cast the return value: \`return { ...incomingConfig, ... } as Config\`
 - Localization uses a localization key with locales, defaultLocale, and fallback`,
 }

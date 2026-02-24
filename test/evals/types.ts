@@ -56,13 +56,19 @@ export type RunCodegenEvalOptions = {
 
 // Scorer
 export type ScorerResult = {
+  completeness: number
+  correctness: number
   pass: boolean
   reasoning: string
+  score: number
 }
 export type ConfigChangeScorerResult = {
   changeDescription: string
+  completeness: number
+  correctness: number
   pass: boolean
   reasoning: string
+  score: number
 }
 export type ScoreAnswerOptions = {
   model?: LanguageModel
@@ -77,10 +83,16 @@ export type EvalResult = {
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string
+  /** Scorer sub-score: fraction of key concepts present (0–1) */
+  completeness?: number
   confidence: number
+  /** Scorer sub-score: factual accuracy of the answer (0–1) */
+  correctness?: number
   pass: boolean
   question: string
   reasoning: string
+  /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
+  score?: number
   /** Populated when TypeScript compilation fails */
   tscErrors?: string[]
 }
