@@ -137,7 +137,7 @@ describe('Lexical Fully Featured - database', () => {
       await expect(blockEl).toBeVisible()
 
       const fieldID = await blockFieldID(blockEl, 'richText')
-      const someTextField = page.locator(fieldID('someText'))
+      const someTextField = blockEl.locator(fieldID('someText'))
 
       /**
        * Test on create
