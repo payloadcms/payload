@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
+import { createServer } from 'net'
 import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
@@ -75,7 +76,7 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    executePlaywright(file, baseTestFolder, bail, undefined, undefined, undefined, undefined, grep)
+    await executePlaywright(file, baseTestFolder, bail)
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -108,7 +109,7 @@ if (!suiteName) {
 
   // Run all spec files in the folder with a single dev server and playwright invocation
   // This avoids port conflicts when multiple spec files exist in the same folder
-  executePlaywright(
+  await executePlaywright(
     allSuitesInFolder,
     baseTestFolder,
     false,
@@ -129,7 +130,7 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-function executePlaywright(
+async function executePlaywright(
   suitePaths: string | string[],
   baseTestFolder: string,
   bail = false,
@@ -161,13 +162,26 @@ function executePlaywright(
 
   process.env.START_MEMORY_DB = 'true'
 
-  const child = spawn('pnpm', spawnDevArgs, {
-    cwd: path.resolve(dirname, '..'),
-    env: {
-      ...process.env,
-    },
-    stdio: 'inherit',
+  const portInUse = await new Promise<boolean>((resolve) => {
+    const server = createServer()
+    server.once('error', () => resolve(true))
+    server.once('listening', () => server.close(() => resolve(false)))
+    server.listen(3000)
   })
+
+  let child: ReturnType<typeof spawn> | undefined
+
+  if (portInUse) {
+    console.log('Port 3000 is already in use — reusing existing dev server.')
+  } else {
+    child = spawn('pnpm', spawnDevArgs, {
+      cwd: path.resolve(dirname, '..'),
+      env: {
+        ...process.env,
+      },
+      stdio: 'inherit',
+    })
+  }
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
@@ -187,10 +201,10 @@ function executePlaywright(
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    child.kill(1)
+    child?.kill(1)
     process.exit(1)
   } else {
-    child.kill()
+    child?.kill()
   }
   testRunCodes.push(results)
 
