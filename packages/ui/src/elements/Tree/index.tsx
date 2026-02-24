@@ -114,6 +114,7 @@ const TreeInner: React.FC<TreeProps> = ({
     limit: treeLimit,
     parentFieldName,
     parentId: 'null', // Special value to query for null parent
+    useAsTitle,
   })
 
   // Wrap loadMore - focusedId stays the same, tabindex handles the rest

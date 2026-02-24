@@ -14,6 +14,7 @@ type UseChildrenArgs = {
   limit?: number
   parentFieldName: string
   parentId: number | string
+  useAsTitle?: string
 }
 
 type UseChildrenReturn = {
@@ -32,6 +33,7 @@ export const useChildren = ({
   limit = 2,
   parentFieldName,
   parentId,
+  useAsTitle,
 }: UseChildrenArgs): UseChildrenReturn => {
   const cacheKey = `${collectionSlug}-${parentId}`
   const cachedData = cache?.current.get(cacheKey)
@@ -83,7 +85,7 @@ export const useChildren = ({
             : { [parentFieldName]: { equals: parentId } }
 
         const queryString = qs.stringify(
-          { limit, page: pageToFetch, where },
+          { limit, page: pageToFetch, sort: useAsTitle ?? 'id', where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({
@@ -139,7 +141,7 @@ export const useChildren = ({
         setIsLoading(false)
       }
     },
-    [parentId, parentFieldName, serverURL, api, collectionSlug, limit, cache, cacheKey],
+    [parentId, parentFieldName, serverURL, api, collectionSlug, limit, cache, cacheKey, useAsTitle],
   )
 
   useEffect(() => {

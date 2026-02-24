@@ -16,6 +16,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
   tableData,
   treeData,
   treeLimit,
+  useAsTitle,
 }) => {
   const { hydrate } = useHierarchy()
 
@@ -28,6 +29,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
       tableData,
       treeData,
       treeLimit,
+      useAsTitle,
     })
   }, [
     collectionSlug,
@@ -38,6 +40,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
     tableData,
     treeData,
     treeLimit,
+    useAsTitle,
   ])
 
   return null

@@ -23,6 +23,7 @@ export type HierarchyHydrateData = {
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
+  useAsTitle?: string
 }
 
 export type HierarchyContextValue = {
@@ -39,6 +40,7 @@ export type HierarchyContextValue = {
   selectParent: (id: null | number | string) => void
   toggleNode: (id: number | string) => void
   treeLimit: number
+  useAsTitle: null | string
 }
 
 export type HierarchyProviderProps = {
@@ -53,4 +55,5 @@ export type HydrateHierarchyProviderProps = {
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
+  useAsTitle?: string
 }
