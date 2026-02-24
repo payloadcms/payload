@@ -59,7 +59,7 @@ export default defineConfig({
           include: ['test/evals/**/*.spec.ts'],
           name: 'eval',
           environment: 'node',
-          testTimeout: 60000,
+          testTimeout: 300000,
         },
       },
     ],
