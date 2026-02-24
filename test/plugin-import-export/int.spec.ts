@@ -5730,6 +5730,7 @@ describe('@payloadcms/plugin-import-export', () => {
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('failed')

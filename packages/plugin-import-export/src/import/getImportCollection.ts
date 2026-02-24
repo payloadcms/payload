@@ -79,11 +79,22 @@ export const getImportCollection = ({
 
     const disableJobsQueue =
       targetPluginConfig?.importDisableJobsQueue ?? importConfig?.disableJobsQueue ?? false
+
+    const debug = pluginConfig.debug || false
+
+    if (debug) {
+      req.payload.logger.info({
+        collectionSlug: doc.collectionSlug,
+        disableJobsQueue,
+        docId: doc.id,
+        msg: '[Import Sync Hook] Starting',
+        transactionID: req.transactionID,
+      })
+    }
+
     if (!disableJobsQueue) {
       return doc
     }
-
-    const debug = pluginConfig.debug || false
 
     try {
       // Get file data from the uploaded document
@@ -177,7 +188,7 @@ export const getImportCollection = ({
         updated: result.updated,
       }
 
-      // Try to update the document with results (may fail due to transaction timing)
+      // Try to update the document with results
       try {
         await req.payload.update({
           id: doc.id,
@@ -190,7 +201,7 @@ export const getImportCollection = ({
           req,
         })
       } catch (updateErr) {
-        // Update may fail if document not yet committed, log but continue
+        // Update may fail if document not yet committed
         if (debug) {
           req.payload.logger.error({
             err: updateErr,
@@ -220,8 +231,24 @@ export const getImportCollection = ({
         updated: 0,
       }
 
+      if (debug) {
+        req.payload.logger.error({
+          docId: doc.id,
+          err,
+          msg: '[Import Sync Hook] Import processing failed, attempting to update status',
+          transactionID: req.transactionID,
+        })
+      }
+
       // Try to update document with error status
       try {
+        if (debug) {
+          req.payload.logger.info({
+            collectionSlug: collectionConfig.slug,
+            docId: doc.id,
+            msg: '[Import Sync Hook] About to update document with failed status',
+          })
+        }
         await req.payload.update({
           id: doc.id,
           collection: collectionConfig.slug,
@@ -232,20 +259,27 @@ export const getImportCollection = ({
           overrideAccess: true,
           req,
         })
-      } catch (updateErr) {
-        // Update may fail if document not yet committed, log but continue
         if (debug) {
-          req.payload.logger.error({
-            err: updateErr,
-            msg: `Failed to update import document ${doc.id} with error status`,
+          req.payload.logger.info({
+            docId: doc.id,
+            msg: '[Import Sync Hook] Successfully updated document with failed status',
           })
         }
+      } catch (updateErr) {
+        // Update may fail if document not yet committed, log but continue
+        // ALWAYS log this error to help debug Postgres issues
+        req.payload.logger.error({
+          err: updateErr,
+          msg: `[Import Sync Hook] Failed to update import document ${doc.id} with error status`,
+          transactionID: req.transactionID,
+        })
       }
 
       if (debug) {
-        req.payload.logger.error({
-          err,
-          msg: 'Import processing failed',
+        req.payload.logger.info({
+          docId: doc.id,
+          msg: '[Import Sync Hook] Returning failed doc',
+          status: 'failed',
         })
       }
 
@@ -268,7 +302,25 @@ export const getImportCollection = ({
 
     const disableJobsQueue =
       targetPluginConfig?.importDisableJobsQueue ?? importConfig?.disableJobsQueue ?? false
+
+    if (pluginConfig.debug) {
+      req.payload.logger.info({
+        collectionSlug: doc.collectionSlug,
+        disableJobsQueue,
+        docId: doc.id,
+        docStatus: doc.status,
+        msg: '[Import Job Hook] Checking if should queue job',
+        transactionID: req.transactionID,
+      })
+    }
+
     if (disableJobsQueue) {
+      if (pluginConfig.debug) {
+        req.payload.logger.info({
+          docId: doc.id,
+          msg: '[Import Job Hook] Skipping job queue (sync mode)',
+        })
+      }
       return
     }
 
