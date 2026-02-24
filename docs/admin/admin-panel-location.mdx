@@ -57,20 +57,46 @@ export default buildConfig({
 })
 ```
 
-**2. Rename the folder:**
+**2. Move the folder:**
 
 ```bash
 # Move the admin folder
 mv app/(payload)/admin app/(payload)/dashboard
 ```
 
-**3. Restart your dev server**
+**3. Update the import path in `layout.tsx`:**
 
-That's it! No other changes needed. Payload will now be available at `/dashboard`.
+Edit `app/(payload)/layout.tsx` and update the import map reference to match the new folder name:
 
-## Scenario 2: Nested Admin Panel
+```ts
+// Before
+import { importMap } from './admin/importMap.js'
 
-To nest Payload at a custom path like `/admin/content`:
+// After
+import { importMap } from './dashboard/importMap.js'
+```
+
+<Banner type="info">
+  Your IDE may auto-update this import when you move the folder, but it may not.
+  To catch any stale references to the old path, run a build or type-check
+  (`pnpm build` or `pnpm tsc --noEmit`) and fix any import errors until it
+  passes.
+</Banner>
+
+**4. Restart your dev server**
+
+Payload will now be available at `/dashboard`.
+
+## Scenario 2: Moving the Entire Payload Folder (Admin Panel and API)
+
+To move both the Payload Admin Panel and API under a custom path, you move the entire `(payload)` folder. This example places everything under `/admin/content`.
+
+<Banner type="info">
+  Because the `admin/` subfolder inside `(payload)` is a Next.js route segment,
+  moving `(payload)` to `app/admin/content/(payload)` results in the admin panel
+  being served at `/admin/content/admin`, not `/admin/content`. Keep this in
+  mind when choosing your target path and setting `routes.admin`.
+</Banner>
 
 **1. Update your Payload Config with all routes and import map settings:**
 
@@ -85,7 +111,7 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   // ...
   routes: {
-    admin: '/admin/content',
+    admin: '/admin/content/admin',
     api: '/admin/content/api',
     graphQL: '/admin/content/api/graphql',
     graphQLPlayground: '/admin/content/api/graphql-playground',
@@ -129,7 +155,7 @@ The import path should be relative from `layout.tsx` to `importMap.js`. In this 
 pnpm payload generate:importmap
 ```
 
-Your Payload admin is now at `/admin/content`!
+Your Payload admin is now at `/admin/content/admin` and the API at `/admin/content/api`.
 
 ## Scenario 3: Multiple Admin Dashboards
 
