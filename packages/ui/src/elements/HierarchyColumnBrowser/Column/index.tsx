@@ -32,6 +32,7 @@ export const Column: React.FC<ColumnProps> = ({
   parentFieldName,
   parentId,
   parentTitle,
+  pathToColumn,
   selectedIds,
   totalDocs,
   useAsTitle,
@@ -68,6 +69,15 @@ export const Column: React.FC<ColumnProps> = ({
   const initialData = parentId !== null ? { [parentFieldName]: parentId } : undefined
   const headerTitle = parentTitle || (parentId === null ? t('general:all') : '')
 
+  const handleSelect = useCallback(
+    (id: number | string) => {
+      const item = items.find((i) => i.id === id)
+      const fullPath = item ? [...pathToColumn, { id: item.id, title: item.title }] : pathToColumn
+      onSelect(id, fullPath)
+    },
+    [items, onSelect, pathToColumn],
+  )
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -97,7 +107,7 @@ export const Column: React.FC<ColumnProps> = ({
             item={item}
             key={String(item.id)}
             onExpand={onExpand}
-            onSelect={onSelect}
+            onSelect={handleSelect}
           />
         ))}
 

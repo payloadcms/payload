@@ -1,6 +1,5 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import { HIERARCHY_PARENT_FIELD } from 'payload/shared'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
 import type {
@@ -74,7 +73,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon })
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
-  const parentFieldName = hierarchyConfig?.parentFieldName ?? HIERARCHY_PARENT_FIELD
+  const parentFieldName = hierarchyConfig?.parentFieldName
 
   const drawerDepth = useEditDepth()
   const uuid = useId()

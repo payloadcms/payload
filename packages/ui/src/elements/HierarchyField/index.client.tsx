@@ -109,10 +109,11 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   })
 
   const handleDrawerSave = useCallback(
-    (selections: Map<number | string, SelectionWithPath>) => {
+    (selections: Map<number | string, SelectionWithPath>, closeDrawer: () => void) => {
       const ids = Array.from(selections.keys())
       const newValue = hasMany ? ids : (ids[0] ?? null)
       setValue(newValue)
+      closeDrawer()
     },
     [hasMany, setValue],
   )

@@ -6,6 +6,11 @@ export type ColumnItemData = {
   title: string
 }
 
+export type PathSegment = {
+  id: number | string
+  title: string
+}
+
 export type ColumnItemProps = {
   hasSelectedDescendants: boolean
   isExpanded: boolean
@@ -25,10 +30,11 @@ export type ColumnProps = {
   onDocumentCreated: (doc: ColumnItemData) => void
   onExpand: (id: number | string) => void
   onLoadMore: () => void
-  onSelect: (id: number | string) => void
+  onSelect: (id: number | string, path: PathSegment[]) => void
   parentFieldName: string
   parentId: null | number | string
   parentTitle?: string
+  pathToColumn: PathSegment[]
   selectedIds: Set<number | string>
   totalDocs: number
   useAsTitle: string
@@ -47,7 +53,7 @@ export type ColumnState = {
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
-  onSelect: (id: number | string) => void
+  onSelect: (id: number | string, path: PathSegment[]) => void
   parentFieldName: string
   selectedIds: Set<number | string>
   useAsTitle?: string
