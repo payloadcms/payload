@@ -90,15 +90,16 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es';
   widgets: {
     count: CountWidget;
     private: PrivateWidget;
     revenue: RevenueWidget;
     'page-query': PageQueryWidget;
+    configurable: ConfigurableWidget;
     collections: CollectionsWidget;
   };
   user: User;
@@ -387,7 +388,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface CountWidget {
   data?: {
-    title?: string | null;
+    title: string;
     collection?: ('tickets' | 'events') | null;
   };
   width?: 'x-small' | 'small' | 'medium';
@@ -419,6 +420,18 @@ export interface RevenueWidget {
 export interface PageQueryWidget {
   data?: {
     [k: string]: unknown;
+  };
+  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configurable_widget".
+ */
+export interface ConfigurableWidget {
+  data?: {
+    title: string;
+    description?: string | null;
+    relatedTicket?: (string | null) | Ticket;
   };
   width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

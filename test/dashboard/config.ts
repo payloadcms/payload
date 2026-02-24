@@ -109,11 +109,43 @@ export default buildConfigWithDefaults({
           ComponentPath: './components/PageQuery.tsx#default',
           label: 'Page Query Widget',
         },
+        {
+          slug: 'configurable',
+          ComponentPath: './components/Configurable.tsx#default',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              localized: true,
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              validate: (value) => {
+                if (value && value.length < 10) {
+                  return 'Description must be at least 10 characters'
+                }
+                return true
+              },
+            },
+            {
+              name: 'relatedTicket',
+              type: 'relationship',
+              relationTo: 'tickets',
+            },
+          ],
+          label: 'Configurable Widget',
+        },
       ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
   },
   collections: [
     Tickets,

@@ -267,6 +267,149 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
   })
 
+  test('widget config drawer validates custom validate function', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widget = d.widgetByPos(widgetCount)
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+
+    await titleInput.fill('Test Title')
+
+    const descriptionInput = drawer.locator('textarea[name="description"]')
+    await descriptionInput.fill('short')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+
+    await expect(drawer.locator('.field-error .tooltip-content')).toContainText(
+      'Description must be at least 10 characters',
+    )
+    await expect(drawer).toBeVisible()
+
+    await descriptionInput.fill('This description is long enough')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('widget config drawer supports relationship fields', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widget = d.widgetByPos(widgetCount)
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill('Widget with Ticket')
+
+    const relationshipField = drawer.locator('.field-type.relationship')
+    await expect(relationshipField).toBeVisible()
+
+    await relationshipField.locator('.rs__control').click()
+    const firstOption = page.locator('.rs__option').first()
+    await expect(firstOption).toBeVisible()
+    await firstOption.click()
+
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+    await expect(drawer).toBeVisible()
+    const selectedValue = drawer.locator('.field-type.relationship .rs__single-value')
+    await expect(selectedValue).toBeVisible({ timeout: 60000 })
+    await expect(selectedValue).not.toBeEmpty()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('localized widget fields persist data per locale', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widgetPos = widgetCount
+
+    // Edit in English locale (default)
+    const widget = d.widgetByPos(widgetPos)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    let drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    let titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill('English Title')
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d.saveChangesAndValidate()
+
+    // Switch to Spanish locale
+    await page.goto(`${url.admin}?locale=es`)
+    const d2 = new DashboardHelper(page)
+    await d2.setEditing()
+
+    const widgetEs = d2.widgetByPos(widgetPos)
+    await widgetEs.hover()
+    await widgetEs.locator('.widget-wrapper__edit-btn').click()
+
+    drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    // Localized field should be empty in Spanish (not set yet)
+    await expect(titleInput).toHaveValue('')
+    await titleInput.fill('Título en Español')
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d2.saveChangesAndValidate()
+
+    // Switch back to English and verify original title persisted
+    await page.goto(`${url.admin}?locale=en`)
+    const d3 = new DashboardHelper(page)
+    await d3.setEditing()
+
+    const widgetEn = d3.widgetByPos(widgetPos)
+    await widgetEn.hover()
+    await widgetEn.locator('.widget-wrapper__edit-btn').click()
+
+    drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await expect(titleInput).toHaveValue('English Title')
+
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {

@@ -9,6 +9,7 @@ import {
   OperationProvider,
   RenderFields,
   ShimmerEffect,
+  useLocale,
   useModal,
   useServerFunctions,
   useTranslation,
@@ -16,6 +17,8 @@ import {
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
+
+import { extractLocaleData, mergeLocaleData } from './utils/localeUtils.js'
 
 type WidgetConfigDrawerProps = {
   drawerSlug: string
@@ -37,6 +40,8 @@ export function WidgetConfigDrawer({
   const { closeModal, modalState } = useModal()
   const { getFormState } = useServerFunctions()
   const { t } = useTranslation()
+  const locale = useLocale()
+  const localeCode = locale?.code ?? 'en'
   const onChangeAbortControllerRef = useRef<AbortController>(null)
 
   const [initialState, setInitialState] = useState<false | FormState | undefined>(false)
@@ -58,12 +63,15 @@ export function WidgetConfigDrawer({
     const controller = new AbortController()
 
     const loadInitialState = async () => {
+      const localeFilteredData = extractLocaleData(widgetData ?? {}, localeCode, fields)
+
       const { state } = await getFormState({
-        data: widgetData ?? {},
+        data: localeFilteredData,
         docPermissions: {
           fields: true,
         },
         docPreferences: EMPTY_WIDGET_PREFERENCES,
+        locale: localeCode,
         operation: 'update',
         renderAllFields: true,
         schemaPath: widget.slug,
@@ -81,7 +89,7 @@ export function WidgetConfigDrawer({
     return () => {
       abortAndIgnore(controller)
     }
-  }, [fields, getFormState, isOpen, widget.slug, widgetData])
+  }, [fields, getFormState, isOpen, localeCode, widget.slug, widgetData])
 
   const onChange = useCallback(
     async ({ formState: prevFormState }: { formState: FormState }) => {
@@ -128,7 +136,7 @@ export function WidgetConfigDrawer({
             initialState={initialState}
             onChange={[onChange]}
             onSubmit={(_, data) => {
-              onSave(data)
+              onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
               closeModal(drawerSlug)
             }}
             uuid={formUUID}

@@ -7,9 +7,10 @@ import React from 'react'
 import type { DashboardViewServerProps } from '../index.js'
 import type { WidgetInstanceClient } from './index.client.js'
 
-import { getItemsFromConfig } from './getItemsFromConfig.js'
-import { getItemsFromPreferences } from './getItemsFromPreferences.js'
 import { ModularDashboardClient } from './index.client.js'
+import { getItemsFromConfig } from './utils/getItemsFromConfig.js'
+import { getItemsFromPreferences } from './utils/getItemsFromPreferences.js'
+import { extractLocaleData } from './utils/localeUtils.js'
 import './index.scss'
 
 type ServerLayout = WidgetInstanceClient[]
@@ -27,16 +28,21 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   const serverLayout: ServerLayout = layout.map((layoutItem) => {
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
+    const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
+    const widgetData = widgetConfig?.fields?.length
+      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields)
+      : layoutItem.data || {}
+
     return {
       component: RenderServerComponent({
-        Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
+        Component: widgetConfig?.ComponentPath,
         importMap,
         serverProps: {
           cookies,
           locale,
           permissions,
           req,
-          widgetData: layoutItem.data || {},
+          widgetData,
           widgetSlug,
         } satisfies WidgetServerProps,
       }),

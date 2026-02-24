@@ -3,6 +3,8 @@ import type { ServerFunction, WidgetServerProps } from 'payload'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { extractLocaleData } from '../utils/localeUtils.js'
+
 export type RenderWidgetServerFnArgs = {
   /**
    * Instance-specific data for this widget
@@ -56,13 +58,16 @@ export const renderWidgetHandler: ServerFunction<
   }
 
   try {
-    // Create server props for the widget
+    const localeFilteredData = widgetConfig.fields?.length
+      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields)
+      : widgetData || {}
+
     const serverProps: WidgetServerProps = {
       cookies,
       locale,
       permissions,
       req,
-      widgetData: widgetData || {},
+      widgetData: localeFilteredData,
       widgetSlug,
     }
 
