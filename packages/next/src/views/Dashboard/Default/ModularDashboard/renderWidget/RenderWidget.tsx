@@ -28,6 +28,7 @@ export const RenderWidget: React.FC<{
   const renderWidget = useCallback(() => {
     async function render() {
       const requestID = ++requestIDRef.current
+      setComponent(null)
 
       try {
         const widgetSlug = widgetId.slice(0, widgetId.lastIndexOf('-'))
@@ -75,7 +76,6 @@ export const RenderWidget: React.FC<{
   }, [serverFunction, widgetData, widgetId])
 
   useEffect(() => {
-    setComponent(null)
     void renderWidget()
   }, [renderWidget])
 
