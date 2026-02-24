@@ -689,6 +689,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         ) {
           await field.editor.buildFormState({
             ...(args as AddFieldStatePromiseArgs<RichTextField>),
+            addErrorPathToParent,
             iterateFields,
           })
         }
