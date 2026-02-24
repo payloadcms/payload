@@ -124,7 +124,6 @@ export function WidgetConfigDrawer({
       ) : (
         <OperationProvider operation="update">
           <Form
-            disableValidationOnSubmit
             fields={fields}
             initialState={initialState}
             onChange={[onChange]}

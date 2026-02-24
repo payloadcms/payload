@@ -221,6 +221,33 @@ describe('Dashboard', () => {
     }
   })
 
+  test('widget config drawer validates required fields on submit', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+
+    const widget = d.widgetByPos(2)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+
+    await titleInput.fill('')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+
+    await expect(drawer.locator('.field-error')).toBeVisible()
+    await expect(drawer).toBeVisible()
+
+    await titleInput.fill('Valid Title')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
 
