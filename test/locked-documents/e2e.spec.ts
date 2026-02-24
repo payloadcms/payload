@@ -1585,6 +1585,83 @@ describe('Locked Documents', () => {
       const modalContainer = page.locator('.payload__modal-container')
       await expect(modalContainer).toBeHidden()
     })
+
+    test('should show stale data modal for globals when user2 edits after user1 saves', async () => {
+      // User 1 opens global and saves to establish initial updatedAt
+      await page.goto(globalUrl.global('menu'))
+      let user1GlobalText = page.locator('#field-globalText')
+      await user1GlobalText.fill('Initial Global State')
+      await saveDocAndAssert(page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Both users now open the same global
+      await page.goto(globalUrl.global('menu'))
+      await user2Page.goto(globalUrl.global('menu'))
+
+      // User 1 makes a change and saves
+      user1GlobalText = page.locator('#field-globalText')
+      await user1GlobalText.fill('User 1 Global Change')
+      await saveDocAndAssert(page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 2 tries to edit (should trigger stale data check)
+      const user2GlobalText = user2Page.locator('#field-globalText')
+      await user2GlobalText.fill('User 2 Global Change')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Stale data modal should appear for user 2
+      const modalContainer = user2Page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+    })
+
+    test('should reload global and show latest data when clicking reload button', async () => {
+      // User 1 opens global and saves to establish initial updatedAt
+      await page.goto(globalUrl.global('menu'))
+      let user1GlobalText = page.locator('#field-globalText')
+      await user1GlobalText.fill('Initial Global State')
+      await saveDocAndAssert(page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Both users now open the same global
+      await page.goto(globalUrl.global('menu'))
+      await user2Page.goto(globalUrl.global('menu'))
+
+      // User 1 makes a change and saves
+      user1GlobalText = page.locator('#field-globalText')
+      await user1GlobalText.fill('User 1 Updated Global Value')
+      await saveDocAndAssert(page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 2 tries to edit
+      const user2GlobalText = user2Page.locator('#field-globalText')
+      await user2GlobalText.fill('Should be discarded')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 2 clicks reload button in modal
+      await user2Page.locator('#document-stale-data-reload').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      const modalContainer = user2Page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeHidden()
+
+      // User 2 should now see User 1's changes
+      await expect(user2GlobalText).toHaveValue('User 1 Updated Global Value')
+    })
   })
 })
 
