@@ -31,7 +31,11 @@ import { assertToastErrors } from '../../../../../__helpers/shared/assertToastEr
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
+import {
+  EXPECT_TIMEOUT,
+  POLL_TOPASS_TIMEOUT,
+  TEST_TIMEOUT_LONG,
+} from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { blockFieldID } from '../../../utils.js'
 import { lexicalDocData } from '../../data.js'
@@ -1681,6 +1685,9 @@ async function createBlock({
       await expect(blockSelectButton).toContainText(name)
       await blockSelectButton.click()
       await expect(slashMenuPopover).toBeHidden()
+
+      // Wait for shimmer to disappear
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0, { timeout: EXPECT_TIMEOUT * 3 })
     },
     {
       allowedNumberOfRequests: 2,
