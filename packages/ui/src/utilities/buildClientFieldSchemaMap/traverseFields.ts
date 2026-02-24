@@ -148,6 +148,10 @@ export const traverseFields = ({
           // check if fields is the only key in the subField object
           const isFieldsOnly = Object.keys(subField).length === 1 && 'fields' in subField
 
+          if (!isFieldsOnly && !('type' in subField)) {
+            continue
+          }
+
           const clientFields = createClientFields({
             defaultIDType: payload.config.db.defaultIDType,
             disableAddingID: true,
