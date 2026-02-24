@@ -1,23 +1,14 @@
 import type { TFunction } from '@payloadcms/translations'
-import type {
-  BasePayload,
-  ClientWidget,
-  DashboardConfig,
-  PayloadRequest,
-  TypedUser,
-  Widget,
-  WidgetInstance,
-  WidgetServerProps,
-} from 'payload'
+import type { ClientWidget, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
-import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
+import type { WidgetInstanceClient } from './index.client.js'
 
-import { getPreferences } from '../../../../utilities/getPreferences.js'
+import { getItemsFromConfig } from './getItemsFromConfig.js'
+import { getItemsFromPreferences } from './getItemsFromPreferences.js'
 import { ModularDashboardClient } from './index.client.js'
 import './index.scss'
 
@@ -67,48 +58,4 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
       <ModularDashboardClient clientLayout={serverLayout} widgets={clientWidgets} />
     </div>
   )
-}
-
-async function getItemsFromPreferences(
-  payload: BasePayload,
-  user: TypedUser,
-): Promise<null | WidgetItem[]> {
-  const savedPreferences = await getPreferences(
-    PREFERENCE_KEYS.DASHBOARD_LAYOUT,
-    payload,
-    user.id,
-    user.collection,
-  )
-  if (
-    !savedPreferences?.value ||
-    typeof savedPreferences.value !== 'object' ||
-    !('layouts' in savedPreferences.value)
-  ) {
-    return null
-  }
-  return savedPreferences.value.layouts as null | WidgetItem[]
-}
-
-async function getItemsFromConfig(
-  defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
-  req: PayloadRequest,
-  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
-): Promise<WidgetItem[]> {
-  let widgetInstances: WidgetInstance[]
-  if (typeof defaultLayout === 'function') {
-    widgetInstances = await defaultLayout({ req })
-  } else {
-    widgetInstances = defaultLayout
-  }
-
-  return widgetInstances.map((widgetInstance, index) => {
-    const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
-    return {
-      id: `${widgetInstance.widgetSlug}-${index}`,
-      data: widgetInstance.data,
-      maxWidth: widget?.maxWidth ?? 'full',
-      minWidth: widget?.minWidth ?? 'x-small',
-      width: widgetInstance.width || 'x-small',
-    }
-  })
 }
