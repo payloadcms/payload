@@ -59,7 +59,8 @@ export default defineConfig({
           include: ['test/evals/**/*.spec.ts'],
           name: 'eval',
           environment: 'node',
-          testTimeout: 300000,
+          // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
+          testTimeout: 600000,
         },
       },
     ],
