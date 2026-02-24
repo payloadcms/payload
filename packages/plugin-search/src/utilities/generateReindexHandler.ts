@@ -113,8 +113,15 @@ export const generateReindexHandler =
       })
     }
 
-    async function reindexCollection(collection: string) {
+    async function reindexCollectionForLocale(
+      collection: string,
+      localeToSync: string | undefined,
+      isFirstLocale: boolean,
+    ) {
       const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
+      const defaultLocale = req.payload.config.localization
+        ? req.payload.config.localization.defaultLocale
+        : req.locale
 
       const totalDocsWithDrafts = await countDocuments(collection, true)
       const totalDocs =
@@ -123,15 +130,13 @@ export const generateReindexHandler =
           : await countDocuments(collection, !draftsEnabled)
       const totalBatches = Math.ceil(totalDocs / batchSize)
 
-      aggregateDocsWithDrafts += totalDocsWithDrafts
-      aggregateDocs += totalDocs
+      // Only accumulate aggregate counts on the first locale pass to avoid double-counting
+      if (isFirstLocale) {
+        aggregateDocsWithDrafts += totalDocsWithDrafts
+        aggregateDocs += totalDocs
+      }
 
-      // Loop through batches, then documents, then locales per document
       for (let i = 0; i < totalBatches; i++) {
-        const defaultLocale = req.payload.config.localization
-          ? req.payload.config.localization.defaultLocale
-          : req.locale
-
         const { docs } = await payload.find({
           collection,
           depth: 0,
@@ -143,52 +148,42 @@ export const generateReindexHandler =
         })
 
         for (const doc of docs) {
-          // Get all configured locales
-          // If no localization, use [undefined] to sync once without a locale
-          const allLocales = req.payload.config.localization
-            ? req.payload.config.localization.localeCodes
-            : [undefined]
-
-          // Loop through all locales and check each one
-          let firstAllowedLocale = true
-          for (const localeToSync of allLocales) {
-            // Check if we should skip this locale for this document
-            let shouldSkip = false
-            if (typeof pluginConfig.skipSync === 'function') {
-              try {
-                shouldSkip = await pluginConfig.skipSync({
-                  collectionSlug: collection,
-                  doc,
-                  locale: localeToSync,
-                  req,
-                })
-              } catch (err) {
-                req.payload.logger.error({
-                  err,
-                  msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
-                })
-              }
+          let shouldSkip = false
+          if (typeof pluginConfig.skipSync === 'function') {
+            try {
+              shouldSkip = await pluginConfig.skipSync({
+                collectionSlug: collection,
+                doc,
+                locale: localeToSync,
+                req,
+              })
+            } catch (err) {
+              req.payload.logger.error({
+                err,
+                msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
+              })
             }
-
-            if (shouldSkip) {
-              continue // Skip this locale
-            }
-
-            // Sync this locale (create first index, then update with other locales accordingly)
-            const operation = firstAllowedLocale ? 'create' : 'update'
-            firstAllowedLocale = false
-
-            await syncDocAsSearchIndex({
-              collection,
-              data: doc,
-              doc,
-              locale: localeToSync,
-              onSyncError: () => operation === 'create' && aggregateErrors++,
-              operation,
-              pluginConfig,
-              req,
-            })
           }
+
+          if (shouldSkip) {
+            continue
+          }
+
+          // First locale pass creates the search index entry, subsequent passes update it.
+          // If skipSync caused the first locale to be skipped for a document,
+          // syncDocAsSearchIndex handles the fallback (update with no existing doc → create).
+          const operation = isFirstLocale ? 'create' : 'update'
+
+          await syncDocAsSearchIndex({
+            collection,
+            data: doc,
+            doc,
+            locale: localeToSync,
+            onSyncError: () => operation === 'create' && aggregateErrors++,
+            operation,
+            pluginConfig,
+            req,
+          })
         }
       }
     }
@@ -196,17 +191,46 @@ export const generateReindexHandler =
     const shouldCommit = await initTransaction(req)
 
     try {
-      const promises = collections.map(async (collection) => {
-        try {
-          await deleteIndexes(collection)
-          await reindexCollection(collection)
-        } catch (err) {
-          const message = t('error:unableToReindexCollection', { collection })
-          payload.logger.error({ err, msg: message })
-        }
-      })
+      // Get all configured locales (or [undefined] when localization is disabled)
+      const allLocales: (string | undefined)[] = req.payload.config.localization
+        ? req.payload.config.localization.localeCodes
+        : [undefined]
 
-      await Promise.all(promises)
+      // Phase 1: Delete all existing search indexes in parallel.
+      // This is safe to parallelize as it does not involve locale-specific state.
+      await Promise.all(
+        collections.map(async (collection) => {
+          try {
+            await deleteIndexes(collection)
+          } catch (err) {
+            const message = t('error:unableToReindexCollection', { collection })
+            payload.logger.error({ err, msg: message })
+          }
+        }),
+      )
+
+      // Phase 2: Process one locale at a time, all collections in parallel per locale.
+      // The Payload local API mutates req.locale in-place inside createLocalReq before
+      // each async DB operation. When multiple collections run concurrently with different
+      // locales, concurrent calls to createLocalReq overwrite req.locale, causing documents
+      // to be stored under the wrong locale. By grouping collections within the same locale
+      // phase, all concurrent operations set req.locale to the same value, making the
+      // in-place mutation idempotent and eliminating the race condition.
+      for (let localeIndex = 0; localeIndex < allLocales.length; localeIndex++) {
+        const localeToSync = allLocales[localeIndex]
+        const isFirstLocale = localeIndex === 0
+
+        await Promise.all(
+          collections.map(async (collection) => {
+            try {
+              await reindexCollectionForLocale(collection, localeToSync, isFirstLocale)
+            } catch (err) {
+              const message = t('error:unableToReindexCollection', { collection })
+              payload.logger.error({ err, msg: message })
+            }
+          }),
+        )
+      }
     } catch (err: any) {
       if (shouldCommit) {
         await killTransaction(req)
