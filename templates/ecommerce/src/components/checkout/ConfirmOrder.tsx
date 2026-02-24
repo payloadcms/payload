@@ -32,7 +32,18 @@ export const ConfirmOrder: React.FC = () => {
           },
         }).then((result) => {
           if (result && typeof result === 'object' && 'orderID' in result && result.orderID) {
-            router.push(`/shop/order/${result.orderID}?email=${email}`)
+            const accessToken = 'accessToken' in result ? (result.accessToken as string) : ''
+            const queryParams = new URLSearchParams()
+
+            if (email) {
+              queryParams.set('email', email)
+            }
+            if (accessToken) {
+              queryParams.set('accessToken', accessToken)
+            }
+
+            const queryString = queryParams.toString()
+            router.push(`/orders/${result.orderID}${queryString ? `?${queryString}` : ''}`)
           }
         })
       }
@@ -40,7 +51,7 @@ export const ConfirmOrder: React.FC = () => {
       // If no payment intent ID is found, redirect to the home
       router.push('/')
     }
-  }, [cart, searchParams])
+  }, [cart, confirmOrder, router, searchParams])
 
   return (
     <div className="text-center w-full flex flex-col items-center justify-start gap-4">
