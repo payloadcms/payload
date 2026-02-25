@@ -1598,8 +1598,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group' | 'images'>
+  admin?: Pick<NonNullable<Block['admin']>, 'custom' | 'disableBlockName' | 'group' | 'images'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
