@@ -391,7 +391,7 @@ export interface CountWidget {
     title: string;
     collection?: ('tickets' | 'events') | null;
   };
-  width?: 'x-small' | 'small' | 'medium';
+  width: 'x-small' | 'small' | 'medium';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -401,7 +401,7 @@ export interface PrivateWidget {
   data?: {
     [k: string]: unknown;
   };
-  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -411,7 +411,7 @@ export interface RevenueWidget {
   data?: {
     [k: string]: unknown;
   };
-  width?: 'medium' | 'large' | 'x-large' | 'full';
+  width: 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -421,7 +421,7 @@ export interface PageQueryWidget {
   data?: {
     [k: string]: unknown;
   };
-  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -436,7 +436,7 @@ export interface ConfigurableWidget {
       nestedText?: string | null;
     };
   };
-  width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -446,7 +446,7 @@ export interface CollectionsWidget {
   data?: {
     [k: string]: unknown;
   };
-  width?: 'full';
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

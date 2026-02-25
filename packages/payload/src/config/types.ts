@@ -785,15 +785,15 @@ export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extend
         ? DataFromWidgetSlug<TSlug>
         : Record<string, unknown>
       widgetSlug: TSlug
-      width?: [
+      width: [
         Extract<
-          TypedWidget[TSlug] extends { width?: infer TWidth } ? TWidth : WidgetWidth,
+          TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
           WidgetWidth
         >,
       ] extends [never]
         ? WidgetWidth
         : Extract<
-            TypedWidget[TSlug] extends { width?: infer TWidth } ? TWidth : WidgetWidth,
+            TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
             WidgetWidth
           >
     }

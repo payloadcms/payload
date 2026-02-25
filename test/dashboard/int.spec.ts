@@ -27,8 +27,8 @@ describe('Dashboard Widget Types', () => {
   it('should contain width and data on widget types', () => {
     expectTypeOf<CountWidget>().toHaveProperty('data')
     expectTypeOf<CountWidget>().toHaveProperty('width')
-    expectTypeOf<CountWidget['width']>().toEqualTypeOf<'medium' | 'small' | 'x-small' | undefined>()
-    expectTypeOf<CollectionsWidget['width']>().toEqualTypeOf<'full' | undefined>()
+    expectTypeOf<CountWidget['width']>().toEqualTypeOf<'medium' | 'small' | 'x-small'>()
+    expectTypeOf<CollectionsWidget['width']>().toEqualTypeOf<'full'>()
   })
 
   it('should mark widget data fields as required or optional', () => {

@@ -209,6 +209,7 @@ function generateWidgetSchemas({
           enum: widthEnum,
         },
       },
+      required: ['width'],
     }
 
     properties[widget.slug] = {
