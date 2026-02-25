@@ -103,6 +103,7 @@ export interface Config {
     'array-fields': ArrayField;
     OnDemandForm: OnDemandForm;
     OnDemandOutsideForm: OnDemandOutsideForm;
+    'lexical-custom-cell': LexicalCustomCell;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -131,6 +132,7 @@ export interface Config {
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
+    'lexical-custom-cell': LexicalCustomCellSelect<false> | LexicalCustomCellSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1031,6 +1033,31 @@ export interface OnDemandOutsideForm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-custom-cell".
+ */
+export interface LexicalCustomCell {
+  id: string;
+  title: string;
+  richTextField?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1157,6 +1184,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'OnDemandOutsideForm';
         value: string | OnDemandOutsideForm;
+      } | null)
+    | ({
+        relationTo: 'lexical-custom-cell';
+        value: string | LexicalCustomCell;
       } | null)
     | ({
         relationTo: 'users';
@@ -1602,6 +1633,16 @@ export interface OnDemandFormSelect<T extends boolean = true> {
 export interface OnDemandOutsideFormSelect<T extends boolean = true> {
   json?: T;
   hiddenAnchor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-custom-cell_select".
+ */
+export interface LexicalCustomCellSelect<T extends boolean = true> {
+  title?: T;
+  richTextField?: T;
   updatedAt?: T;
   createdAt?: T;
 }
