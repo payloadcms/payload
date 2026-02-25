@@ -77,6 +77,46 @@ export const LexicalFullyFeatured: CollectionConfig = {
                   },
                 ],
               },
+              {
+                slug: 'blockWithArray',
+                fields: [
+                  {
+                    name: 'items',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                slug: 'blockWithNestedArrays',
+                fields: [
+                  {
+                    name: 'outerArray',
+                    type: 'array',
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                      },
+                      {
+                        name: 'innerArray',
+                        type: 'array',
+                        fields: [
+                          {
+                            name: 'innerText',
+                            type: 'text',
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
             ],
             inlineBlocks: [
               {

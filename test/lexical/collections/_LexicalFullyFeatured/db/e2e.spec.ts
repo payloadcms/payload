@@ -6,6 +6,7 @@ import {
 import { expect, type Page, test } from '@playwright/test'
 import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
@@ -16,7 +17,7 @@ import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../__helpers
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
 import { blockFieldID, LexicalHelpers, type PasteMode } from '../../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -249,6 +250,21 @@ describe('Lexical Fully Featured - database', () => {
         },
       },
     )
+  })
+
+  test('should resolve shimmer when adding array row inside block', async ({ page }) => {
+    await lexical.slashCommand('blockwitharray')
+    const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
+    await expect(blockEl).toBeVisible()
+
+    const addButton = blockEl.getByRole('button', { name: 'Add Item' })
+    await expect(addButton).toBeVisible({ timeout: EXPECT_TIMEOUT * 3 })
+    // Need the wait to reproduce bug
+    await wait(500)
+    await addButton.click()
+
+    const textInput = blockEl.locator('[id$="-items-row-0"] input[type="text"]')
+    await expect(textInput).toBeVisible({ timeout: EXPECT_TIMEOUT * 3 })
   })
 
   test('ensure block name can be saved and loaded', async ({ page }) => {
