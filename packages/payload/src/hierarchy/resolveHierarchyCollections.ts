@@ -79,7 +79,6 @@ export const resolveHierarchyCollections = (config: Config): void => {
       })
     }
 
-    // this is really good ux since the user does not need to track what collections are folder enabled. Is there a better way to do this. Should we have a child hierarchy flag on collection configs, should we have a createFolderChildCollection or similar helper in addition to the createFoldersCollection and createFolderField helpers?
     for (const collection of config.collections || []) {
       // Skip the hierarchy collection itself (handled above)
       if (collection.slug === hierarchyCollection.slug) {
@@ -126,7 +125,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
         injectHierarchyButton({
           collection,
           fieldName: parentFieldName,
-          hierarchyCollection: hierarchyCollection as SanitizedCollectionConfig,
+          hierarchyCollectionSlug: hierarchyCollection.slug,
           parentFieldName: hierarchyConfig.parentFieldName,
         })
       }
