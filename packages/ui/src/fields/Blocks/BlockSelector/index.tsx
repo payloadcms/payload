@@ -104,7 +104,7 @@ export const BlockSelector: React.FC<Props> = (props) => {
                   {groupBlocks.map((_block, index) => {
                     const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
-                    const { admin, slug, imageAltText, imageURL, labels: blockLabels } = block
+                    const { slug, admin, imageAltText, imageURL, labels: blockLabels } = block
 
                     const thumbnailURL = admin?.images?.thumbnail
                       ? typeof admin.images.thumbnail === 'string'

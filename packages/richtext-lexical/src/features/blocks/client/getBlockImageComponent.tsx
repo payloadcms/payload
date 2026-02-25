@@ -2,15 +2,13 @@ import type { ClientBlock } from 'payload'
 
 import React from 'react'
 
-import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
-
 /**
  * Get the appropriate icon component for a block in Lexical editor menus/toolbars.
  *
  * Priority for URL: images.icon > images.thumbnail > imageURL (deprecated)
  * Priority for alt: images.icon.alt > images.thumbnail.alt > imageAltText (deprecated)
  */
-export function getBlockImageComponent(block: ClientBlock) {
+export function getBlockImageComponent(block: ClientBlock, fallback: React.ElementType) {
   const { admin, imageAltText, imageURL } = block
   const images = admin?.images
 
@@ -30,7 +28,7 @@ export function getBlockImageComponent(block: ClientBlock) {
   }
 
   if (!displayURL) {
-    return BlockIcon
+    return fallback
   }
 
   const alt = displayAlt ?? 'Block Image'
