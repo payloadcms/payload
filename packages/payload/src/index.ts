@@ -814,7 +814,7 @@ export class BasePayload {
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
         ) {
-          return true
+          return
         }
 
         if (!fieldAffectsData(field)) {
