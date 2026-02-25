@@ -10,14 +10,14 @@ export async function runEval(
   question: string,
   options: RunEvalOptions = {},
 ): Promise<RunnerResult> {
-  const { model = DEFAULT_RUNNER_MODEL, systemPromptKey = 'qa' } = options
+  const { model = DEFAULT_RUNNER_MODEL, systemPromptKey = 'qaWithSkill' } = options
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model,
     output: Output.object({ schema: AnswerSchema }),
     system: SYSTEM_PROMPTS[systemPromptKey],
     prompt: question,
   })
 
-  return output
+  return { ...output, usage }
 }

@@ -39,15 +39,34 @@ export type CodegenEvalCase = {
 // Models
 export type ModelKey = 'openai:gpt-4o' | 'openai:gpt-4o-mini' | 'openai:gpt-5.2'
 
+// Usage
+export type TokenUsage = {
+  /** Tokens read from the prompt cache (billed at reduced rate). Key signal for skill efficiency. */
+  cachedInputTokens: number
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+}
+export type EvalUsage = {
+  /** Tokens used by the LLM runner (answer generation or codegen) */
+  runner: TokenUsage
+  /** Tokens used by the LLM scorer */
+  scorer?: TokenUsage
+  /** Convenience sum of runner + scorer */
+  total: TokenUsage
+}
+
 // Runner
-export type SystemPromptKey = 'configModify' | 'configReview' | 'qa'
+export type SystemPromptKey = 'configModify' | 'configReview' | 'qaNoSkill' | 'qaWithSkill'
 export type RunnerResult = {
   answer: string
   confidence: number
+  usage: TokenUsage
 }
 export type CodegenRunnerResult = {
   confidence: number
   modifiedConfig: string
+  usage: TokenUsage
 }
 export type RunEvalOptions = {
   model?: LanguageModel
@@ -64,6 +83,7 @@ export type ScorerResult = {
   pass: boolean
   reasoning: string
   score: number
+  usage: TokenUsage
 }
 export type ConfigChangeScorerResult = {
   changeDescription: string
@@ -72,6 +92,7 @@ export type ConfigChangeScorerResult = {
   pass: boolean
   reasoning: string
   score: number
+  usage: TokenUsage
 }
 export type ScoreAnswerOptions = {
   model?: LanguageModel
@@ -98,6 +119,8 @@ export type EvalResult = {
   score?: number
   /** Populated when TypeScript compilation fails */
   tscErrors?: string[]
+  /** Token usage across all LLM calls for this eval case */
+  usage?: EvalUsage
 }
 export type RunDatasetOptions = {
   runnerModel?: LanguageModel

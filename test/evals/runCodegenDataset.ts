@@ -53,7 +53,11 @@ export async function runCodegenCase(
     return cached
   }
 
-  const { confidence, modifiedConfig } = await runCodegenEval(testCase.input, starterConfig, {
+  const {
+    confidence,
+    modifiedConfig,
+    usage: runnerUsage,
+  } = await runCodegenEval(testCase.input, starterConfig, {
     model: runnerModel,
   })
 
@@ -71,6 +75,15 @@ export async function runCodegenCase(
       question: testCase.input,
       reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
       tscErrors,
+      usage: {
+        runner: runnerUsage,
+        total: {
+          cachedInputTokens: runnerUsage.cachedInputTokens,
+          inputTokens: runnerUsage.inputTokens,
+          outputTokens: runnerUsage.outputTokens,
+          totalTokens: runnerUsage.totalTokens,
+        },
+      },
     }
     setCachedResult(key, result)
     writeFailedCodegenAssertion({
@@ -91,10 +104,17 @@ export async function runCodegenCase(
     return result
   }
 
-  const { changeDescription, completeness, correctness, pass, reasoning, score } =
-    await scoreConfigChange(testCase.input, testCase.expected, starterConfig, modifiedConfig, {
-      model: scorerModel,
-    })
+  const {
+    changeDescription,
+    completeness,
+    correctness,
+    pass,
+    reasoning,
+    score,
+    usage: scorerUsage,
+  } = await scoreConfigChange(testCase.input, testCase.expected, starterConfig, modifiedConfig, {
+    model: scorerModel,
+  })
 
   const result: EvalResult = {
     answer: modifiedConfig,
@@ -107,6 +127,16 @@ export async function runCodegenCase(
     question: testCase.input,
     reasoning,
     score,
+    usage: {
+      runner: runnerUsage,
+      scorer: scorerUsage,
+      total: {
+        cachedInputTokens: runnerUsage.cachedInputTokens + scorerUsage.cachedInputTokens,
+        inputTokens: runnerUsage.inputTokens + scorerUsage.inputTokens,
+        outputTokens: runnerUsage.outputTokens + scorerUsage.outputTokens,
+        totalTokens: runnerUsage.totalTokens + scorerUsage.totalTokens,
+      },
+    },
   }
 
   setCachedResult(key, result)

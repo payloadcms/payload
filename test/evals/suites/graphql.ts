@@ -8,7 +8,7 @@ import { ACCURACY_THRESHOLD } from '../thresholds.js'
 import { failureMessage } from '../utils/index.js'
 
 export function registerGraphQLSuite(options: SuiteOptions = {}) {
-  const { labelSuffix = '', runnerModel } = options
+  const { labelSuffix = '', runnerModel, systemPromptKey } = options
 
   describe(`GraphQL${labelSuffix}`, () => {
     describe('Collections', () => {
@@ -16,7 +16,7 @@ export function registerGraphQLSuite(options: SuiteOptions = {}) {
         const { accuracy, results } = await runDataset(
           graphqlCollectionsQADataset,
           'GraphQL: Collections QA',
-          { runnerModel },
+          { runnerModel, systemPromptKey },
         )
         const failed = results.filter((r) => !r.pass)
         assert(accuracy >= ACCURACY_THRESHOLD, failureMessage(accuracy, failed))

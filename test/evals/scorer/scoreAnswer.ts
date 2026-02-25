@@ -14,7 +14,7 @@ export async function scoreAnswer(
 ): Promise<ScorerResult> {
   const { model = DEFAULT_SCORER_MODEL } = options
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model,
     output: Output.object({ schema: ScoreSchema }),
     prompt: `Question: ${question}
@@ -51,5 +51,5 @@ Important scoring guidance:
   const score = 0.6 * output.correctness + 0.4 * output.completeness
   const pass = score >= SCORE_THRESHOLD
 
-  return { ...output, pass, score }
+  return { ...output, pass, score, usage }
 }

@@ -10,12 +10,13 @@ import { ACCURACY_THRESHOLD } from '../thresholds.js'
 import { caseFailureMessage, failureMessage } from '../utils/index.js'
 
 export function registerBuildingPluginsSuite(options: SuiteOptions = {}) {
-  const { labelSuffix = '', runnerModel } = options
+  const { labelSuffix = '', runnerModel, systemPromptKey } = options
 
   describe(`Building Plugins${labelSuffix}`, () => {
     it(`should achieve >= ${ACCURACY_THRESHOLD * 100}% accuracy on question answering`, async () => {
       const { accuracy, results } = await runDataset(pluginsQADataset, 'Building Plugins: QA', {
         runnerModel,
+        systemPromptKey,
       })
       const failed = results.filter((r) => !r.pass)
       assert(accuracy >= ACCURACY_THRESHOLD, failureMessage(accuracy, failed))

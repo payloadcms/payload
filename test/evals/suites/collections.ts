@@ -10,12 +10,13 @@ import { ACCURACY_THRESHOLD } from '../thresholds.js'
 import { caseFailureMessage, failureMessage } from '../utils/index.js'
 
 export function registerCollectionsSuite(options: SuiteOptions = {}) {
-  const { labelSuffix = '', runnerModel } = options
+  const { labelSuffix = '', runnerModel, systemPromptKey } = options
 
   describe(`Collections${labelSuffix}`, () => {
     it(`should achieve >= ${ACCURACY_THRESHOLD * 100}% accuracy on question answering`, async () => {
       const { accuracy, results } = await runDataset(collectionsQADataset, 'Collections: QA', {
         runnerModel,
+        systemPromptKey,
       })
       const failed = results.filter((r) => !r.pass)
       assert(accuracy >= ACCURACY_THRESHOLD, failureMessage(accuracy, failed))

@@ -13,7 +13,7 @@ export async function runCodegenEval(
 ): Promise<CodegenRunnerResult> {
   const { model = DEFAULT_RUNNER_MODEL } = options
 
-  const { output } = await generateText({
+  const { output, usage } = await generateText({
     model,
     output: Output.object({ schema: ModifiedConfigSchema }),
     system: SYSTEM_PROMPTS.configModify,
@@ -23,5 +23,5 @@ Starter payload.config.ts:
 ${starterConfig}`,
   })
 
-  return output
+  return { ...output, usage }
 }

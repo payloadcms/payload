@@ -4,18 +4,25 @@ import path from 'path'
 
 dotenv.config()
 
-const claudeMdPath = path.resolve(process.cwd(), 'CLAUDE.md')
-const CLAUDE_MD_CONTEXT = fs.readFileSync(claudeMdPath, 'utf-8')
+const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
+const SKILL_CONTEXT = fs.readFileSync(skillPath, 'utf-8')
 
 export const SYSTEM_PROMPTS = {
   /**
-   * For Q&A evals about Payload's contributor conventions (coding style, commits, tests, etc.)
-   * Uses CLAUDE.md as the primary reference.
+   * For Q&A evals about Payload CMS development — with SKILL.md injected as passive context.
+   * Use this to measure the skill's contribution vs qaNoSkill.
    */
-  qa: `You are an expert on the Payload CMS codebase and its development conventions.
-Answer questions accurately and concisely based on the following guidance document:
+  qaWithSkill: `You are an expert Payload CMS developer.
+Answer questions accurately and concisely based on the following skill document:
 
-${CLAUDE_MD_CONTEXT}`,
+${SKILL_CONTEXT}`,
+
+  /**
+   * Baseline: no skill document injected.
+   * Pair with qaWithSkill to measure how much SKILL.md improves answers.
+   */
+  qaNoSkill: `You are an expert Payload CMS developer.
+Answer questions accurately and concisely.`,
 
   /**
    * For config-review evals: given a broken payload.config.ts, identify and explain the errors.

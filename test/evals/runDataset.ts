@@ -21,7 +21,7 @@ export async function runDataset(
   const {
     runnerModel = DEFAULT_RUNNER_MODEL,
     scorerModel = DEFAULT_SCORER_MODEL,
-    systemPromptKey = 'qa',
+    systemPromptKey = 'qaWithSkill',
   } = options
 
   const categories = [...new Set(dataset.map((c) => c.category))]
@@ -72,14 +72,16 @@ export async function runDataset(
       }
 
       const run = await runEval(prompt, { model: runnerModel, systemPromptKey })
-      const { completeness, correctness, pass, reasoning, score } = await scoreAnswer(
-        testCase.input,
-        testCase.expected,
-        run.answer,
-        {
-          model: scorerModel,
-        },
-      )
+      const {
+        completeness,
+        correctness,
+        pass,
+        reasoning,
+        score,
+        usage: scorerUsage,
+      } = await scoreAnswer(testCase.input, testCase.expected, run.answer, {
+        model: scorerModel,
+      })
       const result: EvalResult = {
         answer: run.answer,
         category: testCase.category,
@@ -90,6 +92,16 @@ export async function runDataset(
         question: testCase.input,
         reasoning,
         score,
+        usage: {
+          runner: run.usage,
+          scorer: scorerUsage,
+          total: {
+            cachedInputTokens: run.usage.cachedInputTokens + scorerUsage.cachedInputTokens,
+            inputTokens: run.usage.inputTokens + scorerUsage.inputTokens,
+            outputTokens: run.usage.outputTokens + scorerUsage.outputTokens,
+            totalTokens: run.usage.totalTokens + scorerUsage.totalTokens,
+          },
+        },
       }
 
       setCachedResult(key, result)
