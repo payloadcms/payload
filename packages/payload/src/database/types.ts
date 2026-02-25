@@ -78,6 +78,8 @@ export interface BaseDatabaseAdapter {
 
   findGlobalVersions: FindGlobalVersions
 
+  findMigrationDir: () => string
+
   findOne: FindOne
 
   findVersions: FindVersions
@@ -88,16 +90,15 @@ export interface BaseDatabaseAdapter {
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
   init?: Init
-
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
   migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+
   /**
    * Run any migration down functions that have been performed
    */
   migrateDown: () => Promise<void>
-
   /**
    * Drop the current database and run all migrate up functions
    */
@@ -114,11 +115,6 @@ export interface BaseDatabaseAdapter {
    * Read the current state of migrations and output the result to show which have been run
    */
   migrateStatus: () => Promise<void>
-
-  /**
-   * Path to read and write migration files from
-   */
-  migrationDir: string
 
   /**
    * The name of the database adapter

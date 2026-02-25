@@ -9,6 +9,7 @@ import type {
 
 import { defaultUpdateJobs } from './defaultUpdateJobs.js'
 import { createMigration } from './migrations/createMigration.js'
+import { findMigrationDir } from './migrations/findMigrationDir.js'
 import { migrate } from './migrations/migrate.js'
 import { migrateDown } from './migrations/migrateDown.js'
 import { migrateRefresh } from './migrations/migrateRefresh.js'
@@ -27,13 +28,13 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     | 'allowIDOnCreate'
     | 'bulkOperationsSingleTransaction'
     | 'createMigration'
+    | 'findMigrationDir'
     | 'migrate'
     | 'migrateDown'
     | 'migrateFresh'
     | 'migrateRefresh'
     | 'migrateReset'
     | 'migrateStatus'
-    | 'migrationDir'
     | 'updateJobs'
   >,
 ): T {
@@ -55,8 +56,8 @@ export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
     updateJobs: defaultUpdateJobs,
 
     ...args,
-    // Ensure migrationDir is set
-    migrationDir: args.migrationDir || 'migrations',
+    // Ensure findMigrationDir is set
+    findMigrationDir: args.findMigrationDir || (() => findMigrationDir()),
     // Set default for bulkOperationsSingleTransaction if not provided
     bulkOperationsSingleTransaction: args.bulkOperationsSingleTransaction ?? false,
   } as T
