@@ -237,11 +237,12 @@ describe('lexicalMain', () => {
 
     await wait(500)
 
-    await saveDocHotkeyAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
+    await saveDocHotkeyAndAssert(page, false) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
     await wait(500)
     // Keep writing after save, assuming the cursor position is still at the end of the span
     await page.keyboard.type('text')
     await expect(spanInEditor).toHaveText('Upload Node:moretext')
+    await closeAllToasts(page)
     await wait(500)
     await saveDocAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
 
@@ -456,6 +457,9 @@ describe('lexicalMain', () => {
       const popoverOption3BoundingBox = await popoverOption3.boundingBox()
       expect(popoverOption3BoundingBox).not.toBeNull()
       expect(popoverOption3BoundingBox).not.toBeUndefined()
+      if (!popoverOption3BoundingBox) {
+        throw new Error('popoverOption3BoundingBox is null')
+      }
       expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
       expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
 
@@ -903,7 +907,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
 
@@ -1050,7 +1054,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
@@ -1403,7 +1407,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
@@ -1446,7 +1450,7 @@ describe('lexicalMain', () => {
     const htmlContent = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
     await page.evaluate(
       async ([htmlContent]) => {
-        const blob = new Blob([htmlContent], { type: 'text/html' })
+        const blob = new Blob([htmlContent!], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },
@@ -1556,7 +1560,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       // @ts-expect-error no need to type this
       expect(lexicalField?.root?.children[0].fields.someTextRequired).toEqual('test')
@@ -1588,7 +1592,6 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
     await user.click()
@@ -1598,10 +1601,9 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    page.getByRole('heading', { name: 'Users' })
+
     const button = page.getByLabel('Add new User')
     await button.click()
-    page.getByText('Creating new User')
   })
 
   test('ensure custom Description component is rendered only once', async () => {
@@ -1650,7 +1652,7 @@ describe('lexicalMain', () => {
     const link = '<a href="https://www.google.com">Google</a>'
     await page.evaluate(
       async ([link]) => {
-        const blob = new Blob([link], { type: 'text/html' })
+        const blob = new Blob([link!], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },

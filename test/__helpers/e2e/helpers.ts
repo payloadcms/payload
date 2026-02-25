@@ -188,7 +188,10 @@ export async function throttleTest({
   return client
 }
 
-export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
+export async function saveDocHotkeyAndAssert(
+  page: Page,
+  closeToasts: boolean = true,
+): Promise<void> {
   const ua = page.evaluate(() => navigator.userAgent)
   const isMac = (await ua).includes('Mac OS X')
   if (isMac) {
@@ -203,7 +206,9 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
     await page.keyboard.up('Control')
   }
   await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-  await closeAllToasts(page)
+  if (closeToasts) {
+    await closeAllToasts(page)
+  }
 }
 
 export async function saveDocAndAssert(

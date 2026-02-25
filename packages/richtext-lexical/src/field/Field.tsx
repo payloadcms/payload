@@ -12,7 +12,6 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import { dequal } from 'dequal/lite'
 import { type Validate } from 'payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -26,6 +25,7 @@ import './index.scss'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import { dequalNullable } from '../utilities/dequalNullable.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
 
 const baseClass = 'rich-text-lexical'
@@ -151,7 +151,7 @@ const RichTextComponent: React.FC<
       const refCheck = prevRoot !== valueRoot
       // In postgres, the order of keys in JSON objects is not guaranteed to be preserved,
       // so we use dequal for deep equality that does not care about key order.
-      const deepCheck = !dequal(
+      const deepCheck = !dequalNullable(
         prevRoot != null ? JSON.parse(JSON.stringify(prevRoot)) : prevRoot,
         valueRoot,
       )
