@@ -18,15 +18,15 @@ type PendingRequest = {
 
 type RelationshipValueCacheContextType = {
   clearAll: () => void
-  getCachedDoc: (collection: string, id: number | string) => CachedDoc | undefined
+  getCachedDoc: (collection: string, locale: string, id: number | string) => CachedDoc | undefined
   getDoc: (args: {
     collection: string
     id: number | string
     locale: string
     select: Record<string, true>
   }) => Promise<CachedDoc | undefined>
-  invalidateDoc: (collection: string, id: number | string) => void
-  updateDoc: (collection: string, id: number | string, doc: Record<string, unknown>) => void
+  invalidateDoc: (collection: string, locale: string, id: number | string) => void
+  updateDoc: (collection: string, locale: string, id: number | string, doc: Record<string, unknown>) => void
 }
 
 const Context = createContext<RelationshipValueCacheContextType>({
@@ -61,72 +61,74 @@ export const RelationshipValueCacheProvider: React.FC<{
     const batch = new Map(pendingBatchRef.current)
     pendingBatchRef.current.clear()
 
-    for (const [, pending] of batch) {
-      const { collection, ids, locale, resolve, select } = pending
+    await Promise.all(
+      Array.from(batch.values()).map(async (pending) => {
+        const { collection, ids, locale, resolve, select } = pending
 
-      if (ids.size === 0) {
-        resolve()
-        continue
-      }
+        if (ids.size === 0) {
+          resolve()
+          return
+        }
 
-      const query = {
-        depth: 0,
-        draft: true,
-        limit: ids.size,
-        locale,
-        select,
-        where: {
-          id: {
-            in: Array.from(ids),
-          },
-        },
-      }
-
-      try {
-        const response = await fetch(
-          formatAdminURL({
-            apiRoute,
-            path: `/${collection}`,
-          }),
-          {
-            body: qs.stringify(query),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18nLanguage,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-Payload-HTTP-Method-Override': 'GET',
+        const query = {
+          depth: 0,
+          draft: true,
+          limit: ids.size,
+          locale,
+          select,
+          where: {
+            id: {
+              in: Array.from(ids),
             },
-            method: 'POST',
           },
-        )
+        }
 
-        if (response.ok) {
-          const data = await response.json()
+        try {
+          const response = await fetch(
+            formatAdminURL({
+              apiRoute,
+              path: `/${collection}`,
+            }),
+            {
+              body: qs.stringify(query),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18nLanguage,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Payload-HTTP-Method-Override': 'GET',
+              },
+              method: 'POST',
+            },
+          )
 
-          for (const doc of data.docs) {
-            const cacheKey = `${collection}:${doc.id}`
-            cacheRef.current.set(cacheKey, { id: doc.id, doc })
-          }
+          if (response.ok) {
+            const data = await response.json()
 
-          // For IDs not found in the response, cache a placeholder to avoid refetching
-          for (const id of ids) {
-            const cacheKey = `${collection}:${id}`
-            if (!cacheRef.current.has(cacheKey)) {
-              cacheRef.current.set(cacheKey, { id, doc: { id } })
+            for (const doc of data.docs) {
+              const cacheKey = `${collection}:${locale}:${doc.id}`
+              cacheRef.current.set(cacheKey, { id: doc.id, doc })
+            }
+
+            // For IDs not found in the response, cache a placeholder to avoid refetching
+            for (const id of ids) {
+              const cacheKey = `${collection}:${locale}:${id}`
+              if (!cacheRef.current.has(cacheKey)) {
+                cacheRef.current.set(cacheKey, { id, doc: { id } })
+              }
             }
           }
+        } catch {
+          // On error, don't cache — allow retry on next request
         }
-      } catch {
-        // On error, don't cache — allow retry on next request
-      }
 
-      // Clean up in-flight entries for all IDs in this batch
-      for (const id of ids) {
-        inFlightRef.current.delete(`${collection}:${id}`)
-      }
+        // Clean up in-flight entries for all IDs in this batch
+        for (const id of ids) {
+          inFlightRef.current.delete(`${collection}:${locale}:${id}`)
+        }
 
-      resolve()
-    }
+        resolve()
+      }),
+    )
   }, [apiRoute, i18nLanguage])
 
   const scheduleBatchFlush = useCallback(() => {
@@ -147,7 +149,7 @@ export const RelationshipValueCacheProvider: React.FC<{
       select: Record<string, true>
     }): Promise<CachedDoc | undefined> => {
       const { id, collection, locale, select } = args
-      const cacheKey = `${collection}:${id}`
+      const cacheKey = `${collection}:${locale}:${id}`
 
       // Return from cache if available
       const cached = cacheRef.current.get(cacheKey)
@@ -210,18 +212,18 @@ export const RelationshipValueCacheProvider: React.FC<{
     [scheduleBatchFlush],
   )
 
-  const getCachedDoc = useCallback((collection: string, id: number | string) => {
-    return cacheRef.current.get(`${collection}:${id}`)
+  const getCachedDoc = useCallback((collection: string, locale: string, id: number | string) => {
+    return cacheRef.current.get(`${collection}:${locale}:${id}`)
   }, [])
 
-  const invalidateDoc = useCallback((collection: string, id: number | string) => {
-    cacheRef.current.delete(`${collection}:${id}`)
-    inFlightRef.current.delete(`${collection}:${id}`)
+  const invalidateDoc = useCallback((collection: string, locale: string, id: number | string) => {
+    cacheRef.current.delete(`${collection}:${locale}:${id}`)
+    inFlightRef.current.delete(`${collection}:${locale}:${id}`)
   }, [])
 
   const updateDoc = useCallback(
-    (collection: string, id: number | string, doc: Record<string, unknown>) => {
-      cacheRef.current.set(`${collection}:${id}`, { id, doc: { ...doc, id } })
+    (collection: string, locale: string, id: number | string, doc: Record<string, unknown>) => {
+      cacheRef.current.set(`${collection}:${locale}:${id}`, { id, doc: { ...doc, id } })
     },
     [],
   )
