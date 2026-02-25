@@ -188,35 +188,7 @@ export const etTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Lülita plokk',
     uploadNewLabel: 'Lae üles uus {{label}}',
   },
-  folder: {
-    browseByFolder: 'Sirvi kausta järgi',
-    byFolder: 'Kausta järgi',
-    deleteFolder: 'Kustuta kaust',
-    folderName: 'Kausta nimi',
-    folders: 'Kaustad',
-    folderTypeDescription: 'Valige, millist tüüpi kogumiku dokumente peaks selles kaustas lubama.',
-    itemHasBeenMoved: '{{title}} on teisaldatud kausta {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} on teisaldatud juurkausta',
-    itemsMovedToFolder: '{{title}} viidi üle kausta {{folderName}}',
-    itemsMovedToRoot: '{{title}} on teisaldatud juurkausta.',
-    moveFolder: 'Liiguta kausta',
-    moveItemsToFolderConfirmation:
-      'Te olete umbes kolimas <1>{{count}} {{label}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
-    moveItemsToRootConfirmation:
-      'Te olete peaaegu teisaldamas <1>{{count}} {{label}}</1> juurkausta. Kas olete kindel?',
-    moveItemToFolderConfirmation:
-      'Te olete umbes liigutamas <1>{{title}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
-    moveItemToRootConfirmation:
-      'Te olete peaaegu liigutanud <1>{{title}}</1> juurkausta. Kas olete kindel?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Liigutan {{title}} kaustast {{fromFolder}}',
-    newFolder: 'Uus kaust',
-    noFolder: 'Pole kausta',
-    renameFolder: 'Nimeta kaust ümber',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Otsi nime järgi kaustas {{folderName}}',
-    selectFolderForItem: 'Valige kaust {{title}} jaoks',
-  },
+  folder: {},
   general: {
     name: 'Nimi',
     aboutToDelete: 'Olete kustutamas {{label}} <1>{{title}}</1>. Olete kindel?',
@@ -254,6 +226,7 @@ export const etTranslations: DefaultTranslationsObject = {
     clearAll: 'Tühjenda kõik',
     close: 'Sulge',
     collapse: 'Ahenda',
+    collection: 'Kogumik',
     collections: 'Kollektsioonid',
     columns: 'Veerud',
     columnToSort: 'Sorteeritav veerg',
@@ -458,6 +431,14 @@ export const etTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vaata ainult lugemiseks',
     welcome: 'Tere tulemast',
     yes: 'Jah',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} viidi üle {{destination}}',
+    itemsMovedToRoot: '{{title}} liigutatud juurikasse',
+    moveItemsToRootConfirmation:
+      'Te oled tõstmas <1>{{count}} {{label}}</1> juuretasandile. Oled sa kindel?',
+    moveToRoot: 'Liikuge juurikasse',
+    noParent: 'Ei Vanem',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

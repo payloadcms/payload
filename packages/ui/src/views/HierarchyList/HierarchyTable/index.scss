@@ -94,17 +94,22 @@
       min-width: 200px;
     }
 
+    &__col-collection {
+      width: 140px;
+      min-width: 100px;
+    }
+
+    &__col-date {
+      width: 150px;
+      min-width: 120px;
+    }
+
     &__col-type {
       width: 120px;
       min-width: 100px;
       &:not(.slot-table__th) {
         color: var(--theme-elevation-600);
       }
-    }
-
-    &__col-date {
-      width: 150px;
-      min-width: 120px;
     }
 
     // Section title within collapsible header
@@ -115,59 +120,18 @@
     }
 
     &__load-more-wrap {
-      padding: calc(var(--base) * 0.4);
+      padding: calc(var(--base) * 0.5);
       padding-left: calc(var(--base) * 0.8);
+      padding-top: calc(var(--base) * 0.2);
     }
 
-    // Collapsible section styling - minimal appearance
-    &__section.collapsible {
-      margin-bottom: calc(var(--base) * 1.5);
-      border: none;
-      background: transparent;
-      border-radius: 0;
-
-      .collapsible__toggle-wrap {
-        padding: 0;
-        background: transparent;
-        justify-content: flex-start;
-        gap: calc(var(--base) * 0.25);
-        border-radius: 0;
-
-        &:hover {
-          background: transparent;
-        }
-      }
-
-      .collapsible__header-wrap {
-        width: auto;
-        flex-shrink: 0;
-      }
-
-      .collapsible__actions-wrap {
-        margin-inline-end: 0;
-      }
-
-      .collapsible__indicator {
-        width: auto;
-        height: auto;
-
-        svg {
-          width: 14px;
-          height: 14px;
-          color: var(--theme-elevation-400);
-        }
-      }
-
-      .collapsible__content {
-        padding: 0;
-        background: transparent;
-      }
-
-      &.collapsible--collapsed {
-        .collapsible__toggle-wrap {
-          border-radius: 0;
-        }
-      }
+    &__group-label {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.75);
+      padding: calc(var(--base) * 0.5) 0;
+      line-height: 1;
+      color: var(--theme-text);
     }
   }
 }

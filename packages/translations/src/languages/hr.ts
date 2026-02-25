@@ -190,36 +190,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prebaci blok',
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
-  folder: {
-    browseByFolder: 'Pregledajte po mapi',
-    byFolder: 'Po mapi',
-    deleteFolder: 'Izbriši mapu',
-    folderName: 'Naziv mape',
-    folders: 'Mape',
-    folderTypeDescription:
-      'Odaberite koja vrsta dokumenata kolekcije treba biti dozvoljena u ovoj mapi.',
-    itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je premješten u korijensku mapu.',
-    itemsMovedToFolder: '{{title}} premješteno u {{folderName}}',
-    itemsMovedToRoot: '{{title}} premješten u korijensku mapu',
-    moveFolder: 'Premjesti mapu',
-    moveItemsToFolderConfirmation:
-      'Upravo se spremate premjestiti <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
-    moveItemsToRootConfirmation:
-      'Na korak ste da premjestite <1>{{count}} {{label}}</1> u korijensku mapu. Jeste li sigurni?',
-    moveItemToFolderConfirmation:
-      'Upravo ćete premjestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
-    moveItemToRootConfirmation:
-      'Upravo ćete premjestiti <1>{{title}}</1> u osnovnu mapu. Jeste li sigurni?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Premještanje {{title}} iz {{fromFolder}}',
-    newFolder: 'Nova mapa',
-    noFolder: 'Nema mape',
-    renameFolder: 'Preimenuj mapu',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Pretraživanje po imenu u {{folderName}}',
-    selectFolderForItem: 'Odaberite mapu za {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisat ćete {{label}} <1>{{title}}</1>. Jeste li sigurni?',
@@ -256,6 +227,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     clearAll: 'Očisti sve',
     close: 'Zatvori',
     collapse: 'Sažmi',
+    collection: 'Kolekcija',
     collections: 'Kolekcije',
     columns: 'Stupci',
     columnToSort: 'Stupac za sortiranje',
@@ -463,6 +435,14 @@ export const hrTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Pogledaj samo za čitanje',
     welcome: 'Dobrodošli',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} premješten na {{destination}}',
+    itemsMovedToRoot: '{{title}} premješten u korijen',
+    moveItemsToRootConfirmation:
+      'Uskoro ćete premjestiti <1>{{count}} {{label}}</1> u korijen. Jeste li sigurni?',
+    moveToRoot: 'Premjesti na korijen',
+    noParent: 'Bez nadređenog',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

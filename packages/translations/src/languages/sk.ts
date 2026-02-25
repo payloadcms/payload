@@ -192,36 +192,7 @@ export const skTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prepnúť blok',
     uploadNewLabel: 'Nahrať nový {{label}}',
   },
-  folder: {
-    browseByFolder: 'Prehliadať podľa priečinka',
-    byFolder: 'Podľa priečinka',
-    deleteFolder: 'Odstrániť priečinok',
-    folderName: 'Názov priečinka',
-    folders: 'Priečinky',
-    folderTypeDescription:
-      'Vyberte, ktorý typ dokumentov z kolekcie by mal byť povolený v tejto zložke.',
-    itemHasBeenMoved: '{{title}} bol presunutý do {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
-    itemsMovedToFolder: '{{title}} presunuté do {{folderName}}',
-    itemsMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
-    moveFolder: 'Presunúť priečinok',
-    moveItemsToFolderConfirmation:
-      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
-    moveItemsToRootConfirmation:
-      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňového priečinka. Ste si istý?',
-    moveItemToFolderConfirmation:
-      'Chystáte sa presunúť <1>{{title}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
-    moveItemToRootConfirmation:
-      'Chystáte sa presunúť <1>{{title}}</1> do koreňového priečinka. Ste si istý?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Presun {{title}} z {{fromFolder}}',
-    newFolder: 'Nový priečinok',
-    noFolder: 'Žiadna zložka',
-    renameFolder: 'Premenovať priečinok',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Hľadaj podľa mena v {{folderName}}',
-    selectFolderForItem: 'Vyberte priečinok pre {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Meno',
     aboutToDelete: 'Chystáte sa odstrániť {{label}} <1>{{title}}</1>. Ste si istí?',
@@ -258,6 +229,7 @@ export const skTranslations: DefaultTranslationsObject = {
     clearAll: 'Vymazať všetko',
     close: 'Zavrieť',
     collapse: 'Zbaliť',
+    collection: 'Kolekcia',
     collections: 'Kolekcia',
     columns: 'Stĺpce',
     columnToSort: 'Stĺpec na zoradenie',
@@ -461,6 +433,14 @@ export const skTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Zobraziť iba na čítanie',
     welcome: 'Vitajte',
     yes: 'Áno',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} presunuté do {{destination}}',
+    itemsMovedToRoot: '{{title}} presunutý do koreňa',
+    moveItemsToRootConfirmation:
+      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňa. Ste si istí?',
+    moveToRoot: 'Presunúť do koreňa',
+    noParent: 'Žiadny rodič',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',

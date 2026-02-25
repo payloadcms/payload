@@ -189,36 +189,6 @@ export const enTranslations = {
     toggleBlock: 'Toggle block',
     uploadNewLabel: 'Upload new {{label}}',
   },
-  folder: {
-    browseByFolder: 'Browse by Folder',
-    byFolder: 'By Folder',
-    deleteFolder: 'Delete Folder',
-    folderName: 'Folder Name',
-    folders: 'Folders',
-    folderTypeDescription:
-      'Select which type of collection documents should be allowed in this folder.',
-    itemHasBeenMoved: '{{title}} has been moved to {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} has been moved to the root folder',
-    itemsMovedToFolder: '{{title}} moved to {{folderName}}',
-    itemsMovedToRoot: '{{title}} moved to the root folder',
-    moveFolder: 'Move Folder',
-    moveItemsToFolderConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to <2>{{toFolder}}</2>. Are you sure?',
-    moveItemsToRootConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to the root folder. Are you sure?',
-    moveItemToFolderConfirmation:
-      'You are about to move <1>{{title}}</1> to <2>{{toFolder}}</2>. Are you sure?',
-    moveItemToRootConfirmation:
-      'You are about to move <1>{{title}}</1> to the root folder. Are you sure?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Moving {{title}} from {{fromFolder}}',
-    newFolder: 'New Folder',
-    noFolder: 'No Folder',
-    renameFolder: 'Rename Folder',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Search by Name in {{folderName}}',
-    selectFolderForItem: 'Select folder for {{title}}',
-  },
   general: {
     name: 'Name',
     aboutToDelete: 'You are about to delete the {{label}} <1>{{title}}</1>. Are you sure?',
@@ -257,6 +227,7 @@ export const enTranslations = {
     clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
+    collection: 'Collection',
     collections: 'Collections',
     columns: 'Columns',
     columnToSort: 'Column to Sort',
@@ -463,6 +434,14 @@ export const enTranslations = {
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
     yes: 'Yes',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} moved to {{destination}}',
+    itemsMovedToRoot: '{{title}} moved to root',
+    moveItemsToRootConfirmation:
+      'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
+    moveToRoot: 'Move to Root',
+    noParent: 'No Parent',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',

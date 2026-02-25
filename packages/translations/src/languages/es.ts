@@ -193,36 +193,7 @@ export const esTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alternar bloque',
     uploadNewLabel: 'Subir nuevo {{label}}',
   },
-  folder: {
-    browseByFolder: 'Explorar por Carpeta',
-    byFolder: 'Por Carpeta',
-    deleteFolder: 'Eliminar Carpeta',
-    folderName: 'Nombre de la Carpeta',
-    folders: 'Carpetas',
-    folderTypeDescription:
-      'Seleccione qué tipo de documentos de la colección se deben permitir en esta carpeta.',
-    itemHasBeenMoved: '{{title}} se ha movido a {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} se ha movido a la carpeta raíz',
-    itemsMovedToFolder: '{{title}} movido a {{folderName}}',
-    itemsMovedToRoot: '{{title}} movido a la carpeta raíz',
-    moveFolder: 'Mover Carpeta',
-    moveItemsToFolderConfirmation:
-      'Estás a punto de mover <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
-    moveItemsToRootConfirmation:
-      'Estás a punto de mover <1>{{count}} {{label}}</1> a la carpeta raíz. ¿Estás seguro?',
-    moveItemToFolderConfirmation:
-      'Estás a punto de mover <1>{{title}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
-    moveItemToRootConfirmation:
-      'Estás a punto de mover <1>{{title}}</1> a la carpeta raíz. ¿Estás seguro?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Moviendo {{title}} desde {{fromFolder}}',
-    newFolder: 'Nueva Carpeta',
-    noFolder: 'Sin Carpeta',
-    renameFolder: 'Renombrar carpeta',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Buscar por nombre en {{folderName}}',
-    selectFolderForItem: 'Seleccione la carpeta para {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Nombre',
     aboutToDelete: 'Estás por eliminar el {{label}} <1>{{title}}</1>. ¿Estás seguro?',
@@ -261,6 +232,7 @@ export const esTranslations: DefaultTranslationsObject = {
     clearAll: 'Limpiar todo',
     close: 'Cerrar',
     collapse: 'Contraer',
+    collection: 'Colección',
     collections: 'Colecciones',
     columns: 'Columnas',
     columnToSort: 'Columna de ordenado',
@@ -469,6 +441,14 @@ export const esTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Ver solo lectura',
     welcome: 'Bienvenido',
     yes: 'Sí',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} se trasladó a {{destination}}',
+    itemsMovedToRoot: '{{title}} se movió a la raíz',
+    moveItemsToRootConfirmation:
+      'Estás a punto de mover <1>{{count}} {{label}}</1> a la raíz. ¿Está seguro?',
+    moveToRoot: 'Mover a Raíz',
+    noParent: 'Sin Padre',
   },
   localization: {
     cannotCopySameLocale: 'No se puede copiar al mismo idioma',

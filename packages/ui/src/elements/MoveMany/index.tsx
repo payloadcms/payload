@@ -125,7 +125,7 @@ export function MoveMany({
   )
 
   const handleMoveToRoot = useCallback(() => {
-    setDestination({ id: null, title: t('folder:noFolder') })
+    setDestination({ id: null, title: t('hierarchy:noParent') })
     openModal(confirmMoveDrawerSlug)
   }, [openModal, confirmMoveDrawerSlug, t])
 
@@ -196,11 +196,11 @@ export function MoveMany({
 
       if (totalMoved > 0) {
         const successKey =
-          destination.id === null ? 'folder:itemsMovedToRoot' : 'folder:itemsMovedToFolder'
+          destination.id === null ? 'hierarchy:itemsMovedToRoot' : 'hierarchy:itemsMovedTo'
 
         toast.success(
           t(successKey, {
-            folderName: destination.title,
+            destination: destination.title,
             title: label,
           }),
         )
@@ -255,7 +255,7 @@ export function MoveMany({
                 elements={{
                   '1': ({ children }) => <strong>{children}</strong>,
                 }}
-                i18nKey="folder:moveItemsToRootConfirmation"
+                i18nKey="hierarchy:moveItemsToRootConfirmation"
                 t={t}
                 variables={{
                   count,

@@ -189,36 +189,7 @@ export const csTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Přepnout blok',
     uploadNewLabel: 'Nahrát nový {{label}}',
   },
-  folder: {
-    browseByFolder: 'Procházet podle složek',
-    byFolder: 'Podle složky',
-    deleteFolder: 'Smazat složku',
-    folderName: 'Název složky',
-    folders: 'Složky',
-    folderTypeDescription:
-      'Vyberte, který typ dokumentů ze sbírky by měl být dovolen v této složce.',
-    itemHasBeenMoved: '{{title}} bylo přesunuto do {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} byl přesunut do kořenové složky',
-    itemsMovedToFolder: '{{title}} přesunuto do {{folderName}}',
-    itemsMovedToRoot: '{{title}} byl přesunut do kořenové složky',
-    moveFolder: 'Přesunout složku',
-    moveItemsToFolderConfirmation:
-      'Chystáte se přesunout <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
-    moveItemsToRootConfirmation:
-      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořenové složky. Jste si jisti?',
-    moveItemToFolderConfirmation:
-      'Chystáte se přesunout <1>{{title}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
-    moveItemToRootConfirmation:
-      'Chystáte se přesunout <1>{{title}}</1> do kořenové složky. Jste si jistý?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Přesunutí {{title}} z {{fromFolder}}',
-    newFolder: 'Nová složka',
-    noFolder: 'Žádná složka',
-    renameFolder: 'Přejmenovat složku',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Vyhledat podle jména v {{folderName}}',
-    selectFolderForItem: 'Vyberte složku pro {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Jméno',
     aboutToDelete: 'Chystáte se odstranit {{label}} <1>{{title}}</1>. Jste si jisti?',
@@ -255,6 +226,7 @@ export const csTranslations: DefaultTranslationsObject = {
     clearAll: 'Vymazat vše',
     close: 'Zavřít',
     collapse: 'Sbalit',
+    collection: 'Kolekce',
     collections: 'Kolekce',
     columns: 'Sloupce',
     columnToSort: 'Sloupec k seřazení',
@@ -461,6 +433,14 @@ export const csTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Zobrazit pouze pro čtení',
     welcome: 'Vítejte',
     yes: 'Ano',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
+    itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',
+    moveItemsToRootConfirmation:
+      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořene. Jste si jistý?',
+    moveToRoot: 'Přesunout do kořene',
+    noParent: 'Bez nadřazeného',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

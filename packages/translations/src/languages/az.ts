@@ -189,35 +189,7 @@ export const azTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloku keç',
     uploadNewLabel: 'Yeni {{label}} yüklə',
   },
-  folder: {
-    browseByFolder: 'Qovluqlara görə gözdən keçirin',
-    byFolder: 'Qovluğa görə',
-    deleteFolder: 'Qovluğu Sil',
-    folderName: 'Qovluq Adı',
-    folders: 'Qovluqlar',
-    folderTypeDescription: 'Bu qovluqda hangi tip kolleksiya sənədlərinə icazə verilməlidir seçin.',
-    itemHasBeenMoved: '{{title}} {{folderName}} qovluğuna köçürüldü.',
-    itemHasBeenMovedToRoot: '{{title}} kök qovluğa köçürüldü.',
-    itemsMovedToFolder: '{{title}} {{folderName}} qovluğuna köçürüldü',
-    itemsMovedToRoot: '{{title}} kök qovluğa köçürdü',
-    moveFolder: 'Qovluğu Köçür',
-    moveItemsToFolderConfirmation:
-      'Siz <1>{{count}} {{label}}</1> -i <2>{{toFolder}}</2> -ə köçürmək üzərəsiniz. Eminsiniz?',
-    moveItemsToRootConfirmation:
-      'Siz <1>{{count}} {{label}}</1> əsas qovluğa köçürmək üzərəsiniz. Eminsiniz?',
-    moveItemToFolderConfirmation:
-      'Siz <1>{{title}}</1>-i <2>{{toFolder}}</2>ə köçürmək barədəsiniz. Eminsinizmi?',
-    moveItemToRootConfirmation:
-      "Siz <1>{{title}}</1>'i kök qovluğa köçürmək barədəsindəsiniz. Əminsiniz?",
-    moveToRoot: 'Move to Root',
-    movingFromFolder: '{{title}}-i {{fromFolder}}-dən köçürmək',
-    newFolder: 'Yeni Qovluq',
-    noFolder: 'Qovluq Yoxdur',
-    renameFolder: 'Qovluğun adını dəyişdirin',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: '{{folderName}} qovluğunda adla axtarış',
-    selectFolderForItem: '{{title}} üçün qovluğu seçin',
-  },
+  folder: {},
   general: {
     name: 'Ad',
     aboutToDelete: 'Siz {{label}} <1>{{title}}</1> silməyə hazırsınız. Eminsiniz?',
@@ -258,6 +230,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clearAll: 'Hamısını təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
+    collection: 'Kolleksiya',
     collections: 'Kolleksiyalar',
     columns: 'Sütunlar',
     columnToSort: 'Sıralamağa sütun',
@@ -467,6 +440,14 @@ export const azTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
     yes: 'Bəli',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
+    itemsMovedToRoot: '{{title}} kökə köçürüldü',
+    moveItemsToRootConfirmation:
+      'Siz <1>{{count}} {{label}}</1> kökə köçürməyə yaxınsınız. Eminsiniz?',
+    moveToRoot: 'Kökə köçün',
+    noParent: 'Heç bir Valideyn',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',

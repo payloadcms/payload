@@ -191,36 +191,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Переключить Блок',
     uploadNewLabel: 'Загрузить новый {{label}}',
   },
-  folder: {
-    browseByFolder: 'Просмотр по папкам',
-    byFolder: 'По папке',
-    deleteFolder: 'Удалить папку',
-    folderName: 'Название папки',
-    folders: 'Папки',
-    folderTypeDescription:
-      'Выберите, какие типы документов коллекции должны быть разрешены в этой папке.',
-    itemHasBeenMoved: '{{title}} был перемещен в {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} был перемещен в корневую папку',
-    itemsMovedToFolder: '{{title}} перемещен в {{folderName}}',
-    itemsMovedToRoot: '{{title}} перемещен в корневую папку',
-    moveFolder: 'Переместить папку',
-    moveItemsToFolderConfirmation:
-      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
-    moveItemsToRootConfirmation:
-      'Вы собираетесь перенести <1>{{count}} {{label}}</1> в корневую папку. Вы уверены?',
-    moveItemToFolderConfirmation:
-      'Вы собираетесь переместить <1>{{title}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
-    moveItemToRootConfirmation:
-      'Вы собираетесь переместить <1>{{title}}</1> в корневую папку. Вы уверены?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Перемещение {{title}} из {{fromFolder}}',
-    newFolder: 'Новая папка',
-    noFolder: 'Нет папки',
-    renameFolder: 'Переименовать папку',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Поиск по имени в {{folderName}}',
-    selectFolderForItem: 'Выберите папку для {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Имя',
     aboutToDelete: 'Вы собираетесь удалить {{label}} <1>{{title}}</1>. Вы уверены?',
@@ -258,6 +229,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',
+    collection: 'Коллекция',
     collections: 'Коллекции',
     columns: 'Колонки',
     columnToSort: 'Колонка для сортировки',
@@ -466,6 +438,14 @@ export const ruTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
     yes: 'Да',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} перемещен в {{destination}}',
+    itemsMovedToRoot: '{{title}} перемещен в корень',
+    moveItemsToRootConfirmation:
+      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в корень. Вы уверены?',
+    moveToRoot: 'Перейти в Корень',
+    noParent: 'Нет родителя',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

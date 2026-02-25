@@ -193,36 +193,7 @@ export const itTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Apri/chiudi blocco',
     uploadNewLabel: 'Carica nuovo {{label}}',
   },
-  folder: {
-    browseByFolder: 'Sfoglia per Cartella',
-    byFolder: 'Per Cartella',
-    deleteFolder: 'Elimina cartella',
-    folderName: 'Nome Cartella',
-    folders: 'Cartelle',
-    folderTypeDescription:
-      'Seleziona quale tipo di documenti della collezione dovrebbero essere consentiti in questa cartella.',
-    itemHasBeenMoved: '{{title}} è stato spostato in {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} è stato spostato nella cartella principale',
-    itemsMovedToFolder: '{{title}} spostato in {{folderName}}',
-    itemsMovedToRoot: '{{title}} è stato spostato nella cartella principale',
-    moveFolder: 'Sposta Cartella',
-    moveItemsToFolderConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
-    moveItemsToRootConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> nella cartella principale. Sei sicuro?',
-    moveItemToFolderConfirmation:
-      'Stai per spostare <1>{{title}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
-    moveItemToRootConfirmation:
-      'Stai per spostare <1>{{title}}</1> nella cartella principale. Sei sicuro?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Spostando {{title}} da {{fromFolder}}',
-    newFolder: 'Nuova Cartella',
-    noFolder: 'Nessuna cartella',
-    renameFolder: 'Rinomina Cartella',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Cerca per Nome in {{folderName}}',
-    selectFolderForItem: 'Seleziona la cartella per {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Nome',
     aboutToDelete: 'Stai per eliminare {{label}} <1>{{title}}</1>. Sei sicuro?',
@@ -260,6 +231,7 @@ export const itTranslations: DefaultTranslationsObject = {
     clearAll: 'Cancella Tutto',
     close: 'Chiudere',
     collapse: 'Comprimi',
+    collection: 'Collezione',
     collections: 'Collezioni',
     columns: 'Colonne',
     columnToSort: 'Colonna da Ordinare',
@@ -467,6 +439,14 @@ export const itTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visualizza solo lettura',
     welcome: 'Benvenuto',
     yes: 'Sì',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} è stato spostato a {{destination}}',
+    itemsMovedToRoot: '{{title}} spostato alla radice',
+    moveItemsToRootConfirmation:
+      'Stai per spostare <1>{{count}} {{label}}</1> alla radice. Sei sicuro?',
+    moveToRoot: 'Sposta alla Root',
+    noParent: 'Nessun Genitore',
   },
   localization: {
     cannotCopySameLocale: 'Non è possibile copiare nella stessa posizione',

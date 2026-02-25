@@ -190,35 +190,7 @@ export const myTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ဘလောက်ကို ပြောင်းပါ။',
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
-  folder: {
-    browseByFolder: 'Layari mengikut Folder',
-    byFolder: 'Dengan Folder',
-    deleteFolder: 'Padam Folder',
-    folderName: 'ဖိုင်နာမည်',
-    folders: 'Fail',
-    folderTypeDescription: 'Pilih jenis dokumen koleksi yang harus diizinkan dalam folder ini.',
-    itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
-    itemHasBeenMovedToRoot: '"{{title}}" က ဗဟိုဖိုလ်ဒါသို့ရွှေ့ပြီးပါပြီ။',
-    itemsMovedToFolder: '{{title}} သို့ {{folderName}} သို့ ရွှေ့လိုက်သွားပါပယ်',
-    itemsMovedToRoot: '{{title}} telah dipindahkan ke folder akar',
-    moveFolder: 'Pindah Folder',
-    moveItemsToFolderConfirmation:
-      'သင့်တွင် <1>{{count}} {{label}}</1> <2>{{toFolder}}</2>သို့ ရွှေ့နေသည့်အခါဖြစ်ပါသည်။ သေချာပါသလား?',
-    moveItemsToRootConfirmation:
-      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke folder akar. Adakah anda pasti?',
-    moveItemToFolderConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
-    moveItemToRootConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
-    newFolder: 'Folder Baru',
-    noFolder: 'ဖိုလ်ဒါမရှိပါ',
-    renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
-    selectFolderForItem: 'Pilih folder untuk {{title}}',
-  },
+  folder: {},
   general: {
     name: 'နာမည်',
     aboutToDelete:
@@ -258,6 +230,7 @@ export const myTranslations: DefaultTranslationsObject = {
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
+    collection: 'စုဆည်းမှု',
     collections: 'စုစည်းမှူများ',
     columns: 'ကော်လံများ',
     columnToSort: 'ကော်လံ စီရန်',
@@ -469,6 +442,14 @@ export const myTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
     yes: 'ဟုတ်ကဲ့',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} pindah ke {{destination}}',
+    itemsMovedToRoot: '"{{title}}" telah dipindahkan ke akar.',
+    moveItemsToRootConfirmation:
+      'Anda sedang dalam proses untuk memindahkan <1>{{count}} {{label}}</1> ke akar. Adakah anda pasti?',
+    moveToRoot: 'Pindah ke Root',
+    noParent: 'Tiada Induk',
   },
   localization: {
     cannotCopySameLocale: 'Tidak boleh menyalin ke lokasi yang sama',

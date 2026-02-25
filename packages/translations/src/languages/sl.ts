@@ -189,36 +189,7 @@ export const slTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Preklopi blok',
     uploadNewLabel: 'Naloži nov {{label}}',
   },
-  folder: {
-    browseByFolder: 'Brskaj po mapi',
-    byFolder: 'Po mapi',
-    deleteFolder: 'Izbriši mapo',
-    folderName: 'Ime mape',
-    folders: 'Mape',
-    folderTypeDescription:
-      'Izberite, katere vrste dokumentov zbirke naj bodo dovoljene v tej mapi.',
-    itemHasBeenMoved: '{{title}} je bil premaknjen v {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je bil premaknjen v korensko mapo.',
-    itemsMovedToFolder: '{{title}} premaknjeno v {{folderName}}',
-    itemsMovedToRoot: '{{title}} premaknjeno v korensko mapo',
-    moveFolder: 'Premakni mapo',
-    moveItemsToFolderConfirmation:
-      'Ravno se pripravljate na premik <1>{{count}} {{label}}</1> v mapo <2>{{toFolder}}</2>. Ste prepričani?',
-    moveItemsToRootConfirmation:
-      'Ravno boste premaknili <1>{{count}} {{label}}</1> v korensko mapo. Ste prepričani?',
-    moveItemToFolderConfirmation:
-      'Pravkar boste premaknili <1>{{title}}</1> v <2>{{toFolder}}</2>. Ste prepričani?',
-    moveItemToRootConfirmation:
-      'Pravkar boste premaknili <1>{{title}}</1> v korensko mapo. Ali ste prepričani?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Premik {{title}} iz {{fromFolder}}',
-    newFolder: 'Nova mapa',
-    noFolder: 'Brez mape',
-    renameFolder: 'Preimenuj Mapo',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Iskanje po imenu v {{folderName}}',
-    selectFolderForItem: 'Izberite mapo za {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisali boste {{label}} <1>{{title}}</1>. Ste prepričani?',
@@ -256,6 +227,7 @@ export const slTranslations: DefaultTranslationsObject = {
     clearAll: 'Počisti vse',
     close: 'Zapri',
     collapse: 'Strni',
+    collection: 'Zbirka',
     collections: 'Zbirke',
     columns: 'Stolpci',
     columnToSort: 'Stolpec za razvrščanje',
@@ -462,6 +434,14 @@ export const slTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} preseljeno v {{destination}}',
+    itemsMovedToRoot: '{{title}} premaknjeno v koren',
+    moveItemsToRootConfirmation:
+      'Pravkar boste prestavili <1>{{count}} {{label}}</1> v koren. Ste prepričani?',
+    moveToRoot: 'Premakni v Root',
+    noParent: 'Brez nadrejenega',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

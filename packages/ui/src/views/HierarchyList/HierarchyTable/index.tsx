@@ -5,14 +5,13 @@ import type { PaginatedDocs } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
 import type { HierarchyDocument } from '../../../elements/HierarchyTree/types.js'
 import type { SlotColumn } from './SlotTable.js'
 import type { RelatedGroup, TableRow } from './types.js'
 
-import { Collapsible } from '../../../elements/Collapsible/index.js'
 import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { LoadMoreRow } from '../../../elements/LoadMoreRow/index.js'
 import { NoListResults } from '../../../elements/NoListResults/index.js'
@@ -26,6 +25,18 @@ import { RelatedNameCell } from './RelatedNameCell.js'
 import { SlotTable } from './SlotTable.js'
 import { baseClass } from './types.js'
 import './index.scss'
+
+// Top-level cell components to avoid nested component eslint errors
+const NameCell: SlotColumn<TableRow>['Cell'] = (props) =>
+  props.row._hasChildren !== undefined ? (
+    <ChildNameCell {...props} />
+  ) : (
+    <RelatedNameCell {...props} />
+  )
+
+const CollectionCell: SlotColumn<TableRow>['Cell'] = ({ row }) => (
+  <span>{row._collectionLabel}</span>
+)
 
 export type HierarchyTableProps = {
   childrenData?: PaginatedDocs<HierarchyDocument>
@@ -41,6 +52,18 @@ export type HierarchyTableProps = {
   relatedGroups: RelatedGroup[]
   search?: string
   useAsTitle: string
+}
+
+type GroupState = {
+  docs: TableRow[]
+  hasNextPage: boolean
+  isChildren: boolean
+  isLoading: boolean
+  label: string
+  onCheckboxChange: (row: TableRow) => void
+  onLoadMore: () => void
+  slug: string
+  totalDocs: number
 }
 
 export function HierarchyTable({
@@ -238,27 +261,122 @@ export function HierarchyTable({
     ],
   )
 
+  // Compute collection label for children (once)
+  const childrenLabel = useMemo(
+    () =>
+      getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n) || hierarchyLabel,
+    [collectionSlug, getEntityConfig, hierarchyLabel, i18n],
+  )
+
   // Build children data for table
-  const childTableData: TableRow[] = childDocs.map((doc) => ({
-    ...doc,
-    id: doc.id,
-    _collectionSlug: collectionSlug,
-    _hasChildren: Boolean(doc._hasChildren),
-    _hierarchyIcon: HierarchyIcon,
-  }))
+  const childTableData: TableRow[] = useMemo(
+    () =>
+      childDocs.map((doc) => ({
+        ...doc,
+        id: doc.id,
+        _collectionLabel: childrenLabel,
+        _collectionSlug: collectionSlug,
+        _hasChildren: Boolean(doc._hasChildren),
+        _hierarchyIcon: HierarchyIcon,
+      })),
+    [HierarchyIcon, childDocs, childrenLabel, collectionSlug],
+  )
 
   const hasChildren = childTotal > 0
   const hasRelated = relatedGroups.some((g) => relatedState[g.collectionSlug]?.totalDocs > 0)
 
-  // Child selection handler
-  const handleChildCheckboxChange = (row: TableRow) => {
-    toggleSelection({ id: row.id, collectionSlug })
-  }
+  // Unified groups array
+  const allGroups: GroupState[] = useMemo(() => {
+    const groups: GroupState[] = []
 
-  // Related selection handler
-  const handleRelatedCheckboxChange = (slug: string, row: TableRow) => {
-    toggleSelection({ id: row.id, collectionSlug: slug })
-  }
+    // Children group
+    if (hasChildren) {
+      groups.push({
+        slug: collectionSlug,
+        docs: childTableData,
+        hasNextPage: childHasNext,
+        isChildren: true,
+        isLoading: childLoading,
+        label: childrenLabel,
+        onCheckboxChange: (row: TableRow) => toggleSelection({ id: row.id, collectionSlug }),
+        onLoadMore: () => void handleLoadMoreChildren(),
+        totalDocs: childTotal,
+      })
+    }
+
+    // Related groups
+    for (const group of relatedGroups) {
+      const state = relatedState[group.collectionSlug]
+      if (!state || state.totalDocs === 0) {
+        continue
+      }
+
+      const relatedConfig = getEntityConfig({ collectionSlug: group.collectionSlug })
+      const relatedLabel = getTranslation(relatedConfig?.labels?.plural, i18n) || group.label
+
+      const relatedTableData: TableRow[] = state.docs.map((doc: Record<string, unknown>) => ({
+        ...doc,
+        id: doc.id as number | string,
+        _collectionLabel: relatedLabel,
+        _collectionSlug: group.collectionSlug,
+      }))
+
+      groups.push({
+        slug: group.collectionSlug,
+        docs: relatedTableData,
+        hasNextPage: state.hasNextPage,
+        isChildren: false,
+        isLoading: state.isLoading,
+        label: relatedLabel,
+        onCheckboxChange: (row: TableRow) =>
+          toggleSelection({ id: row.id, collectionSlug: group.collectionSlug }),
+        onLoadMore: () => void handleLoadMoreRelated(group.collectionSlug),
+        totalDocs: state.totalDocs,
+      })
+    }
+
+    return groups
+  }, [
+    childHasNext,
+    childLoading,
+    childrenLabel,
+    childTableData,
+    childTotal,
+    collectionSlug,
+    getEntityConfig,
+    handleLoadMoreChildren,
+    handleLoadMoreRelated,
+    hasChildren,
+    i18n,
+    relatedGroups,
+    relatedState,
+    toggleSelection,
+  ])
+
+  // Column definitions
+  const columns: SlotColumn<TableRow>[] = useMemo(
+    () => [
+      {
+        accessor: 'name',
+        Cell: NameCell,
+        className: `${baseClass}__col-name`,
+        heading: t('general:name'),
+      },
+      {
+        accessor: 'collection',
+        Cell: CollectionCell,
+        className: `${baseClass}__col-collection`,
+        heading: t('general:collection'),
+      },
+      {
+        accessor: 'updatedAt',
+        Cell: DateCell,
+        className: `${baseClass}__col-date`,
+        heading: t('general:updatedAt'),
+      },
+    ],
+    [t],
+  )
 
   if (!hasChildren && !hasRelated) {
     const canShowCreateButton = hasCreatePermission && collections && collections.length > 0
@@ -289,127 +407,44 @@ export function HierarchyTable({
 
   return (
     <div className={baseClass}>
-      {/* Children table (no title, not collapsible) */}
-      {hasChildren && (
-        <Collapsible
-          className={`${baseClass}__section`}
-          header={<h3 className={`${baseClass}__section-title`}>{hierarchyLabel}</h3>}
-          key={`${collectionSlug}-${parentId}`}
-        >
-          <div>
-            <SlotTable
-              collectionSlug={collectionSlug}
-              columns={[
-                // Column definitions for children
-                {
-                  accessor: 'name',
-                  Cell: ChildNameCell,
-                  className: `${baseClass}__col-name`,
-                  heading: t('general:name'),
-                },
-                {
-                  accessor: 'updatedAt',
-                  Cell: DateCell,
-                  className: `${baseClass}__col-date`,
-                  heading: t('general:updatedAt'),
-                },
-              ]}
-              data={childTableData}
-              enableCheckbox={true}
-              enableDragHandle={false}
-              enableSelectAll={false}
-              mergeCheckboxHeader={true}
-              onCheckboxChange={handleChildCheckboxChange}
-              parentId={parentId}
-              selectedIds={
-                new Set(
-                  childTableData
-                    .filter((row) => isSelected({ id: row.id, collectionSlug }))
-                    .map((row) => row.id),
-                )
-              }
-            />
-
-            <div className={`${baseClass}__load-more-wrap`}>
-              <LoadMoreRow
-                currentCount={childDocs.length}
-                hasMore={childHasNext}
-                isLoading={childLoading}
-                onLoadMore={handleLoadMoreChildren}
-                totalDocs={childTotal}
-              />
+      {allGroups.map((group, index) => (
+        <React.Fragment key={group.slug}>
+          {index > 0 && (
+            <div className={`${baseClass}__group-label`}>
+              <span>{group.label}</span>
             </div>
+          )}
+          <SlotTable
+            collectionSlug={group.slug}
+            columns={columns}
+            data={group.docs}
+            enableCheckbox={true}
+            enableDragHandle={false}
+            enableHeader={index === 0}
+            enableSelectAll={false}
+            mergeCheckboxHeader={true}
+            onCheckboxChange={group.onCheckboxChange}
+            parentId={parentId}
+            selectedIds={
+              new Set(
+                group.docs
+                  .filter((row) => isSelected({ id: row.id, collectionSlug: group.slug }))
+                  .map((row) => row.id),
+              )
+            }
+          />
+
+          <div className={`${baseClass}__load-more-wrap`}>
+            <LoadMoreRow
+              currentCount={group.docs.length}
+              hasMore={group.hasNextPage}
+              isLoading={group.isLoading}
+              onLoadMore={group.onLoadMore}
+              totalDocs={group.totalDocs}
+            />
           </div>
-        </Collapsible>
-      )}
-
-      {/* Related collection tables (collapsible with titles) */}
-      {relatedGroups.map((group) => {
-        const state = relatedState[group.collectionSlug]
-        if (!state || state.totalDocs === 0) {
-          return null
-        }
-
-        const relatedConfig = getEntityConfig({ collectionSlug: group.collectionSlug })
-        const collectionLabel = getTranslation(relatedConfig?.labels?.plural, i18n) || group.label
-
-        const relatedTableData: TableRow[] = state.docs.map((doc: Record<string, unknown>) => ({
-          ...doc,
-          id: doc.id as number | string,
-          _collectionSlug: group.collectionSlug,
-        }))
-
-        return (
-          <Collapsible
-            className={`${baseClass}__section`}
-            header={<h3 className={`${baseClass}__section-title`}>{collectionLabel}</h3>}
-            key={group.collectionSlug}
-          >
-            <SlotTable
-              columns={[
-                // Column definitions for related documents
-                {
-                  accessor: 'name',
-                  Cell: RelatedNameCell,
-                  className: `${baseClass}__col-name`,
-                  heading: t('general:name'),
-                },
-                {
-                  accessor: 'updatedAt',
-                  Cell: DateCell,
-                  className: `${baseClass}__col-date`,
-                  heading: t('general:updatedAt'),
-                },
-              ]}
-              data={relatedTableData}
-              enableCheckbox={true}
-              enableDragHandle={false}
-              enableSelectAll={false}
-              mergeCheckboxHeader={true}
-              onCheckboxChange={(row) => handleRelatedCheckboxChange(group.collectionSlug, row)}
-              selectedIds={
-                new Set(
-                  relatedTableData
-                    .filter((row) =>
-                      isSelected({ id: row.id, collectionSlug: group.collectionSlug }),
-                    )
-                    .map((row) => row.id),
-                )
-              }
-            />
-
-            <div className={`${baseClass}__load-more-wrap`}>
-              <LoadMoreRow
-                currentCount={state.docs.length}
-                hasMore={state.hasNextPage}
-                isLoading={state.isLoading}
-                onLoadMore={() => handleLoadMoreRelated(group.collectionSlug)}
-                totalDocs={state.totalDocs}
-              />
-            </div>
-          </Collapsible>
-        )
-      })}
+        </React.Fragment>
+      ))}
     </div>
   )
 }

@@ -190,36 +190,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ブロックを切り替え',
     uploadNewLabel: '新規 {{label}} アップロード',
   },
-  folder: {
-    browseByFolder: 'フォルダーで閲覧する',
-    byFolder: 'フォルダー別に',
-    deleteFolder: 'フォルダーを削除する',
-    folderName: 'フォルダー名',
-    folders: 'フォルダー',
-    folderTypeDescription:
-      'このフォルダーに許可されるコレクションドキュメントのタイプを選択してください。',
-    itemHasBeenMoved: '{{title}}は{{folderName}}に移動されました',
-    itemHasBeenMovedToRoot: '{{title}}はルートフォルダーに移動されました',
-    itemsMovedToFolder: '{{title}}は{{folderName}}に移動されました',
-    itemsMovedToRoot: '{{title}}はルートフォルダーに移動しました。',
-    moveFolder: 'フォルダーを移動する',
-    moveItemsToFolderConfirmation:
-      'あなたは<1>{{count}} {{label}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
-    moveItemsToRootConfirmation:
-      'あなたはまもなく<1>{{count}} {{label}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
-    moveItemToFolderConfirmation:
-      '<1>{{title}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
-    moveItemToRootConfirmation:
-      'あなたは<1>{{title}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: '{{title}}を{{fromFolder}}から移動します',
-    newFolder: '新しいフォルダー',
-    noFolder: 'フォルダーなし',
-    renameFolder: 'フォルダーの名前を変更する',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: '{{folderName}}で名前を検索する',
-    selectFolderForItem: '{{title}}のためのフォルダーを選択してください。',
-  },
+  folder: {},
   general: {
     name: '名前',
     aboutToDelete: '{{label}} <1>{{title}}</1> を削除します。よろしいですか？',
@@ -258,6 +229,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     clearAll: 'すべてクリア',
     close: '閉じる',
     collapse: '閉じる',
+    collection: 'コレクション',
     collections: 'コレクション',
     columns: '行の表示',
     columnToSort: '並び替え対象の行',
@@ -463,6 +435,14 @@ export const jaTranslations: DefaultTranslationsObject = {
     viewReadOnly: '読み取り専用で表示',
     welcome: 'ようこそ',
     yes: 'はい',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}}は{{destination}}に移動しました',
+    itemsMovedToRoot: '{{title}}がルートに移動されました',
+    moveItemsToRootConfirmation:
+      'あなたは<1>{{count}} {{label}} </1>をルートに移動しようとしています。よろしいですか？',
+    moveToRoot: 'ルートに移動',
+    noParent: '親なし',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

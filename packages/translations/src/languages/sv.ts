@@ -189,35 +189,7 @@ export const svTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Växla block',
     uploadNewLabel: 'Ladda upp ny {{label}}',
   },
-  folder: {
-    browseByFolder: 'Bläddra efter mapp',
-    byFolder: 'Efter mapp',
-    deleteFolder: 'Ta bort mapp',
-    folderName: 'Mappnamn',
-    folders: 'Mappar',
-    folderTypeDescription: 'Välj vilka typer av dokument som ska tillåtas i denna mapp.',
-    itemHasBeenMoved: '{{title}} har flyttats till {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} har flyttats till rotmappen',
-    itemsMovedToFolder: '{{title}} flyttad till {{folderName}}',
-    itemsMovedToRoot: '{{titel}} flyttades till rotmappen',
-    moveFolder: 'Flytta mapp',
-    moveItemsToFolderConfirmation:
-      'Du är på väg att flytta <1>{{count}} {{label}}</1> till <2>{{toFolder}}</2>. Är du säker?',
-    moveItemsToRootConfirmation:
-      'Du är på väg att flytta <1>{{count}} {{label}}</1> till root-mappen. Är du säker?',
-    moveItemToFolderConfirmation:
-      'Du håller på att flytta <1>{{title}}</1> till <2>{{toFolder}}</2>. Är du säker?',
-    moveItemToRootConfirmation:
-      'Du är på väg att flytta <1>{{title}}</1> till rotmappen. Är du säker?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Flyttar {{title}} från {{fromFolder}}',
-    newFolder: 'Ny mapp',
-    noFolder: 'Ingen mapp',
-    renameFolder: 'Byt namn på mapp',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Sök efter namn i {{folderName}}',
-    selectFolderForItem: 'Välj mapp för {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Namn',
     aboutToDelete: 'Du är på väg att ta bort {{label}} <1>{{title}}</1>. Är du säker?',
@@ -256,6 +228,7 @@ export const svTranslations: DefaultTranslationsObject = {
     clearAll: 'Rensa alla',
     close: 'Stäng',
     collapse: 'Fäll ihop',
+    collection: 'Samling',
     collections: 'Samlingar',
     columns: 'Kolumner',
     columnToSort: 'Kolumn att sortera',
@@ -464,6 +437,14 @@ export const svTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visa som skrivskyddad',
     welcome: 'Välkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flyttades till {{destination}}',
+    itemsMovedToRoot: '{{title}} flyttad till rot',
+    moveItemsToRootConfirmation:
+      'Du håller på att flytta <1>{{count}} {{label}}</1> till roten. Är du säker?',
+    moveToRoot: 'Flytta till Roten',
+    noParent: 'Ingen förälder',
   },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',

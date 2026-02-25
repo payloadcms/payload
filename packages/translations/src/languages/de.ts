@@ -194,36 +194,7 @@ export const deTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Block umschalten',
     uploadNewLabel: '{{label}} neu hochladen',
   },
-  folder: {
-    browseByFolder: 'Durchsuchen nach Ordner',
-    byFolder: 'Nach Ordner',
-    deleteFolder: 'Ordner löschen',
-    folderName: 'Ordnername',
-    folders: 'Ordner',
-    folderTypeDescription:
-      'Wählen Sie aus, welche Art von Sammlungsdokumenten in diesem Ordner zugelassen sein sollte.',
-    itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
-    itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben',
-    itemsMovedToFolder: '{{title}} wurde in {{folderName}} verschoben.',
-    itemsMovedToRoot: '{{title}} wurde in den Stammordner verschoben',
-    moveFolder: 'Ordner verschieben',
-    moveItemsToFolderConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> nach <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
-    moveItemsToRootConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
-    moveItemToFolderConfirmation:
-      'Sie sind dabei, <1>{{title}}</1> zu <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
-    moveItemToRootConfirmation:
-      'Sie sind dabei, <1>{{title}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Verschieben von {{title}} aus {{fromFolder}}',
-    newFolder: 'Neuer Ordner',
-    noFolder: 'Kein Ordner',
-    renameFolder: 'Ordner umbenennen',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Suche nach Name in {{folderName}}',
-    selectFolderForItem: 'Wählen Sie den Ordner für {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Name',
     aboutToDelete: 'Du bist dabei {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?',
@@ -265,6 +236,7 @@ export const deTranslations: DefaultTranslationsObject = {
     clearAll: 'Alles löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
+    collection: 'Sammlung',
     collections: 'Sammlungen',
     columns: 'Spalten',
     columnToSort: 'Spalten zum Sortieren',
@@ -475,6 +447,14 @@ export const deTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
+    itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
+    moveItemsToRootConfirmation:
+      'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
+    moveToRoot: 'Zur Root verschieben',
+    noParent: 'Kein Elternteil',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

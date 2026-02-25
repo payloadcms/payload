@@ -189,35 +189,7 @@ export const viTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bật/tắt block',
     uploadNewLabel: 'Tải lên bản mới: {{label}}',
   },
-  folder: {
-    browseByFolder: 'Duyệt theo Thư mục',
-    byFolder: 'Theo Thư mục',
-    deleteFolder: 'Xóa Thư mục',
-    folderName: 'Tên thư mục',
-    folders: 'Thư mục',
-    folderTypeDescription: 'Chọn loại tài liệu bộ sưu tập nào nên được cho phép trong thư mục này.',
-    itemHasBeenMoved: '{{title}} đã được chuyển đến {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} đã được chuyển đến thư mục gốc',
-    itemsMovedToFolder: '{{title}} đã được di chuyển vào {{folderName}}',
-    itemsMovedToRoot: '{{title}} đã được di chuyển vào thư mục gốc',
-    moveFolder: 'Di chuyển thư mục',
-    moveItemsToFolderConfirmation:
-      'Bạn sắp chuyển <1>{{count}} {{label}}</1> tới <2>{{toFolder}}</2>. Bạn có chắc chắn không?',
-    moveItemsToRootConfirmation:
-      'Bạn đang chuẩn bị di chuyển <1>{{count}} {{label}}</1> đến thư mục gốc. Bạn có chắc không?',
-    moveItemToFolderConfirmation:
-      'Bạn sắp chuyển <1>{{title}}</1> đến <2>{{toFolder}}</2>. Bạn có chắc không?',
-    moveItemToRootConfirmation:
-      'Bạn đang chuẩn bị di chuyển <1>{{title}}</1> đến thư mục gốc. Bạn có chắc chắn không?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Di chuyển {{title}} từ {{fromFolder}}',
-    newFolder: 'Thư mục mới',
-    noFolder: 'Không có Thư mục',
-    renameFolder: 'Đổi tên thư mục',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Tìm kiếm theo Tên trong {{folderName}}',
-    selectFolderForItem: 'Chọn thư mục cho {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Tên',
     aboutToDelete: 'Chuẩn bị xóa {{label}} <1>{{title}}</1>. Bạn có muốn tiếp tục không?',
@@ -255,6 +227,7 @@ export const viTranslations: DefaultTranslationsObject = {
     clearAll: 'Xóa tất cả',
     close: 'Đóng',
     collapse: 'Thu gọn',
+    collection: 'Bộ sưu tập',
     collections: 'Collections',
     columns: 'Hiển thị cột',
     columnToSort: 'Sắp xếp cột',
@@ -461,6 +434,14 @@ export const viTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Xem chỉ đọc',
     welcome: 'Xin chào',
     yes: 'Có',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} đã di chuyển đến {{destination}}',
+    itemsMovedToRoot: '{{title}} đã được chuyển đến gốc',
+    moveItemsToRootConfirmation:
+      'Bạn sắp di chuyển <1>{{count}} {{label}}</1> về gốc. Bạn có chắc không?',
+    moveToRoot: 'Di chuyển đến Gốc',
+    noParent: 'Không có bố mẹ',
   },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',

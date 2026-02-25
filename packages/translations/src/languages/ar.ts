@@ -185,34 +185,7 @@ export const arTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Toggle block',
     uploadNewLabel: 'رفع {{label}} جديد',
   },
-  folder: {
-    browseByFolder: 'تصفح حسب المجلد',
-    byFolder: 'حسب المجلد',
-    deleteFolder: 'حذف المجلد',
-    folderName: 'اسم المجلد',
-    folders: 'مجلدات',
-    folderTypeDescription: 'حدد نوع المستندات التي يجب السماح بها في هذا المجلد من المجموعات.',
-    itemHasBeenMoved: 'تم نقل {{title}} إلى {{folderName}}',
-    itemHasBeenMovedToRoot: 'تم نقل {{title}} إلى المجلد الجذر',
-    itemsMovedToFolder: '{{title}} تم نقله إلى {{folderName}}',
-    itemsMovedToRoot: '{{title}} تم نقله إلى المجلد الجذر',
-    moveFolder: 'نقل المجلد',
-    moveItemsToFolderConfirmation:
-      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
-    moveItemsToRootConfirmation:
-      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
-    moveItemToFolderConfirmation:
-      'أنت على وشك نقل <1>{{title}}</1> إلى <2>{{toFolder}}</2>. هل أنت متأكد؟',
-    moveItemToRootConfirmation: 'أنت على وشك نقل <1>{{title}}</1> إلى المجلد الجذر. هل أنت متأكد؟',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'نقل {{title}} من {{fromFolder}}',
-    newFolder: 'مجلد جديد',
-    noFolder: 'لا يوجد مجلد',
-    renameFolder: 'إعادة تسمية المجلد',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'البحث عن طريق الاسم في {{folderName}}',
-    selectFolderForItem: 'اختر المجلد لـ {{title}}',
-  },
+  folder: {},
   general: {
     name: 'اسم',
     aboutToDelete: 'أنت على وشك حذف {{label}} <1>{{title}}</1>. هل أنت متأكّد؟',
@@ -247,6 +220,7 @@ export const arTranslations: DefaultTranslationsObject = {
     clearAll: 'امسح الكل',
     close: 'إغلاق',
     collapse: 'طيّ',
+    collection: 'مجموعة',
     collections: 'المجموعات',
     columns: 'الأعمدة',
     columnToSort: 'التّرتيب حسب العامود',
@@ -452,6 +426,14 @@ export const arTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'عرض للقراءة فقط',
     welcome: 'مرحبًا',
     yes: 'نعم',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} تم نقله إلى {{destination}}',
+    itemsMovedToRoot: '{{title}} تم نقله إلى الجذر',
+    moveItemsToRootConfirmation:
+      'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى الجذر. هل أنت متأكد؟',
+    moveToRoot: 'الانتقال إلى الجذر',
+    noParent: 'لا والدين',
   },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',

@@ -190,36 +190,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Пребаци блок',
     uploadNewLabel: 'Учитај нови {{label}}',
   },
-  folder: {
-    browseByFolder: 'Pregledajte po folderu',
-    byFolder: 'Po folderu',
-    deleteFolder: 'Obriši fasciklu',
-    folderName: 'Ime fascikle',
-    folders: 'Fascikle',
-    folderTypeDescription:
-      'Odaberite koja vrsta dokumenata iz kolekcije treba biti dozvoljena u ovom folderu.',
-    itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je premešten u osnovni direktorijum.',
-    itemsMovedToFolder: '{{title}} premešten u {{folderName}}',
-    itemsMovedToRoot: '{{title}} pomeren u koreni direktorijum',
-    moveFolder: 'Premesti fasciklu',
-    moveItemsToFolderConfirmation:
-      'Upravo ste na korak da premestite <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
-    moveItemsToRootConfirmation:
-      'Управо ћете преместити <1>{{count}} {{label}}</1> у основну фасциклу. Да ли сте сигурни?',
-    moveItemToFolderConfirmation:
-      'Uskoro ćete premestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
-    moveItemToRootConfirmation:
-      'Upravo ćete premestiti <1>{{title}}</1> u osnovnu fasciklu. Da li ste sigurni?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Premeštanje {{title}} iz {{fromFolder}}',
-    newFolder: 'Novi folder',
-    noFolder: 'Nema foldera',
-    renameFolder: 'Preimenuj folder',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Pretraži po imenu u {{folderName}}',
-    selectFolderForItem: 'Izaberite fasciklu za {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Избрисаћете {{label}} <1>{{title}}</1>. Да ли сте сигурни?',
@@ -257,6 +228,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     clearAll: 'Obriši sve',
     close: 'Затвори',
     collapse: 'Скупи',
+    collection: 'Kolekcija',
     collections: 'Колекције',
     columns: 'Колоне',
     columnToSort: 'Колона за сортирање',
@@ -463,6 +435,14 @@ export const rsTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Прегледај само за читање',
     welcome: 'Добродошли',
     yes: 'Да',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} je premešten u {{destination}}',
+    itemsMovedToRoot: '{{title}} premestio se u koren',
+    moveItemsToRootConfirmation:
+      'На путу сте да преместите <1>{{count}} {{label}}</1> у корен. Да ли сте сигурни?',
+    moveToRoot: 'Pomeri na koren',
+    noParent: 'Без родитеља',
   },
   localization: {
     cannotCopySameLocale: 'Не може се копирати на исту локацију.',

@@ -188,35 +188,7 @@ export const daTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Skift blok',
     uploadNewLabel: 'Upload ny {{label}}',
   },
-  folder: {
-    browseByFolder: 'Gennemse efter Mappe',
-    byFolder: 'Ved Mappe',
-    deleteFolder: 'Slet mappe',
-    folderName: 'Mappenavn',
-    folders: 'Mapper',
-    folderTypeDescription:
-      'Vælg hvilken type samling af dokumenter der bør være tilladt i denne mappe.',
-    itemHasBeenMoved: '{{title}} er blevet flyttet til {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} er blevet flyttet til rodmappen',
-    itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
-    itemsMovedToRoot: '{{title}} flyttet til rod-mappen',
-    moveFolder: 'Flyt Mappe',
-    moveItemsToFolderConfirmation:
-      'Du er ved at flytte <1>{{count}} {{label}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemsToRootConfirmation:
-      'Du er ved at flytte <1>{{count}} {{label}}</1> til rodmappen. Er du sikker?',
-    moveItemToFolderConfirmation:
-      'Du er ved at flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemToRootConfirmation: 'Du er ved at flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Flytter {{title}} fra {{fromFolder}}',
-    newFolder: 'Ny Mappe',
-    noFolder: 'Ingen Mappe',
-    renameFolder: 'Omdøb mappe',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Søg efter Navn i {{folderName}}',
-    selectFolderForItem: 'Vælg mappe til {{title}}',
-  },
+  folder: {},
   general: {
     name: 'Navn',
     aboutToDelete: 'Du er ved at slette {{label}} <1>{{title}}</1>. Er du sikker?',
@@ -255,6 +227,7 @@ export const daTranslations: DefaultTranslationsObject = {
     clearAll: 'Ryd alt',
     close: 'Luk',
     collapse: 'Skjul',
+    collection: 'Samling',
     collections: 'Samlinger',
     columns: 'Kolonner',
     columnToSort: 'Kolonne at sortere',
@@ -462,6 +435,14 @@ export const daTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vis kun-læsning',
     welcome: 'Velkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flyttet til {{destination}}',
+    itemsMovedToRoot: '{{title}} flyttet til rod',
+    moveItemsToRootConfirmation:
+      'Du er ved at flytte <1>{{count}} {{label}}</1> til roden. Er du sikker?',
+    moveToRoot: 'Flyt til Rod',
+    noParent: 'Ingen Forælder',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',

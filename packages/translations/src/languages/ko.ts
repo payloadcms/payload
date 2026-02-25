@@ -189,34 +189,7 @@ export const koTranslations: DefaultTranslationsObject = {
     toggleBlock: '블록 토글',
     uploadNewLabel: '새로운 {{label}} 업로드',
   },
-  folder: {
-    browseByFolder: '폴더별 브라우징',
-    byFolder: '폴더별로',
-    deleteFolder: '폴더 삭제',
-    folderName: '폴더 이름',
-    folders: '폴더들',
-    folderTypeDescription: '이 폴더에서 어떤 유형의 컬렉션 문서가 허용되어야 하는지 선택하세요.',
-    itemHasBeenMoved: '{{title}}는 {{folderName}}로 이동되었습니다.',
-    itemHasBeenMovedToRoot: '{{title}}이(가) 루트 폴더로 이동되었습니다.',
-    itemsMovedToFolder: '{{title}}이(가) {{folderName}}로 이동되었습니다.',
-    itemsMovedToRoot: '{{title}}이(가) 루트 폴더로 이동되었습니다.',
-    moveFolder: '폴더 이동',
-    moveItemsToFolderConfirmation:
-      '<1>{{count}} {{label}}</1>을(를) <2>{{toFolder}}</2>(으)로 이동하려 합니다. 확실합니까?',
-    moveItemsToRootConfirmation:
-      '당신은 <1>{{count}} {{label}}</1>을 최상위 폴더로 이동하려고 합니다. 확실합니까?',
-    moveItemToFolderConfirmation:
-      '<1>{{title}}</1>을(를) <2>{{toFolder}}</2>(으)로 이동하려고 합니다. 확실하신가요?',
-    moveItemToRootConfirmation: '<1>{{title}}</1>을 루트 폴더로 이동하려고 합니다. 확실합니까?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: '{{title}}를 {{fromFolder}}에서 이동합니다',
-    newFolder: '새 폴더',
-    noFolder: '폴더 없음',
-    renameFolder: '폴더 이름 변경',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: '{{folderName}}에서 이름으로 검색하세요.',
-    selectFolderForItem: '{{title}}에 대한 폴더 선택',
-  },
+  folder: {},
   general: {
     name: '이름',
     aboutToDelete: '{{label}} <1>{{title}}</1>를 삭제하려고 합니다. 계속하시겠습니까?',
@@ -254,6 +227,7 @@ export const koTranslations: DefaultTranslationsObject = {
     clearAll: '모두 지우기',
     close: '닫기',
     collapse: '접기',
+    collection: '콜렉션',
     collections: '컬렉션',
     columns: '열',
     columnToSort: '정렬할 열',
@@ -460,6 +434,14 @@ export const koTranslations: DefaultTranslationsObject = {
     viewReadOnly: '읽기 전용으로 보기',
     welcome: '환영합니다',
     yes: '네',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}}은 {{destination}}으로 이동되었습니다.',
+    itemsMovedToRoot: '{{title}}가 루트로 이동되었습니다.',
+    moveItemsToRootConfirmation:
+      '<1>{{count}} {{label}}</1>을(를) 루트로 이동하려 합니다. 확실한가요?',
+    moveToRoot: '루트로 이동',
+    noParent: '부모 없음',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

@@ -191,36 +191,7 @@ export const trTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloğu aç/kapat',
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
-  folder: {
-    browseByFolder: 'Klasöre Göre Gözat',
-    byFolder: 'Klasör Bazında',
-    deleteFolder: 'Klasörü Sil',
-    folderName: 'Klasör Adı',
-    folders: 'Klasörler',
-    folderTypeDescription:
-      'Bu klasörde hangi türden koleksiyon belgelerine izin verilmesi gerektiğini seçin.',
-    itemHasBeenMoved: '{{title}} {{folderName}} klasörüne taşındı.',
-    itemHasBeenMovedToRoot: '{{title}} kök klasöre taşındı.',
-    itemsMovedToFolder: "{{title}} {{folderName}}'ye taşındı.",
-    itemsMovedToRoot: '{{title}} kök klasörüne taşındı',
-    moveFolder: 'Klasörü Taşı',
-    moveItemsToFolderConfirmation:
-      "<1>{{count}} {{label}}</1>'yi <2>{{toFolder}}</2>'ye taşımayı planlıyorsunuz. Emin misiniz?",
-    moveItemsToRootConfirmation:
-      '<1>{{count}} {{label}}</1> kök klasöre taşımayı planlıyorsunuz. Emin misiniz?',
-    moveItemToFolderConfirmation:
-      '<1>{{title}}</1> ögesini <2>{{toFolder}}</2> konumuna taşımak üzeresiniz. Emin misiniz?',
-    moveItemToRootConfirmation:
-      '<1>{{title}}</1> öğesini ana klasöre taşımak üzeresiniz. Emin misiniz?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: '{{title}} öğesinin {{fromFolder}} klasöründen taşınması',
-    newFolder: 'Yeni Klasör',
-    noFolder: 'Klasör Yok',
-    renameFolder: 'Klasörü Yeniden Adlandır',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: "{{folderName}}'da İsme Göre Ara",
-    selectFolderForItem: '{{title}} için klasör seçin',
-  },
+  folder: {},
   general: {
     name: 'İsim',
     aboutToDelete:
@@ -259,6 +230,7 @@ export const trTranslations: DefaultTranslationsObject = {
     clearAll: 'Hepsini Temizle',
     close: 'Kapat',
     collapse: 'Daralt',
+    collection: 'Koleksiyon',
     collections: 'Koleksiyonlar',
     columns: 'Sütunlar',
     columnToSort: 'Sıralanacak Sütunlar',
@@ -468,6 +440,14 @@ export const trTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Salt okunur olarak görüntüle',
     welcome: 'Hoşgeldiniz',
     yes: 'Evet',
+  },
+  hierarchy: {
+    itemsMovedTo: "{{title}} {{destination}}'ye taşındı",
+    itemsMovedToRoot: '{{title}} kök bölüme taşındı.',
+    moveItemsToRootConfirmation:
+      '<1>{{count}} {{label}}</1> köküne taşımayı planlıyorsunuz. Emin misiniz?',
+    moveToRoot: 'Kök Dizinine Taşı',
+    noParent: 'Üst Yok',
   },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',

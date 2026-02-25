@@ -190,36 +190,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Перемкнути блок',
     uploadNewLabel: 'Завантажити новий {{label}}',
   },
-  folder: {
-    browseByFolder: 'Переглянути за папкою',
-    byFolder: 'За папкою',
-    deleteFolder: 'Видалити папку',
-    folderName: 'Назва папки',
-    folders: 'Папки',
-    folderTypeDescription:
-      'Виберіть, який тип документів колекції повинен бути дозволений у цій папці.',
-    itemHasBeenMoved: '{{title}} було переміщено до {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} був переміщений до кореневої папки',
-    itemsMovedToFolder: '{{title}} перенесено до {{folderName}}',
-    itemsMovedToRoot: '{{title}} переміщено до кореневої папки',
-    moveFolder: 'Перемістити папку',
-    moveItemsToFolderConfirmation:
-      'Ви збираєтесь перемістити <1>{{count}} {{label}}</1> до <2>{{toFolder}}</2>. Ви впевнені?',
-    moveItemsToRootConfirmation:
-      'Ви збираєтеся перемістити <1>{{count}} {{label}}</1> до кореневої папки. Ви впевнені?',
-    moveItemToFolderConfirmation:
-      'Ви збираєтеся перемістити <1>{{title}}</1> до <2>{{toFolder}}</2>. Ви впевнені?',
-    moveItemToRootConfirmation:
-      'Ви збираєтеся перемістити <1>{{title}}</1> до кореневої папки. Ви впевнені?',
-    moveToRoot: 'Move to Root',
-    movingFromFolder: 'Переміщення {{title}} з {{fromFolder}}',
-    newFolder: 'Нова папка',
-    noFolder: 'Немає папки',
-    renameFolder: 'Перейменувати папку',
-    rootFolder: 'Root Folder',
-    searchByNameInFolder: 'Пошук за назвою у {{folderName}}',
-    selectFolderForItem: 'Виберіть папку для {{title}}',
-  },
+  folder: {},
   general: {
     name: "Ім'я",
     aboutToDelete: 'Ви бажаєте видалити {{label}} <1>{{title}}</1>. Ви впевнені?',
@@ -256,6 +227,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     clearAll: 'Очистити все',
     close: 'Закрити',
     collapse: 'Згорнути',
+    collection: 'Колекція',
     collections: 'Колекції',
     columns: 'Колонки',
     columnToSort: 'Колонка для сортування',
@@ -461,6 +433,14 @@ export const ukTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Перегляд тільки для читання',
     welcome: 'Вітаю',
     yes: 'Так',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} перейшов до {{destination}}',
+    itemsMovedToRoot: '{{title}} переміщено в корінь',
+    moveItemsToRootConfirmation:
+      'Ви збираєтеся перемістити <1>{{count}} {{label}}</1> до кореня. Ви впевнені?',
+    moveToRoot: 'Перейти до кореня',
+    noParent: 'Без батьківського елемента',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

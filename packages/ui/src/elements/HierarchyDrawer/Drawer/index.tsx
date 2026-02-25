@@ -106,7 +106,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         <div className={`${baseClass}__subheader-right`}>
           {showMoveToRoot && onMoveToRoot && (
             <button className={`${baseClass}__move-to-root`} onClick={onMoveToRoot} type="button">
-              {t('folder:moveToRoot')}
+              {t('hierarchy:moveToRoot')}
             </button>
           )}
           {selectionCount > 0 && (
