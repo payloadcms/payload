@@ -29,9 +29,16 @@ export type DocumentInfoProps = {
   readonly disableLeaveWithoutSaving?: boolean
   readonly docPermissions?: SanitizedDocumentPermissions
   readonly globalSlug?: SanitizedGlobalConfig['slug']
+  /**
+   * Whether the user can permanently delete documents when trash is enabled.
+   * Determined by checking delete access with `deletedAt` set.
+   */
+  readonly hasDeletePermission?: boolean
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
+  /** Whether the user can trash (soft delete) documents. Only applicable when `trash` is enabled. */
+  readonly hasTrashPermission?: boolean
   readonly id?: number | string
   readonly initialData?: Data
   readonly initialState?: FormState

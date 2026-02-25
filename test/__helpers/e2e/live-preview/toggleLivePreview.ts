@@ -1,6 +1,6 @@
-import type { Page } from 'playwright'
+import type { Page } from '@playwright/test'
 
-import { expect } from 'playwright/test'
+import { expect } from '@playwright/test'
 
 export const toggleLivePreview = async (
   page: Page,

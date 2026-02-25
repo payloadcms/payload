@@ -346,6 +346,7 @@ export const deTranslations: DefaultTranslationsObject = {
     items: 'Artikel',
     language: 'Sprache',
     lastModified: 'Zuletzt geändert',
+    layout: 'Layout',
     leaveAnyway: 'Trotzdem verlassen',
     leaveWithoutSaving: 'Ohne speichern verlassen',
     light: 'Hell',
@@ -375,6 +376,9 @@ export const deTranslations: DefaultTranslationsObject = {
     noOptions: 'Keine Optionen',
     noResults:
       'Keine {{label}} gefunden. Entweder es existieren keine {{label}} oder es gibt keine Übereinstimmung zu den von dir verwendeten Filtern.',
+    noResultsDescription:
+      'Entweder existieren keine oder keine entsprechen den von Ihnen oben angegebenen Filtern.',
+    noResultsFound: 'Keine Ergebnisse gefunden.',
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
     noTrashResults: 'Kein {{label}} im Papierkorb.',
@@ -411,6 +415,7 @@ export const deTranslations: DefaultTranslationsObject = {
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',
+    saveChanges: 'Änderungen speichern',
     saving: 'Speichern...',
     schedulePublishFor: 'Plane die Veröffentlichung für {{title}}',
     searchBy: 'Suche nach {{label}}',

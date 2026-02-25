@@ -1,14 +1,19 @@
 /* eslint-disable no-restricted-exports */
 import { type WidgetServerProps } from 'payload'
 
-export default async function Count({ req }: WidgetServerProps) {
+import type { CountWidget } from '../payload-types.js'
+
+export default async function Count({ req, widgetData }: WidgetServerProps<CountWidget>) {
   let count = 0
   let error: null | string = null
 
-  // TODO: Dynamic collection counting using fields
-  const collection = 'tickets'
+  const selectedCollection =
+    typeof widgetData?.collection === 'string' && widgetData.collection.length > 0
+      ? widgetData.collection
+      : 'tickets'
   const payload = req.payload
-  const title = 'Tickets'
+  const title =
+    typeof widgetData?.title === 'string' && widgetData.title ? widgetData.title : 'Tickets'
   const color = 'blue'
   const icon = '📊'
   const changePercent = 10
@@ -16,14 +21,16 @@ export default async function Count({ req }: WidgetServerProps) {
 
   try {
     const result = await payload.count({
-      // @ts-expect-error - Dynamic collection counting
-      collection,
+      collection: selectedCollection,
     })
     count = result.totalDocs
   } catch (err) {
-    error = err instanceof Error ? err.message : 'Failed to fetch count'
+    error =
+      err instanceof Error
+        ? `${err.message} (${selectedCollection})`
+        : `Failed to fetch count (${selectedCollection})`
     // eslint-disable-next-line no-console
-    console.error(`Error fetching count for ${collection}:`, err)
+    console.error(`Error fetching count for ${selectedCollection}:`, err)
   }
 
   const getColorStyles = (color: 'blue' | 'green' | 'orange' | 'purple' | 'red') => {
