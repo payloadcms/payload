@@ -32,7 +32,7 @@ import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reI
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -1522,6 +1522,57 @@ describe('lexicalBlocks', () => {
       // Check if the text field still contains 'value1'
       await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
     })
+  })
+})
+
+// https://github.com/payloadcms/payload/issues/15509
+describe('lexicalNestedBlocks', () => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    process.env.SEED_IN_CONFIG_ONINIT = 'false'
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+
+    context = await browser.newContext()
+    page = await context.newPage()
+
+    initPageConsoleErrorCatch(page)
+
+    await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test('should render block with nested blocks field using blockReferences without crashing', async () => {
+    const url = new AdminUrlUtil(serverURL, lexicalNestedBlocksSlug)
+
+    await page.goto(url.create)
+    await waitForFormReady(page)
+
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await expect(richTextField).toBeVisible()
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.click()
+
+    await page.keyboard.press('/')
+    await page.keyboard.type('blockwithblockref')
+
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const blockSelectButton = slashMenuPopover.locator('button').first()
+    await expect(blockSelectButton).toBeVisible()
+    await blockSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    const newBlock = richTextField.locator('.LexicalEditorTheme__block').first()
+    await expect(newBlock).toBeVisible()
+
+    const editButton = newBlock.locator('.LexicalEditorTheme__block__editButton').first()
+    await editButton.click()
+
+    const editDrawer = page.locator('dialog[id^=drawer_1_lexical-blocks-create-]').first()
+    await expect(editDrawer).toBeVisible()
+
+    await expect(editDrawer.locator('#field-nestedBlocks')).toBeVisible()
   })
 })
 
