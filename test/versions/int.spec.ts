@@ -11,8 +11,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import {
   cleanupDocuments,
   cleanupGlobal,
@@ -1012,15 +1012,14 @@ describe('Versions', () => {
           draft: true,
         })
 
-        await expect(async () => {
-          // should not be able to publish a doc that fails validation
-          await payload.update({
+        await expect(
+          payload.update({
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
             draft: true,
-          })
-        }).rejects.toThrow(ValidationError)
+          }),
+        ).rejects.toThrow(ValidationError)
 
         // succeeds but returns zero docs updated, with an error
         const updateManyResult = await payload.update({
@@ -2323,6 +2322,57 @@ describe('Versions', () => {
 
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle)
+      })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts with autosave', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
       })
     })
 
