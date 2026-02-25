@@ -68,7 +68,6 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
   const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing: () => void = () => {}
     let rejectInitializing: () => void = () => {}
 
@@ -178,6 +177,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       find,
       findGlobal,
       findGlobalVersions,
+      findMigrationDir: () => findMigrationDir(args.migrationDir),
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -189,7 +189,6 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       migrateRefresh,
       migrateReset,
       migrateStatus,
-      migrationDir,
       packageName: '@payloadcms/db-d1-sqlite',
       payload,
       queryDrafts,

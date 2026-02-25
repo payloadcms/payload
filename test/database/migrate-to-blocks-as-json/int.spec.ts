@@ -24,7 +24,7 @@ describe('migrateToBlocksAsJSON', { db: 'drizzle' }, () => {
 
     const adapter = payload.db as unknown as PostgresAdapter
 
-    rmSync(adapter.migrationDir, { force: true, recursive: true })
+    rmSync(adapter.findMigrationDir(), { force: true, recursive: true })
     rmSync(tempConfigPath, { force: true })
 
     // INITIAL MIGRATION

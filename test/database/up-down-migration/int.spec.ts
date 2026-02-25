@@ -27,7 +27,7 @@ describeToUse('SQL migrations', () => {
     // set options
     databaseAdapter.init = ({ payload }) => {
       const adapter = init({ payload })
-      adapter.migrationDir = path.resolve(dirname, 'migrations')
+      adapter.findMigrationDir = () => path.resolve(dirname, 'migrations')
       adapter.push = false
       return adapter
     }

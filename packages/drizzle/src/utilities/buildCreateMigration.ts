@@ -24,7 +24,7 @@ export const buildCreateMigration = ({
     this: DrizzleAdapter,
     { file, forceAcceptWarning, migrationName, payload, skipEmpty },
   ) {
-    const dir = payload.db.migrationDir
+    const dir = payload.db.findMigrationDir()
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }
@@ -155,7 +155,7 @@ export const buildCreateMigration = ({
     // write migration
     fs.writeFileSync(fullPath, data)
 
-    writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+    writeMigrationIndex({ migrationsDir: payload.db.findMigrationDir() })
 
     payload.logger.info({ msg: `Migration created at ${fullPath}` })
   }

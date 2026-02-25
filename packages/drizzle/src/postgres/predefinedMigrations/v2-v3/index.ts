@@ -47,7 +47,7 @@ const runStatementGroup = async ({ adapter, db, debug, statements }) => {
  */
 export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
   const adapter = payload.db as unknown as BasePostgresAdapter
-  const dir = payload.db.migrationDir
+  const dir = payload.db.findMigrationDir()
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
   const { generateDrizzleJson, generateMigration, upSnapshot } = adapter.requireDrizzleKit()

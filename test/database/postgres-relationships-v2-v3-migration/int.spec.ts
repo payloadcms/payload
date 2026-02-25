@@ -17,7 +17,7 @@ describeToUse('Postgres relationships v2-v3 migration', () => {
     // set options
     databaseAdapter.init = ({ payload }) => {
       const adapter = init({ payload })
-      adapter.migrationDir = path.resolve(dirname, 'migrations')
+      adapter.findMigrationDir = () => path.resolve(dirname, 'migrations')
       adapter.push = false
       return adapter
     }

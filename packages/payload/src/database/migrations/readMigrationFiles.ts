@@ -14,25 +14,26 @@ export const readMigrationFiles = async ({
 }: {
   payload: Payload
 }): Promise<Migration[]> => {
-  if (!fs.existsSync(payload.db.migrationDir)) {
+  const dir = payload.db.findMigrationDir()
+  if (!fs.existsSync(dir)) {
     payload.logger.error({
-      msg: `No migration directory found at ${payload.db.migrationDir}`,
+      msg: `No migration directory found at ${dir}`,
     })
     return []
   }
 
   payload.logger.info({
-    msg: `Reading migration files from ${payload.db.migrationDir}`,
+    msg: `Reading migration files from ${dir}`,
   })
 
   const files = fs
-    .readdirSync(payload.db.migrationDir)
+    .readdirSync(dir)
     .sort()
     .filter((f) => {
       return (f.endsWith('.ts') || f.endsWith('.js')) && f !== 'index.js' && f !== 'index.ts'
     })
     .map((file) => {
-      return path.resolve(payload.db.migrationDir, file)
+      return path.resolve(dir, file)
     })
 
   return Promise.all(

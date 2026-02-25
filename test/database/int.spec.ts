@@ -62,7 +62,7 @@ describe('database', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    payload.db.migrationDir = path.join(dirname, './migrations')
+    payload.db.findMigrationDir = () => path.join(dirname, './migrations')
 
     await seed(payload)
 
@@ -1559,12 +1559,12 @@ describe('database', () => {
 
     it('should run migrate:create', () => {
       // read files names in migrationsDir
-      const migrationFile = path.normalize(fs.readdirSync(payload.db.migrationDir)[0])
+      const migrationFile = path.normalize(fs.readdirSync(payload.db.findMigrationDir())[0])
       expect(migrationFile).toContain('_test')
     })
 
     it('should create index.ts file in the migrations directory with file imports', () => {
-      const indexFile = path.join(payload.db.migrationDir, 'index.ts')
+      const indexFile = path.join(payload.db.findMigrationDir(), 'index.ts')
       const indexFileContent = fs.readFileSync(indexFile, 'utf8')
       expect(indexFileContent).toContain("_test from './")
     })

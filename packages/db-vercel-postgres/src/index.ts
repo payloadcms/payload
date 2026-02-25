@@ -72,7 +72,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing
     let rejectInitializing
     let adapterSchema: VercelPostgresAdapter['pgSchema']
@@ -187,6 +186,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       findDistinct,
       findGlobal,
       findGlobalVersions,
+      findMigrationDir: () => findMigrationDir(args.migrationDir),
       findOne,
       findVersions,
       init,
@@ -197,7 +197,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       migrateRefresh,
       migrateReset,
       migrateStatus,
-      migrationDir,
       packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,

@@ -82,7 +82,7 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   // Override migrationDir if provided (useful for testing)
   if (migrationDir) {
-    adapter.migrationDir = migrationDir
+    adapter.findMigrationDir = () => migrationDir
   }
 
   if (!args.length) {

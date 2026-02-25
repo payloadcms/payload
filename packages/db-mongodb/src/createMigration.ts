@@ -28,7 +28,7 @@ export const createMigration: CreateMigration = async function createMigration({
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
 
-  const dir = payload.db.migrationDir
+  const dir = payload.db.findMigrationDir()
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
@@ -56,7 +56,7 @@ export const createMigration: CreateMigration = async function createMigration({
     fs.writeFileSync(filePath, migrationFileContent)
   }
 
-  writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+  writeMigrationIndex({ migrationsDir: payload.db.findMigrationDir() })
 
   payload.logger.info({ msg: `Migration created at ${filePath}` })
 }

@@ -14,7 +14,7 @@ const adapterFactory = ({ blocksAsJSON = false }: { blocksAsJSON?: boolean }) =>
   databaseAdapter.init = ({ payload }) => {
     const res = init({ payload })
     res.blocksAsJSON = blocksAsJSON
-    res.migrationDir = path.resolve(dirname, 'migrations')
+    res.findMigrationDir = () => path.resolve(dirname, 'migrations')
     res.push = false
     return res
   }

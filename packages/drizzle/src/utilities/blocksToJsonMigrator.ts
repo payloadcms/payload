@@ -209,7 +209,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     batchSize?: number,
   ) {
     this.batchSize = batchSize || DEFAULT_BATCH_SIZE
-    this.tempFolderPath = path.resolve(this.adapter.migrationDir, TEMP_FOLDER_NAME)
+    this.tempFolderPath = path.resolve(this.adapter.findMigrationDir(), TEMP_FOLDER_NAME)
   }
 
   private ensureTempFolder(): void {

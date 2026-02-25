@@ -72,7 +72,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
-    const migrationDir = findMigrationDir(args.migrationDir)
     let resolveInitializing
     let rejectInitializing
     let adapterSchema: PostgresAdapter['pgSchema']
@@ -191,6 +190,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
+      findMigrationDir: () => findMigrationDir(args.migrationDir),
       findOne,
       findVersions,
       foreignKeys: new Set(),
@@ -203,7 +203,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       migrateRefresh,
       migrateReset,
       migrateStatus,
-      migrationDir,
       packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
