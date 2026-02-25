@@ -19,14 +19,16 @@ export const getClientSchemaMap = cache(
     i18n: I18nClient
     payload: Payload
     schemaMap: FieldSchemaMap
+    widgetSlug?: string
   }): ClientFieldSchemaMap => {
-    const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
+    const { collectionSlug, config, globalSlug, i18n, payload, schemaMap, widgetSlug } = args
 
     if (!cachedClientSchemaMap || global._payload_doNotCacheClientSchemaMap) {
       cachedClientSchemaMap = new Map()
     }
 
-    let cachedEntityClientFieldMap = cachedClientSchemaMap.get(collectionSlug || globalSlug)
+    const cacheKey = collectionSlug || globalSlug || `widget:${widgetSlug}`
+    let cachedEntityClientFieldMap = cachedClientSchemaMap.get(cacheKey)
 
     if (cachedEntityClientFieldMap) {
       return cachedEntityClientFieldMap
@@ -41,9 +43,10 @@ export const getClientSchemaMap = cache(
       i18n: i18n as I18n,
       payload,
       schemaMap,
+      widgetSlug,
     })
 
-    cachedClientSchemaMap.set(collectionSlug || globalSlug, entityClientFieldMap)
+    cachedClientSchemaMap.set(cacheKey, entityClientFieldMap)
 
     global._payload_clientSchemaMap = cachedClientSchemaMap
 

@@ -21,6 +21,8 @@ export const uploads2Slug = 'uploads2'
 
 export const arrayFieldsSlug = 'array-fields'
 
+export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
+
 export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,

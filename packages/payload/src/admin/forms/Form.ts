@@ -176,9 +176,16 @@ export type BuildFormStateArgs = {
       // Do not type it as never. This still makes it so that either collectionSlug or globalSlug is required, but makes it easier to provide both collectionSlug and globalSlug if it's
       // unclear which one is actually available.
       globalSlug?: string
+      widgetSlug?: string
     }
   | {
       collectionSlug?: string
       globalSlug: string
+      widgetSlug?: string
+    }
+  | {
+      collectionSlug?: string
+      globalSlug?: string
+      widgetSlug: string
     }
 )

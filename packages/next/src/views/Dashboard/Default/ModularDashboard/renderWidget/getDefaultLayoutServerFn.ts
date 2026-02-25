@@ -44,6 +44,7 @@ export const getDefaultLayoutHandler: ServerFunction<
           locale,
           permissions,
           req,
+          widgetData: layoutItem.data || {},
           widgetSlug,
         } satisfies WidgetServerProps,
       }),
@@ -57,9 +58,8 @@ export const getDefaultLayoutHandler: ServerFunction<
 async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,
   req: PayloadRequest,
-  widgets: Widget[],
+  widgets: Pick<Widget, 'maxWidth' | 'minWidth' | 'slug'>[],
 ): Promise<WidgetItem[]> {
-  // Handle function format
   let widgetInstances
   if (typeof defaultLayout === 'function') {
     widgetInstances = await defaultLayout({ req })
@@ -71,6 +71,7 @@ async function getItemsFromConfig(
     const widget = widgets.find((w) => w.slug === widgetInstance.widgetSlug)
     return {
       id: `${widgetInstance.widgetSlug}-${index}`,
+      data: widgetInstance.data,
       maxWidth: widget?.maxWidth ?? 'full',
       minWidth: widget?.minWidth ?? 'x-small',
       width: widgetInstance.width || 'x-small',
