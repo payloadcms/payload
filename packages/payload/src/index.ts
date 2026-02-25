@@ -1518,6 +1518,7 @@ export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/i
 export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
+  createClientBlocks,
   createClientField,
   createClientFields,
   type ServerOnlyFieldAdminProperties,
