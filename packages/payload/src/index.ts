@@ -1706,7 +1706,8 @@ export {
   HIERARCHY_DEFAULT_LOCALE,
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
-  validateHierarchyFields,
+  injectHierarchyButton,
+  resolveHierarchyCollections,
 } from './hierarchy/index.js'
 export type {
   Ancestor,

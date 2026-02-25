@@ -23,7 +23,7 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { addHierarchySidebarTabs as addFolderSidebarTabs } from '../hierarchy/addHierarchySidebarTabs.js'
 import { addTagSidebarTabs as addHierarchySidebarTabs } from '../hierarchy/addTagSidebarTabs.js'
-import { validateHierarchyFields } from '../hierarchy/validateHierarchyFields.js'
+import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
   getLockedDocumentsCollection,
@@ -284,8 +284,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  // Validate hierarchy fields exist in related collections and build sanitized config
-  validateHierarchyFields(config as unknown as Config)
+  // Resolve hierarchy relationships across collections
+  resolveHierarchyCollections(config as unknown as Config)
 
   // Add sidebar tabs for hierarchy collections (tags/folders)
   addHierarchySidebarTabs(config as unknown as Config)

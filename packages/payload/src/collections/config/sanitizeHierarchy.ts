@@ -126,7 +126,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   }
 
   // If collectionSpecific, add beforeValidate hook to enforce scope inheritance
-  // (hierarchyType field is added in validateHierarchyFields after discovery)
+  // (hierarchyType field is added in linkHierarchyCollections after discovery)
   if (collectionSpecific) {
     // Use parentFieldName for both - backward compatible configs use the same field name everywhere
     if (!collectionConfig.hooks) {

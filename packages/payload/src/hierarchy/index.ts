@@ -14,6 +14,8 @@ export { createTagField } from './createTagField.js'
 export type { CreateTagFieldOptions } from './createTagField.js'
 export { createTagsCollection } from './createTagsCollection.js'
 export type { CreateTagsCollectionOptions } from './createTagsCollection.js'
+export { injectHierarchyButton } from './injectHierarchyButton.js'
+export { resolveHierarchyCollections } from './resolveHierarchyCollections.js'
 export type {
   ClientHierarchyConfig,
   HierarchyConfig,
@@ -25,4 +27,3 @@ export type { Ancestor } from './utils/getAncestors.js'
 export { getAncestors } from './utils/getAncestors.js'
 export { getLocalizedValue } from './utils/getLocalizedValue.js'
 export { buildNestedTree, loadTree } from './utils/loadTree.js'
-export { validateHierarchyFields } from './validateHierarchyFields.js'
