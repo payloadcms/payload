@@ -27,7 +27,6 @@ import {
   appendUploadSelectFields,
   combineWhereConstraints,
   formatAdminURL,
-  getFromImportMap,
   isNumber,
   mergeListSearchAndWhere,
   transformColumnsToPreferences,
@@ -382,19 +381,12 @@ export const renderListView = async (
     // Resolve hierarchy icon from collection config
     const hierarchyConfig =
       typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
-    const iconPath = hierarchyConfig?.admin?.components?.Icon
 
-    if (iconPath) {
-      const ResolvedIcon = getFromImportMap<React.ComponentType>({
-        importMap: payload.importMap,
-        PayloadComponent: iconPath,
-        schemaPath: '',
-      })
-
-      if (ResolvedIcon) {
-        HierarchyIcon = <ResolvedIcon key={iconPath} />
-      }
-    }
+    HierarchyIcon = RenderServerComponent({
+      Component: hierarchyConfig?.admin.components.Icon,
+      importMap: payload.importMap,
+      key: `hierarchy-icon-${collectionSlug}`,
+    })
   }
 
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)

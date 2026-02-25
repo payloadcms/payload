@@ -1,9 +1,8 @@
 import type { RelationshipFieldServerComponent } from 'payload'
 
-import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
-import { TagIcon } from '../../icons/Tag/index.js'
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { HierarchyFieldClient } from './index.client.js'
 
 export const HierarchyField: RelationshipFieldServerComponent = (props) => {
@@ -15,26 +14,18 @@ export const HierarchyField: RelationshipFieldServerComponent = (props) => {
     hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
       ? hierarchyCollectionConfig.hierarchy
       : undefined
-  const iconPath = hierarchyConfig?.admin?.components?.Icon
+  const Icon = hierarchyConfig?.admin.components.Icon
 
-  let Icon: React.ComponentType = TagIcon
-
-  if (iconPath) {
-    const ResolvedIcon = getFromImportMap<React.ComponentType>({
-      importMap: payload.importMap,
-      PayloadComponent: iconPath,
-      schemaPath: '',
-    })
-
-    if (ResolvedIcon) {
-      Icon = ResolvedIcon
-    }
-  }
+  const renderedIcon = RenderServerComponent({
+    Component: Icon,
+    importMap: payload.importMap,
+    key: `hierarchy-field-icon-${hierarchySlug}`,
+  })
 
   return (
     <HierarchyFieldClient
       field={clientField}
-      Icon={<Icon />}
+      Icon={renderedIcon}
       path={props.path}
       permissions={props.permissions}
       readOnly={props.readOnly}

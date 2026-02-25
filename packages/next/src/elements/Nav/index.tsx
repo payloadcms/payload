@@ -196,14 +196,16 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   const allTabs = [
     {
       slug: 'nav',
-      component: (
-        <>
-          {RenderedBeforeNavLinks}
-          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-          {RenderedAfterNavLinks}
-        </>
-      ),
-      icon: <ListViewIcon />,
+      components: {
+        Content: (
+          <>
+            {RenderedBeforeNavLinks}
+            <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+            {RenderedAfterNavLinks}
+          </>
+        ),
+        Icon: <ListViewIcon />,
+      },
       isDefaultActive: true,
       label: i18n.t('general:collections'),
     },

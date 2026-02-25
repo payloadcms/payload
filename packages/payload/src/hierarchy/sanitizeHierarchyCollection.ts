@@ -1,30 +1,35 @@
-import type { Config } from '../../config/types.js'
-import type { SanitizedHierarchyConfig } from '../../hierarchy/types.js'
-import type { CollectionConfig } from './types.js'
+import type { CollectionConfig } from '../collections/config/types.js'
+import type { Config } from '../config/types.js'
+import type { SanitizedHierarchyConfig } from './types.js'
 
-import { fieldAffectsData } from '../../fields/config/types.js'
-import { addHierarchyToCollection } from '../../hierarchy/addHierarchyToCollection.js'
-import { buildParentField } from '../../hierarchy/buildParentField.js'
+import { fieldAffectsData } from '../fields/config/types.js'
+import { slugify as defaultSlugify } from '../utilities/slugify.js'
+import { addHierarchyToCollection } from './addHierarchyToCollection.js'
+import { buildParentField } from './buildParentField.js'
 import {
   DEFAULT_ALLOW_HAS_MANY,
   DEFAULT_HIERARCHY_TREE_LIMIT,
   getHierarchyFieldName,
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
-} from '../../hierarchy/constants.js'
-import { findRelatedHandler } from '../../hierarchy/endpoints/findRelated.js'
-import { ensureSafeCollectionsChange } from '../../hierarchy/hooks/ensureSafeCollectionsChange.js'
-import { slugify as defaultSlugify } from '../../utilities/slugify.js'
+} from './constants.js'
+import { findRelatedHandler } from './endpoints/findRelated.js'
+import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
 
 /**
- * Sanitize and apply hierarchy configuration to a collection config
+ * Sanitizes hierarchy configuration for a single collection.
  *
+ * This is phase 1 of hierarchy setup, called during individual collection sanitization.
+ * It normalizes the hierarchy config, creates the parent field if needed, adds hooks,
+ * and sets up the sanitized config structure.
  *
- * @param collectionConfig
- * @param config
- * @returns
+ * Phase 2 (`resolveHierarchyCollections`) runs after all collections are sanitized
+ * to establish cross-collection relationships.
  */
-export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: Config): void => {
+export const sanitizeHierarchyCollection = (
+  collectionConfig: CollectionConfig,
+  _config: Config,
+): void => {
   if (!collectionConfig.hierarchy) {
     collectionConfig.hierarchy = false
     return
@@ -126,7 +131,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   }
 
   // If collectionSpecific, add beforeValidate hook to enforce scope inheritance
-  // (hierarchyType field is added in linkHierarchyCollections after discovery)
+  // (hierarchyType field is added in resolveHierarchyCollections after discovery)
   if (collectionSpecific) {
     // Use parentFieldName for both - backward compatible configs use the same field name everywhere
     if (!collectionConfig.hooks) {
@@ -151,7 +156,7 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   ;(collectionConfig as unknown as { hierarchy: SanitizedHierarchyConfig }).hierarchy = {
     admin: {
       components: {
-        ...(iconComponent && { Icon: iconComponent }),
+        Icon: iconComponent || '@payloadcms/ui#TagIcon',
       },
       treeLimit,
       useHeaderButton,

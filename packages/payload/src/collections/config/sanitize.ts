@@ -12,6 +12,7 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -27,7 +28,6 @@ import {
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
-import { sanitizeHierarchy } from './sanitizeHierarchy.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
@@ -230,8 +230,8 @@ export const sanitizeCollection = async (
     delete sanitized.versions
   }
 
-  // Sanitize hierarchy configuration (folders, tags)
-  sanitizeHierarchy(sanitized, config)
+  // Sanitize hierarchy configuration (phase 1 - per collection)
+  sanitizeHierarchyCollection(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {

@@ -1,9 +1,8 @@
 import type { Payload } from 'payload'
 
-import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
-import { FolderIcon } from '../../icons/Folder/index.js'
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { HierarchyButtonClient } from './index.js'
 
 export type HierarchyButtonServerProps = {
@@ -26,28 +25,20 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
     hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
       ? hierarchyCollectionConfig.hierarchy
       : undefined
-  const iconPath = hierarchyConfig?.admin?.components?.Icon
+  const Icon = hierarchyConfig?.admin.components.Icon
 
-  let Icon: React.ComponentType = FolderIcon
-
-  if (iconPath) {
-    const ResolvedIcon = getFromImportMap<React.ComponentType>({
-      importMap: payload.importMap,
-      PayloadComponent: iconPath,
-      schemaPath: '',
-    })
-
-    if (ResolvedIcon) {
-      Icon = ResolvedIcon
-    }
-  }
+  const renderedIcon = RenderServerComponent({
+    Component: Icon,
+    importMap: payload.importMap,
+    key: `hierarchy-button-icon-${collectionSlug}`,
+  })
 
   return (
     <HierarchyButtonClient
       collectionSlug={collectionSlug}
       fieldName={fieldName}
       hasMany={hasMany}
-      Icon={<Icon />}
+      Icon={renderedIcon}
     />
   )
 }

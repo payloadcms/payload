@@ -792,12 +792,15 @@ export type SanitizedDashboardConfig = {
 }
 
 export type SidebarTab = {
-  /** Component to render as tab content */
-  component: CustomComponent
+  /** Tab components */
+  components: {
+    /** Component to render as tab content */
+    Content: CustomComponent
+    /** Component to render as tab icon */
+    Icon: PayloadComponent
+  }
   /** Disable this tab */
   disabled?: boolean
-  /** Component to render as tab icon */
-  icon: CustomComponent
   /** Make this tab active by default */
   isDefaultActive?: boolean
   /**

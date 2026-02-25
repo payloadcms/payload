@@ -1,3 +1,5 @@
+import type { PayloadComponent } from '../config/types.js'
+
 /**
  * Configuration options for hierarchy feature
  *
@@ -14,9 +16,9 @@ export type HierarchyConfig = {
      */
     components?: {
       /**
-       * Custom icon component path for hierarchy items
+       * Custom icon component for hierarchy items
        */
-      Icon?: string
+      Icon?: PayloadComponent
     }
     /**
      * Maximum number of items to load in tree views
@@ -89,7 +91,7 @@ export type HierarchyConfig = {
 export type SanitizedHierarchyConfig = {
   admin: {
     components: {
-      Icon?: string
+      Icon: PayloadComponent
     }
     treeLimit: number
     useHeaderButton: boolean

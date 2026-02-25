@@ -165,6 +165,13 @@ export const resolveHierarchyCollections = (config: Config): void => {
         sanitizedRelatedCollections,
       })
     }
+
+    // Add sidebar tab for this hierarchy collection
+    injectSidebarTab({
+      config,
+      hierarchyCollection,
+      hierarchyConfig,
+    })
   }
 }
 
@@ -363,4 +370,45 @@ function injectAfterDeleteHook({
     ...(hierarchyCollection.hooks.afterDelete || []),
     hierarchyCollectionAfterDelete({ relatedCollections: relatedCollectionFieldMap }),
   ]
+}
+
+/**
+ * Injects a sidebar tab for a hierarchy collection.
+ */
+function injectSidebarTab({
+  config,
+  hierarchyCollection,
+  hierarchyConfig,
+}: {
+  config: Config
+  hierarchyCollection: CollectionConfig
+  hierarchyConfig: SanitizedHierarchyConfig
+}): void {
+  const tabSlug = `hierarchy-${hierarchyCollection.slug}`
+  const Icon = hierarchyConfig.admin.components.Icon
+
+  // Initialize admin config structure
+  config.admin = config.admin || {}
+  config.admin.components = config.admin.components || {}
+  config.admin.components.sidebar = config.admin.components.sidebar || {}
+  config.admin.components.sidebar.tabs = config.admin.components.sidebar.tabs || []
+
+  // Check if tab already exists
+  const hasTab = config.admin.components.sidebar.tabs.some((tab) => tab.slug === tabSlug)
+
+  if (!hasTab) {
+    config.admin.components.sidebar.tabs.push({
+      slug: tabSlug,
+      components: {
+        Content: {
+          clientProps: {
+            collectionSlug: hierarchyCollection.slug,
+          },
+          path: '@payloadcms/ui/rsc#HierarchySidebarTabServer',
+        },
+        Icon,
+      },
+      label: hierarchyCollection.labels?.plural || hierarchyCollection.slug,
+    })
+  }
 }

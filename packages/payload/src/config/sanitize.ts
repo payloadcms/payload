@@ -21,8 +21,6 @@ import { migrationsCollection } from '../database/migrations/migrationsCollectio
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
-import { addHierarchySidebarTabs as addFolderSidebarTabs } from '../hierarchy/addHierarchySidebarTabs.js'
-import { addTagSidebarTabs as addHierarchySidebarTabs } from '../hierarchy/addTagSidebarTabs.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
@@ -284,11 +282,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  // Resolve hierarchy relationships across collections
+  // Resolve hierarchy relationships across collections (also adds sidebar tabs)
   resolveHierarchyCollections(config as unknown as Config)
-
-  // Add sidebar tabs for hierarchy collections (tags/folders)
-  addHierarchySidebarTabs(config as unknown as Config)
 
   if (schedulePublishCollections.length || schedulePublishGlobals.length) {
     ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
@@ -360,9 +355,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     ;(config.collections ??= []).push(sanitizedJobsCollection)
   }
-
-  // Add sidebar tabs for folder collections
-  addFolderSidebarTabs(config as unknown as Config)
 
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
 

@@ -34,7 +34,7 @@ export const renderTabHandler: ServerFunction<
 
   try {
     const component = RenderServerComponent({
-      Component: tabConfig.component,
+      Component: tabConfig.components.Content,
       importMap,
       serverProps: {
         i18n: req.i18n,

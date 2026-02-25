@@ -76,8 +76,8 @@ export function iterateConfig({
   // Sidebar tabs
   if (config.admin?.components?.sidebar?.tabs?.length) {
     for (const tab of config.admin.components.sidebar.tabs) {
-      addToImportMap(tab.icon)
-      addToImportMap(tab.component)
+      addToImportMap(tab.components.Icon)
+      addToImportMap(tab.components.Content)
     }
   }
 
