@@ -278,7 +278,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     operation,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     previousDoc,
                     previousSiblingDoc: { ...nodePreviousSiblingDoc },
@@ -381,6 +381,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeId = nodeSiblingData?.id ?? (node as any).id
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -401,7 +402,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: nodeId ? [...path, String(nodeId)].join('.') : path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     populate,
                     populationPromises: populationPromises!,
@@ -571,7 +572,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
                     siblingData: nodeSiblingData,
@@ -800,7 +801,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
                     siblingData: nodeSiblingData,
