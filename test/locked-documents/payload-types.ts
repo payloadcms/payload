@@ -71,6 +71,7 @@ export interface Config {
     posts: Post;
     'server-components': ServerComponent;
     simple: Simple;
+    'simple-with-versions': SimpleWithVersion;
     tests: Test;
     users: User;
     'payload-kv': PayloadKv;
@@ -84,6 +85,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'server-components': ServerComponentsSelect<false> | ServerComponentsSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'simple-with-versions': SimpleWithVersionsSelect<false> | SimpleWithVersionsSelect<true>;
     tests: TestsSelect<false> | TestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -203,6 +205,17 @@ export interface Simple {
   fieldB?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions".
+ */
+export interface SimpleWithVersion {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -278,6 +291,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'simple';
         value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'simple-with-versions';
+        value: string | SimpleWithVersion;
       } | null)
     | ({
         relationTo: 'tests';
@@ -366,6 +383,16 @@ export interface ServerComponentsSelect<T extends boolean = true> {
  * via the `definition` "simple_select".
  */
 export interface SimpleSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions_select".
+ */
+export interface SimpleWithVersionsSelect<T extends boolean = true> {
   fieldA?: T;
   fieldB?: T;
   updatedAt?: T;

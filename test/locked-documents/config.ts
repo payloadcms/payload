@@ -6,6 +6,7 @@ import { PagesCollection } from './collections/Pages/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { ServerComponentsCollection } from './collections/ServerComponents/index.js'
 import { SimpleCollection } from './collections/Simple/index.js'
+import { SimpleWithVersionsCollection } from './collections/SimpleWithVersions/index.js'
 import { TestsCollection } from './collections/Tests/index.js'
 import { Users } from './collections/Users/index.js'
 import { AdminGlobal } from './globals/Admin/index.js'
@@ -27,6 +28,7 @@ export default buildConfigWithDefaults({
     PostsCollection,
     ServerComponentsCollection,
     SimpleCollection,
+    SimpleWithVersionsCollection,
     TestsCollection,
     Users,
   ],

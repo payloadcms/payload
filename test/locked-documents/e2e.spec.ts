@@ -14,6 +14,7 @@ import type {
   Post,
   ServerComponent,
   Simple,
+  SimpleWithVersion,
   Test,
   User,
 } from './payload-types.js'
@@ -44,6 +45,7 @@ let pagesUrl: AdminUrlUtil
 let serverComponentsUrl: AdminUrlUtil
 let testsUrl: AdminUrlUtil
 let simpleUrl: AdminUrlUtil
+let simpleWithVersionsUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
@@ -58,6 +60,7 @@ describe('Locked Documents', () => {
     serverComponentsUrl = new AdminUrlUtil(serverURL, 'server-components')
     testsUrl = new AdminUrlUtil(serverURL, 'tests')
     simpleUrl = new AdminUrlUtil(serverURL, 'simple')
+    simpleWithVersionsUrl = new AdminUrlUtil(serverURL, 'simple-with-versions')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1402,6 +1405,7 @@ describe('Locked Documents', () => {
 
   describe('stale data detection', () => {
     let simpleDoc: Simple
+    let simpleWithVersionsDoc: Simple
     let user2Context: BrowserContext
     let user2Page: Page
 
@@ -1415,6 +1419,14 @@ describe('Locked Documents', () => {
           fieldB: 'Original B',
         },
       })) as unknown as Simple
+
+      simpleWithVersionsDoc = (await payload.create({
+        collection: 'simple-with-versions',
+        data: {
+          fieldA: 'Original A',
+          fieldB: 'Original B',
+        },
+      })) as unknown as SimpleWithVersion
 
       // Create a second browser context for user 2 (user 1 uses the parent test's page)
       user2Context = await browser.newContext()
@@ -1433,315 +1445,632 @@ describe('Locked Documents', () => {
       }
     })
 
-    test('should show stale data modal when user2 edits after user1 saves', async () => {
-      // Both users open the same document
-      await page.goto(simpleUrl.edit(simpleDoc.id))
-      await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+    describe('collections', () => {
+      test('should show stale data modal when user2 edits after user1 saves', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
 
-      // User 1 makes a change and saves
-      const user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('User 1 Change')
-      await saveDocAndAssert(page)
+        // User 1 makes a change and saves
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('User 1 Change')
+        await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 tries to edit (should trigger stale data check)
-      const user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('User 2 Change')
+        // User 2 tries to edit (should trigger stale data check)
+        const user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('User 2 Change')
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Stale data modal should appear for user 2
-      const modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
-      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
+
+      test('should reload document and show latest data when clicking reload button', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+
+        // User 1 makes a change and saves
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('User 1 Updated Value')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit
+        const user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Should be discarded')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 clicks reload button in modal
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
+
+        // User 2 should now see User 1's changes
+        await expect(user2FieldA).toHaveValue('User 1 Updated Value')
+      })
+
+      test('should detect stale data across multiple save cycles for collection without versions', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+
+        // Cycle 1: User 1 saves
+        let user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        let user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should detect stale data across multiple save cycles for collection with versions', async () => {
+        // Both users open the same document
+        await page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+        await user2Page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+
+        // Cycle 1: User 1 saves
+        let user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        let user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should not show modal if user edits their own saved changes', async () => {
+        await page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+
+        // User 1 makes a change and saves as draft
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('My First Change')
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 edits again (their own save)
+        await user1FieldA.fill('My Second Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should NOT appear
+        const modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
+
+        // User 1 saves draft again
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 edits a third time
+        await user1FieldA.fill('My Third Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should still NOT appear
+        await expect(modalContainer).toBeHidden()
+      })
     })
 
-    test('should reload document and show latest data when clicking reload button', async () => {
-      // Both users open the same document
-      await page.goto(simpleUrl.edit(simpleDoc.id))
-      await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+    describe('globals', () => {
+      test('should show stale data modal for globals when user2 edits after user1 saves', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
+
+        // User 1 makes a change and saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('User 1 Global Change')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit (should trigger stale data check)
+        const user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('User 2 Global Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
 
-      // User 1 makes a change and saves
-      const user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('User 1 Updated Value')
-      await saveDocAndAssert(page)
+      test('should reload global and show latest data when clicking reload button', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 tries to edit
-      const user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('Should be discarded')
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 1 makes a change and saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('User 1 Updated Global Value')
+        await saveDocAndAssert(page)
 
-      // User 2 clicks reload button in modal
-      await user2Page.locator('#document-stale-data-reload').click()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 tries to edit
+        const user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Should be discarded')
 
-      const modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeHidden()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 should now see User 1's changes
-      await expect(user2FieldA).toHaveValue('User 1 Updated Value')
-    })
+        // User 2 clicks reload button in modal
+        await user2Page.locator('#document-stale-data-reload').click()
 
-    test('should detect stale data across multiple save cycles', async () => {
-      // Both users open the same document
-      await page.goto(simpleUrl.edit(simpleDoc.id))
-      await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Cycle 1: User 1 saves
-      let user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('Cycle 1 - User 1')
-      await saveDocAndAssert(page)
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 should now see User 1's changes
+        await expect(user2GlobalText).toHaveValue('User 1 Updated Global Value')
+      })
 
-      // User 2 tries to edit and sees modal
-      let user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('Cycle 1 - User 2 attempt')
+      test('should detect stale data across multiple save cycles for globals', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      let modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
 
-      // User 2 reloads
-      await user2Page.locator('#document-stale-data-reload').click()
+        // Cycle 1: User 1 saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Cycle 2: User 2 now saves
-      user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('Cycle 2 - User 2')
-      await saveDocAndAssert(user2Page)
+        // User 2 tries to edit and sees modal
+        let user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 1 - User 2 attempt')
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 1 tries to edit and should see modal again
-      user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('Cycle 2 - User 1 attempt')
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
 
-      modalContainer = page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 1 reloads
-      await page.locator('#document-stale-data-reload').click()
+        // Cycle 2: User 2 now saves
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Cycle 3: User 1 now saves
-      user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('Cycle 3 - User 1')
-      await saveDocAndAssert(page)
+        // User 1 tries to edit and should see modal again
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 2 - User 1 attempt')
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 tries to edit and should see modal again
-      user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('Cycle 3 - User 2 attempt')
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
 
-      modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 reloads
-      await user2Page.locator('#document-stale-data-reload').click()
+        // Cycle 3: User 1 now saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Cycle 4: User 2 now saves
-      user2FieldA = user2Page.locator('#field-fieldA')
-      await user2FieldA.fill('Cycle 4 - User 2')
-      await saveDocAndAssert(user2Page)
+        // User 2 tries to edit and should see modal again
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 3 - User 2 attempt')
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 1 tries to edit and should see modal again
-      user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('Cycle 4 - User 1 attempt')
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
 
-      modalContainer = page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
-    })
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-    test('should not show modal if user edits their own saved changes', async () => {
-      await page.goto(simpleUrl.edit(simpleDoc.id))
+        // Cycle 4: User 2 now saves
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
 
-      // User 1 makes a change and saves as draft
-      const user1FieldA = page.locator('#field-fieldA')
-      await user1FieldA.fill('My First Change')
-      await page.locator('#action-save-draft').click()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 1 tries to edit and should see modal again
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 4 - User 1 attempt')
 
-      // User 1 edits again (their own save)
-      await user1FieldA.fill('My Second Change')
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
 
-      // Modal should NOT appear
-      const modalContainer = page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeHidden()
+      test('should show stale data modal for global with drafts when user2 edits after user1 saves draft', async () => {
+        // User 1 publishes the global first to establish a published version
+        await page.goto(globalUrl.global('global-with-versions'))
+        let user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Initial Published Version')
+        await saveDocAndAssert(page)
 
-      // User 1 saves draft again
-      await page.locator('#action-save-draft').click()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // Both users now open the same global
+        await page.goto(globalUrl.global('global-with-versions'))
+        await user2Page.goto(globalUrl.global('global-with-versions'))
 
-      // User 1 edits a third time
-      await user1FieldA.fill('My Third Change')
+        // Wait for both pages to be fully loaded and ready
+        user1TextField = page.locator('#field-text')
+        await expect(user1TextField).toBeVisible()
+        const user2TextField = user2Page.locator('#field-text')
+        await expect(user2TextField).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // Modal should still NOT appear
-      await expect(modalContainer).toBeHidden()
-    })
+        // User 1 makes a change and saves as draft
+        await user1TextField.fill('User 1 Draft Change')
+        await page.locator('#action-save-draft').click()
 
-    test('should show stale data modal for globals when user2 edits after user1 saves', async () => {
-      // User 1 opens global and saves to establish initial updatedAt
-      await page.goto(globalUrl.global('menu'))
-      let user1GlobalText = page.locator('#field-globalText')
-      await user1GlobalText.fill('Initial Global State')
-      await saveDocAndAssert(page)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 tries to edit (should trigger stale data check)
+        await user2TextField.fill('User 2 Draft Change')
 
-      // Both users now open the same global
-      await page.goto(globalUrl.global('menu'))
-      await user2Page.goto(globalUrl.global('menu'))
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 1 makes a change and saves
-      user1GlobalText = page.locator('#field-globalText')
-      await user1GlobalText.fill('User 1 Global Change')
-      await saveDocAndAssert(page)
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+      test('should detect stale data across multiple save cycles for global with drafts', async () => {
+        // User 1 publishes the global first to establish a published version
+        await page.goto(globalUrl.global('global-with-versions'))
+        let user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Initial Published Version')
+        await saveDocAndAssert(page)
 
-      // User 2 tries to edit (should trigger stale data check)
-      const user2GlobalText = user2Page.locator('#field-globalText')
-      await user2GlobalText.fill('User 2 Global Change')
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // Both users now open the same global
+        await page.goto(globalUrl.global('global-with-versions'))
+        await user2Page.goto(globalUrl.global('global-with-versions'))
 
-      // Stale data modal should appear for user 2
-      const modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
-      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
-    })
+        // Wait for both pages to be fully loaded and ready
+        user1TextField = page.locator('#field-text')
+        await expect(user1TextField).toBeVisible()
+        let user2TextField = user2Page.locator('#field-text')
+        await expect(user2TextField).toBeVisible()
 
-    test('should reload global and show latest data when clicking reload button', async () => {
-      // User 1 opens global and saves to establish initial updatedAt
-      await page.goto(globalUrl.global('menu'))
-      let user1GlobalText = page.locator('#field-globalText')
-      await user1GlobalText.fill('Initial Global State')
-      await saveDocAndAssert(page)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // Cycle 1: User 1 saves draft
+        await user1TextField.fill('Cycle 1 - User 1')
+        await page.locator('#action-save-draft').click()
 
-      // Both users now open the same global
-      await page.goto(globalUrl.global('menu'))
-      await user2Page.goto(globalUrl.global('menu'))
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 1 makes a change and saves
-      user1GlobalText = page.locator('#field-globalText')
-      await user1GlobalText.fill('User 1 Updated Global Value')
-      await saveDocAndAssert(page)
+        // User 2 tries to edit and sees modal
+        await user2TextField.fill('Cycle 1 - User 2 attempt')
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 tries to edit
-      const user2GlobalText = user2Page.locator('#field-globalText')
-      await user2GlobalText.fill('Should be discarded')
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
 
-      // User 2 clicks reload button in modal
-      await user2Page.locator('#document-stale-data-reload').click()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // Cycle 2: User 2 now saves draft
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 2 - User 2')
+        await user2Page.locator('#action-save-draft').click()
 
-      const modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeHidden()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // User 2 should now see User 1's changes
-      await expect(user2GlobalText).toHaveValue('User 1 Updated Global Value')
-    })
+        // User 1 tries to edit and should see modal again
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 2 - User 1 attempt')
 
-    test('should show stale data modal for global with drafts when user2 edits after user1 saves draft', async () => {
-      // User 1 publishes the global first to establish a published version
-      await page.goto(globalUrl.global('global-with-versions'))
-      let user1TextField = page.locator('#field-text')
-      await user1TextField.fill('Initial Published Version')
-      await saveDocAndAssert(page)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // Both users now open the same global
-      await page.goto(globalUrl.global('global-with-versions'))
-      await user2Page.goto(globalUrl.global('global-with-versions'))
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
 
-      // Wait for both pages to be fully loaded and ready
-      user1TextField = page.locator('#field-text')
-      await expect(user1TextField).toBeVisible()
-      const user2TextField = user2Page.locator('#field-text')
-      await expect(user2TextField).toBeVisible()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // Cycle 3: User 1 now saves draft
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 3 - User 1')
+        await page.locator('#action-save-draft').click()
 
-      // User 1 makes a change and saves as draft
-      await user1TextField.fill('User 1 Draft Change')
-      await page.locator('#action-save-draft').click()
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        // User 2 tries to edit and should see modal again
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 3 - User 2 attempt')
 
-      // User 2 tries to edit (should trigger stale data check)
-      await user2TextField.fill('User 2 Draft Change')
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
 
-      // eslint-disable-next-line payload/no-wait-function
-      await wait(500)
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
 
-      // Stale data modal should appear for user 2
-      const modalContainer = user2Page.locator('.payload__modal-container')
-      await expect(modalContainer).toBeVisible()
-      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves draft
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 4 - User 2')
+        await user2Page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
     })
   })
 })

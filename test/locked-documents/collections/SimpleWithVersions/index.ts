@@ -1,9 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { simpleSlug } from '../../slugs.js'
+import { simpleWithVersionsSlug } from '../../slugs.js'
 
-export const SimpleCollection: CollectionConfig = {
-  slug: simpleSlug,
+export const SimpleWithVersionsCollection: CollectionConfig = {
+  slug: simpleWithVersionsSlug,
   admin: {
     useAsTitle: 'fieldA',
   },
@@ -17,4 +17,7 @@ export const SimpleCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: {
+    drafts: true,
+  },
 }
