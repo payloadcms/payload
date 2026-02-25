@@ -49,4 +49,23 @@ export const pluginsOfficialQADataset: EvalCase[] = [
       'adds multi-tenancy support by scoping collections and data access to tenant records, allowing a single Payload instance to serve multiple isolated tenants',
     category: 'plugins',
   },
+  {
+    input:
+      'What does the Payload MCP plugin do and how do you configure which collections an AI agent can access?',
+    expected:
+      'adds a Model Context Protocol server that allows AI agents to interact with Payload via MCP; configured with a collections object mapping slugs to options including an enabled property (boolean or object with find/create/update/delete booleans) and an optional description string',
+    category: 'plugins',
+  },
+  {
+    input: 'What does the Payload Import/Export plugin do?',
+    expected:
+      'adds the ability to export collection data to CSV or JSON format and import data back from those formats directly through the admin UI',
+    category: 'plugins',
+  },
+  {
+    input: 'What does the Payload Ecommerce plugin provide?',
+    expected:
+      'adds e-commerce functionality including products, orders, cart management, and payment integration to a Payload instance',
+    category: 'plugins',
+  },
 ]

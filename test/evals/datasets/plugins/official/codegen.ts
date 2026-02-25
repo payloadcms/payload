@@ -49,4 +49,44 @@ export const pluginsOfficialCodegenDataset: CodegenEvalCase[] = [
     category: 'plugins',
     fixturePath: 'plugins/official/codegen/sentry',
   },
+  {
+    input:
+      'Add the MCP plugin from "@payloadcms/plugin-mcp" to the config. Enable find and create operations for the "posts" collection, and set its description to "Blog posts for content creation".',
+    expected:
+      'named import { mcpPlugin } from "@payloadcms/plugin-mcp", mcpPlugin({ collections: { posts: { enabled: { find: true, create: true }, description: "Blog posts for content creation" } } }) added to plugins array',
+    category: 'plugins',
+    fixturePath: 'plugins/official/codegen/mcp',
+  },
+  {
+    input:
+      'Add the Multi-Tenant plugin from "@payloadcms/plugin-multi-tenant" to the config. Enable it for the "pages" collection with default options, and mark "posts" as a global (one document per tenant).',
+    expected:
+      'named import { multiTenantPlugin } from "@payloadcms/plugin-multi-tenant", multiTenantPlugin({ collections: { pages: {}, posts: { isGlobal: true } } }) added to plugins array',
+    category: 'plugins',
+    fixturePath: 'plugins/official/codegen/multi-tenant',
+  },
+  {
+    input:
+      'Add the Stripe plugin from "@payloadcms/plugin-stripe" to the config using the STRIPE_SECRET_KEY environment variable. Also enable the REST proxy endpoint.',
+    expected:
+      'named import { stripePlugin } from "@payloadcms/plugin-stripe", stripePlugin({ stripeSecretKey: process.env.STRIPE_SECRET_KEY, rest: true }) added to plugins array',
+    category: 'plugins',
+    fixturePath: 'plugins/official/codegen/stripe',
+  },
+  {
+    input:
+      'Add the Import/Export plugin from "@payloadcms/plugin-import-export" to the config, enabling it for the "posts" and "pages" collections.',
+    expected:
+      'named import { importExportPlugin } from "@payloadcms/plugin-import-export", importExportPlugin({ collections: ["posts", "pages"] }) added to plugins array',
+    category: 'plugins',
+    fixturePath: 'plugins/official/codegen/import-export',
+  },
+  {
+    input:
+      'Add the Ecommerce plugin from "@payloadcms/plugin-ecommerce" to the config. Use the "users" collection as the customer collection and provide stub access functions (each returns true) for all required access keys: adminOnlyFieldAccess, adminOrPublishedStatus, isAdmin, isAuthenticated, isCustomer, and isDocumentOwner.',
+    expected:
+      'named import { ecommercePlugin } from "@payloadcms/plugin-ecommerce", ecommercePlugin({ access: { adminOnlyFieldAccess: () => true, adminOrPublishedStatus: () => true, isAdmin: () => true, isAuthenticated: () => true, isCustomer: () => true, isDocumentOwner: () => true }, customers: { slug: "users" } }) added to plugins array',
+    category: 'plugins',
+    fixturePath: 'plugins/official/codegen/ecommerce',
+  },
 ]

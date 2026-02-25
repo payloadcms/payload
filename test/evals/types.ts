@@ -8,8 +8,11 @@ export type EvalCategory =
   | 'config'
   | 'development'
   | 'fields'
+  | 'graphql'
+  | 'local-api'
   | 'negative'
   | 'plugins'
+  | 'rest-api'
   | 'structure'
   | 'testing'
 
