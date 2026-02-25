@@ -6,14 +6,14 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Edit View is where users interact with individual [Collection](../configuration/collections) and [Global](../configuration/globals) Documents within the [Admin Panel](../admin/overview). The Edit View contains the actual form in which submits the data to the server. This is where they can view, edit, and save their content. It contains controls for saving, publishing, and previewing the document, all of which can be customized to a high degree.
+The Edit View is where users interact with individual [Collection](../configuration/collections) and [Global](../configuration/globals) Documents within the [Admin Panel](../admin/overview). The Edit View contains the actual form that submits the data to the server. This is where they can view, edit, and save their content. It contains controls for saving, publishing, and previewing the document, all of which can be customized to a high degree.
 
 The Edit View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="warning">
   **Note:** The Edit View is one of many [Document Views](./document-views) in
   the Payload Admin Panel. Each Document View is responsible for a different
-  aspect of the interacting with a single Document.
+  aspect of interacting with a single Document.
 </Banner>
 
 ## Custom Edit View
@@ -74,8 +74,8 @@ In addition to swapping out the entire Edit View with a [Custom View](./custom-v
 
 <Banner type="warning">
   **Important:** Collection and Globals are keyed to a different property in the
-  `admin.components` object have slightly different options. Be sure to use the
-  correct key for the entity you are working with.
+  `admin.components` object and have slightly different options. Be sure to use
+  the correct key for the entity you are working with.
 </Banner>
 
 #### Collections
@@ -108,8 +108,10 @@ The following options are available:
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Collection. [More details](#description).                                                               |
+| `Status`                 | A component that represents the status of the current document. [More details](#status).                                     |
 | `Upload`                 | A file upload component. [More details](#upload).                                                                            |
 
 #### Globals
@@ -142,25 +144,51 @@ The following options are available:
 | `SaveButton`             | A button that saves the current document. [More details](#savebutton).                                                       |
 | `SaveDraftButton`        | A button that saves the current document as a draft. [More details](#savedraftbutton).                                       |
 | `PublishButton`          | A button that publishes the current document. [More details](#publishbutton).                                                |
+| `UnpublishButton`        | A button that unpublishes the current document. [More details](#unpublishbutton).                                            |
 | `PreviewButton`          | A button that previews the current document. [More details](#previewbutton).                                                 |
 | `Description`            | A description of the Global. [More details](#description).                                                                   |
+| `Status`                 | A component that represents the status of the global. [More details](#status).                                               |
 
 ### SaveButton
 
-The `SaveButton` property allows you to render a custom Save Button in the Edit View.
+The `SaveButton` component allows you to render a custom Save Button in the Edit View.
 
-To add a `SaveButton` component, use the `components.edit.SaveButton` property in your [Collection Config](../configuration/collections) or `components.elements.SaveButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.SaveButton`
+- **Globals:** `admin.components.elements.SaveButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
   admin: {
     components: {
       edit: {
         // highlight-start
-        SaveButton: '/path/to/MySaveButton',
+        SaveButton: '/path/to/CustomSaveButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        SaveButton: '/path/to/CustomSaveButton',
         // highlight-end
       },
     },
@@ -199,7 +227,7 @@ export function MySaveButton(props: SaveButtonClientProps) {
 
 The `beforeDocumentControls` property allows you to render custom components just before the default document action buttons (like Save, Publish, or Preview). This is useful for injecting custom buttons, status indicators, or any other UI elements before the built-in controls.
 
-To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in you [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
+To add `beforeDocumentControls` components, use the `components.edit.beforeDocumentControls` property in your [Collection Config](../configuration/collections) or `components.elements.beforeDocumentControls` in your [Global Config](../configuration/globals):
 
 #### Collections
 
@@ -349,20 +377,50 @@ export const EditMenuItems = (props: EditViewMenuItemClientProps) => {
 
 ### SaveDraftButton
 
-The `SaveDraftButton` property allows you to render a custom Save Draft Button in the Edit View.
+The `SaveDraftButton` component allows you to render a custom Save Draft Button in the Edit View.
 
-To add a `SaveDraftButton` component, use the `components.edit.SaveDraftButton` property in your [Collection Config](../configuration/collections) or `components.elements.SaveDraftButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.SaveDraftButton`
+- **Globals:** `admin.components.elements.SaveDraftButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
   admin: {
     components: {
       edit: {
         // highlight-start
-        SaveDraftButton: '/path/to/MySaveDraftButton',
+        SaveDraftButton: '/path/to/CustomSaveDraftButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        SaveDraftButton: '/path/to/CustomSaveDraftButton',
         // highlight-end
       },
     },
@@ -399,20 +457,50 @@ export function MySaveDraftButton(props: SaveDraftButtonClientProps) {
 
 ### PublishButton
 
-The `PublishButton` property allows you to render a custom Publish Button in the Edit View.
+The `PublishButton` component allows you to render a custom Publish Button in the Edit View.
 
-To add a `PublishButton` component, use the `components.edit.PublishButton` property in your [Collection Config](../configuration/collections) or `components.elements.PublishButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.PublishButton`
+- **Globals:** `admin.components.elements.PublishButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
   admin: {
     components: {
       edit: {
         // highlight-start
-        PublishButton: '/path/to/MyPublishButton',
+        PublishButton: '/path/to/CustomPublishButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        PublishButton: '/path/to/CustomPublishButton',
         // highlight-end
       },
     },
@@ -427,7 +515,7 @@ Here's an example of a custom `PublishButton` component:
 ```tsx
 import React from 'react'
 import { PublishButton } from '@payloadcms/ui'
-import type { PublishButtonClientProps } from 'payload'
+import type { PublishButtonServerProps } from 'payload'
 
 export function MyPublishButton(props: PublishButtonServerProps) {
   return <PublishButton label="Publish" />
@@ -440,18 +528,17 @@ export function MyPublishButton(props: PublishButtonServerProps) {
 'use client'
 import React from 'react'
 import { PublishButton } from '@payloadcms/ui'
-import type { PublishButtonClientProps } from 'payload'
 
-export function MyPublishButton(props: PublishButtonClientProps) {
+export function MyPublishButton() {
   return <PublishButton label="Publish" />
 }
 ```
 
-### PreviewButton
+### UnpublishButton
 
-The `PreviewButton` property allows you to render a custom Preview Button in the Edit View.
+The `UnpublishButton` property allows you to render a custom Unpublish Button in the Edit View.
 
-To add a `PreviewButton` component, use the `components.edit.PreviewButton` property in your [Collection Config](../configuration/collections) or `components.elements.PreviewButton` in your [Global Config](../configuration/globals):
+To add an `UnpublishButton` component, use the `components.edit.UnpublishButton` property in your [Collection Config](../configuration/collections) or `components.elements.UnpublishButton` in your [Global Config](../configuration/globals):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -462,7 +549,82 @@ export const MyCollection: CollectionConfig = {
     components: {
       edit: {
         // highlight-start
-        PreviewButton: '/path/to/MyPreviewButton',
+        UnpublishButton: '/path/to/MyUnpublishButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `UnpublishButton` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { UnpublishButton } from '@payloadcms/ui'
+import type { UnpublishButtonServerProps } from 'payload'
+
+export function MyUnpublishButton(props: UnpublishButtonServerProps) {
+  return <UnpublishButton label="Unpublish" />
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { UnpublishButton } from '@payloadcms/ui'
+
+export function MyUnpublishButton() {
+  return <UnpublishButton label="Unpublish" />
+}
+```
+
+### PreviewButton
+
+The `PreviewButton` component allows you to render a custom Preview Button in the Edit View.
+
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.PreviewButton`
+- **Globals:** `admin.components.elements.PreviewButton`
+
+#### Example for Collections
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    preview: () => 'https://example.com/preview',
+    components: {
+      edit: {
+        // highlight-start
+        PreviewButton: '/path/to/CustomPreviewButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    preview: () => 'https://example.com/preview',
+    components: {
+      elements: {
+        // highlight-start
+        PreviewButton: '/path/to/CustomPreviewButton',
         // highlight-end
       },
     },
@@ -548,22 +710,76 @@ export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
 }
 ```
 
+### Status
+
+The `Status` component displays the document's draft/published state when versioning with drafts is enabled.
+
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.Status`
+- **Globals:** `admin.components.elements.Status`
+
+#### Example for Collections
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        Status: '/path/to/CustomStatus',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        Status: '/path/to/CustomStatus',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
 ### Upload
 
-The `Upload` property allows you to render a custom file upload component in the Edit View.
+The `Upload` property allows you to render a custom file upload component in the Edit View. This is only available for upload-enabled Collections.
 
 To add an `Upload` component, use the `components.edit.Upload` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: true,
   admin: {
     components: {
       edit: {
         // highlight-start
-        Upload: '/path/to/MyUploadComponent',
+        Upload: '/path/to/MyUploadComponent#MyUploadServer',
         // highlight-end
       },
     },
@@ -572,15 +788,55 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** The Upload component is only available for Collections.
+  **Important:** Custom upload components must integrate with Payload's form
+  system to work correctly. You cannot use a simple `<input type="file" />` as
+  it won't connect to Payload's upload API. Instead, use Payload's built-in
+  `<Upload>` component from `@payloadcms/ui` or properly integrate with form
+  hooks like `useDocumentInfo()`.
 </Banner>
 
 Here's an example of a custom `Upload` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type {
+  PayloadServerReactComponent,
+  SanitizedCollectionConfig,
+} from 'payload'
+import { CustomUploadClient } from './MyUploadComponent.client'
 
-export function MyUploadComponent() {
-  return <input type="file" />
+export const MyUploadServer: PayloadServerReactComponent<
+  SanitizedCollectionConfig['admin']['components']['edit']['Upload']
+> = (props) => {
+  return (
+    <div>
+      <h2>Custom Upload Interface</h2>
+      <CustomUploadClient {...props} />
+    </div>
+  )
 }
 ```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { Upload, useDocumentInfo } from '@payloadcms/ui'
+
+export const CustomUploadClient = () => {
+  const { collectionSlug, docConfig, initialState } = useDocumentInfo()
+
+  return (
+    <Upload
+      collectionSlug={collectionSlug}
+      initialState={initialState}
+      uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
+    />
+  )
+}
+```
+
+For more details on customizing upload components, including examples with custom actions and drawers, see the [Upload documentation](../upload/overview#customizing-the-upload-ui).

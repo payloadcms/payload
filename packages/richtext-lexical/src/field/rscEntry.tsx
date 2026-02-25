@@ -13,8 +13,8 @@ import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type {
+  LexicalEditorProps,
   LexicalFieldAdminClientProps,
-  LexicalFieldAdminProps,
   LexicalRichTextFieldProps,
 } from '../types.js'
 
@@ -25,10 +25,10 @@ import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
   {
-    admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
+    Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
@@ -97,7 +97,6 @@ export const RscEntryLexicalField: React.FC<
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
-    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
@@ -111,6 +110,9 @@ export const RscEntryLexicalField: React.FC<
   }
   if (Object.keys(admin).length) {
     props.admin = admin
+  }
+  if (Object.keys(featureClientImportMap).length) {
+    props.featureClientImportMap = featureClientImportMap
   }
 
   for (const key in props) {

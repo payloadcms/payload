@@ -11,6 +11,7 @@ import { validateSearchParam } from './validateSearchParams.js'
 type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
+  // TODO: Rename to permissions or entityPermissions in 4.0
   policies?: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
@@ -100,6 +101,8 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
+          } else if (typeof val !== 'object' || val === null) {
+            errors.push({ path: `${path}.${operator}` })
           }
         }
       }

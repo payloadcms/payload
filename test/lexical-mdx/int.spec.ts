@@ -1,4 +1,3 @@
-/* eslint jest/no-conditional-in-test: 0 */
 import type {
   BlockFields,
   LexicalRichTextAdapter,
@@ -8,18 +7,18 @@ import type {
 import type { RichTextField, SanitizedConfig } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
+import { writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { editorJSONToMDX, mdxToEditorJSON } from './mdx/hooks.js'
+import { codeTest1 } from './tests/code1.test.js'
+import { defaultTests } from './tests/default.test.js'
 import { restExamplesTest1 } from './tests/restExamples.test.js'
 import { restExamplesTest2 } from './tests/restExamples2.test.js'
-
-import { defaultTests } from './tests/default.test.js'
-import { writeFileSync } from 'fs'
-import { codeTest1 } from './tests/code1.test.js'
 
 let config: SanitizedConfig
 let editorConfig: SanitizedServerEditorConfig
@@ -34,14 +33,14 @@ export type Test = {
     MarkOptional<SerializedBlockNode, 'children' | 'fields' | 'format' | 'type' | 'version'>,
     'fields'
   >
+  convertFromEditorJSON?: boolean
+  convertToEditorJSON?: boolean
   debugFlag?: boolean
   description?: string
   ignoreSpacesAndNewlines?: boolean
   input: string
   inputAfterConvertFromEditorJSON?: string
   rootChildren?: any[]
-  convertToEditorJSON?: boolean
-  convertFromEditorJSON?: boolean
 }
 type Tests = Array<Test>
 
@@ -178,6 +177,77 @@ describe('Lexical MDX', () => {
       })
     }
   }
+
+  describe('upload markdown: Markdown → Lexical (import)', () => {
+    function countUploadNodes(node: {
+      type?: string
+      children?: unknown[]
+      [key: string]: unknown
+    }): number {
+      let n = node.type === 'upload' ? 1 : 0
+      const children =
+        node.children ?? (node.fields as { root?: { children?: unknown[] } })?.root?.children
+      if (Array.isArray(children)) {
+        for (const c of children) {
+          n += countUploadNodes(c as typeof node)
+        }
+      }
+      return n
+    }
+
+    function collectUploadNodes(node: {
+      type?: string
+      relationTo?: string
+      value?: unknown
+      children?: unknown[]
+      [key: string]: unknown
+    }): { relationTo: string; value: unknown }[] {
+      const out: { relationTo: string; value: unknown }[] = []
+      if (node.type === 'upload' && node.relationTo != null) {
+        out.push({ relationTo: node.relationTo, value: node.value })
+      }
+      const children =
+        node.children ?? (node.fields as { root?: { children?: unknown[] } })?.root?.children
+      if (Array.isArray(children)) {
+        for (const c of children) {
+          out.push(...collectUploadNodes(c as typeof node))
+        }
+      }
+      return out
+    }
+
+    it('imports upload placeholder as upload node and verifies it is there', () => {
+      const markdown = '![uploads:123]()'
+      const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
+      const rootChildren = result.editorState.root?.children ?? []
+      const uploads = rootChildren.flatMap((child) =>
+        collectUploadNodes(
+          child as { type?: string; relationTo?: string; value?: unknown; [key: string]: unknown },
+        ),
+      )
+      expect(uploads).toHaveLength(1)
+      expect(uploads[0].relationTo).toBe('uploads')
+      expect(uploads[0].value).toBe(123)
+    })
+
+    it('imports image markdown without creating upload node and preserves content', () => {
+      const markdown = '![alt](/uploads/image.jpg)'
+      const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
+      const rootChildren = result.editorState.root?.children ?? []
+      expect(rootChildren.length).toBeGreaterThanOrEqual(1)
+      const uploadCount = rootChildren.reduce(
+        (sum, child) =>
+          sum +
+          countUploadNodes(
+            child as { type?: string; children?: unknown[]; [key: string]: unknown },
+          ),
+        0,
+      )
+      expect(uploadCount).toBe(0)
+      const text = JSON.stringify(result.editorState)
+      expect(text).toMatch(/alt|image\.jpg|\/uploads\//)
+    })
+  })
 })
 
 function removeUndefinedAndIDRecursively(obj: object) {

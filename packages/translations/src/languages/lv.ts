@@ -79,6 +79,11 @@ export const lvTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ja neesat pieprasījis paroles atiestatīšanu, lūdzu, ignorējiet šo e-pastu, un parole paliks nemainīta.',
   },
+  dashboard: {
+    addWidget: 'Pievienot logrīku',
+    deleteWidget: 'Dzēst logrīku {{id}}',
+    searchWidgets: 'Meklēt logrīkus...',
+  },
   error: {
     accountAlreadyActivated: 'Šis konts jau ir aktivizēts.',
     autosaving: 'Radās problēma, automātiski saglabājot šo dokumentu.',
@@ -116,6 +121,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Radās problēma, augšupielādējot failu.',
     restoringTitle:
       'Notika kļūda, atjaunojot {{title}}. Lūdzu, pārbaudiet savu savienojumu un mēģiniet vēlreiz.',
+    revertingDocument: 'Radās problēma, atjaunojot šo dokumentu.',
     tokenInvalidOrExpired: 'Tokens ir nederīgs vai beidzies.',
     tokenNotProvided: 'Tokens nav norādīts.',
     unableToCopy: 'Neizdevās kopēt.',
@@ -332,6 +338,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
+    layout: 'Izkārtojums',
     leaveAnyway: 'Pamest tāpat',
     leaveWithoutSaving: 'Pamest nesaglabājot',
     light: 'Gaišs',
@@ -339,6 +346,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     loading: 'Ielādē...',
     locale: 'Lokalizācija',
     locales: 'Lokalizācijas',
+    lock: 'Slēdzene',
     menu: 'Izvēlne',
     moreOptions: 'Vairāk opciju',
     move: 'Pārvietoties',
@@ -360,6 +368,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     noOptions: 'Nav opciju',
     noResults:
       'Nav atrasts neviens {{label}}. Vai nu vēl nav izveidots, vai neviens neatbilst augstāk norādītajiem filtriem.',
+    noResultsDescription:
+      'Vai nu neviens neeksistē, vai neviens neatbilst jūsu iepriekš norādītajiem filtriem.',
+    noResultsFound: 'Nav rezultātu.',
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',
@@ -395,6 +406,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     row: 'Rinda',
     rows: 'Rindas',
     save: 'Saglabāt',
+    saveChanges: 'Saglabāt Izmaiņas',
     saving: 'Saglabā...',
     schedulePublishFor: 'Ieplānot publicēšanu priekš {{title}}',
     searchBy: 'Meklēt pēc {{label}}',
@@ -428,6 +440,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} pārvietoti uz miskasti.',
     true: 'Patiesi',
     unauthorized: 'Neautorizēts',
+    unlock: 'Atslēgt',
     unsavedChanges: 'Jums ir nesaglabātas izmaiņas. Saglabājiet vai atceliet pirms turpināšanas.',
     unsavedChangesDuplicate: 'Jums ir nesaglabātas izmaiņas. Vai vēlaties turpināt dublēšanu?',
     untitled: 'Bez nosaukuma',
@@ -456,7 +469,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopēt uz',
     copyToLocale: 'Kopēt uz lokalizāciju',
     localeToPublish: 'Lokalizācija publicēšanai',
+    selectedLocales: 'Izvēlētās lokalizācijas',
     selectLocaleToCopy: 'Izvēlieties lokalizāciju, no kuras kopēt',
+    selectLocaleToDuplicate: 'Izvēlieties lokalizācijas, kuras dublēt',
   },
   operators: {
     contains: 'satur',
@@ -545,6 +560,8 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Jūs grasāties atsaukt šī dokumenta izmaiņas uz publicēto versiju. Vai esat pārliecināts?',
     aboutToUnpublish: 'Jūs grasāties atcelt šī dokumenta publicēšanu. Vai esat pārliecināts?',
+    aboutToUnpublishIn:
+      'Jūs gatavojaties atcelt šī dokumenta publicēšanu {{locale}}. Vai esat pārliecināts?',
     aboutToUnpublishSelection:
       'Jūs grasāties atcelt publicēšanu visiem {{label}} izvēlētajā sarakstā. Vai esat pārliecināts?',
     autosave: 'Automātiskā saglabāšana',
@@ -566,6 +583,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Pašlaik skatās',
     currentPublishedVersion: 'Pašreizējā publicētā versija',
     draft: 'Melnraksts',
+    draftHasPublishedVersion: 'Projekts (ir publicēta versija)',
     draftSavedSuccessfully: 'Melnraksts veiksmīgi saglabāts.',
     lastSavedAgo: 'Pēdējo reizi saglabāts pirms {{distance}}',
     modifiedOnly: 'Tikai modificētie',
@@ -591,6 +609,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     restoring: 'Atjauno...',
     reverting: 'Atgriež...',
     revertToPublished: 'Atgriezt uz publicēto',
+    revertUnsuccessful: 'Atcelšana neveiksmīga. Neatradās iepriekš publicēta versija.',
     saveDraft: 'Saglabāt melnrakstu',
     scheduledSuccessfully: 'Veiksmīgi ieplānots.',
     schedulePublish: 'Ieplānot publicēšanu',
@@ -601,6 +620,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkrētā versija',
     status: 'Statuss',
     unpublish: 'Atcelt publicēšanu',
+    unpublished: 'Nepublicēts',
+    unpublishedSuccessfully: 'Veiksmīgi nepublicēts.',
+    unpublishIn: 'Nepublicēt {{locale}}',
     unpublishing: 'Atceļ publicēšanu...',
     version: 'Versija',
     versionAgo: '{{distance}} pirms',

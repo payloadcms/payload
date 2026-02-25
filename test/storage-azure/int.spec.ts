@@ -4,10 +4,11 @@ import type { CollectionSlug, Payload } from 'payload'
 import { BlobServiceClient } from '@azure/storage-blob'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -31,7 +32,7 @@ describe('@payloadcms/storage-azure', () => {
 
     await client.createIfNotExists()
     await clearContainer()
-  })
+  }, 90000)
 
   afterAll(async () => {
     await payload.destroy()

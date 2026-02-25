@@ -78,6 +78,11 @@ export const faTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
+  dashboard: {
+    addWidget: 'اضافه کردن ویجت',
+    deleteWidget: 'حذف ابزارک {{id}}',
+    searchWidgets: 'جستجوی ابزارک‌ها...',
+  },
   error: {
     accountAlreadyActivated: 'این حساب کاربری قبلاً فعال شده است.',
     autosaving: 'هنگام ذخیره خودکار این صفحه، خطایی رخ داد.',
@@ -114,6 +119,7 @@ export const faTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'هنگام آپلود فایل خطایی رخ داد.',
     restoringTitle:
       'در بازیابی "{{title}}" خطایی رخ داد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.',
+    revertingDocument: 'هنگام بازگرداندن این سند مشکلی پیش آمد.',
     tokenInvalidOrExpired: 'توکن شما نامعتبر یا منقضی شده است.',
     tokenNotProvided: 'توکن ارسال نشده است.',
     unableToCopy: 'امکان کپی کردن وجود ندارد.',
@@ -324,6 +330,7 @@ export const faTranslations: DefaultTranslationsObject = {
     items: 'موارد',
     language: 'زبان',
     lastModified: 'آخرین تغییر',
+    layout: 'چیدمان',
     leaveAnyway: 'بله، خارج شو',
     leaveWithoutSaving: 'خروج بدون ذخیره',
     light: 'روشن',
@@ -331,6 +338,7 @@ export const faTranslations: DefaultTranslationsObject = {
     loading: 'در حال بارگذاری...',
     locale: 'زبان',
     locales: 'زبان‌ها',
+    lock: 'قفل',
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'انتقال',
@@ -351,6 +359,9 @@ export const faTranslations: DefaultTranslationsObject = {
     noOptions: 'گزینه‌ای وجود ندارد',
     noResults:
       'هیچ موردی برای "{{label}}" یافت نشد. یا موردی ایجاد نشده یا با فیلترهای شما مطابقت ندارد.',
+    noResultsDescription:
+      'هیچ کدام وجود ندارند یا هیچ کدام با فیلترهایی که در بالا مشخص کرده اید مطابقت ندارند.',
+    noResultsFound: 'نتیجه‌ای یافت نشد.',
     notFound: 'یافت نشد',
     nothingFound: 'موردی یافت نشد',
     noTrashResults: 'هیچ {{label}} در سطل زباله وجود ندارد.',
@@ -386,6 +397,7 @@ export const faTranslations: DefaultTranslationsObject = {
     row: 'ردیف',
     rows: 'ردیف‌ها',
     save: 'ذخیره',
+    saveChanges: 'ذخیره تغییرات',
     saving: 'در حال ذخیره...',
     schedulePublishFor: 'زمان‌بندی انتشار برای "{{title}}"',
     searchBy: 'جستجو بر اساس {{label}}',
@@ -419,6 +431,7 @@ export const faTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} به سطل زباله منتقل شد.',
     true: 'بله',
     unauthorized: 'غیرمجاز',
+    unlock: 'باز کردن',
     unsavedChanges: 'تغییرات ذخیره نشده‌ای دارید. قبل از ادامه، آن‌ها را ذخیره یا لغو کنید.',
     unsavedChangesDuplicate:
       'شما تغییرات ذخیره نشده‌ای دارید. آیا می‌خواهید بدون ذخیره، کپی ایجاد کنید؟',
@@ -448,7 +461,9 @@ export const faTranslations: DefaultTranslationsObject = {
     copyTo: 'کپی به',
     copyToLocale: 'کپی به زبان دیگر',
     localeToPublish: 'زبان مورد نظر برای انتشار',
+    selectedLocales: 'انتخاب مناطق',
     selectLocaleToCopy: 'یک زبان برای کپی کردن اطلاعات انتخاب کنید',
+    selectLocaleToDuplicate: 'انتخاب مکان‌ها برای تکثیر',
   },
   operators: {
     contains: 'شامل می‌شود',
@@ -535,6 +550,7 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'شما در حال بازگرداندن این صفحه به آخرین نسخه منتشر شده آن هستید. آیا مطمئن هستید؟',
     aboutToUnpublish: 'آیا از لغو انتشار این صفحه مطمئن هستید؟',
+    aboutToUnpublishIn: 'شما در حال انتشار نکردن این سند در {{locale}} هستید. آیا مطمئن هستید؟',
     aboutToUnpublishSelection: 'آیا از لغو انتشار {{label}} انتخاب شده مطمئن هستید؟',
     autosave: 'ذخیره خودکار',
     autosavedSuccessfully: 'با موفقیت به صورت خودکار ذخیره شد.',
@@ -555,6 +571,7 @@ export const faTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'در حال مشاهده',
     currentPublishedVersion: 'آخرین نسخه منتشر شده',
     draft: 'پیش‌نویس',
+    draftHasPublishedVersion: 'پیش‌نویس (نسخه منتشر شده دارد)',
     draftSavedSuccessfully: 'پیش‌نویس با موفقیت ذخیره شد.',
     lastSavedAgo: 'آخرین ذخیره {{distance}} پیش',
     modifiedOnly: 'فقط موارد تغییر کرده',
@@ -580,6 +597,7 @@ export const faTranslations: DefaultTranslationsObject = {
     restoring: 'در حال بازیابی...',
     reverting: 'در حال بازگردانی...',
     revertToPublished: 'بازگردانی به نسخه منتشر شده',
+    revertUnsuccessful: 'بازگشت ناموفق بود. نسخه منتشر شده قبلی یافت نشد.',
     saveDraft: 'ذخیره پیش‌نویس',
     scheduledSuccessfully: 'با موفقیت زمان‌بندی شد.',
     schedulePublish: 'زمان‌بندی انتشار',
@@ -590,6 +608,9 @@ export const faTranslations: DefaultTranslationsObject = {
     specificVersion: 'نسخه مشخص',
     status: 'وضعیت',
     unpublish: 'لغو انتشار',
+    unpublished: 'نشر نشده',
+    unpublishedSuccessfully: 'با موفقیت منتشر نشد.',
+    unpublishIn: 'لغو انتشار در {{locale}}',
     unpublishing: 'در حال لغو انتشار...',
     version: 'نسخه',
     versionAgo: '{{distance}} پیش',

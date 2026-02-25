@@ -6,8 +6,7 @@ import type {
   SanitizedPermissions,
 } from 'payload'
 
-import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
@@ -52,7 +51,7 @@ export const getColumns = ({
     }
   }
 
-  return columns
+  return columns?.length
     ? columns?.filter((column) =>
         flattenTopLevelFields(fields, {
           i18n,

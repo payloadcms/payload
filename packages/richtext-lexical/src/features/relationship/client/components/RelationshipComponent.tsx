@@ -6,22 +6,21 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { $getNodeByKey } from 'lexical'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
-import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import './index.scss'
+import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-
-const baseClass = 'lexical-relationship'
 
 const initialParams = {
   depth: 0,
 }
 
 type Props = {
-  className?: string
+  className: string
   data: RelationshipData
   format?: ElementFormatType
   nodeKey?: string
@@ -29,6 +28,7 @@ type Props = {
 
 export const RelationshipComponent: React.FC<Props> = (props) => {
   const {
+    className: baseClass,
     data: { relationTo, value },
     nodeKey,
   } = props
@@ -56,7 +56,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 
@@ -82,7 +82,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
   }, [cacheBust, setParams, closeDocumentDrawer])
 
   return (
-    <div className={baseClass} contentEditable={false} ref={relationshipElemRef}>
+    <div className={`${baseClass}__contents`} contentEditable={false} ref={relationshipElemRef}>
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
           {t('fields:labelRelationship', {

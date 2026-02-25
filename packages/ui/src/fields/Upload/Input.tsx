@@ -9,16 +9,17 @@ import type {
   StaticLabel,
   UploadFieldClient,
   UploadField as UploadFieldType,
-  Where,
+  ValueWithRelation,
 } from 'payload'
 import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
-import type { PopulateDocs, ReloadDoc } from './types.js'
+import type { ReloadDoc, ValueAsDataWithRelation } from './types.js'
 
 import { type BulkUploadContext, useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -33,10 +34,11 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
-import { UploadComponentHasOne } from './HasOne/index.js'
 import './index.scss'
+import { UploadComponentHasOne } from './HasOne/index.js'
 
 export const baseClass = 'upload'
 
@@ -74,7 +76,7 @@ export type UploadInputProps = {
   readonly serverURL?: string
   readonly showError?: boolean
   readonly style?: React.CSSProperties
-  readonly value?: (number | string)[] | (number | string)
+  readonly value?: (number | string)[] | number | string | ValueWithRelation | ValueWithRelation[]
 }
 
 export function UploadInput(props: UploadInputProps) {
@@ -113,31 +115,85 @@ export function UploadInput(props: UploadInputProps) {
     }[]
   >()
 
-  const [activeRelationTo, setActiveRelationTo] = React.useState<string>(
+  const [activeRelationTo] = React.useState<string>(
     Array.isArray(relationTo) ? relationTo[0] : relationTo,
   )
 
   const { openModal } = useModal()
-  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
-    useBulkUpload()
+  const {
+    drawerSlug,
+    setCollectionSlug,
+    setInitialFiles,
+    setMaxFiles,
+    setOnSuccess,
+    setSelectableCollections,
+  } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
+  // This will be used by the bulk upload to allow you to select only collections you have create permissions for
+  const collectionSlugsWithCreatePermission = useMemo(() => {
+    if (Array.isArray(relationTo)) {
+      return relationTo.filter(
+        (relation) => permissions?.collections && permissions.collections?.[relation]?.create,
+      )
+    }
+    return []
+  }, [relationTo, permissions])
+
   const filterOptions: FilterOptionsResult = useMemo(() => {
-    return {
-      ...filterOptionsFromProps,
-      [activeRelationTo]: {
-        ...((filterOptionsFromProps?.[activeRelationTo] as any) || {}),
+    const isPoly = Array.isArray(relationTo)
+
+    if (!value) {
+      return filterOptionsFromProps
+    }
+
+    // Group existing IDs by relation
+    const existingIdsByRelation: Record<string, (number | string)[]> = {}
+
+    const values = Array.isArray(value) ? value : [value]
+
+    for (const val of values) {
+      if (isPoly && typeof val === 'object' && 'relationTo' in val) {
+        // Poly upload - group by relationTo
+        if (!existingIdsByRelation[val.relationTo]) {
+          existingIdsByRelation[val.relationTo] = []
+        }
+        existingIdsByRelation[val.relationTo].push(val.value)
+      } else if (!isPoly) {
+        // Non-poly upload - all IDs belong to the single collection
+        const collection = relationTo
+        if (!existingIdsByRelation[collection]) {
+          existingIdsByRelation[collection] = []
+        }
+        const id = typeof val === 'object' && 'value' in val ? val.value : val
+        if (typeof id === 'string' || typeof id === 'number') {
+          existingIdsByRelation[collection].push(id)
+        }
+      }
+    }
+
+    // Build filter options for each collection
+    const newFilterOptions = { ...filterOptionsFromProps }
+    const relations = isPoly ? relationTo : [relationTo]
+
+    relations.forEach((relation) => {
+      const existingIds = existingIdsByRelation[relation] || []
+
+      newFilterOptions[relation] = {
+        ...((filterOptionsFromProps?.[relation] as any) || {}),
         id: {
-          ...((filterOptionsFromProps?.[activeRelationTo] as any)?.id || {}),
-          not_in: ((filterOptionsFromProps?.[activeRelationTo] as any)?.id?.not_in || []).concat(
-            ...(Array.isArray(value) || value ? [value] : []),
+          ...((filterOptionsFromProps?.[relation] as any)?.id || {}),
+          not_in: ((filterOptionsFromProps?.[relation] as any)?.id?.not_in || []).concat(
+            existingIds,
           ),
         },
-      },
-    }
-  }, [value, activeRelationTo, filterOptionsFromProps])
+      }
+    })
+
+    return newFilterOptions
+  }, [value, filterOptionsFromProps, relationTo])
 
   const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
     useListDrawer({
@@ -154,9 +210,11 @@ export function UploadInput(props: UploadInputProps) {
   })
 
   /**
-   * Prevent initial retrieval of documents from running more than once
+   * Track the last loaded value to prevent unnecessary reloads
    */
-  const loadedValueDocsRef = React.useRef<boolean>(false)
+  const loadedValueRef = React.useRef<
+    (number | string)[] | null | number | string | ValueWithRelation | ValueWithRelation[]
+  >(null)
 
   const canCreate = useMemo(() => {
     if (!allowCreate) {
@@ -181,76 +239,113 @@ export function UploadInput(props: UploadInputProps) {
     [onChangeFromProps],
   )
 
-  const populateDocs = React.useCallback<PopulateDocs>(
-    async (ids, relatedCollectionSlug) => {
-      if (!ids.length) {
-        return
+  const populateDocs = React.useCallback(
+    async (items: ValueWithRelation[]): Promise<ValueAsDataWithRelation[]> => {
+      if (!items?.length) {
+        return []
       }
 
-      const query: {
-        [key: string]: unknown
-        where: Where
-      } = {
-        depth: 0,
-        draft: true,
-        limit: ids.length,
-        locale: code,
-        where: {
-          and: [
-            {
-              id: {
-                in: ids,
-              },
-            },
-          ],
-        },
-      }
+      // 1. Group IDs by collection
+      const grouped: Record<string, (number | string)[]> = {}
+      items.forEach(({ relationTo, value }) => {
+        if (!grouped[relationTo]) {
+          grouped[relationTo] = []
+        }
+        // Ensure we extract the actual ID value, not an object
+        let idValue: number | string = value
 
-      const response = await fetch(`${serverURL}${api}/${relatedCollectionSlug}`, {
-        body: qs.stringify(query),
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Payload-HTTP-Method-Override': 'GET',
-        },
-        method: 'POST',
-      })
-      if (response.ok) {
-        const json = await response.json()
-        let sortedDocs = ids.map((id) =>
-          json.docs.find((doc) => {
-            return String(doc.id) === String(id)
-          }),
-        )
-
-        if (sortedDocs.includes(undefined) && hasMany) {
-          sortedDocs = sortedDocs.map((doc, index) =>
-            doc
-              ? doc
-              : {
-                  id: ids[index],
-                  filename: `${t('general:untitled')} - ID: ${ids[index]}`,
-                  isPlaceholder: true,
-                },
-          )
+        if (value && typeof value === 'object' && 'value' in (value as any)) {
+          idValue = (value as any).value
         }
 
-        return { ...json, docs: sortedDocs }
-      }
+        grouped[relationTo].push(idValue)
+      })
 
-      return null
+      // 2. Fetch per collection
+      const fetches = Object.entries(grouped).map(async ([collection, ids]) => {
+        const query = {
+          depth: 0,
+          draft: true,
+          limit: ids.length,
+          locale: code,
+          where: {
+            and: [
+              {
+                id: {
+                  in: ids,
+                },
+              },
+            ],
+          },
+        }
+        const response = await fetch(
+          formatAdminURL({
+            apiRoute: api,
+            path: `/${collection}`,
+          }),
+          {
+            body: qs.stringify(query),
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Payload-HTTP-Method-Override': 'GET',
+            },
+            method: 'POST',
+          },
+        )
+        let docs: any[] = []
+        if (response.ok) {
+          const data = await response.json()
+          docs = data.docs
+        }
+        // Map docs by ID for fast lookup
+        const docsById = docs.reduce((acc, doc) => {
+          acc[doc.id] = doc
+          return acc
+        }, {})
+        return { collection, docsById }
+      })
+
+      const results = await Promise.all(fetches)
+
+      // 3. Build lookup
+      const lookup: Record<string, Record<string, any>> = {}
+      results.forEach(({ collection, docsById }) => {
+        lookup[collection] = docsById
+      })
+
+      // 4. Reconstruct in input order, add placeholders if missing
+      const sortedDocs = items.map(({ relationTo, value }) => {
+        const doc = lookup[relationTo]?.[value] || {
+          id: value,
+          filename: `${t('general:untitled')} - ID: ${value}`,
+          isPlaceholder: true,
+        }
+        return { relationTo, value: doc }
+      })
+
+      return sortedDocs
     },
-    [code, serverURL, api, i18n.language, t, hasMany],
+    [api, code, i18n.language, t],
+  )
+
+  const normalizeValue = useCallback(
+    (value: any): any => normalizeRelationshipValue(value, relationTo),
+    [relationTo],
   )
 
   const onUploadSuccess: BulkUploadContext['onSuccess'] = useCallback(
     (uploadedForms) => {
+      const isPoly = Array.isArray(relationTo)
+
       if (hasMany) {
-        const mergedValue = [
-          ...(Array.isArray(value) ? value : []),
-          ...uploadedForms.map((form) => form.doc.id),
-        ]
+        const newValues = uploadedForms.map((form) =>
+          isPoly ? { relationTo: form.collectionSlug, value: form.doc.id } : form.doc.id,
+        )
+        // Normalize existing values before merging
+        const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+        const mergedValue = [...normalizedExisting, ...newValues]
         onChange(mergedValue)
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
@@ -260,17 +355,20 @@ export function UploadInput(props: UploadInputProps) {
           })),
         ])
       } else {
-        const firstDoc = uploadedForms[0].doc
-        onChange(firstDoc.id)
+        const firstDoc = uploadedForms[0]
+        const newValue = isPoly
+          ? { relationTo: firstDoc.collectionSlug, value: firstDoc.doc.id }
+          : firstDoc.doc.id
+        onChange(newValue)
         setPopulatedDocs([
           {
             relationTo: firstDoc.collectionSlug,
-            value: firstDoc,
+            value: firstDoc.doc,
           },
         ])
       }
     },
-    [value, onChange, hasMany],
+    [value, onChange, hasMany, relationTo, normalizeValue],
   )
 
   const onLocalFileSelection = React.useCallback(
@@ -284,20 +382,31 @@ export function UploadInput(props: UploadInputProps) {
       if (fileListToUse) {
         setInitialFiles(fileListToUse)
       }
-      setCollectionSlug(relationTo)
+      // Use activeRelationTo for poly uploads, or relationTo as string for single collection
+      const collectionToUse = Array.isArray(relationTo) ? activeRelationTo : relationTo
+
+      setCollectionSlug(collectionToUse)
+      if (Array.isArray(collectionSlugsWithCreatePermission)) {
+        setSelectableCollections(collectionSlugsWithCreatePermission)
+      }
+
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
+
       openModal(drawerSlug)
     },
     [
-      drawerSlug,
       hasMany,
-      openModal,
       relationTo,
+      activeRelationTo,
       setCollectionSlug,
-      setInitialFiles,
+      collectionSlugsWithCreatePermission,
       maxRows,
+      openModal,
+      drawerSlug,
+      setInitialFiles,
+      setSelectableCollections,
       setMaxFiles,
     ],
   )
@@ -305,6 +414,7 @@ export function UploadInput(props: UploadInputProps) {
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs) => {
+      const isPoly = Array.isArray(relationTo)
       const selectedDocIDs = []
 
       for (const [id, isSelected] of docs) {
@@ -313,24 +423,30 @@ export function UploadInput(props: UploadInputProps) {
         }
       }
 
-      const loadedDocs = await populateDocs(selectedDocIDs, activeRelationTo)
+      const itemsToLoad = selectedDocIDs.map((id) => ({
+        relationTo: activeRelationTo,
+        value: id,
+      }))
+
+      const loadedDocs = await populateDocs(itemsToLoad)
       if (loadedDocs) {
-        setPopulatedDocs((currentDocs) => [
-          ...(currentDocs || []),
-          ...loadedDocs.docs.map((doc) => ({
-            relationTo: activeRelationTo,
-            value: doc,
-          })),
-        ])
+        setPopulatedDocs((currentDocs) => [...(currentDocs || []), ...loadedDocs])
       }
-      onChange([...(Array.isArray(value) ? value : []), ...selectedDocIDs])
+
+      const newValues = selectedDocIDs.map((id) =>
+        isPoly ? { relationTo: activeRelationTo, value: id } : id,
+      )
+      // Normalize existing values before merging
+      const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+      onChange([...normalizedExisting, ...newValues])
       closeListDrawer()
     },
-    [activeRelationTo, closeListDrawer, onChange, populateDocs, value],
+    [activeRelationTo, closeListDrawer, onChange, populateDocs, value, relationTo, normalizeValue],
   )
 
   const onDocCreate = React.useCallback(
     (data) => {
+      const isPoly = Array.isArray(relationTo)
       if (data.doc) {
         setPopulatedDocs((currentDocs) => [
           ...(currentDocs || []),
@@ -340,67 +456,64 @@ export function UploadInput(props: UploadInputProps) {
           },
         ])
 
-        onChange(data.doc.id)
+        const newValue = isPoly ? { relationTo: activeRelationTo, value: data.doc.id } : data.doc.id
+        onChange(newValue)
       }
       closeCreateDocDrawer()
     },
-    [closeCreateDocDrawer, activeRelationTo, onChange],
+    [closeCreateDocDrawer, activeRelationTo, onChange, relationTo],
   )
 
   const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     async ({ collectionSlug, doc }) => {
-      const loadedDocs = await populateDocs([doc.id], collectionSlug)
-      const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
+      const isPoly = Array.isArray(relationTo)
+
+      const loadedDocs = await populateDocs([{ relationTo: collectionSlug, value: doc.id }])
+      const selectedDoc = loadedDocs?.[0] || null
+
       setPopulatedDocs((currentDocs) => {
         if (selectedDoc) {
           if (hasMany) {
-            return [
-              ...(currentDocs || []),
-              {
-                relationTo: activeRelationTo,
-                value: selectedDoc,
-              },
-            ]
+            return [...(currentDocs || []), selectedDoc]
           }
-          return [
-            {
-              relationTo: activeRelationTo,
-              value: selectedDoc,
-            },
-          ]
+          return [selectedDoc]
         }
         return currentDocs
       })
+
       if (hasMany) {
-        onChange([...(Array.isArray(value) ? value : []), doc.id])
+        const newValue = isPoly ? { relationTo: collectionSlug, value: doc.id } : doc.id
+        // Normalize existing values before merging
+        const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []
+        const valueToUse = [...normalizedExisting, newValue]
+        onChange(valueToUse)
       } else {
-        onChange(doc.id)
+        const valueToUse = isPoly ? { relationTo: collectionSlug, value: doc.id } : doc.id
+        onChange(valueToUse)
       }
       closeListDrawer()
     },
-    [closeListDrawer, hasMany, populateDocs, onChange, value, activeRelationTo],
+    [closeListDrawer, hasMany, populateDocs, onChange, value, relationTo, normalizeValue],
   )
 
   const reloadDoc = React.useCallback<ReloadDoc>(
     async (docID, collectionSlug) => {
-      const { docs } = await populateDocs([docID], collectionSlug)
+      const docs = await populateDocs([{ relationTo: collectionSlug, value: docID }])
 
       if (docs[0]) {
         let updatedDocsToPropogate = []
         setPopulatedDocs((currentDocs) => {
           const existingDocIndex = currentDocs?.findIndex((doc) => {
-            const hasExisting = doc.value?.id === docs[0].id || doc.value?.isPlaceholder
+            const hasExisting = doc.value?.id === docs[0].value.id || doc.value?.isPlaceholder
             return hasExisting && doc.relationTo === collectionSlug
           })
           if (existingDocIndex > -1) {
             const updatedDocs = [...currentDocs]
-            updatedDocs[existingDocIndex] = {
-              relationTo: collectionSlug,
-              value: docs[0],
-            }
+            updatedDocs[existingDocIndex] = docs[0]
             updatedDocsToPropogate = updatedDocs
             return updatedDocs
           }
+          return currentDocs
         })
 
         if (updatedDocsToPropogate.length && hasMany) {
@@ -414,42 +527,113 @@ export function UploadInput(props: UploadInputProps) {
   // only hasMany can reorder
   const onReorder = React.useCallback(
     (newValue) => {
-      const newValueIDs = newValue.map(({ value }) => value.id)
-      onChange(newValueIDs)
+      const isPoly = Array.isArray(relationTo)
+      const newValueToSave = newValue.map(({ relationTo: rel, value }) =>
+        isPoly ? { relationTo: rel, value: value.id } : value.id,
+      )
+      onChange(newValueToSave)
       setPopulatedDocs(newValue)
     },
-    [onChange],
+    [onChange, relationTo],
   )
 
   const onRemove = React.useCallback(
     (newValue?: PopulatedDocs) => {
-      const newValueIDs = newValue ? newValue.map(({ value }) => value.id) : null
-      onChange(hasMany ? newValueIDs : newValueIDs ? newValueIDs[0] : null)
-      setPopulatedDocs(newValue ? newValue : [])
+      const isPoly = Array.isArray(relationTo)
+
+      if (!newValue || newValue.length === 0) {
+        onChange(hasMany ? [] : null)
+        setPopulatedDocs(hasMany ? [] : null)
+        return
+      }
+
+      const newValueToSave = newValue.map(({ relationTo: rel, value }) =>
+        isPoly ? { relationTo: rel, value: value.id } : value.id,
+      )
+
+      onChange(hasMany ? newValueToSave : newValueToSave[0])
+      setPopulatedDocs(newValue)
     },
-    [onChange, hasMany],
+    [onChange, hasMany, relationTo],
   )
 
   useEffect(() => {
     async function loadInitialDocs() {
       if (value) {
-        loadedValueDocsRef.current = true
-        const loadedDocs = await populateDocs(
-          Array.isArray(value) ? value : [value],
-          activeRelationTo,
-        )
-        if (loadedDocs) {
-          setPopulatedDocs(
-            loadedDocs.docs.map((doc) => ({ relationTo: activeRelationTo, value: doc })),
-          )
+        let itemsToLoad: ValueWithRelation[] = []
+        if (
+          Array.isArray(relationTo) &&
+          ((typeof value === 'object' && 'relationTo' in value) ||
+            (Array.isArray(value) &&
+              value.length > 0 &&
+              typeof value[0] === 'object' &&
+              'relationTo' in value[0]))
+        ) {
+          // For poly uploads, value should already be in the format { relationTo, value }
+          const values = Array.isArray(value) ? value : [value]
+          itemsToLoad = values
+            .filter((v): v is ValueWithRelation => typeof v === 'object' && 'relationTo' in v)
+            .map((v) => {
+              // Ensure the value property is a simple ID, not nested
+              let idValue: any = v.value
+              while (
+                idValue &&
+                typeof idValue === 'object' &&
+                idValue !== null &&
+                'value' in idValue
+              ) {
+                idValue = idValue.value
+              }
+              return {
+                relationTo: v.relationTo,
+                value: idValue as number | string,
+              }
+            })
+        } else {
+          // This check is here to satisfy TypeScript that relationTo is a string
+          if (!Array.isArray(relationTo)) {
+            // For single collection uploads, we need to wrap the IDs
+            const ids = Array.isArray(value) ? value : [value]
+            itemsToLoad = ids.map((id): ValueWithRelation => {
+              // Extract the actual ID, handling nested objects
+              let idValue: any = id
+              while (
+                idValue &&
+                typeof idValue === 'object' &&
+                idValue !== null &&
+                'value' in idValue
+              ) {
+                idValue = idValue.value
+              }
+              return {
+                relationTo,
+                value: idValue as number | string,
+              }
+            })
+          }
         }
+
+        if (itemsToLoad.length > 0) {
+          const loadedDocs = await populateDocs(itemsToLoad)
+
+          if (loadedDocs) {
+            setPopulatedDocs(loadedDocs)
+            loadedValueRef.current = value
+          }
+        }
+      } else {
+        // Clear populated docs when value is cleared
+        setPopulatedDocs([])
+        loadedValueRef.current = null
       }
     }
 
-    if (!loadedValueDocsRef.current) {
+    // Only load if value has changed from what we last loaded
+    const valueChanged = loadedValueRef.current !== value
+    if (valueChanged) {
       void loadInitialDocs()
     }
-  }, [populateDocs, activeRelationTo, value])
+  }, [populateDocs, value, relationTo])
 
   useEffect(() => {
     setOnSuccess(onUploadSuccess)
@@ -500,11 +684,12 @@ export function UploadInput(props: UploadInputProps) {
                 readonly={readOnly}
                 reloadDoc={reloadDoc}
                 serverURL={serverURL}
+                showCollectionSlug={Array.isArray(relationTo)}
               />
             ) : (
               <div className={`${baseClass}__loadingRows`}>
                 {value.map((id) => (
-                  <ShimmerEffect height="40px" key={id} />
+                  <ShimmerEffect height="40px" key={typeof id === 'object' ? id.value : id} />
                 ))}
               </div>
             )}
@@ -520,6 +705,7 @@ export function UploadInput(props: UploadInputProps) {
                 readonly={readOnly}
                 reloadDoc={reloadDoc}
                 serverURL={serverURL}
+                showCollectionSlug={Array.isArray(relationTo)}
               />
             ) : populatedDocs && value && !populatedDocs?.[0]?.value ? (
               <>

@@ -1,3 +1,4 @@
+import type { GenericLanguages, GenericTranslationsObject } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
@@ -8,6 +9,7 @@ import {
   beforeValidateTraverseFields,
   checkDependencies,
   deepMergeSimple,
+  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -15,13 +17,13 @@ import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
 import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
 
-import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
+import { getDefaultSanitizedEditorConfig } from './utilities/getDefaultSanitizedEditorConfig.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
 import { richTextValidateHOC } from './validate/index.js'
 
@@ -83,41 +85,28 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
       resolvedFeatureMap = result.resolvedFeatureMap
     }
 
-    const featureI18n = finalSanitizedEditorConfig.features.i18n
-    for (const lang in i18n) {
-      if (!featureI18n[lang as keyof typeof featureI18n]) {
-        featureI18n[lang as keyof typeof featureI18n] = {
-          lexical: {},
-        }
-      }
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      featureI18n[lang].lexical.general = i18n[lang]
+    const featureI18n: Partial<GenericLanguages> = finalSanitizedEditorConfig.features.i18n
+    for (const _lang in i18n) {
+      const lang = _lang as keyof typeof i18n
+      const lexicalI18nForLang = ((featureI18n[lang] ??= {}).lexical ??=
+        {}) as GenericTranslationsObject
+
+      lexicalI18nForLang.general = i18n[lang] ?? {}
     }
 
     config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
-      CellComponent: {
-        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
-        serverProps: {
-          admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
-        },
-      },
-      DiffComponent: {
-        path: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
-        serverProps: {
-          admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
-        },
-      },
+      CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {
         path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
           admin: args?.admin,
-          sanitizedEditorConfig: finalSanitizedEditorConfig,
+          // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`
+          // in order to reduce the size of the field schema
         },
       },
       generateImportMap: getGenerateImportMap({
@@ -876,7 +865,18 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 export { AlignFeature } from './features/align/server/index.js'
 export { BlockquoteFeature } from './features/blockquote/server/index.js'
 export { CodeBlock } from './features/blocks/premade/CodeBlock/index.js'
-export { BlocksFeature, type BlocksFeatureProps } from './features/blocks/server/index.js'
+export { BlocksFeature } from './features/blocks/server/index.js'
+export type {
+  BlocksFeatureProps,
+  LexicalBlockClientProps,
+  LexicalBlockLabelClientProps,
+  LexicalBlockLabelServerProps,
+  LexicalBlockServerProps,
+  LexicalInlineBlockClientProps,
+  LexicalInlineBlockLabelClientProps,
+  LexicalInlineBlockLabelServerProps,
+  LexicalInlineBlockServerProps,
+} from './features/blocks/server/index.js'
 
 export {
   $createServerBlockNode,
@@ -884,6 +884,13 @@ export {
   type BlockFields,
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
+
+export {
+  $createServerInlineBlockNode,
+  $isServerInlineBlockNode,
+  type InlineBlockFields,
+  ServerInlineBlockNode,
+} from './features/blocks/server/nodes/InlineBlocksNode.js'
 
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 

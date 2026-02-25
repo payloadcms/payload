@@ -1,4 +1,4 @@
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -17,14 +17,16 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+export type Arguments<TSlug extends CollectionSlug, TSelect extends SelectType> = {
   collection: Collection
   depth?: number
   disableTransaction?: boolean
@@ -33,13 +35,12 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect extends SelectType>(
-  incomingArgs: Arguments,
+  incomingArgs: Arguments<TSlug, TSelect>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
@@ -50,18 +51,12 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'delete',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'delete',
+      overrideAccess: args.overrideAccess!,
+    })
 
     const {
       id,
@@ -169,7 +164,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // /////////////////////////////////////
     // Delete scheduled posts
     // /////////////////////////////////////
-    if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+    if (hasScheduledPublishEnabled(collectionConfig)) {
       await deleteScheduledPublishJobs({
         id,
         slug: collectionConfig.slug,
@@ -194,6 +189,14 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       select,
       where: { id: { equals: id } },
     })
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
@@ -237,6 +240,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -267,6 +271,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       args,
       collection: collectionConfig,
       operation: 'deleteByID',
+      overrideAccess,
       result,
     })
 

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "3.60.0",
+  "version": "3.77.0",
   "description": "The officially supported Slate richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -46,13 +46,13 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
@@ -67,13 +67,14 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/is-hotkey": "^0.1.10",
     "@types/node": "22.15.30",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*",
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"

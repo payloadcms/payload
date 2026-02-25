@@ -36,10 +36,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  const options: QueryOptions = {
-    session: await getSession(this, req),
-  }
-
   let hasNearConstraint
   let sort
 
@@ -78,6 +74,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     fields,
     select,
   })
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
+    session,
+  }
+
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0

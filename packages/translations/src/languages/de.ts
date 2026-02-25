@@ -81,6 +81,11 @@ export const deTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert.',
   },
+  dashboard: {
+    addWidget: 'Widget hinzufügen',
+    deleteWidget: 'Löschen Sie das Widget {{id}}',
+    searchWidgets: 'Suche Widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dieses Benutzerkonto wurde bereits aktiviert',
     autosaving: 'Es gab ein Problem bei der automatischen Speicherung für dieses Dokument',
@@ -118,6 +123,7 @@ export const deTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Beim Hochladen der Datei ist ein Fehler aufgetreten.',
     restoringTitle:
       'Es gab einen Fehler beim Wiederherstellen von {{title}}. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+    revertingDocument: 'Es gab ein Problem beim Zurücksetzen dieses Dokuments.',
     tokenInvalidOrExpired: 'Token ist entweder ungültig oder abgelaufen.',
     tokenNotProvided: 'Token nicht bereitgestellt.',
     unableToCopy: 'Kopieren nicht möglich.',
@@ -340,6 +346,7 @@ export const deTranslations: DefaultTranslationsObject = {
     items: 'Artikel',
     language: 'Sprache',
     lastModified: 'Zuletzt geändert',
+    layout: 'Layout',
     leaveAnyway: 'Trotzdem verlassen',
     leaveWithoutSaving: 'Ohne speichern verlassen',
     light: 'Hell',
@@ -347,6 +354,7 @@ export const deTranslations: DefaultTranslationsObject = {
     loading: 'Lädt',
     locale: 'Sprache',
     locales: 'Sprachen',
+    lock: 'Sperren',
     menu: 'Menü',
     moreOptions: 'Mehr Optionen',
     move: 'Bewegen',
@@ -368,6 +376,9 @@ export const deTranslations: DefaultTranslationsObject = {
     noOptions: 'Keine Optionen',
     noResults:
       'Keine {{label}} gefunden. Entweder es existieren keine {{label}} oder es gibt keine Übereinstimmung zu den von dir verwendeten Filtern.',
+    noResultsDescription:
+      'Entweder existieren keine oder keine entsprechen den von Ihnen oben angegebenen Filtern.',
+    noResultsFound: 'Keine Ergebnisse gefunden.',
     notFound: 'Nicht gefunden',
     nothingFound: 'Keine Ergebnisse',
     noTrashResults: 'Kein {{label}} im Papierkorb.',
@@ -404,6 +415,7 @@ export const deTranslations: DefaultTranslationsObject = {
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',
+    saveChanges: 'Änderungen speichern',
     saving: 'Speichern...',
     schedulePublishFor: 'Plane die Veröffentlichung für {{title}}',
     searchBy: 'Suche nach {{label}}',
@@ -438,6 +450,7 @@ export const deTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} wurde in den Papierkorb verschoben.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
+    unlock: 'Entsperren',
     unsavedChanges:
       'Du hast ungespeicherte Änderungen. Speichern oder verwerfe sie, bevor du fortfahrst.',
     unsavedChangesDuplicate:
@@ -468,7 +481,9 @@ export const deTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopieren nach',
     copyToLocale: 'Erstelle Kopie für Sprach-Variante',
     localeToPublish: 'Zu veröffentlichende Sprache',
+    selectedLocales: 'Ausgewählte Gebietsschemata',
     selectLocaleToCopy: 'Wähle den Ort zum Kopieren aus',
+    selectLocaleToDuplicate: 'Wählen Sie die Gebietsschemata zum Duplizieren aus',
   },
   operators: {
     contains: 'enthält',
@@ -556,6 +571,8 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du bist dabei, dieses Dokument auf den Stand des ersten Veröffentlichungsdatums zurückzusetzen. Bist du sicher?',
     aboutToUnpublish: 'Du bist dabei dieses Dokument auf Entwurf zu setzen. Bist du dir sicher?',
+    aboutToUnpublishIn:
+      'Sie sind dabei, dieses Dokument in {{locale}} zu entpublizieren. Sind Sie sicher?',
     aboutToUnpublishSelection:
       'Du bist dabei, die Veröffentlichung aller {{label}} in der Auswahl aufzuheben. Bist du dir sicher?',
     autosave: 'Automatische Speicherung',
@@ -577,6 +594,7 @@ export const deTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Derzeitige Ansicht',
     currentPublishedVersion: 'Aktuell veröffentlichte Version',
     draft: 'Entwurf',
+    draftHasPublishedVersion: 'Entwurf (hat veröffentlichte Version)',
     draftSavedSuccessfully: 'Entwurf erfolgreich gespeichert.',
     lastSavedAgo: 'Zuletzt vor {{distance}} gespeichert',
     modifiedOnly: 'Nur modifiziert',
@@ -602,6 +620,8 @@ export const deTranslations: DefaultTranslationsObject = {
     restoring: 'Wiederherstellen...',
     reverting: 'Zurücksetzen...',
     revertToPublished: 'Auf veröffentlichte Version zurücksetzen',
+    revertUnsuccessful:
+      'Zurücksetzen fehlgeschlagen. Keine zuvor veröffentlichte Version gefunden.',
     saveDraft: 'Entwurf speichern',
     scheduledSuccessfully: 'Erfolgreich geplant.',
     schedulePublish: 'Veröffentlichungsplan',
@@ -612,6 +632,9 @@ export const deTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spezifische Version',
     status: 'Status',
     unpublish: 'Veröffentlichung aufheben',
+    unpublished: 'Unveröffentlicht',
+    unpublishedSuccessfully: 'Erfolgreich unveröffentlicht.',
+    unpublishIn: 'Unveröffentlichen in {{locale}}',
     unpublishing: 'Veröffentlichung aufheben...',
     version: 'Version',
     versionAgo: 'vor {{distance}}',

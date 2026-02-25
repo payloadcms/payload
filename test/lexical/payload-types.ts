@@ -84,6 +84,7 @@ export interface Config {
   blocks: {};
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
+    'lexical-autosave': LexicalAutosave;
     'lexical-link-feature': LexicalLinkFeature;
     'lexical-lists-features': LexicalListsFeature;
     'lexical-heading-feature': LexicalHeadingFeature;
@@ -102,6 +103,7 @@ export interface Config {
     'array-fields': ArrayField;
     OnDemandForm: OnDemandForm;
     OnDemandOutsideForm: OnDemandOutsideForm;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -110,6 +112,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
+    'lexical-autosave': LexicalAutosaveSelect<false> | LexicalAutosaveSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
     'lexical-lists-features': LexicalListsFeaturesSelect<false> | LexicalListsFeaturesSelect<true>;
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
@@ -128,6 +131,7 @@ export interface Config {
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -136,6 +140,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'he') | ('en' | 'es' | 'he')[];
   globals: {
     tabsWithRichText: TabsWithRichText;
   };
@@ -143,9 +148,7 @@ export interface Config {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
   locale: 'en' | 'es' | 'he';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -192,6 +195,37 @@ export interface LexicalFullyFeatured {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave".
+ */
+export interface LexicalAutosave {
+  id: string;
+  title?: string | null;
+  cta?:
+    | {
+        richText?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -653,8 +687,24 @@ export interface LexicalRelationshipField {
     };
     [k: string]: unknown;
   } | null;
+  richTextLocalized?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -981,6 +1031,23 @@ export interface OnDemandOutsideForm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -1002,6 +1069,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1013,6 +1081,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lexical-fully-featured';
         value: string | LexicalFullyFeatured;
+      } | null)
+    | ({
+        relationTo: 'lexical-autosave';
+        value: string | LexicalAutosave;
       } | null)
     | ({
         relationTo: 'lexical-link-feature';
@@ -1140,6 +1212,22 @@ export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave_select".
+ */
+export interface LexicalAutosaveSelect<T extends boolean = true> {
+  title?: T;
+  cta?:
+    | T
+    | {
+        richText?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1275,8 +1363,10 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   richText?: T;
   richText2?: T;
   richText3?: T;
+  richTextLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1517,6 +1607,14 @@ export interface OnDemandOutsideFormSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1630,6 +1728,16 @@ export interface TabsWithRichTextSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InlineBlockWithSelect".
+ */
+export interface InlineBlockWithSelect {
+  styles?: ('opt1' | 'opt2')[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'inlineBlockWithSelect';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

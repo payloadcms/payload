@@ -2,13 +2,10 @@ name: ci
 
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
+    types: [opened, reopened, synchronize]
+
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -53,7 +50,7 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
-      - name: Log all filter results
+      - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
@@ -69,12 +66,15 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     runs-on: ubuntu-24.04
 
     steps:
@@ -91,12 +91,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -105,12 +105,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -120,7 +122,7 @@ jobs:
   tests-types:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -129,61 +131,66 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  # Generate the integration test matrix from TypeScript config
+  int-matrix:
+    name: Setup Int Matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/int.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
   tests-int:
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
-    name: int-${{ matrix.database }}
+    needs: [changes, build, int-matrix]
+    if: needs.changes.outputs.needs_tests == 'true'
+    name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - documentdb
-          - cosmosdb
-          - firestore
-          - postgres
-          - postgres-custom-schema
-          - postgres-uuid
-          - supabase
-          - sqlite
-          - sqlite-uuid
+      matrix: ${{ fromJson(needs.int-matrix.outputs.matrix) }}
 
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
     services:
-      postgres:
-        # Custom postgres 17 docker image that supports both pg-vector and postgis: https://github.com/payloadcms/postgis-vector
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'ghcr.io/payloadcms/postgis-vector:latest' || '' }}
-        env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+      redis:
+        image: redis:latest
         ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          - 6379:6379
+
+        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 
     steps:
       - uses: actions/checkout@v5
@@ -193,127 +200,104 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Configure Redis
+        run: |
+          echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
         with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
+          database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int
+        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
+
+  # Generate the E2E test matrix from TypeScript config
+  e2e-matrix:
+    name: Setup E2E Matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/e2e.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Prepare prod test environment once, shared by all E2E shards
+  e2e-prep:
+    name: E2E Prep
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          pnpm-run-install: false
+          pnpm-restore-cache: false
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
+
+      - name: Restore build
+        uses: actions/cache@v4
+        with:
+          path: ./*
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Prepare prod test environment
+        run: pnpm prepare-run-test-against-prod:ci
+
+      - name: Cache prepared test environment
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
 
   tests-e2e:
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
-    name: e2e-${{ matrix.suite }}
+    needs: [e2e-matrix, e2e-prep]
+    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - joins
-          - field-error-states
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - group-by
-          - folders
-          - hooks
-          - lexical__collections___LexicalFullyFeatured
-          - lexical__collections___LexicalFullyFeatured__db
-          - lexical__collections__LexicalHeadingFeature
-          - lexical__collections__LexicalJSXConverter
-          - lexical__collections__LexicalLinkFeature
-          - lexical__collections__OnDemandForm
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-multi-tenant
-          - plugin-nested-docs
-          - plugin-seo
-          - sort
-          - trash
-          - versions
-          - uploads
+      matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
     steps:
@@ -324,16 +308,35 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
+
+      - name: Restore prepared test environment
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            test/packed
+            test/node_modules
+            test/package.json
+            test/pnpm-lock.yaml
+          key: e2e-prep-${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
+
+      - name: Start database
+        id: db
+        uses: ./.github/actions/start-database
+        with:
+          database: mongodb
 
       - name: Store Playwright's Version
         run: |
@@ -351,22 +354,49 @@ jobs:
 
       - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium --no-shell
 
       - name: Setup Playwright - Dependencies-only
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }}
+        # E2E Test Execution Strategy:
+        #
+        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # - shards: Number of CI runners to split this suite across
+        # - parallel: Whether tests within the suite can run concurrently (default: false)
+        #
+        # Flags explained:
+        # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
+        #   not just files). There is an arbitrary limitation that disables sharding if fullyParallel
+        #   is not set.
+        # - --workers=1: Forces serial execution within each shard. Added when parallel=false.
+        #
+        # How it works:
+        # - Most suites: parallel=false → tests run serially (--workers=1) but are sharded across runners
+        # - Parallel suites (e.g. LexicalFullyFeatured): parallel=true → tests run concurrently within each shard
+        #
+        # Local vs CI behavior:
+        # - Locally: playwright.config.ts has workers=16. Without --fully-parallel, Playwright
+        #   runs tests serially by default (one test at a time per file). Suites with
+        #   test.describe.configure({ mode: 'parallel' }) opt into parallel execution.
+        # - CI: We must use --fully-parallel to enable test-level sharding across runners.
+        #   However, --fully-parallel would also run all tests in parallel within each shard.
+        #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
+        #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
+        #
+        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and caches the result.
+        # This job restores that cache, so we use test:e2e:prod:run which skips preparation.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -404,6 +434,7 @@ jobs:
           - auth
           - auth-basic
           - bulk-edit
+          - dashboard
           - joins
           - field-error-states
           - fields-relationship
@@ -454,6 +485,7 @@ jobs:
           - plugin-multi-tenant
           - plugin-nested-docs
           - plugin-seo
+          - queues
           - sort
           - trash
           - versions
@@ -468,16 +500,18 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
 
       - name: Store Playwright's Version
         run: |
@@ -526,7 +560,7 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -536,9 +570,6 @@ jobs:
             database: mongodb
 
           - template: website
-            database: mongodb
-
-          - template: with-payload-cloud
             database: mongodb
 
           - template: with-vercel-mongodb
@@ -557,12 +588,6 @@ jobs:
           # - template: with-vercel-website
           #   database: postgres
 
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
-      MONGODB_VERSION: 6.0
-
     steps:
       - uses: actions/checkout@v5
 
@@ -571,51 +596,29 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
-      - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
+      - name: Start database
+        id: db
+        if: matrix.database
+        uses: ./.github/actions/start-database
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: matrix.database == 'postgres'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
-
-      # Avoid dockerhub rate-limiting
-      - name: Cache Docker images
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
-        with:
-          mongodb-version: 6.0
-        if: matrix.database == 'mongodb'
+          database: ${{ matrix.database }}
 
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
+          DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
 
       - name: Store Playwright's Version
         run: |
@@ -644,22 +647,22 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
-          MONGODB_URL: mongodb://localhost:27017/payloadtests
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
 
       - name: Runs Template E2E Tests
         run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
-          MONGODB_URL: mongodb://localhost:27017/payloadtests
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           NEXT_TELEMETRY_DISABLED: 1
 
   tests-type-generation:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
       - uses: actions/checkout@v5
 
@@ -668,12 +671,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -686,14 +691,16 @@ jobs:
     if: always()
     runs-on: ubuntu-24.04
     needs:
-      - lint
-      - build
-      - build-and-test-templates
-      - tests-unit
-      - tests-int
-      - tests-e2e
-      - tests-types
-      - tests-type-generation
+      [
+        lint,
+        build,
+        build-and-test-templates,
+        tests-unit,
+        tests-int,
+        tests-e2e,
+        tests-types,
+        tests-type-generation,
+      ]
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
@@ -727,12 +734,14 @@ jobs:
         with:
           pnpm-run-install: false
           pnpm-restore-cache: false # Full build is restored below
+          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
         uses: actions/cache@v4
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
+          fail-on-cache-miss: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:

@@ -1,14 +1,15 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, saveDocAndAssert } from '../../../helpers.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone, saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')

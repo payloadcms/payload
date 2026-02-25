@@ -16,7 +16,6 @@ import type {
 } from '../../translations/index.js'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
 
 const baseClass = 'export-list-menu-item'
 
@@ -25,10 +24,12 @@ export const ExportListMenuItem: React.FC<{
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
+
   const { i18n, t } = useTranslation<
     PluginImportExportTranslations,
     PluginImportExportTranslationKeys
   >()
+
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
@@ -54,7 +55,7 @@ export const ExportListMenuItem: React.FC<{
           }}
         />
       </DocumentDrawerToggler>
-      <DocumentDrawer />
+      <DocumentDrawer initialData={{ collectionSlug }} />
     </PopupList.Button>
   )
 }

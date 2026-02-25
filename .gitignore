@@ -9,6 +9,9 @@ dist
 # Local AI Agent files
 AGENTS.local.md
 CLAUDE.local.md
+.claude/commands/*.local.md
+.claude/artifacts
+.worktrees/
 
 # Custom actions
 !.github/actions/**/dist
@@ -43,7 +46,9 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
+*payload.db
 /versions
+no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,macos,windows,webstorm,sublimetext,visualstudiocode
@@ -258,6 +263,7 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+!.vscode/mcp.json
 
 # Local History for Visual Studio Code
 .history/
@@ -339,6 +345,15 @@ test/.localstack
 test/google-cloud-storage
 test/azurestoragedata/
 /media-without-delete-access
+/media-documents
+/media-with-always-insert-fields
+
 
 
 licenses.csv
+
+# SQLite DB
+payload.db
+
+# Screenshots created by Playwright MCP
+.playwright-mcp

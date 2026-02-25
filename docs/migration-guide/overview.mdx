@@ -416,7 +416,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
 
 1.  The `./src/public` directory is now located directly at root level `./public` [see Next.js docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
-1.  Payload now automatically removes `localized: true` property from sub-fields if a parent is localized, as it's redunant and unnecessary. If you have some existing data in this structure and you want to disable that behavior, you need to enable `allowLocalizedWithinLocalized` flag in your payload.config [read more in documentation](https://payloadcms.com/docs/configuration/overview#compatibility-flags), or create a migration script that aligns your data.
+1.  Payload now automatically removes `localized: true` property from sub-fields if a parent is localized, as it's redundant and unnecessary. If you have some existing data in this structure and you want to disable that behavior, you need to enable `allowLocalizedWithinLocalized` flag in your payload.config [read more in documentation](https://payloadcms.com/docs/configuration/overview#compatibility-flags), or create a migration script that aligns your data.
     Mongodb example for a link in a page layout.
 
         ```diff

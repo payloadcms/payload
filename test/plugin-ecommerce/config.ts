@@ -53,10 +53,7 @@ export default buildConfigWithDefaults({
   plugins: [
     ecommercePlugin({
       access: {
-        adminOnly: ({ req }) => Boolean(req.user),
         adminOnlyFieldAccess: ({ req }) => Boolean(req.user),
-        adminOrCustomerOwner: ({ req }) => Boolean(req.user),
-        customerOnlyFieldAccess: ({ req }) => Boolean(req.user),
         adminOrPublishedStatus: ({ req }) => {
           if (req.user) {
             return true
@@ -68,6 +65,23 @@ export default buildConfigWithDefaults({
             },
           }
         },
+        customerOnlyFieldAccess: ({ req }) => Boolean(req.user),
+        isAdmin: ({ req }) => Boolean(req.user),
+        isAuthenticated: ({ req }) => Boolean(req.user),
+        isCustomer: ({ req }) => Boolean(req.user),
+        isDocumentOwner: ({ req }) => {
+          if (req.user) {
+            return {
+              customer: {
+                equals: req.user.id,
+              },
+            }
+          }
+          return false
+        },
+      },
+      carts: {
+        allowGuestCarts: true,
       },
       customers: {
         slug: 'users',

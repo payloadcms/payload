@@ -1,4 +1,5 @@
 import type { Config, SanitizedConfig } from 'payload'
+import { describe, beforeAll, it, expect } from 'vitest'
 
 import { sanitizeConfig } from 'payload'
 

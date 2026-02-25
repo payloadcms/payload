@@ -1,11 +1,11 @@
-/* eslint-disable react-compiler/react-compiler -- TODO: fix */
 'use client'
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import type { FormProps } from '../../forms/Form/index.js'
 import type { FormOnSuccess } from '../../forms/Form/types.js'
@@ -26,7 +26,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
+import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
@@ -43,6 +43,7 @@ import { SetDocumentTitle } from './SetDocumentTitle/index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
+const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
 
 export type OnSaveContext = {
   getDocPermissions?: boolean
@@ -61,6 +62,8 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
+  UnpublishButton,
   Upload: CustomUpload,
   UploadControls,
 }: DocumentViewClientProps) {
@@ -122,6 +125,7 @@ export function DefaultEditView({
     config: {
       admin: { user: userSlug },
       routes: { admin: adminRoute },
+      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -146,6 +150,7 @@ export function DefaultEditView({
     typeofLivePreviewURL,
     url: livePreviewURL,
   } = useLivePreviewContext()
+  const { isPreviewEnabled, setPreviewURL } = usePreviewURL()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -169,13 +174,7 @@ export function DefaultEditView({
     typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
   const lockDurationInMilliseconds = lockDuration * 1000
 
-  const autosaveEnabled = Boolean(
-    (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave),
-  )
-
-  const preventLeaveWithoutSaving =
-    typeof disableLeaveWithoutSaving !== 'undefined' ? !disableLeaveWithoutSaving : !autosaveEnabled
+  const autosaveEnabled = hasAutosaveEnabled(docConfig)
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
@@ -183,8 +182,13 @@ export function DefaultEditView({
   const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
-
   const isLockExpired = Date.now() > lockExpiryTime
+
+  const preventLeaveWithoutSaving =
+    !isReadOnlyForIncomingUser &&
+    (typeof disableLeaveWithoutSaving !== 'undefined'
+      ? !disableLeaveWithoutSaving
+      : !autosaveEnabled)
 
   const schemaPathSegments = useMemo(() => [entitySlug], [entitySlug])
 
@@ -206,7 +210,7 @@ export function DefaultEditView({
           ? documentLockState.current?.user?.id
           : documentLockState.current?.user
 
-      if (lockedState) {
+      if (lockedState && lockedState.user) {
         const lockedUserID =
           typeof lockedState.user === 'string' || typeof lockedState.user === 'number'
             ? lockedState.user
@@ -252,16 +256,14 @@ export function DefaultEditView({
         nextPath.includes(path),
       )
 
-      // Only retain the lock if the user is still viewing the document
-      if (!isInternalView) {
-        if (isLockOwnedByCurrentUser) {
-          try {
-            await unlockDocument(id, collectionSlug ?? globalSlug)
-            setDocumentIsLocked(false)
-            setCurrentEditor(null)
-          } catch (err) {
-            console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
-          }
+      // Remove the lock if the user is navigating away from the document view they have locked
+      if (isLockOwnedByCurrentUser && !isInternalView) {
+        try {
+          await unlockDocument(id, collectionSlug ?? globalSlug)
+          setDocumentIsLocked(false)
+          setCurrentEditor(null)
+        } catch (err) {
+          console.error('Failed to unlock before leave', err) // eslint-disable-line no-console
         }
       }
     }
@@ -320,6 +322,11 @@ export function DefaultEditView({
       }
 
       if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
+        // Store success message to show after redirect
+        if (json.message && typeof window !== 'undefined') {
+          window.sessionStorage.setItem(PENDING_SUCCESS_TOAST_KEY, json.message)
+        }
+
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -338,7 +345,7 @@ export function DefaultEditView({
       if (id || globalSlug) {
         const docPreferences = await getDocPreferences()
 
-        const { livePreviewURL, state } = await getFormState({
+        const { livePreviewURL, previewURL, state } = await getFormState({
           id,
           collectionSlug,
           data: document,
@@ -350,10 +357,17 @@ export function DefaultEditView({
           renderAllFields: false,
           returnLivePreviewURL: isLivePreviewEnabled && typeofLivePreviewURL === 'function',
           returnLockStatus: false,
+          returnPreviewURL: isPreviewEnabled,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
           skipValidation: true,
         })
+
+        // For upload collections, clear the file field from the returned state
+        // to prevent the File object from persisting in form state after save
+        if (upload && state) {
+          delete state.file
+        }
 
         // Unlock the document after save
         if (isLockingEnabled) {
@@ -364,31 +378,44 @@ export function DefaultEditView({
           setLivePreviewURL(livePreviewURL)
         }
 
+        if (isPreviewEnabled) {
+          setPreviewURL(previewURL)
+        }
+
         reportUpdate({
           id,
+          doc: document,
+          drawerSlug,
           entitySlug,
+          operation: 'update',
           updatedAt,
         })
 
         abortOnSaveRef.current = null
 
         return state
+      } else {
+        reportUpdate({
+          id,
+          doc: document,
+          drawerSlug,
+          entitySlug,
+          operation: 'create',
+          updatedAt,
+        })
       }
     },
     [
-      reportUpdate,
-      id,
-      entitySlug,
       user,
       collectionSlug,
       userSlug,
+      id,
       setLastUpdateTime,
       setData,
       onSaveFromContext,
       isEditing,
       depth,
       redirectAfterCreate,
-      setLivePreviewURL,
       globalSlug,
       refreshCookieAsync,
       incrementVersionCount,
@@ -404,9 +431,16 @@ export function DefaultEditView({
       operation,
       isLivePreviewEnabled,
       typeofLivePreviewURL,
+      isPreviewEnabled,
       schemaPathSegments,
+      upload,
       isLockingEnabled,
+      reportUpdate,
+      drawerSlug,
+      entitySlug,
       setDocumentIsLocked,
+      setLivePreviewURL,
+      setPreviewURL,
     ],
   )
 
@@ -487,6 +521,18 @@ export function DefaultEditView({
     }
   }, [])
 
+  // Show pending success toast after redirect from create
+  useEffect(() => {
+    if (!isInitializing && typeof window !== 'undefined') {
+      const pendingMessage = window.sessionStorage.getItem(PENDING_SUCCESS_TOAST_KEY)
+
+      if (pendingMessage) {
+        window.sessionStorage.removeItem(PENDING_SUCCESS_TOAST_KEY)
+        toast.success(pendingMessage)
+      }
+    }
+  }, [isInitializing])
+
   const shouldShowDocumentLockedModal =
     documentIsLocked &&
     currentEditor &&
@@ -517,6 +563,7 @@ export function DefaultEditView({
           action={action}
           className={`${baseClass}__form`}
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission || isTrashed}
+          disableSuccessStatus={!isEditing && depth < 2 && redirectAfterCreate !== false}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
           isDocumentForm={true}
@@ -535,7 +582,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
             <DocumentLocked
-              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router })}
+              handleGoBack={() => handleGoBack({ adminRoute, collectionSlug, router, serverURL })}
               isActive={shouldShowDocumentLockedModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -561,7 +608,7 @@ export function DefaultEditView({
           )}
           {isLockingEnabled && showTakeOverModal && (
             <DocumentTakeOver
-              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router })}
+              handleBackToDashboard={() => handleBackToDashboard({ adminRoute, router, serverURL })}
               isActive={showTakeOverModal}
               onReadOnly={() => {
                 setIsReadOnlyForIncomingUser(true)
@@ -569,7 +616,7 @@ export function DefaultEditView({
               }}
             />
           )}
-          {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && (
+          {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
           )}
           {!isInDrawer && (
@@ -596,6 +643,8 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
+              UnpublishButton,
             }}
             data={data}
             disableActions={disableActions || isFolderCollection || isTrashed}
@@ -667,6 +716,7 @@ export function DefaultEditView({
                           readOnly={!hasSavePermission}
                           requirePassword={!id}
                           setValidateBeforeSubmit={setValidateBeforeSubmit}
+                          // eslint-disable-next-line react-compiler/react-compiler
                           useAPIKey={auth.useAPIKey}
                           username={data?.username}
                           verify={auth.verify}

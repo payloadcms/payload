@@ -10,11 +10,11 @@ import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { ProductsCollection } from '@/collections/Products'
-import { adminOrCustomerOwner } from '@/access/adminOrCustomerOwner'
 import { adminOrPublishedStatus } from '@/access/adminOrPublishedStatus'
-import { adminOnly } from '@/access/adminOnly'
 import { adminOnlyFieldAccess } from '@/access/adminOnlyFieldAccess'
 import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
+import { isAdmin } from '@/access/isAdmin'
+import { isDocumentOwner } from '@/access/isDocumentOwner'
 
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
@@ -36,11 +36,22 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formSubmissionOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
     },
     formOverrides: {
+      access: {
+        delete: isAdmin,
+        read: isAdmin,
+        update: isAdmin,
+        create: isAdmin,
+      },
       admin: {
         group: 'Content',
       },
@@ -67,14 +78,42 @@ export const plugins: Plugin[] = [
   }),
   ecommercePlugin({
     access: {
-      adminOnly,
       adminOnlyFieldAccess,
-      adminOrCustomerOwner,
       adminOrPublishedStatus,
       customerOnlyFieldAccess,
+      isAdmin,
+      isDocumentOwner,
     },
     customers: {
       slug: 'users',
+    },
+    orders: {
+      ordersCollectionOverride: ({ defaultCollection }) => ({
+        ...defaultCollection,
+        fields: [
+          ...defaultCollection.fields,
+          {
+            name: 'accessToken',
+            type: 'text',
+            unique: true,
+            index: true,
+            admin: {
+              position: 'sidebar',
+              readOnly: true,
+            },
+            hooks: {
+              beforeValidate: [
+                ({ value, operation }) => {
+                  if (operation === 'create' || !value) {
+                    return crypto.randomUUID()
+                  }
+                  return value
+                },
+              ],
+            },
+          },
+        ],
+      }),
     },
     payments: {
       paymentMethods: [

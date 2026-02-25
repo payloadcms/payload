@@ -48,7 +48,6 @@ export const Restore: React.FC<Props> = ({
   const {
     config: {
       routes: { admin: adminRoute, api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -58,15 +57,21 @@ export const Restore: React.FC<Props> = ({
   const [draft, setDraft] = useState(false)
   const { startRouteTransition } = useRouteTransition()
 
-  const restoreMessage = t('version:aboutToRestoreGlobal', {
-    label: getTranslation(label, i18n),
-    versionDate: versionDateFormatted,
-  })
+  const restoreMessage = t(
+    globalConfig ? 'version:aboutToRestoreGlobal' : 'version:aboutToRestore',
+    {
+      label: getTranslation(label, i18n),
+      versionDate: versionDateFormatted,
+    },
+  )
 
   const canRestoreAsDraft = status !== 'draft' && collectionConfig?.versions?.drafts
 
   const handleRestore = useCallback(async () => {
-    let fetchURL = `${serverURL}${apiRoute}`
+    let fetchURL = formatAdminURL({
+      apiRoute,
+      path: '',
+    })
     let redirectURL: string
 
     if (collectionConfig) {
@@ -99,7 +104,6 @@ export const Restore: React.FC<Props> = ({
       toast.error(t('version:problemRestoringVersion'))
     }
   }, [
-    serverURL,
     apiRoute,
     collectionConfig,
     globalConfig,

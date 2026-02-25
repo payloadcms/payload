@@ -3,11 +3,12 @@ import type { CollectionSlug, Payload } from 'payload'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { postDoc } from './config.js'
 
 let restClient: NextRESTClient
@@ -192,7 +193,7 @@ describe('dataloader', () => {
   describe('find', () => {
     it('should call the same query only once in a request', async () => {
       const req = await createLocalReq({}, payload)
-      const spy = jest.spyOn(payload, 'find')
+      const spy = vitest.spyOn(payload, 'find')
 
       const findArgs = {
         collection: 'items' as CollectionSlug,

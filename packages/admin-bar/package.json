@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/admin-bar",
-  "version": "3.60.0",
+  "version": "3.77.0",
   "description": "An admin bar for React apps using Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -32,23 +32,23 @@
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.1.12",
-    "@types/react-dom": "19.1.9",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {

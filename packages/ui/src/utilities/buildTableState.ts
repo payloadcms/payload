@@ -11,8 +11,8 @@ import type {
   Where,
 } from 'payload'
 
-import { APIError, canAccessAdmin, formatErrors, getAccessResults } from 'payload'
-import { isNumber } from 'payload/shared'
+import { APIError, canAccessAdmin, formatErrors } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'
@@ -69,9 +69,10 @@ export const buildTableStateHandler: ServerFunction<
   }
 }
 
-const buildTableState = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateSuccessResult> => {
+const buildTableState: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateSuccessResult>
+> = async (args) => {
   const {
     collectionSlug,
     columns: columnsFromArgs,
@@ -79,6 +80,7 @@ const buildTableState = async (
     enableRowSelections,
     orderableFieldName,
     parent,
+    permissions,
     query,
     renderRowTypes,
     req,
@@ -100,7 +102,7 @@ const buildTableState = async (
     user,
   })
 
-  const permissions = await getAccessResults({ req })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
@@ -219,6 +221,7 @@ const buildTableState = async (
     payload,
     query,
     renderRowTypes,
+    req,
     tableAppearance,
     useAsTitle: Array.isArray(collectionSlug)
       ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle

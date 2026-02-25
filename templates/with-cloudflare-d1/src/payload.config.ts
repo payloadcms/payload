@@ -1,7 +1,7 @@
-// storage-adapter-import-placeholder
-import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite' // database-adapter-import
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import fs from 'fs'
 import path from 'path'
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
@@ -13,10 +13,33 @@ import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
 
-const cloudflareRemoteBindings = process.env.NODE_ENV === 'production'
+const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
+const isProduction = process.env.NODE_ENV === 'production'
+
+const createLog =
+  (level: string, fn: typeof console.log) => (objOrMsg: object | string, msg?: string) => {
+    if (typeof objOrMsg === 'string') {
+      fn(JSON.stringify({ level, msg: objOrMsg }))
+    } else {
+      fn(JSON.stringify({ level, ...objOrMsg, msg: msg ?? (objOrMsg as { msg?: string }).msg }))
+    }
+  }
+
+const cloudflareLogger = {
+  level: process.env.PAYLOAD_LOG_LEVEL || 'info',
+  trace: createLog('trace', console.debug),
+  debug: createLog('debug', console.debug),
+  info: createLog('info', console.log),
+  warn: createLog('warn', console.warn),
+  error: createLog('error', console.error),
+  fatal: createLog('fatal', console.error),
+  silent: () => {},
+} as any // Use PayloadLogger type when it's exported
+
 const cloudflare =
-  process.argv.find((value) => value.match(/^(generate|migrate):?/)) || !cloudflareRemoteBindings
+  isCLI || !isProduction
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
@@ -33,11 +56,9 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  // database-adapter-config-start
   db: sqliteD1Adapter({ binding: cloudflare.env.D1 }),
-  // database-adapter-config-end
+  logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
-    // storage-adapter-placeholder
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },
@@ -51,7 +72,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        experimental: { remoteBindings: cloudflareRemoteBindings },
+        remoteBindings: isProduction,
       } satisfies GetPlatformProxyOptions),
   )
 }

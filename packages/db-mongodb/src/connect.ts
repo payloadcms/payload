@@ -1,5 +1,5 @@
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import mongoose from 'mongoose'
 import { defaultBeginTransaction } from 'payload'
@@ -37,9 +37,16 @@ export const connect: Connect = async function connect(
   try {
     if (!this.connection) {
       this.connection = await mongoose.createConnection(urlToConnect, connectionOptions).asPromise()
+      if (this.afterCreateConnection) {
+        await this.afterCreateConnection(this)
+      }
     }
 
     await this.connection.openUri(urlToConnect, connectionOptions)
+
+    if (this.afterOpenConnection) {
+      await this.afterOpenConnection(this)
+    }
 
     if (this.useAlternativeDropDatabase) {
       if (this.connection.db) {
@@ -70,9 +77,7 @@ export const connect: Connect = async function connect(
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
 
-    const client = this.connection.getClient()
-
-    if (!client.options.replicaSet) {
+    if (!this.connection.getClient().options.replicaSet) {
       this.transactionOptions = false
       this.beginTransaction = defaultBeginTransaction()
     }
@@ -95,7 +100,7 @@ export const connect: Connect = async function connect(
     }
 
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-      await this.migrate({ migrations: this.prodMigrations })
+      await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
     }
   } catch (err) {
     let msg = `Error: cannot connect to MongoDB.`
@@ -108,6 +113,6 @@ export const connect: Connect = async function connect(
       err,
       msg,
     })
-    process.exit(1)
+    throw new Error(`Error: cannot connect to MongoDB: ${msg}`)
   }
 }

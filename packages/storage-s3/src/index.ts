@@ -24,8 +24,18 @@ export type S3StorageOptions = {
   /**
    * Access control list for uploaded files.
    */
-
   acl?: 'private' | 'public-read'
+
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
 
   /**
    * Bucket name to upload files to.
@@ -34,6 +44,14 @@ export type S3StorageOptions = {
    */
 
   bucket: string
+
+  /**
+   * Optional cache key to identify the S3 storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `s3:containerName`
+   */
+  clientCacheKey?: string
 
   /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
@@ -79,7 +97,7 @@ export type S3StorageOptions = {
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
-let storageClient: AWS.S3 | null = null
+const s3Clients = new Map<string, AWS.S3>()
 
 const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
   httpAgent: {
@@ -95,16 +113,22 @@ const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
+    const cacheKey = s3StorageOptions.clientCacheKey || `s3:${s3StorageOptions.bucket}`
+
     const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) {
-        return storageClient
+      if (s3Clients.has(cacheKey)) {
+        return s3Clients.get(cacheKey)!
       }
 
-      storageClient = new AWS.S3({
-        requestHandler: defaultRequestHandlerOpts,
-        ...(s3StorageOptions.config ?? {}),
-      })
-      return storageClient
+      s3Clients.set(
+        cacheKey,
+        new AWS.S3({
+          requestHandler: defaultRequestHandlerOpts,
+          ...(s3StorageOptions.config ?? {}),
+        }),
+      )
+
+      return s3Clients.get(cacheKey)!
     }
 
     const isPluginDisabled = s3StorageOptions.enabled === false
@@ -128,6 +152,29 @@ export const s3Storage: S3StoragePlugin =
     })
 
     if (isPluginDisabled) {
+      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
+      if (s3StorageOptions.alwaysInsertFields) {
+        // Build collections with adapter: null since plugin is disabled
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          s3StorageOptions.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: {
+              ...(collOptions === true ? {} : collOptions),
+              adapter: null,
+            },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+        })(incomingConfig)
+      }
+
       return incomingConfig
     }
 
@@ -166,6 +213,7 @@ export const s3Storage: S3StoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

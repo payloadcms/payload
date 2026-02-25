@@ -1,6 +1,6 @@
 {
   "name": "create-payload-app",
-  "version": "3.60.0",
+  "version": "3.77.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -49,19 +49,19 @@
   ],
   "scripts": {
     "build": "pnpm pack-template-files && pnpm typecheck && pnpm build:swc",
+    "build:debug": "pnpm build",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
-    "prepublishOnly": "pnpm clean && pnpm build",
     "test": "jest",
     "typecheck": "tsc"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "@sindresorhus/slugify": "^1.1.0",
-    "@swc/core": "1.11.29",
+    "@swc/core": "1.15.3",
     "arg": "^5.0.0",
     "chalk": "^4.1.0",
     "comment-json": "^4.2.3",
@@ -70,13 +70,14 @@
     "figures": "^6.1.0",
     "fs-extra": "^9.0.1",
     "globby": "11.1.0",
-    "tar": "^7.4.3",
-    "terminal-link": "^2.1.1"
+    "prettier": "^3.5.0",
+    "tar": "^7.5.7",
+    "terminal-link": "^2.1.1",
+    "ts-morph": "^21.0.1"
   },
   "devDependencies": {
     "@types/esprima": "^4.0.6",
     "@types/fs-extra": "^9.0.12",
-    "@types/jest": "29.5.12",
     "@types/node": "22.15.30"
   },
   "engines": {

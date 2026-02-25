@@ -3,13 +3,14 @@ import type { Payload, TypeWithID } from 'payload'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   categoriesJoinRestrictedSlug,
   categoriesSlug,
@@ -1836,6 +1837,118 @@ describe('Joins Field', () => {
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { group: { category: category.id }, isFiltered: true, title: 'my-category-title' },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'group.relatedPosts.title': { equals: 'my-category-title' },
+          },
+          {
+            'group.relatedPosts.title': { exists: true },
+          },
+          {
+            'group.relatedPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with hasMany relationship multiple times', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    await payload.create({
+      collection: 'posts',
+      data: { categories: [category.id], title: 'my-title', isFiltered: true },
+    })
+
+    const found = await payload.find({
+      collection: 'categories',
+      where: {
+        and: [
+          {
+            'hasManyPosts.title': { equals: 'my-title' },
+          },
+          {
+            'hasManyPosts.title': { exists: true },
+          },
+          {
+            'hasManyPosts.isFiltered': { equals: true },
+          },
+        ],
+      },
+    })
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+  })
+
+  describe('Polymorphic join query validation', () => {
+    const isPostgres = process.env.PAYLOAD_DATABASE === 'postgres'
+
+    it.skipIf(!isPostgres)('should reject unknown operators and not delay response', async () => {
+      const startTime = Date.now()
+
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { x: { $raw: 'EXISTS(SELECT 1 FROM pg_sleep(3))' } },
+            },
+          },
+        },
+      })
+
+      const elapsedSeconds = (Date.now() - startTime) / 1000
+
+      expect(response.status).toBe(400)
+      expect(elapsedSeconds).toBeLessThan(1)
+    })
+
+    it('should reject unknown operators in polymorphic join where', async () => {
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { x: { $raw: 'true' } },
+            },
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should allow valid operators in polymorphic join where', async () => {
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { title: { equals: 'test' } },
+            },
+          },
+        },
+      })
+
+      expect(response.status).toBe(200)
+    })
   })
 })
 

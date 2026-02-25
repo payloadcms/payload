@@ -22,9 +22,27 @@ export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * The name of the bucket to use.
    */
   bucket: string
+  /**
+   * Optional cache key to identify the GCS storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `gcs:containerName`
+   */
+  clientCacheKey?: string
   /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
    */
@@ -50,18 +68,20 @@ export interface GcsStorageOptions {
 
 type GcsStoragePlugin = (gcsStorageArgs: GcsStorageOptions) => Plugin
 
+const gcsClients = new Map<string, Storage>()
+
 export const gcsStorage: GcsStoragePlugin =
   (gcsStorageOptions: GcsStorageOptions) =>
   (incomingConfig: Config): Config => {
-    let storageClient: null | Storage = null
+    const cacheKey = gcsStorageOptions.clientCacheKey || `gcs:${gcsStorageOptions.bucket}`
 
     const getStorageClient = (): Storage => {
-      if (storageClient) {
-        return storageClient
+      if (gcsClients.has(cacheKey)) {
+        return gcsClients.get(cacheKey)!
       }
-      storageClient = new Storage(gcsStorageOptions.options)
+      gcsClients.set(cacheKey, new Storage(gcsStorageOptions.options))
 
-      return storageClient
+      return gcsClients.get(cacheKey)!
     }
 
     const adapter = gcsStorageInternal(getStorageClient, gcsStorageOptions)
@@ -122,6 +142,7 @@ export const gcsStorage: GcsStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

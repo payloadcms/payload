@@ -86,11 +86,12 @@ Please do note that this does not run before client-side validation. If you rend
 
 ```ts
 import type { GlobalBeforeValidateHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const beforeValidateHook: GlobalBeforeValidateHook = async ({
-  data,
+const beforeValidateHook: GlobalBeforeValidateHook<SiteSettings> = async ({
+  data, // Typed as Partial<SiteSettings>
   req,
-  originalDoc,
+  originalDoc, // Typed as SiteSettings
 }) => {
   return data
 }
@@ -103,8 +104,15 @@ The following arguments are provided to the `beforeValidate` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
@@ -112,11 +120,12 @@ Immediately following validation, `beforeChange` hooks will run within the `upda
 
 ```ts
 import type { GlobalBeforeChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const beforeChangeHook: GlobalBeforeChangeHook = async ({
-  data,
+const beforeChangeHook: GlobalBeforeChangeHook<SiteSettings> = async ({
+  data, // Typed as Partial<SiteSettings>
   req,
-  originalDoc,
+  originalDoc, // Typed as SiteSettings
 }) => {
   return data
 }
@@ -129,8 +138,15 @@ The following arguments are provided to the `beforeChange` hook:
 | **`global`**      | The [Global](../configuration/globals) in which this Hook is running against.                                                                         |
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 
@@ -138,13 +154,14 @@ After a global is updated, the `afterChange` hook runs. Use this hook to purge c
 
 ```ts
 import type { GlobalAfterChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const afterChangeHook: GlobalAfterChangeHook = async ({
-  doc,
-  previousDoc,
+const afterChangeHook: GlobalAfterChangeHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
+  previousDoc, // Typed as SiteSettings
   req,
 }) => {
-  return data
+  return doc
 }
 ```
 
@@ -187,15 +204,18 @@ Runs as the last step before a global is returned. Flattens locales, hides prote
 
 ```ts
 import type { GlobalAfterReadHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
 
-const afterReadHook: GlobalAfterReadHook = async ({
-  doc,
+const afterReadHook: GlobalAfterReadHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
   req,
   findMany,
-}) => {...}
+}) => {
+  return doc
+}
 ```
 
-The following arguments are provided to the `beforeRead` hook:
+The following arguments are provided to the `afterRead` hook:
 
 | Option         | Description                                                                                                                                           |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -218,4 +238,18 @@ import type {
   GlobalBeforeReadHook,
   GlobalAfterReadHook,
 } from 'payload'
+```
+
+You can also pass a generic type to each hook for strongly-typed `doc`, `previousDoc`, and `data` properties:
+
+```ts
+import type { GlobalAfterChangeHook } from 'payload'
+import type { SiteSettings } from '@/payload-types'
+
+const afterChangeHook: GlobalAfterChangeHook<SiteSettings> = async ({
+  doc, // Typed as SiteSettings
+  previousDoc, // Typed as SiteSettings
+}) => {
+  return doc
+}
 ```
