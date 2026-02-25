@@ -167,12 +167,13 @@ export function HierarchyListView(props: ListViewClientProps) {
 
   // Add related collections (for creating documents that reference this hierarchy)
   // Use hierarchyConfig.relatedCollections to show ALL related collections, not just ones with documents
-  const hierarchyFieldName = `_h_${collectionSlug}`
-  for (const slug of Object.keys(hierarchyConfig?.relatedCollections || {})) {
+  for (const [slug, relatedConfig] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
+    // Use array for hasMany fields, single value for hasMany: false
+    const fieldValue = relatedConfig.hasMany ? [parentId] : parentId
+
     collections.push({
       collectionSlug: slug,
-      // Always use array - Payload normalizes for single relationship fields
-      initialData: parentId !== null ? { [hierarchyFieldName]: [parentId] } : {},
+      initialData: parentId !== null ? { [relatedConfig.fieldName]: fieldValue } : {},
     })
   }
 
