@@ -221,14 +221,16 @@ Used in the block selection drawer when editors add blocks to a blocks field.
 ```ts
 const QuoteBlock: Block = {
   slug: 'quote',
-  images: {
-    icon: {
-      url: 'https://example.com/icons/quote-icon-20x20.svg',
-      alt: 'Quote icon',
-    },
-    thumbnail: {
-      url: 'https://example.com/thumbnails/quote-block-480x320.jpg',
-      alt: 'Quote block',
+  admin: {
+    images: {
+      icon: {
+        url: 'https://example.com/icons/quote-icon-20x20.svg',
+        alt: 'Quote icon',
+      },
+      thumbnail: {
+        url: 'https://example.com/thumbnails/quote-block-480x320.jpg',
+        alt: 'Quote block',
+      },
     },
   },
   fields: [
@@ -246,9 +248,11 @@ const QuoteBlock: Block = {
 ```ts
 const CallToActionBlock: Block = {
   slug: 'cta',
-  images: {
-    icon: 'https://example.com/icons/cta-20x20.svg',
-    thumbnail: 'https://example.com/thumbnails/cta-block-480x320.jpg',
+  admin: {
+    images: {
+      icon: 'https://example.com/icons/cta-20x20.svg',
+      thumbnail: 'https://example.com/thumbnails/cta-block-480x320.jpg',
+    },
   },
   fields: [
     {
@@ -264,8 +268,10 @@ const CallToActionBlock: Block = {
 ```ts
 const DividerBlock: Block = {
   slug: 'divider',
-  images: {
-    icon: 'https://example.com/icons/divider-20x20.svg',
+  admin: {
+    images: {
+      icon: 'https://example.com/icons/divider-20x20.svg',
+    },
   },
   fields: [],
 }
