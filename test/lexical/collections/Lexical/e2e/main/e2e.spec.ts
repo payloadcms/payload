@@ -1848,7 +1848,5 @@ describe('lexicalMain', () => {
     await expect(customCells.first()).toBeVisible()
     // Both title (text) and richTextField (richText) should render the custom cell
     await expect(customCells).toHaveCount(2)
-
-    await payload.delete({ collection: lexicalCustomCellSlug, id: doc.id })
   })
 })
