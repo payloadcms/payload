@@ -1562,15 +1562,39 @@ describe('Locked Documents', () => {
 
       modalContainer = user2Page.locator('.payload__modal-container')
       await expect(modalContainer).toBeVisible()
+
+      // User 2 reloads
+      await user2Page.locator('#document-stale-data-reload').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Cycle 4: User 2 now saves
+      user2FieldA = user2Page.locator('#field-fieldA')
+      await user2FieldA.fill('Cycle 4 - User 2')
+      await saveDocAndAssert(user2Page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 1 tries to edit and should see modal again
+      user1FieldA = page.locator('#field-fieldA')
+      await user1FieldA.fill('Cycle 4 - User 1 attempt')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
     })
 
     test('should not show modal if user edits their own saved changes', async () => {
       await page.goto(simpleUrl.edit(simpleDoc.id))
 
-      // User 1 makes a change and saves
+      // User 1 makes a change and saves as draft
       const user1FieldA = page.locator('#field-fieldA')
       await user1FieldA.fill('My First Change')
-      await saveDocAndAssert(page)
+      await page.locator('#action-save-draft').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -1583,6 +1607,21 @@ describe('Locked Documents', () => {
 
       // Modal should NOT appear
       const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeHidden()
+
+      // User 1 saves draft again
+      await page.locator('#action-save-draft').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 1 edits a third time
+      await user1FieldA.fill('My Third Change')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Modal should still NOT appear
       await expect(modalContainer).toBeHidden()
     })
 
@@ -1661,6 +1700,48 @@ describe('Locked Documents', () => {
 
       // User 2 should now see User 1's changes
       await expect(user2GlobalText).toHaveValue('User 1 Updated Global Value')
+    })
+
+    test('should show stale data modal for global with drafts when user2 edits after user1 saves draft', async () => {
+      // User 1 publishes the global first to establish a published version
+      await page.goto(globalUrl.global('global-with-versions'))
+      let user1TextField = page.locator('#field-text')
+      await user1TextField.fill('Initial Published Version')
+      await saveDocAndAssert(page)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Both users now open the same global
+      await page.goto(globalUrl.global('global-with-versions'))
+      await user2Page.goto(globalUrl.global('global-with-versions'))
+
+      // Wait for both pages to be fully loaded and ready
+      user1TextField = page.locator('#field-text')
+      await expect(user1TextField).toBeVisible()
+      const user2TextField = user2Page.locator('#field-text')
+      await expect(user2TextField).toBeVisible()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 1 makes a change and saves as draft
+      await user1TextField.fill('User 1 Draft Change')
+      await page.locator('#action-save-draft').click()
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // User 2 tries to edit (should trigger stale data check)
+      await user2TextField.fill('User 2 Draft Change')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // Stale data modal should appear for user 2
+      const modalContainer = user2Page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+      await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
     })
   })
 })

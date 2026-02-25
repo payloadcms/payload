@@ -97,10 +97,12 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     admin: Admin;
+    'global-with-versions': GlobalWithVersion;
     menu: Menu;
   };
   globalsSelect: {
     admin: AdminSelect<false> | AdminSelect<true>;
+    'global-with-versions': GlobalWithVersionsSelect<false> | GlobalWithVersionsSelect<true>;
     menu: MenuSelect<false> | MenuSelect<true>;
   };
   locale: null;
@@ -456,6 +458,17 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions".
+ */
+export interface GlobalWithVersion {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
@@ -470,6 +483,17 @@ export interface Menu {
  */
 export interface AdminSelect<T extends boolean = true> {
   adminText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions_select".
+ */
+export interface GlobalWithVersionsSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
