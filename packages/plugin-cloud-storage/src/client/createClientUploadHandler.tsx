@@ -10,7 +10,8 @@ type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
   collectionSlug: UploadCollectionSlug
   enabled?: boolean
   extra: T
-  serverHandlerPath: string
+  prefix?: string
+  serverHandlerPath: `/${string}`
 }
 
 export const createClientUploadHandler = <T extends Record<string, unknown>>({
@@ -21,7 +22,8 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     collectionSlug: UploadCollectionSlug
     extra: T
     file: File
-    serverHandlerPath: string
+    prefix?: string
+    serverHandlerPath: `/${string}`
     serverURL: string
     updateFilename: (value: string) => void
   }) => Promise<unknown>
@@ -31,6 +33,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     collectionSlug,
     enabled,
     extra,
+    prefix,
     serverHandlerPath,
   }: ClientUploadHandlerProps<T>) {
     const { setUploadHandler } = useUploadHandlers()
@@ -51,6 +54,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
               collectionSlug,
               extra,
               file,
+              prefix,
               serverHandlerPath,
               serverURL,
               updateFilename,

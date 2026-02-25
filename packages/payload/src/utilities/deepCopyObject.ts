@@ -1,4 +1,4 @@
-// @ts-strict-ignore
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { JsonValue } from '../types/index.js'
 
 /*
@@ -21,7 +21,7 @@ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFT
 IN THE SOFTWARE.
 */
 
-function copyBuffer(cur) {
+function copyBuffer(cur: any) {
   if (cur instanceof Buffer) {
     return Buffer.from(cur)
   }
@@ -30,23 +30,23 @@ function copyBuffer(cur) {
 }
 
 const constructorHandlers = new Map()
-constructorHandlers.set(Date, (o) => new Date(o))
-constructorHandlers.set(Map, (o, fn) => new Map(cloneArray<any>(Array.from(o), fn)))
-constructorHandlers.set(Set, (o, fn) => new Set(cloneArray(Array.from(o), fn)))
+constructorHandlers.set(Date, (o: any) => new Date(o))
+constructorHandlers.set(Map, (o: any, fn: any) => new Map(cloneArray<any>(Array.from(o), fn)))
+constructorHandlers.set(Set, (o: any, fn: any) => new Set(cloneArray(Array.from(o), fn)))
 constructorHandlers.set(RegExp, (regex: RegExp) => new RegExp(regex.source, regex.flags))
 
-let handler = null
+let handler: ((o: any, fn: any) => any) | null = null
 
-function cloneArray<T>(a: T, fn): T {
+function cloneArray<T extends object>(a: T, fn: (o: any) => any): T {
   const keys = Object.keys(a)
-  const a2 = new Array(keys.length)
+  const a2 = new Array(keys.length) as T
   for (let i = 0; i < keys.length; i++) {
-    const k = keys[i]
-    const cur = a[k]
+    const k = keys[i] as keyof typeof a
+    const cur = a[k] as any
     if (typeof cur !== 'object' || cur === null) {
       a2[k] = cur
     } else if (cur instanceof RegExp) {
-      a2[k] = new RegExp(cur.source, cur.flags)
+      a2[k] = new RegExp(cur.source, cur.flags) as any
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
       a2[k] = handler(cur, fn)
     } else if (ArrayBuffer.isView(cur)) {
@@ -55,7 +55,7 @@ function cloneArray<T>(a: T, fn): T {
       a2[k] = fn(cur)
     }
   }
-  return a2 as T
+  return a2
 }
 
 export const deepCopyObject = <T>(o: T): T => {
@@ -72,25 +72,25 @@ export const deepCopyObject = <T>(o: T): T => {
   if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
     return handler(o, deepCopyObject)
   }
-  const o2 = {}
+  const o2 = {} as T
   for (const k in o) {
     if (Object.hasOwnProperty.call(o, k) === false) {
       continue
     }
     const cur = o[k]
     if (typeof cur !== 'object' || cur === null) {
-      o2[k as string] = cur
+      o2[k] = cur
     } else if (cur instanceof RegExp) {
-      o2[k as string] = new RegExp(cur.source, cur.flags)
+      o2[k] = new RegExp(cur.source, cur.flags) as any
     } else if (cur.constructor !== Object && (handler = constructorHandlers.get(cur.constructor))) {
-      o2[k as string] = handler(cur, deepCopyObject)
+      o2[k] = handler(cur, deepCopyObject)
     } else if (ArrayBuffer.isView(cur)) {
-      o2[k as string] = copyBuffer(cur)
+      o2[k] = copyBuffer(cur)
     } else {
-      o2[k as string] = deepCopyObject(cur)
+      o2[k] = deepCopyObject(cur)
     }
   }
-  return o2 as T
+  return o2
 }
 
 /*
@@ -135,21 +135,34 @@ export function deepCopyObjectSimple<T extends JsonValue>(value: T, filterUndefi
   }
 }
 
-export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(value: T): T {
+export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
+  value: T,
+  opts: {
+    excludeFiles?: boolean
+  } = {},
+): T {
   if (
     typeof value === 'object' &&
     value !== null &&
     '$$typeof' in value &&
     typeof value.$$typeof === 'symbol'
   ) {
-    return undefined
+    return undefined!
   } else if (typeof value !== 'object' || value === null) {
     return value
   } else if (Array.isArray(value)) {
     return value.map((e) =>
-      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e),
+      typeof e !== 'object' || e === null ? e : deepCopyObjectSimpleWithoutReactComponents(e, opts),
     ) as T
   } else {
+    // Handle File objects by returning them as-is (don't serialize to plain object) or exclude if excludeFiles is provided
+    if (value instanceof File) {
+      if (opts.excludeFiles) {
+        return undefined!
+      }
+
+      return value as unknown as T
+    }
     if (value instanceof Date) {
       return new Date(value) as unknown as T
     }
@@ -159,7 +172,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
       ret[k] =
         typeof v !== 'object' || v === null
           ? v
-          : (deepCopyObjectSimpleWithoutReactComponents(v as T) as any)
+          : (deepCopyObjectSimpleWithoutReactComponents(v as T, opts) as any)
     }
     return ret as unknown as T
   }
@@ -171,7 +184,7 @@ export function deepCopyObjectSimpleWithoutReactComponents<T extends JsonValue>(
  */
 export function deepCopyObjectComplex<T>(object: T, cache: WeakMap<any, any> = new WeakMap()): T {
   if (object === null) {
-    return null
+    return null!
   }
 
   if (cache.has(object)) {

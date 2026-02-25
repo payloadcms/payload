@@ -1,6 +1,6 @@
 import type { FlattenedField, Payload, Where } from 'payload'
 
-import { QueryError } from 'payload'
+import { APIError } from 'payload'
 
 import { parseParams } from './parseParams.js'
 
@@ -23,7 +23,7 @@ export const getBuildQueryPlugin = ({
   collectionSlug,
   versionsFields,
 }: GetBuildQueryPluginArgs = {}) => {
-  return function buildQueryPlugin(schema) {
+  return function buildQueryPlugin(schema: any) {
     const modifiedSchema = schema
     async function schemaBuildQuery({
       globalSlug,
@@ -31,19 +31,35 @@ export const getBuildQueryPlugin = ({
       payload,
       where,
     }: BuildQueryArgs): Promise<Record<string, unknown>> {
-      let fields = versionsFields
-      if (!fields) {
+      let fields: FlattenedField[] | null = null
+
+      if (versionsFields) {
+        fields = versionsFields
+      } else {
         if (globalSlug) {
           const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+
+          if (!globalConfig) {
+            throw new APIError(`Global with the slug ${globalSlug} was not found`)
+          }
+
           fields = globalConfig.flattenedFields
         }
         if (collectionSlug) {
-          const collectionConfig = payload.collections[collectionSlug].config
+          const collectionConfig = payload.collections[collectionSlug]?.config
+
+          if (!collectionConfig) {
+            throw new APIError(`Collection with the slug ${globalSlug} was not found`)
+          }
+
           fields = collectionConfig.flattenedFields
         }
       }
 
-      const errors = []
+      if (fields === null) {
+        throw new APIError('Fields are not initialized.')
+      }
+
       const result = await parseParams({
         collectionSlug,
         fields,
@@ -53,10 +69,6 @@ export const getBuildQueryPlugin = ({
         payload,
         where,
       })
-
-      if (errors.length > 0) {
-        throw new QueryError(errors)
-      }
 
       return result
     }

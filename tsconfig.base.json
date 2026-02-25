@@ -16,13 +16,13 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "outDir": "${configDir}/dist",
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
     "sourceMap": true,
-    "types": ["jest", "node", "@types/jest"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -31,12 +31,15 @@
       }
     ],
     "paths": {
+      "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
       "@payload-config": ["./test/_community/config.ts"],
+      "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
+      "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
@@ -45,6 +48,9 @@
       ],
       "@payloadcms/richtext-lexical/rsc": ["./packages/richtext-lexical/src/exports/server/rsc.ts"],
       "@payloadcms/richtext-slate/rsc": ["./packages/richtext-slate/src/exports/server/rsc.ts"],
+      "@payloadcms/plugin-ecommerce/ui": ["./packages/plugin-ecommerce/src/exports/ui.ts"],
+      "@payloadcms/plugin-ecommerce/react": ["./packages/plugin-ecommerce/src/exports/react.ts"],
+      "@payloadcms/plugin-ecommerce/types": ["./packages/plugin-ecommerce/src/exports/types.ts"],
       "@payloadcms/richtext-slate/client": [
         "./packages/richtext-slate/src/exports/client/index.ts"
       ],
@@ -55,6 +61,10 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-import-export/rsc": [
+        "./packages/plugin-import-export/src/exports/rsc.ts"
+      ],
+      "@payloadcms/plugin-mcp": ["./packages/plugin-mcp/src/index.ts"],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
@@ -66,7 +76,14 @@
         "./packages/plugin-multi-tenant/src/exports/client.ts"
       ],
       "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
+      "@payloadcms/plugin-multi-tenant/translations/languages/all": [
+        "./packages/plugin-multi-tenant/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-multi-tenant/translations/languages/*": [
+        "./packages/plugin-multi-tenant/src/translations/languages/*.ts"
+      ],
       "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payloadcms/storage-azure/client": ["./packages/storage-azure/src/exports/client.ts"],
       "@payloadcms/storage-s3/client": ["./packages/storage-s3/src/exports/client.ts"],
       "@payloadcms/storage-vercel-blob/client": [
         "./packages/storage-vercel-blob/src/exports/client.ts"
@@ -74,7 +91,8 @@
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
       "@payloadcms/storage-uploadthing/client": [
         "./packages/storage-uploadthing/src/exports/client.ts"
-      ]
+      ],
+      "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
   "include": ["${configDir}/src"],

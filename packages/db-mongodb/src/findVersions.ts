@@ -8,21 +8,29 @@ import type { MongooseAdapter } from './index.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {}, select, skip, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    limit = 0,
+    locale,
+    page,
+    pagination,
+    req = {},
+    select,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const Model = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const session = await getSession(this, req)
-  const options: QueryOptions = {
-    limit,
-    session,
-    skip,
-  }
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   let hasNearConstraint = false
 
@@ -34,6 +42,7 @@ export const findVersions: FindVersions = async function findVersions(
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
@@ -50,6 +59,15 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
+  const options: QueryOptions = {
+    limit,
+    session,
+    skip,
+  }
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -95,7 +113,8 @@ export const findVersions: FindVersions = async function findVersions(
   if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {

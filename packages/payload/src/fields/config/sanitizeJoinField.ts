@@ -1,17 +1,12 @@
-// @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { FlattenedJoinField, JoinField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
-import { traverseFields } from '../../utilities/traverseFields.js'
-import {
-  fieldShouldBeLocalized,
-  type FlattenedJoinField,
-  type JoinField,
-  type RelationshipField,
-  type UploadField,
-} from './types.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
+import { getFieldByPath } from '../../utilities/getFieldByPath.js'
+
 export const sanitizeJoinField = ({
   config,
   field,
@@ -40,6 +35,7 @@ export const sanitizeJoinField = ({
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
     parentIsLocalized,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     targetField: undefined,
   }
 
@@ -68,88 +64,46 @@ export const sanitizeJoinField = ({
     return
   }
 
-  const joinCollection = config.collections.find(
+  const joinCollection = config.collections?.find(
     (collection) => collection.slug === field.collection,
   )
   if (!joinCollection) {
     throw new InvalidFieldJoin(field)
   }
-  let joinRelationship: RelationshipField | UploadField
 
-  const pathSegments = field.on.split('.') // Split the schema path into segments
-  let currentSegmentIndex = 0
-
-  let localized = false
-  // Traverse fields and match based on the schema path
-  traverseFields({
-    callback: ({ field, next, parentIsLocalized }) => {
-      if (!('name' in field) || !field.name) {
-        return
-      }
-      const currentSegment = pathSegments[currentSegmentIndex]
-      // match field on path segments
-      if ('name' in field && field.name === currentSegment) {
-        if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
-          localized = true
-          const fieldIndex = currentSegmentIndex
-
-          join.getForeignPath = ({ locale }) => {
-            return pathSegments.reduce((acc, segment, index) => {
-              let result = `${acc}${segment}`
-
-              if (index === fieldIndex) {
-                result = `${result}.${locale}`
-              }
-
-              if (index !== pathSegments.length - 1) {
-                result = `${result}.`
-              }
-
-              return result
-            }, '')
-          }
-        }
-
-        // Check if this is the last segment in the path
-        if (
-          (currentSegmentIndex === pathSegments.length - 1 &&
-            'type' in field &&
-            field.type === 'relationship') ||
-          field.type === 'upload'
-        ) {
-          joinRelationship = field // Return the matched field
-          next()
-          return true
-        } else {
-          // Move to the next path segment and continue traversal
-          currentSegmentIndex++
-        }
-      } else {
-        // skip fields in non-matching path segments
-        next()
-        return
-      }
-    },
-    config: config as unknown as SanitizedConfig,
-    fields: joinCollection.fields,
-    parentIsLocalized: false,
+  const relationshipField = getFieldByPath({
+    fields: flattenAllFields({ cache: true, fields: joinCollection.fields }),
+    path: field.on,
   })
 
-  if (!joinRelationship) {
+  if (
+    !relationshipField ||
+    (relationshipField.field.type !== 'relationship' && relationshipField.field.type !== 'upload')
+  ) {
     throw new InvalidFieldJoin(join.field)
+  }
+
+  if (relationshipField.pathHasLocalized) {
+    join.getForeignPath = ({ locale }) => {
+      return relationshipField.localizedPath.replace('<locale>', locale!)
+    }
+  }
+
+  if (!relationshipField.field.index && !relationshipField.field.unique) {
+    relationshipField.field.index = true
   }
 
   if (validateOnly) {
     return
   }
 
-  join.targetField = joinRelationship
+  join.targetField = relationshipField.field
 
   // override the join field localized property to use whatever the relationship field has
   // or if it's nested to a localized array / blocks / tabs / group
-  field.localized = localized
+  field.localized = relationshipField.field.localized
   // override the join field hasMany property to use whatever the relationship field has
-  field.hasMany = joinRelationship.hasMany
+  field.hasMany = relationshipField.field.hasMany
 
   // @ts-expect-error converting JoinField to FlattenedJoinField to track targetField
   field.targetField = join.targetField
@@ -157,6 +111,6 @@ export const sanitizeJoinField = ({
   if (!joins[field.collection]) {
     joins[field.collection] = [join]
   } else {
-    joins[field.collection].push(join)
+    joins[field.collection]?.push(join)
   }
 }

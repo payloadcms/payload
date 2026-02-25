@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SharpOptions } from 'sharp'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -8,8 +7,8 @@ import type { UploadEdits } from './types.js'
 
 import { optionallyAppendMetadata } from './optionallyAppendMetadata.js'
 
-export const percentToPixel = (value, dimension) => {
-  return Math.floor((parseFloat(value) / 100) * dimension)
+const percentToPixel = (value: number, dimension: number) => {
+  return Math.floor((value / 100) * dimension)
 }
 
 type CropImageArgs = {
@@ -25,7 +24,7 @@ type CropImageArgs = {
 export async function cropImage({
   cropData,
   dimensions,
-  file,
+  file: fileArg,
   heightInPixels,
   req,
   sharp,
@@ -33,7 +32,8 @@ export async function cropImage({
   withMetadata,
 }: CropImageArgs) {
   try {
-    const { x, y } = cropData
+    const { x, y } = cropData!
+    const file = fileArg!
 
     const fileIsAnimatedType = ['image/avif', 'image/gif', 'image/webp'].includes(file.mimetype)
 
@@ -41,6 +41,33 @@ export async function cropImage({
 
     if (fileIsAnimatedType) {
       sharpOptions.animated = true
+    }
+
+    const { height: originalHeight, width: originalWidth } = dimensions
+    const newWidth = Number(widthInPixels)
+    const newHeight = Number(heightInPixels)
+
+    const dimensionsChanged = originalWidth !== newWidth || originalHeight !== newHeight
+
+    if (!dimensionsChanged) {
+      let adjustedHeight = originalHeight
+
+      if (fileIsAnimatedType) {
+        const animatedMetadata = await sharp(
+          file.tempFilePath || file.data,
+          sharpOptions,
+        ).metadata()
+        adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
+      }
+
+      return {
+        data: file.data,
+        info: {
+          height: adjustedHeight,
+          size: file.size,
+          width: originalWidth,
+        },
+      }
     }
 
     const formattedCropData = {
@@ -53,9 +80,9 @@ export async function cropImage({
     let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
 
     cropped = await optionallyAppendMetadata({
-      req,
+      req: req!,
       sharpFile: cropped,
-      withMetadata,
+      withMetadata: withMetadata!,
     })
 
     return await cropped.toBuffer({

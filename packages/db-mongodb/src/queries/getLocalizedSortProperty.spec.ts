@@ -1,5 +1,5 @@
+import { describe, beforeAll, it, expect } from 'vitest'
 import type { Config, SanitizedConfig } from 'payload'
-
 import { flattenAllFields, sanitizeConfig } from 'payload'
 
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
@@ -19,6 +19,7 @@ describe('get localized sort property', () => {
   it('passes through a non-localized sort property', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: [
         {
           name: 'title',
@@ -35,6 +36,7 @@ describe('get localized sort property', () => {
   it('properly localizes an un-localized sort property', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: [
         {
           name: 'title',
@@ -52,6 +54,7 @@ describe('get localized sort property', () => {
   it('keeps specifically asked-for localized sort properties', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: [
         {
           name: 'title',
@@ -69,6 +72,7 @@ describe('get localized sort property', () => {
   it('properly localizes nested sort properties', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: flattenAllFields({
         fields: [
           {
@@ -94,6 +98,7 @@ describe('get localized sort property', () => {
   it('keeps requested locale with nested sort properties', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: flattenAllFields({
         fields: [
           {
@@ -119,6 +124,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within row', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: flattenAllFields({
         fields: [
           {
@@ -143,6 +149,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within named tab', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: flattenAllFields({
         fields: [
           {
@@ -172,6 +179,7 @@ describe('get localized sort property', () => {
   it('properly localizes field within unnamed tab', () => {
     const result = getLocalizedSortProperty({
       config,
+      parentIsLocalized: false,
       fields: flattenAllFields({
         fields: [
           {

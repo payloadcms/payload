@@ -20,6 +20,7 @@ export { StrikethroughFeatureClient } from '../../features/format/strikethrough/
 export { SubscriptFeatureClient } from '../../features/format/subscript/feature.client.js'
 export { SuperscriptFeatureClient } from '../../features/format/superscript/feature.client.js'
 export { UnderlineFeatureClient } from '../../features/format/underline/feature.client.js'
+export { TextStateFeatureClient } from '../../features/textState/feature.client.js'
 export { HeadingFeatureClient } from '../../features/heading/client/index.js'
 export { HorizontalRuleFeatureClient } from '../../features/horizontalRule/client/index.js'
 export { IndentFeatureClient } from '../../features/indent/client/index.js'
@@ -30,6 +31,8 @@ export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/c
 export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
 export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
+export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
+export { defaultColors } from '../../features/textState/defaultColors.js'
 
 export { RelationshipFeatureClient } from '../../features/relationship/client/index.js'
 
@@ -43,7 +46,7 @@ export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/inde
 export { TableFeatureClient } from '../../features/experimental_table/client/index.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
-export { UploadFeatureClient } from '../../features/upload/client/feature.client.js'
+export { UploadFeatureClient } from '../../features/upload/client/index.js'
 
 export { RichTextField } from '../../field/index.js'
 export {
@@ -132,6 +135,12 @@ export {
   InlineBlockNode,
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
+export {
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+  HorizontalRuleNode,
+} from '../../features/horizontalRule/client/nodes/HorizontalRuleNode.js'
+
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
 export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -146,3 +155,10 @@ export { BlockCollapsible } from '../../features/blocks/client/component/compone
 export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
 export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'
 export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
+export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'
+export { codeConverterClient } from '../../features/blocks/premade/CodeBlock/converterClient.js'
+export { CodeComponent } from '../../features/blocks/premade/CodeBlock/Component/Code.js'
+export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock/Component/Block.js'
+
+export { RenderLexical } from '../../field/RenderLexical/index.js'
+export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'

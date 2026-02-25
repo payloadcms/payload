@@ -58,7 +58,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
   }
   ```
 
-  For more details on how to extend this functionality, see the [Live Preview](https://payloadcms.com/docs/live-preview) docs.
+  For more details on how to extend this functionality, see the [Live Preview](https://payloadcms.com/docs/live-preview/overview) docs.
 
 ## Front-end
 

@@ -1,13 +1,7 @@
 import type { Payload } from 'payload'
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 
 export const seed = async (_payload: Payload) => {
   await _payload.create({
@@ -22,9 +16,11 @@ export const seed = async (_payload: Payload) => {
 export async function clearAndSeedEverything(_payload: Payload) {
   return await seedDB({
     _payload,
-    collectionSlugs: _payload.config.collections.map((collection) => collection.slug),
+    collectionSlugs: [
+      ..._payload.config.collections.map((collection) => collection.slug),
+      'payload-jobs',
+    ],
     seedFunction: seed,
-    snapshotKey: 'fieldsTest',
-    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+    snapshotKey: 'queuesTest',
   })
 }

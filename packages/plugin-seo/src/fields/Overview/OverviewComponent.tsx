@@ -59,15 +59,6 @@ export const OverviewComponent: React.FC<OverviewProps> = ({
   const minTitle = titleOverrides?.minLength || minTitleDefault
   const maxTitle = titleOverrides?.maxLength || maxTitleDefault
 
-  const resetAll = useCallback(() => {
-    const fields = getFields()
-    const fieldsWithoutMeta = fields
-    fieldsWithoutMeta['meta.title'].value = ''
-    fieldsWithoutMeta['meta.description'].value = ''
-    fieldsWithoutMeta['meta.image'].value = ''
-    // dispatchFields(fieldsWithoutMeta);
-  }, [getFields])
-
   useEffect(() => {
     if (typeof metaTitle === 'string') {
       setTitleIsValid(metaTitle.length >= minTitle && metaTitle.length <= maxTitle)

@@ -7,10 +7,12 @@ import {
   customDefaultTabMetaTitle,
   customEditLabel,
   customNestedTabViewPath,
+  customTabComponent,
   customTabLabel,
   customTabViewPath,
   customVersionsTabMetaTitle,
   customViewMetaTitle,
+  overriddenDefaultRouteTabLabel,
 } from '../shared.js'
 import { customViews2CollectionSlug } from '../slugs.js'
 
@@ -23,6 +25,17 @@ export const CustomViews2: CollectionConfig = {
     components: {
       views: {
         edit: {
+          api: {
+            // Override the default tab component for the default route
+            tab: {
+              Component: {
+                path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                clientProps: {
+                  label: overriddenDefaultRouteTabLabel,
+                },
+              },
+            },
+          },
           // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
           customViewWithParam: {
             Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
@@ -54,7 +67,12 @@ export const CustomViews2: CollectionConfig = {
           myCustomViewWithCustomTab: {
             Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
             tab: {
-              Component: '/components/CustomTabComponent/index.js#CustomTabComponent',
+              Component: {
+                path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                clientProps: {
+                  label: customTabComponent,
+                },
+              },
             },
             path: customTabViewPath,
           },

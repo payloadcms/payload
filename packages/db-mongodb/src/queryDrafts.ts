@@ -1,4 +1,4 @@
-import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage, QueryOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
@@ -7,20 +7,34 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
+import { resolveJoins } from './utilities/resolveJoins.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  { collection, joins, limit, locale, page, pagination, req, select, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    req,
+    select,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const VersionModel = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
-  const options: QueryOptions = {
-    session: await getSession(this, req),
-  }
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   let hasNearConstraint
   let sort
@@ -30,19 +44,24 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+
+  const sortAggregation: PipelineStage[] = []
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
-      fields: collectionConfig.flattenedFields,
+      fields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
+      sortAggregation,
       timestamps: true,
+      versions: true,
     })
   }
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
-  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
   const versionQuery = await buildQuery({
     adapter: this,
     fields,
@@ -55,6 +74,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     fields,
     select,
   })
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
+    session,
+  }
+
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
@@ -88,24 +113,25 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
-        VersionModel.countDocuments(versionQuery, {
+        Model.countDocuments(versionQuery, {
           hint: { _id: 1 },
         }),
       )
     }
   }
 
-  if (limit > 0) {
+  if (limit && limit > 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
   }
 
   let result
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
-    collection,
+    collection: collectionSlug,
     collectionConfig,
     joins,
     locale,
@@ -115,13 +141,35 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   })
 
   // build join aggregation
-  if (aggregate) {
-    result = await VersionModel.aggregatePaginate(
-      VersionModel.aggregate(aggregate),
-      paginationOptions,
-    )
+  if (aggregate || sortAggregation.length > 0) {
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query: versionQuery,
+      session: paginationOptions.options?.session ?? undefined,
+      sort: paginationOptions.sort as object,
+      sortAggregation,
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
   } else {
-    result = await VersionModel.paginate(versionQuery, paginationOptions)
+    result = await Model.paginate(versionQuery, paginationOptions)
+  }
+
+  if (!this.useJoinAggregations) {
+    await resolveJoins({
+      adapter: this,
+      collectionSlug,
+      docs: result.docs as Record<string, unknown>[],
+      joins,
+      locale,
+      versions: true,
+    })
   }
 
   transform({
@@ -133,7 +181,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   for (let i = 0; i < result.docs.length; i++) {
     const id = result.docs[i].parent
-    result.docs[i] = result.docs[i].version
+    result.docs[i] = result.docs[i].version ?? {}
     result.docs[i].id = id
   }
 

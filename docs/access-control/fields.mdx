@@ -11,19 +11,21 @@ Field Access Control is [Access Control](../access-control/overview) used to res
 To add Access Control to a Field, use the `access` property in your [Field Config](../fields/overview):
 
 ```ts
-import type { Field } from 'payload';
+import type { Field } from 'payload'
 
 export const FieldWithAccessControl: Field = {
   // ...
-  access: { // highlight-line
+  access: {
+    // highlight-line
     // ...
   },
 }
 ```
 
 <Banner type="warning">
-  **Note:**
-  Field Access Controls does not support returning [Query](../queries/overview) constraints like [Collection Access Control](./collections) does.
+  **Note:** Field Access Control does not support returning
+  [Query](../queries/overview) constraints like [Collection Access
+  Control](./collections) does.
 </Banner>
 
 ## Config Options
@@ -55,11 +57,11 @@ export const Posts: CollectionConfig = {
 
 The following options are available:
 
-| Function                | Purpose                                                                          |
-| ----------------------- | -------------------------------------------------------------------------------- |
+| Function     | Purpose                                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
 | **`create`** | Allows or denies the ability to set a field's value when creating a new document. [More details](#create). |
-| **`read`**     | Allows or denies the ability to read a field's value. [More details](#read).       |
-| **`update`** | Allows or denies the ability to update a field's value [More details](#update).    |
+| **`read`**   | Allows or denies the ability to read a field's value. [More details](#read).                               |
+| **`update`** | Allows or denies the ability to update a field's value [More details](#update).                            |
 
 ### Create
 
@@ -67,11 +69,11 @@ Returns a boolean which allows or denies the ability to set a field's value when
 
 **Available argument properties:**
 
-| Option            | Description                                                                |
-| ----------------- | -------------------------------------------------------------------------- |
+| Option            | Description                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`data`**        | The full data passed to create the document.                               |
-| **`siblingData`** | Immediately adjacent field data passed to create the document.             |
+| **`data`**        | The full data passed to create the document.                                                                                 |
+| **`siblingData`** | Immediately adjacent field data passed to create the document.                                                               |
 
 ### Read
 
@@ -79,12 +81,12 @@ Returns a boolean which allows or denies the ability to read a field's value. If
 
 **Available argument properties:**
 
-| Option            | Description                                                                |
-| ----------------- | -------------------------------------------------------------------------- |
+| Option            | Description                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**          | `id` of the document being read                                            |
-| **`doc`**         | The full document data.                                                    |
-| **`siblingData`** | Immediately adjacent field data of the document being read.                |
+| **`id`**          | `id` of the document being read                                                                                              |
+| **`doc`**         | The full document data.                                                                                                      |
+| **`siblingData`** | Immediately adjacent field data of the document being read.                                                                  |
 
 ### Update
 
@@ -94,10 +96,10 @@ If `false` is returned and you attempt to update the field's value, the operatio
 
 **Available argument properties:**
 
-| Option            | Description                                                                |
-| ----------------- | -------------------------------------------------------------------------- |
+| Option            | Description                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **`req`**         | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object containing the currently authenticated `user` |
-| **`id`**          | `id` of the document being updated                                         |
-| **`data`**        | The full data passed to update the document.                               |
-| **`siblingData`** | Immediately adjacent field data passed to update the document with.        |
-| **`doc`**         | The full document data, before the update is applied.                      |
+| **`id`**          | `id` of the document being updated                                                                                           |
+| **`data`**        | The full data passed to update the document.                                                                                 |
+| **`siblingData`** | Immediately adjacent field data passed to update the document with.                                                          |
+| **`doc`**         | The full document data, before the update is applied.                                                                        |

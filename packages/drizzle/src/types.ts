@@ -37,10 +37,7 @@ import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
-import type { ChainedMethods } from './find/chainMethods.js'
 import type { Operators } from './queries/operatorMap.js'
-
-export { ChainedMethods }
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -92,6 +89,7 @@ export type TransactionPg = PgTransaction<
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type CountDistinct = (args: {
+  column?: PgColumn<any> | SQLiteColumn<any>
   db: DrizzleTransaction | LibSQLDatabase | PostgresDB
   joins: BuildQueryJoinAliases
   tableName: string
@@ -163,10 +161,11 @@ export type CreateJSONQueryArgs = {
   column?: Column | string
   operator: string
   pathSegments: string[]
+  rawColumn?: SQL<unknown>
   table?: string
   treatAsArray?: string[]
   treatRootAsArray?: boolean
-  value: boolean | number | string
+  value: boolean | number | number[] | string | string[]
 }
 
 /**
@@ -279,14 +278,38 @@ export type IntegerRawColumn = {
   type: 'integer'
 } & BaseRawColumn
 
+export type VectorRawColumn = {
+  dimensions?: number
+  type: 'vector'
+} & BaseRawColumn
+
+export type HalfVecRawColumn = {
+  dimensions?: number
+  type: 'halfvec'
+} & BaseRawColumn
+
+export type SparseVecRawColumn = {
+  dimensions?: number
+  type: 'sparsevec'
+} & BaseRawColumn
+
+export type BinaryVecRawColumn = {
+  dimensions?: number
+  type: 'bit'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
     } & BaseRawColumn)
+  | BinaryVecRawColumn
   | EnumRawColumn
+  | HalfVecRawColumn
   | IntegerRawColumn
+  | SparseVecRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
+  | VectorRawColumn
 
 export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
 
@@ -311,7 +334,56 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
   rawTable: RawTable
 }) => void
 
+export type BlocksToJsonBlockToMigrate = {
+  data: Record<string, unknown> | Record<string, unknown>[]
+  fieldAccessor: (number | string)[]
+}
+
+export interface BaseBlocksToJsonEntityToMigrate {
+  blocks: BlocksToJsonBlockToMigrate[]
+  originalData: Record<string, any>
+}
+
+export interface CollectionOrVersionBlocksToJsonEntityToMigrate
+  extends BaseBlocksToJsonEntityToMigrate {
+  id: number | string
+  slug: string
+  type: 'collection' | 'collectionVersion' | 'globalVersion'
+}
+
+export interface GlobalBlocksToJsonEntityToMigrate extends BaseBlocksToJsonEntityToMigrate {
+  slug: string
+  type: 'global'
+}
+
+export type BlocksToJsonEntityToMigrate =
+  | CollectionOrVersionBlocksToJsonEntityToMigrate
+  | GlobalBlocksToJsonEntityToMigrate
+
+export interface BlocksToJsonMigrator {
+  collectAndSaveEntitiesToBatches(
+    req: PayloadRequest,
+    options?: {
+      batchSize?: number
+    },
+  ): Promise<void>
+  getMigrationStatements(): Promise<{
+    statements: string
+    writeDrizzleSnapshot(filePath: string): void
+  }>
+  migrateEntitiesFromTempFolder(
+    req: PayloadRequest,
+    options?: {
+      clearBatches?: boolean
+    },
+  ): Promise<void>
+  setTempFolder(tempFolderPath: string): void
+  updatePayloadConfigFile(): Promise<void>
+}
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
+  blocksAsJSON?: boolean
+  blocksToJsonMigrator?: BlocksToJsonMigrator
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -320,8 +392,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-  execute: Execute<unknown>
 
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }
@@ -330,22 +402,25 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+  foreignKeys: Set<string>
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
-  rejectInitializing: () => void
 
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
+
   schema: Record<string, unknown>
 
   schemaName?: string
@@ -371,3 +446,8 @@ export type RelationMap = Map<
     type: 'many' | 'one'
   }
 >
+
+/**
+ * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ */
+export type { ChainedMethods } from './find/chainMethods.js'

@@ -5,7 +5,7 @@ import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } f
 type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
-  locale: string
+  locale?: string
   parentIsLocalized: boolean
   result?: string
   segments: string[]
@@ -36,14 +36,16 @@ export const getLocalizedSortProperty = ({
   )
 
   if (matchedField && !fieldIsPresentationalOnly(matchedField)) {
-    let nextFields: FlattenedField[]
+    let nextFields: FlattenedField[] | null = null
     let nextParentIsLocalized = parentIsLocalized
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
-    if (fieldShouldBeLocalized({ field: matchedField, parentIsLocalized })) {
+    if (
+      fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: parentIsLocalized ?? false })
+    ) {
       // Check to see if next segment is a locale
-      if (segments.length > 0) {
+      if (segments.length > 0 && remainingSegments[0]) {
         const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0])
 
         // If next segment is locale, remove it from remaining segments
@@ -66,16 +68,21 @@ export const getLocalizedSortProperty = ({
     ) {
       nextFields = matchedField.flattenedFields
       if (!nextParentIsLocalized) {
-        nextParentIsLocalized = matchedField.localized
+        nextParentIsLocalized = matchedField.localized ?? false
       }
     }
 
     if (matchedField.type === 'blocks') {
-      nextFields = (matchedField.blockReferences ?? matchedField.blocks).reduce(
+      nextFields = (matchedField.blockReferences ?? matchedField.blocks).reduce<FlattenedField[]>(
         (flattenedBlockFields, _block) => {
           // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
           const block =
-            typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
+            typeof _block === 'string' ? config.blocks?.find((b) => b.slug === _block) : _block
+
+          if (!block) {
+            return [...flattenedBlockFields]
+          }
+
           return [
             ...flattenedBlockFields,
             ...block.flattenedFields.filter(
@@ -93,7 +100,7 @@ export const getLocalizedSortProperty = ({
 
     const result = incomingResult ? `${incomingResult}.${localizedSegment}` : localizedSegment
 
-    if (nextFields) {
+    if (nextFields !== null) {
       return getLocalizedSortProperty({
         config,
         fields: nextFields,

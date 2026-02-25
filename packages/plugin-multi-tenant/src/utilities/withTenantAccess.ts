@@ -1,23 +1,17 @@
-import type {
-  Access,
-  AccessArgs,
-  AccessResult,
-  AllOperations,
-  CollectionConfig,
-  User,
-  Where,
-} from 'payload'
+import type { Access, AccessArgs, AccessResult, CollectionConfig, TypedUser, Where } from 'payload'
 
-import type { MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
+import type { AllAccessKeys, MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
 
 import { combineWhereConstraints } from './combineWhereConstraints.js'
 import { getTenantAccess } from './getTenantAccess.js'
 
 type Args<ConfigType> = {
   accessFunction?: Access
+  accessKey: AllAccessKeys[number]
+  accessResultCallback?: MultiTenantPluginConfig<ConfigType>['usersAccessResultOverride']
+  adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
-  operation: AllOperations
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
   userHasAccessToAllTenants: Required<
@@ -27,6 +21,9 @@ type Args<ConfigType> = {
 export const withTenantAccess =
   <ConfigType>({
     accessFunction,
+    accessKey,
+    accessResultCallback,
+    adminUsersSlug,
     collection,
     fieldName,
     tenantsArrayFieldName,
@@ -42,15 +39,24 @@ export const withTenantAccess =
     const accessResult: AccessResult = await accessFn(args)
 
     if (accessResult === false) {
-      return false
+      if (accessResultCallback) {
+        return accessResultCallback({
+          accessKey,
+          accessResult: false,
+          ...args,
+        })
+      } else {
+        return false
+      }
     } else if (accessResult && typeof accessResult === 'object') {
       constraints.push(accessResult)
     }
 
     if (
       args.req.user &&
+      args.req.user.collection === adminUsersSlug &&
       !userHasAccessToAllTenants(
-        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
+        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
       )
     ) {
       const tenantConstraint = getTenantAccess({
@@ -59,6 +65,20 @@ export const withTenantAccess =
         tenantsArrayTenantFieldName,
         user: args.req.user as UserWithTenantsField,
       })
+
+      // User with no tenants should have no access to tenant-scoped documents
+      // except for their own user document
+      if (tenantConstraint[fieldName]?.in.length === 0) {
+        const result: AccessResult =
+          collection.slug === args.req.user.collection
+            ? { id: { equals: args.req.user.id } }
+            : false
+
+        return accessResultCallback
+          ? accessResultCallback({ accessKey, accessResult: result, ...args })
+          : result
+      }
+
       if (collection.slug === args.req.user.collection) {
         constraints.push({
           or: [
@@ -73,8 +93,25 @@ export const withTenantAccess =
       } else {
         constraints.push(tenantConstraint)
       }
-      return combineWhereConstraints(constraints)
+
+      if (accessResultCallback) {
+        return accessResultCallback({
+          accessKey,
+          accessResult: combineWhereConstraints(constraints),
+          ...args,
+        })
+      } else {
+        return combineWhereConstraints(constraints)
+      }
     }
 
-    return accessResult
+    if (accessResultCallback) {
+      return accessResultCallback({
+        accessKey,
+        accessResult,
+        ...args,
+      })
+    } else {
+      return accessResult
+    }
   }

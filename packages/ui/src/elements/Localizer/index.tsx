@@ -1,16 +1,16 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useSearchParams } from 'next/navigation.js'
+import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
 import './index.scss'
+import { LocalizerLabel } from './LocalizerLabel/index.js'
 
 const baseClass = 'localizer'
 
@@ -21,7 +21,10 @@ export const Localizer: React.FC<{
   const {
     config: { localization },
   } = useConfig()
-  const searchParams = useSearchParams()
+
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+
   const { setLocaleIsLoading } = useLocaleLoading()
 
   const { i18n } = useTranslation()
@@ -44,17 +47,28 @@ export const Localizer: React.FC<{
                   <PopupList.Button
                     active={locale.code === localeOption.code}
                     disabled={locale.code === localeOption.code}
-                    href={qs.stringify(
-                      {
-                        ...parseSearchParams(searchParams),
-                        locale: localeOption.code,
-                      },
-                      { addQueryPrefix: true },
-                    )}
                     key={localeOption.code}
                     onClick={() => {
                       setLocaleIsLoading(true)
                       close()
+
+                      // can't use `useSearchParams` here because it is stale due to `window.history.pushState` in `ListQueryProvider`
+                      const searchParams = new URLSearchParams(window.location.search)
+
+                      const url = qs.stringify(
+                        {
+                          ...qs.parse(searchParams.toString(), {
+                            depth: 10,
+                            ignoreQueryPrefix: true,
+                          }),
+                          locale: localeOption.code,
+                        },
+                        { addQueryPrefix: true },
+                      )
+
+                      startRouteTransition(() => {
+                        router.push(url)
+                      })
                     }}
                   >
                     {localeOptionLabel !== localeOption.code ? (

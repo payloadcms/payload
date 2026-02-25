@@ -2,12 +2,12 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { v4 as uuid } from 'uuid'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -15,12 +15,26 @@ import {
   slug,
 } from './shared.js'
 
+process.env.NEXT_BASE_PATH = BASE_PATH
+
 export default buildConfigWithDefaults({
   admin: {
     autoLogin: {
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
+    },
+    autoRefresh: true,
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+      views: {
+        'create-first-user': {
+          Component: './CreateFirstUser.js#CreateFirstUser',
+          path: '/create-first-user',
+          exact: true,
+        },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -70,11 +84,26 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
         {
+          name: 'loginMetadata',
+          type: 'array',
+          label: 'Login Metadata',
+          fields: [
+            {
+              name: 'info',
+              type: 'text',
+            },
+          ],
+        },
+        {
           name: 'namedSaveToJWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
           label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'richText',
+          type: 'richText',
         },
         {
           name: 'group',
@@ -182,6 +211,16 @@ export default buildConfigWithDefaults({
           },
           label: 'Auth Debug',
         },
+        {
+          // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
+          // E.g. if the user is authenticated, it will appear in the both the client config
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+          access: {
+            // Setting this forces the field to show up in the permissions object
+            read: () => true,
+          },
+        },
       ],
     },
     {
@@ -201,6 +240,17 @@ export default buildConfigWithDefaults({
         // hash
         // login_attempts
         // lock_until
+      ],
+    },
+    {
+      slug: 'disable-local-strategy-password',
+      auth: { disableLocalStrategy: true },
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          required: true,
+        },
       ],
     },
     {
@@ -251,34 +301,35 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'api-keys-with-field-read-access',
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [
+        {
+          name: 'enableAPIKey',
+          type: 'checkbox',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'apiKey',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+      labels: {
+        plural: 'API Keys With Field Read Access',
+        singular: 'API Key With Field Read Access',
+      },
+    },
   ],
-  onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        custom: 'Hello, world!',
-        email: devUser.email,
-        password: devUser.password,
-        roles: ['admin'],
-      },
-    })
-
-    await payload.create({
-      collection: apiKeysSlug,
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-
-    await payload.create({
-      collection: apiKeysSlug,
-      data: {
-        apiKey: uuid(),
-        enableAPIKey: true,
-      },
-    })
-  },
+  onInit: seed,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

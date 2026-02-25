@@ -1,9 +1,0 @@
-@layer payload-default {
-  .select-version-locales {
-    flex-grow: 1;
-
-    &__label {
-      margin-bottom: calc(var(--base) * 0.25);
-    }
-  }
-}

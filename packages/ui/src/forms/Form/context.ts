@@ -1,7 +1,7 @@
 'use client'
 import type { RenderedField } from 'payload'
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 import {
   createContext as createSelectorContext,
   useContextSelector,
@@ -15,6 +15,11 @@ const DocumentFormContext = createContext({} as Context)
 const FormWatchContext = createContext({} as Context)
 const SubmittedContext = createContext(false)
 const ProcessingContext = createContext(false)
+/**
+ * If the form has started processing in the background (e.g.
+ * if autosave is running), this will be true.
+ */
+const BackgroundProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
@@ -26,18 +31,23 @@ export type RenderedFieldSlots = Map<string, RenderedField>
  *
  * @see https://payloadcms.com/docs/admin/react-hooks#useform
  */
-const useForm = (): Context => useContext(FormContext)
+const useForm = (): Context => use(FormContext)
 /**
  * Get the state of the document-level form. This is useful if you need to access the document-level Form from within a child Form.
  * This is the case withing lexical Blocks, as each lexical blocks renders their own Form.
  */
-const useDocumentForm = (): Context => useContext(DocumentFormContext)
+const useDocumentForm = (): Context => use(DocumentFormContext)
 
-const useWatchForm = (): Context => useContext(FormWatchContext)
-const useFormSubmitted = (): boolean => useContext(SubmittedContext)
-const useFormProcessing = (): boolean => useContext(ProcessingContext)
-const useFormModified = (): boolean => useContext(ModifiedContext)
-const useFormInitializing = (): boolean => useContext(InitializingContext)
+const useWatchForm = (): Context => use(FormWatchContext)
+const useFormSubmitted = (): boolean => use(SubmittedContext)
+const useFormProcessing = (): boolean => use(ProcessingContext)
+/**
+ * If the form has started processing in the background (e.g.
+ * if autosave is running), this will be true.
+ */
+const useFormBackgroundProcessing = (): boolean => use(BackgroundProcessingContext)
+const useFormModified = (): boolean => use(ModifiedContext)
+const useFormInitializing = (): boolean => use(InitializingContext)
 
 /**
  * Get and set the value of a form field based on a selector
@@ -56,6 +66,7 @@ const useFormFields = <Value = unknown>(
 const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
 
 export {
+  BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
   FormFieldsContext,
@@ -67,6 +78,7 @@ export {
   useAllFormFields,
   useDocumentForm,
   useForm,
+  useFormBackgroundProcessing,
   useFormFields,
   useFormInitializing,
   useFormModified,

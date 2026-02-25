@@ -1,7 +1,6 @@
 import type { PaginateOptions, Schema } from 'mongoose'
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 
 import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
@@ -24,12 +23,14 @@ export const buildCollectionSchema = (
         ...schemaOptions,
       },
     },
+    compoundIndexes: collection.sanitizedIndexes,
     configFields: collection.fields,
+    flattenedFields: collection.flattenedFields,
     payload,
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {
-    const indexDefinition: Record<string, 1> = collection.upload.filenameCompoundIndex.reduce(
+    const indexDefinition = collection.upload.filenameCompoundIndex.reduce<Record<string, 1>>(
       (acc, index) => {
         acc[index] = 1
         return acc
@@ -43,13 +44,6 @@ export const buildCollectionSchema = (
   schema
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
-
-  if (
-    Object.keys(collection.joins).length > 0 ||
-    Object.keys(collection.polymorphicJoins).length > 0
-  ) {
-    schema.plugin(mongooseAggregatePaginate)
-  }
 
   return schema
 }

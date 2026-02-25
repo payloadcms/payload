@@ -2,6 +2,7 @@
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
@@ -22,8 +23,8 @@ import { useEditorConfigContext } from '../../../../../lexical/config/client/Edi
 import { getDOMRangeRect } from '../../../../../lexical/utils/getDOMRangeRect.js'
 import { setFloatingElemPosition } from '../../../../../lexical/utils/setFloatingElemPosition.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import './index.scss'
+import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 
 function ButtonGroupItem({
   anchorElem,
@@ -94,6 +95,7 @@ function ToolbarGroupComponent({
   return (
     <div
       className={`inline-toolbar-popup__group inline-toolbar-popup__group-${group.key}`}
+      data-toolbar-group-key={group.key}
       key={group.key}
     >
       {group.type === 'dropdown' && group.items.length ? (
@@ -317,6 +319,7 @@ function useInlineToolbar(
   anchorElem: HTMLElement,
 ): null | React.ReactElement {
   const [isText, setIsText] = useState(false)
+  const isEditable = useLexicalEditable()
 
   const updatePopup = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -389,7 +392,7 @@ function useInlineToolbar(
     )
   }, [editor, updatePopup])
 
-  if (!isText || !editor.isEditable()) {
+  if (!isText || !isEditable) {
     return null
   }
 

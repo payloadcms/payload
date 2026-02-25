@@ -28,7 +28,7 @@ export const LocalizerLabel: React.FC<{
         <span className={`${baseClass}__current-label`}>
           {`${getTranslation(locale.label, i18n)}`}
         </span>
-        <ChevronIcon className={`${baseClass}__chevron`} size="small" />
+        <ChevronIcon className={`${baseClass}__chevron`} />
       </div>
     </div>
   )

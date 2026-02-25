@@ -11,6 +11,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import type { ReindexButtonProps } from './types.js'
@@ -45,12 +46,18 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     }
 
     try {
-      const res = await fetch(`${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`, {
-        body: JSON.stringify({
-          collections: reindexCollections,
+      const res = await fetch(
+        formatAdminURL({
+          apiRoute: config.routes.api,
+          path: `/${searchSlug}/reindex?locale=${locale.code}`,
         }),
-        method: 'POST',
-      })
+        {
+          body: JSON.stringify({
+            collections: reindexCollections,
+          }),
+          method: 'POST',
+        },
+      )
 
       const { message } = (await res.json()) as { message: string }
 
@@ -89,7 +96,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
       if (typeof label === 'string') {
         return label
       } else {
-        return Object.hasOwn(label, locale.code) ? label[locale.code] : slug
+        return label && Object.hasOwn(label, locale.code) ? label[locale.code] : slug
       }
     },
     [collectionLabels, locale.code],
@@ -97,7 +104,10 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
 
   const pluralizedLabels = useMemo(() => {
     return searchCollections.reduce<Record<string, string>>((acc, slug) => {
-      acc[slug] = getPluralizedLabel(slug)
+      const label = getPluralizedLabel(slug)
+      if (label) {
+        acc[slug] = label
+      }
       return acc
     }, {})
   }, [searchCollections, getPluralizedLabel])
@@ -111,9 +121,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   const modalDescription = selectedAll
     ? t('general:confirmReindexDescriptionAll')
     : t('general:confirmReindexDescription', { collections: selectedLabels })
-  const loadingText = selectedAll
-    ? t('general:reindexingAll', { collections: t('general:collections') })
-    : t('general:reindexingAll', { collections: selectedLabels })
 
   return (
     <div>

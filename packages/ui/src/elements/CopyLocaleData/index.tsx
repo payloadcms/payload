@@ -3,6 +3,7 @@
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -29,7 +30,6 @@ export const CopyLocaleData: React.FC = () => {
     config: {
       localization,
       routes: { admin },
-      serverURL,
     },
   } = useConfig()
   const { code } = useLocale()
@@ -82,13 +82,21 @@ export const CopyLocaleData: React.FC = () => {
 
         startRouteTransition(() =>
           router.push(
-            `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
+            formatAdminURL({
+              adminRoute: admin,
+              path: `/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}`,
+            }) + `?locale=${to}`,
           ),
         )
 
         toggleModal(drawerSlug)
       } catch (error) {
-        toast.error(error.message)
+        setCopying(false)
+        const errorMessage = (error as Error).message || 'error:unknown'
+        const translatedMessage = errorMessage.startsWith('error:')
+          ? t(errorMessage as any)
+          : errorMessage
+        toast.error(translatedMessage)
       }
     },
     [
@@ -99,9 +107,9 @@ export const CopyLocaleData: React.FC = () => {
       overwriteExisting,
       toggleModal,
       router,
-      serverURL,
       admin,
       startRouteTransition,
+      t,
     ],
   )
 

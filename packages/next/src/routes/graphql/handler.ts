@@ -99,6 +99,7 @@ export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
+      canSetHeaders: true,
       config,
       request,
     })

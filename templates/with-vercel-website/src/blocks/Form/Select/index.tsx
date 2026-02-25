@@ -20,7 +20,7 @@ export const Select: React.FC<
     control: Control
     errors: Partial<FieldErrorsImpl>
   }
-> = ({ name, control, errors, label, options, required, width }) => {
+> = ({ name, control, errors, label, options, required, width, defaultValue }) => {
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -33,7 +33,7 @@ export const Select: React.FC<
       </Label>
       <Controller
         control={control}
-        defaultValue=""
+        defaultValue={defaultValue}
         name={name}
         render={({ field: { onChange, value } }) => {
           const controlledValue = options.find((t) => t.value === value)
@@ -57,7 +57,7 @@ export const Select: React.FC<
         }}
         rules={{ required }}
       />
-      {errors[name] && <Error />}
+      {errors[name] && <Error name={name} />}
     </Width>
   )
 }

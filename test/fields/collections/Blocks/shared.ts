@@ -32,6 +32,10 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
       },
     ],
   },
+  {
+    blockType: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+    text: 'Hello world',
+  },
 ]
 
 export const blocksDoc: Partial<BlockField> = {

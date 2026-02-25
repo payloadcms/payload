@@ -19,6 +19,11 @@ export default buildConfigWithDefaults({
           name: 'text',
         },
         {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
           type: 'text',
           name: 'title',
         },
@@ -39,6 +44,26 @@ export default buildConfigWithDefaults({
           ],
         },
         {
+          type: 'group',
+          label: 'Unnamed Group',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideUnnamedGroup',
+            },
+          ],
+        },
+        {
+          type: 'group',
+          name: 'namedGroup',
+          fields: [
+            {
+              type: 'text',
+              name: 'insideNamedGroup',
+            },
+          ],
+        },
+        {
           name: 'radioField',
           type: 'radio',
           required: true,
@@ -52,6 +77,15 @@ export default buildConfigWithDefaults({
               label: 'Option 2',
               value: 'option-2',
             },
+          ],
+        },
+        {
+          name: 'externalType',
+          type: 'text',
+          typescriptSchema: [
+            () => ({
+              $ref: './test/types/schemas/custom-type.json',
+            }),
           ],
         },
       ],
@@ -85,6 +119,24 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'draft-posts',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          required: true,
+        },
+        {
+          type: 'text',
+          name: 'description',
+          required: true,
+        },
+      ],
+    },
   ],
   admin: {
     importMap: {
@@ -103,8 +155,21 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'settings',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'siteName',
+        },
+      ],
+    },
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    strictDraftTypes: true,
   },
 })

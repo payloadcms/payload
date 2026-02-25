@@ -42,6 +42,17 @@ export const Uploads1: CollectionConfig = {
       },
     },
     {
+      type: 'upload',
+      name: 'hasManyThumbnailUpload',
+      relationTo: 'admin-thumbnail-size',
+      hasMany: true,
+    },
+    {
+      type: 'upload',
+      name: 'singleThumbnailUpload',
+      relationTo: 'admin-thumbnail-size',
+    },
+    {
       type: 'richText',
       name: 'richText',
     },

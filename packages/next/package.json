@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.24.0",
+  "version": "3.77.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -16,16 +16,24 @@
       "url": "https://payloadcms.com"
     }
   ],
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
+    "./css": {
+      "import": "./src/dummy.css",
+      "default": "./src/dummy.css"
+    },
     ".": {
       "import": "./src/index.js",
       "types": "./src/index.js",
       "default": "./src/index.js"
     },
     "./withPayload": {
-      "import": "./src/withPayload.js",
-      "default": "./src/withPayload.js"
+      "import": "./src/withPayload/withPayload.js",
+      "default": "./src/withPayload/withPayload.js"
     },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
@@ -36,6 +44,11 @@
       "import": "./src/exports/routes.ts",
       "types": "./src/exports/routes.ts",
       "default": "./src/exports/routes.ts"
+    },
+    "./auth": {
+      "import": "./src/exports/auth.ts",
+      "types": "./src/exports/auth.ts",
+      "default": "./src/exports/auth.ts"
     },
     "./templates": {
       "import": "./src/exports/templates.ts",
@@ -51,6 +64,16 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
     }
   },
   "main": "./src/index.js",
@@ -61,28 +84,33 @@
   "scripts": {
     "build": "pnpm build:reactcompiler",
     "build:babel": "rm -rf dist_optimized && babel dist --out-dir dist_optimized --source-maps --extensions .ts,.js,.tsx,.jsx,.cjs,.mjs && rm -rf dist && mv dist_optimized dist",
-    "build:cjs": "swc ./src/withPayload.js -o ./dist/cjs/withPayload.cjs --config-file .swcrc-cjs --strip-leading-paths",
+    "build:bundle-for-analysis": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && node ./bundle.js esbuild",
+    "build:cjs": "node ./bundleWithPayload.js",
+    "build:debug": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc:debug && pnpm copyfiles:debug && pnpm build:types && pnpm build:cjs && node createStubScss.js",
     "build:esbuild": "node bundleScss.js",
     "build:reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm build:swc && pnpm build:babel && pnpm copyfiles && pnpm build:types && pnpm build:esbuild  && pnpm build:cjs",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:cjs && pnpm build:esbuild",
-    "clean": "rimraf -g {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles:debug": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build"
+    "lint:fix": "eslint . --fix"
   },
   "lint-staged": {
     "**/package.json": "sort-package-json",
     "*.{md,mdx,yml,json}": "prettier --write",
     "*.{js,jsx,ts,tsx}": [
-      "prettier --write",
-      "eslint --cache --fix"
+      "eslint --flag v10_config_lookup_from_file --cache --fix",
+      "prettier --write"
     ]
   },
   "dependencies": {
-    "@dnd-kit/core": "6.0.8",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
+    "@dnd-kit/sortable": "10.0.0",
     "@payloadcms/graphql": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
@@ -94,32 +122,30 @@
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "4.0.4",
     "sass": "1.77.4",
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.26.4",
-    "@babel/core": "7.26.7",
-    "@babel/preset-env": "7.26.7",
-    "@babel/preset-react": "7.26.3",
-    "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.1.5",
+    "@babel/cli": "7.27.2",
+    "@babel/core": "7.27.3",
+    "@babel/preset-env": "7.27.2",
+    "@babel/preset-react": "7.27.1",
+    "@babel/preset-typescript": "7.27.1",
+    "@next/eslint-plugin-next": "16.2.0-canary.54",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
-    "esbuild": "0.24.2",
+    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "3.1.0"
+    "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.0.0",
+    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0",
     "payload": "workspace:*"
   },
   "engines": {
@@ -132,9 +158,9 @@
         "default": "./dist/prod/styles.css"
       },
       "./withPayload": {
-        "import": "./dist/withPayload.js",
+        "import": "./dist/withPayload/withPayload.js",
         "require": "./dist/cjs/withPayload.cjs",
-        "default": "./dist/withPayload.js"
+        "default": "./dist/withPayload/withPayload.js"
       },
       "./layouts": {
         "import": "./dist/exports/layouts.js",
@@ -151,6 +177,11 @@
         "types": "./dist/exports/templates.d.ts",
         "default": "./dist/exports/templates.js"
       },
+      "./auth": {
+        "import": "./dist/exports/auth.js",
+        "types": "./dist/exports/auth.d.ts",
+        "default": "./dist/exports/auth.js"
+      },
       "./utilities": {
         "import": "./dist/exports/utilities.js",
         "types": "./dist/exports/utilities.d.ts",
@@ -160,6 +191,16 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       }
     },
     "main": "./dist/index.js",

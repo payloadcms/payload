@@ -1,9 +1,15 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { formatAdminURL } from 'payload/shared'
 
 export const AzureClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
-    const response = await fetch(`${serverURL}${apiRoute}${serverHandlerPath}`, {
+  handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
+    const endpointRoute = formatAdminURL({
+      apiRoute,
+      path: serverHandlerPath,
+      serverURL,
+    })
+    const response = await fetch(endpointRoute, {
       body: JSON.stringify({
         collectionSlug,
         filename: file.name,
@@ -13,7 +19,9 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       method: 'POST',
     })
 
-    const { url } = await response.json()
+    const { url } = (await response.json()) as {
+      url: string
+    }
 
     await fetch(url, {
       body: file,
@@ -25,5 +33,7 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       },
       method: 'PUT',
     })
+
+    return { prefix }
   },
 })

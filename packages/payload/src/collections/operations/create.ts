@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 
+import type { CollectionSlug, FindOptions, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -9,9 +9,6 @@ import type {
   TransformCollectionWithSelect,
 } from '../../types/index.js'
 import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
   Collection,
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
@@ -19,7 +16,7 @@ import type {
 } from '../config/types.js'
 
 import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
@@ -27,16 +24,22 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
-import { type CollectionSlug, type JsonObject } from '../../index.js'
+import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import {
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+} from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
-import { saveVersion } from '../../versions/saveVersion.js'
-import { buildAfterOperation } from './utils.js'
+import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   autosave?: boolean
@@ -50,10 +53,12 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
+  publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
+  selectedLocales?: string[]
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const createOperation = async <
   TSlug extends CollectionSlug,
@@ -78,17 +83,15 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection.config,
-            context: args.req.context,
-            operation: 'create',
-            req: args.req,
-          })) || args
-      }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'create',
+      overrideAccess: args.overrideAccess!,
+    })
+
+    if (args.publishSpecificLocale) {
+      args.req.locale = args.publishSpecificLocale
     }
 
     const {
@@ -102,6 +105,8 @@ export const createOperation = async <
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales: publishAllLocalesArg,
+      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -109,13 +114,21 @@ export const createOperation = async <
         payload: { config },
       },
       req,
-      select,
+      select: incomingSelect,
+      selectedLocales,
       showHiddenFields,
     } = args
 
     let { data } = args
 
-    const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
+    const publishAllLocales =
+      !draft &&
+      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+    const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
+
+    if (isSavingDraft) {
+      data._status = 'draft'
+    }
 
     let duplicatedFromDocWithLocales: JsonObject = {}
     let duplicatedFromDoc: JsonObject = {}
@@ -124,10 +137,10 @@ export const createOperation = async <
       const duplicateResult = await getDuplicateDocumentData({
         id: duplicateFromID,
         collectionConfig,
-        draftArg: shouldSaveDraft,
+        draftArg: isSavingDraft,
         overrideAccess,
         req,
-        shouldSaveDraft,
+        selectedLocales,
       })
 
       duplicatedFromDoc = duplicateResult.duplicatedFromDoc
@@ -156,7 +169,7 @@ export const createOperation = async <
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
-        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
+        !isSavingDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
 
     data = newFileData
@@ -172,7 +185,7 @@ export const createOperation = async <
       doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
@@ -224,12 +237,38 @@ export const createOperation = async <
       docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
+      overrideAccess,
       req,
-      skipValidation:
-        shouldSaveDraft &&
-        collectionConfig.versions.drafts &&
-        !collectionConfig.versions.drafts.validate,
+      skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (
+      config.localization &&
+      collectionConfig.versions &&
+      collectionConfig.versions.drafts &&
+      collectionConfig.versions.drafts.localizeStatus &&
+      publishAllLocales
+    ) {
+      let accessibleLocaleCodes = config.localization.localeCodes
+
+      if (config.localization.filterAvailableLocales) {
+        const filteredLocales = await config.localization.filterAvailableLocales({
+          locales: config.localization.locales,
+          req,
+        })
+        accessibleLocaleCodes = filteredLocales.map((locale) =>
+          typeof locale === 'string' ? locale : locale.code,
+        )
+      }
+
+      if (typeof resultWithLocales._status !== 'object' || resultWithLocales._status === null) {
+        resultWithLocales._status = {}
+      }
+
+      for (const localeCode of accessibleLocaleCodes) {
+        resultWithLocales._status[localeCode] = 'published'
+      }
+    }
 
     // /////////////////////////////////////
     // Write files to local storage
@@ -245,6 +284,12 @@ export const createOperation = async <
 
     let doc
 
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
+
     if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
       if (collectionConfig.auth.verify) {
         resultWithLocales._verified = Boolean(resultWithLocales._verified) || false
@@ -257,19 +302,25 @@ export const createOperation = async <
         password: data.password as string,
         payload: req.payload,
         req,
-        select,
       })
     } else {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
         req,
-        select,
       })
     }
 
     const verificationToken = doc._verificationToken
     let result: Document = sanitizeInternalFields(doc)
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Create version
@@ -281,8 +332,11 @@ export const createOperation = async <
         autosave,
         collection: collectionConfig,
         docWithLocales: result,
+        operation: 'create',
         payload,
+        publishSpecificLocale,
         req,
+        returning: false,
       })
     }
 
@@ -294,7 +348,7 @@ export const createOperation = async <
       await sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,
-        disableEmail: disableVerificationEmail,
+        disableEmail: disableVerificationEmail!,
         email: payload.email,
         req,
         token: verificationToken,
@@ -309,17 +363,17 @@ export const createOperation = async <
     result = await afterRead({
       collection: collectionConfig,
       context: req.context,
-      depth,
+      depth: depth!,
       doc: result,
       draft,
-      fallbackLocale,
+      fallbackLocale: fallbackLocale!,
       global: null,
-      locale,
-      overrideAccess,
+      locale: locale!,
+      overrideAccess: overrideAccess!,
       populate,
       req,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields!,
     })
 
     // /////////////////////////////////////
@@ -333,6 +387,7 @@ export const createOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             req,
           })) || result
       }
@@ -363,8 +418,10 @@ export const createOperation = async <
           (await hook({
             collection: collectionConfig,
             context: req.context,
+            data,
             doc: result,
             operation: 'create',
+            overrideAccess,
             previousDoc: {},
             req: args.req,
           })) || result
@@ -379,6 +436,7 @@ export const createOperation = async <
       args,
       collection: collectionConfig,
       operation: 'create',
+      overrideAccess: args.overrideAccess!,
       result,
     })
 

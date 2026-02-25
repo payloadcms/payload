@@ -1,9 +1,8 @@
-import type { CreateOptions } from 'mongoose'
-
 import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
@@ -13,34 +12,30 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     autosave,
     createdAt,
     globalSlug,
-    parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
-  const VersionModel = this.versions[globalSlug]
-  const options: CreateOptions = {
-    session: await getSession(this, req),
-  }
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
 
   const data = {
     autosave,
     createdAt,
     latest: true,
-    parent,
     publishedLocale,
     snapshot,
     updatedAt,
     version: versionData,
   }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
-  const fields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.config.globals.find((global) => global.slug === globalSlug),
-  )
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
 
   transform({
     adapter: this,
@@ -49,19 +44,20 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     operation: 'write',
   })
 
-  let [doc] = await VersionModel.create([data], options, req)
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
 
-  await VersionModel.updateMany(
+  let [doc] = await Model.create([data], options, req)
+
+  await Model.updateMany(
     {
       $and: [
         {
           _id: {
             $ne: doc._id,
-          },
-        },
-        {
-          parent: {
-            $eq: parent,
           },
         },
         {
@@ -74,6 +70,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     { $unset: { latest: 1 } },
     options,
   )
+
+  if (returning === false) {
+    return null
+  }
 
   doc = doc.toObject()
 

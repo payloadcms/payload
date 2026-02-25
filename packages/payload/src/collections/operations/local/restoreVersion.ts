@@ -1,13 +1,22 @@
-// @ts-strict-ignore
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type {
+  DataFromCollectionSlug,
+  DraftFlagFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { restoreVersionOperation } from '../restoreVersion.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+type BaseOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -24,10 +33,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   depth?: number
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale
@@ -41,7 +46,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -55,21 +60,21 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
   showHiddenFields?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
+export type Options<TSlug extends CollectionSlug> =
+  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
+
+export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<DataFromCollectionSlug<TSlug>> {
@@ -100,7 +105,7 @@ export default async function restoreVersionLocal<TSlug extends CollectionSlug>(
     overrideAccess,
     payload,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
   }

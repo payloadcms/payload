@@ -1,4 +1,10 @@
-import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
+import type {
+  FieldAffectingData,
+  FlattenedField,
+  SelectIncludeType,
+  SelectMode,
+  SelectType,
+} from 'payload'
 
 import {
   deepCopyObjectSimple,
@@ -107,7 +113,7 @@ const traverseFields = ({
         const fieldSelect = select[field.name] as SelectType
 
         if (field.type === 'array' && selectMode === 'include') {
-          fieldSelect['id'] = true
+          fieldSelect.id = true
         }
 
         traverseFields({
@@ -122,12 +128,16 @@ const traverseFields = ({
 
         break
       }
-
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType
 
         for (const _block of field.blockReferences ?? field.blocks) {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
+
+          if (!block) {
+            continue
+          }
+
           if (
             (selectMode === 'include' && blocksSelect[block.slug] === true) ||
             (selectMode === 'exclude' && typeof blocksSelect[block.slug] === 'undefined')
@@ -155,9 +165,10 @@ const traverseFields = ({
             blocksSelect[block.slug] = {}
           }
 
-          if (blockSelectMode === 'include') {
-            blocksSelect[block.slug]['id'] = true
-            blocksSelect[block.slug]['blockType'] = true
+          if (blockSelectMode === 'include' && typeof blocksSelect[block.slug] === 'object') {
+            const blockSelect = blocksSelect[block.slug] as SelectIncludeType
+            blockSelect.id = true
+            blockSelect.blockType = true
           }
 
           traverseFields({
@@ -171,6 +182,20 @@ const traverseFields = ({
           })
         }
 
+        break
+      }
+
+      case 'relationship':
+      case 'upload': {
+        // When a relationship/upload field is selected with nested fields (for population), we still need to include the raw
+        // field value in the projection so that population can work. The nested select is handled by the population logic.
+        addFieldToProjection({
+          adapter,
+          databaseSchemaPath,
+          field,
+          parentIsLocalized,
+          projection,
+        })
         break
       }
 

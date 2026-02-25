@@ -6,8 +6,12 @@ export const acceptedLanguages = [
   'ar',
   'az',
   'bg',
+  'bn-BD',
+  'bn-IN',
   'ca',
   'cs',
+  'bn-BD',
+  'bn-IN',
   'da',
   'de',
   'en',
@@ -18,11 +22,14 @@ export const acceptedLanguages = [
   'he',
   'hr',
   'hu',
+  'hy',
   'id',
+  'is',
   'it',
   'ja',
   'ko',
   'lt',
+  'lv',
   'my',
   'nb',
   'nl',
@@ -35,6 +42,7 @@ export const acceptedLanguages = [
   'sk',
   'sl',
   'sv',
+  'ta',
   'th',
   'tr',
   'uk',
@@ -51,10 +59,7 @@ export const acceptedLanguages = [
    * 'as',
    * 'az-latin',
    * 'be',
-   * 'bn-BD',
-   * 'bn-IN',
    * 'bs',
-   * 'ca',
    * 'ca-ES-valencia',
    * 'cy',
    * 'el',
@@ -74,9 +79,7 @@ export const acceptedLanguages = [
    * 'gu',
    * 'ha-Latn',
    * 'hi',
-   * 'hy',
    * 'ig-Latn',
-   * 'is',
    * 'it-it',
    * 'ka',
    * 'kk',
@@ -86,7 +89,6 @@ export const acceptedLanguages = [
    * 'ku-Arab',
    * 'ky-Cyrl',
    * 'lb',
-   * 'lv',
    * 'mi-Latn',
    * 'mk',
    * 'ml',
@@ -152,7 +154,7 @@ function parseAcceptLanguage(acceptLanguageHeader: string): LanguagePreference[]
 export function extractHeaderLanguage(acceptLanguageHeader: string): AcceptedLanguages | undefined {
   const parsedHeader = parseAcceptLanguage(acceptLanguageHeader)
 
-  let matchedLanguage: AcceptedLanguages
+  let matchedLanguage: AcceptedLanguages | undefined
 
   for (const { language } of parsedHeader) {
     if (!matchedLanguage && acceptedLanguages.includes(language)) {

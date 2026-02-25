@@ -2,391 +2,98 @@
 title: Lexical Converters
 label: Converters
 order: 20
-desc: Conversion between lexical, markdown and html
-keywords: lexical, rich text, editor, headless cms, convert, html, mdx, markdown, md, conversion, export
+desc: Conversion between lexical, markdown, jsx and html
+keywords: lexical, rich text, editor, headless cms, convert, html, mdx, markdown, md, conversion, export, jsx
 ---
 
-Lexical saves data in JSON - this is great for storage and flexibility and allows you to easily to convert it to other formats like JSX, HTML or Markdown.
+Richtext fields save data in JSON - this is great for storage and flexibility and allows you to easily to convert it to other formats:
 
-## Lexical => JSX
+- [Converting JSX](/docs/rich-text/converting-jsx)
+- [Converting HTML](/docs/rich-text/converting-html)
+- [Converting Plaintext](/docs/rich-text/converting-plaintext)
+- [Converting Markdown and MDX](/docs/rich-text/converting-markdown)
 
-For React-based frontends, converting Lexical content to JSX is the recommended rendering approach. Import the RichText component from @payloadcms/richtext-lexical/react and pass the Lexical content to it:
+## Retrieving the Editor Config
 
-```tsx
-import React from 'react'
-import { RichText } from '@payloadcms/richtext-lexical/react'
-import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+Some converters require access to the Lexical editor config, which defines available features and behaviors. Payload provides multiple ways to obtain the editor config through the `editorConfigFactory` from `@payloadcms/richtext-lexical`.
 
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
-  return (
-    <RichText data={data} />
-  )
-}
-```
+### Importing the Factory
 
-The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop. In our [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) you have an example of how to use `converters` to render custom blocks, custom nodes and override existing converters.
-
-<Banner type="default">
-  When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes such as uploads. The JSX converter requires fully populated data to work correctly.
-</Banner>
-
-### Converting Internal Links
-
-By default, Payload doesn't know how to convert **internal** links to JSX, as it doesn't know what the corresponding URL of the internal link is. You'll notice that you get a "found internal link, but internalDocToHref is not provided" error in the console when you try to render content with internal links.
-
-To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that receives the link node and returns the URL of the document.
-
-```tsx
-import type { DefaultNodeTypes, SerializedLinkNode } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import {
-  type JSXConvertersFunction,
-  LinkJSXConverter,
-  RichText,
-} from '@payloadcms/richtext-lexical/react'
-import React from 'react'
-
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { relationTo, value } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
-}
-
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
-})
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
-}
-```
-
-### Converting Lexical Blocks
-
-To convert Lexical Blocks or Inline Blocks to JSX, pass the converter for your block to the `RichText` component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
-
-```tsx
-'use client'
-import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
-import type { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
-import React from 'react'
-
-// Extend the default node types with your custom blocks for full type safety
-type NodeTypes = DefaultNodeTypes | SerializedBlockNode<MyInlineBlock | MyTextBlock>
-
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  blocks: {
-    // Each key should match your block's slug
-    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
-  },
-  inlineBlocks: {
-    // Each key should match your inline block's slug
-    myInlineBlock: ({ node }) => <span>{node.fields.text}</span>,
-  },
-})
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
-}
-```
-
-### Overriding Default JSX Converters
-
-You can override any of the default JSX converters by passing passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
-
-Example - overriding the upload node converter to use next/image:
-
-```tsx
-'use client'
-import type { DefaultNodeTypes, SerializedUploadNode } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
-import Image from 'next/image'
-import React from 'react'
-
-type NodeTypes = DefaultNodeTypes
-
-// Custom upload converter component that uses next/image
-const CustomUploadComponent: React.FC<{
-  node: SerializedUploadNode
-}> = ({ node }) => {
-  if (node.relationTo === 'uploads') {
-    const uploadDoc = node.value
-    if (typeof uploadDoc !== 'object') {
-      return null
-    }
-    const { alt, height, url, width } = uploadDoc
-    return <Image alt={alt} height={height} src={url} width={width} />
-  }
-
-  return null
-}
-
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  // Override the default upload converter
-  upload: ({ node }) => {
-    return <CustomUploadComponent node={node} />
-  },
-})
-
-export const MyComponent: React.FC<{
-  lexicalData: SerializedEditorState
-}> = ({ lexicalData }) => {
-  return <RichText converters={jsxConverters} data={lexicalData} />
-}
-```
-
-## Lexical => HTML
-
-If you don't have a React-based frontend, or if you need to send the content to a third-party service, you can convert lexical to HTML. There are two ways to do this:
-
-1. **Outputting HTML from the Collection:** Create a new field in your collection to convert saved JSON content to HTML. Payload generates and outputs the HTML for use in your frontend.
-2. **Generating HTML on any server** Convert JSON to HTML on-demand on the server.
-
-In both cases, the conversion needs to happen on a server, as the HTML converter will automatically fetch data for nodes that require it (e.g. uploads and internal links). The editor comes with built-in HTML serializers, simplifying the process of converting JSON to HTML.
-
-### Outputting HTML from the Collection
-
-To add HTML generation directly within the collection, follow the example below:
+First, import the necessary utilities:
 
 ```ts
-import type { CollectionConfig } from 'payload'
+import type { SanitizedConfig } from 'payload'
+import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 
-import { HTMLConverterFeature, lexicalEditor, lexicalHTML } from '@payloadcms/richtext-lexical'
+// Your Payload Config needs to be available in order to retrieve the default editor config
+const config: SanitizedConfig = {} as SanitizedConfig
+```
 
-const Pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    {
-      name: 'nameOfYourRichTextField',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [
-          ...defaultFeatures,
-          // The HTMLConverter Feature is the feature which manages the HTML serializers.
-          // If you do not pass any arguments to it, it will use the default serializers.
-          HTMLConverterFeature({}),
-        ],
-      }),
-    },
-    lexicalHTML('nameOfYourRichTextField', { name: 'nameOfYourRichTextField_html' }),
+### Option 1: Default Editor Config
+
+If you require the default editor config:
+
+```ts
+const defaultEditorConfig = await editorConfigFactory.default({ config })
+```
+
+### Option 2: Extract from a Lexical Field
+
+When a lexical field config is available, you can extract the editor config directly:
+
+```ts
+const fieldEditorConfig = editorConfigFactory.fromField({
+  field: config.collections[0].fields[1],
+})
+```
+
+### Option 3: Create a Custom Editor Config
+
+You can create a custom editor configuration by specifying additional features:
+
+```ts
+import { FixedToolbarFeature } from '@payloadcms/richtext-lexical'
+
+const customEditorConfig = await editorConfigFactory.fromFeatures({
+  config,
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
   ],
-}
-```
-
-The `lexicalHTML()` function creates a new field that automatically converts the referenced lexical richText field into HTML through an afterRead hook.
-
-### Generating HTML anywhere on the server
-
-If you wish to convert JSON to HTML ad-hoc, use the `convertLexicalToHTML` function:
-
-```ts
-import { consolidateHTMLConverters, convertLexicalToHTML } from '@payloadcms/richtext-lexical'
-
-
-await convertLexicalToHTML({
-  converters: consolidateHTMLConverters({ editorConfig }),
-  data: editorData,
-  payload, // if you have Payload but no req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes)
-  req, // if you have req available, pass it in here to enable server-only functionality (e.g. proper conversion of upload nodes). No need to pass in Payload if req is passed in.
-})
-```
-This method employs `convertLexicalToHTML` from `@payloadcms/richtext-lexical`, which converts the serialized editor state into HTML.
-
-Because every `Feature` is able to provide html converters, and because the `htmlFeature` can modify those or provide their own, we need to consolidate them with the default html Converters using the `consolidateHTMLConverters` function.
-
-#### Example: Generating HTML within an afterRead hook
-
-```ts
-import type { FieldHook } from 'payload'
-
-import {
-  HTMLConverterFeature,
-  consolidateHTMLConverters,
-  convertLexicalToHTML,
-  defaultEditorConfig,
-  defaultEditorFeatures,
-  sanitizeServerEditorConfig,
-} from '@payloadcms/richtext-lexical'
-
-const hook: FieldHook = async ({ req, siblingData }) => {
-  const editorConfig = defaultEditorConfig
-
-  editorConfig.features = [...defaultEditorFeatures, HTMLConverterFeature({})]
-
-  const sanitizedEditorConfig = await sanitizeServerEditorConfig(editorConfig, req.payload.config)
-
-  const html = await convertLexicalToHTML({
-    converters: consolidateHTMLConverters({ editorConfig: sanitizedEditorConfig }),
-    data: siblingData.lexicalSimple,
-    req,
-  })
-  return html
-}
-```
-
-### CSS
-
-Payload's lexical HTML converter does not generate CSS for you, but it does add classes to the generated HTML. You can use these classes to style the HTML in your frontend.
-
-Here is some "base" CSS you can use to ensure that nested lists render correctly:
-
-```css
-/* Base CSS for Lexical HTML */
-.nestedListItem, .list-check {
-  list-style-type: none;
-}
-```
-
-### Creating your own HTML Converter
-
-HTML Converters are typed as `HTMLConverter`, which contains the node type it should handle, and a function that accepts the serialized node from the lexical editor, and outputs the HTML string. Here's the HTML Converter of the Upload node as an example:
-
-```ts
-import type { HTMLConverter } from '@payloadcms/richtext-lexical'
-
-const UploadHTMLConverter: HTMLConverter<SerializedUploadNode> = {
-  converter: async ({ node, req }) => {
-    const uploadDocument: {
-      value?: any
-      } = {}
-    if(req) {
-      await populate({
-        id,
-        collectionSlug: node.relationTo,
-        currentDepth: 0,
-        data: uploadDocument,
-        depth: 1,
-        draft: false,
-        key: 'value',
-        overrideAccess: false,
-        req,
-        showHiddenFields: false,
-      })
-    }
-
-    const url = (req?.payload?.config?.serverURL || '') + uploadDocument?.value?.url
-
-    if (!(uploadDocument?.value?.mimeType as string)?.startsWith('image')) {
-      // Only images can be serialized as HTML
-      return ``
-    }
-
-    return `<img src="${url}" alt="${uploadDocument?.value?.filename}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
-  },
-  nodeTypes: [UploadNode.getType()], // This is the type of the lexical node that this converter can handle. Instead of hardcoding 'upload' we can get the node type directly from the UploadNode, since it's static.
-}
-```
-
-As you can see, we have access to all the information saved in the node (for the Upload node, this is `value`and `relationTo`) and we can use that to generate the HTML.
-
-The `convertLexicalToHTML` is part of `@payloadcms/richtext-lexical` automatically handles traversing the editor state and calling the correct converter for each node.
-
-### Embedding the HTML Converter in your Feature
-
-You can embed your HTML Converter directly within your custom `ServerFeature`, allowing it to be handled automatically by the `consolidateHTMLConverters` function. Here is an example:
-
-```ts
-import { createNode } from '@payloadcms/richtext-lexical'
-import type { FeatureProviderProviderServer } from '@payloadcms/richtext-lexical'
-
-export const UploadFeature: FeatureProviderProviderServer<
-  UploadFeatureProps,
-  UploadFeaturePropsClient
-> = (props) => {
-  /*...*/
-  return {
-    feature: () => {
-      return {
-        nodes: [
-          createNode({
-            converters: {
-              html: yourHTMLConverter, // <= This is where you define your HTML Converter
-            },
-            node: UploadNode,
-            //...
-          }),
-        ],
-        ClientComponent: UploadFeatureClientComponent,
-        clientFeatureProps: clientProps,
-        serverFeatureProps: props,
-        /*...*/
-      }
-    },
-    key: 'upload',
-    serverFeatureProps: props,
-  }
-}
-```
-
-## Headless Editor
-
-Lexical provides a seamless way to perform conversions between various other formats:
-
-- HTML to Lexical (or, importing HTML into the lexical editor)
-- Markdown to Lexical (or, importing Markdown into the lexical editor)
-- Lexical to Markdown
-
-A headless editor can perform such conversions outside of the main editor instance. Follow this method to initiate a headless editor:
-
-```ts
-import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import { getEnabledNodes, sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
-
-const yourEditorConfig // <= your editor config here
-const payloadConfig // <= your Payload Config here
-
-const headlessEditor = createHeadlessEditor({
-  nodes: getEnabledNodes({
-    editorConfig: sanitizeServerEditorConfig(yourEditorConfig, payloadConfig),
-  }),
 })
 ```
 
-### Getting the editor config
+### Option 4: Extract from an Instantiated Editor
 
-As you can see, you need to provide an editor config in order to create a headless editor. This is because the editor config is used to determine which nodes & features are enabled, and which converters are used.
-
-To get the editor config, simply import the default editor config and adjust it - just like you did inside of the `editor: lexicalEditor({})` property:
+If you've created a global or reusable Lexical editor instance, you can access its configuration. This method is typically less efficient and not recommended:
 
 ```ts
-import { defaultEditorConfig, defaultEditorFeatures } from '@payloadcms/richtext-lexical' // <= make sure this package is installed
+const editor = lexicalEditor({
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
+  ],
+})
 
-const yourEditorConfig = defaultEditorConfig
-
-// If you made changes to the features of the field's editor config, you should also make those changes here:
-yourEditorConfig.features = [
-  ...defaultEditorFeatures,
-  // Add your custom features here
-]
+const instantiatedEditorConfig = await editorConfigFactory.fromEditor({
+  config,
+  editor,
+})
 ```
 
-### Getting the editor config from an existing field
+For better efficiency, consider extracting the `features` into a separate variable and using `fromFeatures` instead of this method.
 
-If you have access to the sanitized collection config, you can get access to the lexical sanitized editor config & features, as every lexical richText field returns it. Here is an example how you can get it from another field's afterRead hook:
+### Example - Retrieving the editor config from an existing field
+
+If you have access to the sanitized collection config, you can access the lexical sanitized editor config, as every lexical richText field returns it. Here is an example how you can retrieve it from another field's afterRead hook:
 
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
-import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
+
 import {
+  editorConfigFactory,
   getEnabledNodes,
-  lexicalEditor
+  lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
 export const MyCollection: CollectionConfig = {
@@ -397,24 +104,16 @@ export const MyCollection: CollectionConfig = {
       type: 'text',
       hooks: {
         afterRead: [
-          ({ value, collection }) => {
-            const otherRichTextField: RichTextField = collection.fields.find(
+          ({ siblingFields, value }) => {
+            const field: RichTextField = siblingFields.find(
               (field) => 'name' in field && field.name === 'richText',
             ) as RichTextField
 
-            const lexicalAdapter: LexicalRichTextAdapter =
-              otherRichTextField.editor as LexicalRichTextAdapter
-
-            const sanitizedServerEditorConfig: SanitizedServerEditorConfig =
-              lexicalAdapter.editorConfig
-
-            const headlessEditor = createHeadlessEditor({
-              nodes: getEnabledNodes({
-                editorConfig: sanitizedServerEditorConfig,
-              }),
+            const editorConfig = editorConfigFactory.fromField({
+              field,
             })
 
-            // Do whatever you want with the headless editor
+            // Now you can use the editor config
 
             return value
           },
@@ -424,143 +123,8 @@ export const MyCollection: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      editor: lexicalEditor({
-        features,
-      }),
-    }
-  ]
-}
-```
-
-## HTML => Lexical
-
-Once you have your headless editor instance, you can use it to convert HTML to Lexical:
-
-```ts
-import { $generateNodesFromDOM } from '@payloadcms/richtext-lexical/lexical/html'
-import { $getRoot, $getSelection } from '@payloadcms/richtext-lexical/lexical'
-import { JSDOM } from 'jsdom'
-
-headlessEditor.update(
-  () => {
-    // In a headless environment you can use a package such as JSDom to parse the HTML string.
-    const dom = new JSDOM(htmlString)
-
-    // Once you have the DOM instance it's easy to generate LexicalNodes.
-    const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
-
-    // Select the root
-    $getRoot().select()
-
-    // Insert them at a selection.
-    const selection = $getSelection()
-    selection.insertNodes(nodes)
-  },
-  { discrete: true },
-)
-
-// Do this if you then want to get the editor JSON
-const editorJSON = headlessEditor.getEditorState().toJSON()
-```
-
-Functions prefixed with a `$` can only be run inside an `editor.update()` or `editorState.read()` callback.
-
-This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
-
-<Banner type="success">
-  **Note:**
-
-  Using the `discrete: true` flag ensures instant updates to the editor state. If
-  immediate reading of the updated state isn't necessary, you can omit the flag.
-</Banner>
-
-## Markdown => Lexical
-
-Convert markdown content to the Lexical editor format with the following:
-
-```ts
-import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
-
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
-const markdown = `# Hello World`
-
-headlessEditor.update(
-  () => {
-    $convertFromMarkdownString(markdown, yourSanitizedEditorConfig.features.markdownTransformers)
-  },
-  { discrete: true },
-)
-
-// Do this if you then want to get the editor JSON
-const editorJSON = headlessEditor.getEditorState().toJSON()
-```
-
-## Lexical => Markdown
-
-Export content from the Lexical editor into Markdown format using these steps:
-
-1. Import your current editor state into the headless editor.
-2. Convert and fetch the resulting markdown string.
-
-Here's the code for it:
-
-```ts
-import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
-const yourEditorState: SerializedEditorState // <= your current editor state here
-
-// Import editor state into your headless editor
-try {
-  headlessEditor.update(
-    () => {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+      editor: lexicalEditor(),
     },
-    { discrete: true },  // This should commit the editor state immediately
-  )
-} catch (e) {
-  logger.error({ err: e }, 'ERROR parsing editor state')
+  ],
 }
-
-// Export to markdown
-let markdown: string
-headlessEditor.getEditorState().read(() => {
-  markdown = $convertToMarkdownString(yourSanitizedEditorConfig?.features?.markdownTransformers)
-})
-```
-
-## Lexical => Plain Text
-
-Export content from the Lexical editor into plain text using these steps:
-
-1. Import your current editor state into the headless editor.
-2. Convert and fetch the resulting plain text string.
-
-Here's the code for it:
-
-```ts
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
-
-const yourEditorState: SerializedEditorState // <= your current editor state here
-
-// Import editor state into your headless editor
-try {
-    headlessEditor.update(
-    () => {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
-    },
-    { discrete: true },  // This should commit the editor state immediately
-  )
-  } catch (e) {
-  logger.error({ err: e }, 'ERROR parsing editor state')
-}
-
-// Export to plain text
-const plainTextContent =
-  headlessEditor.getEditorState().read(() => {
-    return $getRoot().getTextContent()
-  }) || ''
 ```

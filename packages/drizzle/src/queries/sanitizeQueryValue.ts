@@ -110,14 +110,32 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  // Helper function to convert a single date value to ISO string
+  const convertDateToISO = (item: unknown): unknown => {
+    if (typeof item === 'string') {
+      if (item === 'null' || item === '') {
+        return null
+      }
+      const date = new Date(item)
+      return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+    } else if (typeof item === 'number') {
+      return new Date(item).toISOString()
+    } else if (item instanceof Date) {
+      return item.toISOString()
+    }
+    return item
+  }
+
   if (field.type === 'date' && operator !== 'exists') {
-    if (typeof val === 'string') {
-      formattedValue = new Date(val).toISOString()
-      if (Number.isNaN(Date.parse(formattedValue))) {
+    if (Array.isArray(formattedValue)) {
+      // Handle arrays of dates for 'in' and 'not_in' operators
+      formattedValue = formattedValue.map(convertDateToISO).filter((item) => item !== undefined)
+    } else {
+      const converted = convertDateToISO(val)
+      if (converted === undefined) {
         return { operator, value: undefined }
       }
-    } else if (typeof val === 'number') {
-      formattedValue = new Date(val).toISOString()
+      formattedValue = converted
     }
   }
 
@@ -220,7 +238,13 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+  // For hasMany relationship/upload fields, contains should use equals operator
+  if (
+    'hasMany' in field &&
+    field.hasMany &&
+    operator === 'contains' &&
+    (field.type === 'relationship' || field.type === 'upload')
+  ) {
     operator = 'equals'
   }
 
@@ -231,7 +255,19 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'contains') {
-    formattedValue = `%${formattedValue}%`
+    // Handle array values for hasMany text/number/select fields
+    if (
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany &&
+      ['number', 'select', 'text'].includes(field.type)
+    ) {
+      // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
+      formattedValue = formattedValue.map((val) => `%${val}%`)
+    } else if (!Array.isArray(formattedValue)) {
+      // For non-array values, wrap with % for LIKE matching
+      formattedValue = `%${formattedValue}%`
+    }
   }
 
   if (operator === 'exists') {

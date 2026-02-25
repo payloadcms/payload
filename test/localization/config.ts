@@ -8,9 +8,13 @@ import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { AllFieldsLocalized } from './collections/AllFields/index.js'
 import { ArrayCollection } from './collections/Array/index.js'
+import { ArrayWithFallbackCollection } from './collections/ArrayWithFallback/index.js'
 import { BlocksCollection } from './collections/Blocks/index.js'
 import { Group } from './collections/Group/index.js'
+import { LocalizedDateFields } from './collections/LocalizedDateFields/index.js'
+import { LocalizedDrafts } from './collections/LocalizedDrafts/index.js'
 import { LocalizedWithinLocalized } from './collections/LocalizedWithinLocalized/index.js'
 import { NestedArray } from './collections/NestedArray/index.js'
 import { NestedFields } from './collections/NestedFields/index.js'
@@ -23,7 +27,10 @@ import {
   cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
+  globalWithDraftsSlug,
   hungarianLocale,
+  localeRestrictedSlug,
+  localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
   portugueseLocale,
@@ -37,7 +44,6 @@ import {
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
 } from './shared.js'
-
 export type LocalizedPostAllLocale = {
   title: {
     en?: string
@@ -58,11 +64,17 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  experimental: {
+    localizeStatus: true,
+  },
   collections: [
     RichTextCollection,
     BlocksCollection,
     NestedArray,
     NestedFields,
+    LocalizedDrafts,
+    LocalizedDateFields,
+    AllFieldsLocalized,
     {
       admin: {
         listSearchableFields: 'name',
@@ -341,6 +353,20 @@ export default buildConfigWithDefaults({
       ],
       slug: cannotCreateDefaultLocale,
     },
+    {
+      access: {
+        ...openAccess,
+        update: ({ req }) => req.locale === spanishLocale,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+      slug: localeRestrictedSlug,
+    },
     NestedToArrayAndBlock,
     Group,
     Tab,
@@ -393,6 +419,7 @@ export default buildConfigWithDefaults({
       ],
     },
     LocalizedWithinLocalized,
+    ArrayWithFallbackCollection,
   ],
   globals: [
     {
@@ -421,6 +448,21 @@ export default buildConfigWithDefaults({
       ],
       slug: 'global-text',
     },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
+      slug: globalWithDraftsSlug,
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+      },
+    },
   ],
   localization: {
     filterAvailableLocales: ({ locales }) => {
@@ -435,27 +477,47 @@ export default buildConfigWithDefaults({
       },
       {
         code: defaultLocale,
-        label: 'English',
+        label: {
+          de: 'Englisch',
+          en: 'English',
+          es: 'Inglés',
+        },
         rtl: false,
       },
       {
         code: spanishLocale,
-        label: 'Spanish',
+        label: {
+          de: 'Spanisch',
+          en: 'Spanish',
+          es: 'Español',
+        },
         rtl: false,
       },
       {
         code: portugueseLocale,
         fallbackLocale: spanishLocale,
-        label: 'Portuguese',
+        label: {
+          de: 'Portugiesisch',
+          en: 'Portuguese',
+          es: 'Portugués',
+        },
       },
       {
         code: 'ar',
-        label: 'Arabic',
+        label: {
+          de: 'Arabisch',
+          en: 'Arabic',
+          es: 'Árabe',
+        },
         rtl: true,
       },
       {
         code: hungarianLocale,
-        label: 'Hungarian',
+        label: {
+          de: 'Ungarische',
+          en: 'Hungarian',
+          es: 'Húngaro',
+        },
         rtl: false,
       },
     ],
@@ -477,7 +539,13 @@ export default buildConfigWithDefaults({
       },
     })
 
-    console.log('SEED 1')
+    await payload.create({
+      collection: localizedDateFieldsSlug,
+      data: {
+        localizedDate: new Date().toISOString(),
+        date: new Date().toISOString(),
+      },
+    })
 
     await payload.create({
       collection: 'users',
@@ -497,8 +565,6 @@ export default buildConfigWithDefaults({
       locale: spanishLocale,
     })
 
-    console.log('SEED 2')
-
     const localizedRelation = await payload.create({
       collection,
       data: {
@@ -515,8 +581,6 @@ export default buildConfigWithDefaults({
       locale: spanishLocale,
     })
 
-    console.log('SEED 3')
-
     const localizedRelation2 = await payload.create({
       collection,
       data: {
@@ -531,8 +595,6 @@ export default buildConfigWithDefaults({
       },
       locale: spanishLocale,
     })
-
-    console.log('SEED 4')
 
     await payload.create({
       collection: withLocalizedRelSlug,
@@ -574,8 +636,6 @@ export default buildConfigWithDefaults({
       locale: 'es',
     })
 
-    console.log('SEED 5')
-
     const globalArray = await payload.updateGlobal({
       data: {
         array: [
@@ -600,8 +660,6 @@ export default buildConfigWithDefaults({
       locale: 'es',
       slug: 'global-array',
     })
-
-    console.log('SEED COMPLETE')
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

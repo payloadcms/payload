@@ -1,12 +1,5 @@
 import type { ClientSession } from 'mongodb'
-import type {
-  AggregatePaginateModel,
-  IndexDefinition,
-  IndexOptions,
-  Model,
-  PaginateModel,
-  SchemaOptions,
-} from 'mongoose'
+import type { IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose'
 import type {
   ArrayField,
   BlocksField,
@@ -19,6 +12,7 @@ import type {
   GroupField,
   JoinField,
   JSONField,
+  MigrationData,
   NumberField,
   Payload,
   PayloadRequest,
@@ -37,10 +31,7 @@ import type {
 
 import type { BuildQueryArgs } from './queries/getBuildQueryPlugin.js'
 
-export interface CollectionModel
-  extends Model<any>,
-    PaginateModel<any>,
-    AggregatePaginateModel<any> {
+export interface CollectionModel extends Model<any>, PaginateModel<any> {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
@@ -173,3 +164,8 @@ export type MigrateDownArgs = {
    */
   session?: ClientSession
 }
+
+export type MongooseMigration = {
+  down: (args: MigrateDownArgs) => Promise<void>
+  up: (args: MigrateUpArgs) => Promise<void>
+} & MigrationData

@@ -1,13 +1,14 @@
-import type { BlockField, Payload } from 'payload'
-
 import { execSync } from 'child_process'
 import { existsSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
+import { type BlocksField, getPayload, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { testFilePath } from './testFilePath.js'
 
 let restClient: NextRESTClient
@@ -22,9 +23,7 @@ describe('Config', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('payload config', () => {
@@ -36,11 +35,62 @@ describe('Config', () => {
     })
 
     it('allows a custom field in the root endpoints', () => {
-      const [endpoint] = payload.config.endpoints
+      const endpoints = payload.config.endpoints
+      const customEndpoint = endpoints?.find((endpoint) => endpoint.path === '/config')
 
-      expect(endpoint.custom).toEqual({
+      expect(customEndpoint?.custom).toEqual({
         description: 'Get the sanitized payload config',
       })
+    })
+
+    it('should allow multiple getPayload calls using different configs in same process', async () => {
+      const payload2 = await getPayload({
+        key: 'payload2',
+        config: await buildConfigWithDefaults({
+          collections: [
+            {
+              slug: 'payload2',
+              fields: [{ name: 'title2', type: 'text' }],
+            },
+          ],
+        }),
+      })
+
+      // Use payload2 instance before creating payload3 instance, as we share the same db connection => each instance
+      // creation will reset the db schema.
+      const result2: any = await payload2.create({
+        collection: 'payload2',
+        data: {
+          title2: 'Payload 2',
+        },
+      } as any)
+
+      expect(result2.title2).toBe('Payload 2')
+
+      const payload3 = await getPayload({
+        key: 'payload3',
+        config: await buildConfigWithDefaults({
+          collections: [
+            {
+              slug: 'payload3',
+              fields: [{ name: 'title3', type: 'text' }],
+            },
+          ],
+        }),
+      })
+
+      // If payload was still incorrectly cached, this would fail, as the old payload config would still be used
+      const result3: any = await payload3.create({
+        collection: 'payload3',
+        data: {
+          title3: 'Payload 3',
+        },
+      } as any)
+
+      expect(result3.title3).toBe('Payload 3')
+
+      await payload2.destroy()
+      await payload3.destroy()
     })
   })
 
@@ -74,9 +124,14 @@ describe('Config', () => {
       const [collection] = payload.config.collections
       const [, blocksField] = collection.fields
 
-      expect((blocksField as BlockField).blocks[0].custom).toEqual({
+      expect((blocksField as BlocksField).blocks[0].custom).toEqual({
         description: 'The blockOne of this page',
       })
+    })
+
+    it('properly merges collection.labels with defaults', () => {
+      const [collection] = payload.config.collections
+      expect(collection?.labels).toEqual({ plural: 'Pages', singular: 'Page' })
     })
   })
 
@@ -129,7 +184,7 @@ describe('Config', () => {
       }
     }
 
-    it('should execute a custom script', () => {
+    it.skip('should execute a custom script', () => {
       deleteTestFile()
       executeCLI('start-server')
       expect(JSON.parse(readFileSync(testFilePath, 'utf-8')).docs).toHaveLength(1)

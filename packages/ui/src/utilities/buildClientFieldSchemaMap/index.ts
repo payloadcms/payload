@@ -33,8 +33,9 @@ export const buildClientFieldSchemaMap = (args: {
   i18n: I18n
   payload: Payload
   schemaMap: FieldSchemaMap
+  widgetSlug?: string
 }): { clientFieldSchemaMap: ClientFieldSchemaMap } => {
-  const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
+  const { collectionSlug, config, globalSlug, i18n, payload, schemaMap, widgetSlug } = args
 
   const clientSchemaMap: ClientFieldSchemaMap = new Map()
 
@@ -49,7 +50,8 @@ export const buildClientFieldSchemaMap = (args: {
       if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
         ;(baseAuthFields[0] as TextFieldClient).label = i18n.t('general:password')
         ;(baseAuthFields[1] as TextFieldClient).label = i18n.t('authentication:confirmPassword')
-        fieldsToSet = baseAuthFields.concat(fieldsToSet)
+        // Place these fields _last_ to ensure they do not disrupt field paths in the field schema map
+        fieldsToSet = fieldsToSet.concat(baseAuthFields)
       }
 
       clientSchemaMap.set(collectionSlug, {
@@ -82,6 +84,27 @@ export const buildClientFieldSchemaMap = (args: {
         i18n,
         parentIndexPath: '',
         parentSchemaPath: globalSlug,
+        payload,
+        schemaMap,
+      })
+    }
+  } else if (widgetSlug) {
+    const matchedWidget = config.admin?.dashboard?.widgets?.find(
+      (widget) => widget.slug === widgetSlug,
+    )
+
+    if (matchedWidget?.fields?.length) {
+      clientSchemaMap.set(widgetSlug, {
+        fields: matchedWidget.fields,
+      })
+
+      traverseFields({
+        clientSchemaMap,
+        config,
+        fields: matchedWidget.fields,
+        i18n,
+        parentIndexPath: '',
+        parentSchemaPath: widgetSlug,
         payload,
         schemaMap,
       })

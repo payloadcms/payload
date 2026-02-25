@@ -1,0 +1,53 @@
+name: audit-dependencies
+
+on:
+  # Monday at 2am EST
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      audit-level:
+        description: The level of audit to run (low, moderate, high, critical)
+        required: false
+        default: high
+      debug:
+        description: Enable debug logging
+        required: false
+        default: false
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Run audit dependencies script
+        id: audit_dependencies
+        run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
+
+      - name: Slack notification on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "username": "GitHub Actions Bot",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Script Run Details>"
+                  }
+                },
+              ]
+            }

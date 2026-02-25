@@ -1,5 +1,15 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
+import type {
+  AccessArgs,
+  AccessResult,
+  ArrayField,
+  CollectionConfig,
+  CollectionSlug,
+  Field,
+  RelationshipField,
+  SingleRelationshipField,
+  TypedUser,
+} from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
@@ -16,13 +26,44 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
+       * Override the access result from the collection access control functions
+       *
+       * The function receives:
+       *  - accessResult: the original result from the access control function
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - ...restOfAccessArgs: the original arguments passed to the access control function
+       */
+      accessResultOverride?: CollectionAccessResultOverride
+      /**
+       * Opt out of adding the tenant field and place
+       * it manually using the `tenantField` export from the plugin
+       */
+      customTenantField?: boolean
+      /**
        * Set to `true` if you want the collection to behave as a global
        *
        * @default false
        */
       isGlobal?: boolean
       /**
+       * Overrides for the tenant field, will override the entire tenantField configuration
+       */
+      tenantFieldOverrides?: CollectionTenantFieldConfigOverrides
+      /**
        * Set to `false` if you want to manually apply the baseListFilter
+       * Set to `false` if you want to manually apply the baseFilter
+       *
+       * @default true
+       */
+      useBaseFilter?: boolean
+      /**
+       * @deprecated Use `useBaseFilter` instead. If both are defined,
+       * `useBaseFilter` will take precedence. This property remains only
+       * for backward compatibility and may be removed in a future version.
+       *
+       * Originally, `baseListFilter` was intended to filter only the List View
+       * in the admin panel. However, base filtering is often required in other areas
+       * such as internal link relationships in the Lexical editor.
        *
        * @default true
        */
@@ -49,17 +90,42 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    */
   enabled?: boolean
   /**
+   * Localization for the plugin
+   */
+  i18n?: {
+    translations: {
+      [key in AcceptedLanguages]?: {
+        /**
+         * Shown inside 3 dot menu on edit document view
+         *
+         * @default 'Assign Tenant'
+         */
+        'assign-tenant-button-label'?: string
+        /**
+         * Shown as the title of the assign tenant modal
+         *
+         * @default 'Assign "{{title}}"'
+         */
+        'assign-tenant-modal-title'?: string
+        /**
+         * Shown as the label for the assigned tenant field in the assign tenant modal
+         *
+         * @default 'Assigned Tenant'
+         */
+        'field-assignedTenant-label'?: string
+        /**
+         * Shown as the label for the global tenant selector in the admin UI
+         *
+         * @default 'Filter by Tenant'
+         */
+        'nav-tenantSelector-label'?: string
+      }
+    }
+  }
+  /**
    * Field configuration for the field added to all tenant enabled collections
    */
-  tenantField?: {
-    access?: RelationshipField['access']
-    /**
-     * The name of the field added to all tenant enabled collections
-     *
-     * @default 'tenant'
-     */
-    name?: string
-  }
+  tenantField?: RootTenantFieldConfigOverrides
   /**
    * Field configuration for the field added to the users collection
    *
@@ -111,7 +177,9 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are locales and the values are the string labels
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
+   *
+   * @deprecated Use `i18n.translations` instead.
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -130,8 +198,17 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
   ) => boolean
+  /**
+   * Override the access result on the users collection access control functions
+   *
+   * The function receives:
+   *  - accessResult: the original result from the access control function
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - ...restOfAccessArgs: the original arguments passed to the access control function
+   */
+  usersAccessResultOverride?: CollectionAccessResultOverride
   /**
    * Opt out of adding access constraints to the tenants collection
    */
@@ -140,11 +217,35 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out including the baseListFilter to filter tenants by selected tenant
    */
   useTenantsListFilter?: boolean
+
   /**
    * Opt out including the baseListFilter to filter users by selected tenant
    */
   useUsersTenantFilter?: boolean
 }
+
+export type RootTenantFieldConfigOverrides = Partial<
+  Omit<
+    SingleRelationshipField,
+    | '_sanitized'
+    | 'hidden'
+    | 'index'
+    | 'localized'
+    | 'max'
+    | 'maxRows'
+    | 'min'
+    | 'minRows'
+    | 'relationTo'
+    | 'required'
+    | 'type'
+    | 'unique'
+    | 'virtual'
+  >
+>
+
+export type CollectionTenantFieldConfigOverrides = Partial<
+  Omit<RootTenantFieldConfigOverrides, 'name'>
+>
 
 export type Tenant<IDType = number | string> = {
   id: IDType
@@ -152,7 +253,30 @@ export type Tenant<IDType = number | string> = {
 }
 
 export type UserWithTenantsField = {
-  tenants: {
-    tenant: number | string | Tenant
-  }[]
-} & User
+  tenants?:
+    | {
+        tenant: number | string | Tenant
+      }[]
+    | null
+} & TypedUser
+
+type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
+  Required<CollectionConfig>['access'],
+  'admin'
+>
+  ? keyof Omit<Required<CollectionConfig>['access'], 'admin'> extends T[number]
+    ? T
+    : never
+  : never
+
+export type AllAccessKeys = AllAccessKeysT<
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
+>
+
+export type CollectionAccessResultOverride = ({
+  accessKey,
+  accessResult,
+}: {
+  accessKey: AllAccessKeys[number]
+  accessResult: AccessResult
+} & AccessArgs) => AccessResult | Promise<AccessResult>

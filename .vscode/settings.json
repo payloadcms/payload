@@ -1,28 +1,44 @@
 {
   "npm.packageManager": "pnpm",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "mdx",
+    "markdown"
+  ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
   },
   "editor.formatOnSaveMode": "file",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
   "eslint.rules.customizations": [
-    // Defaultt all ESLint errors to 'warn' to differentate from TypeScript's 'error' level
-    { "rule": "*", "severity": "warn" },
-
     // Silence some warnings that will get auto-fixed
     { "rule": "perfectionist/*", "severity": "off", "fixable": true },
     { "rule": "curly", "severity": "off", "fixable": true },
     { "rule": "object-shorthand", "severity": "off", "fixable": true }
   ],
+  "stylelint.enable": true,
+  "stylelint.validate": ["css", "scss"],
+  "css.validate": false,
+  "scss.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
-  "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
-  "jestrunner.changeDirectoryToWorkspaceRoot": false,
-  "jestrunner.debugOptions": {
-    "runtimeArgs": ["--no-deprecation"]
-  },
   // Essentially disables bun test buttons
-  "bun.test.filePattern": "bun.test.ts"
+  "bun.test.filePattern": "bun.test.ts",
+  "playwright.env": {
+    "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
+  },
+  "vitest.nodeEnv": {
+    // Ensure the node options match the ones we use for pnpm test:int. Otherwise, the behavior
+    // of the test run buttons in vscode will be different from CI, which can result to tests passing
+    // locally, and suddenly failing in CI.
+    "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
+  }
 }

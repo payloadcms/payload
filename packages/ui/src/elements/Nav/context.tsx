@@ -1,5 +1,7 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
+import { usePathname } from 'next/navigation.js'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -12,6 +14,9 @@ type NavContextType = {
   shouldAnimate: boolean
 }
 
+/**
+ * @internal
+ */
 export const NavContext = React.createContext<NavContextType>({
   hydrated: false,
   navOpen: true,
@@ -20,10 +25,10 @@ export const NavContext = React.createContext<NavContextType>({
   shouldAnimate: false,
 })
 
-export const useNav = () => React.useContext(NavContext)
+export const useNav = () => React.use(NavContext)
 
 const getNavPreference = async (getPreference): Promise<boolean> => {
-  const navPrefs = await getPreference('nav')
+  const navPrefs = await getPreference(PREFERENCE_KEYS.NAV)
   const preferredState = navPrefs?.open
   if (typeof preferredState === 'boolean') {
     return preferredState
@@ -32,6 +37,9 @@ const getNavPreference = async (getPreference): Promise<boolean> => {
   }
 }
 
+/**
+ * @internal
+ */
 export const NavProvider: React.FC<{
   children: React.ReactNode
   initialIsOpen?: boolean
@@ -39,6 +47,8 @@ export const NavProvider: React.FC<{
   const {
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()
+
+  const pathname = usePathname()
 
   const { getPreference } = usePreferences()
   const navRef = useRef(null)
@@ -64,8 +74,13 @@ export const NavProvider: React.FC<{
     }
   }, [largeBreak, getPreference, setNavOpen])
 
-  // TODO: on smaller screens where the nav is a modal
+  // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
+  useEffect(() => {
+    if (smallBreak === true) {
+      setNavOpen(false)
+    }
+  }, [pathname])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
@@ -88,9 +103,12 @@ export const NavProvider: React.FC<{
     }
     setHydrated(true)
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShouldAnimate(true)
     }, 100)
+    return () => {
+      clearTimeout(timeout)
+    }
   }, [largeBreak, midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
@@ -103,8 +121,8 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
+    <NavContext value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
       {children}
-    </NavContext.Provider>
+    </NavContext>
   )
 }

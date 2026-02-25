@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { ContentBlock } from './blocks/ContentBlock.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -20,12 +21,21 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'hyphenated-name',
+          type: 'text',
+        },
+        {
           type: 'relationship',
           relationTo: 'posts',
           name: 'relationToSelf',
           graphQL: {
             complexity: 801,
           },
+        },
+        {
+          name: 'contentBlockField',
+          type: 'blocks',
+          blocks: [ContentBlock],
         },
       ],
     },

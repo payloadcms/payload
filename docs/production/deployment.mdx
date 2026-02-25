@@ -7,8 +7,8 @@ keywords: deployment, production, config, configuration, documentation, Content 
 ---
 
 <Banner type="success">
-  So you've developed a Payload app, it's fully tested, and running great locally. Now it's time to
-  launch. **Awesome! Great work!** Now, what's next?
+  So you've developed a Payload app, it's fully tested, and running great
+  locally. Now it's time to launch. **Awesome! Great work!** Now, what's next?
 </Banner>
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need
@@ -23,16 +23,6 @@ to consider these main aspects:
 Payload can be deployed _anywhere that Next.js can run_ - including Vercel, Netlify, SST, DigitalOcean, AWS, and more. Because it's open source, you can self-host it.
 
 But it's important to remember that most Payload projects will also need a database, file storage, an email provider, and a CDN. Make sure you have all of the requirements that your project needs, no matter what deployment platform you choose.
-
-Often, the easiest and fastest way to deploy Payload is to use [Payload Cloud](https://payloadcms.com/new) — where you get everything you need out of the box, including:
-
-1. A MongoDB Atlas database
-1. S3 file storage
-1. Resend email service
-1. Cloudflare CDN
-1. Blue / green deployments
-1. Logs
-1. And more
 
 ## Basics
 
@@ -55,18 +45,10 @@ Because _**you**_ are in complete control of who can do what with your data, you
 wield that power responsibly before deploying to Production.
 
 <Banner type="error">
-  **
-    By default, all Access Control functions require that a user is successfully logged in to
-    Payload to create, read, update, or delete data.
-  **
-  But, if you allow public user registration, for example, you will want to make sure that your
-  access control functions are more strict - permitting
+**By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.**
 
-  **
-    only appropriate users
-  **
+But, if you allow public user registration, for example, you will want to make sure that your access control functions are more strict - permitting **only appropriate users** to perform appropriate actions.
 
-  to perform appropriate actions.
 </Banner>
 
 ### Running in Production
@@ -90,7 +72,7 @@ more. [Click here to learn more](/docs/production/preventing-abuse).
 
 Payload can be used with any Postgres database or MongoDB-compatible database including AWS DocumentDB or Azure Cosmos DB. Make sure your production environment has access to the database that Payload uses.
 
-Out of the box, Payload templates pass the `process.env.DATABASE_URI` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
+Out of the box, Payload templates pass the `process.env.DATABASE_URL` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
 
 ### DocumentDB
 
@@ -134,8 +116,9 @@ perpetually.
 <Banner type="error">
   **Warning:**
 
-  If you rely on Payload's **Upload** functionality, make sure you either use a host
-  with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
+If you rely on Payload's **Upload** functionality, make sure you either use a host
+with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
+
 </Banner>
 
 ### Using cloud storage providers
@@ -157,7 +140,7 @@ Follow the docs to configure any one of these storage providers. For local devel
 ## Docker
 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
-variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
+variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URL` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
 In your Next.js config, set the `output` property `standalone`.
 
@@ -174,7 +157,7 @@ Dockerfile
 # Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -252,7 +235,7 @@ version: '3'
 
 services:
   payload:
-    image: node:18-alpine
+    image: node:24-alpine
     ports:
       - '3000:3000'
     volumes:
@@ -266,7 +249,7 @@ services:
     env_file:
       - .env
 
-  # Ensure your DATABASE_URI uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
+  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
   mongo:
     image: mongo:latest
     ports:

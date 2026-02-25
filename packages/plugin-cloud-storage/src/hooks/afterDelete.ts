@@ -15,7 +15,9 @@ export const getAfterDeleteHook = ({
     try {
       const filesToDelete: string[] = [
         doc.filename,
-        ...Object.values(doc?.sizes || []).map((resizedFileData) => resizedFileData?.filename),
+        ...Object.values(doc?.sizes || []).map(
+          (resizedFileData) => resizedFileData?.filename as string,
+        ),
       ]
 
       const promises = filesToDelete.map(async (filename) => {

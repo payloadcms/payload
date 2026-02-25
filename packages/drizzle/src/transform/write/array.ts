@@ -3,7 +3,13 @@ import type { FlattenedArrayField } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
-import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
+import type {
+  ArrayRowToInsert,
+  BlockRowToInsert,
+  NumberToDelete,
+  RelationshipToDelete,
+  TextToDelete,
+} from './types.js'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows.js'
 import { traverseFields } from './traverseFields.js'
@@ -20,6 +26,7 @@ type Args = {
   field: FlattenedArrayField
   locale?: string
   numbers: Record<string, unknown>[]
+  numbersToDelete: NumberToDelete[]
   parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
@@ -28,6 +35,7 @@ type Args = {
     [tableName: string]: Record<string, unknown>[]
   }
   texts: Record<string, unknown>[]
+  textsToDelete: TextToDelete[]
   /**
    * Set to a locale code if this set of fields is traversed within a
    * localized array or block field
@@ -45,12 +53,14 @@ export const transformArray = ({
   field,
   locale,
   numbers,
+  numbersToDelete,
   parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
   selects,
   texts,
+  textsToDelete,
   withinArrayOrBlockLocale,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
@@ -61,6 +71,7 @@ export const transformArray = ({
     data.forEach((arrayRow, i) => {
       const newRow: ArrayRowToInsert = {
         arrays: {},
+        arraysToPush: {},
         locales: {},
         row: {
           _order: i + 1,
@@ -94,6 +105,7 @@ export const transformArray = ({
       traverseFields({
         adapter,
         arrays: newRow.arrays,
+        arraysToPush: newRow.arraysToPush,
         baseTableName,
         blocks,
         blocksToDelete,
@@ -104,14 +116,17 @@ export const transformArray = ({
         insideArrayOrBlock: true,
         locales: newRow.locales,
         numbers,
+        numbersToDelete,
         parentIsLocalized: parentIsLocalized || field.localized,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
+        relationshipsToAppend: [],
         relationshipsToDelete,
         row: newRow.row,
         selects,
         texts,
+        textsToDelete,
         withinArrayOrBlockLocale,
       })
 

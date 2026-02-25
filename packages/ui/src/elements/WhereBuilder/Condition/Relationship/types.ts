@@ -4,12 +4,13 @@ import type {
   PaginatedDocs,
   RelationshipFieldClient,
   ResolvedFilterOptions,
+  UploadFieldClient,
 } from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 
-export type Props = {
-  readonly field: RelationshipFieldClient
+export type RelationshipFilterProps = {
+  readonly field: RelationshipFieldClient | UploadFieldClient
   readonly filterOptions: ResolvedFilterOptions
 } & DefaultFilterProps
 

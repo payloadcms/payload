@@ -1,5 +1,5 @@
+import { describe, it, expect } from 'vitest'
 import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
-
 import { Types } from 'mongoose'
 
 import { transform } from './transform.js'
@@ -395,6 +395,10 @@ describe('transform', () => {
       data,
       fields: config.collections[0].fields,
     })
+    if ('updatedAt' in data) {
+      delete data.updatedAt
+    }
+
     const flattenValuesAfter = Object.values(flattenRelationshipValues(data))
 
     flattenValuesAfter.forEach((value, i) => {

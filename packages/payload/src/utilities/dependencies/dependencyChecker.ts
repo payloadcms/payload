@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -55,7 +54,7 @@ export async function checkDependencies({
       if (Object.keys(foundVersions).length > 1) {
         const targetVersion =
           dependencyGroup.targetVersion ??
-          resolvedDependencies.resolved.get(dependencyGroup.targetVersionDependency)?.version
+          resolvedDependencies.resolved.get(dependencyGroup.targetVersionDependency!)?.version
         if (targetVersion) {
           const formattedVersionsWithPackageNameString = Object.entries(foundVersions)
             .filter(([version]) => version !== targetVersion)

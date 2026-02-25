@@ -72,7 +72,7 @@ const JSON: CollectionConfig = {
       type: 'json',
       admin: {
         components: {
-          afterInput: ['./collections/JSON/AfterField#AfterField'],
+          afterInput: ['./collections/JSON/AfterField.js#AfterField'],
         },
       },
       label: 'Custom Json',

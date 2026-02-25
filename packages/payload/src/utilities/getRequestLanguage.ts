@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 
@@ -18,7 +17,7 @@ export const getRequestLanguage = ({
   cookies,
   headers,
 }: GetRequestLanguageArgs): AcceptedLanguages => {
-  const supportedLanguageKeys = <AcceptedLanguages[]>Object.keys(config.i18n.supportedLanguages)
+  const supportedLanguageKeys = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
   const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
 
   const languageFromCookie: AcceptedLanguages = (
@@ -30,7 +29,7 @@ export const getRequestLanguage = ({
   }
 
   const languageFromHeader = headers.get('Accept-Language')
-    ? extractHeaderLanguage(headers.get('Accept-Language'))
+    ? extractHeaderLanguage(headers.get('Accept-Language')!)
     : undefined
 
   if (languageFromHeader && supportedLanguageKeys.includes(languageFromHeader)) {

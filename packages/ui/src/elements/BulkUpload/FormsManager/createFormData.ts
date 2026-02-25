@@ -18,11 +18,10 @@ export async function createFormData(
     delete data.file
   }
 
-  let clientUploadContext = null
-
-  if (typeof uploadHandler === 'function') {
+  if (file && typeof uploadHandler === 'function') {
     let filename = file.name
-    clientUploadContext = await uploadHandler({
+
+    const clientUploadContext = await uploadHandler({
       file,
       updateFilename: (value) => {
         filename = value

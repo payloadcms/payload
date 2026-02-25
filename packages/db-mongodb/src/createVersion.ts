@@ -1,9 +1,8 @@
-import type { CreateOptions } from 'mongoose'
-
 import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
@@ -16,15 +15,17 @@ export const createVersion: CreateVersion = async function createVersion(
     parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
-  const VersionModel = this.versions[collectionSlug]
-  const options: CreateOptions = {
-    session: await getSession(this, req),
-  }
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   const data = {
     autosave,
@@ -36,11 +37,11 @@ export const createVersion: CreateVersion = async function createVersion(
     updatedAt,
     version: versionData,
   }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
-  const fields = buildVersionCollectionFields(
-    this.payload.config,
-    this.payload.collections[collectionSlug].config,
-  )
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   transform({
     adapter: this,
@@ -49,7 +50,13 @@ export const createVersion: CreateVersion = async function createVersion(
     operation: 'write',
   })
 
-  let [doc] = await VersionModel.create([data], options, req)
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
+
+  let [doc] = await Model.create([data], options, req)
 
   const parentQuery = {
     $or: [
@@ -61,7 +68,7 @@ export const createVersion: CreateVersion = async function createVersion(
     ],
   }
 
-  await VersionModel.updateMany(
+  await Model.updateMany(
     {
       $and: [
         {
@@ -85,6 +92,10 @@ export const createVersion: CreateVersion = async function createVersion(
     { $unset: { latest: 1 } },
     options,
   )
+
+  if (returning === false) {
+    return null
+  }
 
   doc = doc.toObject()
 

@@ -115,6 +115,18 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayHasMany',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
       name: 'localizedArray',
       type: 'array',
       localized: true,
@@ -137,6 +149,35 @@ export const Posts: CollectionConfig = {
               name: 'category',
               type: 'relationship',
               relationTo: categoriesSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'first',
+          fields: [
+            {
+              type: 'text',
+              name: 'tabText',
+            },
+          ],
+        },
+        {
+          name: 'tab',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'category',
+                  type: 'relationship',
+                  relationTo: categoriesSlug,
+                },
+              ],
             },
           ],
         },

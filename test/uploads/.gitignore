@@ -3,5 +3,12 @@ focal-no-sizes
 media
 uploads
 versions
+with-any-image-type
+with-meta-data
+with-only-jpeg-meta-data
+without-meta-data
+svg-only
 /media-gif
 /custom-file-name-media
+/media-without-delete-access
+/media-with-relation-preview

@@ -1,4 +1,4 @@
-@import '../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .rich-text-lexical {
@@ -12,17 +12,6 @@
       font-family: var(--font-serif);
       font-size: base(0.8);
       letter-spacing: 0.02em;
-
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        font-family: var(--font-body);
-        line-height: 1.125;
-        letter-spacing: 0;
-      }
     }
 
     &--show-gutter {
@@ -31,7 +20,7 @@
         > .editor-scroller
         > .editor
         > div
-        > .editor-placeholder {
+        > .LexicalEditorTheme__placeholder {
         left: 3rem;
       }
     }
@@ -42,11 +31,11 @@
       > .editor-scroller
       > .editor
       > div
-      > .editor-placeholder {
+      > .LexicalEditorTheme__placeholder {
       left: 0;
     }
 
-    .editor-placeholder {
+    .LexicalEditorTheme__placeholder {
       position: absolute;
       top: 8px;
       font-size: base(0.8);

@@ -8,7 +8,11 @@ export type PackageDetails = {
   name: string
   /** Full path to package relative to project root */
   packagePath: `packages/${string}`
-  /** Short name is the directory name */
+  /**
+   * Short name is the directory name of the package
+   *
+   * @example payload, db-mongodb, ui, etc
+   * */
   shortName: string
   /** Version in package.json */
   version: string
@@ -42,7 +46,7 @@ export const getPackageDetails = async (packages?: null | string[]): Promise<Pac
       return {
         name: packageJson.name as string,
         packagePath: path.relative(PROJECT_ROOT, dirname(packageJsonPath)),
-        shortName: path.dirname(packageJsonPath),
+        shortName: path.basename(path.dirname(packageJsonPath)),
         version: packageJson.version,
       } as PackageDetails
     }),

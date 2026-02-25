@@ -20,9 +20,9 @@ import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import path from 'path'
 
-type TemplateVariations = {
+type TemplateVariation = {
   /** Base template to copy from */
-  base?: string
+  base?: 'none' | ({} & string)
   configureConfig?: boolean
   db: DbType
   /** Directory in templates dir */
@@ -30,6 +30,10 @@ type TemplateVariations = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * If the template is part of the workspace, then do not replace the package.json versions
+   */
+  workspace?: boolean
   generateLockfile?: boolean
   /** package.json name */
   name: string
@@ -43,8 +47,19 @@ type TemplateVariations = {
    * @default false
    */
   skipReadme?: boolean
+  /**
+   * @default false
+   */
+  skipAgents?: boolean
   storage: StorageAdapterType
   vercelDeployButtonLink?: string
+  /**
+   * Identify where this template is intended to be deployed.
+   * Useful for making some modifications like PNPM's engines config for Vercel.
+   *
+   * @default 'default'
+   */
+  targetDeployment?: 'cloudflare' | 'default' | 'vercel'
 }
 
 main().catch((error) => {
@@ -56,20 +71,25 @@ async function main() {
   const args = minimist(process.argv.slice(2))
   const template = args['template'] // template directory name
 
+  const shouldBuild = args['build']
+
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
-  let variations: TemplateVariations[] = [
+  let variations: TemplateVariation[] = [
     {
-      name: 'payload-vercel-postgres-template',
+      name: 'with-vercel-postgres',
       db: 'vercel-postgres',
       dirname: 'with-vercel-postgres',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: false,
       skipDockerCompose: true,
+      skipReadme: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -81,18 +101,20 @@ async function main() {
         ),
     },
     {
-      name: 'payload-vercel-website-template',
+      name: 'with-vercel-website',
       base: 'website', // This is the base template to copy from
       db: 'vercel-postgres',
       dirname: 'with-vercel-website',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: true,
       skipDockerCompose: true,
       skipReadme: true,
+      skipAgents: false,
       storage: 'vercelBlobStorage',
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -104,22 +126,26 @@ async function main() {
         ),
     },
     {
-      name: 'payload-postgres-template',
+      name: 'with-postgres',
       db: 'postgres',
       dirname: 'with-postgres',
       sharp: true,
       skipDockerCompose: true,
+      skipAgents: false,
       storage: 'localDisk',
     },
     {
-      name: 'payload-vercel-mongodb-template',
+      name: 'with-vercel-mongodb',
       db: 'mongodb',
       dirname: 'with-vercel-mongodb',
       envNames: {
-        dbUri: 'MONGODB_URI',
+        dbUri: 'MONGODB_URL',
       },
       sharp: false,
       storage: 'vercelBlobStorage',
+      skipReadme: true,
+      skipAgents: false,
+      targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
         encodeURI(
@@ -135,13 +161,65 @@ async function main() {
       name: 'blank',
       db: 'mongodb',
       dirname: 'blank',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipReadme: true, // Do not copy the README.md file from the base template
+      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
+      workspace: true,
+      base: 'none', // Do not copy from the base _template directory
+    },
+    {
+      name: 'website',
+      db: 'mongodb',
+      dirname: 'website',
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'ecommerce',
+      db: 'mongodb',
+      dirname: 'ecommerce',
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'with-cloudflare-d1',
+      db: 'd1-sqlite',
+      dirname: 'with-cloudflare-d1',
+      sharp: false,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      skipAgents: false,
+      storage: 'r2Storage',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: false,
+      targetDeployment: 'cloudflare',
     },
   ]
 
@@ -154,35 +232,47 @@ async function main() {
     variations = [variation]
   }
 
-  for (const {
-    name,
-    base,
-    configureConfig,
-    db,
-    dirname,
-    envNames,
-    generateLockfile,
-    sharp,
-    skipConfig = false,
-    skipDockerCompose = false,
-    skipReadme = false,
-    storage,
-    vercelDeployButtonLink,
-  } of variations) {
+  for (const variation of variations) {
+    const {
+      name,
+      base,
+      configureConfig,
+      db,
+      dirname,
+      envNames,
+      generateLockfile,
+      sharp,
+      skipConfig = false,
+      skipDockerCompose = false,
+      skipReadme = false,
+      skipAgents = false,
+      storage,
+      vercelDeployButtonLink,
+      targetDeployment = 'default',
+      workspace = false,
+    } = variation
+
     header(`Generating ${name}...`)
     const destDir = path.join(TEMPLATES_DIR, dirname)
-    copyRecursiveSync(path.join(TEMPLATES_DIR, base || '_template'), destDir, [
-      'node_modules',
-      '\\*\\.tgz',
-      '.next',
-      '.env$',
-      'pnpm-lock.yaml',
-      ...(skipReadme ? ['README.md'] : []),
-      ...(skipDockerCompose ? ['docker-compose.yml'] : []),
-      ...(skipConfig ? ['payload.config.ts'] : []),
-    ])
+    if (base !== 'none') {
+      copyRecursiveSync(path.join(TEMPLATES_DIR, base || '_template'), destDir, [
+        'node_modules',
+        '\\*\\.tgz',
+        '.next',
+        '.env$',
+        'pnpm-lock.yaml',
+        ...(skipReadme ? ['README.md'] : []),
+        ...(skipDockerCompose ? ['docker-compose.yml'] : []),
+        ...(skipConfig ? ['payload.config.ts'] : []),
+      ])
+    }
 
     log(`Copied to ${destDir}`)
+
+    // Copy _agents files
+    if (!skipAgents) {
+      await copyAgentsFiles({ destDir })
+    }
 
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
@@ -194,10 +284,11 @@ async function main() {
         sharp,
         storageAdapter: storage,
       }
+
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
-      // Replace DATABASE_URI with the correct env name if set
+      // Replace DATABASE_URL with the correct env name if set
       await writeEnvExample({
         dbType: db,
         destDir,
@@ -217,12 +308,28 @@ async function main() {
       })
     }
 
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
-    } else {
-      log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace`, { cwd: destDir })
+    // Fetch latest npm version of payload package:
+    const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+
+    // Bump package.json versions only in non-workspace templates such as Vercel variants
+    // Workspace templates should always continue to point to `workspace:*` version of payload packages
+    if (!workspace) {
+      await bumpPackageJson({
+        templateDir: destDir,
+        latestVersion: payloadVersion,
+      })
+    }
+
+    // Install packages BEFORE running any commands that load the config
+    // This ensures all imports in payload.config.ts can be resolved
+    log('Installing dependencies...')
+
+    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+      cwd: destDir,
+    })
+
+    if (!generateLockfile) {
+      log('Removing lockfile as per configuration')
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 
@@ -248,10 +355,34 @@ async function main() {
         env: {
           ...process.env,
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
+          DATABASE_URL: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
       })
+    }
+
+    if (targetDeployment) {
+      await handleDeploymentTarget({
+        targetDeployment,
+        destDir,
+      })
+    }
+
+    // Generate importmap
+    log('Generating import map')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+      cwd: destDir,
+    })
+
+    // Generate types
+    log('Generating types')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+      cwd: destDir,
+    })
+
+    if (shouldBuild) {
+      log('Building...')
+      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -271,7 +402,7 @@ async function generateReadme({
   destDir,
 }: {
   data: {
-    attributes: Pick<TemplateVariations, 'db' | 'storage'>
+    attributes: Pick<TemplateVariation, 'db' | 'storage'>
     description: string
     name: string
     vercelDeployButtonLink?: string
@@ -298,6 +429,58 @@ ${description}
   log('Generated README.md')
 }
 
+async function copyAgentsFiles({ destDir }: { destDir: string }) {
+  const agentsSourceDir = path.join(TEMPLATES_DIR, '_agents')
+
+  if (!(await fs.stat(agentsSourceDir).catch(() => null))) {
+    log(`Skipping agents copy: ${agentsSourceDir} does not exist`)
+    return
+  }
+
+  log('Copying agents files')
+
+  // Copy AGENTS.md
+  const agentsMdSource = path.join(agentsSourceDir, 'AGENTS.md')
+  const agentsMdDest = path.join(destDir, 'AGENTS.md')
+  if (await fs.stat(agentsMdSource).catch(() => null)) {
+    await fs.copyFile(agentsMdSource, agentsMdDest)
+    log('Copied AGENTS.md')
+  }
+
+  // Copy .cursor directory
+  const cursorSourceDir = path.join(agentsSourceDir, 'rules')
+  const cursorDestDir = path.join(destDir, '.cursor', 'rules')
+  if (await fs.stat(cursorSourceDir).catch(() => null)) {
+    await fs.mkdir(path.dirname(cursorDestDir), { recursive: true })
+    await fs.cp(cursorSourceDir, cursorDestDir, { recursive: true })
+    log('Copied .cursor/rules/')
+  }
+}
+
+async function handleDeploymentTarget({
+  targetDeployment,
+  destDir,
+}: {
+  targetDeployment: TemplateVariation['targetDeployment']
+  destDir: string
+}) {
+  if (targetDeployment === 'vercel') {
+    // Add Vercel specific settings to package.json
+    const packageJsonPath = path.join(destDir, 'package.json')
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'))
+
+    if (packageJson.engines?.pnpm) {
+      delete packageJson.engines.pnpm
+    }
+
+    const pnpmVersion = await getLatestPackageVersion({ packageName: 'pnpm' })
+
+    packageJson.packageManager = `pnpm@${pnpmVersion}`
+
+    await fs.writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  }
+}
+
 async function writeEnvExample({
   dbType,
   destDir,
@@ -305,7 +488,7 @@ async function writeEnvExample({
 }: {
   dbType: DbType
   destDir: string
-  envNames?: TemplateVariations['envNames']
+  envNames?: TemplateVariation['envNames']
 }) {
   const envExamplePath = path.join(destDir, '.env.example')
   const envFileContents = await fs.readFile(envExamplePath, 'utf8')
@@ -317,25 +500,25 @@ async function writeEnvExample({
       if (
         dbType === 'vercel-postgres' &&
         (l.startsWith('# Or use a PG connection string') ||
-          l.startsWith('#DATABASE_URI=postgresql://'))
+          l.startsWith('#DATABASE_URL=postgresql://'))
       ) {
         return false // Skip this line
       }
       return true // Keep other lines
     })
     .map((l) => {
-      if (l.startsWith('DATABASE_URI')) {
+      if (l.startsWith('DATABASE_URL')) {
         if (dbType === 'mongodb') {
-          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+          l = 'MONGODB_URL=mongodb://127.0.0.1/your-database-name'
         }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
+          l = 'DATABASE_URL=postgresql://127.0.0.1:5432/your-database-name'
         }
 
-        // Replace DATABASE_URI with the correct env name if set
+        // Replace DATABASE_URL with the correct env name if set
         if (envNames?.dbUri) {
-          l = l.replace('DATABASE_URI', envNames.dbUri)
+          l = l.replace('DATABASE_URL', envNames.dbUri)
         }
       }
       return l
@@ -354,9 +537,10 @@ function header(message: string) {
 function log(message: string) {
   console.log(chalk.dim(message))
 }
+
 function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1]) {
   try {
-    console.log(`Executing: ${command}`)
+    log(`Executing: ${command}`)
     execSync(command, { stdio: 'inherit', ...options })
   } catch (error) {
     if (error instanceof Error) {
@@ -375,6 +559,78 @@ function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1])
     } else {
       console.error('An unexpected error occurred:', error)
     }
+    throw error
+  }
+}
+
+const DO_NOT_BUMP = ['@payloadcms/eslint-config', '@payloadcms/eslint-plugin']
+async function bumpPackageJson({
+  templateDir,
+  latestVersion,
+}: {
+  templateDir: string
+  latestVersion: string
+}) {
+  const packageJsonString = await fs.readFile(path.resolve(templateDir, 'package.json'), 'utf8')
+  const packageJson = JSON.parse(packageJsonString)
+
+  for (const key of ['dependencies', 'devDependencies']) {
+    const dependencies = packageJson[key]
+    if (dependencies) {
+      for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
+        if (
+          (packageName === 'payload' || packageName.startsWith('@payloadcms')) &&
+          !DO_NOT_BUMP.includes(packageName)
+        ) {
+          dependencies[packageName] = latestVersion
+        }
+      }
+    }
+  }
+
+  // write it out
+  await fs.writeFile(
+    path.resolve(templateDir, 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+  )
+}
+
+/**
+ * Fetches the latest version of a package from the NPM registry.
+ *
+ * Used in determining the latest version of Payload to use in the generated templates.
+ */
+async function getLatestPackageVersion({
+  packageName = 'payload',
+}: {
+  /**
+   * Package name to fetch the latest version for based on the NPM registry URL
+   *
+   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
+   *
+   * @default 'payload'
+   */
+  packageName?: string
+}) {
+  try {
+    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
+    const data = await response.json()
+
+    // Monster chaining for type safety just checking for data.latest
+    const latestVersion =
+      data &&
+      typeof data === 'object' &&
+      'latest' in data &&
+      data.latest &&
+      typeof data.latest === 'string'
+        ? data.latest
+        : null
+
+    log(`Found latest version of ${packageName}: ${latestVersion}`)
+
+    return latestVersion
+  } catch (error) {
+    console.error('Error fetching Payload version:', error)
     throw error
   }
 }

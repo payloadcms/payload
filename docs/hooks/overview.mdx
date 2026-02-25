@@ -26,8 +26,10 @@ There are four main types of Hooks in Payload:
 - [Field Hooks](/docs/hooks/fields)
 
 <Banner type="warning">
-  **Reminder:**
-  Payload also ships a set of _React_ hooks that you can use in your frontend application. Although they share a common name, these are very different things and should not be confused. [More details](../admin/react-hooks).
+  **Reminder:** Payload also ships a set of _React_ hooks that you can use in
+  your frontend application. Although they share a common name, these are very
+  different things and should not be confused. [More
+  details](../admin/react-hooks).
 </Banner>
 
 ## Root Hooks
@@ -51,9 +53,9 @@ export default buildConfig({
 
 The following options are available:
 
-| Option       | Description                                                                                   |
-|--------------|-----------------------------------------------------------------------------------------------|
-| **`afterError`** | Runs after an error occurs in the Payload application.                                         |
+| Option           | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| **`afterError`** | Runs after an error occurs in the Payload application. |
 
 ### afterError
 
@@ -65,9 +67,11 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   hooks: {
-    afterError: [async ({ error }) => {
-      // Do something
-    }]
+    afterError: [
+      async ({ error }) => {
+        // Do something
+      },
+    ],
   },
 })
 ```
@@ -82,18 +86,130 @@ The following arguments are provided to the `afterError` Hook:
 | **`req`**           | The `PayloadRequest` object that extends [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). Contains currently authenticated `user` and the Local API instance `payload`. |
 | **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against. This will be `undefined` if the hook is executed from a non-collection endpoint or GraphQL.               |
 | **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
-## Async vs. Synchronous
 
-All Hooks can be written as either synchronous or asynchronous functions. Choosing the right type depends on your use case, but switching between the two is as simple as adding or removing the `async` keyword.
+## Awaited vs. non-blocking hooks
 
-#### Asynchronous
+Hooks can either block the request until they finish or run without blocking it. What matters is whether your hook returns a Promise.
 
-If the Hook should modify data before a Document is updated or created, and it relies on asynchronous actions such as fetching data from a third party, it might make sense to define your Hook as an asynchronous function. This way you can be sure that your Hook completes before the operation's lifecycle continues. Async hooks are run in series - so if you have two async hooks defined, the second hook will wait for the first to complete before it starts.
+Awaited (blocking): If your hook returns a Promise (for example, if it’s declared async), Payload will wait for it to resolve before continuing that lifecycle step. Use this when your hook needs to modify data or influence the response. Hooks that return Promises run in series at the same lifecycle stage.
 
-#### Synchronous
+Non-blocking (sometimes called “fire-and-forget”): If your hook does not return a Promise (returns nothing), Payload will not wait for it to finish. This can be useful for side-effects that don’t affect the outcome of the operation, but keep in mind that any work started this way might continue after the request has already completed.
 
-If your Hook simply performs a side-effect, such as updating a CRM, it might be okay to define it synchronously, so the Payload operation does not have to wait for your hook to complete.
+**Declaring a function with async does not make it “synchronous.” The async keyword simply makes the function return a Promise automatically — which is why Payload then awaits it.**
+
+<Banner type="success">
+  **Tip:** If your hook executes a long-running task that doesn't affect the
+  response in any way, consider [offloading it to the job
+  queue](#offloading-long-running-tasks). That will free up the request to
+  continue processing without waiting for the task to complete.
+</Banner>
+
+**Awaited**
+
+```ts
+const beforeChange = async ({ data }) => {
+  const enriched = await fetchProfile(data.userId) // Payload waits here
+  return { ...data, profile: enriched }
+}
+```
+
+**Non-blocking**
+
+```ts
+const afterChange = ({ doc }) => {
+  // Trigger side-effect without blocking
+  void pingAnalyticsService(doc.id)
+  // No return → Payload does not wait
+}
+```
 
 ## Server-only Execution
 
 Hooks are only triggered on the server and are automatically excluded from the client-side bundle. This means that you can safely use sensitive business logic in your Hooks without worrying about exposing it to the client.
+
+## Performance
+
+Hooks are a powerful way to customize the behavior of your APIs, but some hooks are run very often and can add significant overhead to your requests if not optimized.
+
+When building hooks, combine together as many of these strategies as possible to ensure your hooks are as performant as they can be.
+
+<Banner type="success">
+  For more performance tips, see the [Performance
+  documentation](../performance/overview).
+</Banner>
+
+### Writing efficient hooks
+
+Consider when hooks are run. One common pitfall is putting expensive logic in hooks that run very often.
+
+For example, the `read` operation runs on every read request, so avoid putting expensive logic in a `beforeRead` or `afterRead` hook.
+
+```ts
+{
+  hooks: {
+    beforeRead: [
+      async () => {
+        // This runs on every read request - avoid expensive logic here
+        await doSomethingExpensive()
+        return data
+      },
+    ],
+  },
+}
+```
+
+Instead, you might want to use a `beforeChange` or `afterChange` hook, which only runs when a document is created or updated.
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async ({ context }) => {
+        // This is more acceptable here, although still should be mindful of performance
+        await doSomethingExpensive()
+        // ...
+      },
+    ]
+  },
+}
+```
+
+### Using Hook Context
+
+Use [Hook Context](./context) to avoid infinite loops or to prevent repeating expensive operations across multiple hooks in the same request.
+
+```ts
+{
+  hooks: {
+    beforeChange: [
+      async ({ context }) => {
+        const somethingExpensive = await doSomethingExpensive()
+        context.somethingExpensive = somethingExpensive
+        // ...
+      },
+    ],
+  },
+}
+```
+
+To learn more, see the [Hook Context documentation](./context).
+
+### Offloading to the jobs queue
+
+If your hooks perform any long-running tasks that don't directly affect the request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
+
+```ts
+{
+  hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        // Offload to job queue
+        await req.payload.jobs.queue(...)
+        // ...
+      },
+    ],
+  },
+}
+```
+
+To learn more, see the [Job Queue documentation](../jobs-queue/overview).

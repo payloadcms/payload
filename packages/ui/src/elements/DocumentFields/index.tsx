@@ -4,9 +4,9 @@ import type { ClientField, SanitizedDocumentPermissions } from 'payload'
 import { fieldIsSidebar } from 'payload/shared'
 import React, { useMemo } from 'react'
 
-import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { TrashBanner } from '../TrashBanner/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'
@@ -18,6 +18,7 @@ type Args = {
   readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
+  readonly isTrashed?: boolean
   readonly readOnly?: boolean
   readonly schemaPathSegments: string[]
 }
@@ -25,11 +26,11 @@ type Args = {
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
-  Description,
   docPermissions,
   fields,
   forceSidebarWrap,
-  readOnly: readOnlyProp,
+  isTrashed = false,
+  readOnly,
   schemaPathSegments,
 }) => {
   const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
@@ -53,11 +54,6 @@ export const DocumentFields: React.FC<Args> = ({
     )
   }, [fields])
 
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
-
-  const readOnly = readOnlyProp || formInitializing || formProcessing
-
   return (
     <div
       className={[
@@ -70,11 +66,7 @@ export const DocumentFields: React.FC<Args> = ({
     >
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
-          {Description ? (
-            <header className={`${baseClass}__header`}>
-              <div className={`${baseClass}__sub-header`}>{Description}</div>
-            </header>
-          ) : null}
+          {isTrashed && <TrashBanner />}
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}

@@ -1,10 +1,9 @@
 {
   "name": "@tools/constants",
   "version": "0.0.1",
-  "description": "",
-  "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "description": "Shared constants for Payload internal tooling",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {

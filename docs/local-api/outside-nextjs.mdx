@@ -9,9 +9,9 @@ keywords: local api, config, configuration, documentation, Content Management Sy
 Payload can be used completely outside of Next.js which is helpful in cases like running scripts, using Payload in a separate backend service, or using Payload's Local API to fetch your data directly from your database in other frontend frameworks like SvelteKit, Remix, Nuxt, and similar.
 
 <Banner>
-  **Note:**
-  
-  Payload and all of its official packages are fully ESM. If you want to use Payload within your own projects, make sure you are writing your scripts in ESM format or dynamically importing the Payload Config.
+  **Note:** Payload and all of its official packages are fully ESM. If you want
+  to use Payload within your own projects, make sure you are writing your
+  scripts in ESM format or dynamically importing the Payload Config.
 </Banner>
 
 ## Importing the Payload Config outside of Next.js
@@ -32,8 +32,8 @@ const seed = async () => {
     collection: 'users',
     data: {
       email: 'dev@payloadcms.com',
-      password: 'some-password'
-    }
+      password: 'some-password',
+    },
   })
 
   const page = await payload.create({
@@ -41,7 +41,7 @@ const seed = async () => {
     data: {
       title: 'My Homepage',
       // other data to seed here
-    }
+    },
   })
 }
 
@@ -67,6 +67,7 @@ If you encounter import-related errors, you have 2 options:
 #### Option 1: enable swc mode by appending `--use-swc` to the `payload` command:
 
 Example:
+
 ```sh
 payload run src/seed.ts --use-swc
 ```
@@ -75,7 +76,7 @@ Note: Install @swc-node/register in your project first. While swc mode is faster
 
 #### Option 2: use an alternative runtime like bun
 
-While we do not guarantee support for alternative runtimes, you are free to use them and disable payloads own transpilation by appending the `--disable-transpilation` flag to the `payload` command:
+While we do not guarantee support for alternative runtimes, you are free to use them and disable Payload's own transpilation by appending the `--disable-transpile` flag to the `payload` command:
 
 ```sh
 bunx --bun payload run src/seed.ts --disable-transpile

@@ -1,12 +1,11 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import type {
   DOMConversionMap,
-  DOMConversionOutput,
   DOMExportOutput,
+  EditorConfig,
   ElementFormatType,
   LexicalNode,
   NodeKey,
-  Spread,
 } from 'lexical'
 import type {
   CollectionSlug,
@@ -18,76 +17,70 @@ import type {
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
-import * as React from 'react'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+
+import { $convertUploadElement } from './conversions.js'
 
 export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in CollectionSlug]: {
     fields: TUploadExtraFieldsData
-    // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
     id: string
     relationTo: TCollectionSlug
-    // Value can be just the document ID, or the full, populated document
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
     value: DataFromCollectionSlug<TCollectionSlug> | number | string
   }
 }[CollectionSlug]
 
 /**
- * @todo Replace UploadData with UploadDataImproved
+ * Internal use only - UploadData type that can contain a pending state
+ * @internal
+ */
+export type Internal_UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
+  pending?: {
+    /**
+     * ID that corresponds to the bulk upload form ID
+     */
+    formID: string
+    /**
+     * src value of the image dom element
+     */
+    src: string
+  }
+} & UploadData<TUploadExtraFieldsData>
+
+/**
+ * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ *
+ * @todo Replace UploadData with UploadDataImproved in 4.0
  */
 export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in UploadCollectionSlug]: {
     fields: TUploadExtraFieldsData
-    // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
     id: string
     relationTo: TCollectionSlug
-    // Value can be just the document ID, or the full, populated document
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
     value: number | string | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
-export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
-  return (
-    img.parentElement != null &&
-    img.parentElement.tagName === 'LI' &&
-    img.previousSibling === null &&
-    img.getAttribute('aria-roledescription') === 'checkbox'
-  )
-}
-
-function $convertUploadServerElement(domNode: HTMLImageElement): DOMConversionOutput | null {
-  if (
-    domNode.hasAttribute('data-lexical-upload-relation-to') &&
-    domNode.hasAttribute('data-lexical-upload-id')
-  ) {
-    const id = domNode.getAttribute('data-lexical-upload-id')
-    const relationTo = domNode.getAttribute('data-lexical-upload-relation-to')
-
-    if (id != null && relationTo != null) {
-      const node = $createUploadServerNode({
-        data: {
-          fields: {},
-          relationTo,
-          value: id,
-        },
-      })
-      return { node }
-    }
-  }
-  const img = domNode
-  if (img.src.startsWith('file:///') || isGoogleDocCheckboxImg(img)) {
-    return null
-  }
-  // TODO: Auto-upload functionality here!
-  //}
-  return null
-}
-
-export type SerializedUploadNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'upload'
-} & Spread<UploadData, SerializedDecoratorBlockNode>
+export type SerializedUploadNode = StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'upload'> &
+  UploadData
 
 export class UploadServerNode extends DecoratorBlockNode {
   __data: UploadData
@@ -120,7 +113,7 @@ export class UploadServerNode extends DecoratorBlockNode {
   static override importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
       img: (node) => ({
-        conversion: $convertUploadServerElement,
+        conversion: (domNode) => $convertUploadElement(domNode, $createUploadServerNode),
         priority: 0,
       }),
     }
@@ -135,9 +128,10 @@ export class UploadServerNode extends DecoratorBlockNode {
       serializedNode.version = 3
     }
 
-    const importedData: UploadData = {
+    const importedData: Internal_UploadData = {
       id: serializedNode.id,
       fields: serializedNode.fields,
+      pending: (serializedNode as Internal_UploadData).pending,
       relationTo: serializedNode.relationTo,
       value: serializedNode.value,
     }
@@ -152,15 +146,26 @@ export class UploadServerNode extends DecoratorBlockNode {
     return false
   }
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.upload)
+    return element
+  }
+
   override decorate(): JSX.Element {
-    // @ts-expect-error
-    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
+    return null as unknown as JSX.Element
   }
 
   override exportDOM(): DOMExportOutput {
     const element = document.createElement('img')
-    element.setAttribute('data-lexical-upload-id', String(this.__data?.value))
-    element.setAttribute('data-lexical-upload-relation-to', this.__data?.relationTo)
+    const data = this.__data as Internal_UploadData
+    if (data.pending) {
+      element.setAttribute('data-lexical-pending-upload-form-id', String(data?.pending?.formID))
+      element.setAttribute('src', data?.pending?.src || '')
+    } else {
+      element.setAttribute('data-lexical-upload-id', String(data?.value))
+      element.setAttribute('data-lexical-upload-relation-to', data?.relationTo)
+    }
 
     return { element }
   }

@@ -19,7 +19,7 @@ export async function parseParams({
   collectionSlug?: string
   fields: FlattenedField[]
   globalSlug?: string
-  locale: string
+  locale?: string
   parentIsLocalized: boolean
   payload: Payload
   where: Where
@@ -30,7 +30,7 @@ export async function parseParams({
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(where)) {
       const condition = where[relationOrPath]
-      let conditionOperator: '$and' | '$or'
+      let conditionOperator: '$and' | '$or' | null = null
       if (relationOrPath.toLowerCase() === 'and') {
         conditionOperator = '$and'
       } else if (relationOrPath.toLowerCase() === 'or') {
@@ -46,7 +46,7 @@ export async function parseParams({
           payload,
           where: condition,
         })
-        if (builtConditions.length > 0) {
+        if (builtConditions.length > 0 && conditionOperator !== null) {
           result[conditionOperator] = builtConditions
         }
       } else {
@@ -55,9 +55,10 @@ export async function parseParams({
         // So we need to loop on keys again here to handle each operator independently
         const pathOperators = where[relationOrPath]
         if (typeof pathOperators === 'object') {
-          const validOperators = Object.keys(pathOperators).filter((operator) =>
+          const validOperators: Operator[] = Object.keys(pathOperators).filter((operator) =>
             validOperatorSet.has(operator as Operator),
-          )
+          ) as Operator[]
+
           for (const operator of validOperators) {
             const searchParam = await buildSearchParam({
               collectionSlug,
@@ -68,7 +69,7 @@ export async function parseParams({
               operator,
               parentIsLocalized,
               payload,
-              val: pathOperators[operator],
+              val: (pathOperators as Record<string, Where>)[operator],
             })
 
             if (searchParam?.value && searchParam?.path) {
@@ -80,10 +81,22 @@ export async function parseParams({
                   [searchParam.path]: searchParam.value,
                 })
               } else {
-                result[searchParam.path] = searchParam.value
+                if (result[searchParam.path]) {
+                  if (!result.$and) {
+                    result.$and = []
+                  }
+
+                  result.$and.push({ [searchParam.path]: result[searchParam.path] })
+                  result.$and.push({
+                    [searchParam.path]: searchParam.value,
+                  })
+                  delete result[searchParam.path]
+                } else {
+                  result[searchParam.path] = searchParam.value
+                }
               }
             } else if (typeof searchParam?.value === 'object') {
-              result = deepMergeWithCombinedArrays(result, searchParam.value, {
+              result = deepMergeWithCombinedArrays(result, searchParam.value ?? {}, {
                 // dont clone Types.ObjectIDs
                 clone: false,
               })

@@ -1,9 +1,11 @@
 import type { JSONSchema4 } from 'json-schema'
+import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
 
 import { sanitizeConfig } from '../config/sanitize.js'
 import { configToJSONSchema } from './configToJSONSchema.js'
+import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', async () => {
@@ -332,5 +334,123 @@ describe('configToJSONSchema', () => {
       required: ['id'],
       title: 'Test',
     })
+  })
+
+  it('should handle same block object being referenced in both collection and config.blocks', async () => {
+    const sharedBlock: Block = {
+      slug: 'sharedBlock',
+      interfaceName: 'SharedBlock',
+      fields: [
+        {
+          name: 'richText',
+          type: 'richText',
+          editor: () => {
+            // stub rich text editor
+            return {
+              CellComponent: '',
+              FieldComponent: '',
+              validate: () => true,
+            }
+          },
+        },
+      ],
+    }
+
+    // @ts-expect-error
+    const config: Config = {
+      blocks: [sharedBlock],
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'someBlockField',
+              type: 'blocks',
+              blocks: [sharedBlock],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    // Ensure both rich text editor are sanitized
+    const sanitizedConfig = await sanitizeConfig(config)
+    expect(typeof (sanitizedConfig?.blocks?.[0]?.fields?.[0] as RichTextField)?.editor).toBe(
+      'object',
+    )
+    expect(
+      typeof (
+        (sanitizedConfig.collections[0].fields[0] as BlocksField)?.blocks?.[0]
+          ?.fields?.[0] as RichTextField
+      )?.editor,
+    ).toBe('object')
+
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    const expectedBlockSchema = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: { type: ['string', 'null'] },
+        blockName: { type: ['string', 'null'] },
+        blockType: { const: 'sharedBlock' },
+        richText: { type: ['array', 'null'], items: { type: 'object' } },
+      },
+      required: ['blockType'],
+    }
+
+    expect(schema?.definitions?.test).toStrictEqual({
+      type: 'object',
+      additionalProperties: false,
+      title: 'Test',
+      properties: {
+        id: {
+          type: 'string',
+        },
+        someBlockField: {
+          type: ['array', 'null'],
+          items: {
+            oneOf: [expectedBlockSchema],
+          },
+        },
+      },
+      required: ['id'],
+    })
+
+    // The definition should still be registered for TypeScript type generation
+    expect(schema?.definitions?.SharedBlock).toStrictEqual(expectedBlockSchema)
+  })
+
+  it('should allow overriding required to false', async () => {
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              defaultValue: 'test',
+              typescriptSchema: [
+                () => ({
+                  type: 'string',
+                  required: false,
+                }),
+              ],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig, 'text')
+
+    // @ts-expect-error
+    expect(schema.definitions.test.properties.title.required).toStrictEqual(false)
   })
 })

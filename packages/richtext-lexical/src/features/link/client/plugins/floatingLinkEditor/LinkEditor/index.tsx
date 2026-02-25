@@ -3,6 +3,7 @@ import type { ElementNode, LexicalNode } from 'lexical'
 import type { Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -26,7 +27,8 @@ import {
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
 import type { LinkFields } from '../../../../nodes/types.js'
@@ -54,6 +56,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [linkNode, setLinkNode] = useState<LinkNode>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
+  const selectedNodeRectRef = useRef<DOMRect | null>(null)
   const [linkUrl, setLinkUrl] = useState<null | string>(null)
   const [linkLabel, setLinkLabel] = useState<null | string>(null)
 
@@ -61,6 +64,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     fieldProps: { schemaPath },
     uuid,
   } = useEditorConfigContext()
+  const isEditable = useLexicalEditable()
 
   const { config, getEntityConfig } = useConfig()
 
@@ -171,15 +175,22 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
         setLinkLabel(loadingLabel)
 
         requests
-          .get(`${config.serverURL}${config.routes.api}/${collection}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
+          .get(
+            formatAdminURL({
+              apiRoute: config.routes.api,
+              path: `/${collection}/${id}`,
+              serverURL: config.serverURL,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale: locale?.code,
+              },
             },
-            params: {
-              depth: 0,
-              locale: locale?.code,
-            },
-          })
+          )
           .then(async (res) => {
             if (!res.ok) {
               throw new Error(`HTTP error! Status: ${res.status}`)
@@ -234,7 +245,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
       if (selectedNodeDomRect != null) {
         selectedNodeDomRect.y += 40
-        setFloatingElemPositionForLinkEditor(selectedNodeDomRect, editorElem, anchorElem)
+        // Store the rect for positioning in useLayoutEffect after content renders
+        selectedNodeRectRef.current = selectedNodeDomRect
       }
     } else if (activeElement == null || activeElement.className !== 'link-input') {
       if (rootElement !== null) {
@@ -337,6 +349,17 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     })
   }, [editor, $updateLinkEditor])
 
+  // Position the tooltip after React renders the link content
+  useLayoutEffect(() => {
+    if (!isLink || !editorRef.current || !anchorElem || !selectedNodeRectRef.current) {
+      return
+    }
+
+    // Now the DOM has the actual link element, we can position the tooltip
+    setFloatingElemPositionForLinkEditor(selectedNodeRectRef.current, editorRef.current, anchorElem)
+    // linkNode dependency ensures re-positioning when clicking between different links with the same URL
+  }, [linkUrl, linkLabel, isLink, anchorElem, linkNode])
+
   return (
     <React.Fragment>
       <div className="link-editor" ref={editorRef}>
@@ -353,7 +376,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             </>
           ) : null}
 
-          {editor.isEditable() && (
+          {isEditable && (
             <React.Fragment>
               <button
                 aria-label="Edit link"

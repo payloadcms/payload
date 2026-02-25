@@ -1,15 +1,14 @@
-/* eslint-disable jest/require-top-level-describe */
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
+import { describe, expect, it } from 'vitest'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describe =
-  process.env.PAYLOAD_DATABASE === 'postgres' ? global.describe : global.describe.skip
+const describeToUse = process.env.PAYLOAD_DATABASE === 'postgres' ? describe : describe.skip
 
-describe('Postgres relationships v2-v3 migration', () => {
+describeToUse('Postgres relationships v2-v3 migration', () => {
   it('should execute relationships v2-v3 migration', async () => {
     const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
 
@@ -46,6 +45,6 @@ describe('Postgres relationships v2-v3 migration', () => {
     expect(hasErr).toBeFalsy()
 
     await payload.db.dropDatabase({ adapter: payload.db as any })
-    await payload.db.destroy()
+    await payload.destroy()
   })
 })

@@ -15,16 +15,19 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
-import * as React from 'react'
 
 import './index.scss'
+
+import { formatAdminURL, hasDraftsEnabled } from 'payload/shared'
+import * as React from 'react'
+
 import { LocaleSelector } from './LocaleSelector/index.js'
 import { RenderJSON } from './RenderJSON/index.js'
 
 const baseClass = 'query-inspector'
 
 export const APIViewClient: React.FC = () => {
-  const { id, collectionSlug, globalSlug, initialData } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug, initialData, isTrashed } = useDocumentInfo()
 
   const searchParams = useSearchParams()
   const { i18n, t } = useTranslation()
@@ -32,6 +35,7 @@ export const APIViewClient: React.FC = () => {
 
   const {
     config: {
+      defaultDepth,
       localization,
       routes: { api: apiRoute },
       serverURL,
@@ -47,32 +51,41 @@ export const APIViewClient: React.FC = () => {
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   let draftsEnabled: boolean = false
-  let docEndpoint: string = ''
+  let docEndpoint: `/${string}` = undefined
 
   if (collectionConfig) {
-    draftsEnabled = Boolean(collectionConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(collectionConfig)
     docEndpoint = `/${collectionSlug}/${id}`
   }
 
   if (globalConfig) {
-    draftsEnabled = Boolean(globalConfig.versions?.drafts)
+    draftsEnabled = hasDraftsEnabled(globalConfig)
     docEndpoint = `/globals/${globalSlug}`
   }
 
   const [data, setData] = React.useState<any>(initialData)
   const [draft, setDraft] = React.useState<boolean>(searchParams.get('draft') === 'true')
   const [locale, setLocale] = React.useState<string>(searchParams?.get('locale') || code)
-  const [depth, setDepth] = React.useState<string>(searchParams.get('depth') || '1')
+  const [depth, setDepth] = React.useState<string>(
+    searchParams.get('depth') || defaultDepth.toString(),
+  )
   const [authenticated, setAuthenticated] = React.useState<boolean>(true)
   const [fullscreen, setFullscreen] = React.useState<boolean>(false)
+
+  const trashParam = typeof initialData?.deletedAt === 'string'
 
   const params = new URLSearchParams({
     depth,
     draft: String(draft),
     locale,
+    trash: trashParam ? 'true' : 'false',
   }).toString()
 
-  const fetchURL = `${serverURL}${apiRoute}${docEndpoint}?${params}`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: `${docEndpoint}?${params}`,
+    serverURL: serverURL || window.location.origin,
+  })
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -111,6 +124,7 @@ export const APIViewClient: React.FC = () => {
         globalLabel={globalConfig?.label}
         globalSlug={globalSlug}
         id={id}
+        isTrashed={isTrashed}
         pluralLabel={collectionConfig ? collectionConfig?.labels?.plural : undefined}
         useAsTitle={collectionConfig ? collectionConfig?.admin?.useAsTitle : undefined}
         view="API"

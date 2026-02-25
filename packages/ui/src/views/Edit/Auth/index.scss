@@ -37,13 +37,39 @@
         gap: calc(var(--base) / 2);
       }
     }
-  }
 
-  .field-type.api-key {
-    margin-bottom: var(--base);
+    .field-type.api-key {
+      margin-bottom: var(--base);
 
-    input {
-      @include formInput;
+      input {
+        @include formInput;
+        width: 100%;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+
+    .api-key {
+      &__input-wrap {
+        display: flex;
+        align-items: center;
+      }
+
+      &__toggle-button-wrap {
+        display: flex;
+        align-self: stretch;
+      }
+
+      &__toggle-button {
+        @include formInput;
+        background: var(--theme-elevation-100);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        margin: 0 0 0 -1px;
+        padding: 0 calc(var(--base) / 2);
+        box-shadow: none;
+        --btn-icon-size: var(--base);
+      }
     }
   }
 

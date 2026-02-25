@@ -35,6 +35,17 @@ export type VercelBlobStorageOptions = {
   addRandomSuffix?: boolean
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * Cache-Control max-age in seconds
    *
    * @default 365 * 24 * 60 * 60 // (1 Year)
@@ -80,15 +91,15 @@ type VercelBlobStoragePlugin = (vercelBlobStorageOpts: VercelBlobStorageOptions)
 export const vercelBlobStorage: VercelBlobStoragePlugin =
   (options: VercelBlobStorageOptions) =>
   (incomingConfig: Config): Config => {
-    // If the plugin is disabled or no token is provided, do not enable the plugin
-    if (options.enabled === false || !options.token) {
-      return incomingConfig
-    }
-
     // Parse storeId from token
-    const storeId = options.token.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]?.toLowerCase()
+    const storeId = options.token
+      ?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
+      ?.toLowerCase()
 
-    if (!storeId) {
+    const isPluginDisabled = options.enabled === false || !options.token
+
+    // Don't throw if the plugin is disabled
+    if (!storeId && !isPluginDisabled) {
       throw new Error(
         'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
       )
@@ -108,21 +119,27 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
       collections: options.collections,
       config: incomingConfig,
-      enabled: !!options.clientUploads,
+      enabled: !isPluginDisabled && Boolean(options.clientUploads),
       extraClientHandlerProps: (collection) => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
         baseURL: baseUrl,
-        prefix: (typeof collection === 'object' && collection.prefix) || '',
+        prefix:
+          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
       }),
       serverHandler: getClientUploadRoute({
         access:
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
         cacheControlMaxAge: options.cacheControlMaxAge,
-        token: options.token,
+        token: options.token ?? '',
       }),
       serverHandlerPath: '/vercel-blob-client-upload-route',
     })
+
+    // If the plugin is disabled or no token is provided, do not enable the plugin
+    if (isPluginDisabled) {
+      return incomingConfig
+    }
 
     const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 
@@ -159,6 +176,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: options.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -167,7 +185,7 @@ function vercelBlobStorageInternal(
   options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
+    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, clientUploads, token } = options
 
     if (!token) {
       throw new Error('Vercel Blob storage token is required')
@@ -175,6 +193,7 @@ function vercelBlobStorageInternal(
 
     return {
       name: 'vercel-blob',
+      clientUploads,
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token }),
       handleUpload: getHandleUpload({

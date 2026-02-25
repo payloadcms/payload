@@ -2,7 +2,7 @@
 title: Vercel Content Link
 label: Vercel Content Link
 order: 10
-desc: Payload + Vercel Content Link allows yours editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it.
+desc: Payload + Vercel Content Link allows your editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it.
 keywords: vercel, vercel content link, content link, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
@@ -11,9 +11,10 @@ keywords: vercel, vercel content link, content link, visual editing, content sou
 ![Versions](/images/docs/vercel-visual-editing.jpg)
 
 <Banner type="warning">
-  Vercel Content Link is an enterprise-only feature and only available for deployments hosted on
-  Vercel. If you are an existing enterprise customer, [contact our sales
-  team](https://payloadcms.com/for-enterprise) for help with your integration.
+  Vercel Content Link is an enterprise-only feature and only available for
+  deployments hosted on Vercel. If you are an existing enterprise customer,
+  [contact our sales team](https://payloadcms.com/for-enterprise) for help with
+  your integration.
 </Banner>
 
 ## How it works
@@ -33,20 +34,20 @@ npm i @payloadcms/plugin-csm
 Then in the `plugins` array of your Payload Config, call the plugin and enable any collections that require Content Source Maps.
 
 ```ts
-import { buildConfig } from "payload/config"
-import contentSourceMaps from "@payloadcms/plugin-csm"
+import { buildConfig } from 'payload/config'
+import contentSourceMaps from '@payloadcms/plugin-csm'
 
 const config = buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [
         {
           name: 'slug',
           type: 'text',
         },
         {
-          name: 'title,'
+          name: 'title',
           type: 'text',
         },
       ],
@@ -54,7 +55,7 @@ const config = buildConfig({
   ],
   plugins: [
     contentSourceMaps({
-      collections: ["pages"],
+      collections: ['pages'],
     }),
   ],
 })
@@ -62,19 +63,50 @@ const config = buildConfig({
 export default config
 ```
 
-Now in your Next.js app, include the `?encodeSourceMaps=true` parameter in any of your API requests. For performance reasons, this should only be done when in draft mode or on preview deployments.
+## Enabling Content Source Maps
+
+Now in your Next.js app, you need to add the `encodeSourceMaps` query parameter to your API requests. This will tell Payload to include the Content Source Maps in the API response.
+
+<Banner type="warning">
+  **Note:** For performance reasons, this should only be done when in draft mode
+  or on preview deployments.
+</Banner>
+
+#### REST API
+
+If you're using the REST API, include the `?encodeSourceMaps=true` search parameter.
 
 ```ts
 if (isDraftMode || process.env.VERCEL_ENV === 'preview') {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_PAYLOAD_CMS_URL}/api/pages?where[slug][equals]=${slug}&encodeSourceMaps=true`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_CMS_URL}/api/pages?encodeSourceMaps=true&where[slug][equals]=${slug}`,
   )
+}
+```
+
+#### Local API
+
+If you're using the Local API, include the `encodeSourceMaps` via the `context` property.
+
+```ts
+if (isDraftMode || process.env.VERCEL_ENV === 'preview') {
+  const res = await payload.find({
+    collection: 'pages',
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+    context: {
+      encodeSourceMaps: true,
+    },
+  })
 }
 ```
 
 And that's it! You are now ready to enter Edit Mode and begin visually editing your content.
 
-#### Edit Mode
+## Edit Mode
 
 To see Content Link on your site, you first need to visit any preview deployment on Vercel and login using the Vercel Toolbar. When Content Source Maps are detected on the page, a pencil icon will appear in the toolbar. Clicking this icon will enable Edit Mode, highlighting all editable fields on the page in blue.
 
@@ -93,7 +125,9 @@ const { cleaned, encoded } = vercelStegaSplit(text)
 
 ### Blocks and array fields
 
-All `blocks` and `array` fields by definition do not have plain text strings to encode. For this reason, they are given an additional `_encodedSourceMap` property, which you can use to enable Content Link on entire _sections_ of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
+All `blocks` and `array` fields by definition do not have plain text strings to encode. For this reason, they are automatically given an additional `_encodedSourceMap` property, which you can use to enable Content Link on entire _sections_ of your site.
+
+You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
 
 ```ts
 <div data-vercel-edit-target>

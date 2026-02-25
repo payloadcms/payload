@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SelectType } from '../types/index.js'
 
 /**
@@ -6,11 +5,12 @@ import type { SelectType } from '../types/index.js'
  */
 export const sanitizeSelectParam = (unsanitizedSelect: unknown): SelectType | undefined => {
   if (unsanitizedSelect && typeof unsanitizedSelect === 'object') {
-    for (const k in unsanitizedSelect) {
+    for (const _k in unsanitizedSelect) {
+      const k = _k as keyof typeof unsanitizedSelect
       if (unsanitizedSelect[k] === 'true') {
-        unsanitizedSelect[k] = true
+        ;(unsanitizedSelect as Record<string, any>)[k] = true
       } else if (unsanitizedSelect[k] === 'false') {
-        unsanitizedSelect[k] = false
+        ;(unsanitizedSelect as Record<string, any>)[k] = false
       } else if (typeof unsanitizedSelect[k] === 'object') {
         sanitizeSelectParam(unsanitizedSelect[k])
       }

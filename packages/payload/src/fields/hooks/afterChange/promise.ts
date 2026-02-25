@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -8,7 +7,7 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -71,10 +70,16 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+  const getNestedValue = (data: JsonObject, path: string[]) =>
+    path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), data)
+  const previousValData =
+    previousSiblingDoc && Object.keys(previousSiblingDoc).length > 0
+      ? previousSiblingDoc
+      : previousDoc
 
   if (fieldAffectsData(field)) {
     // Execute hooks
-    if (field.hooks?.afterChange) {
+    if ('hooks' in field && field.hooks?.afterChange) {
       for (const hook of field.hooks.afterChange) {
         const hookedValue = await hook({
           blockData,
@@ -89,12 +94,13 @@ export const promise = async ({
           path: pathSegments,
           previousDoc,
           previousSiblingDoc,
-          previousValue: previousDoc[field.name],
+          previousValue:
+            getNestedValue(previousValData, pathSegments) ?? previousValData?.[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
-          siblingFields,
-          value: siblingDoc[field.name],
+          siblingFields: siblingFields!,
+          value: getNestedValue(siblingDoc, pathSegments) ?? siblingDoc?.[field.name],
         })
 
         if (hookedValue !== undefined) {
@@ -110,7 +116,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
@@ -144,7 +150,7 @@ export const promise = async ({
       const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = []
+        const promises: Promise<void>[] = []
 
         rows.forEach((row, rowIndex) => {
           const blockTypeToMatch = (row as JsonObject).blockType
@@ -171,7 +177,7 @@ export const promise = async ({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
-                previousSiblingDoc: previousDoc?.[field.name]?.[rowIndex] || ({} as JsonObject),
+                previousSiblingDoc: previousValData?.[field.name]?.[rowIndex] || ({} as JsonObject),
                 req,
                 siblingData: siblingData?.[field.name]?.[rowIndex] || {},
                 siblingDoc: row ? { ...row } : {},
@@ -212,25 +218,47 @@ export const promise = async ({
     }
 
     case 'group': {
-      await traverseFields({
-        blockData,
-        collection,
-        context,
-        data,
-        doc,
-        fields: field.fields,
-        global,
-        operation,
-        parentIndexPath: '',
-        parentIsLocalized: parentIsLocalized || field.localized,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as JsonObject,
-        req,
-        siblingData: (siblingData?.[field.name] as JsonObject) || {},
-        siblingDoc: siblingDoc[field.name] as JsonObject,
-      })
+      if (fieldAffectsData(field)) {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: '',
+          parentIsLocalized: parentIsLocalized || field.localized,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: (previousDoc?.[field.name] as JsonObject) || {},
+          req,
+          siblingData: (siblingData?.[field.name] as JsonObject) || {},
+          siblingDoc: (siblingDoc?.[field.name] as JsonObject) || {},
+        })
+      } else {
+        await traverseFields({
+          blockData,
+          collection,
+          context,
+          data,
+          doc,
+          fields: field.fields,
+          global,
+          operation,
+          parentIndexPath: indexPath,
+          parentIsLocalized,
+          parentPath,
+          parentSchemaPath: schemaPath,
+          previousDoc,
+          previousSiblingDoc: { ...previousSiblingDoc },
+          req,
+          siblingData: siblingData || {},
+          siblingDoc: { ...siblingDoc },
+        })
+      }
 
       break
     }
@@ -261,11 +289,12 @@ export const promise = async ({
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
-            previousValue: previousDoc[field.name],
+            previousValue:
+              getNestedValue(previousValData, pathSegments) ?? previousValData?.[field.name],
             req,
             schemaPath: schemaPathSegments,
             siblingData,
-            value: siblingDoc[field.name],
+            value: siblingDoc?.[field.name],
           })
 
           if (hookedValue !== undefined) {
@@ -279,14 +308,14 @@ export const promise = async ({
     case 'tab': {
       let tabSiblingData = siblingData
       let tabSiblingDoc = siblingDoc
-      let tabPreviousSiblingDoc = siblingDoc
+      let tabPreviousSiblingDoc = { ...previousDoc }
 
       const isNamedTab = tabHasName(field)
 
       if (isNamedTab) {
-        tabSiblingData = (siblingData[field.name] as JsonObject) ?? {}
-        tabSiblingDoc = (siblingDoc[field.name] as JsonObject) ?? {}
-        tabPreviousSiblingDoc = (previousDoc[field.name] as JsonObject) ?? {}
+        tabSiblingData = (siblingData?.[field.name] ?? {}) as JsonObject
+        tabSiblingDoc = (siblingDoc?.[field.name] ?? {}) as JsonObject
+        tabPreviousSiblingDoc = (previousSiblingDoc?.[field.name] ?? {}) as JsonObject
       }
 
       await traverseFields({

@@ -33,7 +33,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       required,
       timezone,
     },
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -58,23 +58,35 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
   const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
-  const supportedTimezones = config.admin.timezones.supportedTimezones
+
+  const supportedTimezones = useMemo(() => {
+    if (timezone && typeof timezone === 'object' && timezone.supportedTimezones) {
+      return timezone.supportedTimezones
+    }
+
+    return config.admin.timezones.supportedTimezones
+  }, [config.admin.timezones.supportedTimezones, timezone])
+
   /**
    * Date appearance doesn't include timestamps,
    * which means we need to pin the time to always 12:00 for the selected date
    */
   const isDateOnly = ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)
   const selectedTimezone = timezoneField?.value as string
+  const timezoneRequired =
+    required || (timezone && typeof timezone === 'object' && timezone.required)
 
   // The displayed value should be the original value, adjusted to the user's timezone
   const displayedValue = useMemo(() => {
@@ -102,7 +114,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const onChange = useCallback(
     (incomingDate: Date) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         if (timezone && selectedTimezone && incomingDate) {
           // Create TZDate instances for the selected timezone
           const TZDateWithSelectedTz = TZDate.tz(selectedTimezone)
@@ -132,7 +144,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         }
       }
     },
-    [readOnly, setValue, timezone, selectedTimezone],
+    [readOnly, disabled, timezone, selectedTimezone, isDateOnly, setValue],
   )
 
   const onChangeTimezone = useCallback(
@@ -157,7 +169,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -165,7 +177,9 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     >
       <RenderCustomComponent
         CustomComponent={Label}
-        Fallback={<FieldLabel label={label} localized={localized} required={required} />}
+        Fallback={
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        }
       />
       <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
         <RenderCustomComponent
@@ -180,7 +194,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             ...datePickerProps?.overrides,
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={readOnly}
+          readOnly={readOnly || disabled}
           value={displayedValue}
         />
         {timezone && supportedTimezones.length > 0 && (
@@ -188,7 +202,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             id={`${path}-timezone-picker`}
             onChange={onChangeTimezone}
             options={supportedTimezones}
-            required={required}
+            readOnly={readOnly || disabled}
+            required={timezoneRequired}
             selectedTimezone={selectedTimezone}
           />
         )}

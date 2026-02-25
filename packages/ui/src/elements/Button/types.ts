@@ -9,7 +9,17 @@ type secondaryAction = {
 export type Props = {
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?: 'error' | 'icon-label' | 'none' | 'pill' | 'primary' | 'secondary' | 'transparent'
+  buttonStyle?:
+    | 'dashed'
+    | 'error'
+    | 'icon-label'
+    | 'none'
+    | 'pill'
+    | 'primary'
+    | 'secondary'
+    | 'subtle'
+    | 'tab'
+    | 'transparent'
   children?: React.ReactNode
   className?: string
   disabled?: boolean
@@ -18,6 +28,7 @@ export type Props = {
    * Setting to `true` will allow the submenu to be opened when the button is disabled
    */
   enableSubMenu?: boolean
+  extraButtonProps?: Record<string, any>
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'
@@ -28,6 +39,7 @@ export type Props = {
    * Components now import their own `Link` directly from `next/link`.
    */
   Link?: React.ElementType
+  margin?: boolean
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
@@ -42,7 +54,7 @@ export type Props = {
   ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
-  size?: 'large' | 'medium' | 'small'
+  size?: 'large' | 'medium' | 'small' | 'xsmall'
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
   tooltip?: string

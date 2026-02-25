@@ -1,7 +1,7 @@
 'use client'
 
 import { CopyToClipboard, Link, useConfig, useField } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 export const LinkToDocClient: React.FC = () => {
@@ -20,12 +20,11 @@ export const LinkToDocClient: React.FC = () => {
     return null
   }
 
-  const href = `${serverURL}${formatAdminURL({
+  const href = formatAdminURL({
     adminRoute,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
-  })}`
-
-  const hrefToDisplay = `${process.env.NEXT_BASE_PATH || ''}${href}`
+    serverURL,
+  })
 
   return (
     <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
@@ -38,7 +37,7 @@ export const LinkToDocClient: React.FC = () => {
         >
           Doc URL
         </span>
-        <CopyToClipboard value={hrefToDisplay} />
+        <CopyToClipboard value={href} />
       </div>
       <div
         style={{
@@ -48,7 +47,7 @@ export const LinkToDocClient: React.FC = () => {
         }}
       >
         <Link href={href} passHref {...{ rel: 'noopener noreferrer', target: '_blank' }}>
-          {hrefToDisplay}
+          {href}
         </Link>
       </div>
     </div>

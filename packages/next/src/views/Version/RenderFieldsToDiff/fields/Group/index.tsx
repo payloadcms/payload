@@ -16,11 +16,11 @@ const baseClass = 'group-diff'
 
 export const Group: GroupFieldDiffClientComponent = ({
   baseVersionField,
-  comparisonValue,
+  comparisonValue: valueFrom,
   field,
   locale,
   parentIsLocalized,
-  versionValue,
+  versionValue: valueTo,
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
@@ -28,21 +28,23 @@ export const Group: GroupFieldDiffClientComponent = ({
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparisonValue}
         fields={field.fields}
-        label={
-          'label' in field &&
-          field.label &&
-          typeof field.label !== 'function' && (
+        Label={
+          'label' in field && field.label && typeof field.label !== 'function' ? (
             <span>
               {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
               {getTranslation(field.label, i18n)}
+            </span>
+          ) : (
+            <span className={`${baseClass}__locale-label ${baseClass}__locale-label--no-label`}>
+              &lt;{i18n.t('version:noLabelGroup')}&gt;
             </span>
           )
         }
         locales={selectedLocales}
         parentIsLocalized={parentIsLocalized || field.localized}
-        version={versionValue}
+        valueFrom={valueFrom}
+        valueTo={valueTo}
       >
         <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>

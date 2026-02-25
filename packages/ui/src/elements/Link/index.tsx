@@ -6,8 +6,7 @@ import React from 'react'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { formatUrl } from './formatUrl.js'
 
-const NextLink = (NextLinkImport.default ||
-  NextLinkImport) as unknown as typeof NextLinkImport.default
+const NextLink = 'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
 
 // Copied from  https://github.com/vercel/next.js/blob/canary/packages/next/src/client/link.tsx#L180-L191
 function isModifiedEvent(event: React.MouseEvent): boolean {
@@ -63,15 +62,18 @@ export const Link: React.FC<Props> = ({
           e.preventDefault()
         }
 
-        startRouteTransition(() => {
-          const url = typeof href === 'string' ? href : formatUrl(href)
+        const url = typeof href === 'string' ? href : formatUrl(href)
 
+        const navigate = () => {
           if (replace) {
             void router.replace(url, { scroll })
           } else {
             void router.push(url, { scroll })
           }
-        })
+        }
+
+        // Call startRouteTransition if available, otherwise navigate directly
+        startRouteTransition(navigate)
       }}
       ref={ref}
       {...rest}

@@ -7,16 +7,26 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug, locale, req, select, where },
+  { slug: globalSlug, locale, req, select, where = {} },
 ) {
-  const Model = this.globals
-  const globalConfig = this.payload.globals.config.find((each) => each.slug === slug)
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
+
   const fields = globalConfig.flattenedFields
+
+  const query = await buildQuery({
+    adapter: this,
+    fields,
+    globalSlug,
+    locale,
+    where: combineQueries({ globalType: { equals: globalSlug } }, where),
+  })
+
   const options: QueryOptions = {
     lean: true,
     select: buildProjectionFromSelect({
@@ -27,15 +37,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
     session: await getSession(this, req),
   }
 
-  const query = await buildQuery({
-    adapter: this,
-    fields,
-    globalSlug: slug,
-    locale,
-    where: combineQueries({ globalType: { equals: slug } }, where),
-  })
-
-  const doc = (await Model.findOne(query, {}, options)) as any
+  const doc: any = await Model.findOne(query, {}, options)
 
   if (!doc) {
     return null

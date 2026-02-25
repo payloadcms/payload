@@ -1,17 +1,17 @@
 import type {
   Adapter,
-  ClientUploadsConfig,
+  ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
+import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
-import { createRouteHandler } from 'uploadthing/next'
-import { createUploadthing, UTApi } from 'uploadthing/server'
+import { UTApi } from 'uploadthing/server'
 
 import { generateURL } from './generateURL.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
@@ -19,11 +19,29 @@ import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
+export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthing>>[0]
+
 export type UploadthingStorageOptions = {
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
   /**
    * Do uploads directly on the client, to bypass limits on Vercel.
    */
-  clientUploads?: ClientUploadsConfig
+  clientUploads?:
+    | {
+        access?: ClientUploadsAccess
+        routerInputConfig?: FileRouterInputConfig
+      }
+    | boolean
 
   /**
    * Collection options to apply the adapter to.
@@ -56,7 +74,29 @@ export type ACL = 'private' | 'public-read'
 export const uploadthingStorage: UploadthingPlugin =
   (uploadthingStorageOptions: UploadthingStorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (uploadthingStorageOptions.enabled === false) {
+    const isPluginDisabled = uploadthingStorageOptions.enabled === false
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
+      collections: uploadthingStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(uploadthingStorageOptions.clientUploads),
+      serverHandler: getClientUploadRoute({
+        access:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.access
+            : undefined,
+        acl: uploadthingStorageOptions.options.acl || 'public-read',
+        routerInputConfig:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.routerInputConfig
+            : undefined,
+        token: uploadthingStorageOptions.options.token,
+      }),
+      serverHandlerPath: '/storage-uploadthing-client-upload-route',
+    })
+
+    if (isPluginDisabled) {
       return incomingConfig
     }
 
@@ -66,22 +106,6 @@ export const uploadthingStorage: UploadthingPlugin =
     }
 
     const adapter = uploadthingInternal(uploadthingStorageOptions)
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
-      collections: uploadthingStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !!uploadthingStorageOptions.clientUploads,
-      serverHandler: getClientUploadRoute({
-        access:
-          typeof uploadthingStorageOptions.clientUploads === 'object'
-            ? uploadthingStorageOptions.clientUploads.access
-            : undefined,
-        acl: uploadthingStorageOptions.options.acl || 'public-read',
-        token: uploadthingStorageOptions.options.token,
-      }),
-      serverHandlerPath: '/storage-uploadthing-client-upload-route',
-    })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -122,6 +146,7 @@ export const uploadthingStorage: UploadthingPlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }
@@ -132,6 +157,9 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
       name: '_key',
       type: 'text',
       admin: {
+        disableBulkEdit: true,
+        disableListColumn: true,
+        disableListFilter: true,
         hidden: true,
       },
     },
@@ -139,6 +167,7 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
   return (): GeneratedAdapter => {
     const {
+      clientUploads,
       options: { acl = 'public-read', ...utOptions },
     } = options
 
@@ -146,6 +175,7 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
     return {
       name: 'uploadthing',
+      clientUploads,
       fields,
       generateURL,
       handleDelete: getHandleDelete({ utApi }),

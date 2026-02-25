@@ -9,23 +9,31 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const create: Create = async function create(
   this: DrizzleAdapter,
-  { collection: collectionSlug, data, req, select },
+  { collection: collectionSlug, customID, data, req, returning, select },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow({
     adapter: this,
+    collectionSlug,
+    customID,
     data,
     db,
     fields: collection.flattenedFields,
+    ignoreResult: returning === false,
     operation: 'create',
     req,
     select,
     tableName,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

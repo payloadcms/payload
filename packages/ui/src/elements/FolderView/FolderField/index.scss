@@ -1,0 +1,12 @@
+@layer payload-default {
+  .folder-edit-field {
+    display: none;
+  }
+
+  .edit-many-bulk-uploads__main,
+  .edit-many__main {
+    .folder-edit-field {
+      display: initial;
+    }
+  }
+}

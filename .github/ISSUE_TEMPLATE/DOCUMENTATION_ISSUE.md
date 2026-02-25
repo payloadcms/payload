@@ -2,6 +2,7 @@
 name: Documentation Issue
 about: Suggest fix to Payload documentation
 labels: 'documentation'
+assignees: 'zubricks'
 ---
 
 # Documentation Issue

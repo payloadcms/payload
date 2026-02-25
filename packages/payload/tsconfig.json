@@ -1,17 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../translations" }],
   "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
-    "noUncheckedIndexedAccess": false,
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin"
-      },
-      {
-        "name": "tsc-strict"
-      }
-    ],
-  },
-  "references": [{ "path": "../translations" }]
+    // Do not include DOM and DOM.Iterable as payload is a server-only package.
+    // This ensures node types do not conflict with node types (e.g. fetch.dispatcher)
+    "lib": ["ES2022"],
+  }
 }
