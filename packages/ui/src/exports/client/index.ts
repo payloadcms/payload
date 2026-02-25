@@ -199,6 +199,7 @@ export { ItemsDrawer } from '../../elements/ItemsDrawer/index.js'
 
 // fields
 export { HiddenField } from '../../fields/Hidden/index.js'
+export { NullField } from '../../fields/Null/index.js'
 export { ArrayField } from '../../fields/Array/index.js'
 export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
