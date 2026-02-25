@@ -81,7 +81,10 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    nestedBlock: NestedBlock;
+    blockWithBlockRef: BlockWithBlockRef;
+  };
   collections: {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-autosave': LexicalAutosave;
@@ -96,6 +99,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlock;
     'lexical-access-control': LexicalAccessControl;
     'lexical-relationship-fields': LexicalRelationshipField;
+    'lexical-nested-blocks': LexicalNestedBlock;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
@@ -124,6 +128,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
     'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
+    'lexical-nested-blocks': LexicalNestedBlocksSelect<false> | LexicalNestedBlocksSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -171,6 +176,33 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nestedBlock".
+ */
+export interface NestedBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nestedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blockWithBlockRef".
+ */
+export interface BlockWithBlockRef {
+  nestedBlocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nestedBlock';
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithBlockRef';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -708,6 +740,31 @@ export interface LexicalRelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-nested-blocks".
+ */
+export interface LexicalNestedBlock {
+  id: string;
+  title: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
@@ -1131,6 +1188,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalRelationshipField;
       } | null)
     | ({
+        relationTo: 'lexical-nested-blocks';
+        value: string | LexicalNestedBlock;
+      } | null)
+    | ({
         relationTo: 'rich-text-fields';
         value: string | RichTextField;
       } | null)
@@ -1367,6 +1428,16 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-nested-blocks_select".
+ */
+export interface LexicalNestedBlocksSelect<T extends boolean = true> {
+  title?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

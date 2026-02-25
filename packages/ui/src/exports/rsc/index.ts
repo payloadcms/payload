@@ -3,7 +3,11 @@ export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { HierarchyButton } from '../../elements/HierarchyButton/index.server.js'
 export { HierarchyField } from '../../elements/HierarchyField/index.server.js'
 export { HierarchySidebarTabServer } from '../../elements/HierarchyTree/HierarchySidebarTab.server.js'
-export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
+export {
+  escapeDiffHTML,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+} from '../../elements/HTMLDiff/index.js'
 export { _internal_renderFieldHandler } from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'

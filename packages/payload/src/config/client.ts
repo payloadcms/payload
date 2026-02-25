@@ -5,9 +5,9 @@ import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
+  ClientWidget,
   RootLivePreviewConfig,
   SanitizedConfig,
-  SanitizedDashboardConfig,
   ServerOnlyLivePreviewProperties,
 } from './types.js'
 
@@ -15,7 +15,7 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
-import { createClientBlocks } from '../fields/config/client.js'
+import { createClientBlocks, createClientFields } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
@@ -46,7 +46,9 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
-    dashboard?: SanitizedDashboardConfig
+    dashboard?: {
+      widgets: ClientWidget[]
+    }
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
@@ -181,9 +183,19 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { ComponentPath: _, label, ...rest } = widget
+              const { ComponentPath: _, fields, label, ...rest } = widget
               return {
                 ...rest,
+                ...(fields?.length
+                  ? {
+                      fields: createClientFields({
+                        defaultIDType: config.db.defaultIDType,
+                        fields,
+                        i18n,
+                        importMap,
+                      }),
+                    }
+                  : {}),
                 // Resolve label function to string for client
                 label:
                   typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,

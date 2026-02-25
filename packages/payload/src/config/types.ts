@@ -42,7 +42,10 @@ import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  ClientField,
+  DataFromWidgetSlug,
   DefaultDocumentIDType,
+  Field,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
@@ -50,6 +53,8 @@ import type {
   RequestContext,
   SelectField,
   TypedUser,
+  TypedWidget,
+  WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -748,6 +753,7 @@ export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x
 
 export type Widget = {
   ComponentPath: string
+  fields?: Field[]
   /**
    * Human-friendly label for the widget.
    * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
@@ -757,8 +763,6 @@ export type Widget = {
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
@@ -767,18 +771,32 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
 }
 
-export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
-  widgetSlug: string
-  width?: WidgetWidth
-}
+export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extends WidgetSlug
+  ? {
+      data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
+        ? DataFromWidgetSlug<TSlug>
+        : Record<string, unknown>
+      widgetSlug: TSlug
+      width: [
+        Extract<
+          TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+          WidgetWidth
+        >,
+      ] extends [never]
+        ? WidgetWidth
+        : Extract<
+            TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+            WidgetWidth
+          >
+    }
+  : never
 
 export type DashboardConfig = {
   defaultLayout?:

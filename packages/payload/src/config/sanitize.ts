@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
   WidgetInstance,
 } from './types.js'
 
@@ -201,6 +202,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
   ]
+
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+    }
+  }
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks

@@ -104,7 +104,8 @@ export const buildFormState = async (
     returnLivePreviewURL,
     returnLockStatus,
     returnPreviewURL,
-    schemaPath = collectionSlug || globalSlug,
+    widgetSlug,
+    schemaPath = collectionSlug || globalSlug || widgetSlug,
     select,
     skipClientConfigAuth,
     skipValidation,
@@ -113,8 +114,8 @@ export const buildFormState = async (
 
   const selectMode = select ? getSelectMode(select) : undefined
 
-  if (!collectionSlug && !globalSlug) {
-    throw new Error('Either collectionSlug or globalSlug must be provided')
+  if (!collectionSlug && !globalSlug && !widgetSlug) {
+    throw new Error('Either collectionSlug, globalSlug, or widgetSlug must be provided')
   }
 
   const schemaMap = getSchemaMap({
@@ -122,6 +123,7 @@ export const buildFormState = async (
     config,
     globalSlug,
     i18n,
+    widgetSlug,
   })
 
   const clientSchemaMap = getClientSchemaMap({
@@ -136,6 +138,7 @@ export const buildFormState = async (
     i18n,
     payload,
     schemaMap,
+    widgetSlug,
   })
 
   const id = collectionSlug ? idFromArgs : undefined
