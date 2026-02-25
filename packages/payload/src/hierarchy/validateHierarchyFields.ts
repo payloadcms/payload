@@ -50,8 +50,51 @@ export const validateHierarchyFields = (config: Config): void => {
     // Build relatedCollections by scanning all collections for hierarchy fields
     const sanitizedRelatedCollections: Record<string, SanitizedHierarchyRelatedCollection> = {}
 
+    // Check if the hierarchy collection's own parent field needs header button
+    const selfParentField = hierarchyCollection.fields.find(
+      (field) =>
+        fieldAffectsData(field) &&
+        field.name === parentFieldName &&
+        field.type === 'relationship' &&
+        (field as RelationshipField).relationTo === hierarchyCollection.slug,
+    ) as RelationshipField | undefined
+
+    if (selfParentField?.custom?.hierarchy?.injectHeaderButton === true) {
+      hierarchyCollection.admin = hierarchyCollection.admin || {}
+      hierarchyCollection.admin.components = hierarchyCollection.admin.components || {}
+      hierarchyCollection.admin.components.edit = hierarchyCollection.admin.components.edit || {}
+
+      const hierarchyComponent = {
+        path: '@payloadcms/ui/rsc#HierarchyButton',
+        serverProps: {
+          collectionSlug: hierarchyCollection.slug,
+          fieldName: parentFieldName,
+          parentFieldName: hierarchyConfig.parentFieldName,
+        },
+      }
+
+      const existingComponents = hierarchyCollection.admin.components.edit.BeforeDocumentMeta || []
+      const componentPath = '@payloadcms/ui/rsc#HierarchyButton'
+      const alreadyInjected = existingComponents.some((c) => {
+        if (typeof c === 'string') {
+          return c === componentPath
+        }
+        if (c && typeof c === 'object' && 'path' in c) {
+          return c.path === componentPath
+        }
+        return false
+      })
+
+      if (!alreadyInjected) {
+        hierarchyCollection.admin.components.edit.BeforeDocumentMeta = [
+          hierarchyComponent,
+          ...existingComponents,
+        ]
+      }
+    }
+
     for (const collection of config.collections || []) {
-      // Skip the hierarchy collection itself
+      // Skip the hierarchy collection itself (handled above)
       if (collection.slug === hierarchyCollection.slug) {
         continue
       }
