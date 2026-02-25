@@ -16,20 +16,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
-      let data = {}
       try {
         const text = await req.text?.()
-        data = text ? JSON.parse(text) : {}
+        const data = text ? JSON.parse(text) : {}
+        req.data = data
+        // @ts-expect-error attach json method to request
+        req.json = () => Promise.resolve(data)
       } catch (error) {
         if (error instanceof SyntaxError) {
           throw new APIError('Invalid JSON', 400)
         }
         req.payload.logger.error(error)
         throw error
-      } finally {
-        req.data = data
-        // @ts-expect-error attach json method to request
-        req.json = () => Promise.resolve(data)
       }
     } else if (bodyByteSize && contentType?.includes('multipart/')) {
       const { error, fields, files } = await processMultipartFormdata({
