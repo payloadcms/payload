@@ -27,9 +27,9 @@ export const ModifyInlineBlockFeatureClient = createClientFeature({
                 const selection = $getSelection()
 
                 // Check if selection consist of 1 node and that its an inlineblocknode
-                const nodes = selection.getNodes()
+                const nodes = selection?.getNodes()
 
-                if (nodes.length !== 1) {
+                if (nodes?.length !== 1) {
                   return
                 }
 

@@ -1305,17 +1305,15 @@ describe('lexicalBlocks', () => {
       await goToFirstCell(page, serverURL)
       await waitForFormReady(page)
 
-      await expect(
-        page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields label.field-label'),
-      ).toHaveText('My Label*')
-      await expect(
-        page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields .required'),
-      ).toHaveText('*')
-      await expect(
-        page.locator(
-          '.LexicalEditorTheme__block-blockInLexical .render-fields .field-description-lexicalInBlock',
-        ),
-      ).toHaveText('Some Description')
+      const blockInLexical = page.locator('.LexicalEditorTheme__block-blockInLexical')
+
+      await expect(blockInLexical.locator('.render-fields label.field-label')).toHaveText(
+        'My Label*',
+      )
+      await expect(blockInLexical.locator('.render-fields .required')).toHaveText('*')
+      await expect(blockInLexical.locator('.render-fields .field-description')).toHaveText(
+        'Some Description',
+      )
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async ({

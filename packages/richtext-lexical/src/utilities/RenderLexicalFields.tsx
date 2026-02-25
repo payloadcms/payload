@@ -14,13 +14,16 @@ type RenderLexicalFieldsProps = {
 } & React.ComponentProps<typeof RenderFields>
 
 /**
- * Drop-in replacement for `RenderFields` that automatically syncs field value
- * changes back into the Lexical node via `node.setSubFieldValue()`.
+ * Drop-in replacement for `RenderFields` that syncs form field edits back
+ * into the Lexical node via `setSubFieldValue()`. Changes are batched via
+ * `requestAnimationFrame` to avoid resetting cursor position. On unmount,
+ * pending changes are flushed synchronously so drawers closing don't lose
+ * the last edit.
  *
- * Changes are batched via `requestAnimationFrame` to avoid triggering Lexical
- * reconciliation synchronously during input events (which would reset cursor
- * position). On unmount, pending changes are flushed synchronously so drawers
- * closing don't lose the last edit.
+ * No explicit cycle prevention is needed: `NodeFieldsSyncPlugin` (which
+ * handles the reverse direction, node → form) compares against form state
+ * via `getField()`. Because the form-state update that triggered this
+ * flush already committed, the plugin sees matching values and skips.
  */
 export const RenderLexicalFields: React.FC<RenderLexicalFieldsProps> = ({
   nodeKey,
