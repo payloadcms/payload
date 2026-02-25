@@ -54,8 +54,8 @@
     transition: opacity 0.2s ease;
   }
 
-  .widget:focus,
-  .widget:focus-within {
+  .widget:focus-visible,
+  .widget:has(:focus-visible) {
     .widget-wrapper__controls {
       opacity: 1;
     }
@@ -107,7 +107,8 @@
       gap: 8px;
     }
 
-    &__delete-btn {
+    &__delete-btn,
+    &__edit-btn {
       display: flex;
       align-items: center;
       justify-content: center;

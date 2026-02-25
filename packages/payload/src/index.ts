@@ -192,6 +192,7 @@ export interface PayloadTypesShape {
   jobs: unknown
   locale: unknown
   user: unknown
+  widgets?: Record<string, unknown>
 }
 
 /**
@@ -256,6 +257,9 @@ export interface UntypedPayloadTypes {
   }
   locale: null | string
   user: UntypedUser
+  widgets: {
+    [slug: string]: JsonObject
+  }
 }
 
 /**
@@ -281,6 +285,14 @@ export type PayloadTypes = IsAugmented extends true
 export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
 export type TypedBlock = PayloadTypes['blocks']
+
+export type TypedWidget<T extends PayloadTypesShape = PayloadTypes> = T extends {
+  widgets: infer TWidgets
+}
+  ? TWidgets extends Record<string, unknown>
+    ? TWidgets
+    : Record<string, unknown>
+  : Record<string, unknown>
 
 export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
   [TSlug in keyof T['collections']]:
@@ -310,6 +322,14 @@ export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringK
 >
 
 export type BlockSlug = StringKeyOf<TypedBlock>
+
+export type WidgetSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<TypedWidget<T>>
+
+export type DataFromWidgetSlug<TSlug extends WidgetSlug> = TypedWidget[TSlug] extends {
+  data?: infer TData
+}
+  ? TData
+  : TypedWidget[TSlug]
 
 export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
   TypedUploadCollection<T>
