@@ -19,7 +19,7 @@ export type CreateFolderFieldOptions = {
  *
  * This field:
  * - Has hasMany:false (single folder selection)
- * - Is hidden from the form by default
+ * - Uses NullField to render nothing in the form (no DOM output)
  * - Injects a header button for folder selection via miller columns UI
  *
  * Use this in your collection's fields array to add a folder relationship.
@@ -47,10 +47,11 @@ export function createFolderField(options: CreateFolderFieldOptions): Relationsh
     name: getHierarchyFieldName(relationTo),
     type: 'relationship',
     admin: {
-      hidden: true,
       position: 'sidebar',
       ...restAdminOverrides,
       components: {
+        // NullField renders nothing - the header button handles the UI
+        Field: '@payloadcms/ui#NullField',
         ...componentOverrides,
       },
     },

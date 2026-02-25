@@ -85,6 +85,7 @@ export function createFoldersCollection(options: CreateFoldersCollectionOptions)
           Icon: '@payloadcms/ui#FolderIcon',
           ...hierarchyOverrides?.admin?.components,
         },
+        useHeaderButton: hierarchyOverrides?.admin?.useHeaderButton ?? true,
       },
       allowHasMany: false,
       parentFieldName,

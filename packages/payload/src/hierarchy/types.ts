@@ -23,6 +23,13 @@ export type HierarchyConfig = {
      * @default 100
      */
     treeLimit?: number
+    /**
+     * Whether to use a header button for parent selection instead of inline field.
+     * When true, the parent field is hidden and a button is injected into the document header.
+     * Useful for folder-like hierarchies where the parent is selected via miller columns.
+     * @default false
+     */
+    useHeaderButton?: boolean
   }
   /**
    * Whether related documents can have multiple values of this hierarchy
@@ -85,6 +92,7 @@ export type SanitizedHierarchyConfig = {
       Icon?: string
     }
     treeLimit: number
+    useHeaderButton: boolean
   }
   allowHasMany: boolean
   collectionSpecific:

@@ -67,8 +67,12 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
     }
   } else {
     // Auto-create parent field if it doesn't exist
+    // useHeaderButton defaults to false - only true when explicitly enabled (e.g., createFoldersCollection)
+    const useHeaderButton = collectionConfig.hierarchy.admin?.useHeaderButton ?? false
+
     const parentField = buildParentField({
       collectionSlug: collectionConfig.slug,
+      injectHeaderButton: useHeaderButton,
       parentFieldName,
     })
 
@@ -142,12 +146,15 @@ export const sanitizeHierarchy = (collectionConfig: CollectionConfig, _config: C
   }
 
   // Set sanitized hierarchy config (cast needed as we're transitioning from HierarchyConfig to SanitizedHierarchyConfig)
+  const useHeaderButton = collectionConfig.hierarchy.admin?.useHeaderButton ?? false
+
   ;(collectionConfig as unknown as { hierarchy: SanitizedHierarchyConfig }).hierarchy = {
     admin: {
       components: {
         ...(iconComponent && { Icon: iconComponent }),
       },
       treeLimit,
+      useHeaderButton,
     },
     allowHasMany,
     collectionSpecific,
