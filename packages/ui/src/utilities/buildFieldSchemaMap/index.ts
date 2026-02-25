@@ -28,8 +28,9 @@ export const buildFieldSchemaMap = (args: {
   config: SanitizedConfig
   globalSlug?: string
   i18n: I18n
+  widgetSlug?: string
 }): { fieldSchemaMap: FieldSchemaMap } => {
-  const { collectionSlug, config, globalSlug, i18n } = args
+  const { collectionSlug, config, globalSlug, i18n, widgetSlug } = args
 
   const schemaMap: FieldSchemaMap = new Map()
 
@@ -75,6 +76,26 @@ export const buildFieldSchemaMap = (args: {
         i18n,
         parentIndexPath: '',
         parentSchemaPath: globalSlug,
+        schemaMap,
+      })
+    }
+  } else if (widgetSlug) {
+    const matchedWidget = config.admin?.dashboard?.widgets?.find(
+      (widget) => widget.slug === widgetSlug,
+    )
+    const widgetFields = matchedWidget?.fields as Field[] | undefined
+
+    if (widgetFields?.length) {
+      schemaMap.set(widgetSlug, {
+        fields: widgetFields,
+      })
+
+      traverseFields({
+        config,
+        fields: widgetFields,
+        i18n,
+        parentIndexPath: '',
+        parentSchemaPath: widgetSlug,
         schemaMap,
       })
     }

@@ -80,8 +80,11 @@ export const createExport = async (args: CreateExportArgs) => {
 
   if (debug) {
     req.payload.logger.debug({
-      message: 'Starting export process with args:',
+      msg: '[createExport] Starting export process',
+      exportDocId: id,
+      exportName: nameArg,
       collectionSlug,
+      exportCollection,
       draft: draftsFromInput,
       fields,
       format,
@@ -513,22 +516,50 @@ export const createExport = async (args: CreateExportArgs) => {
     }
   } else {
     if (debug) {
-      req.payload.logger.debug(`Updating existing export with id: ${id}`)
+      req.payload.logger.debug({
+        msg: '[createExport] Updating export document with file',
+        exportDocId: id,
+        exportCollection,
+        fileName: name,
+        fileSize: buffer.length,
+        mimeType: isCSV ? 'text/csv' : 'application/json',
+      })
     }
-    await req.payload.update({
-      id,
-      collection: exportCollection,
-      data: {},
-      file: {
-        name,
-        data: buffer,
-        mimetype: isCSV ? 'text/csv' : 'application/json',
-        size: buffer.length,
-      },
-      // Override access only here so that we can be sure the export collection itself is updated as expected
-      overrideAccess: true,
-      req,
-    })
+    try {
+      await req.payload.update({
+        id,
+        collection: exportCollection,
+        data: {},
+        file: {
+          name,
+          data: buffer,
+          mimetype: isCSV ? 'text/csv' : 'application/json',
+          size: buffer.length,
+        },
+        // Override access only here so that we can be sure the export collection itself is updated as expected
+        overrideAccess: true,
+        req,
+      })
+    } catch (error) {
+      const errorDetails =
+        error instanceof Error
+          ? {
+              message: error.message,
+              name: error.name,
+              stack: error.stack,
+              // @ts-expect-error - data might exist on Payload errors
+              data: error.data,
+            }
+          : error
+      req.payload.logger.error({
+        msg: '[createExport] Failed to update export document with file',
+        err: errorDetails,
+        exportDocId: id,
+        exportCollection,
+        fileName: name,
+      })
+      throw error
+    }
   }
   if (debug) {
     req.payload.logger.debug('Export process completed successfully')

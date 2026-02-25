@@ -22,6 +22,7 @@ export const uploads2Slug = 'uploads2'
 export const arrayFieldsSlug = 'array-fields'
 
 export const lexicalCustomCellSlug = 'lexical-custom-cell'
+export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
 
 export const collectionSlugs = [
   lexicalFieldsSlug,
@@ -33,4 +34,6 @@ export const collectionSlugs = [
   textFieldsSlug,
   uploadsSlug,
   lexicalListsFeatureSlug,
+  lexicalCustomCellSlug,
+  lexicalNestedBlocksSlug,
 ]

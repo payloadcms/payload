@@ -1,6 +1,6 @@
 import type { CollectionConfig, Config } from 'payload'
 
-import type { ExportConfig, ImportConfig, ImportExportPluginConfig } from '../types.js'
+import type { ImportExportPluginConfig } from '../types.js'
 
 import { getExportCollection } from '../export/getExportCollection.js'
 import { getImportCollection } from '../import/getImportCollection.js'
@@ -33,7 +33,10 @@ export type PluginCollectionsResult = {
  * - Applies top-level overrideExportCollection/overrideImportCollection if provided
  * - For each collection in `pluginConfig.collections` that has a function override
  *   for `export` or `import`, applies the override to create customized collections
- * - Applies settings from collections without overrideCollection to the base collection
+ *
+ * Note: Per-collection settings (disableJobsQueue, batchSize, etc.) are stored on the
+ * target collection's `custom['plugin-import-export']` and looked up dynamically at
+ * runtime in the export/import hooks.
  *
  * @param config - The Payload config
  * @param pluginConfig - The import/export plugin config
@@ -183,52 +186,6 @@ export const getPluginCollections = async ({
             },
           }
         }
-      }
-    }
-  }
-
-  // Apply settings from collections without overrideCollection to the base collection
-  // This is done AFTER all overrides so these settings take precedence
-  if (pluginConfig.collections && pluginConfig.collections.length > 0) {
-    let mergedExportSettings: Partial<ExportConfig> = {}
-    let mergedImportSettings: Partial<ImportConfig> = {}
-
-    for (const collectionConfig of pluginConfig.collections) {
-      const exportConf =
-        typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
-      const importConf =
-        typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
-
-      if (exportConf && !exportConf.overrideCollection) {
-        mergedExportSettings = { ...mergedExportSettings, ...exportConf }
-      }
-      if (importConf && !importConf.overrideCollection) {
-        mergedImportSettings = { ...mergedImportSettings, ...importConf }
-      }
-    }
-
-    if (
-      mergedExportSettings.format !== undefined ||
-      mergedExportSettings.disableSave !== undefined ||
-      mergedExportSettings.disableDownload !== undefined
-    ) {
-      baseExportCollection = {
-        ...baseExportCollection,
-        admin: {
-          ...baseExportCollection.admin,
-          custom: {
-            ...baseExportCollection.admin?.custom,
-            ...(mergedExportSettings.disableDownload !== undefined && {
-              disableDownload: mergedExportSettings.disableDownload,
-            }),
-            ...(mergedExportSettings.disableSave !== undefined && {
-              disableSave: mergedExportSettings.disableSave,
-            }),
-            ...(mergedExportSettings.format !== undefined && {
-              format: mergedExportSettings.format,
-            }),
-          },
-        },
       }
     }
   }
