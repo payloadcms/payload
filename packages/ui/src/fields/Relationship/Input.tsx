@@ -466,8 +466,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (idsToLoad.length > 0 && !errorLoading) {
         const fetchPromises = idsToLoad.map((id) =>
           getDoc({
-            collection: relation,
             id,
+            collection: relation,
             locale,
             select: { [fieldToSelect]: true },
           }),
@@ -619,7 +619,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       return
     },
-    [i18n, config, hasMany, onChange, value],
+    [i18n, config, hasMany, invalidateDoc, locale, onChange, value],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -711,7 +711,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
+  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany, clearAll])
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
