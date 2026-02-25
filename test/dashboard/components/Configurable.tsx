@@ -8,6 +8,7 @@ export default function Configurable({ widgetData }: WidgetServerProps<Configura
   const description = widgetData?.description || ''
   const relatedTicket =
     typeof widgetData?.relatedTicket === 'string' ? widgetData.relatedTicket : undefined
+  const nestedText = widgetData?.nestedGroup?.nestedText
 
   return (
     <div className="configurable-widget card" style={{ padding: '16px' }}>
@@ -22,6 +23,11 @@ export default function Configurable({ widgetData }: WidgetServerProps<Configura
       {relatedTicket && (
         <p data-testid="configurable-ticket" style={{ fontSize: '12px', margin: '8px 0 0' }}>
           Ticket: {relatedTicket}
+        </p>
+      )}
+      {nestedText && (
+        <p data-testid="configurable-nested-text" style={{ fontSize: '12px', margin: '8px 0 0' }}>
+          {nestedText}
         </p>
       )}
     </div>

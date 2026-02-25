@@ -432,6 +432,9 @@ export interface ConfigurableWidget {
     title: string;
     description?: string | null;
     relatedTicket?: (string | null) | Ticket;
+    nestedGroup?: {
+      nestedText?: string | null;
+    };
   };
   width?: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

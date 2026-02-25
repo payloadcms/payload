@@ -134,6 +134,17 @@ export default buildConfigWithDefaults({
               type: 'relationship',
               relationTo: 'tickets',
             },
+            {
+              name: 'nestedGroup',
+              type: 'group',
+              fields: [
+                {
+                  name: 'nestedText',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
           ],
           label: 'Configurable Widget',
         },

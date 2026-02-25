@@ -359,6 +359,12 @@ describe('Dashboard', () => {
     let titleInput = drawer.locator('input[name="title"]').first()
     await expect(titleInput).toBeVisible({ timeout: 60000 })
     await titleInput.fill('English Title')
+
+    // Fill nested localized field (inside a group)
+    let nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toBeVisible()
+    await nestedInput.fill('Nested English')
+
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
@@ -380,9 +386,14 @@ describe('Dashboard', () => {
 
     titleInput = drawer.locator('input[name="title"]').first()
     await expect(titleInput).toBeVisible({ timeout: 60000 })
-    // Localized field should be empty in Spanish (not set yet)
+    // Localized fields should be empty in Spanish (not set yet)
     await expect(titleInput).toHaveValue('')
+
+    nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toHaveValue('')
+
     await titleInput.fill('Título en Español')
+    await nestedInput.fill('Texto anidado')
     // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
@@ -390,7 +401,7 @@ describe('Dashboard', () => {
 
     await d2.saveChangesAndValidate()
 
-    // Switch back to English and verify original title persisted
+    // Switch back to English and verify original values persisted
     await page.goto(`${url.admin}?locale=en`)
     const d3 = new DashboardHelper(page)
     await d3.setEditing()
@@ -405,6 +416,9 @@ describe('Dashboard', () => {
     titleInput = drawer.locator('input[name="title"]').first()
     await expect(titleInput).toBeVisible({ timeout: 60000 })
     await expect(titleInput).toHaveValue('English Title')
+
+    nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toHaveValue('Nested English')
 
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
     await expect(drawer).toBeHidden()
