@@ -11,7 +11,8 @@ import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
  * Priority for alt: images.icon.alt > images.thumbnail.alt > imageAltText (deprecated)
  */
 export function getBlockImageComponent(block: ClientBlock) {
-  const { imageAltText, images, imageURL } = block
+  const { admin, imageAltText, imageURL } = block
+  const images = admin?.images
 
   let displayURL: string | undefined
   let displayAlt: string | undefined

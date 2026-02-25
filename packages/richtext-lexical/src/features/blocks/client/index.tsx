@@ -180,12 +180,7 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: InlineBlocksIcon,
                 items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
-                    ChildComponent:
-                      inlineBlock.images?.icon ||
-                      inlineBlock.images?.thumbnail ||
-                      inlineBlock.imageURL
-                        ? getBlockImageComponent(inlineBlock)
-                        : InlineBlocksIcon,
+                    ChildComponent: getBlockImageComponent(inlineBlock),
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
                     label: ({ i18n }) => {

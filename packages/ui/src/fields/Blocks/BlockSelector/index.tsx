@@ -104,16 +104,16 @@ export const BlockSelector: React.FC<Props> = (props) => {
                   {groupBlocks.map((_block, index) => {
                     const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
-                    const { slug, imageAltText, images, imageURL, labels: blockLabels } = block
+                    const { admin, slug, imageAltText, imageURL, labels: blockLabels } = block
 
-                    const thumbnailURL = images?.thumbnail
-                      ? typeof images.thumbnail === 'string'
-                        ? images.thumbnail
-                        : images.thumbnail.url
+                    const thumbnailURL = admin?.images?.thumbnail
+                      ? typeof admin.images.thumbnail === 'string'
+                        ? admin.images.thumbnail
+                        : admin.images.thumbnail.url
                       : imageURL
                     const thumbnailAlt =
-                      images?.thumbnail && typeof images.thumbnail !== 'string'
-                        ? images.thumbnail.alt
+                      admin?.images?.thumbnail && typeof admin.images.thumbnail !== 'string'
+                        ? admin.images.thumbnail.alt
                         : imageAltText
 
                     return (

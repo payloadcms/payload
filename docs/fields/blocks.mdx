@@ -148,20 +148,30 @@ Blocks are defined as separate configs of their own.
   trivializes their reusability.
 </Banner>
 
-| Option                            | Description                                                                                                                                                                                                                                                    |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*                     | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                                                                                                       |
-| **`fields`** \*                   | Array of fields to be stored in this block.                                                                                                                                                                                                                    |
-| **`labels`**                      | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.                                                                                |
-| **`images`**                      | Custom images for the block in different UI contexts. Supports `icon` (20x20px for Lexical menus/toolbars) and `thumbnail` (3:2 ratio for block selection drawer). Each can be a URL string or `{ url, alt }` object. [More details](#block-image-guidelines). |
-| **`imageURL`** _(deprecated)_     | Use `images` instead. Thumbnail URL for the block selection drawer.                                                                                                                                                                                            |
-| **`imageAltText`** _(deprecated)_ | Use `images` instead. Alt text for the block thumbnail.                                                                                                                                                                                                        |
-| **`interfaceName`**               | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                            |
-| **`graphQL.singularName`**        | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                                                                                                   |
-| **`dbName`**                      | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                                                                                                          |
-| **`custom`**                      | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                      |
+| Option                     | Description                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.     |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
+| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
+
+### Admin Options
+
+Blocks are not fields, so they don’t inherit the base properties shared by all fields (not to be confused with the Blocks Field, documented above, which does). Here are their available admin options:
+
+| Option                 | Description                                                                                                                                                                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| **`components.Block`** | Custom component for replacing the Block, including the header.                                                                                                                                                                                                |
+| **`components.Label`** | Custom component for replacing the Block Label.                                                                                                                                                                                                                |
+| **`disableBlockName`** | Hide the blockName field by setting this value to `true`.                                                                                                                                                                                                      |
+| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer.                                                                                                                                                                                     |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                      |
+| **`images`**           | Custom images for the block in different UI contexts. Supports `icon` (20x20px for Lexical menus/toolbars) and `thumbnail` (3:2 ratio for block selection drawer). Each can be a URL string or `{ url, alt }` object. [More details](#block-image-guidelines). |     |
 
 ### Block Image Guidelines
 
@@ -262,18 +272,6 @@ const DividerBlock: Block = {
 ```
 
 If no `images` is provided, default graphics are displayed automatically in both contexts.
-
-### Admin Options
-
-Blocks are not fields, so they don’t inherit the base properties shared by all fields (not to be confused with the Blocks Field, documented above, which does). Here are their available admin options:
-
-| Option                 | Description                                                                |
-| ---------------------- | -------------------------------------------------------------------------- |
-| **`components.Block`** | Custom component for replacing the Block, including the header.            |
-| **`components.Label`** | Custom component for replacing the Block Label.                            |
-| **`disableBlockName`** | Hide the blockName field by setting this value to `true`.                  |
-| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                  |
 
 ### blockType, blockName, and block.label
 

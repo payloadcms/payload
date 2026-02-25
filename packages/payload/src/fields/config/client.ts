@@ -104,9 +104,6 @@ export const createClientBlocks = ({
       slug: block.slug,
       fields: [],
     }
-    if (block.images) {
-      clientBlock.images = block.images
-    }
     if (block.imageAltText) {
       clientBlock.imageAltText = block.imageAltText
     }
@@ -114,7 +111,7 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom || block.admin?.group) {
+    if (block.admin?.custom || block.admin?.group || block.admin?.images) {
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       clientBlock.admin = {}
       if (block.admin.custom) {
@@ -122,6 +119,9 @@ export const createClientBlocks = ({
       }
       if (block.admin.group) {
         clientBlock.admin!.group = block.admin.group
+      }
+      if (block.admin.images) {
+        clientBlock.admin!.images = block.admin.images
       }
     }
 
