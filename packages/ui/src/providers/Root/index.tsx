@@ -37,6 +37,7 @@ import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
+import { RelationshipValueCacheProvider } from '../RelationshipValueCache/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
@@ -111,17 +112,22 @@ export const RootProvider: React.FC<Props> = ({
                                     <StepNavProvider>
                                       <LoadingOverlayProvider>
                                         <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
+                                          <RelationshipValueCacheProvider
+                                            apiRoute={config.routes.api}
+                                            i18nLanguage={languageCode}
+                                          >
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              <UploadHandlersProvider>
+                                                <DndContext
+                                                  collisionDetection={pointerWithin}
+                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                  id={dndContextID}
+                                                >
+                                                  {children}
+                                                </DndContext>
+                                              </UploadHandlersProvider>
+                                            </NavProvider>
+                                          </RelationshipValueCacheProvider>
                                         </DocumentEventsProvider>
                                       </LoadingOverlayProvider>
                                     </StepNavProvider>
