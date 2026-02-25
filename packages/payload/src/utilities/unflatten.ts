@@ -39,6 +39,9 @@ export const unflatten = (target: any, opts?: Opts) => {
   const overwrite = opts.overwrite || false
   const recursive = opts.recursive || false
   const result = {}
+  // Tracks objects created by unflatten so we can detect when we're about to
+  // navigate into an external input value and clone it first to avoid mutation.
+  const ownObjects = new WeakSet()
 
   const isbuffer = isBuffer(target)
 
@@ -74,7 +77,15 @@ export const unflatten = (target: any, opts?: Opts) => {
       }
 
       if ((overwrite && !isobject) || (!overwrite && recipient[key1] == null)) {
-        recipient[key1] = typeof key2 === 'number' && !opts.object ? [] : {}
+        const newObj = typeof key2 === 'number' && !opts.object ? [] : {}
+        ownObjects.add(newObj)
+        recipient[key1] = newObj
+      } else if (isobject && !ownObjects.has(recipient[key1])) {
+        const cloned = Array.isArray(recipient[key1])
+          ? [...recipient[key1]]
+          : { ...recipient[key1] }
+        ownObjects.add(cloned)
+        recipient[key1] = cloned
       }
 
       recipient = recipient[key1]
