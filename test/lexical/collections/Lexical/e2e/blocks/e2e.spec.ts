@@ -1522,8 +1522,13 @@ describe('lexicalBlocks', () => {
         .first()
         .click()
 
-      await page.locator('.drawer--is-open #field-text').fill('value1')
-      await page.locator('.drawer--is-open button[type="submit"]').first().click()
+      await page.locator('.drawer--is-open input[id$="__text"]').fill('value1')
+      await page
+        .locator('.drawer--is-open button', {
+          hasText: 'Save changes',
+        })
+        .first()
+        .click()
 
       // remove inline block
       await inlineBlockElement.click()
@@ -1549,7 +1554,7 @@ describe('lexicalBlocks', () => {
         .click()
 
       // Check if the text field still contains 'value1'
-      await expect(page.locator('.drawer--is-open #field-text')).toHaveValue('value1')
+      await expect(page.locator('.drawer--is-open input[id$="__text"]')).toHaveValue('value1')
     })
   })
 })
