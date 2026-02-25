@@ -232,7 +232,22 @@ export type GlobalAdminOptions = {
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit View
+   * @deprecated This will be removed in v4. Use the `condition` property on the API view instead.
+   * @example
+   * ```ts
+   * export const MyGlobal: GlobalConfig = {
+   *   // ...
+   *   admin: {
+   *     views: {
+   *       edit: {
+   *         api: {
+   *           condition: () => false
+   *         },
+   *       }
+   *     }
+   *   }
+   * }
+   * ```
    */
   hideAPIURL?: boolean
   /**

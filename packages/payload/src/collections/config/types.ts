@@ -524,7 +524,22 @@ export type CollectionAdminOptions = {
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit view
+   * @deprecated This will be removed in v4. Use the `condition` property on the API view instead.
+   * @example
+   * ```ts
+   * export const MyCollection: CollectionConfig = {
+   *   // ...
+   *   admin: {
+   *     views: {
+   *       edit: {
+   *         api: {
+   *           condition: () => false
+   *         },
+   *       }
+   *     }
+   *   }
+   * }
+   * ```
    */
   hideAPIURL?: boolean
   /**
