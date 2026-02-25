@@ -331,6 +331,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 allowCreateCollectionSlugs.includes(folderCollectionSlug) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
                     folderAssignedCollections={
                       Array.isArray(folderType) ? folderType : [collectionSlug]
@@ -343,6 +345,8 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 allowCreateCollectionSlugs.includes(collectionSlug) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={[collectionSlug]}
                     folderAssignedCollections={
                       Array.isArray(folderType) ? folderType : [collectionSlug]
@@ -354,14 +358,10 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 ),
               ].filter(Boolean)}
               Message={
-                <p>
-                  {i18n.t('general:noResults', {
-                    label: `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ${getTranslation(
-                      folderCollectionConfig.labels?.plural,
-                      i18n,
-                    )}`,
-                  })}
-                </p>
+                <>
+                  <h3>{i18n.t('general:noResultsFound')}</h3>
+                  <p>{i18n.t('general:noResultsDescription')}</p>
+                </>
               }
             />
           )}

@@ -33,7 +33,7 @@ case "$FILE" in
     fi
     ;;
   *.js|*.jsx|*.ts|*.tsx)
-    pnpm eslint --cache --fix "$FILE" >/dev/null 2>&1
+    pnpm eslint --flag v10_config_lookup_from_file --cache --fix "$FILE" >/dev/null 2>&1
     pnpm prettier --write "$FILE" >/dev/null 2>&1
     ;;
 esac

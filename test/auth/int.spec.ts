@@ -18,8 +18,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
@@ -905,24 +905,25 @@ describe('Auth', () => {
             },
           })
 
-          expect(lockedUser.docs[0].loginAttempts).toBe(2)
-          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+          expect(lockedUser.docs[0]!.loginAttempts).toBe(2)
+          expect(lockedUser.docs[0]!.lockUntil).toBeDefined()
 
           const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
-          const userLockElapsed = await payload.update({
+          await payload.db.updateOne({
             collection: slug,
+            id: lockedUser.docs[0]!.id,
             data: {
               lockUntil: manuallyReleaseLock,
             },
-            showHiddenFields: true,
-            where: {
-              email: {
-                equals: userEmail,
-              },
-            },
           })
 
-          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
+          const userAfterUpdate = await payload.findByID({
+            collection: slug,
+            id: lockedUser.docs[0]!.id,
+            showHiddenFields: true,
+          })
+
+          expect(userAfterUpdate.lockUntil).toEqual(manuallyReleaseLock)
 
           // login
           await restClient.POST(`/${slug}/login`, {

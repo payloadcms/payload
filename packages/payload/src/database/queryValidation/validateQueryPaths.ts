@@ -101,6 +101,8 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
+          } else if (typeof val !== 'object' || val === null) {
+            errors.push({ path: `${path}.${operator}` })
           }
         }
       }

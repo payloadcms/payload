@@ -6,8 +6,9 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
-import { mediaSlug } from './shared.js'
+import { mediaSlug, mediaWithPrefixSlug } from './shared.js'
 import { MB } from './test-utils.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,7 +24,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, Users],
+  collections: [Media, MediaWithPrefix, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -37,6 +38,9 @@ export default buildConfigWithDefaults({
     s3Storage({
       collections: {
         [mediaSlug]: true,
+        [mediaWithPrefixSlug]: {
+          prefix: 'test-prefix',
+        },
       },
       bucket: process.env.S3_BUCKET!,
       clientUploads: {

@@ -337,6 +337,7 @@ export const svTranslations: DefaultTranslationsObject = {
     items: 'artiklar',
     language: 'Språk',
     lastModified: 'Senast ändrad',
+    layout: 'Layout',
     leaveAnyway: 'Lämna ändå',
     leaveWithoutSaving: 'Lämna utan att spara',
     light: 'Ljust',
@@ -366,6 +367,9 @@ export const svTranslations: DefaultTranslationsObject = {
     noOptions: 'Inga alternativ',
     noResults:
       'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller så matchar inga filtren du har angett ovan.',
+    noResultsDescription:
+      'Antingen finns ingen eller ingen matchar de filter du har specificerat ovan.',
+    noResultsFound: 'Inga resultat.',
     notFound: 'Hittades inte',
     nothingFound: 'Inget hittades',
     noTrashResults: 'Inget {{label}} i papperskorgen.',
@@ -403,6 +407,7 @@ export const svTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
+    saveChanges: 'Spara Ändringar',
     saving: 'Sparar...',
     schedulePublishFor: 'Schemalägg publicering för {{title}}',
     searchBy: 'Sök efter {{label}}',
