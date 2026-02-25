@@ -231,6 +231,43 @@ export const getPluginCollections = async ({
         },
       }
     }
+
+    // disableJobsQueue affects hook closures captured at collection creation time, so the
+    // base collection must be regenerated rather than patched via admin.custom
+    if (mergedExportSettings.disableJobsQueue !== undefined) {
+      const filteredSlugs = baseExportSlugs.filter((slug) => !customExportSlugMap.has(slug))
+      baseExportCollection = getExportCollection({
+        collectionSlugs: filteredSlugs,
+        config,
+        exportConfig: mergedExportSettings,
+        pluginConfig,
+      })
+      if (
+        pluginConfig.overrideExportCollection &&
+        typeof pluginConfig.overrideExportCollection === 'function'
+      ) {
+        baseExportCollection = await pluginConfig.overrideExportCollection({
+          collection: baseExportCollection,
+        })
+      }
+    }
+
+    if (mergedImportSettings.disableJobsQueue !== undefined) {
+      const filteredSlugs = baseImportSlugs.filter((slug) => !customImportSlugMap.has(slug))
+      baseImportCollection = getImportCollection({
+        collectionSlugs: filteredSlugs,
+        importConfig: mergedImportSettings,
+        pluginConfig,
+      })
+      if (
+        pluginConfig.overrideImportCollection &&
+        typeof pluginConfig.overrideImportCollection === 'function'
+      ) {
+        baseImportCollection = await pluginConfig.overrideImportCollection({
+          collection: baseImportCollection,
+        })
+      }
+    }
   }
 
   // Filter out slugs that have custom export/import collections from the base collections
