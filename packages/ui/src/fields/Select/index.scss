@@ -3,6 +3,8 @@
 @layer payload-default {
   .field-type.select {
     position: relative;
+    // Fixes a bug where the Select field's dropdown menu would be hidden behind the AppHeader in landscape mobile mode
+    z-index: 1;
   }
 
   html[data-theme='light'] {

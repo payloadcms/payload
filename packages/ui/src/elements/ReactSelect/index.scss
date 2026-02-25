@@ -36,7 +36,7 @@
     }
 
     .rs__menu {
-      z-index: 4;
+      z-index: var(--z-select-menu);
       border-radius: 0;
       @include shadow-lg;
       background: var(--theme-input-bg);
