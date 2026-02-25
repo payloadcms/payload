@@ -182,7 +182,10 @@ export const traverseFields = ({
             })
 
             clientSchemaMap.set(path, { fields: clientFields })
+            continue
           }
+
+          subField satisfies never
         }
         break
       }
