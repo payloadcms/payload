@@ -5,10 +5,18 @@ import type {
   SerializedTextNode,
 } from 'lexical'
 
+/**
+ * This function checks if the editor state is empty (has any text). If the editor state has no nodes,
+ * or only an empty paragraph node (no TextNode with length > 0), it returns false.
+ * Otherwise, it returns true.
+ */
 export function hasText(
   value: null | SerializedEditorState<SerializedLexicalNode> | undefined,
-): boolean {
+): value is SerializedEditorState<SerializedLexicalNode> {
   const hasChildren = !!value?.root?.children?.length
+  if (!hasChildren) {
+    return false
+  }
 
   let hasOnlyEmptyParagraph = false
   if (value?.root?.children?.length === 1) {
@@ -28,9 +36,9 @@ export function hasText(
     }
   }
 
-  if (!hasChildren || hasOnlyEmptyParagraph) {
+  if (hasOnlyEmptyParagraph) {
     return false
-  } else {
-    return true
   }
+
+  return true
 }

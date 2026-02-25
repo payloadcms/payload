@@ -10,7 +10,7 @@ import React from 'react'
  * rendering the original component.
  *
  * @example
- * const PredefinedComponent = getMergedPropsComponent({
+ * const PredefinedComponent = withMergedProps({
  *   Component: OriginalComponent,
  *   toMergeIntoProps: { someExtraValue: 5 }
  * });

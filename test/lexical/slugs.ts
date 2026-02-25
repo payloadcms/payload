@@ -5,7 +5,11 @@ export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalJSXConverterSlug = 'lexical-jsx-converter'
 export const lexicalHeadingFeatureSlug = 'lexical-heading-feature'
 export const lexicalListsFeatureSlug = 'lexical-lists-features'
-
+export const lexicalViewsSlug = 'lexical-views'
+export const lexicalViewsFrontendSlug = 'lexical-views-frontend'
+export const lexicalViewsProviderSlug = 'lexical-views-provider'
+export const lexicalViewsProviderDefaultSlug = 'lexical-views-provider-default'
+export const lexicalViewsNestedSlug = 'lexical-views-nested'
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
@@ -33,4 +37,9 @@ export const collectionSlugs = [
   textFieldsSlug,
   uploadsSlug,
   lexicalListsFeatureSlug,
+  lexicalViewsSlug,
+  lexicalViewsFrontendSlug,
+  lexicalViewsProviderSlug,
+  lexicalViewsProviderDefaultSlug,
+  lexicalViewsNestedSlug,
 ]
