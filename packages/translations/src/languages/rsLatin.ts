@@ -338,6 +338,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promena',
+    layout: 'Raspored',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez čuvanja',
     light: 'Svetlo',
@@ -367,6 +368,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nema pronađenih {{label}}. Moguće da {{label}} još uvek ne postoji ili nema rezultata u skladu sa postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoji nijedan ili nijedan ne odgovara filterima koje ste naveli iznad.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u otpadu.',
@@ -403,6 +407,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     row: 'Red',
     rows: 'Redovi',
     save: 'Sačuvaj',
+    saveChanges: 'Sačuvaj Promene',
     saving: 'Čuvanje u toku...',
     schedulePublishFor: 'Zakaži objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',

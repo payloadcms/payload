@@ -5,6 +5,7 @@ import type {
   PayloadRequest,
   SanitizedConfig,
 } from 'payload'
+import type tsTypes from 'typescript'
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import path from 'path'
@@ -16,7 +17,6 @@ import {
 } from 'payload'
 import { findConfig } from 'payload/node'
 import { fieldShouldBeLocalized } from 'payload/shared'
-import * as ts from 'typescript'
 
 import type {
   BlocksToJsonBlockToMigrate,
@@ -640,6 +640,8 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
 
     const configFile = readFileSync(configPath, 'utf-8')
 
+    const ts = await dynamicImport<typeof tsTypes>('typescript')
+
     const source = ts.createSourceFile(configPath, configFile, ts.ScriptTarget.ESNext)
 
     let hadChanges = false
@@ -648,7 +650,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
       (ctx) => (sourceFile) => {
         const factory = ctx.factory
 
-        const visit: ts.Visitor = (node) => {
+        const visit: tsTypes.Visitor = (node) => {
           if (
             ts.isPropertyAssignment(node) &&
             ts.isIdentifier(node.name) &&
@@ -691,7 +693,7 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
           return ts.visitEachChild(node, visit, ctx)
         }
 
-        return ts.visitNode(sourceFile, visit) as ts.SourceFile
+        return ts.visitNode(sourceFile, visit) as tsTypes.SourceFile
       },
     ])
 

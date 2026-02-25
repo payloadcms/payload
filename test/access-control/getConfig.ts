@@ -11,16 +11,19 @@ import type { User } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { Auth } from './collections/Auth/index.js'
 import { BlocksFieldAccess } from './collections/BlocksFieldAccess/index.js'
+import { DifferentiatedTrash } from './collections/DifferentiatedTrash/index.js'
 import { Disabled } from './collections/Disabled/index.js'
 import { Hooks } from './collections/hooks/index.js'
 import { ReadRestricted } from './collections/ReadRestricted/index.js'
 import { seedReadRestricted } from './collections/ReadRestricted/seed.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
+import { RestrictedTrash } from './collections/RestrictedTrash/index.js'
 import { RichText } from './collections/RichText/index.js'
 import {
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
+  differentiatedTrashSlug,
   docLevelAccessSlug,
   firstArrayText,
   fullyRestrictedSlug,
@@ -33,7 +36,9 @@ import {
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  regularUserEmail,
   relyOnRequestHeadersSlug,
+  restrictedTrashSlug,
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
@@ -622,6 +627,8 @@ export const getConfig: () => Partial<Config> = () => ({
     Hooks,
     Auth,
     ReadRestricted,
+    DifferentiatedTrash,
+    RestrictedTrash,
     {
       slug: 'field-restricted-update-based-on-data',
       fields: [
@@ -873,6 +880,16 @@ export const getConfig: () => Partial<Config> = () => ({
       },
     })
 
+    // Regular user - can access admin panel but has limited delete permissions
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: regularUserEmail,
+        password: 'test',
+        roles: ['user'],
+      },
+    })
+
     await payload.create({
       collection: publicUsersSlug,
       data: {
@@ -1029,6 +1046,23 @@ export const getConfig: () => Partial<Config> = () => ({
 
     // Seed read-restricted collection
     await seedReadRestricted(payload)
+
+    // Seed trash access control collections
+    await payload.create({
+      collection: differentiatedTrashSlug,
+      data: {
+        title: 'Differentiated Doc 1',
+        _status: 'published',
+      },
+    })
+
+    await payload.create({
+      collection: restrictedTrashSlug,
+      data: {
+        title: 'Restricted Doc 1',
+        _status: 'published',
+      },
+    })
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
