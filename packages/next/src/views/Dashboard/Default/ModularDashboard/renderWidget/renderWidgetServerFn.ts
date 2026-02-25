@@ -1,4 +1,4 @@
-import type { ServerFunction, WidgetServerProps } from 'payload'
+import type { Field, ServerFunction, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -59,7 +59,7 @@ export const renderWidgetHandler: ServerFunction<
 
   try {
     const localeFilteredData = widgetConfig.fields?.length
-      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields)
+      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields as Field[])
       : widgetData || {}
 
     const serverProps: WidgetServerProps = {

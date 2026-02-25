@@ -1,5 +1,5 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { ClientWidget, WidgetServerProps } from 'payload'
+import type { ClientWidget, Field, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -30,7 +30,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
     const widgetData = widgetConfig?.fields?.length
-      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields)
+      ? extractLocaleData(layoutItem.data || {}, req.locale || 'en', widgetConfig.fields as Field[])
       : layoutItem.data || {}
 
     return {
