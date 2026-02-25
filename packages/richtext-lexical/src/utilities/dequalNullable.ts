@@ -32,6 +32,7 @@ export function dequalNullable(foo: unknown, bar: unknown): boolean {
 
     if (ctor === Array) {
       if ((len = (foo as any[]).length) === (bar as any[]).length) {
+        // eslint-disable-next-line no-empty
         while (len-- && dequalNullable((foo as any[])[len], (bar as any[])[len])) {}
       }
       return len === -1
