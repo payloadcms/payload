@@ -1031,7 +1031,7 @@ export interface DateField {
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
   dayAndTimeWithTimezoneFixed?: string | null;
-  dayAndTimeWithTimezoneFixed_tz?: 'Europe/London' | null;
+  dayAndTimeWithTimezoneFixed_tz?: SupportedTimezones;
   dayAndTimeWithTimezoneRequired?: string | null;
   dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
   dayAndTimeWithTimezoneReadOnly?: string | null;
@@ -1063,9 +1063,9 @@ export interface DateField {
       }[]
     | null;
   dateWithOffsetTimezone?: string | null;
-  dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
+  dateWithOffsetTimezone_tz?: SupportedTimezones;
   dateWithMixedTimezones?: string | null;
-  dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithMixedTimezones_tz?: SupportedTimezones;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
