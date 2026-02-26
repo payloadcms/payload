@@ -11,7 +11,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
-  const { existingMigrations } = await getMigrations({ payload })
+  const { existingMigrations } = await getMigrations({ payload, sort: ['-batch', '-name'] })
 
   if (!existingMigrations?.length) {
     payload.logger.info({ msg: 'No migrations to reset.' })
@@ -19,8 +19,6 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
   }
 
   const req = await createLocalReq({}, payload)
-
-  migrationFiles.reverse()
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
