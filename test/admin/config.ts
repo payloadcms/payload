@@ -94,7 +94,7 @@ export default buildConfigWithDefaults({
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
         collections: {
-          Component: '/components/views/CustomView/index.js#CustomView',
+          Component: '/componesnts/views/CustomView/index.js#CustomView',
           path: '/collections',
         },
         CustomDefaultView: {

@@ -406,9 +406,9 @@ function getPathCompletions(
   const offsetInString = position - node.getStart() - 1
   const hashIndex = text.indexOf('#')
 
-  // Only complete the path portion (everything before #, or the whole string)
-  const pathPortion =
-    hashIndex !== -1 ? text.substring(0, hashIndex) : text.substring(0, offsetInString)
+  // Complete up to the cursor position, but never past the #
+  const endOffset = hashIndex !== -1 ? Math.min(offsetInString, hashIndex) : offsetInString
+  const pathPortion = text.substring(0, endOffset)
   const lastSlash = pathPortion.lastIndexOf('/')
 
   // Directory to list entries from, and the partial segment being typed
