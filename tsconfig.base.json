@@ -41,7 +41,7 @@
         "../enterprise-plugins/packages/figma/src/index.ts"
       ],
       "@payload-config": [
-        "./test/_community/config.ts"
+        "./test/admin/config.ts"
       ],
       "@payloadcms/admin-bar": [
         "./packages/admin-bar/src"

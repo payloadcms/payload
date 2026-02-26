@@ -4,12 +4,11 @@ import type { ClientAdminConfig, SharedAdminConfig } from 'payload'
 import { ClientAdminConfigProvider } from '@payloadcms/ui'
 import React, { useMemo } from 'react'
 
-import clientConfig from '../../../test/_community/payload.config.admin.client.js'
-import sharedConfig from '../../../test/_community/payload.config.shared.js'
+import clientConfig from '../../../test/admin/payload.config.admin.client.js'
 
 function mergeSharedIntoClient(
   client: ClientAdminConfig,
-  shared: SharedAdminConfig,
+  shared?: SharedAdminConfig,
 ): ClientAdminConfig {
   if (!shared?.fields) {
     return client
@@ -30,10 +29,7 @@ function mergeSharedIntoClient(
 }
 
 export const ClientConfigBridge: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const mergedConfig = useMemo(
-    () => mergeSharedIntoClient(clientConfig ?? {}, sharedConfig ?? {}),
-    [],
-  )
+  const mergedConfig = useMemo(() => mergeSharedIntoClient(clientConfig ?? {}), [])
 
   return <ClientAdminConfigProvider config={mergedConfig}>{children}</ClientAdminConfigProvider>
 }

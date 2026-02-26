@@ -6,11 +6,6 @@ export const ListViewSelectAPI: CollectionConfig = {
   slug: listViewSelectAPISlug,
   admin: {
     enableListViewSelectAPI: true,
-    components: {
-      beforeListTable: [
-        './collections/ListViewSelectAPI/BeforeListTable/index.tsx#BeforeListTable',
-      ],
-    },
   },
   fields: [
     {

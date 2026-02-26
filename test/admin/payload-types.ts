@@ -146,7 +146,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
@@ -174,6 +174,9 @@ export interface Config {
     settings: SettingsSelect<false> | SettingsSelect<true>;
   };
   locale: 'es' | 'en';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -203,7 +206,7 @@ export interface UserAuthOperations {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -232,7 +235,7 @@ export interface Upload {
  * via the `definition` "uploads-two".
  */
 export interface UploadsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -253,7 +256,7 @@ export interface UploadsTwo {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -274,10 +277,10 @@ export interface Post {
     nestedTextFieldInNamedTab?: string | null;
   };
   nestedTextFieldInUnnamedTab?: string | null;
-  relationship?: (string | null) | Post;
-  users?: (string | null) | User;
+  relationship?: (number | null) | Post;
+  users?: (number | null) | User;
   customCell?: string | null;
-  upload?: (string | null) | Upload;
+  upload?: (number | null) | Upload;
   hiddenField?: string | null;
   adminHiddenField?: string | null;
   disableListColumnText?: string | null;
@@ -303,7 +306,7 @@ export interface Post {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   textField?: string | null;
   sidebarField?: string | null;
   updatedAt: string;
@@ -330,7 +333,7 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -340,7 +343,7 @@ export interface HiddenCollection {
  * via the `definition` "not-in-view-collection".
  */
 export interface NotInViewCollection {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -350,7 +353,7 @@ export interface NotInViewCollection {
  * via the `definition` "collection-no-api-view".
  */
 export interface CollectionNoApiView {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -359,7 +362,7 @@ export interface CollectionNoApiView {
  * via the `definition` "custom-document-controls".
  */
 export interface CustomDocumentControl {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -370,7 +373,7 @@ export interface CustomDocumentControl {
  * via the `definition` "custom-views-one".
  */
 export interface CustomViewsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -380,7 +383,7 @@ export interface CustomViewsOne {
  * via the `definition` "custom-views-two".
  */
 export interface CustomViewsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -390,7 +393,7 @@ export interface CustomViewsTwo {
  * via the `definition` "reorder-tabs".
  */
 export interface ReorderTab {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -400,7 +403,7 @@ export interface ReorderTab {
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
-  id: string;
+  id: number;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
   /**
@@ -412,7 +415,7 @@ export interface CustomField {
   customSelectField?: string | null;
   customSelectInput?: string | null;
   customMultiSelectField?: string[] | null;
-  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
+  relationshipFieldWithBeforeAfterInputs?: (number | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
         someTextField?: string | null;
@@ -441,7 +444,7 @@ export interface CustomField {
  * via the `definition` "group-one-collection-ones".
  */
 export interface GroupOneCollectionOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -451,7 +454,7 @@ export interface GroupOneCollectionOne {
  * via the `definition` "group-one-collection-twos".
  */
 export interface GroupOneCollectionTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -461,7 +464,7 @@ export interface GroupOneCollectionTwo {
  * via the `definition` "group-two-collection-ones".
  */
 export interface GroupTwoCollectionOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -471,7 +474,7 @@ export interface GroupTwoCollectionOne {
  * via the `definition` "group-two-collection-twos".
  */
 export interface GroupTwoCollectionTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -481,7 +484,7 @@ export interface GroupTwoCollectionTwo {
  * via the `definition` "geo".
  */
 export interface Geo {
-  id: string;
+  id: number;
   /**
    * @minItems 2
    * @maxItems 2
@@ -495,7 +498,7 @@ export interface Geo {
  * via the `definition` "array".
  */
 export interface Array {
-  id: string;
+  id: number;
   array?:
     | {
         text?: string | null;
@@ -510,7 +513,7 @@ export interface Array {
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -520,7 +523,7 @@ export interface DisableDuplicate {
  * via the `definition` "disable-copy-to-locale".
  */
 export interface DisableCopyToLocale {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -530,7 +533,7 @@ export interface DisableCopyToLocale {
  * via the `definition` "edit-menu-items".
  */
 export interface EditMenuItem {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -540,7 +543,7 @@ export interface EditMenuItem {
  * via the `definition` "format-doc-url".
  */
 export interface FormatDocUrl {
-  id: string;
+  id: number;
   title: string;
   description?: string | null;
   updatedAt: string;
@@ -553,7 +556,7 @@ export interface FormatDocUrl {
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -563,9 +566,9 @@ export interface BaseListFilter {
  * via the `definition` "with300documents".
  */
 export interface With300Document {
-  id: string;
+  id: number;
   text?: string | null;
-  selfRelation?: (string | null) | With300Document;
+  selfRelation?: (number | null) | With300Document;
   updatedAt: string;
   createdAt: string;
 }
@@ -574,7 +577,7 @@ export interface With300Document {
  * via the `definition` "with-list-drawer".
  */
 export interface WithListDrawer {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -586,11 +589,11 @@ export interface WithListDrawer {
  * via the `definition` "placeholder".
  */
 export interface Placeholder {
-  id: string;
+  id: number;
   defaultSelect?: 'option1' | null;
   placeholderSelect?: 'option1' | null;
-  defaultRelationship?: (string | null) | Post;
-  placeholderRelationship?: (string | null) | Post;
+  defaultRelationship?: (number | null) | Post;
+  placeholderRelationship?: (number | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -599,7 +602,7 @@ export interface Placeholder {
  * via the `definition` "use-as-title-group-field".
  */
 export interface UseAsTitleGroupField {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -609,7 +612,7 @@ export interface UseAsTitleGroupField {
  * via the `definition` "disable-bulk-edit".
  */
 export interface DisableBulkEdit {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -618,7 +621,7 @@ export interface DisableBulkEdit {
  * via the `definition` "custom-list-drawer".
  */
 export interface CustomListDrawer {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -627,7 +630,7 @@ export interface CustomListDrawer {
  * via the `definition` "list-view-select-api".
  */
 export interface ListViewSelectApi {
-  id: string;
+  id: number;
   title?: string | null;
   description?: string | null;
   group?: {
@@ -641,11 +644,11 @@ export interface ListViewSelectApi {
  * via the `definition` "virtuals".
  */
 export interface Virtual {
-  id: string;
+  id: number;
   virtualTitleFromPost?: string | null;
   textField?: string | null;
   virtualText?: string | null;
-  post?: (string | null) | Post;
+  post?: (number | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -654,7 +657,7 @@ export interface Virtual {
  * via the `definition` "no-timestamps".
  */
 export interface NoTimestamp {
-  id: string;
+  id: number;
   title?: string | null;
 }
 /**
@@ -662,7 +665,7 @@ export interface NoTimestamp {
  * via the `definition` "localized".
  */
 export interface Localized {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -673,7 +676,7 @@ export interface Localized {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -690,144 +693,144 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'uploads';
-        value: string | Upload;
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'uploads-two';
-        value: string | UploadsTwo;
+        value: number | UploadsTwo;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'hidden-collection';
-        value: string | HiddenCollection;
+        value: number | HiddenCollection;
       } | null)
     | ({
         relationTo: 'not-in-view-collection';
-        value: string | NotInViewCollection;
+        value: number | NotInViewCollection;
       } | null)
     | ({
         relationTo: 'collection-no-api-view';
-        value: string | CollectionNoApiView;
+        value: number | CollectionNoApiView;
       } | null)
     | ({
         relationTo: 'custom-document-controls';
-        value: string | CustomDocumentControl;
+        value: number | CustomDocumentControl;
       } | null)
     | ({
         relationTo: 'custom-views-one';
-        value: string | CustomViewsOne;
+        value: number | CustomViewsOne;
       } | null)
     | ({
         relationTo: 'custom-views-two';
-        value: string | CustomViewsTwo;
+        value: number | CustomViewsTwo;
       } | null)
     | ({
         relationTo: 'reorder-tabs';
-        value: string | ReorderTab;
+        value: number | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
-        value: string | CustomField;
+        value: number | CustomField;
       } | null)
     | ({
         relationTo: 'group-one-collection-ones';
-        value: string | GroupOneCollectionOne;
+        value: number | GroupOneCollectionOne;
       } | null)
     | ({
         relationTo: 'group-one-collection-twos';
-        value: string | GroupOneCollectionTwo;
+        value: number | GroupOneCollectionTwo;
       } | null)
     | ({
         relationTo: 'group-two-collection-ones';
-        value: string | GroupTwoCollectionOne;
+        value: number | GroupTwoCollectionOne;
       } | null)
     | ({
         relationTo: 'group-two-collection-twos';
-        value: string | GroupTwoCollectionTwo;
+        value: number | GroupTwoCollectionTwo;
       } | null)
     | ({
         relationTo: 'geo';
-        value: string | Geo;
+        value: number | Geo;
       } | null)
     | ({
         relationTo: 'array';
-        value: string | Array;
+        value: number | Array;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
-        value: string | DisableDuplicate;
+        value: number | DisableDuplicate;
       } | null)
     | ({
         relationTo: 'disable-copy-to-locale';
-        value: string | DisableCopyToLocale;
+        value: number | DisableCopyToLocale;
       } | null)
     | ({
         relationTo: 'edit-menu-items';
-        value: string | EditMenuItem;
+        value: number | EditMenuItem;
       } | null)
     | ({
         relationTo: 'format-doc-url';
-        value: string | FormatDocUrl;
+        value: number | FormatDocUrl;
       } | null)
     | ({
         relationTo: 'base-list-filters';
-        value: string | BaseListFilter;
+        value: number | BaseListFilter;
       } | null)
     | ({
         relationTo: 'with300documents';
-        value: string | With300Document;
+        value: number | With300Document;
       } | null)
     | ({
         relationTo: 'with-list-drawer';
-        value: string | WithListDrawer;
+        value: number | WithListDrawer;
       } | null)
     | ({
         relationTo: 'placeholder';
-        value: string | Placeholder;
+        value: number | Placeholder;
       } | null)
     | ({
         relationTo: 'use-as-title-group-field';
-        value: string | UseAsTitleGroupField;
+        value: number | UseAsTitleGroupField;
       } | null)
     | ({
         relationTo: 'disable-bulk-edit';
-        value: string | DisableBulkEdit;
+        value: number | DisableBulkEdit;
       } | null)
     | ({
         relationTo: 'custom-list-drawer';
-        value: string | CustomListDrawer;
+        value: number | CustomListDrawer;
       } | null)
     | ({
         relationTo: 'list-view-select-api';
-        value: string | ListViewSelectApi;
+        value: number | ListViewSelectApi;
       } | null)
     | ({
         relationTo: 'virtuals';
-        value: string | Virtual;
+        value: number | Virtual;
       } | null)
     | ({
         relationTo: 'no-timestamps';
-        value: string | NoTimestamp;
+        value: number | NoTimestamp;
       } | null)
     | ({
         relationTo: 'localized';
-        value: string | Localized;
+        value: number | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -837,10 +840,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -860,7 +863,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1349,7 +1352,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1359,7 +1362,7 @@ export interface HiddenGlobal {
  * via the `definition` "not-in-view-global".
  */
 export interface NotInViewGlobal {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1369,7 +1372,7 @@ export interface NotInViewGlobal {
  * via the `definition` "global-no-api-view".
  */
 export interface GlobalNoApiView {
-  id: string;
+  id: number;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1378,7 +1381,7 @@ export interface GlobalNoApiView {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   title?: string | null;
   sidebarField?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -1390,7 +1393,7 @@ export interface Global {
  * via the `definition` "custom-global-document-controls".
  */
 export interface CustomGlobalDocumentControl {
-  id: string;
+  id: number;
   title?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -1401,7 +1404,7 @@ export interface CustomGlobalDocumentControl {
  * via the `definition` "custom-global-views-one".
  */
 export interface CustomGlobalViewsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1411,7 +1414,7 @@ export interface CustomGlobalViewsOne {
  * via the `definition` "custom-global-views-two".
  */
 export interface CustomGlobalViewsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1421,7 +1424,7 @@ export interface CustomGlobalViewsTwo {
  * via the `definition` "group-globals-one".
  */
 export interface GroupGlobalsOne {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1431,7 +1434,7 @@ export interface GroupGlobalsOne {
  * via the `definition` "group-globals-two".
  */
 export interface GroupGlobalsTwo {
-  id: string;
+  id: number;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1441,7 +1444,7 @@ export interface GroupGlobalsTwo {
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: string;
+  id: number;
   canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1550,11 +1553,319 @@ export interface SettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
+
+export type SchemaPath =
+  | 'array'
+  | 'array.array'
+  | 'array.array.id'
+  | 'array.array.text'
+  | 'array.createdAt'
+  | 'array.updatedAt'
+  | 'base-list-filters'
+  | 'base-list-filters.createdAt'
+  | 'base-list-filters.title'
+  | 'base-list-filters.updatedAt'
+  | 'collection-no-api-view'
+  | 'collection-no-api-view.createdAt'
+  | 'collection-no-api-view.updatedAt'
+  | 'custom-document-controls'
+  | 'custom-document-controls._status'
+  | 'custom-document-controls.createdAt'
+  | 'custom-document-controls.title'
+  | 'custom-document-controls.updatedAt'
+  | 'custom-fields'
+  | 'custom-fields.arrayFieldWithBeforeAfterInputs'
+  | 'custom-fields.arrayFieldWithBeforeAfterInputs.id'
+  | 'custom-fields.arrayFieldWithBeforeAfterInputs.someTextField'
+  | 'custom-fields.blocksFieldWithBeforeAfterInputs'
+  | 'custom-fields.blocksFieldWithBeforeAfterInputs.blockFields'
+  | 'custom-fields.blocksFieldWithBeforeAfterInputs.blockFields.blockName'
+  | 'custom-fields.blocksFieldWithBeforeAfterInputs.blockFields.id'
+  | 'custom-fields.blocksFieldWithBeforeAfterInputs.blockFields.textField'
+  | 'custom-fields.createdAt'
+  | 'custom-fields.customMultiSelectField'
+  | 'custom-fields.customSelectField'
+  | 'custom-fields.customSelectInput'
+  | 'custom-fields.customTextClientField'
+  | 'custom-fields.customTextServerField'
+  | 'custom-fields.descriptionAsComponent'
+  | 'custom-fields.descriptionAsFunction'
+  | 'custom-fields.descriptionAsString'
+  | 'custom-fields.groupFieldWithBeforeAfterInputs'
+  | 'custom-fields.groupFieldWithBeforeAfterInputs.textOne'
+  | 'custom-fields.groupFieldWithBeforeAfterInputs.textTwo'
+  | 'custom-fields.radioFieldWithBeforeAfterInputs'
+  | 'custom-fields.relationshipFieldWithBeforeAfterInputs'
+  | 'custom-fields.text'
+  | 'custom-fields.updatedAt'
+  | 'custom-global-document-controls'
+  | 'custom-global-document-controls._status'
+  | 'custom-global-document-controls.createdAt'
+  | 'custom-global-document-controls.title'
+  | 'custom-global-document-controls.updatedAt'
+  | 'custom-global-views-one'
+  | 'custom-global-views-one.createdAt'
+  | 'custom-global-views-one.title'
+  | 'custom-global-views-one.updatedAt'
+  | 'custom-global-views-two'
+  | 'custom-global-views-two.createdAt'
+  | 'custom-global-views-two.title'
+  | 'custom-global-views-two.updatedAt'
+  | 'custom-list-drawer'
+  | 'custom-list-drawer.createdAt'
+  | 'custom-list-drawer.updatedAt'
+  | 'custom-views-one'
+  | 'custom-views-one.createdAt'
+  | 'custom-views-one.title'
+  | 'custom-views-one.updatedAt'
+  | 'custom-views-two'
+  | 'custom-views-two.createdAt'
+  | 'custom-views-two.title'
+  | 'custom-views-two.updatedAt'
+  | 'disable-bulk-edit'
+  | 'disable-bulk-edit.createdAt'
+  | 'disable-bulk-edit.updatedAt'
+  | 'disable-copy-to-locale'
+  | 'disable-copy-to-locale.createdAt'
+  | 'disable-copy-to-locale.title'
+  | 'disable-copy-to-locale.updatedAt'
+  | 'disable-duplicate'
+  | 'disable-duplicate.createdAt'
+  | 'disable-duplicate.title'
+  | 'disable-duplicate.updatedAt'
+  | 'edit-menu-items'
+  | 'edit-menu-items.createdAt'
+  | 'edit-menu-items.title'
+  | 'edit-menu-items.updatedAt'
+  | 'format-doc-url'
+  | 'format-doc-url._status'
+  | 'format-doc-url.createdAt'
+  | 'format-doc-url.deletedAt'
+  | 'format-doc-url.description'
+  | 'format-doc-url.title'
+  | 'format-doc-url.updatedAt'
+  | 'geo'
+  | 'geo.createdAt'
+  | 'geo.point'
+  | 'geo.updatedAt'
+  | 'global'
+  | 'global-no-api-view'
+  | 'global-no-api-view.createdAt'
+  | 'global-no-api-view.updatedAt'
+  | 'global._status'
+  | 'global.createdAt'
+  | 'global.sidebarField'
+  | 'global.title'
+  | 'global.updatedAt'
+  | 'group-globals-one'
+  | 'group-globals-one.createdAt'
+  | 'group-globals-one.title'
+  | 'group-globals-one.updatedAt'
+  | 'group-globals-two'
+  | 'group-globals-two.createdAt'
+  | 'group-globals-two.title'
+  | 'group-globals-two.updatedAt'
+  | 'group-one-collection-ones'
+  | 'group-one-collection-ones.createdAt'
+  | 'group-one-collection-ones.title'
+  | 'group-one-collection-ones.updatedAt'
+  | 'group-one-collection-twos'
+  | 'group-one-collection-twos.createdAt'
+  | 'group-one-collection-twos.title'
+  | 'group-one-collection-twos.updatedAt'
+  | 'group-two-collection-ones'
+  | 'group-two-collection-ones.createdAt'
+  | 'group-two-collection-ones.title'
+  | 'group-two-collection-ones.updatedAt'
+  | 'group-two-collection-twos'
+  | 'group-two-collection-twos.createdAt'
+  | 'group-two-collection-twos.title'
+  | 'group-two-collection-twos.updatedAt'
+  | 'hidden-collection'
+  | 'hidden-collection.createdAt'
+  | 'hidden-collection.title'
+  | 'hidden-collection.updatedAt'
+  | 'hidden-global'
+  | 'hidden-global.createdAt'
+  | 'hidden-global.title'
+  | 'hidden-global.updatedAt'
+  | 'list-view-select-api'
+  | 'list-view-select-api.createdAt'
+  | 'list-view-select-api.description'
+  | 'list-view-select-api.group'
+  | 'list-view-select-api.group.groupNameField'
+  | 'list-view-select-api.title'
+  | 'list-view-select-api.updatedAt'
+  | 'localized'
+  | 'localized._status'
+  | 'localized.createdAt'
+  | 'localized.title'
+  | 'localized.updatedAt'
+  | 'no-timestamps'
+  | 'no-timestamps.title'
+  | 'not-in-view-collection'
+  | 'not-in-view-collection.createdAt'
+  | 'not-in-view-collection.title'
+  | 'not-in-view-collection.updatedAt'
+  | 'not-in-view-global'
+  | 'not-in-view-global.createdAt'
+  | 'not-in-view-global.title'
+  | 'not-in-view-global.updatedAt'
+  | 'payload-kv'
+  | 'payload-kv.data'
+  | 'payload-kv.key'
+  | 'payload-locked-documents'
+  | 'payload-locked-documents.createdAt'
+  | 'payload-locked-documents.document'
+  | 'payload-locked-documents.globalSlug'
+  | 'payload-locked-documents.updatedAt'
+  | 'payload-locked-documents.user'
+  | 'payload-migrations'
+  | 'payload-migrations.batch'
+  | 'payload-migrations.createdAt'
+  | 'payload-migrations.name'
+  | 'payload-migrations.updatedAt'
+  | 'payload-preferences'
+  | 'payload-preferences.createdAt'
+  | 'payload-preferences.key'
+  | 'payload-preferences.updatedAt'
+  | 'payload-preferences.user'
+  | 'payload-preferences.value'
+  | 'placeholder'
+  | 'placeholder.createdAt'
+  | 'placeholder.defaultRelationship'
+  | 'placeholder.defaultSelect'
+  | 'placeholder.placeholderRelationship'
+  | 'placeholder.placeholderSelect'
+  | 'placeholder.updatedAt'
+  | 'posts'
+  | 'posts._status'
+  | 'posts.adminHiddenField'
+  | 'posts.createdAt'
+  | 'posts.customCell'
+  | 'posts.description'
+  | 'posts.disableListColumnText'
+  | 'posts.disableListColumnTextInRow'
+  | 'posts.disableListFilterText'
+  | 'posts.file'
+  | 'posts.groupWithCustomCell'
+  | 'posts.groupWithCustomCell.nestedTextFieldInGroupWithCustomCell'
+  | 'posts.hiddenField'
+  | 'posts.namedGroup'
+  | 'posts.namedGroup.someTextField'
+  | 'posts.namedTab'
+  | 'posts.namedTab.nestedTextFieldInNamedTab'
+  | 'posts.nestedTextFieldInUnnamedTab'
+  | 'posts.noReadAccessField'
+  | 'posts.number'
+  | 'posts.relationship'
+  | 'posts.richText'
+  | 'posts.selectField'
+  | 'posts.sidebarField'
+  | 'posts.someGroup'
+  | 'posts.someGroup.disableListColumnTextInGroup'
+  | 'posts.someTextField'
+  | 'posts.textFieldInUnnamedGroup'
+  | 'posts.title'
+  | 'posts.updatedAt'
+  | 'posts.upload'
+  | 'posts.users'
+  | 'posts.wavelengths'
+  | 'reorder-tabs'
+  | 'reorder-tabs.createdAt'
+  | 'reorder-tabs.title'
+  | 'reorder-tabs.updatedAt'
+  | 'settings'
+  | 'settings.canAccessProtected'
+  | 'settings.createdAt'
+  | 'settings.updatedAt'
+  | 'uploads'
+  | 'uploads-two'
+  | 'uploads-two.createdAt'
+  | 'uploads-two.filename'
+  | 'uploads-two.filesize'
+  | 'uploads-two.focalX'
+  | 'uploads-two.focalY'
+  | 'uploads-two.height'
+  | 'uploads-two.mimeType'
+  | 'uploads-two.thumbnailURL'
+  | 'uploads-two.title'
+  | 'uploads-two.updatedAt'
+  | 'uploads-two.url'
+  | 'uploads-two.width'
+  | 'uploads.createdAt'
+  | 'uploads.filename'
+  | 'uploads.filesize'
+  | 'uploads.focalX'
+  | 'uploads.focalY'
+  | 'uploads.height'
+  | 'uploads.mimeType'
+  | 'uploads.sizes'
+  | 'uploads.sizes.thumbnail'
+  | 'uploads.sizes.thumbnail.filename'
+  | 'uploads.sizes.thumbnail.filesize'
+  | 'uploads.sizes.thumbnail.height'
+  | 'uploads.sizes.thumbnail.mimeType'
+  | 'uploads.sizes.thumbnail.url'
+  | 'uploads.sizes.thumbnail.width'
+  | 'uploads.thumbnailURL'
+  | 'uploads.title'
+  | 'uploads.updatedAt'
+  | 'uploads.url'
+  | 'uploads.width'
+  | 'use-as-title-group-field'
+  | 'use-as-title-group-field.createdAt'
+  | 'use-as-title-group-field.name'
+  | 'use-as-title-group-field.updatedAt'
+  | 'users'
+  | 'users.createdAt'
+  | 'users.email'
+  | 'users.hash'
+  | 'users.lockUntil'
+  | 'users.loginAttempts'
+  | 'users.resetPasswordExpiration'
+  | 'users.resetPasswordToken'
+  | 'users.salt'
+  | 'users.sessions'
+  | 'users.sessions.createdAt'
+  | 'users.sessions.expiresAt'
+  | 'users.sessions.id'
+  | 'users.sidebarField'
+  | 'users.textField'
+  | 'users.updatedAt'
+  | 'virtuals'
+  | 'virtuals.createdAt'
+  | 'virtuals.post'
+  | 'virtuals.textField'
+  | 'virtuals.updatedAt'
+  | 'virtuals.virtualText'
+  | 'virtuals.virtualTitleFromPost'
+  | 'with-list-drawer'
+  | 'with-list-drawer.createdAt'
+  | 'with-list-drawer.description'
+  | 'with-list-drawer.number'
+  | 'with-list-drawer.title'
+  | 'with-list-drawer.updatedAt'
+  | 'with300documents'
+  | 'with300documents.createdAt'
+  | 'with300documents.selfRelation'
+  | 'with300documents.text'
+  | 'with300documents.updatedAt';
 
 
 declare module 'payload' {

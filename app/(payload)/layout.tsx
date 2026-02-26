@@ -6,7 +6,7 @@ import config from '@payload-config'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
-import rscAdminConfig from '../../test/_community/payload.config.admin.rsc.js'
+import rscAdminConfig from '../../test/admin/payload.config.admin.rsc.js'
 import { ClientConfigBridge } from './admin/ClientConfigBridge.js'
 import './custom.scss'
 

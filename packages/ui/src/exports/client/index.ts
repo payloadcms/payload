@@ -328,9 +328,9 @@ export {
 } from '../../providers/RouteTransition/index.js'
 export {
   ClientAdminConfigProvider,
-  RscAdminConfigProvider,
+  RscSchemaPathsProvider,
   useClientAdminConfig,
-  useRscAdminConfig,
+  useRscSchemaPaths,
 } from '../../providers/AdminConfig/index.js'
 export { useAdminFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'

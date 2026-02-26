@@ -46,16 +46,7 @@ import { GlobalNoApiView } from './globals/NoApiView.js'
 import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
-import {
-  BASE_PATH,
-  customAdminRoutes,
-  customNestedViewPath,
-  customParamViewPath,
-  customRootViewMetaTitle,
-  customViewPath,
-  protectedCustomNestedViewPath,
-  publicCustomViewPath,
-} from './shared.js'
+import { BASE_PATH, customAdminRoutes } from './shared.js'
 import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 
@@ -63,95 +54,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
-    components: {
-      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
-      afterDashboard: [
-        '/components/AfterDashboard/index.js#AfterDashboard',
-        '/components/AfterDashboardClient/index.js#AfterDashboardClient',
-      ],
-      afterNav: ['/components/AfterNav/index.js#AfterNav'],
-      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
-      beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
-      beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
-      beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
-      graphics: {
-        Icon: '/components/graphics/Icon.js#Icon',
-        Logo: '/components/graphics/Logo.js#Logo',
-      },
-      header: ['/components/CustomHeader/index.js#CustomHeader'],
-      logout: {
-        Button: '/components/Logout/index.js#Logout',
-      },
-      providers: [
-        '/components/CustomProviderServer/index.js#CustomProviderServer',
-        '/components/CustomProvider/index.js#CustomProvider',
-      ],
-      settingsMenu: [
-        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
-        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
-      ],
-      views: {
-        // Dashboard: CustomDashboardView,
-        // Account: CustomAccountView,
-        collections: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          path: '/collections',
-        },
-        CustomDefaultView: {
-          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
-          path: '/custom-default-view',
-        },
-        CustomMinimalView: {
-          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-          meta: {
-            title: customRootViewMetaTitle,
-          },
-          path: '/custom-minimal-view',
-        },
-        CustomNestedView: {
-          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
-          exact: true,
-          path: customNestedViewPath,
-        },
-        CustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: customViewPath,
-          strict: true,
-        },
-        CustomViewWithParam: {
-          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-          path: customParamViewPath,
-        },
-        ProtectedCustomNestedView: {
-          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
-          exact: true,
-          path: protectedCustomNestedViewPath,
-        },
-        PublicCustomView: {
-          Component: '/components/views/CustomView/index.js#CustomView',
-          exact: true,
-          path: publicCustomViewPath,
-          strict: true,
-        },
-        ButtonShowcase: {
-          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
-          path: '/button-styles',
-        },
-      },
-    },
-    dependencies: {
-      myTestComponent: {
-        type: 'component',
-        clientProps: {
-          test: 'hello',
-        },
-        path: '/components/TestComponent.js#TestComponent',
-      },
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
       url: 'http://localhost:3000',

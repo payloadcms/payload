@@ -124,7 +124,6 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
-          rscAdminConfig={rscAdminConfig}
           rscSchemaPaths={rscAdminConfig ? getRscSchemaPaths(rscAdminConfig) : undefined}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
