@@ -440,6 +440,8 @@ export const plTranslations: DefaultTranslationsObject = {
       'Zamierzasz przenieść <1>{{count}} {{label}}</1> do korzenia. Jesteś pewny?',
     moveToRoot: 'Przenieś do korzenia',
     noParent: 'Brak rodzica',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Szukaj {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nie można skopiować do tego samego miejsca.',

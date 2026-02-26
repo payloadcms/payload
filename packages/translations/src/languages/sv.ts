@@ -444,6 +444,8 @@ export const svTranslations: DefaultTranslationsObject = {
       'Du håller på att flytta <1>{{count}} {{label}}</1> till roten. Är du säker?',
     moveToRoot: 'Flytta till Roten',
     noParent: 'Ingen förälder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Sök {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',

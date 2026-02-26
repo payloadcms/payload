@@ -447,6 +447,8 @@ export const trTranslations: DefaultTranslationsObject = {
       '<1>{{count}} {{label}}</1> köküne taşımayı planlıyorsunuz. Emin misiniz?',
     moveToRoot: 'Kök Dizinine Taşı',
     noParent: 'Üst Yok',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} Ara',
   },
   localization: {
     cannotCopySameLocale: 'Aynı yerel ayara kopyalanamaz.',

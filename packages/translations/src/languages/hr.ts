@@ -442,6 +442,8 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Uskoro ćete premjestiti <1>{{count}} {{label}}</1> u korijen. Jeste li sigurni?',
     moveToRoot: 'Premjesti na korijen',
     noParent: 'Bez nadređenog',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pretraži {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

@@ -438,6 +438,8 @@ export const etTranslations: DefaultTranslationsObject = {
       'Te oled tõstmas <1>{{count}} {{label}}</1> juuretasandile. Oled sa kindel?',
     moveToRoot: 'Liikuge juurikasse',
     noParent: 'Ei Vanem',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Otsi {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

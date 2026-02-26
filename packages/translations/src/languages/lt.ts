@@ -443,6 +443,8 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į šaknį. Ar esate įsitikinęs?',
     moveToRoot: 'Perkelti į šaknį',
     noParent: 'Be tėvų',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Ieškoti {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',

@@ -444,6 +444,8 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Você está prestes a mover <1>{{count}} {{label}}</1> para a raiz. Tem certeza?',
     moveToRoot: 'Mover para Raiz',
     noParent: 'Sem Parentesco',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pesquisar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

@@ -454,6 +454,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> à la racine. Êtes-vous sûr ?',
     moveToRoot: 'Déplacer vers la Racine',
     noParent: 'Aucun parent',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Recherche {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',

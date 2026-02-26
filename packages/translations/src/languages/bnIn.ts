@@ -448,6 +448,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'আপনি <1>{{count}} {{label}}</1> কে রুট এ সরিয়ে দিতে চলেছেন। আপনি কি নিশ্চিত?',
     moveToRoot: 'রুটে সরান',
     noParent: 'কোন মাতা-পিতা নেই',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} অনুসন্ধান করুন',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

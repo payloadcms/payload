@@ -436,6 +436,8 @@ export const faTranslations: DefaultTranslationsObject = {
       'شما در حال حاضر در مرحله انتقال <1>{{count}} {{label}}</1> به ریشه هستید. آیا مطمئن هستید؟',
     moveToRoot: 'انتقال به ریشه',
     noParent: 'بدون والد',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'جستجو {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',

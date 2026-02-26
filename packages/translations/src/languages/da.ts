@@ -442,6 +442,8 @@ export const daTranslations: DefaultTranslationsObject = {
       'Du er ved at flytte <1>{{count}} {{label}}</1> til roden. Er du sikker?',
     moveToRoot: 'Flyt til Rod',
     noParent: 'Ingen Forælder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Søg {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',

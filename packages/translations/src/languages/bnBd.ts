@@ -449,6 +449,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি চলে যাচ্ছেন <1>{{count}} {{label}}</1> রুটে। আপনি কি নিশ্চিত?',
     moveToRoot: 'রুটে যান',
     noParent: 'কোন অভিভাবক নেই',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'অনুসন্ধান করুন {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

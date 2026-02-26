@@ -446,6 +446,8 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ön éppen <1>{{count}} {{label}}</1> áthelyezésére készül a gyökérhez. Biztos benne?',
     moveToRoot: 'Áthelyezés a gyökérhez',
     noParent: 'Nincs Szülő',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Keresés {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',

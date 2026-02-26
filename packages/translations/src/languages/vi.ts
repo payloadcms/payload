@@ -441,6 +441,8 @@ export const viTranslations: DefaultTranslationsObject = {
       'Bạn sắp di chuyển <1>{{count}} {{label}}</1> về gốc. Bạn có chắc không?',
     moveToRoot: 'Di chuyển đến Gốc',
     noParent: 'Không có bố mẹ',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Tìm kiếm {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Không thể sao chép vào cùng một vị trí',

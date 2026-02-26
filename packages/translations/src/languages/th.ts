@@ -435,6 +435,8 @@ export const thTranslations: DefaultTranslationsObject = {
       'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังรูท คุณแน่ใจหรือไม่?',
     moveToRoot: 'ย้ายไปที่ราก',
     noParent: 'ไม่มีผู้ปกครอง',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'ค้นหา {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',

@@ -440,6 +440,8 @@ export const skTranslations: DefaultTranslationsObject = {
       'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňa. Ste si istí?',
     moveToRoot: 'Presunúť do koreňa',
     noParent: 'Žiadny rodič',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Vyhľadávanie {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',

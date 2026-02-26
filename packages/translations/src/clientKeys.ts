@@ -143,6 +143,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'hierarchy:moveItemsToRootConfirmation',
   'hierarchy:moveToRoot',
   'hierarchy:noParent',
+  'hierarchy:noResults',
+  'hierarchy:searchLabel',
 
   'general:all',
   'general:aboutToDeleteCount',

@@ -444,6 +444,8 @@ export const caTranslations: DefaultTranslationsObject = {
       "Esteu a punt de moure <1>{{count}} {{label}}</1> a l'arrel. N'esteu segur?",
     moveToRoot: "Mou a l'arrel",
     noParent: 'Sense Pare',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cerca {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',

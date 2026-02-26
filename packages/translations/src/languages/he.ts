@@ -430,6 +430,8 @@ export const heTranslations: DefaultTranslationsObject = {
     moveItemsToRootConfirmation: 'אתה עומד להעביר <1>{{count}} {{label}}</1> לשורש. האם אתה בטוח?',
     moveToRoot: 'העבר לשורש',
     noParent: 'אין הורה',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'חפש {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'לא ניתן להעתיק לאותו מקום',

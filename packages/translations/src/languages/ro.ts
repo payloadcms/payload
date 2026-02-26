@@ -447,6 +447,8 @@ export const roTranslations: DefaultTranslationsObject = {
       'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> la rădăcină. Sunteți sigur?',
     moveToRoot: 'Mutați la Rădăcină',
     noParent: 'Fără părinte',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Caută {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',

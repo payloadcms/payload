@@ -448,6 +448,8 @@ export const esTranslations: DefaultTranslationsObject = {
       'Estás a punto de mover <1>{{count}} {{label}}</1> a la raíz. ¿Está seguro?',
     moveToRoot: 'Mover a Raíz',
     noParent: 'Sin Padre',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Buscar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'No se puede copiar al mismo idioma',

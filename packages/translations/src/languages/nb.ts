@@ -444,6 +444,8 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til roten. Er du sikker?',
     moveToRoot: 'Flytt til Rot',
     noParent: 'Ingen forelder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Søk {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',

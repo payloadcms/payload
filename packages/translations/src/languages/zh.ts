@@ -424,6 +424,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     moveItemsToRootConfirmation: '您即将将<1>{{count}} {{label}}</1>移动至根目录。您确定吗？',
     moveToRoot: '移至根目录',
     noParent: '无父项',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '搜索 {{label}}',
   },
   localization: {
     cannotCopySameLocale: '无法复制到相同的语言环境',

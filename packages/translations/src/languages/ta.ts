@@ -441,6 +441,8 @@ export const taTranslations: DefaultTranslationsObject = {
       'நீங்கள் மூலத்துக்கு <1>{{count}} {{label}}</1> பேரை நகர்த்த உள்ளீர்கள். உங்கள் சரிபார்வை உறுதிசெய்யப்பட்டதா?',
     moveToRoot: 'ரூட்டிற்கு நகருங்கள்',
     noParent: 'பெற்றோர் இல்லை',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} ஐ தேடு',
   },
   localization: {
     cannotCopySameLocale: 'அதே மொழி அமைவுக்கு நகலெடுக்க முடியாது',

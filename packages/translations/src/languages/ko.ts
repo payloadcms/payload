@@ -441,6 +441,8 @@ export const koTranslations: DefaultTranslationsObject = {
       '<1>{{count}} {{label}}</1>을(를) 루트로 이동하려 합니다. 확실한가요?',
     moveToRoot: '루트로 이동',
     noParent: '부모 없음',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} 검색',
   },
   localization: {
     cannotCopySameLocale: '동일한 로캘에 복사할 수 없습니다.',

@@ -442,6 +442,8 @@ export const jaTranslations: DefaultTranslationsObject = {
       'あなたは<1>{{count}} {{label}} </1>をルートに移動しようとしています。よろしいですか？',
     moveToRoot: 'ルートに移動',
     noParent: '親なし',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}}を検索する',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

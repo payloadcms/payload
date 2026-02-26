@@ -422,6 +422,8 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     moveItemsToRootConfirmation: '您即將將 <1>{{count}} {{label}}</1> 移至根目錄。您確定嗎？',
     moveToRoot: '移至根目錄',
     noParent: '無父項',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '搜尋 {{label}}',
   },
   localization: {
     cannotCopySameLocale: '無法複製到相同語言地區',

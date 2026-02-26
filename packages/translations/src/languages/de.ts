@@ -454,6 +454,8 @@ export const deTranslations: DefaultTranslationsObject = {
       'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
     moveToRoot: 'Zur Root verschieben',
     noParent: 'Kein Elternteil',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Suche {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

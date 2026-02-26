@@ -442,6 +442,8 @@ export const lvTranslations: DefaultTranslationsObject = {
       'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes. Vai esat pārliecināts?',
     moveToRoot: 'Pāriet uz Sakni',
     noParent: 'Nav vecāku',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Meklēt {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',

@@ -442,6 +442,8 @@ export const rsTranslations: DefaultTranslationsObject = {
       'На путу сте да преместите <1>{{count}} {{label}}</1> у корен. Да ли сте сигурни?',
     moveToRoot: 'Pomeri na koren',
     noParent: 'Без родитеља',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pretraga {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Не може се копирати на исту локацију.',

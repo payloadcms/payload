@@ -447,6 +447,8 @@ export const azTranslations: DefaultTranslationsObject = {
       'Siz <1>{{count}} {{label}}</1> kökə köçürməyə yaxınsınız. Eminsiniz?',
     moveToRoot: 'Kökə köçün',
     noParent: 'Heç bir Valideyn',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Axtar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',

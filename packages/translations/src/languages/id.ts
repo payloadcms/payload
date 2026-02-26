@@ -446,6 +446,8 @@ export const idTranslations: DefaultTranslationsObject = {
       'Anda akan memindahkan <1>{{count}} {{label}}</1> ke root. Apakah Anda yakin?',
     moveToRoot: 'Pindah ke Root',
     noParent: 'Tanpa Orang Tua',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cari {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',

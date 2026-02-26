@@ -446,6 +446,8 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստ եք տեղափոխել <1>{{count}} {{label}}</1> արմատ. Հաստատում եք:',
     moveToRoot: 'Տեղափոխվեք արմատ՝',
     noParent: 'Ոչ ծնող',
+    noResults: '«{{query}}»-ի համար արդյունքներ չկան',
+    searchLabel: 'Որոնել {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',

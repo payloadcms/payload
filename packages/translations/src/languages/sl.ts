@@ -441,6 +441,8 @@ export const slTranslations: DefaultTranslationsObject = {
       'Pravkar boste prestavili <1>{{count}} {{label}}</1> v koren. Ste prepričani?',
     moveToRoot: 'Premakni v Root',
     noParent: 'Brez nadrejenega',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Iskanje {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

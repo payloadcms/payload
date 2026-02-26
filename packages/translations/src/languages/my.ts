@@ -449,6 +449,8 @@ export const myTranslations: DefaultTranslationsObject = {
       'Anda sedang dalam proses untuk memindahkan <1>{{count}} {{label}}</1> ke akar. Adakah anda pasti?',
     moveToRoot: 'Pindah ke Root',
     noParent: 'Tiada Induk',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cari {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Tidak boleh menyalin ke lokasi yang sama',

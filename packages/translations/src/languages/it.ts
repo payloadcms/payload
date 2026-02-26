@@ -446,6 +446,8 @@ export const itTranslations: DefaultTranslationsObject = {
       'Stai per spostare <1>{{count}} {{label}}</1> alla radice. Sei sicuro?',
     moveToRoot: 'Sposta alla Root',
     noParent: 'Nessun Genitore',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cerca {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Non è possibile copiare nella stessa posizione',

@@ -445,6 +445,8 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Вы собираетесь переместить <1>{{count}} {{label}}</1> в корень. Вы уверены?',
     moveToRoot: 'Перейти в Корень',
     noParent: 'Нет родителя',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Поиск {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

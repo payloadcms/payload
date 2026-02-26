@@ -440,6 +440,8 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Ви збираєтеся перемістити <1>{{count}} {{label}}</1> до кореня. Ви впевнені?',
     moveToRoot: 'Перейти до кореня',
     noParent: 'Без батьківського елемента',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Пошук {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Не можна копіювати в ту ж саму локалізацію',

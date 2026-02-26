@@ -441,6 +441,8 @@ export const isTranslations: DefaultTranslationsObject = {
       'Þú ert um það bil að færa <1>{{count}} {{label}}</1> í rót. Ertu viss?',
     moveToRoot: 'Færa í rót',
     noParent: 'Engin foreldri',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Leita {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',

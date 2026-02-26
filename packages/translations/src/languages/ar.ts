@@ -433,6 +433,8 @@ export const arTranslations: DefaultTranslationsObject = {
       'أنت على وشك نقل <1>{{count}} {{label}}</1> إلى الجذر. هل أنت متأكد؟',
     moveToRoot: 'الانتقال إلى الجذر',
     noParent: 'لا والدين',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'البحث {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'لا يمكن النسخ إلى نفس الموقع',

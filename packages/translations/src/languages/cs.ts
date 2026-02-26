@@ -440,6 +440,8 @@ export const csTranslations: DefaultTranslationsObject = {
       'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořene. Jste si jistý?',
     moveToRoot: 'Přesunout do kořene',
     noParent: 'Bez nadřazeného',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Hledat {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

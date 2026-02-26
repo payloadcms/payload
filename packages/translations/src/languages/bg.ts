@@ -441,6 +441,8 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Предстои да преместите <1>{{count}} {{label}}</1> към основната директория. Сигурен ли сте?',
     moveToRoot: 'Преместване към Корена',
     noParent: 'Без родител',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Търсене {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',
