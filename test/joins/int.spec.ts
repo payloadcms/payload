@@ -313,7 +313,7 @@ describe('Joins Field', () => {
 
   it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       data: {
         name: 'sharedFolder',
       },
@@ -323,7 +323,7 @@ describe('Joins Field', () => {
       collection: 'folderPoly1',
       data: {
         folderPoly1Title: 'Poly 1 title',
-        folder: folderDoc.id,
+        '_h_joins-test-folders': folderDoc.id,
       },
       depth: 0,
     })
@@ -332,13 +332,13 @@ describe('Joins Field', () => {
       collection: 'folderPoly2',
       data: {
         folderPoly2Title: 'Poly 2 Title',
-        folder: folderDoc.id,
+        '_h_joins-test-folders': folderDoc.id,
       },
       depth: 0,
     })
 
     const result = await payload.find({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       joins: {
         documentsAndFolders: {
           limit: 100_000,
@@ -371,7 +371,7 @@ describe('Joins Field', () => {
 
   it('should allow join where query on hasMany select fields', async () => {
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -379,16 +379,16 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        folder: folderDoc.id,
+        '_h_joins-test-folders': folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       where: {
         id: {
           equals: folderDoc.id,
@@ -402,7 +402,7 @@ describe('Joins Field', () => {
             and: [
               {
                 relationTo: {
-                  equals: 'payload-folders',
+                  equals: 'joins-test-folders',
                 },
               },
               {
@@ -420,9 +420,9 @@ describe('Joins Field', () => {
   })
 
   it('should query where with exists for hasMany select fields', async () => {
-    await payload.delete({ collection: 'payload-folders', where: {} })
+    await payload.delete({ collection: 'joins-test-folders', where: {} })
     const folderDoc = await payload.create({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -430,16 +430,16 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        folder: folderDoc.id,
+        '_h_joins-test-folders': folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'payload-folders',
+      collection: 'joins-test-folders',
       where: {
         id: {
           equals: folderDoc.id,
@@ -453,7 +453,7 @@ describe('Joins Field', () => {
             and: [
               {
                 relationTo: {
-                  equals: 'payload-folders',
+                  equals: 'joins-test-folders',
                 },
               },
               {
