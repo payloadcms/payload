@@ -6,7 +6,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { Fragment, useCallback, useEffect } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
@@ -25,6 +25,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
+import { TypeFilter } from './TypeFilter/index.js'
 import './index.scss'
 
 const baseClass = 'hierarchy-list'
@@ -177,7 +178,55 @@ export function HierarchyListView(props: ListViewClientProps) {
     })
   }
 
-  const filteredChildrenData = hierarchyData?.childrenData
+  // Build type filter options from hierarchy collection + related collections
+  const typeOptions = useMemo(() => {
+    const options: { label: string; value: string }[] = []
+
+    // Add hierarchy collection itself (for children/folders)
+    options.push({
+      label: collectionLabel,
+      value: collectionSlug,
+    })
+
+    // Add related collections
+    for (const [slug] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
+      const config = getEntityConfig({ collectionSlug: slug })
+      options.push({
+        label: getTranslation(config.labels?.plural, i18n),
+        value: slug,
+      })
+    }
+
+    return options
+  }, [collectionLabel, collectionSlug, getEntityConfig, hierarchyConfig?.relatedCollections, i18n])
+
+  // Track selected types (default: all selected)
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(() =>
+    typeOptions.map((opt) => opt.value),
+  )
+
+  // Filter children based on selected types
+  const filteredChildrenData = useMemo(() => {
+    if (!hierarchyData?.childrenData) {
+      return undefined
+    }
+    if (!selectedTypes.includes(collectionSlug)) {
+      return { ...hierarchyData.childrenData, docs: [], totalDocs: 0 }
+    }
+    return hierarchyData.childrenData
+  }, [hierarchyData?.childrenData, selectedTypes, collectionSlug])
+
+  // Filter related groups based on selected types
+  const filteredRelatedGroups = useMemo(() => {
+    return Object.entries(hierarchyData?.relatedDocumentsByCollection || {})
+      .filter(([slug]) => selectedTypes.includes(slug))
+      .map(([slug, related]) => ({
+        collectionSlug: slug,
+        data: related.result,
+        hasMany: related.hasMany,
+        label: related.label,
+      }))
+  }, [hierarchyData?.relatedDocumentsByCollection, selectedTypes])
 
   const collectionData = hierarchyData
     ? {
@@ -220,6 +269,15 @@ export function HierarchyListView(props: ListViewClientProps) {
 
             <div className={`${baseClass}__controls`}>
               <SearchBar
+                Actions={[
+                  <TypeFilter
+                    i18n={i18n}
+                    key="type-filter"
+                    onChange={setSelectedTypes}
+                    options={typeOptions}
+                    selectedValues={selectedTypes}
+                  />,
+                ]}
                 label={t('general:searchBy', {
                   label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
                 })}
@@ -242,14 +300,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                 .join(',')}`}
               parentFieldName={parentFieldName}
               parentId={parentId}
-              relatedGroups={Object.entries(hierarchyData?.relatedDocumentsByCollection || {}).map(
-                ([slug, related]) => ({
-                  collectionSlug: slug,
-                  data: related.result,
-                  hasMany: related.hasMany,
-                  label: related.label,
-                }),
-              )}
+              relatedGroups={filteredRelatedGroups}
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
