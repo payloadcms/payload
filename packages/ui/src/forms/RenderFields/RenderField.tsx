@@ -93,6 +93,9 @@ export function RenderField({
   const AdminFieldComponent = clientConfig?.components?.Field ?? rscNodes.Field
   const AdminLabel = clientConfig?.components?.Label ?? rscNodes.Label
   const AdminDescription = clientConfig?.components?.Description ?? rscNodes.Description
+  const AdminError = clientConfig?.components?.Error ?? rscNodes.Error
+  const AdminBeforeInput = clientConfig?.components?.BeforeInput ?? rscNodes.BeforeInput
+  const AdminAfterInput = clientConfig?.components?.AfterInput ?? rscNodes.AfterInput
   const adminValidate = clientConfig?.validate
 
   const baseFieldProps: { validate?: any } & Pick<
@@ -132,27 +135,41 @@ export function RenderField({
     parentSchemaPath,
   }
 
-  const renderLabel = () => {
-    if (!AdminLabel) {
+  const fieldComponentProps = { field: clientFieldConfig, path, schemaPath }
+
+  const renderAdminComponent = (Comp: typeof AdminLabel) => {
+    if (!Comp) {
       return null
     }
-    if (typeof AdminLabel === 'function') {
-      return <AdminLabel />
+    if (typeof Comp === 'function') {
+      const C = Comp as React.ComponentType<any>
+      return <C {...fieldComponentProps} />
     }
-    return AdminLabel
+    return Comp
   }
 
-  const renderDescription = () => {
-    if (!AdminDescription) {
+  const renderAdminComponentArray = (comps: typeof AdminBeforeInput) => {
+    if (!comps) {
       return null
     }
-    if (typeof AdminDescription === 'function') {
-      return <AdminDescription />
+    if (Array.isArray(comps)) {
+      return comps.map((Comp, i) => {
+        if (typeof Comp === 'function') {
+          const C = Comp as React.ComponentType<any>
+          return <C key={i} {...fieldComponentProps} />
+        }
+        return <React.Fragment key={i}>{Comp}</React.Fragment>
+      })
     }
-    return AdminDescription
+    if (typeof comps === 'function') {
+      const C = comps as React.ComponentType<any>
+      return <C {...fieldComponentProps} />
+    }
+    return comps as React.ReactNode
   }
 
-  const hasAdminWrapper = AdminLabel || AdminDescription
+  const hasAdminWrapper =
+    AdminLabel || AdminDescription || AdminError || AdminBeforeInput || AdminAfterInput
 
   const renderDefaultField = () => {
     switch (clientFieldConfig.type) {
@@ -230,9 +247,12 @@ export function RenderField({
   if (hasAdminWrapper) {
     return (
       <div data-admin-config-field={schemaPath}>
-        {renderLabel()}
+        {renderAdminComponent(AdminLabel)}
+        {renderAdminComponent(AdminError)}
+        {renderAdminComponentArray(AdminBeforeInput)}
         {renderDefaultField()}
-        {renderDescription()}
+        {renderAdminComponentArray(AdminAfterInput)}
+        {renderAdminComponent(AdminDescription)}
       </div>
     )
   }
