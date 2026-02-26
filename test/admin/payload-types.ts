@@ -146,7 +146,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
@@ -206,7 +206,7 @@ export interface UserAuthOperations {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -235,7 +235,7 @@ export interface Upload {
  * via the `definition` "uploads-two".
  */
 export interface UploadsTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -256,7 +256,7 @@ export interface UploadsTwo {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -277,10 +277,10 @@ export interface Post {
     nestedTextFieldInNamedTab?: string | null;
   };
   nestedTextFieldInUnnamedTab?: string | null;
-  relationship?: (number | null) | Post;
-  users?: (number | null) | User;
+  relationship?: (string | null) | Post;
+  users?: (string | null) | User;
   customCell?: string | null;
-  upload?: (number | null) | Upload;
+  upload?: (string | null) | Upload;
   hiddenField?: string | null;
   adminHiddenField?: string | null;
   disableListColumnText?: string | null;
@@ -306,7 +306,7 @@ export interface Post {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   textField?: string | null;
   sidebarField?: string | null;
   updatedAt: string;
@@ -333,7 +333,7 @@ export interface User {
  * via the `definition` "hidden-collection".
  */
 export interface HiddenCollection {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -343,7 +343,7 @@ export interface HiddenCollection {
  * via the `definition` "not-in-view-collection".
  */
 export interface NotInViewCollection {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -353,7 +353,7 @@ export interface NotInViewCollection {
  * via the `definition` "collection-no-api-view".
  */
 export interface CollectionNoApiView {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -362,7 +362,7 @@ export interface CollectionNoApiView {
  * via the `definition` "custom-document-controls".
  */
 export interface CustomDocumentControl {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -373,7 +373,7 @@ export interface CustomDocumentControl {
  * via the `definition` "custom-views-one".
  */
 export interface CustomViewsOne {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -383,7 +383,7 @@ export interface CustomViewsOne {
  * via the `definition` "custom-views-two".
  */
 export interface CustomViewsTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -393,7 +393,7 @@ export interface CustomViewsTwo {
  * via the `definition` "reorder-tabs".
  */
 export interface ReorderTab {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -403,7 +403,7 @@ export interface ReorderTab {
  * via the `definition` "custom-fields".
  */
 export interface CustomField {
-  id: number;
+  id: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
   /**
@@ -415,7 +415,7 @@ export interface CustomField {
   customSelectField?: string | null;
   customSelectInput?: string | null;
   customMultiSelectField?: string[] | null;
-  relationshipFieldWithBeforeAfterInputs?: (number | null) | Post;
+  relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
         someTextField?: string | null;
@@ -444,7 +444,7 @@ export interface CustomField {
  * via the `definition` "group-one-collection-ones".
  */
 export interface GroupOneCollectionOne {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -454,7 +454,7 @@ export interface GroupOneCollectionOne {
  * via the `definition` "group-one-collection-twos".
  */
 export interface GroupOneCollectionTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -464,7 +464,7 @@ export interface GroupOneCollectionTwo {
  * via the `definition` "group-two-collection-ones".
  */
 export interface GroupTwoCollectionOne {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -474,7 +474,7 @@ export interface GroupTwoCollectionOne {
  * via the `definition` "group-two-collection-twos".
  */
 export interface GroupTwoCollectionTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -484,7 +484,7 @@ export interface GroupTwoCollectionTwo {
  * via the `definition` "geo".
  */
 export interface Geo {
-  id: number;
+  id: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -498,7 +498,7 @@ export interface Geo {
  * via the `definition` "array".
  */
 export interface Array {
-  id: number;
+  id: string;
   array?:
     | {
         text?: string | null;
@@ -513,7 +513,7 @@ export interface Array {
  * via the `definition` "disable-duplicate".
  */
 export interface DisableDuplicate {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -523,7 +523,7 @@ export interface DisableDuplicate {
  * via the `definition` "disable-copy-to-locale".
  */
 export interface DisableCopyToLocale {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -533,7 +533,7 @@ export interface DisableCopyToLocale {
  * via the `definition` "edit-menu-items".
  */
 export interface EditMenuItem {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -543,7 +543,7 @@ export interface EditMenuItem {
  * via the `definition` "format-doc-url".
  */
 export interface FormatDocUrl {
-  id: number;
+  id: string;
   title: string;
   description?: string | null;
   updatedAt: string;
@@ -556,7 +556,7 @@ export interface FormatDocUrl {
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -566,9 +566,9 @@ export interface BaseListFilter {
  * via the `definition` "with300documents".
  */
 export interface With300Document {
-  id: number;
+  id: string;
   text?: string | null;
-  selfRelation?: (number | null) | With300Document;
+  selfRelation?: (string | null) | With300Document;
   updatedAt: string;
   createdAt: string;
 }
@@ -577,7 +577,7 @@ export interface With300Document {
  * via the `definition` "with-list-drawer".
  */
 export interface WithListDrawer {
-  id: number;
+  id: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -589,11 +589,11 @@ export interface WithListDrawer {
  * via the `definition` "placeholder".
  */
 export interface Placeholder {
-  id: number;
+  id: string;
   defaultSelect?: 'option1' | null;
   placeholderSelect?: 'option1' | null;
-  defaultRelationship?: (number | null) | Post;
-  placeholderRelationship?: (number | null) | Post;
+  defaultRelationship?: (string | null) | Post;
+  placeholderRelationship?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -602,7 +602,7 @@ export interface Placeholder {
  * via the `definition` "use-as-title-group-field".
  */
 export interface UseAsTitleGroupField {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -612,7 +612,7 @@ export interface UseAsTitleGroupField {
  * via the `definition` "disable-bulk-edit".
  */
 export interface DisableBulkEdit {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -621,7 +621,7 @@ export interface DisableBulkEdit {
  * via the `definition` "custom-list-drawer".
  */
 export interface CustomListDrawer {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -630,7 +630,7 @@ export interface CustomListDrawer {
  * via the `definition` "list-view-select-api".
  */
 export interface ListViewSelectApi {
-  id: number;
+  id: string;
   title?: string | null;
   description?: string | null;
   group?: {
@@ -644,11 +644,11 @@ export interface ListViewSelectApi {
  * via the `definition` "virtuals".
  */
 export interface Virtual {
-  id: number;
+  id: string;
   virtualTitleFromPost?: string | null;
   textField?: string | null;
   virtualText?: string | null;
-  post?: (number | null) | Post;
+  post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
 }
@@ -657,7 +657,7 @@ export interface Virtual {
  * via the `definition` "no-timestamps".
  */
 export interface NoTimestamp {
-  id: number;
+  id: string;
   title?: string | null;
 }
 /**
@@ -665,7 +665,7 @@ export interface NoTimestamp {
  * via the `definition` "localized".
  */
 export interface Localized {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -676,7 +676,7 @@ export interface Localized {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -693,144 +693,144 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'uploads';
-        value: number | Upload;
+        value: string | Upload;
       } | null)
     | ({
         relationTo: 'uploads-two';
-        value: number | UploadsTwo;
+        value: string | UploadsTwo;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'hidden-collection';
-        value: number | HiddenCollection;
+        value: string | HiddenCollection;
       } | null)
     | ({
         relationTo: 'not-in-view-collection';
-        value: number | NotInViewCollection;
+        value: string | NotInViewCollection;
       } | null)
     | ({
         relationTo: 'collection-no-api-view';
-        value: number | CollectionNoApiView;
+        value: string | CollectionNoApiView;
       } | null)
     | ({
         relationTo: 'custom-document-controls';
-        value: number | CustomDocumentControl;
+        value: string | CustomDocumentControl;
       } | null)
     | ({
         relationTo: 'custom-views-one';
-        value: number | CustomViewsOne;
+        value: string | CustomViewsOne;
       } | null)
     | ({
         relationTo: 'custom-views-two';
-        value: number | CustomViewsTwo;
+        value: string | CustomViewsTwo;
       } | null)
     | ({
         relationTo: 'reorder-tabs';
-        value: number | ReorderTab;
+        value: string | ReorderTab;
       } | null)
     | ({
         relationTo: 'custom-fields';
-        value: number | CustomField;
+        value: string | CustomField;
       } | null)
     | ({
         relationTo: 'group-one-collection-ones';
-        value: number | GroupOneCollectionOne;
+        value: string | GroupOneCollectionOne;
       } | null)
     | ({
         relationTo: 'group-one-collection-twos';
-        value: number | GroupOneCollectionTwo;
+        value: string | GroupOneCollectionTwo;
       } | null)
     | ({
         relationTo: 'group-two-collection-ones';
-        value: number | GroupTwoCollectionOne;
+        value: string | GroupTwoCollectionOne;
       } | null)
     | ({
         relationTo: 'group-two-collection-twos';
-        value: number | GroupTwoCollectionTwo;
+        value: string | GroupTwoCollectionTwo;
       } | null)
     | ({
         relationTo: 'geo';
-        value: number | Geo;
+        value: string | Geo;
       } | null)
     | ({
         relationTo: 'array';
-        value: number | Array;
+        value: string | Array;
       } | null)
     | ({
         relationTo: 'disable-duplicate';
-        value: number | DisableDuplicate;
+        value: string | DisableDuplicate;
       } | null)
     | ({
         relationTo: 'disable-copy-to-locale';
-        value: number | DisableCopyToLocale;
+        value: string | DisableCopyToLocale;
       } | null)
     | ({
         relationTo: 'edit-menu-items';
-        value: number | EditMenuItem;
+        value: string | EditMenuItem;
       } | null)
     | ({
         relationTo: 'format-doc-url';
-        value: number | FormatDocUrl;
+        value: string | FormatDocUrl;
       } | null)
     | ({
         relationTo: 'base-list-filters';
-        value: number | BaseListFilter;
+        value: string | BaseListFilter;
       } | null)
     | ({
         relationTo: 'with300documents';
-        value: number | With300Document;
+        value: string | With300Document;
       } | null)
     | ({
         relationTo: 'with-list-drawer';
-        value: number | WithListDrawer;
+        value: string | WithListDrawer;
       } | null)
     | ({
         relationTo: 'placeholder';
-        value: number | Placeholder;
+        value: string | Placeholder;
       } | null)
     | ({
         relationTo: 'use-as-title-group-field';
-        value: number | UseAsTitleGroupField;
+        value: string | UseAsTitleGroupField;
       } | null)
     | ({
         relationTo: 'disable-bulk-edit';
-        value: number | DisableBulkEdit;
+        value: string | DisableBulkEdit;
       } | null)
     | ({
         relationTo: 'custom-list-drawer';
-        value: number | CustomListDrawer;
+        value: string | CustomListDrawer;
       } | null)
     | ({
         relationTo: 'list-view-select-api';
-        value: number | ListViewSelectApi;
+        value: string | ListViewSelectApi;
       } | null)
     | ({
         relationTo: 'virtuals';
-        value: number | Virtual;
+        value: string | Virtual;
       } | null)
     | ({
         relationTo: 'no-timestamps';
-        value: number | NoTimestamp;
+        value: string | NoTimestamp;
       } | null)
     | ({
         relationTo: 'localized';
-        value: number | Localized;
+        value: string | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -840,10 +840,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -863,7 +863,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1352,7 +1352,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "hidden-global".
  */
 export interface HiddenGlobal {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1362,7 +1362,7 @@ export interface HiddenGlobal {
  * via the `definition` "not-in-view-global".
  */
 export interface NotInViewGlobal {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1372,7 +1372,7 @@ export interface NotInViewGlobal {
  * via the `definition` "global-no-api-view".
  */
 export interface GlobalNoApiView {
-  id: number;
+  id: string;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1381,7 +1381,7 @@ export interface GlobalNoApiView {
  * via the `definition` "global".
  */
 export interface Global {
-  id: number;
+  id: string;
   title?: string | null;
   sidebarField?: string | null;
   _status?: ('draft' | 'published') | null;
@@ -1393,7 +1393,7 @@ export interface Global {
  * via the `definition` "custom-global-document-controls".
  */
 export interface CustomGlobalDocumentControl {
-  id: number;
+  id: string;
   title?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -1404,7 +1404,7 @@ export interface CustomGlobalDocumentControl {
  * via the `definition` "custom-global-views-one".
  */
 export interface CustomGlobalViewsOne {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1414,7 +1414,7 @@ export interface CustomGlobalViewsOne {
  * via the `definition` "custom-global-views-two".
  */
 export interface CustomGlobalViewsTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1424,7 +1424,7 @@ export interface CustomGlobalViewsTwo {
  * via the `definition` "group-globals-one".
  */
 export interface GroupGlobalsOne {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1434,7 +1434,7 @@ export interface GroupGlobalsOne {
  * via the `definition` "group-globals-two".
  */
 export interface GroupGlobalsTwo {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1444,7 +1444,7 @@ export interface GroupGlobalsTwo {
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: number;
+  id: string;
   canAccessProtected?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;

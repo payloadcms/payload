@@ -3,6 +3,7 @@ import type { EditConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } fro
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAPIViewMetadata } from '../API/metadata.js'
 import { generateEditViewMetadata } from '../Edit/metadata.js'
@@ -153,7 +154,18 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
     })
 
     if (viewKey) {
+      const adminConfig = getAdminConfig()
+      const slug = collectionConfig?.slug ?? globalConfig?.slug
+      const adminEntityViews = slug
+        ? (
+            (collectionConfig
+              ? adminConfig.collections?.[slug]
+              : adminConfig.globals?.[slug]) as any
+          )?.views?.edit?.[viewKey]
+        : undefined
+
       const customViewConfig =
+        adminEntityViews ||
         collectionConfig?.admin?.components?.views?.edit?.[viewKey] ||
         globalConfig?.admin?.components?.views?.edit?.[viewKey]
 

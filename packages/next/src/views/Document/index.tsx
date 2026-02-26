@@ -28,6 +28,7 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
@@ -290,14 +291,27 @@ export const renderDocument = async ({
 
   let showHeader = true
 
+  const adminConfig = getAdminConfig()
+  const collectionSlugForConfig = collectionConfig?.slug
+  const globalSlugForConfig = globalConfig?.slug
+
+  const adminCollectionEditRoot = collectionSlugForConfig
+    ? (adminConfig.collections?.[collectionSlugForConfig] as any)?.views?.edit?.root?.Component
+    : undefined
+  const adminGlobalEditRoot = globalSlugForConfig
+    ? (adminConfig.globals?.[globalSlugForConfig] as any)?.views?.edit?.root?.Component
+    : undefined
+
   const RootViewOverride =
-    collectionConfig?.admin?.components?.views?.edit?.root &&
+    adminCollectionEditRoot ??
+    adminGlobalEditRoot ??
+    (collectionConfig?.admin?.components?.views?.edit?.root &&
     'Component' in collectionConfig.admin.components.views.edit.root
       ? collectionConfig?.admin?.components?.views?.edit?.root?.Component
       : globalConfig?.admin?.components?.views?.edit?.root &&
           'Component' in globalConfig.admin.components.views.edit.root
         ? globalConfig?.admin?.components?.views?.edit?.root?.Component
-        : null
+        : null)
 
   if (RootViewOverride) {
     View = RootViewOverride

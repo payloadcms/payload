@@ -18,11 +18,11 @@ export const getCustomViewByRoute = ({
   viewKey: string
 } => {
   const {
-    admin: {
-      components: { views },
-    },
     routes: { admin: adminRoute },
   } = config
+
+  const adminConfig = getAdminConfig()
+  const views = adminConfig.admin?.views ?? config.admin?.components?.views
 
   let viewKey: string
 
@@ -59,24 +59,23 @@ export const getCustomViewByRoute = ({
     }
   }
 
-  const adminConfig = getAdminConfig()
-  const adminViewComponent = adminConfig.admin?.views?.[viewKey]?.Component
+  const Component = foundViewConfig.Component
 
-  if (adminViewComponent) {
+  if (Component && typeof Component === 'function') {
     return {
       view: {
-        Component: adminViewComponent as React.FC<AdminViewServerProps>,
+        Component: Component as React.FC<AdminViewServerProps>,
       },
-      viewConfig: foundViewConfig,
+      viewConfig: foundViewConfig as AdminViewConfig,
       viewKey,
     }
   }
 
   return {
     view: {
-      payloadComponent: foundViewConfig.Component,
+      payloadComponent: Component,
     },
-    viewConfig: foundViewConfig,
+    viewConfig: foundViewConfig as AdminViewConfig,
     viewKey,
   }
 }
