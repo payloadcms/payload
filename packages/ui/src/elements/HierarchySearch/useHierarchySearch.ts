@@ -11,6 +11,7 @@ import { useConfig } from '../../providers/Config/index.js'
 type UseHierarchySearchArgs = {
   collectionSlug: string
   limit?: number
+  parentFieldName?: string
   titleField: string
   titlePathField?: string
 }
@@ -28,6 +29,7 @@ type UseHierarchySearchReturn = {
 export const useHierarchySearch = ({
   collectionSlug,
   limit = 15,
+  parentFieldName = 'parent',
   titleField,
   titlePathField = '_h_titlePath',
 }: UseHierarchySearchArgs): UseHierarchySearchReturn => {
@@ -56,6 +58,7 @@ export const useHierarchySearch = ({
             limit,
             page: pageToFetch,
             select: {
+              [parentFieldName]: true,
               [titleField]: true,
               [titlePathField]: true,
             },
@@ -99,7 +102,7 @@ export const useHierarchySearch = ({
         setIsLoading(false)
       }
     },
-    [api, collectionSlug, limit, serverURL, titleField, titlePathField],
+    [api, collectionSlug, limit, parentFieldName, serverURL, titleField, titlePathField],
   )
 
   const search = useCallback(

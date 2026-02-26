@@ -11,6 +11,7 @@ import type { HierarchyInitialData } from './types.js'
 import { HierarchySearch } from '../../elements/HierarchySearch/index.js'
 import { HydrateHierarchyProvider } from '../../elements/HydrateHierarchyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { HierarchyTree } from './index.js'
 
 export const HierarchySidebarTab: React.FC<
@@ -34,6 +35,7 @@ export const HierarchySidebarTab: React.FC<
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { startRouteTransition } = useRouteTransition()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -43,28 +45,18 @@ export const HierarchySidebarTab: React.FC<
 
   const selectedNodeId = searchParams.get('parent') ?? undefined
 
-  const handleNodeClick = useCallback(
+  const handleNavigateToParent = useCallback(
     (id: number | string) => {
       const url = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}?parent=${id}`,
       })
-      router.push(url)
-      router.refresh()
-    },
-    [adminRoute, collectionSlug, router],
-  )
-
-  const handleSearchSelect = useCallback(
-    (id: number | string) => {
-      const url = formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}?parent=${id}`,
+      startRouteTransition(() => {
+        router.push(url)
+        router.refresh()
       })
-      router.push(url)
-      router.refresh()
     },
-    [adminRoute, collectionSlug, router],
+    [adminRoute, collectionSlug, router, startRouteTransition],
   )
 
   return (
@@ -82,14 +74,14 @@ export const HierarchySidebarTab: React.FC<
           collectionSlug={collectionSlug}
           isActive={isSearchActive}
           onActiveChange={setIsSearchActive}
-          onSelect={handleSearchSelect}
+          onSelect={handleNavigateToParent}
         />
         {!isSearchActive && (
           <HierarchyTree
             collectionSlug={collectionSlug}
             initialData={initialData}
             key={collectionSlug}
-            onNodeClick={handleNodeClick}
+            onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}
             useAsTitle={useAsTitle}
           />

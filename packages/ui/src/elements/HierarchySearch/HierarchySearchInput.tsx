@@ -48,7 +48,9 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
 
   return (
     <div className={baseClass}>
-      <SearchIcon />
+      <div className={`${baseClass}__icon-container`}>
+        <SearchIcon />
+      </div>
       <input
         aria-label={placeholder}
         className={`${baseClass}__input`}
@@ -58,7 +60,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
         type="text"
         value={value}
       />
-      {value.length > 0 && (
+      <div className={`${baseClass}__clear-container`}>
         <button
           aria-label="Clear search"
           className={`${baseClass}__clear`}
@@ -67,7 +69,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
         >
           <XIcon />
         </button>
-      )}
+      </div>
     </div>
   )
 }

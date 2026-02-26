@@ -1,5 +1,6 @@
 'use client'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
 import type { HierarchySearchProps } from './types.js'
@@ -20,17 +21,24 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   onActiveChange,
   onSelect,
 }) => {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
   const [inputValue, setInputValue] = useState('')
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const titleField = collectionConfig?.admin?.useAsTitle || 'id'
+  const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : null
 
   const { clearResults, hasNextPage, isLoading, loadMore, results, search, totalDocs } =
     useHierarchySearch({
       collectionSlug,
+      parentFieldName: hierarchyConfig?.parentFieldName,
       titleField,
+      titlePathField: hierarchyConfig?.titlePathFieldName,
     })
 
   const handleSearch = useCallback(
@@ -62,7 +70,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
         onChange={setInputValue}
         onClear={handleClear}
         onSearch={handleSearch}
-        placeholder={t('hierarchy:search')}
+        placeholder={t('hierarchy:searchLabel', { label: collectionLabel })}
         value={inputValue}
       />
       {isActive && (
