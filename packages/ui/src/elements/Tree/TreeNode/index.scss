@@ -28,6 +28,10 @@
     & > .tree-node__indicator {
       background-color: var(--theme-text);
     }
+
+    & > .tree-node__title {
+      color: var(--theme-text);
+    }
   }
 
   &__content {
@@ -77,10 +81,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: var(--tree-font-size);
+    color: var(--theme-elevation-650);
     color: var(--theme-text);
     cursor: pointer;
     &:hover {
       text-decoration: underline;
+      color: var(--theme-text);
     }
   }
 
