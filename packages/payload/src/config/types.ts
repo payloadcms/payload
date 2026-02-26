@@ -26,12 +26,6 @@ import type {
 import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
-  AddToImportMap,
-  ImportMap,
-  Imports,
-  InternalImportMap,
-} from '../bin/generateImportMap/index.js'
-import type {
   Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -288,8 +282,6 @@ export type InitOptions = {
    * Disable running of the `onInit` function
    */
   disableOnInit?: boolean
-
-  importMap?: ImportMap
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
@@ -736,16 +728,6 @@ export type AfterErrorHookArgs = {
   result?: ErrorResult
 }
 
-export type ImportMapGenerators = Array<
-  (props: {
-    addToImportMap: AddToImportMap
-    baseDir: string
-    config: SanitizedConfig
-    importMap: InternalImportMap
-    imports: Imports
-  }) => void
->
-
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -949,7 +931,7 @@ export type Config = {
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
     dateFormat?: string
     /**
-     * Each entry in this map generates an entry in the importMap.
+     * Admin dependencies map.
      */
     dependencies?: AdminDependencies
     /**
@@ -960,28 +942,6 @@ export type Config = {
      * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
      */
     disable?: boolean
-    importMap?: {
-      /**
-       * Automatically generate component map during development
-       * @default true
-       */
-      autoGenerate?: boolean
-      /**
-       * The base directory for component paths starting with /.
-       * @default process.cwd()
-       **/
-      baseDir?: string
-      /**
-       * You can use generators to add custom components to the component import map.
-       * This allows you to import custom components in the admin panel.
-       */
-      generators?: ImportMapGenerators
-      /**
-       * If Payload cannot find the import map file location automatically,
-       * you can manually provide it here.
-       */
-      importMapFile?: string
-    }
     /**
      * Live Preview options.
      *
