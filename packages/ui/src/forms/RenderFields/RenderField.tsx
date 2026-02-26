@@ -112,6 +112,39 @@ export function RenderField({
     baseFieldProps.validate = adminValidate
   }
 
+  const fieldComponentProps = { field: clientFieldConfig, path, schemaPath }
+
+  const renderAdminComponent = (Comp: typeof AdminLabel) => {
+    if (!Comp) {
+      return null
+    }
+    if (typeof Comp === 'function') {
+      const C = Comp as React.ComponentType<any>
+      return <C {...fieldComponentProps} />
+    }
+    return Comp
+  }
+
+  const renderAdminComponentArray = (comps: typeof AdminBeforeInput) => {
+    if (!comps) {
+      return null
+    }
+    if (Array.isArray(comps)) {
+      return comps.map((Comp, i) => {
+        if (typeof Comp === 'function') {
+          const C = Comp as React.ComponentType<any>
+          return <C key={i} {...fieldComponentProps} />
+        }
+        return <React.Fragment key={i}>{Comp}</React.Fragment>
+      })
+    }
+    if (typeof comps === 'function') {
+      const C = comps as React.ComponentType<any>
+      return <C {...fieldComponentProps} />
+    }
+    return comps as React.ReactNode
+  }
+
   if (clientFieldConfig.admin?.hidden) {
     return <HiddenField forceRender={forceRender} path={path} schemaPath={schemaPath} />
   }
@@ -145,39 +178,6 @@ export function RenderField({
     indexPath,
     parentPath,
     parentSchemaPath,
-  }
-
-  const fieldComponentProps = { field: clientFieldConfig, path, schemaPath }
-
-  const renderAdminComponent = (Comp: typeof AdminLabel) => {
-    if (!Comp) {
-      return null
-    }
-    if (typeof Comp === 'function') {
-      const C = Comp as React.ComponentType<any>
-      return <C {...fieldComponentProps} />
-    }
-    return Comp
-  }
-
-  const renderAdminComponentArray = (comps: typeof AdminBeforeInput) => {
-    if (!comps) {
-      return null
-    }
-    if (Array.isArray(comps)) {
-      return comps.map((Comp, i) => {
-        if (typeof Comp === 'function') {
-          const C = Comp as React.ComponentType<any>
-          return <C key={i} {...fieldComponentProps} />
-        }
-        return <React.Fragment key={i}>{Comp}</React.Fragment>
-      })
-    }
-    if (typeof comps === 'function') {
-      const C = comps as React.ComponentType<any>
-      return <C {...fieldComponentProps} />
-    }
-    return comps as React.ReactNode
   }
 
   const hasAdminWrapper =
