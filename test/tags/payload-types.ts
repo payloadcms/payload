@@ -71,7 +71,6 @@ export interface Config {
     pages: Page;
     media: Media;
     tags: Tag;
-    categories: Category;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -84,7 +83,6 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -98,6 +96,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -131,7 +132,6 @@ export interface Post {
   title: string;
   content?: string | null;
   _h_tags?: (string | Tag)[] | null;
-  parentCategory?: (string | Category)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -144,19 +144,6 @@ export interface Tag {
   _h_tags?: (string | null) | Tag;
   name: string;
   description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  parentCategory?: (string | null) | Category;
-  name: string;
   updatedAt: string;
   createdAt: string;
   _h_slugPath?: string | null;
@@ -259,10 +246,6 @@ export interface PayloadLockedDocument {
         value: string | Tag;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -316,7 +299,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
   _h_tags?: T;
-  parentCategory?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -357,18 +339,6 @@ export interface TagsSelect<T extends boolean = true> {
   _h_tags?: T;
   name?: T;
   description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  parentCategory?: T;
-  name?: T;
   updatedAt?: T;
   createdAt?: T;
   _h_slugPath?: T;
@@ -435,6 +405,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

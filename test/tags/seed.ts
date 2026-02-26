@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { categoriesSlug, mediaSlug, pagesSlug, postsSlug, tagsSlug } from './config.js'
+import { pagesSlug, postsSlug, tagsSlug } from './config.js'
 
 export const seed = async (payload: Payload): Promise<void> => {
   // Create hierarchical tags taxonomy
@@ -329,30 +329,6 @@ export const seed = async (payload: Payload): Promise<void> => {
       name: 'Web Design',
       description: 'Website design',
       [`_h_${tagsSlug}`]: design.id,
-    } as any,
-  })
-
-  // Create hierarchical categories taxonomy
-  const articles = await payload.create({
-    collection: categoriesSlug as any,
-    data: {
-      name: 'Articles',
-    } as any,
-  })
-
-  const tutorials = await payload.create({
-    collection: categoriesSlug as any,
-    data: {
-      name: 'Tutorials',
-      parentCategory: articles.id,
-    } as any,
-  })
-
-  const guides = await payload.create({
-    collection: categoriesSlug as any,
-    data: {
-      name: 'Guides',
-      parentCategory: articles.id,
     } as any,
   })
 

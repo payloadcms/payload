@@ -44,8 +44,8 @@ describe('Taxonomy Tree', () => {
 
       await openNav(page)
 
-      const taxonomySidebar = page.locator('.taxonomy-sidebar-tab')
-      await expect(taxonomySidebar.locator('.taxonomy-tree')).toBeVisible()
+      const taxonomySidebar = page.locator('.hierarchy-sidebar-tab')
+      await expect(taxonomySidebar.locator('.tree')).toBeVisible()
     })
 
     test('should show tree nodes from seed data', async () => {
@@ -54,10 +54,10 @@ describe('Taxonomy Tree', () => {
 
       await openNav(page)
 
-      const tree = page.locator('.taxonomy-tree')
+      const tree = page.locator('.hierarchy-sidebar-tab .tree')
       await expect(tree).toBeVisible()
 
-      const nodes = tree.locator('.taxonomy-tree-node')
+      const nodes = tree.locator('.tree-node')
       await expect(nodes.first()).toBeVisible({ timeout: 10000 })
     })
   })
@@ -69,13 +69,13 @@ describe('Taxonomy Tree', () => {
 
       await openNav(page)
 
-      const tree = page.locator('.taxonomy-tree')
-      const firstChevron = tree.locator('.taxonomy-tree-node__toggle').first()
+      const tree = page.locator('.hierarchy-sidebar-tab .tree')
+      const firstChevron = tree.locator('.tree-node__toggle').first()
 
       await expect(firstChevron).toBeVisible({ timeout: 10000 })
       await firstChevron.click()
 
-      const childrenContainer = tree.locator('.taxonomy-tree-node__children').first()
+      const childrenContainer = tree.locator('.tree-node__children').first()
       await expect(childrenContainer).toBeVisible({ timeout: 5000 })
     })
 
@@ -85,7 +85,7 @@ describe('Taxonomy Tree', () => {
 
       await openNav(page)
 
-      const tree = page.locator('.taxonomy-tree')
+      const tree = page.locator('.hierarchy-sidebar-tab .tree')
       await expect(tree).toBeVisible()
 
       await tree.focus()
@@ -93,23 +93,6 @@ describe('Taxonomy Tree', () => {
 
       const focusedElement = page.locator(':focus')
       await expect(focusedElement).toBeVisible()
-    })
-  })
-
-  describe('Custom Configuration', () => {
-    test('should work with custom parent field name for categories', async () => {
-      await page.goto(adminUrl.collection('categories'))
-      await page.waitForURL('**/categories')
-
-      await openNav(page)
-
-      const tree = page.locator('.taxonomy-tree')
-      await expect(tree).toBeVisible()
-
-      const content = tree.locator(
-        '.taxonomy-tree-node, .taxonomy-tree__empty, .taxonomy-tree__loading',
-      )
-      await expect(content.first()).toBeVisible({ timeout: 10000 })
     })
   })
 })

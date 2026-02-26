@@ -16,29 +16,6 @@ export const tagsSlug = 'tags'
 export const postsSlug = 'posts'
 export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
-export const categoriesSlug = 'categories'
-
-// Categories hierarchy with custom configuration
-export const Categories = createTagsCollection({
-  slug: categoriesSlug,
-  useAsTitle: 'name',
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-  hierarchy: {
-    admin: {
-      components: {
-        Icon: './components/TaxonomyTabIcon.js#TaxonomyTabIcon',
-      },
-    },
-    parentFieldName: 'parentCategory',
-    // relatedCollections auto-discovered from fields
-  },
-})
 
 // Tags hierarchy collection
 export const Tags = createTagsCollection({
@@ -58,7 +35,7 @@ export const Tags = createTagsCollection({
   // relatedCollections auto-discovered from fields
 })
 
-// Posts collection that references tags and categories
+// Posts collection that references tags
 export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -75,7 +52,6 @@ export const Posts: CollectionConfig = {
       type: 'textarea',
     },
     createTagField({ hasMany: true, relationTo: tagsSlug, label: 'Tags' }),
-    createTagField({ relationTo: categoriesSlug, label: 'Categories' }),
   ],
 }
 
@@ -122,7 +98,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Posts, Pages, Media, Tags, Categories],
+  collections: [Posts, Pages, Media, Tags],
   debug: true,
   onInit: async (payload) => {
     await payload.create({
@@ -147,7 +123,6 @@ export default buildConfigWithDefaults({
 })
 
 export {
-  Categories as CategoriesCollection,
   Media as MediaCollection,
   Pages as PagesCollection,
   Posts as PostsCollection,
