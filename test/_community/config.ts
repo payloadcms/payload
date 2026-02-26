@@ -12,13 +12,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  // ...extend config here
   collections: [PostsCollection, MediaCollection],
-  admin: {
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
-  },
   editor: lexicalEditor({}),
   globals: [
     // ...add more globals here

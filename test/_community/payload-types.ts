@@ -86,7 +86,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
@@ -96,6 +96,9 @@ export interface Config {
     menu: MenuSelect<false> | MenuSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -125,8 +128,33 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
+  tags?:
+    | {
+        label: string;
+        color?: ('red' | 'blue' | 'green') | null;
+        id?: string | null;
+      }[]
+    | null;
+  layout?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            label: string;
+            url?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'callToAction';
+          }
+      )[]
+    | null;
   content?: {
     root: {
       type: string;
@@ -150,7 +178,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -194,7 +222,7 @@ export interface Media {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -211,7 +239,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -236,24 +264,24 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -263,10 +291,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -286,7 +314,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -298,6 +326,33 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  tags?:
+    | T
+    | {
+        label?: T;
+        color?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        callToAction?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   content?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -420,7 +475,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: string;
+  id: number;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -437,11 +492,115 @@ export interface MenuSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
 }
+
+export type SchemaPath =
+  | 'media'
+  | 'media.createdAt'
+  | 'media.filename'
+  | 'media.filesize'
+  | 'media.focalX'
+  | 'media.focalY'
+  | 'media.height'
+  | 'media.mimeType'
+  | 'media.sizes'
+  | 'media.sizes.large'
+  | 'media.sizes.large.filename'
+  | 'media.sizes.large.filesize'
+  | 'media.sizes.large.height'
+  | 'media.sizes.large.mimeType'
+  | 'media.sizes.large.url'
+  | 'media.sizes.large.width'
+  | 'media.sizes.medium'
+  | 'media.sizes.medium.filename'
+  | 'media.sizes.medium.filesize'
+  | 'media.sizes.medium.height'
+  | 'media.sizes.medium.mimeType'
+  | 'media.sizes.medium.url'
+  | 'media.sizes.medium.width'
+  | 'media.sizes.thumbnail'
+  | 'media.sizes.thumbnail.filename'
+  | 'media.sizes.thumbnail.filesize'
+  | 'media.sizes.thumbnail.height'
+  | 'media.sizes.thumbnail.mimeType'
+  | 'media.sizes.thumbnail.url'
+  | 'media.sizes.thumbnail.width'
+  | 'media.thumbnailURL'
+  | 'media.updatedAt'
+  | 'media.url'
+  | 'media.width'
+  | 'menu'
+  | 'menu.createdAt'
+  | 'menu.globalText'
+  | 'menu.updatedAt'
+  | 'payload-kv'
+  | 'payload-kv.data'
+  | 'payload-kv.key'
+  | 'payload-locked-documents'
+  | 'payload-locked-documents.createdAt'
+  | 'payload-locked-documents.document'
+  | 'payload-locked-documents.globalSlug'
+  | 'payload-locked-documents.updatedAt'
+  | 'payload-locked-documents.user'
+  | 'payload-migrations'
+  | 'payload-migrations.batch'
+  | 'payload-migrations.createdAt'
+  | 'payload-migrations.name'
+  | 'payload-migrations.updatedAt'
+  | 'payload-preferences'
+  | 'payload-preferences.createdAt'
+  | 'payload-preferences.key'
+  | 'payload-preferences.updatedAt'
+  | 'payload-preferences.user'
+  | 'payload-preferences.value'
+  | 'posts'
+  | 'posts.content'
+  | 'posts.createdAt'
+  | 'posts.layout'
+  | 'posts.layout.callToAction'
+  | 'posts.layout.callToAction.blockName'
+  | 'posts.layout.callToAction.id'
+  | 'posts.layout.callToAction.label'
+  | 'posts.layout.callToAction.url'
+  | 'posts.layout.hero'
+  | 'posts.layout.hero.blockName'
+  | 'posts.layout.hero.heading'
+  | 'posts.layout.hero.id'
+  | 'posts.layout.hero.subheading'
+  | 'posts.tags'
+  | 'posts.tags.color'
+  | 'posts.tags.id'
+  | 'posts.tags.label'
+  | 'posts.title'
+  | 'posts.updatedAt'
+  | 'users'
+  | 'users.createdAt'
+  | 'users.email'
+  | 'users.hash'
+  | 'users.lockUntil'
+  | 'users.loginAttempts'
+  | 'users.resetPasswordExpiration'
+  | 'users.resetPasswordToken'
+  | 'users.salt'
+  | 'users.sessions'
+  | 'users.sessions.createdAt'
+  | 'users.sessions.expiresAt'
+  | 'users.sessions.id'
+  | 'users.updatedAt';
 
 
 declare module 'payload' {
