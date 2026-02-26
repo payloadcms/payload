@@ -17,10 +17,6 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
         components: {
           Label: './collections/Blocks/components/CustomBlockLabel.tsx',
         },
-        images: {
-          icon: { url: '/api/uploads/file/payload20x20.png', alt: 'Block icon' },
-          thumbnail: { url: '/api/uploads/file/payload480x320.jpg', alt: 'Block thumbnail' },
-        },
       },
       fields: [
         {
