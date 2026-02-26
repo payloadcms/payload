@@ -10,6 +10,7 @@ import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
+import { setAdminConfig } from './adminConfigCache.js'
 import { initReq } from './initReq.js'
 import { renderAdminRscHandler } from './renderAdminRsc.js'
 import { slugifyHandler } from './slugify.js'
@@ -37,6 +38,10 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     config: configPromise,
     serverFunctions: extraServerFunctions,
   } = args
+
+  if (adminConfig) {
+    setAdminConfig(adminConfig)
+  }
 
   const { cookies, locale, permissions, req } = await initReq({
     configPromise,
