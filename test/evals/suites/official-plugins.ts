@@ -28,6 +28,7 @@ export function registerOfficialPluginsSuite(options: SuiteOptions = {}) {
         it(`${testCase.fixturePath}`, async () => {
           const result = await runCodegenCase(testCase, 'Official Plugins: Codegen', {
             runnerModel,
+            systemPromptKey,
           })
           assert(result.pass, caseFailureMessage(result))
         })

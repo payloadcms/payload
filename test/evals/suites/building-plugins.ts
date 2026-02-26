@@ -27,6 +27,7 @@ export function registerBuildingPluginsSuite(options: SuiteOptions = {}) {
         it(`${testCase.fixturePath}`, async () => {
           const result = await runCodegenCase(testCase, 'Building Plugins: Codegen', {
             runnerModel,
+            systemPromptKey,
           })
           assert(result.pass, caseFailureMessage(result))
         })
