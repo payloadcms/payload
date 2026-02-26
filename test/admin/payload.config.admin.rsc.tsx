@@ -5,6 +5,7 @@ import React from 'react'
 import { AllButtons } from './collections/CustomFields/fields/Buttons/index.js'
 import { CustomServerDescription } from './collections/CustomFields/fields/Text/DescriptionServer.js'
 import { CustomServerLabel } from './collections/CustomFields/fields/Text/LabelServer.js'
+import { BeforeListTable } from './collections/ListViewSelectAPI/BeforeListTable/index.js'
 import { AdminButton } from './components/actions/AdminButton/index.js'
 import { CollectionAPIButton } from './components/actions/CollectionAPIButton/index.js'
 import { CollectionEditButton } from './components/actions/CollectionEditButton/index.js'
@@ -13,17 +14,33 @@ import { GlobalAPIButton } from './components/actions/GlobalAPIButton/index.js'
 import { GlobalEditButton } from './components/actions/GlobalEditButton/index.js'
 import { AfterDashboard } from './components/AfterDashboard/index.js'
 import { AfterDashboardClient } from './components/AfterDashboardClient/index.js'
+import { AfterNav } from './components/AfterNav/index.js'
+import { AfterNavLinks } from './components/AfterNavLinks/index.js'
 import { Banner } from './components/Banner/index.js'
 import { CustomDraftButton } from './components/BeforeDocumentControls/CustomDraftButton/index.js'
 import { CustomSaveButton } from './components/BeforeDocumentControls/CustomSaveButton/index.js'
+import { SelectPostsButton } from './components/BeforeList/index.js'
+import { BeforeLogin } from './components/BeforeLogin/index.js'
+import { BeforeNav } from './components/BeforeNav/index.js'
+import { BeforeNavLinks } from './components/BeforeNavLinks/index.js'
 import { CustomHeader } from './components/CustomHeader/index.js'
+import { CustomProvider } from './components/CustomProvider/index.js'
 import { CustomProviderServer } from './components/CustomProviderServer/index.js'
 import { CustomTabComponent } from './components/CustomTabComponent/index.js'
 import { DemoUIFieldCell } from './components/DemoUIField/Cell.js'
 import { DemoUIField } from './components/DemoUIField/Field.js'
+import { EditMenuItems } from './components/EditMenuItems/index.js'
 import { EditMenuItemsServer } from './components/EditMenuItemsServer/index.js'
 import { Icon } from './components/graphics/Icon.js'
 import { Logo } from './components/graphics/Logo.js'
+import { ListMenuItemsExample } from './components/ListMenuItems/index.js'
+import { Logout } from './components/Logout/index.js'
+import { ResetDefaultColumnsButton } from './components/ResetColumns/index.js'
+import { SettingsMenuItem1 } from './components/SettingsMenuItems/Item1.js'
+import { SettingsMenuItem2 } from './components/SettingsMenuItems/Item2.js'
+import { Status } from './components/Status/index.js'
+import { ViewDescription } from './components/ViewDescription/index.js'
+import { ButtonStyles } from './components/views/ButtonStyles/index.js'
 import { CustomDefaultView } from './components/views/CustomDefault/index.js'
 import { CustomEditView } from './components/views/CustomEdit/index.js'
 import { CustomDefaultEditView } from './components/views/CustomEditDefault/index.js'
@@ -57,7 +74,9 @@ import {
   publicCustomViewPath,
 } from './shared.js'
 import {
+  customDocumentControlsSlug,
   customFieldsSlug,
+  customGlobalDocumentControlsSlug,
   customGlobalViews1GlobalSlug,
   customGlobalViews2GlobalSlug,
   customViews1CollectionSlug,
@@ -65,6 +84,7 @@ import {
   editMenuItemsSlug,
   geoCollectionSlug,
   globalSlug,
+  listDrawerSlug,
   postsCollectionSlug,
   reorderTabsSlug,
 } from './slugs.js'
@@ -73,13 +93,26 @@ export default defineRscConfig({
   admin: {
     actions: [AdminButton],
     afterDashboard: [AfterDashboard, AfterDashboardClient],
+    afterNav: [AfterNav],
+    afterNavLinks: [AfterNavLinks],
+    beforeLogin: [BeforeLogin],
+    beforeNav: [BeforeNav],
+    beforeNavLinks: [BeforeNavLinks],
     graphics: {
       Icon,
       Logo,
     },
     header: [CustomHeader],
-    providers: [CustomProviderServer],
+    logout: {
+      Button: Logout,
+    },
+    providers: [CustomProvider, CustomProviderServer],
+    settingsMenu: [SettingsMenuItem1, SettingsMenuItem2],
     views: {
+      ButtonShowcase: {
+        Component: ButtonStyles,
+        path: '/button-styles',
+      },
       collections: {
         Component: CustomView,
         path: '/collections',
@@ -124,7 +157,13 @@ export default defineRscConfig({
     },
   },
   collections: {
+    [customDocumentControlsSlug]: {
+      edit: {
+        Status,
+      },
+    },
     [customViews1CollectionSlug]: {
+      Description: ViewDescription,
       views: {
         edit: {
           root: {
@@ -197,7 +236,7 @@ export default defineRscConfig({
     },
     [editMenuItemsSlug]: {
       edit: {
-        editMenuItems: [EditMenuItemsServer],
+        editMenuItems: [EditMenuItemsServer, EditMenuItems],
       },
     },
     [geoCollectionSlug]: {
@@ -215,14 +254,25 @@ export default defineRscConfig({
         },
       },
     },
+    ['list-view-select-api']: {
+      beforeListTable: [BeforeListTable],
+    },
+    [listDrawerSlug]: {
+      beforeListTable: [SelectPostsButton],
+    },
     [postsCollectionSlug]: {
       afterList: [<Banner message="AfterList custom component" />],
       afterListTable: [<Banner message="AfterListTable custom component" />],
       beforeList: [<Banner message="BeforeList custom component" />],
-      beforeListTable: [<Banner message="BeforeListTable custom component" />],
+      beforeListTable: [
+        <Banner message="BeforeListTable custom component" />,
+        ResetDefaultColumnsButton,
+      ],
+      Description: ViewDescription,
       edit: {
         beforeDocumentControls: [CustomDraftButton, CustomSaveButton],
       },
+      listMenuItems: [ListMenuItemsExample],
     },
     [reorderTabsSlug]: {
       views: {
@@ -270,6 +320,11 @@ export default defineRscConfig({
     },
   },
   globals: {
+    [customGlobalDocumentControlsSlug]: {
+      elements: {
+        Status,
+      },
+    },
     [customGlobalViews1GlobalSlug]: {
       views: {
         edit: {

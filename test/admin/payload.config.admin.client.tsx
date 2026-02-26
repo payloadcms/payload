@@ -13,80 +13,11 @@ import { CustomClientDescription } from './collections/CustomFields/fields/Text/
 import { CustomClientField } from './collections/CustomFields/fields/Text/FieldClient.js'
 import { CustomClientLabel } from './collections/CustomFields/fields/Text/LabelClient.js'
 import { CustomListDrawer as CustomListDrawerField } from './collections/CustomListDrawer/Component.js'
-import { BeforeListTable } from './collections/ListViewSelectAPI/BeforeListTable/index.js'
-import { AfterNav } from './components/AfterNav/index.js'
-import { AfterNavLinks } from './components/AfterNavLinks/index.js'
-import { SelectPostsButton } from './components/BeforeList/index.js'
-import { BeforeLogin } from './components/BeforeLogin/index.js'
-import { BeforeNav } from './components/BeforeNav/index.js'
-import { BeforeNavLinks } from './components/BeforeNavLinks/index.js'
 import { CustomCell } from './components/CustomCell/index.js'
 import { CustomGroupCell } from './components/CustomGroupCell/index.js'
-import { CustomProvider } from './components/CustomProvider/index.js'
-import { EditMenuItems } from './components/EditMenuItems/index.js'
-import { ListMenuItemsExample } from './components/ListMenuItems/index.js'
-import { Logout } from './components/Logout/index.js'
-import { ResetDefaultColumnsButton } from './components/ResetColumns/index.js'
-import { SettingsMenuItem1 } from './components/SettingsMenuItems/Item1.js'
-import { SettingsMenuItem2 } from './components/SettingsMenuItems/Item2.js'
-import { Status } from './components/Status/index.js'
-import { ViewDescription } from './components/ViewDescription/index.js'
-import { ButtonStyles } from './components/views/ButtonStyles/index.js'
-import {
-  customDocumentControlsSlug,
-  customFieldsSlug,
-  customGlobalDocumentControlsSlug,
-  customViews1CollectionSlug,
-  editMenuItemsSlug,
-  listDrawerSlug,
-  postsCollectionSlug,
-} from './slugs.js'
+import { customFieldsSlug, postsCollectionSlug } from './slugs.js'
 
 export default defineClientConfig({
-  admin: {
-    afterNav: [AfterNav],
-    afterNavLinks: [AfterNavLinks],
-    beforeLogin: [BeforeLogin],
-    beforeNav: [BeforeNav],
-    beforeNavLinks: [BeforeNavLinks],
-    logout: {
-      Button: Logout,
-    },
-    providers: [CustomProvider],
-    settingsMenu: [SettingsMenuItem1, SettingsMenuItem2],
-    views: {
-      ButtonShowcase: {
-        Component: ButtonStyles,
-        path: '/button-styles',
-      },
-    },
-  },
-  collections: {
-    [customDocumentControlsSlug]: {
-      edit: {
-        Status,
-      },
-    },
-    [customViews1CollectionSlug]: {
-      Description: ViewDescription,
-    },
-    [editMenuItemsSlug]: {
-      edit: {
-        editMenuItems: [EditMenuItems],
-      },
-    },
-    ['list-view-select-api']: {
-      beforeListTable: [BeforeListTable],
-    },
-    [listDrawerSlug]: {
-      beforeListTable: [SelectPostsButton],
-    },
-    [postsCollectionSlug]: {
-      beforeListTable: [ResetDefaultColumnsButton],
-      Description: ViewDescription,
-      listMenuItems: [ListMenuItemsExample],
-    },
-  },
   fields: {
     [`${customFieldsSlug}.arrayFieldWithBeforeAfterInputs`]: {
       components: {
@@ -168,13 +99,6 @@ export default defineClientConfig({
     'custom-list-drawer.customListDrawer': {
       components: {
         Field: CustomListDrawerField,
-      },
-    },
-  },
-  globals: {
-    [customGlobalDocumentControlsSlug]: {
-      elements: {
-        Status,
       },
     },
   },
