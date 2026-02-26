@@ -14,6 +14,7 @@ import { applyLocaleFiltering, getRscSchemaPaths } from 'payload/shared'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { setAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -40,6 +41,10 @@ export const RootLayout = async ({
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
+
+  if (rscAdminConfig) {
+    setAdminConfig(rscAdminConfig)
+  }
 
   const {
     cookies,
