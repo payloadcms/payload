@@ -156,7 +156,7 @@ export function mergeLocalizedData({
                       ? (existingValue[index] as JsonObject)
                       : {}
 
-                  return mergeLocalizedData({
+                  const merged = mergeLocalizedData({
                     configBlockReferences,
                     dataWithLocales: newBlockData,
                     docWithLocales: blockData,
@@ -164,6 +164,14 @@ export function mergeLocalizedData({
                     parentIsLocalized,
                     selectedLocales,
                   })
+
+                  // blockType, id, blockName are set by Payload internally
+                  // and not part of block.fields, so they must be preserved explicitly
+                  merged.blockType = newBlockData.blockType
+                  merged.id = newBlockData.id
+                  merged.blockName = newBlockData.blockName
+
+                  return merged
                 }
 
                 return newBlockData

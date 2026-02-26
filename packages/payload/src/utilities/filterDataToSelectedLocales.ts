@@ -68,13 +68,21 @@ export function filterDataToSelectedLocales({
               }
 
               if (block) {
-                return filterDataToSelectedLocales({
+                const filtered = filterDataToSelectedLocales({
                   configBlockReferences,
                   docWithLocales: blockData,
                   fields: block?.fields || [],
                   parentIsLocalized: fieldIsLocalized,
                   selectedLocales,
                 })
+
+                // blockType, id, blockName are set by Payload internally
+                // and not part of block.fields, so they must be preserved explicitly
+                filtered.blockType = blockData.blockType
+                filtered.id = blockData.id
+                filtered.blockName = blockData.blockName
+
+                return filtered
               }
 
               return blockData

@@ -1458,6 +1458,74 @@ describe('Versions', () => {
         es: 'spanish published',
       })
     })
+
+    test('should preserve block metadata when publishing specific locale after initial save without blocks', async () => {
+      // This reproduces the bug where:
+      // 1. A doc is saved without blocks (autosave fires before blocks are added)
+      // 2. Blocks are added
+      // 3. Publishing with publishSpecificLocale drops blockType/id
+      await page.goto(url.create)
+      const textField = page.locator('#field-text')
+
+      // Step 1: Create and save a document without blocks
+      await textField.fill('english text')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const id = await page.locator('.id-label').getAttribute('title')
+
+      // Step 2: Add a block via API (simpler and more reliable than UI interaction)
+      await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Step 3: Publish specific locale (English) via API
+      const published = await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          _status: 'published',
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+          text: 'english text',
+        },
+        draft: false,
+        locale: 'en',
+        publishSpecificLocale: 'en',
+      })
+
+      // Step 4: Verify blocks survived with metadata intact
+      expect(published.blocks).toHaveLength(1)
+      expect(published.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(published.blocks![0].id).toBeDefined()
+
+      // Step 5: Verify via find (reload from DB)
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const found = data.docs[0]
+      expect(found.blocks).toHaveLength(1)
+      expect(found.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(found.blocks![0].id).toBeDefined()
+    })
   })
 
   describe('Collections with draft validation', () => {
