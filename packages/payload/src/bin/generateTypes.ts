@@ -8,6 +8,7 @@ import type { SanitizedConfig } from '../config/types.js'
 
 import { addSelectGenericsToGeneratedTypes } from '../utilities/addSelectGenericsToGeneretedTypes.js'
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js'
+import { generateSchemaPathType } from '../utilities/generateSchemaPathTypes.js'
 import { getLogger } from '../utilities/logger.js'
 
 export async function generateTypes(
@@ -49,6 +50,8 @@ export async function generateTypes(
   })
 
   compiled = addSelectGenericsToGeneratedTypes({ compiledGeneratedTypes: compiled })
+
+  compiled += generateSchemaPathType(config)
 
   if (config.typescript.declare !== false) {
     if (config.typescript.declare?.ignoreTSError) {
