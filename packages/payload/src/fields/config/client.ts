@@ -7,7 +7,6 @@ import type {
   AdminClient,
   ArrayFieldClient,
   Block,
-  BlockJSX,
   BlocksFieldClient,
   ClientBlock,
   ClientField,
@@ -23,10 +22,9 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { flattenTopLevelFields } from '../../index.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -83,12 +81,10 @@ export const createClientBlocks = ({
   blocks,
   defaultIDType,
   i18n,
-  importMap,
 }: {
   blocks: (Block | string)[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
-  importMap: ImportMap
 }): (ClientBlock | string)[] | ClientBlock[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
@@ -122,15 +118,6 @@ export const createClientBlocks = ({
       }
     }
 
-    if (block?.admin?.jsx) {
-      const jsxResolved = getFromImportMap<BlockJSX>({
-        importMap,
-        PayloadComponent: block.admin.jsx,
-        schemaPath: '',
-      })
-      clientBlock.jsx = jsxResolved
-    }
-
     if (block?.admin?.disableBlockName) {
       // Check for existing admin object, this way we don't have to spread it in
       if (clientBlock.admin) {
@@ -162,7 +149,6 @@ export const createClientBlocks = ({
       defaultIDType,
       fields: block.fields,
       i18n,
-      importMap,
     })
 
     clientBlocks.push(clientBlock)
@@ -175,12 +161,10 @@ export const createClientField = ({
   defaultIDType,
   field: incomingField,
   i18n,
-  importMap,
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   field: Field
   i18n: I18nClient
-  importMap: ImportMap
 }): ClientField => {
   const clientField: ClientField = {} as ClientField
 
@@ -284,7 +268,6 @@ export const createClientField = ({
         disableAddingID: incomingField.type !== 'array',
         fields: incomingField.fields,
         i18n,
-        importMap,
       })
 
       break
@@ -315,7 +298,6 @@ export const createClientField = ({
           blocks: incomingField.blockReferences,
           defaultIDType,
           i18n,
-          importMap,
         })
       }
 
@@ -324,7 +306,6 @@ export const createClientField = ({
           blocks: incomingField.blocks,
           defaultIDType,
           i18n,
-          importMap,
         }) as ClientBlock[]
       }
 
@@ -421,7 +402,6 @@ export const createClientField = ({
                 disableAddingID: true,
                 fields: tab.fields,
                 i18n,
-                importMap,
               })
             } else if (
               (key === 'label' || key === 'description') &&
@@ -480,13 +460,11 @@ export const createClientFields = ({
   disableAddingID,
   fields,
   i18n,
-  importMap,
 }: {
   defaultIDType: Payload['config']['db']['defaultIDType']
   disableAddingID?: boolean
   fields: Field[]
   i18n: I18nClient
-  importMap: ImportMap
 }): ClientField[] => {
   const clientFields: ClientField[] = []
 
@@ -497,7 +475,6 @@ export const createClientFields = ({
       defaultIDType,
       field,
       i18n,
-      importMap,
     })
 
     clientFields.push(clientField)

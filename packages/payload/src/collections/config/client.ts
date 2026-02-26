@@ -1,7 +1,6 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type {
   LivePreviewConfig,
   ServerOnlyLivePreviewProperties,
@@ -107,12 +106,10 @@ export const createClientCollectionConfig = ({
   collection,
   defaultIDType,
   i18n,
-  importMap,
 }: {
   collection: SanitizedCollectionConfig
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
-  importMap: ImportMap
 }): ClientCollectionConfig => {
   const clientCollection = {} as Partial<ClientCollectionConfig>
 
@@ -233,7 +230,6 @@ export const createClientCollectionConfig = ({
           defaultIDType,
           fields: collection.fields,
           i18n,
-          importMap,
         })
 
         break
@@ -292,12 +288,10 @@ export const createClientCollectionConfigs = ({
   collections,
   defaultIDType,
   i18n,
-  importMap,
 }: {
   collections: SanitizedCollectionConfig[]
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
-  importMap: ImportMap
 }): ClientCollectionConfig[] => {
   const clientCollections = new Array(collections.length)
 
@@ -308,7 +302,6 @@ export const createClientCollectionConfigs = ({
       collection,
       defaultIDType,
       i18n,
-      importMap,
     })
   }
 
