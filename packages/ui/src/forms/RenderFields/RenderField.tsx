@@ -33,6 +33,7 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
+import { useAdminFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -52,8 +53,15 @@ export function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
+  const { clientConfig, rscOverrides } = useAdminFieldConfig(schemaPath)
 
-  const baseFieldProps: Pick<
+  const AdminFieldComponent = clientConfig?.components?.Field
+  const AdminLabel = clientConfig?.components?.Label ?? rscOverrides?.Label
+  const AdminDescription = clientConfig?.components?.Description ?? rscOverrides?.Description
+  const RscField = rscOverrides?.Field
+  const adminValidate = clientConfig?.validate
+
+  const baseFieldProps: { validate?: any } & Pick<
     ClientComponentProps,
     'forceRender' | 'permissions' | 'readOnly' | 'schemaPath'
   > = {
@@ -63,8 +71,21 @@ export function RenderField({
     schemaPath,
   }
 
+  if (adminValidate) {
+    baseFieldProps.validate = adminValidate
+  }
+
   if (clientFieldConfig.admin?.hidden) {
-    return <HiddenField {...baseFieldProps} path={path} />
+    return <HiddenField forceRender={forceRender} path={path} schemaPath={schemaPath} />
+  }
+
+  if (RscField) {
+    return RscField
+  }
+
+  if (AdminFieldComponent) {
+    const FieldComp = AdminFieldComponent as React.ComponentType<any>
+    return <FieldComp {...baseFieldProps} field={clientFieldConfig} path={path} />
   }
 
   if (CustomField !== undefined) {
@@ -78,71 +99,110 @@ export function RenderField({
     parentSchemaPath,
   }
 
-  switch (clientFieldConfig.type) {
-    case 'array':
-      return <ArrayField {...iterableFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'blocks':
-      return <BlocksField {...iterableFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'checkbox':
-      return <CheckboxField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'code':
-      return <CodeField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'collapsible':
-      return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'date':
-      return <DateTimeField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'email':
-      return <EmailField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'group':
-      return <GroupField {...iterableFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'join':
-      return <JoinField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'json':
-      return <JSONField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'number':
-      return <NumberField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'point':
-      return <PointField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'radio':
-      return <RadioGroupField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'relationship':
-      return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'richText':
-      return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'row':
-      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
-
-    case 'select':
-      return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'tabs':
-      return <TabsField {...iterableFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'text':
-      return <TextField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'textarea':
-      return <TextareaField {...baseFieldProps} field={clientFieldConfig} path={path} />
-
-    case 'ui':
-      return <UIField />
-
-    case 'upload':
-      return <UploadField {...baseFieldProps} field={clientFieldConfig} path={path} />
+  const renderLabel = () => {
+    if (!AdminLabel) {
+      return null
+    }
+    if (typeof AdminLabel === 'function') {
+      return <AdminLabel />
+    }
+    return AdminLabel
   }
+
+  const renderDescription = () => {
+    if (!AdminDescription) {
+      return null
+    }
+    if (typeof AdminDescription === 'function') {
+      return <AdminDescription />
+    }
+    return AdminDescription
+  }
+
+  const hasAdminWrapper = AdminLabel || AdminDescription
+
+  const renderDefaultField = () => {
+    switch (clientFieldConfig.type) {
+      case 'array':
+        return <ArrayField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'blocks':
+        return <BlocksField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'checkbox':
+        return <CheckboxField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'code':
+        return <CodeField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'collapsible':
+        return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'date':
+        return <DateTimeField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'email':
+        return <EmailField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'group':
+        return <GroupField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'join':
+        return <JoinField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'json':
+        return <JSONField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'number':
+        return <NumberField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'point':
+        return <PointField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'radio':
+        return <RadioGroupField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'relationship':
+        return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'richText':
+        return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'row':
+        return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+
+      case 'select':
+        return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'tabs':
+        return <TabsField {...iterableFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'text':
+        return <TextField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'textarea':
+        return <TextareaField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      case 'ui':
+        return <UIField />
+
+      case 'upload':
+        return <UploadField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+      default:
+        return null
+    }
+  }
+
+  if (hasAdminWrapper) {
+    return (
+      <div data-admin-config-field={schemaPath}>
+        {renderLabel()}
+        {renderDefaultField()}
+        {renderDescription()}
+      </div>
+    )
+  }
+
+  return renderDefaultField()
 }
