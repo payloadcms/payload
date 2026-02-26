@@ -98,7 +98,6 @@ const buildTableState: ServerFunction<
   const clientConfig = getClientConfig({
     config,
     i18n,
-    importMap: payload.importMap,
     user,
   })
 
@@ -231,7 +230,7 @@ const buildTableState: ServerFunction<
   let renderedFilters
 
   if (collectionConfig) {
-    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+    renderedFilters = renderFilters(collectionConfig.fields)
   }
 
   return {

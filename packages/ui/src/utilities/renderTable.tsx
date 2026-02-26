@@ -6,7 +6,6 @@ import type {
   Column,
   ColumnPreference,
   Field,
-  ImportMap,
   ListQuery,
   PaginatedDocs,
   Payload,
@@ -39,10 +38,7 @@ import {
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
-export const renderFilters = (
-  fields: Field[],
-  importMap: ImportMap,
-): Map<string, React.ReactNode> =>
+export const renderFilters = (fields: Field[]): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
       if (fieldIsHiddenOrDisabled(field)) {
@@ -54,7 +50,6 @@ export const renderFilters = (
           field.name,
           RenderServerComponent({
             Component: field.admin.components?.Filter,
-            importMap,
           }),
         )
       }

@@ -152,7 +152,6 @@ export const traverseFields = ({
               blocks: [subField],
               defaultIDType: payload.config.db.defaultIDType,
               i18n,
-              importMap: payload.importMap,
             })
 
             clientSchemaMap.set(path, clientBlocks[0] as ClientBlock)
@@ -165,7 +164,6 @@ export const traverseFields = ({
               disableAddingID: true,
               fields: [subField],
               i18n,
-              importMap: payload.importMap,
             })
 
             clientSchemaMap.set(path, clientFields[0])
@@ -178,7 +176,6 @@ export const traverseFields = ({
               disableAddingID: true,
               fields: subField.fields,
               i18n,
-              importMap: payload.importMap,
             })
 
             clientSchemaMap.set(path, { fields: clientFields })

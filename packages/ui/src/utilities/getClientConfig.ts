@@ -13,7 +13,7 @@ if (!cachedClientConfigs) {
 }
 
 export const getClientConfig = cache(
-  ({ config, i18n, importMap, user }: CreateClientConfigArgs): ClientConfig => {
+  ({ config, i18n, user }: CreateClientConfigArgs): ClientConfig => {
     const currentLanguage = i18n.language
 
     if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
@@ -29,7 +29,6 @@ export const getClientConfig = cache(
     const cachedClientConfig = createClientConfig({
       config,
       i18n,
-      importMap,
       user,
     })
 
