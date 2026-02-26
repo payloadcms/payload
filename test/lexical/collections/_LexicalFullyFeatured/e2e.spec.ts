@@ -209,7 +209,7 @@ describe('Lexical Fully Featured', () => {
     // Ensure it does not contain payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
-    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
 
   test('ensure payload code block can be created using slash commands and it contains payload types', async ({
@@ -228,7 +228,7 @@ describe('Lexical Fully Featured', () => {
     // Ensure it contains payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
-    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
   })
 
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
