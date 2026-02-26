@@ -86,7 +86,7 @@ export type RenderDocumentServerFunction = ServerFunction<
 >
 
 type RenderDocumentServerFunctionHookFn = (
-  // No req or importMap - those are augmented by handleServerFunctions
+  // No req - those are augmented by handleServerFunctions
   args: {
     signal?: AbortSignal
   } & RenderDocumentBaseArgs,
@@ -184,29 +184,9 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
-  const getFormState = useCallback<GetFormStateClient>(
-    async (args) => {
-      const { signal: remoteSignal, ...rest } = args || {}
-
-      try {
-        if (!remoteSignal?.aborted) {
-          const result = (await serverFunction({
-            name: 'form-state',
-            args: { fallbackLocale: false, ...rest },
-          })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
-
-          if (!remoteSignal?.aborted) {
-            return result
-          }
-        }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
-      }
-
-      return { state: null }
-    },
-    [serverFunction],
-  )
+  const getFormState = useCallback<GetFormStateClient>(async (_args) => {
+    return { state: null }
+  }, [])
 
   const getTableState = useCallback<GetTableStateClient>(
     async (args) => {
