@@ -380,7 +380,7 @@ export const updateDocument = async <
       id,
       autosave,
       collection: collectionConfig,
-      docWithLocales: result,
+      docWithLocales: resultWithLocales,
       draft: isSavingDraft,
       operation: 'update',
       payload,
