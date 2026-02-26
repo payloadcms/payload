@@ -1,5 +1,7 @@
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { UpdateJobs, Where } from 'payload'
 
+import { and, eq, inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -71,6 +73,34 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const results = []
 
   // TODO: We need to batch this to reduce the amount of db calls. This can get very slow if we are updating a lot of rows.
+  // PostgreSQL MVCC fix: prevent multiple workers from claiming the same jobs
+  // Uses atomic UPDATE ... WHERE processing = false to ensure exclusivity
+  if (this.name === 'postgres' && data.processing === true && !id && jobs.docs.length > 0) {
+    const jobIds = jobs.docs.map((job: any) => job.id)
+    const table = this.tables[tableName]
+    const pgDb = db as NodePgDatabase
+
+    try {
+      // Atomic update with WHERE clause ensures only unclaimed jobs are updated
+      const atomicResults = await pgDb
+        .update(table)
+        .set(data)
+        .where(and(inArray(table.id, jobIds), eq(table.processing, false)))
+        .returning()
+
+      if (atomicResults && atomicResults.length > 0) {
+        // Preserve original ordering
+        const resultMap = new Map(atomicResults.map((r: any) => [r.id, r]))
+        const orderedResults = jobIds.map((id: any) => resultMap.get(id)).filter(Boolean)
+        return orderedResults
+      }
+      return []
+    } catch (_error) {
+      // Fall back to original logic
+    }
+  }
+
+  // Original logic for non-PostgreSQL or non-processing updates
   for (const job of jobs.docs) {
     const updateData = useOptimizedUpsertRow
       ? data
