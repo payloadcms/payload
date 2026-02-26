@@ -1,14 +1,20 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type {
+  LanguageOptions,
+  RscAdminConfig,
+  SanitizedConfig,
+  ServerFunctionClient,
+} from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
-import { applyLocaleFiltering } from 'payload/shared'
+import { applyLocaleFiltering, getRscSchemaPaths } from 'payload/shared'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { getAdminConfig, setAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -25,16 +31,20 @@ export const RootLayout = async ({
   children,
   config: configPromise,
   htmlProps = {},
-  importMap,
+  rscAdminConfig,
   serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
-  readonly importMap: ImportMap
+  readonly rscAdminConfig?: RscAdminConfig
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
+
+  if (rscAdminConfig) {
+    setAdminConfig(rscAdminConfig)
+  }
 
   const {
     cookies,
@@ -45,7 +55,7 @@ export const RootLayout = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
+  } = await initReq({ configPromise, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,
@@ -85,11 +95,13 @@ export const RootLayout = async ({
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
-    importMap,
     user: req.user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
+
+  const adminConfigProviders = getAdminConfig().admin?.providers
+  const providers = adminConfigProviders || config.admin?.components?.providers
 
   return (
     <html
@@ -112,6 +124,7 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
+          rscSchemaPaths={rscAdminConfig ? getRscSchemaPaths(rscAdminConfig) : undefined}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
@@ -119,11 +132,9 @@ export const RootLayout = async ({
           user={req.user}
         >
           <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
+          {Array.isArray(providers) && providers.length > 0 ? (
             <NestProviders
-              importMap={req.payload.importMap}
-              providers={config.admin?.components?.providers}
+              providers={providers}
               serverProps={{
                 i18n: req.i18n,
                 payload: req.payload,

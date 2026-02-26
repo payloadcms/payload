@@ -4,15 +4,6 @@ import { listDrawerSlug } from '../slugs.js'
 
 export const ListDrawer: CollectionConfig = {
   slug: listDrawerSlug,
-  admin: {
-    components: {
-      beforeListTable: [
-        {
-          path: '/components/BeforeList/index.js#SelectPostsButton',
-        },
-      ],
-    },
-  },
   fields: [
     {
       name: 'title',

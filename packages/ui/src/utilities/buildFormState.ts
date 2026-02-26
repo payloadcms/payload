@@ -141,7 +141,6 @@ export const buildFormState = async (
     config: getClientConfig({
       config,
       i18n,
-      importMap: req.payload.importMap,
       user: skipClientConfigAuth ? true : req.user,
     }),
     globalSlug,

@@ -1,5 +1,6 @@
 import type { DocumentTabConfig, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
+import { getAdminConfig } from '../../../../utilities/adminConfigCache.js'
 import { VersionsPill } from './VersionsPill/index.js'
 
 export const documentViewKeys = ['api', 'default', 'livePreview', 'versions']
@@ -13,7 +14,15 @@ export const getTabs = ({
   collectionConfig?: SanitizedCollectionConfig
   globalConfig?: SanitizedGlobalConfig
 }): { tab: DocumentTabConfig; viewPath: string }[] => {
+  const adminConfig = getAdminConfig()
+  const slug = collectionConfig?.slug ?? globalConfig?.slug
+  const adminEntityViews = slug
+    ? ((collectionConfig ? adminConfig.collections?.[slug] : adminConfig.globals?.[slug]) as any)
+        ?.views?.edit
+    : undefined
+
   const customViews =
+    adminEntityViews ||
     collectionConfig?.admin?.components?.views?.edit ||
     globalConfig?.admin?.components?.views?.edit ||
     {}
@@ -58,7 +67,7 @@ export const getTabs = ({
     },
   ]
     .concat(
-      Object.entries(customViews).reduce((acc, [key, value]) => {
+      Object.entries(customViews).reduce((acc, [key, value]: [string, any]) => {
         if (documentViewKeys.includes(key)) {
           return acc
         }

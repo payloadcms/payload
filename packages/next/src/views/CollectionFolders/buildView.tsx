@@ -199,7 +199,6 @@ export const buildCollectionFolderView = async (
             } satisfies FolderListViewClientProps,
             // Component: collectionConfig?.admin?.components?.views?.Folders?.Component,
             Fallback: DefaultCollectionFolderView,
-            importMap: payload.importMap,
             serverProps,
           })}
         </>

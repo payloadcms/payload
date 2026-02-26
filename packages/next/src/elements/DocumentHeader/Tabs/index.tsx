@@ -52,7 +52,6 @@ export const DocumentTabs: React.FC<{
                     path: viewPath,
                   } satisfies DocumentTabClientProps,
                   Component: tabConfig.Component,
-                  importMap: req.payload.importMap,
                   key: `tab-${index}`,
                   serverProps: {
                     collectionConfig,

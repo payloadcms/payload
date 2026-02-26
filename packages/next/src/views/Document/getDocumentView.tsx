@@ -10,6 +10,7 @@ import type React from 'react'
 
 import type { ViewToRender } from './index.js'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { APIView as DefaultAPIView } from '../API/index.js'
 import { EditView as DefaultEditView } from '../Edit/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
@@ -47,7 +48,15 @@ export const getDocumentView = ({
     routes: { admin: adminRoute },
   } = config
 
+  const adminConfig = getAdminConfig()
+  const slug = collectionConfig?.slug ?? globalConfig?.slug
+  const adminEntityViews = slug
+    ? ((collectionConfig ? adminConfig.collections?.[slug] : adminConfig.globals?.[slug]) as any)
+        ?.views
+    : undefined
+
   const views =
+    adminEntityViews ||
     (collectionConfig && collectionConfig?.admin?.components?.views) ||
     (globalConfig && globalConfig?.admin?.components?.views)
 

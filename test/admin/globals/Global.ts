@@ -5,23 +5,6 @@ import { globalSlug } from '../slugs.js'
 export const Global: GlobalConfig = {
   slug: globalSlug,
   admin: {
-    components: {
-      elements: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-        ],
-      },
-      views: {
-        edit: {
-          api: {
-            actions: ['/components/actions/GlobalAPIButton/index.js#GlobalAPIButton'],
-          },
-          default: {
-            actions: ['/components/actions/GlobalEditButton/index.js#GlobalEditButton'],
-          },
-        },
-      },
-    },
     group: 'Group',
     preview: () => 'https://payloadcms.com',
   },

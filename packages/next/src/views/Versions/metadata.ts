@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { generateMetadata } from '../../utilities/meta.js'
 
 /**
@@ -30,9 +31,13 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
 
   const data: any = {} // TODO: figure this out
 
+  const adminConfig = getAdminConfig()
+
   if (collectionConfig) {
     const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
     const titleFromData = data?.[useAsTitle]
+    const adminVersionsMeta = (adminConfig.collections?.[collectionConfig.slug] as any)?.views?.edit
+      ?.versions?.meta
 
     metaToUse = {
       ...(config.admin.meta || {}),
@@ -42,17 +47,24 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
       }),
       title: `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
       ...(collectionConfig?.admin.meta || {}),
-      ...(collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
+      ...(adminVersionsMeta ||
+        collectionConfig?.admin?.components?.views?.edit?.versions?.meta ||
+        {}),
     }
   }
 
   if (globalConfig) {
+    const adminVersionsMeta = (adminConfig.globals?.[globalConfig.slug] as any)?.views?.edit
+      ?.versions?.meta
+
     metaToUse = {
       ...(config.admin.meta || {}),
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
       ...((globalConfig?.admin.meta || {}) as MetaConfig),
-      ...((globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}) as MetaConfig),
+      ...((adminVersionsMeta ||
+        globalConfig?.admin?.components?.views?.edit?.versions?.meta ||
+        {}) as MetaConfig),
     }
   }
 

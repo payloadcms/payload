@@ -37,7 +37,13 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type { FieldState } from './admin/forms/Form.js'
+export {
+  defineClientConfig,
+  defineRscConfig,
+  defineSharedConfig,
+  getRscSchemaPaths,
+  mergeSharedIntoClientConfig,
+} from './admin/buildClientConfig.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -119,6 +125,28 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type {
+  AdminComponentsConfig,
+  ArrayFieldComponents,
+  BaseFieldComponents,
+  BlockFieldComponents,
+  BlocksFieldComponents,
+  ClientAdminConfig,
+  ClientFieldConfig,
+  ClientFieldConfigFor,
+  CollectionComponentsConfig,
+  FieldComponentConfig,
+  FieldComponentConfigFor,
+  GlobalComponentsConfig,
+  InputFieldComponents,
+  RscAdminConfig,
+  RscFieldConfig,
+  RscFieldConfigFor,
+  SharedAdminConfig,
+  SharedFieldConfig,
+  UIFieldComponents,
+} from './admin/buildClientConfig.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
@@ -134,7 +162,6 @@ import { decrypt, encrypt } from './auth/crypto.js'
 import { authLocal } from './auth/operations/local/auth.js'
 import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
-import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import {
   countVersionsLocal,
@@ -189,6 +216,7 @@ export interface PayloadTypesShape {
   globalsSelect: Record<string, unknown>
   jobs: unknown
   locale: unknown
+  schemaPathMap: Record<string, string>
   user: unknown
   widgets?: Record<string, unknown>
 }
@@ -254,6 +282,7 @@ export interface UntypedPayloadTypes {
     }
   }
   locale: null | string
+  schemaPathMap: Record<string, string>
   user: UntypedUser
   widgets: {
     [slug: string]: JsonObject
@@ -265,6 +294,8 @@ export interface UntypedPayloadTypes {
  * When augmented, its properties take precedence over UntypedPayloadTypes.
  */
 export interface GeneratedTypes {}
+
+export type TypedSchemaPathMap<T extends PayloadTypesShape = PayloadTypes> = T['schemaPathMap']
 
 /**
  * Check if GeneratedTypes has been augmented (has any keys).
@@ -607,8 +638,6 @@ export class BasePayload {
 
   globals!: Globals
 
-  importMap!: ImportMap
-
   jobs = getJobsLocalAPI(this)
 
   /**
@@ -807,8 +836,6 @@ export class BasePayload {
       checkedDependencies = true
       void checkPayloadDependencies()
     }
-
-    this.importMap = options.importMap!
 
     if (!options?.config) {
       throw new Error('Error: the payload config is required to initialize payload.')
@@ -1017,7 +1044,6 @@ export default initialized
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
-  skipImportMapGeneration?: boolean,
   options?: InitOptions,
 ): Promise<void> => {
   if (typeof payload.db.destroy === 'function') {
@@ -1058,17 +1084,6 @@ export const reload = async (
     void payload.bin({
       args: ['generate:types'],
       log: false,
-    })
-  }
-
-  // Generate import map
-  if (skipImportMapGeneration !== true && config.admin?.importMap?.autoGenerate !== false) {
-    // This may run outside of the admin panel, e.g. in the user's frontend, where we don't have an import map file.
-    // We don't want to throw an error in this case, as it would break the user's frontend.
-    // => just skip it => ignoreResolveError: true
-    await generateImportMap(config, {
-      ignoreResolveError: true,
-      log: true,
     })
   }
 
@@ -1164,17 +1179,7 @@ export const getPayload = async (
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
 
-      // Reload the payload instance after a config change (triggered by HMR in development).
-      // The second parameter (false) forces import map regeneration rather than deciding based on options.importMap.
-      //
-      // Why we always regenerate import map: getPayload() may be called from multiple sources (admin panel, frontend, etc.)
-      // that share the same cache but may pass different importMap values. Since call order is unpredictable,
-      // we cannot rely on options.importMap to determine if regeneration is needed.
-      //
-      // Example scenario: If the frontend calls getPayload() without importMap first, followed by the admin
-      // panel calling it with importMap, we'd incorrectly skip generation for the admin panel's needs.
-      // By always regenerating on reload, we ensure the import map stays in sync with the updated config.
-      await reload(config, cached.payload, false, options)
+      await reload(config, cached.payload, options)
 
       resolve()
       cached.reload = false
@@ -1182,9 +1187,6 @@ export const getPayload = async (
 
     if (cached.reload instanceof Promise) {
       await cached.reload
-    }
-    if (options?.importMap) {
-      cached.payload.importMap = options.importMap
     }
     return cached.payload
   }
@@ -1253,10 +1255,6 @@ export const getPayload = async (
     throw e
   }
 
-  if (options?.importMap) {
-    cached.payload.importMap = options.importMap
-  }
-
   return cached.payload
 }
 
@@ -1306,10 +1304,6 @@ export type {
   UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
-export { generateImportMap } from './bin/generateImportMap/index.js'
-
-export type { ImportMap } from './bin/generateImportMap/index.js'
-export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
 
 export {

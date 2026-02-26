@@ -9,7 +9,7 @@ type CustomContext = {
 
 const Context = createContext({} as CustomContext)
 
-export const CustomProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CustomProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [getCustom, setCustom] = useState({})
 
   const value = {

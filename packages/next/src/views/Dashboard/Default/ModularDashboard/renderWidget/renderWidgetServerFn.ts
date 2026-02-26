@@ -33,7 +33,6 @@ export const renderWidgetHandler: ServerFunction<
   }
 
   const { widgets } = req.payload.config.admin.dashboard
-  const { importMap } = req.payload
 
   // Find the widget configuration
   const widgetConfig = widgets.find((widget) => widget.slug === widgetSlug)
@@ -74,7 +73,6 @@ export const renderWidgetHandler: ServerFunction<
     // Render the widget server component
     const component = RenderServerComponent({
       Component: widgetConfig.ComponentPath,
-      importMap,
       serverProps,
     })
 

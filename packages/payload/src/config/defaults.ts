@@ -15,9 +15,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     custom: {},
     dateFormat: 'MMMM do yyyy, h:mm a',
     dependencies: {},
-    importMap: {
-      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
-    },
     meta: {
       defaultOGImageType: 'dynamic',
       robots: 'noindex, nofollow',
@@ -92,10 +89,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
     dependencies: {},
     theme: 'all',
     ...(config.admin || {}),
-    importMap: {
-      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
-      ...(config?.admin?.importMap || {}),
-    },
     meta: {
       defaultOGImageType: 'dynamic',
       robots: 'noindex, nofollow',

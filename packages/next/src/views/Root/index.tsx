@@ -4,7 +4,6 @@ import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
-  ImportMap,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -38,12 +37,10 @@ export type GenerateViewMetadata = (args: {
 
 export const RootPage = async ({
   config: configPromise,
-  importMap,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: {
   readonly config: Promise<SanitizedConfig>
-  readonly importMap: ImportMap
   readonly params: Promise<{
     segments: string[]
   }>
@@ -128,7 +125,6 @@ export const RootPage = async ({
     req: { payload },
   } = await initReq({
     configPromise: config,
-    importMap,
     key: 'initPage',
     overrides: {
       fallbackLocale: false,
@@ -247,7 +243,6 @@ export const RootPage = async ({
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
-    importMap,
     user: viewType === 'createFirstUser' ? true : req.user,
   })
 
@@ -287,7 +282,6 @@ export const RootPage = async ({
     } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
-    importMap,
     serverProps: {
       clientConfig,
       collectionConfig,
@@ -295,7 +289,6 @@ export const RootPage = async ({
       folderID,
       globalConfig,
       i18n: req.i18n,
-      importMap,
       initPageResult: {
         collectionConfig,
         cookies,

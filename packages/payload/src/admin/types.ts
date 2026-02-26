@@ -1,7 +1,6 @@
 import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type React from 'react'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { TypeWithID } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type {
@@ -530,7 +529,6 @@ export type RenderConfigArgs = {
   action: Action.RenderConfig
   config: Promise<SanitizedConfig> | SanitizedConfig
   i18n: I18nClient
-  importMap: ImportMap
   languageCode: AcceptedLanguages
   serverProps?: any
 } & (RenderEntityConfigArgs | RenderFieldConfigArgs | RenderRootConfigArgs)

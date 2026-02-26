@@ -18,6 +18,8 @@ import type {
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
+
 type Args = {
   clientProps: ListViewSlotSharedClientProps
   collectionConfig: SanitizedCollectionConfig
@@ -35,62 +37,76 @@ export const renderFolderViewSlots = ({
 }: Args): FolderListViewSlots => {
   const result: FolderListViewSlots = {} as FolderListViewSlots
 
-  if (collectionConfig.admin.components?.afterList) {
+  const adminConfig = getAdminConfig()
+  const adminCollectionComponents = adminConfig.collections?.[collectionConfig.slug] as any
+
+  const afterList =
+    adminCollectionComponents?.afterList || collectionConfig.admin.components?.afterList
+
+  if (afterList) {
     result.AfterFolderList = RenderServerComponent({
       clientProps: clientProps satisfies AfterFolderListClientProps,
-      Component: collectionConfig.admin.components.afterList,
-      importMap: payload.importMap,
+      Component: afterList,
       serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
 
-  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+  const listMenuItems =
+    adminCollectionComponents?.listMenuItems || collectionConfig.admin.components?.listMenuItems
+
   if (Array.isArray(listMenuItems)) {
     result.listMenuItems = [
       RenderServerComponent({
         clientProps,
         Component: listMenuItems,
-        importMap: payload.importMap,
         serverProps,
       }),
     ]
   }
 
-  if (collectionConfig.admin.components?.afterListTable) {
+  const afterListTable =
+    adminCollectionComponents?.afterListTable || collectionConfig.admin.components?.afterListTable
+
+  if (afterListTable) {
     result.AfterFolderListTable = RenderServerComponent({
       clientProps: clientProps satisfies AfterFolderListTableClientProps,
-      Component: collectionConfig.admin.components.afterListTable,
-      importMap: payload.importMap,
+      Component: afterListTable,
       serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
 
-  if (collectionConfig.admin.components?.beforeList) {
+  const beforeList =
+    adminCollectionComponents?.beforeList || collectionConfig.admin.components?.beforeList
+
+  if (beforeList) {
     result.BeforeFolderList = RenderServerComponent({
       clientProps: clientProps satisfies BeforeFolderListClientProps,
-      Component: collectionConfig.admin.components.beforeList,
-      importMap: payload.importMap,
+      Component: beforeList,
       serverProps: serverProps satisfies BeforeFolderListServerPropsOnly,
     })
   }
 
-  if (collectionConfig.admin.components?.beforeListTable) {
+  const beforeListTable =
+    adminCollectionComponents?.beforeListTable || collectionConfig.admin.components?.beforeListTable
+
+  if (beforeListTable) {
     result.BeforeFolderListTable = RenderServerComponent({
       clientProps: clientProps satisfies BeforeFolderListTableClientProps,
-      Component: collectionConfig.admin.components.beforeListTable,
-      importMap: payload.importMap,
+      Component: beforeListTable,
       serverProps: serverProps satisfies BeforeFolderListTableServerPropsOnly,
     })
   }
 
-  if (collectionConfig.admin.components?.Description) {
+  const Description =
+    adminCollectionComponents?.Description || collectionConfig.admin.components?.Description
+
+  if (Description) {
     result.Description = RenderServerComponent({
       clientProps: {
         collectionSlug: collectionConfig.slug,
         description,
       } satisfies ViewDescriptionClientProps,
-      Component: collectionConfig.admin.components.Description,
-      importMap: payload.importMap,
+      Component: Description,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }

@@ -76,7 +76,6 @@ export const DefaultDocumentTab: React.FC<{
             {RenderServerComponent({
               Component: Pill,
               Fallback: Pill_Component,
-              importMap: req.payload.importMap,
               serverProps: {
                 i18n: req.i18n,
                 payload: req.payload,

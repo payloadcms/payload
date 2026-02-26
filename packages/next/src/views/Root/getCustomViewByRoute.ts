@@ -1,7 +1,9 @@
-import type { AdminViewConfig, SanitizedConfig } from 'payload'
+import type { AdminViewConfig, AdminViewServerProps, SanitizedConfig } from 'payload'
+import type React from 'react'
 
 import type { ViewFromConfig } from './getRouteData.js'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 export const getCustomViewByRoute = ({
@@ -16,11 +18,11 @@ export const getCustomViewByRoute = ({
   viewKey: string
 } => {
   const {
-    admin: {
-      components: { views },
-    },
     routes: { admin: adminRoute },
   } = config
+
+  const adminConfig = getAdminConfig()
+  const views = adminConfig.admin?.views ?? config.admin?.components?.views
 
   let viewKey: string
 
@@ -57,11 +59,23 @@ export const getCustomViewByRoute = ({
     }
   }
 
+  const Component = foundViewConfig.Component
+
+  if (Component && typeof Component === 'function') {
+    return {
+      view: {
+        Component: Component as React.FC<AdminViewServerProps>,
+      },
+      viewConfig: foundViewConfig as AdminViewConfig,
+      viewKey,
+    }
+  }
+
   return {
     view: {
-      payloadComponent: foundViewConfig.Component,
+      payloadComponent: Component,
     },
-    viewConfig: foundViewConfig,
+    viewConfig: foundViewConfig as AdminViewConfig,
     viewKey,
   }
 }

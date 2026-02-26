@@ -556,7 +556,6 @@ const buildVersionField = ({
     clientProps: clientDiffProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,
-    importMap: req.payload.importMap,
     key: 'diff component',
     serverProps: serverDiffProps,
   })

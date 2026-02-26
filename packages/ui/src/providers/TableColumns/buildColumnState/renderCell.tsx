@@ -180,7 +180,6 @@ export function renderCell({
     CustomCell = RenderServerComponent({
       clientProps: cellClientProps,
       Component: serverField.editor.CellComponent,
-      importMap: payload.importMap,
       serverProps: cellServerProps,
     })
   } else {
@@ -190,7 +189,6 @@ export function renderCell({
       CustomCell = RenderServerComponent({
         clientProps: cellClientProps,
         Component: CustomCellComponent,
-        importMap: payload.importMap,
         serverProps: cellServerProps,
       })
     } else if (
@@ -201,7 +199,6 @@ export function renderCell({
       CustomCell = RenderServerComponent({
         clientProps: cellClientProps,
         Component: DefaultCell,
-        importMap: payload.importMap,
       })
     } else {
       const CustomCellComponent = serverField?.admin?.components?.Cell
@@ -210,7 +207,6 @@ export function renderCell({
         CustomCell = RenderServerComponent({
           clientProps: cellClientProps,
           Component: CustomCellComponent,
-          importMap: payload.importMap,
           serverProps: cellServerProps,
         })
       } else {

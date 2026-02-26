@@ -20,55 +20,6 @@ export const Posts: CollectionConfig = {
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
-    components: {
-      beforeListTable: [
-        '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'BeforeListTable custom component',
-          },
-        },
-      ],
-      Description: {
-        path: '/components/ViewDescription/index.js#ViewDescription',
-      },
-      afterListTable: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'AfterListTable custom component',
-          },
-        },
-      ],
-      listMenuItems: [
-        {
-          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
-        },
-      ],
-      afterList: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'AfterList custom component',
-          },
-        },
-      ],
-      beforeList: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'BeforeList custom component',
-          },
-        },
-      ],
-      edit: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
-        ],
-      },
-    },
     pagination: {
       defaultLimit: 5,
       limits: [5, 10, 15],
@@ -113,12 +64,6 @@ export const Posts: CollectionConfig = {
             {
               name: 'demoUIField',
               type: 'ui',
-              admin: {
-                components: {
-                  Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
-                  Field: '/components/DemoUIField/Field.js#DemoUIField',
-                },
-              },
               label: 'Demo UI Field',
             },
           ],
@@ -163,11 +108,6 @@ export const Posts: CollectionConfig = {
     {
       name: 'groupWithCustomCell',
       type: 'group',
-      admin: {
-        components: {
-          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
-        },
-      },
       fields: [
         {
           name: 'nestedTextFieldInGroupWithCustomCell',
@@ -217,11 +157,6 @@ export const Posts: CollectionConfig = {
     {
       name: 'customCell',
       type: 'text',
-      admin: {
-        components: {
-          Cell: '/components/CustomCell/index.js#CustomCell',
-        },
-      },
     },
     {
       name: 'upload',

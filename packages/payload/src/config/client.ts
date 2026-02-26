@@ -1,7 +1,6 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
@@ -105,7 +104,6 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
 export type CreateClientConfigArgs = {
   config: SanitizedConfig
   i18n: I18nClient
-  importMap: ImportMap
   /**
    * If unauthenticated, the client config will omit some sensitive properties
    * such as field schemas, etc. This is useful for login and error pages where
@@ -151,11 +149,7 @@ export const createUnauthenticatedClientConfig = ({
   }
 }
 
-export const createClientConfig = ({
-  config,
-  i18n,
-  importMap,
-}: CreateClientConfigArgs): ClientConfig => {
+export const createClientConfig = ({ config, i18n }: CreateClientConfigArgs): ClientConfig => {
   const clientConfig = {} as DeepPartial<ClientConfig>
 
   for (const key in config) {
@@ -171,7 +165,6 @@ export const createClientConfig = ({
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
-          importMap: config.admin.importMap,
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
@@ -192,7 +185,6 @@ export const createClientConfig = ({
                         defaultIDType: config.db.defaultIDType,
                         fields,
                         i18n,
-                        importMap,
                       }),
                     }
                   : {}),
@@ -227,7 +219,6 @@ export const createClientConfig = ({
           blocks: config.blocks!,
           defaultIDType: config.db.defaultIDType,
           i18n,
-          importMap,
         }).filter((block) => typeof block !== 'string') as ClientBlock[]
 
         clientConfig.blocksMap = {}
@@ -249,7 +240,6 @@ export const createClientConfig = ({
           collections: config.collections,
           defaultIDType: config.db.defaultIDType,
           i18n,
-          importMap,
         })
 
         break
@@ -271,7 +261,6 @@ export const createClientConfig = ({
           defaultIDType: config.db.defaultIDType,
           globals: config.globals,
           i18n,
-          importMap,
         })
 
         break

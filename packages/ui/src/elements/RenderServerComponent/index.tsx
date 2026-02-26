@@ -1,6 +1,6 @@
-import type { ImportMap, PayloadComponent } from 'payload'
+import type { PayloadComponent } from 'payload'
 
-import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
+import { isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
 import { removeUndefined } from '../../utilities/removeUndefined.js'
@@ -13,7 +13,6 @@ type RenderServerComponentFn = (args: {
     | React.ComponentType
     | React.ComponentType[]
   readonly Fallback?: React.ComponentType
-  readonly importMap: ImportMap
   readonly key?: string
   readonly serverProps?: object
 }) => React.ReactNode
@@ -25,7 +24,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
   clientProps = {},
   Component,
   Fallback,
-  importMap,
   key,
   serverProps,
 }) => {
@@ -34,7 +32,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
       RenderServerComponent({
         clientProps,
         Component: c,
-        importMap,
         key: index,
         serverProps,
       }),
@@ -54,34 +51,21 @@ export const RenderServerComponent: RenderServerComponentFn = ({
   }
 
   if (typeof Component === 'string' || isPlainObject(Component)) {
-    const ResolvedComponent = getFromImportMap<React.ComponentType>({
-      importMap,
-      PayloadComponent: Component,
-      schemaPath: '',
-    })
-
-    if (ResolvedComponent) {
-      const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
-
-      // prevent $undefined from being passed through rsc requests
-      const sanitizedProps = removeUndefined({
-        ...clientProps,
-        ...(isRSC ? serverProps : {}),
-        ...(isRSC && typeof Component === 'object' && Component?.serverProps
-          ? Component.serverProps
-          : {}),
-        ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
-      })
-
-      return <ResolvedComponent key={key} {...sanitizedProps} />
-    }
+    // String-based component resolution is no longer supported
+    return Fallback
+      ? RenderServerComponent({
+          clientProps,
+          Component: Fallback,
+          key,
+          serverProps,
+        })
+      : null
   }
 
   return Fallback
     ? RenderServerComponent({
         clientProps,
         Component: Fallback,
-        importMap,
         key,
         serverProps,
       })

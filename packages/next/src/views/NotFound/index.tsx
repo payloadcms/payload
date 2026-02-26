@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
+import type { AdminViewServerProps, SanitizedConfig } from 'payload'
 
 import { getVisibleEntities } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
@@ -30,12 +30,10 @@ export const generateNotFoundViewMetadata = async ({
 
 export const NotFoundPage = async ({
   config: configPromise,
-  importMap,
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: {
   config: Promise<SanitizedConfig>
-  importMap: ImportMap
   params: Promise<{
     segments: string[]
   }>
@@ -56,7 +54,6 @@ export const NotFoundPage = async ({
     req: { payload },
   } = await initReq({
     configPromise: config,
-    importMap,
     key: 'RootLayout',
     overrides: {
       fallbackLocale: false,

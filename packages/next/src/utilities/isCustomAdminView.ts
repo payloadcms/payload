@@ -1,10 +1,8 @@
 import type { SanitizedConfig } from 'payload'
 
+import { getAdminConfig } from './adminConfigCache.js'
 import { getRouteWithoutAdmin } from './getRouteWithoutAdmin.js'
 
-/**
- * Returns an array of views marked with 'public: true' in the config
- */
 export const isCustomAdminView = ({
   adminRoute,
   config,
@@ -14,8 +12,11 @@ export const isCustomAdminView = ({
   config: SanitizedConfig
   route: string
 }): boolean => {
-  if (config.admin?.components?.views) {
-    const isPublicAdminRoute = Object.entries(config.admin.components.views).some(([_, view]) => {
+  const adminConfig = getAdminConfig()
+  const views = adminConfig.admin?.views ?? config.admin?.components?.views
+
+  if (views) {
+    const isPublicAdminRoute = Object.entries(views).some(([_, view]) => {
       const routeWithoutAdmin = getRouteWithoutAdmin({ adminRoute, route })
 
       if (view.exact) {

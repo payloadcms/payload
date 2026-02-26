@@ -6,11 +6,6 @@ export const CustomListDrawer: CollectionConfig = {
     {
       name: 'customListDrawer',
       type: 'ui',
-      admin: {
-        components: {
-          Field: '/collections/CustomListDrawer/Component.js#CustomListDrawer',
-        },
-      },
     },
   ],
 }

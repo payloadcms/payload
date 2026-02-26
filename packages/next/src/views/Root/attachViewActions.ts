@@ -20,20 +20,24 @@ export function getViewActions({
 }
 
 export function getSubViewActions({
+  adminEditConfig,
   collectionOrGlobal,
   viewKeyArg,
 }: {
+  adminEditConfig?: EditConfig
   collectionOrGlobal: SanitizedCollectionConfig | SanitizedGlobalConfig
   viewKeyArg?: keyof EditConfig
 }): CustomComponent[] {
-  if (collectionOrGlobal?.admin?.components?.views?.edit) {
+  const editConfig = adminEditConfig || collectionOrGlobal?.admin?.components?.views?.edit
+
+  if (editConfig) {
     let viewKey = viewKeyArg || 'default'
-    if ('root' in collectionOrGlobal.admin.components.views.edit) {
+    if ('root' in editConfig) {
       viewKey = 'root'
     }
 
     const actions = getViewActions({
-      editConfig: collectionOrGlobal.admin?.components?.views?.edit,
+      editConfig,
       viewKey,
     })
 

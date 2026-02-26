@@ -1,7 +1,6 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
 import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
-import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
@@ -11,14 +10,16 @@ import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
+import { setAdminConfig } from './adminConfigCache.js'
 import { initReq } from './initReq.js'
+import { renderAdminRscHandler } from './renderAdminRsc.js'
 import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
+  'render-admin-rsc': renderAdminRscHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
@@ -32,22 +33,25 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const {
     name: fnKey,
+    adminConfig,
     args: fnArgs,
     config: configPromise,
-    importMap,
     serverFunctions: extraServerFunctions,
   } = args
 
+  if (adminConfig) {
+    setAdminConfig(adminConfig)
+  }
+
   const { cookies, locale, permissions, req } = await initReq({
     configPromise,
-    importMap,
     key: 'RootLayout',
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {
     ...fnArgs,
+    adminConfig,
     cookies,
-    importMap,
     locale,
     permissions,
     req,

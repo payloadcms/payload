@@ -6,6 +6,7 @@ import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
 export const loginBaseClass = 'login'
@@ -21,9 +22,13 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
   } = req
 
   const {
-    admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
+    admin: { user: userSlug },
     routes: { admin },
   } = config
+
+  const adminConfig = getAdminConfig()
+  const beforeLogin = adminConfig.admin?.beforeLogin as any
+  const afterLogin = adminConfig.admin?.afterLogin as any
 
   const redirectUrl = getSafeRedirect({ fallbackTo: admin, redirectTo: searchParams.redirect })
 
@@ -66,7 +71,6 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
       </div>
       {RenderServerComponent({
         Component: beforeLogin,
-        importMap: payload.importMap,
         serverProps: {
           i18n,
           locale,
@@ -87,7 +91,6 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
       )}
       {RenderServerComponent({
         Component: afterLogin,
-        importMap: payload.importMap,
         serverProps: {
           i18n,
           locale,

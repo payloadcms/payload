@@ -17,7 +17,6 @@ type ServerLayout = WidgetInstanceClient[]
 
 export async function ModularDashboard(props: DashboardViewServerProps) {
   const { defaultLayout = [], widgets = [] } = props.payload.config.admin.dashboard || {}
-  const { importMap } = props.payload
   const { user } = props
   const { cookies, locale, permissions, req } = props.initPageResult
   const { i18n } = req
@@ -36,7 +35,6 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
     return {
       component: RenderServerComponent({
         Component: widgetConfig?.ComponentPath,
-        importMap,
         serverProps: {
           cookies,
           locale,

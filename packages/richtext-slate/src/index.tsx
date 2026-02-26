@@ -57,60 +57,6 @@ export function slateEditor(
           args,
         },
       },
-      generateImportMap: ({ addToImportMap }) => {
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
-        Object.values(leafTypes).forEach((leaf) => {
-          if (leaf.Button) {
-            addToImportMap(leaf.Button)
-          }
-          if (leaf.Leaf) {
-            addToImportMap(leaf.Leaf)
-          }
-          if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
-            addToImportMap(leaf.plugins)
-          }
-        })
-        args?.admin?.leaves?.forEach((leaf) => {
-          if (typeof leaf === 'object') {
-            if (leaf.Button) {
-              addToImportMap(leaf.Button)
-            }
-            if (leaf.Leaf) {
-              addToImportMap(leaf.Leaf)
-            }
-            if (Array.isArray(leaf.plugins) && leaf.plugins?.length) {
-              addToImportMap(leaf.plugins)
-            }
-          }
-        })
-
-        Object.values(elementTypes).forEach((element) => {
-          if (element.Button) {
-            addToImportMap(element.Button)
-          }
-          if (element.Element) {
-            addToImportMap(element.Element)
-          }
-          if (Array.isArray(element.plugins) && element.plugins?.length) {
-            addToImportMap(element.plugins)
-          }
-        })
-
-        args?.admin?.elements?.forEach((element) => {
-          if (typeof element === 'object') {
-            if (element.Button) {
-              addToImportMap(element.Button)
-            }
-            if (element.Element) {
-              addToImportMap(element.Element)
-            }
-            if (Array.isArray(element.plugins) && element.plugins?.length) {
-              addToImportMap(element.plugins)
-            }
-          }
-        })
-      },
       generateSchemaMap: getGenerateSchemaMap(args),
       graphQLPopulationPromises({
         context,

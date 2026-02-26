@@ -213,7 +213,6 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
         ? RenderServerComponent({
             clientProps,
             Component: CustomLabelToRender,
-            importMap: payload.importMap,
             serverProps: customLabelServerProps,
           })
         : undefined

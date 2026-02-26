@@ -1,6 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/index.js'
@@ -14,6 +13,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
+import type { RscAdminConfig } from '../buildClientConfig.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -27,7 +27,7 @@ export type InitReqResult = {
 }
 
 export type DefaultServerFunctionArgs = {
-  importMap: ImportMap
+  adminConfig?: RscAdminConfig
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {
@@ -54,8 +54,8 @@ export type ServerFunctionConfig = {
 
 export type ServerFunctionHandler = (
   args: {
+    adminConfig?: RscAdminConfig
     config: Promise<SanitizedConfig> | SanitizedConfig
-    importMap: ImportMap
     /**
      * A map of server function names to their implementations. These are
      * registered alongside the base server functions and can be called

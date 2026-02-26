@@ -7,7 +7,6 @@ import '@payloadcms/next/css'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
-import { importMap } from './admin/importMap.js'
 import './custom.scss'
 
 type Args = {
@@ -19,13 +18,25 @@ const serverFunction: ServerFunctionClient = async function (args) {
   return handleServerFunctions({
     ...args,
     config,
-    importMap,
   })
 }
 
 const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+  <RootLayout config={config} serverFunction={serverFunction}>
     {children}
+    <div
+      style={{
+        background: 'red',
+        color: 'white',
+        padding: 10,
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        zIndex: 9999,
+      }}
+    >
+      LAYOUT TEST
+    </div>
   </RootLayout>
 )
 

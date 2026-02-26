@@ -10,9 +10,7 @@ import { getPayload } from 'payload'
  *  ```
  * @deprecated
  */
-export const getPayloadHMR = async (
-  options: Pick<InitOptions, 'config' | 'importMap'>,
-): Promise<Payload> => {
+export const getPayloadHMR = async (options: Pick<InitOptions, 'config'>): Promise<Payload> => {
   const result = await getPayload(options)
 
   result.logger.warn(

@@ -21,6 +21,7 @@ import './index.scss'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -58,16 +59,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   viewType,
   visibleEntities,
 }) => {
-  const {
-    admin: {
-      avatar,
-      components,
-      components: { header: CustomHeader, Nav: CustomNav } = {
-        header: undefined,
-        Nav: undefined,
-      },
-    } = {},
-  } = payload.config || {}
+  const { admin: { avatar } = {} } = payload.config || {}
+
+  const adminConfig = getAdminConfig()
+  const CustomNav = adminConfig.admin?.Nav as any
+  const CustomHeader = adminConfig.admin?.header as any
 
   const clientProps = {
     documentSubViewType,
@@ -103,7 +99,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Actions[key] = RenderServerComponent({
       clientProps,
       Component: action,
-      importMap: payload.importMap,
       serverProps,
     })
   }
@@ -112,7 +107,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     clientProps,
     Component: CustomNav,
     Fallback: DefaultNav,
-    importMap: payload.importMap,
     serverProps,
   })
 
@@ -123,7 +117,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           {RenderServerComponent({
             clientProps,
             Component: CustomHeader,
-            importMap: payload.importMap,
             serverProps,
           })}
           <div style={{ position: 'relative' }}>
@@ -142,16 +135,14 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     avatar !== 'gravatar' && avatar !== 'default'
                       ? RenderServerComponent({
                           Component: avatar.Component,
-                          importMap: payload.importMap,
                           serverProps,
                         })
                       : undefined
                   }
                   CustomIcon={
-                    components?.graphics?.Icon
+                    adminConfig.admin?.graphics?.Icon
                       ? RenderServerComponent({
-                          Component: components.graphics.Icon,
-                          importMap: payload.importMap,
+                          Component: adminConfig.admin.graphics.Icon as any,
                           serverProps,
                         })
                       : undefined

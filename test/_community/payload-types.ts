@@ -61,7 +61,106 @@ export type SupportedTimezones =
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
 
+
+export interface SchemaPathMap {
+  'media': 'entity'
+  'media.createdAt': 'date'
+  'media.filename': 'text'
+  'media.filesize': 'number'
+  'media.focalX': 'number'
+  'media.focalY': 'number'
+  'media.height': 'number'
+  'media.mimeType': 'text'
+  'media.sizes': 'group'
+  'media.sizes.large': 'group'
+  'media.sizes.large.filename': 'text'
+  'media.sizes.large.filesize': 'number'
+  'media.sizes.large.height': 'number'
+  'media.sizes.large.mimeType': 'text'
+  'media.sizes.large.url': 'text'
+  'media.sizes.large.width': 'number'
+  'media.sizes.medium': 'group'
+  'media.sizes.medium.filename': 'text'
+  'media.sizes.medium.filesize': 'number'
+  'media.sizes.medium.height': 'number'
+  'media.sizes.medium.mimeType': 'text'
+  'media.sizes.medium.url': 'text'
+  'media.sizes.medium.width': 'number'
+  'media.sizes.thumbnail': 'group'
+  'media.sizes.thumbnail.filename': 'text'
+  'media.sizes.thumbnail.filesize': 'number'
+  'media.sizes.thumbnail.height': 'number'
+  'media.sizes.thumbnail.mimeType': 'text'
+  'media.sizes.thumbnail.url': 'text'
+  'media.sizes.thumbnail.width': 'number'
+  'media.thumbnailURL': 'text'
+  'media.updatedAt': 'date'
+  'media.url': 'text'
+  'media.width': 'number'
+  'menu': 'entity'
+  'menu.createdAt': 'date'
+  'menu.globalText': 'text'
+  'menu.updatedAt': 'date'
+  'payload-kv': 'entity'
+  'payload-kv.data': 'json'
+  'payload-kv.key': 'text'
+  'payload-locked-documents': 'entity'
+  'payload-locked-documents.createdAt': 'date'
+  'payload-locked-documents.document': 'relationship'
+  'payload-locked-documents.globalSlug': 'text'
+  'payload-locked-documents.updatedAt': 'date'
+  'payload-locked-documents.user': 'relationship'
+  'payload-migrations': 'entity'
+  'payload-migrations.batch': 'number'
+  'payload-migrations.createdAt': 'date'
+  'payload-migrations.name': 'text'
+  'payload-migrations.updatedAt': 'date'
+  'payload-preferences': 'entity'
+  'payload-preferences.createdAt': 'date'
+  'payload-preferences.key': 'text'
+  'payload-preferences.updatedAt': 'date'
+  'payload-preferences.user': 'relationship'
+  'payload-preferences.value': 'json'
+  'posts': 'entity'
+  'posts.content': 'richText'
+  'posts.createdAt': 'date'
+  'posts.layout': 'blocks'
+  'posts.layout.callToAction': 'block'
+  'posts.layout.callToAction.blockName': 'text'
+  'posts.layout.callToAction.id': 'text'
+  'posts.layout.callToAction.label': 'text'
+  'posts.layout.callToAction.url': 'text'
+  'posts.layout.hero': 'block'
+  'posts.layout.hero.blockName': 'text'
+  'posts.layout.hero.heading': 'text'
+  'posts.layout.hero.id': 'text'
+  'posts.layout.hero.subheading': 'textarea'
+  'posts.tags': 'array'
+  'posts.tags.color': 'select'
+  'posts.tags.id': 'text'
+  'posts.tags.label': 'text'
+  'posts.title': 'text'
+  'posts.updatedAt': 'date'
+  'users': 'entity'
+  'users.createdAt': 'date'
+  'users.email': 'email'
+  'users.hash': 'text'
+  'users.lockUntil': 'date'
+  'users.loginAttempts': 'number'
+  'users.resetPasswordExpiration': 'date'
+  'users.resetPasswordToken': 'text'
+  'users.salt': 'text'
+  'users.sessions': 'array'
+  'users.sessions.createdAt': 'date'
+  'users.sessions.expiresAt': 'date'
+  'users.sessions.id': 'text'
+  'users.updatedAt': 'date'
+}
+
+export type SchemaPath = keyof SchemaPathMap;
+
 export interface Config {
+  schemaPathMap: SchemaPathMap;
   auth: {
     users: UserAuthOperations;
   };
@@ -96,6 +195,9 @@ export interface Config {
     menu: MenuSelect<false> | MenuSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -127,6 +229,31 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  tags?:
+    | {
+        label: string;
+        color?: ('red' | 'blue' | 'green') | null;
+        id?: string | null;
+      }[]
+    | null;
+  layout?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            label: string;
+            url?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'callToAction';
+          }
+      )[]
+    | null;
   content?: {
     root: {
       type: string;
@@ -298,6 +425,33 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  tags?:
+    | T
+    | {
+        label?: T;
+        color?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        callToAction?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   content?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -434,6 +588,16 @@ export interface MenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
