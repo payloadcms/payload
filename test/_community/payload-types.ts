@@ -86,7 +86,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -128,7 +128,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
   tags?:
     | {
@@ -178,7 +178,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -222,7 +222,7 @@ export interface Media {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -239,7 +239,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -264,24 +264,24 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -291,10 +291,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -314,7 +314,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -475,7 +475,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: number;
+  id: string;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -508,102 +508,106 @@ export interface Auth {
   [k: string]: unknown;
 }
 
-export type SchemaPath =
-  | 'media'
-  | 'media.createdAt'
-  | 'media.filename'
-  | 'media.filesize'
-  | 'media.focalX'
-  | 'media.focalY'
-  | 'media.height'
-  | 'media.mimeType'
-  | 'media.sizes'
-  | 'media.sizes.large'
-  | 'media.sizes.large.filename'
-  | 'media.sizes.large.filesize'
-  | 'media.sizes.large.height'
-  | 'media.sizes.large.mimeType'
-  | 'media.sizes.large.url'
-  | 'media.sizes.large.width'
-  | 'media.sizes.medium'
-  | 'media.sizes.medium.filename'
-  | 'media.sizes.medium.filesize'
-  | 'media.sizes.medium.height'
-  | 'media.sizes.medium.mimeType'
-  | 'media.sizes.medium.url'
-  | 'media.sizes.medium.width'
-  | 'media.sizes.thumbnail'
-  | 'media.sizes.thumbnail.filename'
-  | 'media.sizes.thumbnail.filesize'
-  | 'media.sizes.thumbnail.height'
-  | 'media.sizes.thumbnail.mimeType'
-  | 'media.sizes.thumbnail.url'
-  | 'media.sizes.thumbnail.width'
-  | 'media.thumbnailURL'
-  | 'media.updatedAt'
-  | 'media.url'
-  | 'media.width'
-  | 'menu'
-  | 'menu.createdAt'
-  | 'menu.globalText'
-  | 'menu.updatedAt'
-  | 'payload-kv'
-  | 'payload-kv.data'
-  | 'payload-kv.key'
-  | 'payload-locked-documents'
-  | 'payload-locked-documents.createdAt'
-  | 'payload-locked-documents.document'
-  | 'payload-locked-documents.globalSlug'
-  | 'payload-locked-documents.updatedAt'
-  | 'payload-locked-documents.user'
-  | 'payload-migrations'
-  | 'payload-migrations.batch'
-  | 'payload-migrations.createdAt'
-  | 'payload-migrations.name'
-  | 'payload-migrations.updatedAt'
-  | 'payload-preferences'
-  | 'payload-preferences.createdAt'
-  | 'payload-preferences.key'
-  | 'payload-preferences.updatedAt'
-  | 'payload-preferences.user'
-  | 'payload-preferences.value'
-  | 'posts'
-  | 'posts.content'
-  | 'posts.createdAt'
-  | 'posts.layout'
-  | 'posts.layout.callToAction'
-  | 'posts.layout.callToAction.blockName'
-  | 'posts.layout.callToAction.id'
-  | 'posts.layout.callToAction.label'
-  | 'posts.layout.callToAction.url'
-  | 'posts.layout.hero'
-  | 'posts.layout.hero.blockName'
-  | 'posts.layout.hero.heading'
-  | 'posts.layout.hero.id'
-  | 'posts.layout.hero.subheading'
-  | 'posts.tags'
-  | 'posts.tags.color'
-  | 'posts.tags.id'
-  | 'posts.tags.label'
-  | 'posts.title'
-  | 'posts.updatedAt'
-  | 'users'
-  | 'users.createdAt'
-  | 'users.email'
-  | 'users.hash'
-  | 'users.lockUntil'
-  | 'users.loginAttempts'
-  | 'users.resetPasswordExpiration'
-  | 'users.resetPasswordToken'
-  | 'users.salt'
-  | 'users.sessions'
-  | 'users.sessions.createdAt'
-  | 'users.sessions.expiresAt'
-  | 'users.sessions.id'
-  | 'users.updatedAt';
+export interface SchemaPathMap {
+  'media': 'entity'
+  'media.createdAt': 'date'
+  'media.filename': 'text'
+  'media.filesize': 'number'
+  'media.focalX': 'number'
+  'media.focalY': 'number'
+  'media.height': 'number'
+  'media.mimeType': 'text'
+  'media.sizes': 'group'
+  'media.sizes.large': 'group'
+  'media.sizes.large.filename': 'text'
+  'media.sizes.large.filesize': 'number'
+  'media.sizes.large.height': 'number'
+  'media.sizes.large.mimeType': 'text'
+  'media.sizes.large.url': 'text'
+  'media.sizes.large.width': 'number'
+  'media.sizes.medium': 'group'
+  'media.sizes.medium.filename': 'text'
+  'media.sizes.medium.filesize': 'number'
+  'media.sizes.medium.height': 'number'
+  'media.sizes.medium.mimeType': 'text'
+  'media.sizes.medium.url': 'text'
+  'media.sizes.medium.width': 'number'
+  'media.sizes.thumbnail': 'group'
+  'media.sizes.thumbnail.filename': 'text'
+  'media.sizes.thumbnail.filesize': 'number'
+  'media.sizes.thumbnail.height': 'number'
+  'media.sizes.thumbnail.mimeType': 'text'
+  'media.sizes.thumbnail.url': 'text'
+  'media.sizes.thumbnail.width': 'number'
+  'media.thumbnailURL': 'text'
+  'media.updatedAt': 'date'
+  'media.url': 'text'
+  'media.width': 'number'
+  'menu': 'entity'
+  'menu.createdAt': 'date'
+  'menu.globalText': 'text'
+  'menu.updatedAt': 'date'
+  'payload-kv': 'entity'
+  'payload-kv.data': 'json'
+  'payload-kv.key': 'text'
+  'payload-locked-documents': 'entity'
+  'payload-locked-documents.createdAt': 'date'
+  'payload-locked-documents.document': 'relationship'
+  'payload-locked-documents.globalSlug': 'text'
+  'payload-locked-documents.updatedAt': 'date'
+  'payload-locked-documents.user': 'relationship'
+  'payload-migrations': 'entity'
+  'payload-migrations.batch': 'number'
+  'payload-migrations.createdAt': 'date'
+  'payload-migrations.name': 'text'
+  'payload-migrations.updatedAt': 'date'
+  'payload-preferences': 'entity'
+  'payload-preferences.createdAt': 'date'
+  'payload-preferences.key': 'text'
+  'payload-preferences.updatedAt': 'date'
+  'payload-preferences.user': 'relationship'
+  'payload-preferences.value': 'json'
+  'posts': 'entity'
+  'posts.content': 'richText'
+  'posts.createdAt': 'date'
+  'posts.layout': 'blocks'
+  'posts.layout.callToAction': 'block'
+  'posts.layout.callToAction.blockName': 'text'
+  'posts.layout.callToAction.id': 'text'
+  'posts.layout.callToAction.label': 'text'
+  'posts.layout.callToAction.url': 'text'
+  'posts.layout.hero': 'block'
+  'posts.layout.hero.blockName': 'text'
+  'posts.layout.hero.heading': 'text'
+  'posts.layout.hero.id': 'text'
+  'posts.layout.hero.subheading': 'textarea'
+  'posts.tags': 'array'
+  'posts.tags.color': 'select'
+  'posts.tags.id': 'text'
+  'posts.tags.label': 'text'
+  'posts.title': 'text'
+  'posts.updatedAt': 'date'
+  'users': 'entity'
+  'users.createdAt': 'date'
+  'users.email': 'email'
+  'users.hash': 'text'
+  'users.lockUntil': 'date'
+  'users.loginAttempts': 'number'
+  'users.resetPasswordExpiration': 'date'
+  'users.resetPasswordToken': 'text'
+  'users.salt': 'text'
+  'users.sessions': 'array'
+  'users.sessions.createdAt': 'date'
+  'users.sessions.expiresAt': 'date'
+  'users.sessions.id': 'text'
+  'users.updatedAt': 'date'
+}
+
+export type SchemaPath = keyof SchemaPathMap;
 
 
 declare module 'payload' {
   // @ts-ignore 
   export interface GeneratedTypes extends Config {}
+  export interface GeneratedSchemaPathMap extends SchemaPathMap {}
 }

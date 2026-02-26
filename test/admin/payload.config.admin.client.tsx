@@ -15,38 +15,37 @@ import { CustomClientLabel } from './collections/CustomFields/fields/Text/LabelC
 import { CustomListDrawer as CustomListDrawerField } from './collections/CustomListDrawer/Component.js'
 import { CustomCell } from './components/CustomCell/index.js'
 import { CustomGroupCell } from './components/CustomGroupCell/index.js'
-import { customFieldsSlug, postsCollectionSlug } from './slugs.js'
 
 export default defineClientConfig({
   fields: {
-    [`${customFieldsSlug}.arrayFieldWithBeforeAfterInputs`]: {
+    'custom-fields.arrayFieldWithBeforeAfterInputs': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
       },
     },
-    [`${customFieldsSlug}.blocksFieldWithBeforeAfterInputs`]: {
+    'custom-fields.blocksFieldWithBeforeAfterInputs': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
       },
     },
-    [`${customFieldsSlug}.customMultiSelectField`]: {
+    'custom-fields.customMultiSelectField': {
       components: {
         Field: CustomMultiSelect,
       },
     },
-    [`${customFieldsSlug}.customSelectField`]: {
+    'custom-fields.customSelectField': {
       components: {
         Field: CustomSelect,
       },
     },
-    [`${customFieldsSlug}.customSelectInput`]: {
+    'custom-fields.customSelectInput': {
       components: {
         Field: CustomInput,
       },
     },
-    [`${customFieldsSlug}.customTextClientField`]: {
+    'custom-fields.customTextClientField': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
@@ -56,49 +55,49 @@ export default defineClientConfig({
         Label: CustomClientLabel,
       },
     },
-    [`${customFieldsSlug}.customTextServerField`]: {
+    'custom-fields.customTextServerField': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
         Error: CustomError,
       },
     },
-    [`${customFieldsSlug}.descriptionAsComponent`]: {
+    'custom-fields.descriptionAsComponent': {
       components: {
         Description: FieldDescriptionComponent,
       },
     },
-    [`${customFieldsSlug}.groupFieldWithBeforeAfterInputs`]: {
+    'custom-fields.groupFieldWithBeforeAfterInputs': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
       },
     },
-    [`${customFieldsSlug}.radioFieldWithBeforeAfterInputs`]: {
+    'custom-fields.radioFieldWithBeforeAfterInputs': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
       },
     },
-    [`${customFieldsSlug}.relationshipFieldWithBeforeAfterInputs`]: {
+    'custom-fields.relationshipFieldWithBeforeAfterInputs': {
       components: {
         AfterInput: [AfterInput],
         BeforeInput: [BeforeInput],
-      },
-    },
-    [`${postsCollectionSlug}.customCell`]: {
-      components: {
-        Cell: CustomCell,
-      },
-    },
-    [`${postsCollectionSlug}.groupWithCustomCell`]: {
-      components: {
-        Cell: CustomGroupCell,
       },
     },
     'custom-list-drawer.customListDrawer': {
       components: {
         Field: CustomListDrawerField,
+      },
+    },
+    'posts.customCell': {
+      components: {
+        Cell: CustomCell,
+      },
+    },
+    'posts.groupWithCustomCell': {
+      components: {
+        Cell: CustomGroupCell,
       },
     },
   },

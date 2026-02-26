@@ -1,22 +1,79 @@
 import type React from 'react'
 
 import type { Condition, Validate } from '../fields/config/types.js'
+import type { CollectionSlug, GlobalSlug, TypedSchemaPathMap } from '../index.js'
 
-// ─── Field-level config ───
+// ─── Component type helpers ───
 
-export type FieldComponentConfig = {
-  AfterInput?: React.ComponentType | React.ComponentType[] | React.ReactNode
-  BeforeInput?: React.ComponentType | React.ComponentType[] | React.ReactNode
-  Cell?: React.ComponentType | React.ReactNode
-  Description?: React.ComponentType | React.ReactNode
-  Error?: React.ComponentType | React.ReactNode
-  Field?: React.ComponentType | React.ReactNode
-  Filter?: React.ComponentType | React.ReactNode
-  Label?: React.ComponentType | React.ReactNode
+type Comp = React.ComponentType<any> | React.ReactNode
+type CompArray = (React.ComponentType<any> | React.ReactNode)[]
+
+// ─── Per-field-type component configs ───
+
+export type BaseFieldComponents = {
+  Description?: Comp
+  Error?: Comp
+  Field?: Comp
+  Label?: Comp
 }
 
+export type InputFieldComponents = {
+  AfterInput?: Comp | CompArray
+  BeforeInput?: Comp | CompArray
+  Filter?: Comp
+} & BaseFieldComponents
+
+export type ArrayFieldComponents = {
+  RowLabel?: Comp
+} & InputFieldComponents
+
+export type BlocksFieldComponents = BaseFieldComponents
+
+export type BlockFieldComponents = {
+  Block?: Comp
+  Label?: Comp
+}
+
+export type UIFieldComponents = {
+  Field?: Comp
+}
+
+// ─── Map field type string to component config ───
+
+export type FieldComponentConfigFor<T extends string> = T extends 'array'
+  ? ArrayFieldComponents
+  : T extends 'blocks'
+    ? BlocksFieldComponents
+    : T extends 'block'
+      ? BlockFieldComponents
+      : T extends 'ui'
+        ? UIFieldComponents
+        : T extends 'entity'
+          ? never
+          : InputFieldComponents
+
+// ─── Per-field-type full config ───
+
+export type ClientFieldConfigFor<T extends string> = T extends 'entity'
+  ? never
+  : {
+      components?: FieldComponentConfigFor<T>
+      condition?: Condition
+      defaultValue?: (() => unknown) | unknown
+      filterOptions?: (options: any) => any
+      validate?: Validate
+    }
+
+export type RscFieldConfigFor<T extends string> = T extends 'entity'
+  ? never
+  : {
+      components?: FieldComponentConfigFor<T>
+    }
+
+// ─── Untyped fallback field configs (for string keys) ───
+
 export type ClientFieldConfig = {
-  components?: FieldComponentConfig
+  components?: ArrayFieldComponents & BlockFieldComponents & InputFieldComponents
   condition?: Condition
   defaultValue?: (() => unknown) | unknown
   filterOptions?: (options: any) => any
@@ -24,13 +81,31 @@ export type ClientFieldConfig = {
 }
 
 export type RscFieldConfig = {
-  components?: FieldComponentConfig
+  components?: ArrayFieldComponents & BlockFieldComponents & InputFieldComponents
+}
+
+// ─── Typed fields mapped type ───
+
+type TypedClientFields<TMap extends Record<string, string>> = {
+  [K in keyof TMap]?: ClientFieldConfigFor<string & TMap[K]>
+}
+
+type TypedRscFields<TMap extends Record<string, string>> = {
+  [K in keyof TMap]?: RscFieldConfigFor<string & TMap[K]>
+}
+
+type TypedSharedFields<TMap extends Record<string, string>> = {
+  [K in keyof TMap]?: TMap[K] extends 'entity'
+    ? never
+    : {
+        validate?: Validate
+      }
 }
 
 // ─── Admin-level config ───
 
 type AdminViewConfig = {
-  Component: React.ComponentType | React.ReactNode
+  Component: React.ComponentType<any> | React.ReactNode
   exact?: boolean
   meta?: { title?: string }
   path: string
@@ -38,96 +113,102 @@ type AdminViewConfig = {
 }
 
 export type AdminComponentsConfig = {
-  actions?: (React.ComponentType | React.ReactNode)[]
-  afterDashboard?: (React.ComponentType | React.ReactNode)[]
-  afterLogin?: (React.ComponentType | React.ReactNode)[]
-  afterNav?: (React.ComponentType | React.ReactNode)[]
-  afterNavLinks?: (React.ComponentType | React.ReactNode)[]
-  avatar?: React.ComponentType | React.ReactNode
-  beforeDashboard?: (React.ComponentType | React.ReactNode)[]
-  beforeLogin?: (React.ComponentType | React.ReactNode)[]
-  beforeNav?: (React.ComponentType | React.ReactNode)[]
-  beforeNavLinks?: (React.ComponentType | React.ReactNode)[]
+  actions?: CompArray
+  afterDashboard?: CompArray
+  afterLogin?: CompArray
+  afterNav?: CompArray
+  afterNavLinks?: CompArray
+  avatar?: Comp
+  beforeDashboard?: CompArray
+  beforeLogin?: CompArray
+  beforeNav?: CompArray
+  beforeNavLinks?: CompArray
   graphics?: {
-    Icon?: React.ComponentType | React.ReactNode
-    Logo?: React.ComponentType | React.ReactNode
+    Icon?: Comp
+    Logo?: Comp
   }
-  header?: (React.ComponentType | React.ReactNode)[]
+  header?: CompArray
   logout?: {
-    Button?: React.ComponentType | React.ReactNode
+    Button?: Comp
   }
-  Nav?: React.ComponentType | React.ReactNode
+  Nav?: Comp
   providers?: (React.ComponentType<{ children?: React.ReactNode }> | React.ReactNode)[]
-  settingsMenu?: (React.ComponentType | React.ReactNode)[]
+  settingsMenu?: CompArray
   views?: Record<string, AdminViewConfig>
 }
 
 // ─── Collection-level config ───
 
 export type CollectionComponentsConfig = {
-  afterList?: (React.ComponentType | React.ReactNode)[]
-  afterListTable?: (React.ComponentType | React.ReactNode)[]
-  beforeList?: (React.ComponentType | React.ReactNode)[]
-  beforeListTable?: (React.ComponentType | React.ReactNode)[]
-  Description?: React.ComponentType | React.ReactNode
+  afterList?: CompArray
+  afterListTable?: CompArray
+  beforeList?: CompArray
+  beforeListTable?: CompArray
+  Description?: Comp
   edit?: {
-    beforeDocumentControls?: (React.ComponentType | React.ReactNode)[]
-    editMenuItems?: (React.ComponentType | React.ReactNode)[]
-    PreviewButton?: React.ComponentType | React.ReactNode
-    PublishButton?: React.ComponentType | React.ReactNode
-    SaveButton?: React.ComponentType | React.ReactNode
-    SaveDraftButton?: React.ComponentType | React.ReactNode
-    Status?: React.ComponentType | React.ReactNode
-    UnpublishButton?: React.ComponentType | React.ReactNode
-    Upload?: React.ComponentType | React.ReactNode
+    beforeDocumentControls?: CompArray
+    editMenuItems?: CompArray
+    PreviewButton?: Comp
+    PublishButton?: Comp
+    SaveButton?: Comp
+    SaveDraftButton?: Comp
+    Status?: Comp
+    UnpublishButton?: Comp
+    Upload?: Comp
   }
-  listMenuItems?: (React.ComponentType | React.ReactNode)[]
+  listMenuItems?: CompArray
   views?: Record<string, any>
 }
 
 // ─── Global-level config ───
 
 export type GlobalComponentsConfig = {
-  Description?: React.ComponentType | React.ReactNode
+  Description?: Comp
   elements?: {
-    beforeDocumentControls?: (React.ComponentType | React.ReactNode)[]
-    PreviewButton?: React.ComponentType | React.ReactNode
-    PublishButton?: React.ComponentType | React.ReactNode
-    SaveButton?: React.ComponentType | React.ReactNode
-    SaveDraftButton?: React.ComponentType | React.ReactNode
-    Status?: React.ComponentType | React.ReactNode
-    UnpublishButton?: React.ComponentType | React.ReactNode
+    beforeDocumentControls?: CompArray
+    PreviewButton?: Comp
+    PublishButton?: Comp
+    SaveButton?: Comp
+    SaveDraftButton?: Comp
+    Status?: Comp
+    UnpublishButton?: Comp
   }
   views?: Record<string, any>
 }
 
-// ─── Client admin config ('use client' file) ───
+// ─── Combined configs with type-safe keys ───
 
-export type ClientAdminConfig = {
+export type ClientAdminConfig<TSchemaPathMap extends Record<string, string> = TypedSchemaPathMap> =
+  {
+    admin?: AdminComponentsConfig
+    collections?: Partial<Record<CollectionSlug, CollectionComponentsConfig>>
+    fields?: TypedClientFields<TSchemaPathMap>
+    globals?: Partial<Record<GlobalSlug, GlobalComponentsConfig>>
+  }
+
+export type RscAdminConfig<TSchemaPathMap extends Record<string, string> = TypedSchemaPathMap> = {
   admin?: AdminComponentsConfig
-  collections?: Record<string, CollectionComponentsConfig>
-  fields?: Record<string, ClientFieldConfig>
-  globals?: Record<string, GlobalComponentsConfig>
+  collections?: Partial<Record<CollectionSlug, CollectionComponentsConfig>>
+  fields?: TypedRscFields<TSchemaPathMap>
+  globals?: Partial<Record<GlobalSlug, GlobalComponentsConfig>>
 }
 
-// ─── RSC admin config (no directive file) ───
-
-export type RscAdminConfig = {
-  admin?: AdminComponentsConfig
-  collections?: Record<string, CollectionComponentsConfig>
-  fields?: Record<string, RscFieldConfig>
-  globals?: Record<string, GlobalComponentsConfig>
-}
-
-// ─── Shared config (no directive, auto-merged into all configs) ───
+// ─── Shared config ───
 
 export type SharedFieldConfig = {
   validate?: Validate
 }
 
-export type SharedAdminConfig = {
-  fields?: Record<string, SharedFieldConfig>
-}
+export type SharedAdminConfig<TSchemaPathMap extends Record<string, string> = TypedSchemaPathMap> =
+  {
+    fields?: TypedSharedFields<TSchemaPathMap>
+  }
+
+// ─── Backward-compatible aliases ───
+
+export type FieldComponentConfig = ArrayFieldComponents &
+  BlockFieldComponents &
+  InputFieldComponents
 
 // ─── Builder functions ───
 
@@ -143,6 +224,8 @@ export function defineSharedConfig<TConfig extends SharedAdminConfig>(config: TC
   return config
 }
 
+// ─── Utilities ───
+
 export function getRscSchemaPaths(rscConfig: RscAdminConfig): string[] {
   if (!rscConfig.fields) {
     return []
@@ -150,7 +233,7 @@ export function getRscSchemaPaths(rscConfig: RscAdminConfig): string[] {
   return Object.entries(rscConfig.fields)
     .filter(
       ([_, fieldConfig]) =>
-        fieldConfig.components && Object.keys(fieldConfig.components).length > 0,
+        (fieldConfig as any)?.components && Object.keys((fieldConfig as any).components).length > 0,
     )
     .map(([path]) => path)
 }
@@ -163,14 +246,15 @@ export function mergeSharedIntoClientConfig(
     return clientConfig
   }
 
-  const merged: ClientAdminConfig = { ...clientConfig, fields: { ...clientConfig.fields } }
+  const merged: ClientAdminConfig = { ...clientConfig, fields: { ...clientConfig.fields } as any }
 
   for (const [path, sharedField] of Object.entries(sharedConfig.fields)) {
-    if (!merged.fields![path]) {
-      merged.fields![path] = {}
+    const fields = merged.fields as Record<string, any>
+    if (!fields[path]) {
+      fields[path] = {}
     }
-    if (sharedField.validate && !merged.fields![path].validate) {
-      merged.fields![path] = { ...merged.fields![path], validate: sharedField.validate }
+    if ((sharedField as any)?.validate && !fields[path].validate) {
+      fields[path] = { ...fields[path], validate: (sharedField as any).validate }
     }
   }
 

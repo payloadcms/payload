@@ -7,15 +7,24 @@ export {
 } from '../admin/buildClientConfig.js'
 export type {
   AdminComponentsConfig,
+  ArrayFieldComponents,
+  BaseFieldComponents,
+  BlockFieldComponents,
+  BlocksFieldComponents,
   ClientAdminConfig,
   ClientFieldConfig,
+  ClientFieldConfigFor,
   CollectionComponentsConfig,
   FieldComponentConfig,
+  FieldComponentConfigFor,
   GlobalComponentsConfig,
+  InputFieldComponents,
   RscAdminConfig,
   RscFieldConfig,
+  RscFieldConfigFor,
   SharedAdminConfig,
   SharedFieldConfig,
+  UIFieldComponents,
 } from '../admin/buildClientConfig.js'
 export {
   generateCookie,

@@ -72,22 +72,6 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-import {
-  customDocumentControlsSlug,
-  customFieldsSlug,
-  customGlobalDocumentControlsSlug,
-  customGlobalViews1GlobalSlug,
-  customGlobalViews2GlobalSlug,
-  customViews1CollectionSlug,
-  customViews2CollectionSlug,
-  editMenuItemsSlug,
-  geoCollectionSlug,
-  globalSlug,
-  listDrawerSlug,
-  postsCollectionSlug,
-  reorderTabsSlug,
-} from './slugs.js'
-
 export default defineRscConfig({
   admin: {
     actions: [AdminButton],
@@ -156,12 +140,12 @@ export default defineRscConfig({
     },
   },
   collections: {
-    [customDocumentControlsSlug]: {
+    'custom-document-controls': {
       edit: {
         Status,
       },
     },
-    [customViews1CollectionSlug]: {
+    'custom-views-one': {
       Description: ViewDescription,
       views: {
         edit: {
@@ -171,7 +155,7 @@ export default defineRscConfig({
         },
       },
     },
-    [customViews2CollectionSlug]: {
+    'custom-views-two': {
       views: {
         edit: {
           api: {
@@ -236,12 +220,12 @@ export default defineRscConfig({
         },
       },
     },
-    [editMenuItemsSlug]: {
+    'edit-menu-items': {
       edit: {
         editMenuItems: [EditMenuItemsServer, EditMenuItems],
       },
     },
-    [geoCollectionSlug]: {
+    geo: {
       views: {
         edit: {
           api: {
@@ -259,10 +243,7 @@ export default defineRscConfig({
     ['list-view-select-api']: {
       beforeListTable: [BeforeListTable],
     },
-    [listDrawerSlug]: {
-      beforeListTable: [SelectPostsButton],
-    },
-    [postsCollectionSlug]: {
+    posts: {
       afterList: [Banner],
       afterListTable: [Banner],
       beforeList: [Banner],
@@ -273,7 +254,7 @@ export default defineRscConfig({
       },
       listMenuItems: [ListMenuItemsExample],
     },
-    [reorderTabsSlug]: {
+    'reorder-tabs': {
       views: {
         edit: {
           api: {
@@ -298,20 +279,23 @@ export default defineRscConfig({
         },
       },
     },
+    'with-list-drawer': {
+      beforeListTable: [SelectPostsButton],
+    },
   },
   fields: {
-    [`${customFieldsSlug}.allButtons`]: {
+    'custom-fields.allButtons': {
       components: {
         Field: AllButtons,
       },
     },
-    [`${customFieldsSlug}.customTextServerField`]: {
+    'custom-fields.customTextServerField': {
       components: {
         Description: CustomServerDescription,
         Label: CustomServerLabel,
       },
     },
-    [`${postsCollectionSlug}.demoUIField`]: {
+    'posts.demoUIField': {
       components: {
         Cell: DemoUIFieldCell,
         Field: DemoUIField,
@@ -319,12 +303,12 @@ export default defineRscConfig({
     },
   },
   globals: {
-    [customGlobalDocumentControlsSlug]: {
+    'custom-global-document-controls': {
       elements: {
         Status,
       },
     },
-    [customGlobalViews1GlobalSlug]: {
+    'custom-global-views-one': {
       views: {
         edit: {
           default: {
@@ -333,7 +317,7 @@ export default defineRscConfig({
         },
       },
     },
-    [customGlobalViews2GlobalSlug]: {
+    'custom-global-views-two': {
       views: {
         edit: {
           api: {
@@ -368,7 +352,7 @@ export default defineRscConfig({
         },
       },
     },
-    [globalSlug]: {
+    global: {
       elements: {
         beforeDocumentControls: [CustomDraftButton],
       },

@@ -8,7 +8,7 @@ import { fieldAffectsData } from '../fields/config/types.js'
 function collectFieldPaths(
   fields: FlattenedField[],
   parentPath: string,
-  paths: Set<string>,
+  pathMap: Map<string, string>,
   config?: SanitizedConfig,
 ): void {
   for (const field of fields) {
@@ -17,18 +17,18 @@ function collectFieldPaths(
     }
 
     const fieldPath = parentPath ? `${parentPath}.${field.name}` : field.name
-    paths.add(fieldPath)
+    pathMap.set(fieldPath, field.type)
 
     if (
       'schemaPathId' in field &&
       typeof (field as any).schemaPathId === 'string' &&
       (field as any).schemaPathId
     ) {
-      paths.add((field as any).schemaPathId)
+      pathMap.set((field as any).schemaPathId, field.type)
     }
 
     if ('flattenedFields' in field && field.flattenedFields) {
-      collectFieldPaths(field.flattenedFields, fieldPath, paths, config)
+      collectFieldPaths(field.flattenedFields, fieldPath, pathMap, config)
     }
 
     if (field.type === 'blocks') {
@@ -55,9 +55,9 @@ function collectFieldPaths(
 
       for (const block of blocks) {
         const blockPath = `${fieldPath}.${block.slug}`
-        paths.add(blockPath)
+        pathMap.set(blockPath, 'block')
         if (block.flattenedFields) {
-          collectFieldPaths(block.flattenedFields, blockPath, paths, config)
+          collectFieldPaths(block.flattenedFields, blockPath, pathMap, config)
         }
       }
     }
@@ -66,31 +66,31 @@ function collectFieldPaths(
 
 function collectEntityPaths(
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
-  paths: Set<string>,
+  pathMap: Map<string, string>,
   config: SanitizedConfig,
 ): void {
   const prefix = entity.slug
-  paths.add(prefix)
-  collectFieldPaths(entity.flattenedFields, prefix, paths, config)
+  pathMap.set(prefix, 'entity')
+  collectFieldPaths(entity.flattenedFields, prefix, pathMap, config)
 }
 
 export function generateSchemaPathType(config: SanitizedConfig): string {
-  const paths = new Set<string>()
+  const pathMap = new Map<string, string>()
 
   for (const collection of config.collections) {
-    collectEntityPaths(collection, paths, config)
+    collectEntityPaths(collection, pathMap, config)
   }
 
   for (const global of config.globals) {
-    collectEntityPaths(global, paths, config)
+    collectEntityPaths(global, pathMap, config)
   }
 
-  if (paths.size === 0) {
-    return '\nexport type SchemaPath = never;\n'
+  if (pathMap.size === 0) {
+    return '\nexport interface SchemaPathMap {}\nexport type SchemaPath = never;\n'
   }
 
-  const sortedPaths = [...paths].sort()
-  const unionMembers = sortedPaths.map((p) => `  | '${p}'`).join('\n')
+  const sortedEntries = [...pathMap.entries()].sort(([a], [b]) => a.localeCompare(b))
+  const interfaceMembers = sortedEntries.map(([p, t]) => `  '${p}': '${t}'`).join('\n')
 
-  return `\nexport type SchemaPath =\n${unionMembers};\n`
+  return `\nexport interface SchemaPathMap {\n${interfaceMembers}\n}\n\nexport type SchemaPath = keyof SchemaPathMap;\n`
 }

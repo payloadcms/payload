@@ -127,15 +127,24 @@ import {
 } from './globals/operations/local/update.js'
 export type {
   AdminComponentsConfig,
+  ArrayFieldComponents,
+  BaseFieldComponents,
+  BlockFieldComponents,
+  BlocksFieldComponents,
   ClientAdminConfig,
   ClientFieldConfig,
+  ClientFieldConfigFor,
   CollectionComponentsConfig,
   FieldComponentConfig,
+  FieldComponentConfigFor,
   GlobalComponentsConfig,
+  InputFieldComponents,
   RscAdminConfig,
   RscFieldConfig,
+  RscFieldConfigFor,
   SharedAdminConfig,
   SharedFieldConfig,
+  UIFieldComponents,
 } from './admin/buildClientConfig.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
@@ -283,6 +292,18 @@ export interface UntypedPayloadTypes {
  * When augmented, its properties take precedence over UntypedPayloadTypes.
  */
 export interface GeneratedTypes {}
+
+/**
+ * Interface to be module-augmented by the `payload-types.ts` file.
+ * Maps schema paths to their field types for type-safe admin config.
+ */
+export interface GeneratedSchemaPathMap {}
+
+type IsSchemaPathMapAugmented = keyof GeneratedSchemaPathMap extends never ? false : true
+
+export type TypedSchemaPathMap = IsSchemaPathMapAugmented extends true
+  ? GeneratedSchemaPathMap
+  : Record<string, string>
 
 /**
  * Check if GeneratedTypes has been augmented (has any keys).

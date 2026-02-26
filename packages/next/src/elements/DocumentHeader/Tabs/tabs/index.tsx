@@ -67,7 +67,7 @@ export const getTabs = ({
     },
   ]
     .concat(
-      Object.entries(customViews).reduce((acc, [key, value]) => {
+      Object.entries(customViews).reduce((acc, [key, value]: [string, any]) => {
         if (documentViewKeys.includes(key)) {
           return acc
         }
