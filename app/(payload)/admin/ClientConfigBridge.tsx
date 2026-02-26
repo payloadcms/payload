@@ -1,5 +1,5 @@
 'use client'
-import type { ClientAdminConfig } from 'payload'
+import type { ClientAdminConfig, SharedAdminConfig } from 'payload'
 
 import { ClientAdminConfigProvider } from '@payloadcms/ui'
 import React, { useMemo } from 'react'
@@ -9,16 +9,19 @@ import sharedConfig from '../../../test/_community/payload.config.shared.js'
 
 function mergeSharedIntoClient(
   client: ClientAdminConfig,
-  shared: Record<string, { validate?: any }>,
+  shared: SharedAdminConfig,
 ): ClientAdminConfig {
   const merged: ClientAdminConfig = { ...client }
 
-  for (const [path, sharedFieldConfig] of Object.entries(shared)) {
-    if (!merged[path]) {
-      merged[path] = {}
-    }
-    if (sharedFieldConfig.validate && !merged[path].validate) {
-      merged[path] = { ...merged[path], validate: sharedFieldConfig.validate }
+  if (shared.fields) {
+    merged.fields = { ...merged.fields }
+    for (const [path, sharedFieldConfig] of Object.entries(shared.fields)) {
+      if (!merged.fields[path]) {
+        merged.fields[path] = {}
+      }
+      if (sharedFieldConfig.validate && !merged.fields[path].validate) {
+        merged.fields[path] = { ...merged.fields[path], validate: sharedFieldConfig.validate }
+      }
     }
   }
 

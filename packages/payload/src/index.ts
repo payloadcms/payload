@@ -125,12 +125,15 @@ import {
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
 export type {
+  AdminComponentsConfig,
   AdminConfig,
   AdminFieldComponentConfig,
   AdminFieldConfig,
   ClientAdminConfig,
   ClientFieldComponentConfig,
   ClientFieldConfig,
+  CollectionComponentsConfig,
+  GlobalComponentsConfig,
   RscAdminConfig,
   RscFieldComponentConfig,
   RscFieldConfig,

@@ -5,12 +5,15 @@ export {
   defineSharedConfig,
 } from '../admin/buildClientConfig.js'
 export type {
+  AdminComponentsConfig,
   AdminConfig,
   AdminFieldComponentConfig,
   AdminFieldConfig,
   ClientAdminConfig,
   ClientFieldComponentConfig,
   ClientFieldConfig,
+  CollectionComponentsConfig,
+  GlobalComponentsConfig,
   RscAdminConfig,
   RscFieldComponentConfig,
   RscFieldConfig,

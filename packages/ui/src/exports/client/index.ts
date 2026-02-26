@@ -332,6 +332,7 @@ export {
   RscOverridesProvider,
   useAdminConfig,
   useClientAdminConfig,
+  useRscAdminConfig,
   useRscOverrides,
 } from '../../providers/AdminConfig/index.js'
 export type { MergedFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'

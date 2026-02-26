@@ -1,7 +1,7 @@
 'use client'
 import type { ClientFieldConfig, RscFieldComponentConfig } from 'payload'
 
-import { useClientAdminConfig, useRscOverrides } from './index.js'
+import { useClientAdminConfig, useRscAdminConfig } from './index.js'
 
 export type MergedFieldConfig = {
   clientConfig?: ClientFieldConfig
@@ -10,14 +10,14 @@ export type MergedFieldConfig = {
 
 export const useAdminFieldConfig = (schemaPath: string | undefined): MergedFieldConfig => {
   const clientConfig = useClientAdminConfig()
-  const rscOverrides = useRscOverrides()
+  const rscConfig = useRscAdminConfig()
 
   if (!schemaPath) {
     return {}
   }
 
   return {
-    clientConfig: clientConfig[schemaPath],
-    rscOverrides: rscOverrides[schemaPath]?.components,
+    clientConfig: clientConfig.fields?.[schemaPath],
+    rscOverrides: rscConfig.fields?.[schemaPath]?.components,
   }
 }
