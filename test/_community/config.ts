@@ -7,18 +7,19 @@ import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+import { hookPerfTestingPlugin } from './plugins/hookPerfTesting/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
+  collections: [PostsCollection, MediaCollection],
   editor: lexicalEditor({}),
   globals: [
     // ...add more globals here
@@ -40,6 +41,7 @@ export default buildConfigWithDefaults({
       },
     })
   },
+  plugins: [hookPerfTestingPlugin()],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
