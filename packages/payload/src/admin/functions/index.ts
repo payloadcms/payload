@@ -1,6 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/index.js'
@@ -26,9 +25,10 @@ export type InitReqResult = {
   req: PayloadRequest
 }
 
-export type DefaultServerFunctionArgs = {
-  importMap: ImportMap
-} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
+export type DefaultServerFunctionArgs = Pick<
+  InitReqResult,
+  'cookies' | 'locale' | 'permissions' | 'req'
+>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>
@@ -55,7 +55,6 @@ export type ServerFunctionConfig = {
 export type ServerFunctionHandler = (
   args: {
     config: Promise<SanitizedConfig> | SanitizedConfig
-    importMap: ImportMap
     /**
      * A map of server function names to their implementations. These are
      * registered alongside the base server functions and can be called

@@ -1,7 +1,6 @@
 import type { ClientTranslationsObject } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
-import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
 import type {
@@ -48,7 +47,6 @@ export type AdminViewServerPropsOnly = {
   readonly docID?: number | string
   readonly folderID?: number | string
   readonly globalConfig?: SanitizedGlobalConfig
-  readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
   readonly params?: { [key: string]: string | string[] | undefined }

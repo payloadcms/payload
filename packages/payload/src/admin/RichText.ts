@@ -3,7 +3,7 @@ import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
-import type { ImportMapGenerators, PayloadComponent, SanitizedConfig } from '../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
   FieldAffectingData,
@@ -202,11 +202,6 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
-  /**
-   * Provide a function that can be used to add items to the import map. This is useful for
-   * making modules available to the client.
-   */
-  generateImportMap?: ImportMapGenerators[0]
   /**
    * Provide a function that can be used to add items to the schema map. This is useful for
    * richtext sub-fields the server needs to "know" about in order to do things like calculate form state.
