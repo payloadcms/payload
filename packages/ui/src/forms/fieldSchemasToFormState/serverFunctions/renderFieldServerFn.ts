@@ -69,7 +69,6 @@ export const _internal_renderFieldHandler: ServerFunction<
     config: getClientConfig({
       config: req.payload.config,
       i18n: req.i18n,
-      importMap: req.payload.importMap,
       user: req.user,
     }),
     globalSlug: entityType === 'global' ? entitySlug : undefined,

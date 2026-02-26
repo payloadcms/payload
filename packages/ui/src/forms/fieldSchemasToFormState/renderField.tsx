@@ -68,7 +68,6 @@ export const renderField: RenderFieldMethod = ({
           defaultIDType: req.payload.config.db.defaultIDType,
           field: fieldConfig,
           i18n: req.i18n,
-          importMap: req.payload.importMap,
         })
 
   const clientProps: ClientComponentProps & Partial<FieldPaths> = {
@@ -142,7 +141,6 @@ export const renderField: RenderFieldMethod = ({
             ? RenderServerComponent({
                 clientProps,
                 Component: fieldConfig.admin.components.RowLabel,
-                importMap: req.payload.importMap,
                 key: `${rowIndex}`,
                 serverProps: {
                   ...serverProps,
@@ -191,7 +189,6 @@ export const renderField: RenderFieldMethod = ({
             ? RenderServerComponent({
                 clientProps,
                 Component: blockConfig.admin.components.Label,
-                importMap: req.payload.importMap,
                 key: `${rowIndex}`,
                 serverProps: {
                   ...serverProps,
@@ -262,7 +259,6 @@ export const renderField: RenderFieldMethod = ({
           {RenderServerComponent({
             clientProps,
             Component: fieldConfig.editor.FieldComponent,
-            importMap: req.payload.importMap,
             serverProps: {
               ...serverProps,
               // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
@@ -293,7 +289,6 @@ export const renderField: RenderFieldMethod = ({
             ? RenderServerComponent({
                 clientProps,
                 Component,
-                importMap: req.payload.importMap,
                 key: `field.admin.components.${key}`,
                 serverProps,
               })
@@ -332,7 +327,6 @@ export const renderField: RenderFieldMethod = ({
           ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.afterInput,
-              importMap: req.payload.importMap,
               key: `field.admin.components.afterInput.${path}`,
               serverProps,
             })
@@ -344,7 +338,6 @@ export const renderField: RenderFieldMethod = ({
           ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.beforeInput,
-              importMap: req.payload.importMap,
               key: `field.admin.components.beforeInput.${path}`,
               serverProps,
             })
@@ -356,7 +349,6 @@ export const renderField: RenderFieldMethod = ({
           ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Description,
-              importMap: req.payload.importMap,
               key: 'field.admin.components.Description',
               serverProps,
             })
@@ -368,7 +360,6 @@ export const renderField: RenderFieldMethod = ({
           ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Error,
-              importMap: req.payload.importMap,
               key: 'field.admin.components.Error',
               serverProps,
             })
@@ -380,7 +371,6 @@ export const renderField: RenderFieldMethod = ({
           ? RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Label,
-              importMap: req.payload.importMap,
               key: 'field.admin.components.Label',
               serverProps,
             })
@@ -393,7 +383,6 @@ export const renderField: RenderFieldMethod = ({
             {RenderServerComponent({
               clientProps,
               Component: fieldConfig.admin.components.Field,
-              importMap: req.payload.importMap,
               key: 'field.admin.components.Field',
               serverProps,
             })}
