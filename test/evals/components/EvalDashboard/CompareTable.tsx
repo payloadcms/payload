@@ -292,7 +292,8 @@ export function CompareTable({ entries }: Props) {
   const pairs = useMemo<ComparePair[]>(() => {
     // Include all entries (QA + Codegen). Untagged entries (pre-dating modelId/systemPromptKey)
     // are treated as qaWithSkill + high-power since those were the only variants run before
-    // baseline/low-power were added. Codegen has no baseline variant so that slot stays empty.
+    // baseline/low-power were added.
+    // Baseline slot: qaNoSkill OR codegenNoSkill — both represent "no skill context injected".
     const byQuestion = new Map<string, ComparePair>()
     for (const entry of entries) {
       const key = entry.result.question
@@ -302,7 +303,7 @@ export function CompareTable({ entries }: Props) {
       const pair = byQuestion.get(key)!
       const variant = entry.systemPromptKey ?? 'qaWithSkill'
 
-      if (variant === 'qaNoSkill') {
+      if (variant === 'qaNoSkill' || variant === 'codegenNoSkill') {
         if (!pair.baseline || entry.systemPromptKey) {
           pair.baseline = entry
         }
@@ -336,6 +337,8 @@ export function CompareTable({ entries }: Props) {
         cmp = a.category.localeCompare(b.category) || a.question.localeCompare(b.question)
       } else if (sortKey === 'question') {
         cmp = a.question.localeCompare(b.question)
+      } else if (sortKey === 'type') {
+        cmp = a.type.localeCompare(b.type) || a.question.localeCompare(b.question)
       } else if (sortKey === 'delta') {
         const da = scoreDelta(a) ?? -Infinity
         const db = scoreDelta(b) ?? -Infinity
