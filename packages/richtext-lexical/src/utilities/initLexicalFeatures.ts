@@ -1,12 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
 
 import { type ClientFieldSchemaMap, type FieldSchemaMap, type Payload } from 'payload'
-import { getFromImportMap } from 'payload/shared'
 
-import type {
-  BaseClientFeatureProps,
-  FeatureProviderProviderClient,
-} from '../features/typesClient.js'
+import type { BaseClientFeatureProps } from '../features/typesClient.js'
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
 type Args = {
@@ -47,17 +43,6 @@ export function initLexicalFeatures(args: Args): {
     const ClientFeaturePayloadComponent = resolvedFeature.ClientFeature
 
     if (ClientFeaturePayloadComponent) {
-      const clientFeatureProvider = getFromImportMap<FeatureProviderProviderClient>({
-        importMap: args.payload.importMap,
-        PayloadComponent: ClientFeaturePayloadComponent,
-        schemaPath: 'lexical-clientComponent',
-        silent: true,
-      })
-
-      if (!clientFeatureProvider) {
-        continue
-      }
-
       const clientFeatureProps: BaseClientFeatureProps<Record<string, any>> =
         resolvedFeature.clientFeatureProps ?? {}
       clientFeatureProps.featureKey = resolvedFeature.key
@@ -68,8 +53,7 @@ export function initLexicalFeatures(args: Args): {
       ) {
         clientFeatureProps.clientProps = ClientFeaturePayloadComponent.clientProps
       }
-      // As clientFeatureProvider is a client function, we cannot execute it on the server here. Thus, the client will have to execute clientFeatureProvider with its props
-      clientFeatures[featureKey] = { clientFeatureProps, clientFeatureProvider }
+      clientFeatures[featureKey] = { clientFeatureProps }
     }
 
     /**
@@ -97,14 +81,7 @@ export function initLexicalFeatures(args: Args): {
       !Array.isArray(resolvedFeature.componentImports)
     ) {
       for (const [key, payloadComponent] of Object.entries(resolvedFeature.componentImports)) {
-        const resolvedComponent = getFromImportMap({
-          importMap: args.payload.importMap,
-          PayloadComponent: payloadComponent,
-          schemaPath: 'lexical-clientComponent',
-          silent: true,
-        })
-
-        featureClientImportMap[`${resolvedFeature.key}.${key}`] = resolvedComponent
+        featureClientImportMap[`${resolvedFeature.key}.${key}`] = payloadComponent
       }
     }
   }

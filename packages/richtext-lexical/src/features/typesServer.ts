@@ -10,7 +10,6 @@ import type {
 import type {
   Field,
   FieldSchemaMap,
-  ImportMapGenerators,
   JsonObject,
   PayloadComponent,
   PayloadRequest,
@@ -287,7 +286,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    */
   clientFeatureProps?: ClientFeatureProps
   /**
-   * Adds payload components to the importMap.
+   * Payload components to make available to the client feature.
    *
    * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
    */
@@ -295,7 +294,6 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
     | {
         [key: string]: PayloadComponent
       }
-    | ImportMapGenerators[0]
     | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: (args: {
