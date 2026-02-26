@@ -189,7 +189,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alternar bloco',
     uploadNewLabel: 'Carregar novo(a) {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nome',
     aboutToDelete: 'Você está prestes a excluir o/a {{label}} <1>{{title}}</1>. Tem certeza?',

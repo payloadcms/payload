@@ -182,7 +182,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     toggleBlock: '切换区块',
     uploadNewLabel: '上传新的 {{label}}',
   },
-  folder: {},
   general: {
     name: '名称',
     aboutToDelete: '您即将删除 {{label}} <1>{{title}}</1>。您确定要继续吗？',

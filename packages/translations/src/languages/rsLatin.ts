@@ -190,7 +190,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prebaci blok',
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
-  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisaćete {{label}} <1>{{title}}</1>. Da li ste sigurni?',

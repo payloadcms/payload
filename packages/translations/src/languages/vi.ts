@@ -189,7 +189,6 @@ export const viTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bật/tắt block',
     uploadNewLabel: 'Tải lên bản mới: {{label}}',
   },
-  folder: {},
   general: {
     name: 'Tên',
     aboutToDelete: 'Chuẩn bị xóa {{label}} <1>{{title}}</1>. Bạn có muốn tiếp tục không?',

@@ -190,7 +190,6 @@ export const idTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Beralih blok',
     uploadNewLabel: 'Unggah {{label}} baru',
   },
-  folder: {},
   general: {
     name: 'Nama',
     aboutToDelete: 'Anda akan menghapus {{label}} <1>{{title}}</1>. Apakah Anda yakin?',

@@ -189,7 +189,6 @@ export const csTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Přepnout blok',
     uploadNewLabel: 'Nahrát nový {{label}}',
   },
-  folder: {},
   general: {
     name: 'Jméno',
     aboutToDelete: 'Chystáte se odstranit {{label}} <1>{{title}}</1>. Jste si jisti?',

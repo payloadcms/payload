@@ -191,7 +191,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blok togglen',
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
-  folder: {},
   general: {
     name: 'Naam',
     aboutToDelete:

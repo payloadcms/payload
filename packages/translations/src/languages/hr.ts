@@ -190,7 +190,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prebaci blok',
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
-  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisat ćete {{label}} <1>{{title}}</1>. Jeste li sigurni?',

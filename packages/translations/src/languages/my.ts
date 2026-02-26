@@ -190,7 +190,6 @@ export const myTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ဘလောက်ကို ပြောင်းပါ။',
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
-  folder: {},
   general: {
     name: 'နာမည်',
     aboutToDelete:

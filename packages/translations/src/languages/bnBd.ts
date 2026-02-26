@@ -190,7 +190,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ব্লক টগল করুন',
     uploadNewLabel: 'নতুন {{label}} আপলোড করুন',
   },
-  folder: {},
   general: {
     name: 'নাম',
     aboutToDelete: 'আপনি {{label}} <1>{{title}}</1> মুছতে চলেছেন। আপনি কি নিশ্চিত?',

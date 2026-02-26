@@ -189,7 +189,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Միացնել/անջատել բլոկը',
     uploadNewLabel: 'Վերբեռնել նոր {{label}}',
   },
-  folder: {},
   general: {
     name: 'Անուն',
     aboutToDelete: 'Դուք պատրաստվում եք ջնջել {{label}} <1>{{title}}</1>-ը։ Համոզվա՞ծ եք։',

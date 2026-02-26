@@ -189,7 +189,6 @@ export const svTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Växla block',
     uploadNewLabel: 'Ladda upp ny {{label}}',
   },
-  folder: {},
   general: {
     name: 'Namn',
     aboutToDelete: 'Du är på väg att ta bort {{label}} <1>{{title}}</1>. Är du säker?',

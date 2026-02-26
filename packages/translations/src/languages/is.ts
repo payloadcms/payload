@@ -189,7 +189,6 @@ export const isTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Fletta blokk',
     uploadNewLabel: 'Hlaða upp nýju {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nafn',
     aboutToDelete: 'Þú ert að fara að eyða {{label}} <1>{{title}}</1>. Ertu viss?',

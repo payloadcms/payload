@@ -195,7 +195,6 @@ export const frTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloc bascule',
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nom',
     aboutToDelete:

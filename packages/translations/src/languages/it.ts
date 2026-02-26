@@ -193,7 +193,6 @@ export const itTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Apri/chiudi blocco',
     uploadNewLabel: 'Carica nuovo {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nome',
     aboutToDelete: 'Stai per eliminare {{label}} <1>{{title}}</1>. Sei sicuro?',

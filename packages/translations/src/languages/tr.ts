@@ -191,7 +191,6 @@ export const trTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloğu aç/kapat',
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
-  folder: {},
   general: {
     name: 'İsim',
     aboutToDelete:

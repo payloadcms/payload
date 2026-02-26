@@ -183,7 +183,6 @@ export const heTranslations: DefaultTranslationsObject = {
     toggleBlock: 'החלף בלוק',
     uploadNewLabel: 'העלאת {{label}} חדשה',
   },
-  folder: {},
   general: {
     name: 'שם',
     aboutToDelete: 'אתה עומד למחוק את {{label}} <1>{{title}}</1>. האם אתה בטוח?',

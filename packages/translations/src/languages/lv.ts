@@ -189,7 +189,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Pārslēgt bloku',
     uploadNewLabel: 'Augšupielādēt jaunu {{label}}',
   },
-  folder: {},
   general: {
     name: 'Vārds',
     aboutToDelete: 'Jūs grasāties dzēst {{label}} <1>{{title}}</1>. Vai esat pārliecināts?',

@@ -191,7 +191,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Perjungti bloką',
     uploadNewLabel: 'Įkelti naują {{label}}',
   },
-  folder: {},
   general: {
     name: 'Vardas',
     aboutToDelete: 'Jūs ketinate ištrinti {{label}} <1>{{title}}</1>. Ar esate tikri?',

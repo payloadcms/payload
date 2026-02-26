@@ -189,7 +189,6 @@ export const koTranslations: DefaultTranslationsObject = {
     toggleBlock: '블록 토글',
     uploadNewLabel: '새로운 {{label}} 업로드',
   },
-  folder: {},
   general: {
     name: '이름',
     aboutToDelete: '{{label}} <1>{{title}}</1>를 삭제하려고 합니다. 계속하시겠습니까?',

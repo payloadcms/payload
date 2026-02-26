@@ -192,7 +192,6 @@ export const skTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prepnúť blok',
     uploadNewLabel: 'Nahrať nový {{label}}',
   },
-  folder: {},
   general: {
     name: 'Meno',
     aboutToDelete: 'Chystáte sa odstrániť {{label}} <1>{{title}}</1>. Ste si istí?',

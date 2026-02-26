@@ -186,7 +186,6 @@ export const thTranslations: DefaultTranslationsObject = {
     toggleBlock: 'เปิด/ปิด Block',
     uploadNewLabel: 'อัปโหลด {{label}} ใหม่',
   },
-  folder: {},
   general: {
     name: 'ชื่อ',
     aboutToDelete: 'คุณกำลังจะลบ {{label}} <1>{{title}}</1> ต้องการดำเนินการต่อหรือไม่?',

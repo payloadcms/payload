@@ -189,7 +189,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Veksle blokk',
     uploadNewLabel: 'Last opp ny {{label}}',
   },
-  folder: {},
   general: {
     name: 'Navn',
     aboutToDelete: 'Du er i ferd med å slette {{label}} <1>{{title}}</1>. Er du sikker?',

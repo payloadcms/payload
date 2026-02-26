@@ -188,7 +188,6 @@ export const daTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Skift blok',
     uploadNewLabel: 'Upload ny {{label}}',
   },
-  folder: {},
   general: {
     name: 'Navn',
     aboutToDelete: 'Du er ved at slette {{label}} <1>{{title}}</1>. Er du sikker?',

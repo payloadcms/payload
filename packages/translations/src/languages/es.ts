@@ -193,7 +193,6 @@ export const esTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alternar bloque',
     uploadNewLabel: 'Subir nuevo {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nombre',
     aboutToDelete: 'Estás por eliminar el {{label}} <1>{{title}}</1>. ¿Estás seguro?',

@@ -180,7 +180,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     toggleBlock: '切換區塊',
     uploadNewLabel: '上傳新 {{label}}',
   },
-  folder: {},
   general: {
     name: '名稱',
     aboutToDelete: '您即將刪除 {{label}} <1>{{title}}</1>。確定要繼續？',

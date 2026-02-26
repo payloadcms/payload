@@ -189,7 +189,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Превключи блок',
     uploadNewLabel: 'Качи нов {{label}}',
   },
-  folder: {},
   general: {
     name: 'Име',
     aboutToDelete: 'На път си да изтриеш {{label}} <1>{{title}}</1>. Сигурен ли си?',

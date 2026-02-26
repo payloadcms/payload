@@ -189,7 +189,6 @@ export const slTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Preklopi blok',
     uploadNewLabel: 'Naloži nov {{label}}',
   },
-  folder: {},
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisali boste {{label}} <1>{{title}}</1>. Ste prepričani?',

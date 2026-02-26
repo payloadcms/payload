@@ -190,7 +190,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Перемкнути блок',
     uploadNewLabel: 'Завантажити новий {{label}}',
   },
-  folder: {},
   general: {
     name: "Ім'я",
     aboutToDelete: 'Ви бажаєте видалити {{label}} <1>{{title}}</1>. Ви впевнені?',

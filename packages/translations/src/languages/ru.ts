@@ -191,7 +191,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Переключить Блок',
     uploadNewLabel: 'Загрузить новый {{label}}',
   },
-  folder: {},
   general: {
     name: 'Имя',
     aboutToDelete: 'Вы собираетесь удалить {{label}} <1>{{title}}</1>. Вы уверены?',

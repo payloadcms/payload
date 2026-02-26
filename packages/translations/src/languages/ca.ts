@@ -190,7 +190,6 @@ export const caTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alterna el bloc',
     uploadNewLabel: 'Puja un nou {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nom',
     aboutToDelete: 'Estas apunt de eliminar {{label}} <1>{{title}}</1>. Estas segur?',

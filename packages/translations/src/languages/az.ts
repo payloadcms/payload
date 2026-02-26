@@ -189,7 +189,6 @@ export const azTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloku keç',
     uploadNewLabel: 'Yeni {{label}} yüklə',
   },
-  folder: {},
   general: {
     name: 'Ad',
     aboutToDelete: 'Siz {{label}} <1>{{title}}</1> silməyə hazırsınız. Eminsiniz?',

@@ -188,7 +188,6 @@ export const taTranslations: DefaultTranslationsObject = {
     toggleBlock: 'தொகுதியை மாற்றவும்',
     uploadNewLabel: 'புதிய {{label}} பதிவேற்றவும்',
   },
-  folder: {},
   general: {
     name: 'பெயர்',
     aboutToDelete: '{{label}} <1>{{title}}</1>-ஐ நீக்கவிருக்கிறீர்கள். உறுதியாகவா?',

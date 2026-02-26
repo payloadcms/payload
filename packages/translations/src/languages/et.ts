@@ -188,7 +188,6 @@ export const etTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Lülita plokk',
     uploadNewLabel: 'Lae üles uus {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nimi',
     aboutToDelete: 'Olete kustutamas {{label}} <1>{{title}}</1>. Olete kindel?',

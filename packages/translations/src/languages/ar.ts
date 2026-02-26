@@ -185,7 +185,6 @@ export const arTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Toggle block',
     uploadNewLabel: 'رفع {{label}} جديد',
   },
-  folder: {},
   general: {
     name: 'اسم',
     aboutToDelete: 'أنت على وشك حذف {{label}} <1>{{title}}</1>. هل أنت متأكّد؟',

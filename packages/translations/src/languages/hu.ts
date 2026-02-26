@@ -191,7 +191,6 @@ export const huTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blokk kinyitása',
     uploadNewLabel: 'Új {{label}} feltöltése',
   },
-  folder: {},
   general: {
     name: 'Név',
     aboutToDelete: 'A {{label}} <1>{{title}}</1> törlésére készül. Biztos benne?',

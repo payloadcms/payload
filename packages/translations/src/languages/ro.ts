@@ -193,7 +193,6 @@ export const roTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Toggle bloc',
     uploadNewLabel: 'Încărcați un nou {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nume',
     aboutToDelete: 'Sunteți pe cale să ștergeți {{label}} <1>{{title}}</1>. Sunteți sigur?',

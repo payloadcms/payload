@@ -188,7 +188,6 @@ export const plTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Przełącz blok',
     uploadNewLabel: 'Wrzuć nowy {{label}}',
   },
-  folder: {},
   general: {
     name: 'Nazwa',
     aboutToDelete: 'Zamierzasz usunąć {{label}} <1>{{title}}</1>. Jesteś pewien?',

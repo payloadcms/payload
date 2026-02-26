@@ -185,7 +185,6 @@ export const faTranslations: DefaultTranslationsObject = {
     toggleBlock: 'تغییر وضعیت بلاک',
     uploadNewLabel: 'آپلود {{label}} جدید',
   },
-  folder: {},
   general: {
     name: 'نام',
     aboutToDelete: 'آیا از حذف {{label}} "{{title}}" مطمئن هستید؟',

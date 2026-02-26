@@ -190,7 +190,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ブロックを切り替え',
     uploadNewLabel: '新規 {{label}} アップロード',
   },
-  folder: {},
   general: {
     name: '名前',
     aboutToDelete: '{{label}} <1>{{title}}</1> を削除します。よろしいですか？',

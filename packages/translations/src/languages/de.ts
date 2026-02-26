@@ -194,7 +194,6 @@ export const deTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Block umschalten',
     uploadNewLabel: '{{label}} neu hochladen',
   },
-  folder: {},
   general: {
     name: 'Name',
     aboutToDelete: 'Du bist dabei {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?',
