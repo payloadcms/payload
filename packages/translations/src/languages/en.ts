@@ -442,6 +442,10 @@ export const enTranslations = {
       'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
     moveToRoot: 'Move to Root',
     noParent: 'No Parent',
+    noResults: 'No results for "{{query}}"',
+    search: 'Search...',
+    searchMinChars: 'Enter at least {{count}} characters',
+    showingResults: 'Showing {{from}}-{{to}} of {{total}} results',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',
