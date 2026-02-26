@@ -326,7 +326,12 @@ export {
   RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
-export { AdminConfigProvider, useAdminConfig } from '../../providers/AdminConfig/index.js'
+export {
+  ClientAdminConfigProvider,
+  RscAdminConfigProvider,
+  useClientAdminConfig,
+  useRscAdminConfig,
+} from '../../providers/AdminConfig/index.js'
 export { useAdminFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'

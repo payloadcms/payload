@@ -15,12 +15,16 @@ export type FieldComponentConfig = {
   Label?: React.ComponentType | React.ReactNode
 }
 
-export type FieldConfig = {
+export type ClientFieldConfig = {
   components?: FieldComponentConfig
   condition?: Condition
   defaultValue?: (() => unknown) | unknown
   filterOptions?: (options: any) => any
   validate?: Validate
+}
+
+export type RscFieldConfig = {
+  components?: FieldComponentConfig
 }
 
 // ─── Admin-level config ───
@@ -97,16 +101,25 @@ export type GlobalComponentsConfig = {
   views?: Record<string, any>
 }
 
-// ─── Combined admin config (single file, no directive) ───
+// ─── Client admin config ('use client' file) ───
 
-export type AdminConfig = {
+export type ClientAdminConfig = {
   admin?: AdminComponentsConfig
   collections?: Record<string, CollectionComponentsConfig>
-  fields?: Record<string, FieldConfig>
+  fields?: Record<string, ClientFieldConfig>
   globals?: Record<string, GlobalComponentsConfig>
 }
 
-// ─── Shared config (optional, for validators that run on both client and server) ───
+// ─── RSC admin config (no directive file) ───
+
+export type RscAdminConfig = {
+  admin?: AdminComponentsConfig
+  collections?: Record<string, CollectionComponentsConfig>
+  fields?: Record<string, RscFieldConfig>
+  globals?: Record<string, GlobalComponentsConfig>
+}
+
+// ─── Shared config (no directive, auto-merged into all configs) ───
 
 export type SharedFieldConfig = {
   validate?: Validate
@@ -118,10 +131,48 @@ export type SharedAdminConfig = {
 
 // ─── Builder functions ───
 
-export function defineAdminConfig<TConfig extends AdminConfig>(config: TConfig): TConfig {
+export function defineClientConfig<TConfig extends ClientAdminConfig>(config: TConfig): TConfig {
+  return config
+}
+
+export function defineRscConfig<TConfig extends RscAdminConfig>(config: TConfig): TConfig {
   return config
 }
 
 export function defineSharedConfig<TConfig extends SharedAdminConfig>(config: TConfig): TConfig {
   return config
+}
+
+export function getRscSchemaPaths(rscConfig: RscAdminConfig): string[] {
+  if (!rscConfig.fields) {
+    return []
+  }
+  return Object.entries(rscConfig.fields)
+    .filter(
+      ([_, fieldConfig]) =>
+        fieldConfig.components && Object.keys(fieldConfig.components).length > 0,
+    )
+    .map(([path]) => path)
+}
+
+export function mergeSharedIntoClientConfig(
+  clientConfig: ClientAdminConfig,
+  sharedConfig?: SharedAdminConfig,
+): ClientAdminConfig {
+  if (!sharedConfig?.fields) {
+    return clientConfig
+  }
+
+  const merged: ClientAdminConfig = { ...clientConfig, fields: { ...clientConfig.fields } }
+
+  for (const [path, sharedField] of Object.entries(sharedConfig.fields)) {
+    if (!merged.fields![path]) {
+      merged.fields![path] = {}
+    }
+    if (sharedField.validate && !merged.fields![path].validate) {
+      merged.fields![path] = { ...merged.fields![path], validate: sharedField.validate }
+    }
+  }
+
+  return merged
 }

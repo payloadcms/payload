@@ -1,15 +1,33 @@
 'use client'
-import type { AdminConfig } from 'payload'
+import type { ClientAdminConfig, RscAdminConfig } from 'payload'
 
 import { createContext, use } from 'react'
 
-const AdminConfigContext = createContext<AdminConfig>({})
+const ClientAdminConfigContext = createContext<ClientAdminConfig>({})
+const RscAdminConfigContext = createContext<RscAdminConfig>({})
+const RscSchemaPathsContext = createContext<string[]>([])
 
-export const AdminConfigProvider: React.FC<{
-  readonly adminConfig: AdminConfig
+export const ClientAdminConfigProvider: React.FC<{
   readonly children: React.ReactNode
-}> = ({ adminConfig, children }) => {
-  return <AdminConfigContext value={adminConfig}>{children}</AdminConfigContext>
+  readonly config: ClientAdminConfig
+}> = ({ children, config }) => {
+  return <ClientAdminConfigContext value={config}>{children}</ClientAdminConfigContext>
 }
 
-export const useAdminConfig = (): AdminConfig => use(AdminConfigContext)
+export const RscAdminConfigProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly config: RscAdminConfig
+}> = ({ children, config }) => {
+  return <RscAdminConfigContext value={config}>{children}</RscAdminConfigContext>
+}
+
+export const RscSchemaPathsProvider: React.FC<{
+  readonly children: React.ReactNode
+  readonly paths: string[]
+}> = ({ children, paths }) => {
+  return <RscSchemaPathsContext value={paths}>{children}</RscSchemaPathsContext>
+}
+
+export const useClientAdminConfig = (): ClientAdminConfig => use(ClientAdminConfigContext)
+export const useRscAdminConfig = (): RscAdminConfig => use(RscAdminConfigContext)
+export const useRscSchemaPaths = (): string[] => use(RscSchemaPathsContext)

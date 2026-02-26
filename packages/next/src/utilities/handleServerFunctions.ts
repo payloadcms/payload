@@ -11,12 +11,14 @@ import { renderDocumentHandler } from '../views/Document/handleServerFunction.js
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
 import { renderListHandler } from '../views/List/handleServerFunction.js'
 import { initReq } from './initReq.js'
+import { renderAdminRscHandler } from './renderAdminRsc.js'
 import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
+  'render-admin-rsc': renderAdminRscHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,

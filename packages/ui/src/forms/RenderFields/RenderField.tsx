@@ -7,7 +7,7 @@ import type {
   SanitizedFieldPermissions,
 } from 'payload'
 
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
@@ -33,7 +33,8 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
-import { useAdminConfig } from '../../providers/AdminConfig/index.js'
+import { useAdminFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -53,13 +54,46 @@ export function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
-  const adminConfig = useAdminConfig()
-  const fieldConfig = schemaPath ? adminConfig.fields?.[schemaPath] : undefined
+  const { clientConfig, hasRscComponents } = useAdminFieldConfig(schemaPath)
+  const { serverFunction } = useServerFunctions()
 
-  const AdminFieldComponent = fieldConfig?.components?.Field
-  const AdminLabel = fieldConfig?.components?.Label
-  const AdminDescription = fieldConfig?.components?.Description
-  const adminValidate = fieldConfig?.validate
+  const [rscNodes, setRscNodes] = useState<Record<string, React.ReactNode>>({})
+
+  const fetchRscComponent = useCallback(
+    async (componentSlot: string) => {
+      if (!schemaPath) {
+        return
+      }
+      try {
+        const result = await serverFunction({
+          name: 'render-admin-rsc',
+          args: { componentSlot, schemaPath },
+        })
+        if (result && typeof result === 'object' && 'renderedComponent' in result) {
+          setRscNodes((prev) => ({
+            ...prev,
+            [componentSlot]: (result as any).renderedComponent,
+          }))
+        }
+      } catch (_err) {
+        // RSC rendering failed, fall through to default
+      }
+    },
+    [schemaPath, serverFunction],
+  )
+
+  useEffect(() => {
+    if (hasRscComponents) {
+      void fetchRscComponent('Field')
+      void fetchRscComponent('Label')
+      void fetchRscComponent('Description')
+    }
+  }, [hasRscComponents, fetchRscComponent])
+
+  const AdminFieldComponent = clientConfig?.components?.Field ?? rscNodes.Field
+  const AdminLabel = clientConfig?.components?.Label ?? rscNodes.Label
+  const AdminDescription = clientConfig?.components?.Description ?? rscNodes.Description
+  const adminValidate = clientConfig?.validate
 
   const baseFieldProps: { validate?: any } & Pick<
     ClientComponentProps,

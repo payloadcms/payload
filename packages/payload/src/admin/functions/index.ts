@@ -13,7 +13,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
-import type { AdminConfig } from '../buildClientConfig.js'
+import type { RscAdminConfig } from '../buildClientConfig.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -27,7 +27,7 @@ export type InitReqResult = {
 }
 
 export type DefaultServerFunctionArgs = {
-  adminConfig?: AdminConfig
+  adminConfig?: RscAdminConfig
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {
@@ -54,7 +54,7 @@ export type ServerFunctionConfig = {
 
 export type ServerFunctionHandler = (
   args: {
-    adminConfig?: AdminConfig
+    adminConfig?: RscAdminConfig
     config: Promise<SanitizedConfig> | SanitizedConfig
     /**
      * A map of server function names to their implementations. These are

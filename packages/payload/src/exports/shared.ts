@@ -1,11 +1,19 @@
-export { defineAdminConfig, defineSharedConfig } from '../admin/buildClientConfig.js'
+export {
+  defineClientConfig,
+  defineRscConfig,
+  defineSharedConfig,
+  getRscSchemaPaths,
+  mergeSharedIntoClientConfig,
+} from '../admin/buildClientConfig.js'
 export type {
   AdminComponentsConfig,
-  AdminConfig,
+  ClientAdminConfig,
+  ClientFieldConfig,
   CollectionComponentsConfig,
   FieldComponentConfig,
-  FieldConfig,
   GlobalComponentsConfig,
+  RscAdminConfig,
+  RscFieldConfig,
   SharedAdminConfig,
   SharedFieldConfig,
 } from '../admin/buildClientConfig.js'

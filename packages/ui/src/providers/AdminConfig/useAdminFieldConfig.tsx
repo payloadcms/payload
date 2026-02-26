@@ -1,14 +1,23 @@
 'use client'
-import type { FieldConfig } from 'payload'
+import type { ClientFieldConfig } from 'payload'
 
-import { useAdminConfig } from './index.js'
+import { useClientAdminConfig, useRscSchemaPaths } from './index.js'
 
-export const useAdminFieldConfig = (schemaPath: string | undefined): FieldConfig | undefined => {
-  const adminConfig = useAdminConfig()
+export type AdminFieldConfigResult = {
+  clientConfig?: ClientFieldConfig
+  hasRscComponents: boolean
+}
+
+export const useAdminFieldConfig = (schemaPath: string | undefined): AdminFieldConfigResult => {
+  const clientConfig = useClientAdminConfig()
+  const rscPaths = useRscSchemaPaths()
 
   if (!schemaPath) {
-    return undefined
+    return { hasRscComponents: false }
   }
 
-  return adminConfig.fields?.[schemaPath]
+  return {
+    clientConfig: clientConfig.fields?.[schemaPath],
+    hasRscComponents: rscPaths.includes(schemaPath),
+  }
 }

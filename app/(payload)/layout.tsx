@@ -6,7 +6,8 @@ import config from '@payload-config'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
-import adminConfig from '../../test/_community/payload.config.admin.js'
+import rscAdminConfig from '../../test/_community/payload.config.admin.rsc.js'
+import { ClientConfigBridge } from './admin/ClientConfigBridge.js'
 import './custom.scss'
 
 type Args = {
@@ -17,14 +18,14 @@ const serverFunction: ServerFunctionClient = async function (args) {
   'use server'
   return handleServerFunctions({
     ...args,
-    adminConfig,
+    adminConfig: rscAdminConfig,
     config,
   })
 }
 
 const Layout = ({ children }: Args) => (
-  <RootLayout adminConfig={adminConfig} config={config} serverFunction={serverFunction}>
-    {children}
+  <RootLayout config={config} rscAdminConfig={rscAdminConfig} serverFunction={serverFunction}>
+    <ClientConfigBridge>{children}</ClientConfigBridge>
   </RootLayout>
 )
 

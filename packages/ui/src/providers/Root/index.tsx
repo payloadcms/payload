@@ -1,10 +1,10 @@
 'use client'
 import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
-  AdminConfig,
   ClientConfig,
   LanguageOptions,
   Locale,
+  RscAdminConfig,
   SanitizedPermissions,
   ServerFunctionClient,
   TypedUser,
@@ -24,7 +24,7 @@ import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
-import { AdminConfigProvider } from '../AdminConfig/index.js'
+import { RscAdminConfigProvider, RscSchemaPathsProvider } from '../AdminConfig/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -42,7 +42,6 @@ import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
-  readonly adminConfig?: AdminConfig
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
@@ -52,6 +51,8 @@ type Props = {
   readonly languageOptions: LanguageOptions
   readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
+  readonly rscAdminConfig?: RscAdminConfig
+  readonly rscSchemaPaths?: string[]
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
@@ -60,7 +61,6 @@ type Props = {
 }
 
 export const RootProvider: React.FC<Props> = ({
-  adminConfig,
   children,
   config,
   dateFNSKey,
@@ -70,6 +70,8 @@ export const RootProvider: React.FC<Props> = ({
   languageOptions,
   locale,
   permissions,
+  rscAdminConfig,
+  rscSchemaPaths,
   serverFunction,
   switchLanguageServerAction,
   theme,
@@ -86,68 +88,70 @@ export const RootProvider: React.FC<Props> = ({
             cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           >
             <ConfigProvider config={config}>
-              <AdminConfigProvider adminConfig={adminConfig ?? {}}>
-                <ClientFunctionProvider>
-                  <TranslationProvider
-                    dateFNSKey={dateFNSKey}
-                    fallbackLang={fallbackLang}
-                    language={languageCode}
-                    languageOptions={languageOptions}
-                    switchLanguageServerAction={switchLanguageServerAction}
-                    translations={translations}
-                  >
-                    <WindowInfoProvider
-                      breakpoints={{
-                        l: '(max-width: 1440px)',
-                        m: '(max-width: 1024px)',
-                        s: '(max-width: 768px)',
-                        xs: '(max-width: 400px)',
-                      }}
+              <RscAdminConfigProvider config={rscAdminConfig ?? {}}>
+                <RscSchemaPathsProvider paths={rscSchemaPaths ?? []}>
+                  <ClientFunctionProvider>
+                    <TranslationProvider
+                      dateFNSKey={dateFNSKey}
+                      fallbackLang={fallbackLang}
+                      language={languageCode}
+                      languageOptions={languageOptions}
+                      switchLanguageServerAction={switchLanguageServerAction}
+                      translations={translations}
                     >
-                      <ScrollInfoProvider>
-                        <SearchParamsProvider>
-                          <ModalProvider
-                            classPrefix="payload"
-                            transTime={0}
-                            zIndex="var(--z-modal)"
-                          >
-                            <CloseModalOnRouteChange />
-                            <AuthProvider permissions={permissions} user={user}>
-                              <PreferencesProvider>
-                                <ThemeProvider theme={theme}>
-                                  <ParamsProvider>
-                                    <LocaleProvider locale={locale}>
-                                      <StepNavProvider>
-                                        <LoadingOverlayProvider>
-                                          <DocumentEventsProvider>
-                                            <NavProvider initialIsOpen={isNavOpen}>
-                                              <UploadHandlersProvider>
-                                                <DndContext
-                                                  collisionDetection={pointerWithin}
-                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                  id={dndContextID}
-                                                >
-                                                  {children}
-                                                </DndContext>
-                                              </UploadHandlersProvider>
-                                            </NavProvider>
-                                          </DocumentEventsProvider>
-                                        </LoadingOverlayProvider>
-                                      </StepNavProvider>
-                                    </LocaleProvider>
-                                  </ParamsProvider>
-                                </ThemeProvider>
-                              </PreferencesProvider>
-                              <ModalContainer />
-                              <StayLoggedInModal />
-                            </AuthProvider>
-                          </ModalProvider>
-                        </SearchParamsProvider>
-                      </ScrollInfoProvider>
-                    </WindowInfoProvider>
-                  </TranslationProvider>
-                </ClientFunctionProvider>
-              </AdminConfigProvider>
+                      <WindowInfoProvider
+                        breakpoints={{
+                          l: '(max-width: 1440px)',
+                          m: '(max-width: 1024px)',
+                          s: '(max-width: 768px)',
+                          xs: '(max-width: 400px)',
+                        }}
+                      >
+                        <ScrollInfoProvider>
+                          <SearchParamsProvider>
+                            <ModalProvider
+                              classPrefix="payload"
+                              transTime={0}
+                              zIndex="var(--z-modal)"
+                            >
+                              <CloseModalOnRouteChange />
+                              <AuthProvider permissions={permissions} user={user}>
+                                <PreferencesProvider>
+                                  <ThemeProvider theme={theme}>
+                                    <ParamsProvider>
+                                      <LocaleProvider locale={locale}>
+                                        <StepNavProvider>
+                                          <LoadingOverlayProvider>
+                                            <DocumentEventsProvider>
+                                              <NavProvider initialIsOpen={isNavOpen}>
+                                                <UploadHandlersProvider>
+                                                  <DndContext
+                                                    collisionDetection={pointerWithin}
+                                                    // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                    id={dndContextID}
+                                                  >
+                                                    {children}
+                                                  </DndContext>
+                                                </UploadHandlersProvider>
+                                              </NavProvider>
+                                            </DocumentEventsProvider>
+                                          </LoadingOverlayProvider>
+                                        </StepNavProvider>
+                                      </LocaleProvider>
+                                    </ParamsProvider>
+                                  </ThemeProvider>
+                                </PreferencesProvider>
+                                <ModalContainer />
+                                <StayLoggedInModal />
+                              </AuthProvider>
+                            </ModalProvider>
+                          </SearchParamsProvider>
+                        </ScrollInfoProvider>
+                      </WindowInfoProvider>
+                    </TranslationProvider>
+                  </ClientFunctionProvider>
+                </RscSchemaPathsProvider>
+              </RscAdminConfigProvider>
             </ConfigProvider>
           </RouteCache>
         </RouteTransitionProvider>

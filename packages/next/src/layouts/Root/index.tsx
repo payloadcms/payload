@@ -1,11 +1,16 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { AdminConfig, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type {
+  LanguageOptions,
+  RscAdminConfig,
+  SanitizedConfig,
+  ServerFunctionClient,
+} from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
-import { applyLocaleFiltering } from 'payload/shared'
+import { applyLocaleFiltering, getRscSchemaPaths } from 'payload/shared'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
@@ -22,16 +27,16 @@ export const metadata = {
 }
 
 export const RootLayout = async ({
-  adminConfig,
   children,
   config: configPromise,
   htmlProps = {},
+  rscAdminConfig,
   serverFunction,
 }: {
-  readonly adminConfig?: AdminConfig
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
+  readonly rscAdminConfig?: RscAdminConfig
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
@@ -103,7 +108,6 @@ export const RootLayout = async ({
       </head>
       <body>
         <RootProvider
-          adminConfig={adminConfig}
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
@@ -112,6 +116,8 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
+          rscAdminConfig={rscAdminConfig}
+          rscSchemaPaths={rscAdminConfig ? getRscSchemaPaths(rscAdminConfig) : undefined}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}

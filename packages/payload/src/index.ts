@@ -37,7 +37,13 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export { defineAdminConfig, defineSharedConfig } from './admin/buildClientConfig.js'
+export {
+  defineClientConfig,
+  defineRscConfig,
+  defineSharedConfig,
+  getRscSchemaPaths,
+  mergeSharedIntoClientConfig,
+} from './admin/buildClientConfig.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -121,11 +127,13 @@ import {
 } from './globals/operations/local/update.js'
 export type {
   AdminComponentsConfig,
-  AdminConfig,
+  ClientAdminConfig,
+  ClientFieldConfig,
   CollectionComponentsConfig,
   FieldComponentConfig,
-  FieldConfig,
   GlobalComponentsConfig,
+  RscAdminConfig,
+  RscFieldConfig,
   SharedAdminConfig,
   SharedFieldConfig,
 } from './admin/buildClientConfig.js'

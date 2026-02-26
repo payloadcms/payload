@@ -1,5 +1,4 @@
 /* eslint-disable no-restricted-exports */
-'use client'
 import { defineSharedConfig } from 'payload/shared'
 
 export default defineSharedConfig({
