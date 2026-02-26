@@ -535,6 +535,13 @@ export interface FieldBase {
   required?: boolean
   saveToJWT?: boolean | string
   /**
+   * Stable key for the schema path map in payload.config.admin.tsx.
+   * When set, this value can be used as the key in the admin config
+   * instead of (or in addition to) the auto-derived dot-notation path.
+   * Useful for plugins to provide stable, collision-free field identifiers.
+   */
+  schemaPathId?: string
+  /**
    * Allows you to modify the base JSON schema that is generated during generate:types for this field.
    * This JSON schema will be used to generate the TypeScript interface of this field.
    */
