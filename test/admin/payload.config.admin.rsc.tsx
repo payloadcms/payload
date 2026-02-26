@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-exports */
 import { defineRscConfig } from 'payload/shared'
-import React from 'react'
 
 import { AllButtons } from './collections/CustomFields/fields/Buttons/index.js'
 import { CustomServerDescription } from './collections/CustomFields/fields/Text/DescriptionServer.js'
@@ -177,7 +176,8 @@ export default defineRscConfig({
         edit: {
           api: {
             tab: {
-              Component: <CustomTabComponent label={overriddenDefaultRouteTabLabel} />,
+              clientProps: { label: overriddenDefaultRouteTabLabel },
+              Component: CustomTabComponent,
             },
           },
           customViewWithParam: {
@@ -208,10 +208,12 @@ export default defineRscConfig({
             },
           },
           myCustomViewWithCustomTab: {
-            Component: <CustomTabComponentView label={customTabComponent} />,
+            clientProps: { label: customTabComponent },
+            Component: CustomTabComponentView,
             path: customTabViewPath,
             tab: {
-              Component: <CustomTabComponent label={customTabComponent} />,
+              clientProps: { label: customTabComponent },
+              Component: CustomTabComponent,
             },
           },
           myCustomViewWithNestedPath: {
@@ -261,13 +263,10 @@ export default defineRscConfig({
       beforeListTable: [SelectPostsButton],
     },
     [postsCollectionSlug]: {
-      afterList: [<Banner message="AfterList custom component" />],
-      afterListTable: [<Banner message="AfterListTable custom component" />],
-      beforeList: [<Banner message="BeforeList custom component" />],
-      beforeListTable: [
-        <Banner message="BeforeListTable custom component" />,
-        ResetDefaultColumnsButton,
-      ],
+      afterList: [Banner],
+      afterListTable: [Banner],
+      beforeList: [Banner],
+      beforeListTable: [Banner, ResetDefaultColumnsButton],
       Description: ViewDescription,
       edit: {
         beforeDocumentControls: [CustomDraftButton, CustomSaveButton],
@@ -339,7 +338,8 @@ export default defineRscConfig({
         edit: {
           api: {
             tab: {
-              Component: <CustomTabComponent label={overriddenDefaultRouteTabLabel} />,
+              clientProps: { label: overriddenDefaultRouteTabLabel },
+              Component: CustomTabComponent,
             },
           },
           default: {
@@ -354,10 +354,12 @@ export default defineRscConfig({
             },
           },
           myCustomViewWithCustomTab: {
-            Component: <CustomTabComponentView label={customTabComponent} />,
+            clientProps: { label: customTabComponent },
+            Component: CustomTabComponentView,
             path: '/custom-tab-component',
             tab: {
-              Component: <CustomTabComponent label={customTabComponent} />,
+              clientProps: { label: customTabComponent },
+              Component: CustomTabComponent,
             },
           },
           versions: {
