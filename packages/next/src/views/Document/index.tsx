@@ -57,7 +57,6 @@ export const renderDocument = async ({
   disableActions,
   documentSubViewType,
   drawerSlug,
-  importMap,
   initialData,
   initPageResult,
   overrideEntityVisibility,
@@ -451,7 +450,6 @@ export const renderDocument = async ({
             {RenderServerComponent({
               clientProps,
               Component: View,
-              importMap,
               serverProps: documentViewServerProps,
             })}
           </EditDepthProvider>

@@ -1,5 +1,10 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type {
+  LanguageOptions,
+  RscAdminConfig,
+  SanitizedConfig,
+  ServerFunctionClient,
+} from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
@@ -25,13 +30,13 @@ export const RootLayout = async ({
   children,
   config: configPromise,
   htmlProps = {},
-  importMap,
+  rscOverrides,
   serverFunction,
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
-  readonly importMap: ImportMap
+  readonly rscOverrides?: RscAdminConfig
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
@@ -45,7 +50,7 @@ export const RootLayout = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
+  } = await initReq({ configPromise, key: 'RootLayout' })
 
   const theme = getRequestTheme({
     config,
@@ -85,7 +90,6 @@ export const RootLayout = async ({
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
-    importMap,
     user: req.user,
   })
 
@@ -112,6 +116,7 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
+          rscOverrides={rscOverrides}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
@@ -122,7 +127,6 @@ export const RootLayout = async ({
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
             <NestProviders
-              importMap={req.payload.importMap}
               providers={config.admin?.components?.providers}
               serverProps={{
                 i18n: req.i18n,

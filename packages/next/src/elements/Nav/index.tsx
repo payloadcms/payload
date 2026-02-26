@@ -81,7 +81,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
     Component: logout?.Button,
     Fallback: Logout,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,
@@ -102,7 +101,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
               viewType,
             },
             Component: item,
-            importMap: payload.importMap,
             key: `settings-menu-item-${index}`,
             serverProps: {
               i18n,
@@ -123,7 +121,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
       viewType,
     },
     Component: beforeNav,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,
@@ -141,7 +138,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
       viewType,
     },
     Component: beforeNavLinks,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,
@@ -159,7 +155,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
       viewType,
     },
     Component: afterNavLinks,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,
@@ -177,7 +172,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
       viewType,
     },
     Component: afterNav,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,

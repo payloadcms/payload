@@ -1,7 +1,6 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
 import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
-import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
@@ -16,7 +15,6 @@ import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
   'render-document': renderDocumentHandler,
@@ -34,20 +32,17 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     name: fnKey,
     args: fnArgs,
     config: configPromise,
-    importMap,
     serverFunctions: extraServerFunctions,
   } = args
 
   const { cookies, locale, permissions, req } = await initReq({
     configPromise,
-    importMap,
     key: 'RootLayout',
   })
 
   const augmentedArgs: DefaultServerFunctionArgs = {
     ...fnArgs,
     cookies,
-    importMap,
     locale,
     permissions,
     req,

@@ -38,7 +38,6 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
   const clientConfig = getClientConfig({
     config,
     i18n,
-    importMap: req.payload.importMap,
     user,
   })
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -91,7 +90,6 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     documentSubViewType: 'default',
     drawerSlug,
     i18n,
-    importMap: payload.importMap,
     initialData,
     initPageResult: {
       collectionConfig: payload?.collections?.[collectionSlug]?.config,

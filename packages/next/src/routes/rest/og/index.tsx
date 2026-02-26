@@ -52,7 +52,6 @@ export const generateOGImage: PayloadHandler = async (req) => {
           Fallback={PayloadIcon}
           fontFamily={fontFamily}
           Icon={config.admin?.components?.graphics?.Icon}
-          importMap={req.payload.importMap}
           leader={leader}
           title={title}
         />

@@ -103,7 +103,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     Actions[key] = RenderServerComponent({
       clientProps,
       Component: action,
-      importMap: payload.importMap,
       serverProps,
     })
   }
@@ -112,7 +111,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     clientProps,
     Component: CustomNav,
     Fallback: DefaultNav,
-    importMap: payload.importMap,
     serverProps,
   })
 
@@ -123,7 +121,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           {RenderServerComponent({
             clientProps,
             Component: CustomHeader,
-            importMap: payload.importMap,
             serverProps,
           })}
           <div style={{ position: 'relative' }}>
@@ -142,7 +139,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     avatar !== 'gravatar' && avatar !== 'default'
                       ? RenderServerComponent({
                           Component: avatar.Component,
-                          importMap: payload.importMap,
                           serverProps,
                         })
                       : undefined
@@ -151,7 +147,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     components?.graphics?.Icon
                       ? RenderServerComponent({
                           Component: components.graphics.Icon,
-                          importMap: payload.importMap,
                           serverProps,
                         })
                       : undefined

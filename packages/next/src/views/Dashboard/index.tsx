@@ -36,7 +36,6 @@ export async function DashboardView(props: AdminViewServerProps) {
         } satisfies DashboardViewClientProps,
         Component: config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
-        importMap: payload.importMap,
         serverProps: {
           ...props,
           globalData,

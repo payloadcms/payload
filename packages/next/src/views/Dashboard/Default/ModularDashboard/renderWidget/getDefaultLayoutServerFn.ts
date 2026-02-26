@@ -29,7 +29,6 @@ export const getDefaultLayoutHandler: ServerFunction<
   }
 
   const { defaultLayout = [], widgets = [] } = req.payload.config.admin.dashboard || {}
-  const { importMap } = req.payload
 
   const layoutItems = await getItemsFromConfig(defaultLayout, req, widgets)
 
@@ -38,7 +37,6 @@ export const getDefaultLayoutHandler: ServerFunction<
     return {
       component: RenderServerComponent({
         Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
-        importMap,
         serverProps: {
           cookies,
           locale,

@@ -336,7 +336,7 @@ export const renderListView = async (
     }
   }
 
-  const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+  const renderedFilters = renderFilters(collectionConfig.fields)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
     fields: collectionConfig.fields,
@@ -436,7 +436,6 @@ export const renderListView = async (
             Component:
               ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
             Fallback: DefaultListView,
-            importMap: payload.importMap,
             serverProps,
           })}
         </ListQueryProvider>

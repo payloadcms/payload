@@ -225,7 +225,6 @@ export async function VersionView(props: DocumentViewServerProps) {
     config: getClientConfig({
       config: payload.config,
       i18n,
-      importMap: payload.importMap,
       user,
     }),
     globalSlug,

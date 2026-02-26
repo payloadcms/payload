@@ -1,4 +1,4 @@
-import type { ImportMap, PayloadComponent } from 'payload'
+import type { PayloadComponent } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
@@ -8,25 +8,15 @@ export const OGImage: React.FC<{
   Fallback: React.ComponentType
   fontFamily?: string
   Icon: PayloadComponent
-  importMap: ImportMap
   leader?: string
   title?: string
-}> = ({
-  description,
-  Fallback,
-  fontFamily = 'Arial, sans-serif',
-  Icon,
-  importMap,
-  leader,
-  title,
-}) => {
+}> = ({ description, Fallback, fontFamily = 'Arial, sans-serif', Icon, leader, title }) => {
   const IconComponent = RenderServerComponent({
     clientProps: {
       fill: 'white',
     },
     Component: Icon,
     Fallback,
-    importMap,
   })
   return (
     <div

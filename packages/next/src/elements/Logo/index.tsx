@@ -20,7 +20,6 @@ export const Logo: React.FC<ServerProps> = (props) => {
   return RenderServerComponent({
     Component: CustomLogo,
     Fallback: PayloadLogo,
-    importMap: payload.importMap,
     serverProps: {
       i18n,
       locale,

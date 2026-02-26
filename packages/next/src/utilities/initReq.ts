@@ -1,5 +1,5 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { ImportMap, InitReqResult, PayloadRequest, SanitizedConfig } from 'payload'
+import type { InitReqResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
@@ -31,13 +31,11 @@ const reqCache = selectiveCache<InitReqResult>('req')
 export const initReq = async function ({
   canSetHeaders,
   configPromise,
-  importMap,
   key,
   overrides,
 }: {
   canSetHeaders?: boolean
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
-  importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
 }): Promise<InitReqResult> {
@@ -46,7 +44,7 @@ export const initReq = async function ({
 
   const partialResult = await partialReqCache.get(async () => {
     const config = await configPromise
-    const payload = await getPayload({ config, cron: true, importMap })
+    const payload = await getPayload({ config, cron: true })
     const languageCode = getRequestLanguage({
       config,
       cookies,

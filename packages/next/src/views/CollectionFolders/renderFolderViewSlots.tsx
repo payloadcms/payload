@@ -39,7 +39,6 @@ export const renderFolderViewSlots = ({
     result.AfterFolderList = RenderServerComponent({
       clientProps: clientProps satisfies AfterFolderListClientProps,
       Component: collectionConfig.admin.components.afterList,
-      importMap: payload.importMap,
       serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
@@ -50,7 +49,6 @@ export const renderFolderViewSlots = ({
       RenderServerComponent({
         clientProps,
         Component: listMenuItems,
-        importMap: payload.importMap,
         serverProps,
       }),
     ]
@@ -60,7 +58,6 @@ export const renderFolderViewSlots = ({
     result.AfterFolderListTable = RenderServerComponent({
       clientProps: clientProps satisfies AfterFolderListTableClientProps,
       Component: collectionConfig.admin.components.afterListTable,
-      importMap: payload.importMap,
       serverProps: serverProps satisfies AfterFolderListTableServerPropsOnly,
     })
   }
@@ -69,7 +66,6 @@ export const renderFolderViewSlots = ({
     result.BeforeFolderList = RenderServerComponent({
       clientProps: clientProps satisfies BeforeFolderListClientProps,
       Component: collectionConfig.admin.components.beforeList,
-      importMap: payload.importMap,
       serverProps: serverProps satisfies BeforeFolderListServerPropsOnly,
     })
   }
@@ -78,7 +74,6 @@ export const renderFolderViewSlots = ({
     result.BeforeFolderListTable = RenderServerComponent({
       clientProps: clientProps satisfies BeforeFolderListTableClientProps,
       Component: collectionConfig.admin.components.beforeListTable,
-      importMap: payload.importMap,
       serverProps: serverProps satisfies BeforeFolderListTableServerPropsOnly,
     })
   }
@@ -90,7 +85,6 @@ export const renderFolderViewSlots = ({
         description,
       } satisfies ViewDescriptionClientProps,
       Component: collectionConfig.admin.components.Description,
-      importMap: payload.importMap,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }

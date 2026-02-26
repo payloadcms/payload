@@ -44,7 +44,6 @@ export const renderListHandler: ServerFunction<
   const clientConfig = getClientConfig({
     config,
     i18n,
-    importMap: payload.importMap,
     user,
   })
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -96,7 +95,6 @@ export const renderListHandler: ServerFunction<
     drawerSlug,
     enableRowSelections,
     i18n,
-    importMap: payload.importMap,
     initPageResult: {
       collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,

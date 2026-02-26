@@ -155,7 +155,6 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
           {RenderServerComponent({
             Component: config.admin?.components?.views?.account?.Component,
             Fallback: EditView,
-            importMap: payload.importMap,
             serverProps: {
               doc: data,
               hasPublishedDoc,

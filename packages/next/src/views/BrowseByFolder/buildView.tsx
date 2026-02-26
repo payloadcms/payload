@@ -222,7 +222,6 @@ export const buildBrowseByFolderView = async (
           } satisfies FolderListViewClientProps,
           // Component:config.folders?.components?.views?.BrowseByFolders?.Component,
           Fallback: DefaultBrowseByFolderView,
-          importMap: payload.importMap,
           serverProps,
         })}
       </>

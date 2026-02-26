@@ -66,7 +66,6 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
       </div>
       {RenderServerComponent({
         Component: beforeLogin,
-        importMap: payload.importMap,
         serverProps: {
           i18n,
           locale,
@@ -87,7 +86,6 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
       )}
       {RenderServerComponent({
         Component: afterLogin,
-        importMap: payload.importMap,
         serverProps: {
           i18n,
           locale,
