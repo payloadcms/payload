@@ -1,8 +1,8 @@
 import type tslib from 'typescript/lib/tsserverlibrary'
 
 export type PayloadComponentContext =
+  | { exportNameValue?: string; node: tslib.StringLiteral; type: 'path' }
   | { node: tslib.StringLiteral; pathValue?: string; type: 'exportName' }
-  | { node: tslib.StringLiteral; type: 'path' }
   | { node: tslib.StringLiteral; type: 'string' }
 
 /**
@@ -31,7 +31,19 @@ export function getPayloadComponentContext(
 
     if (objectContextualType && isRawPayloadComponentType(ts, objectContextualType)) {
       if (propName === 'path') {
-        return { type: 'path', node }
+        const exportNameProp = objectLiteral.properties.find(
+          (p): p is tslib.PropertyAssignment =>
+            ts.isPropertyAssignment(p) &&
+            ts.isIdentifier(p.name) &&
+            p.name.text === 'exportName' &&
+            ts.isStringLiteral(p.initializer),
+        )
+        const exportNameValue =
+          exportNameProp && ts.isStringLiteral(exportNameProp.initializer)
+            ? exportNameProp.initializer.text
+            : undefined
+
+        return { type: 'path', exportNameValue, node }
       }
 
       if (propName === 'exportName') {

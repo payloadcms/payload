@@ -1,4 +1,5 @@
-import type {} from './payload-types.d.ts'
+// @ts-ignore - ambient type declarations
+import './payload-types.d.ts'
 
 const validField: FieldConfig = {
   name: 'test',
@@ -62,6 +63,65 @@ const objectFormInvalidExport: FieldConfig = {
       Field: {
         exportName: 'DoesNotExist',
         path: '/components/MyField.tsx',
+      },
+    },
+  },
+}
+
+const objectFormWithHash: FieldConfig = {
+  name: 'objectFormHash',
+  type: 'text',
+  admin: {
+    components: {
+      Field: {
+        path: '/components/MyField.tsx#MyField',
+      },
+    },
+  },
+}
+
+const objectFormDirIndex: FieldConfig = {
+  name: 'objectFormDirIndex',
+  type: 'text',
+  admin: {
+    components: {
+      Field: {
+        path: '/components/views/CustomView#CustomView',
+      },
+    },
+  },
+}
+
+const noDefaultExport: FieldConfig = {
+  name: 'noDefault',
+  type: 'text',
+  admin: {
+    components: {
+      Field: '/components/icons/Icon',
+    },
+  },
+}
+
+const noDefaultExportObjectForm: FieldConfig = {
+  name: 'noDefaultObj',
+  type: 'text',
+  admin: {
+    components: {
+      Field: {
+        path: '/components/icons/Icon',
+      },
+    },
+  },
+}
+
+const objectFormWithExportName: FieldConfig = {
+  name: 'withExportName',
+  type: 'text',
+  admin: {
+    components: {
+      Field: {
+        exportName: 'Icon',
+        path: '/components/icons/Icon',
       },
     },
   },

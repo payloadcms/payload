@@ -92,10 +92,15 @@ function getFileContent(): string {
   return ts.sys.readFile(TEST_CONFIG_FILE)!
 }
 
-function findStringPosition(content: string, searchString: string): number {
-  const idx = content.indexOf(searchString)
-  if (idx === -1) {
-    throw new Error(`Could not find "${searchString}" in test file`)
+function findStringPosition(content: string, searchString: string, occurrence = 1): number {
+  let idx = -1
+  for (let i = 0; i < occurrence; i++) {
+    idx = content.indexOf(searchString, idx + 1)
+    if (idx === -1) {
+      throw new Error(
+        `Could not find occurrence ${i + 1}/${occurrence} of "${searchString}" in test file`,
+      )
+    }
   }
   return idx + 1
 }
@@ -164,6 +169,69 @@ describe('@payloadcms/typescript-plugin', () => {
         typeof d.messageText === 'string' ? d.messageText : d.messageText.messageText,
       )
       expect(messages.some((m) => m.includes('Available exports'))).toBe(true)
+    })
+
+    it('should handle # in object form path property', () => {
+      const diagnostics = service.getSemanticDiagnostics(TEST_CONFIG_FILE)
+      const pluginDiagnostics = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+      const matching = pluginDiagnostics.filter((d) => {
+        const start = d.start!
+        const text = content.substring(start, start + d.length!)
+        return text === '/components/MyField.tsx#MyField'
+      })
+
+      expect(matching, 'Object form { path: "...#export" } should not error').toHaveLength(0)
+    })
+
+    it('should error when string path without # points to module with no default export', () => {
+      const diagnostics = service.getSemanticDiagnostics(TEST_CONFIG_FILE)
+      const exportErrors = diagnostics.filter((d) => d.code === 71002)
+
+      const matching = exportErrors.filter((d) => {
+        const start = d.start!
+        const text = content.substring(start, start + d.length!)
+        return text === '/components/icons/Icon'
+      })
+      expect(
+        matching.length,
+        "String form '/components/icons/Icon' should error for missing default export",
+      ).toBeGreaterThanOrEqual(1)
+    })
+
+    it('should error when object form path without # points to module with no default export', () => {
+      const diagnostics = service.getSemanticDiagnostics(TEST_CONFIG_FILE)
+      const exportErrors = diagnostics.filter((d) => d.code === 71002)
+
+      const matching = exportErrors.filter((d) => {
+        const msg = typeof d.messageText === 'string' ? d.messageText : d.messageText.messageText
+        return msg.includes('icons/Icon') && msg.includes("'default'")
+      })
+      // At least 2: one from the string form, one from the object form path property
+      expect(
+        matching.length,
+        'Both string and object form should report missing default export',
+      ).toBeGreaterThanOrEqual(2)
+    })
+
+    it('should not error when sibling exportName provides a valid export', () => {
+      const diagnostics = service.getSemanticDiagnostics(TEST_CONFIG_FILE)
+      const pluginDiags = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+      // The objectFormWithExportName fixture has path: '/components/icons/Icon' with exportName: 'Icon'
+      // The path property itself should NOT error because the sibling exportName overrides the default
+      // Find diagnostics that point to the 3rd occurrence of '/components/icons/Icon' (the one with exportName sibling)
+      const matching = pluginDiags.filter((d) => {
+        const start = d.start!
+        const text = content.substring(start, start + d.length!)
+        return text === '/components/icons/Icon'
+      })
+
+      // Should be exactly 2 (string form + object form without exportName), NOT 3
+      expect(
+        matching.length,
+        'path with sibling exportName should not report missing default export',
+      ).toBe(2)
     })
 
     it('should validate object form exportName', () => {
@@ -255,6 +323,64 @@ describe('@payloadcms/typescript-plugin', () => {
       expect(definition).toBeDefined()
       expect(definition!.definitions).toBeDefined()
       expect(definition!.definitions![0]!.fileName).toContain('CustomView/index.tsx')
+    })
+
+    it('should navigate to definition for object form path with #', () => {
+      // Use 2nd occurrence — first is the string form, second is the object form path property
+      const searchStr = '/components/MyField.tsx#MyField'
+      const pos = findStringPosition(content, searchStr, 2)
+
+      const definition = service.getDefinitionAndBoundSpan(TEST_CONFIG_FILE, pos)
+
+      expect(definition).toBeDefined()
+      expect(definition!.definitions).toBeDefined()
+      expect(definition!.definitions!.length).toBeGreaterThan(0)
+      expect(definition!.definitions![0]!.fileName).toContain('MyField.tsx')
+      expect(definition!.definitions![0]!.name).toBe('MyField')
+    })
+
+    it('should navigate to definition for object form path with dir/index resolution', () => {
+      const searchStr = '/components/views/CustomView#CustomView'
+      const pos = findStringPosition(content, searchStr)
+
+      const definition = service.getDefinitionAndBoundSpan(TEST_CONFIG_FILE, pos)
+
+      expect(definition).toBeDefined()
+      expect(definition!.definitions).toBeDefined()
+      expect(definition!.definitions!.length).toBeGreaterThan(0)
+      expect(definition!.definitions![0]!.fileName).toContain('CustomView/index.tsx')
+      expect(definition!.definitions![0]!.name).toBe('CustomView')
+    })
+  })
+
+  describe('object form path with #', () => {
+    it('should provide export completions after # in path property', () => {
+      // Use 2nd occurrence to target the object form, not the string form
+      const searchStr = '/components/MyField.tsx#MyField'
+      const pos = findStringPosition(content, searchStr, 2)
+      const hashOffset = searchStr.indexOf('#')
+      const cursorPos = pos + hashOffset + 1
+
+      const completions = service.getCompletionsAtPosition(TEST_CONFIG_FILE, cursorPos, {})
+
+      expect(completions).toBeDefined()
+      const names = completions!.entries.map((e) => e.name)
+      expect(names).toContain('MyField')
+      expect(names).toContain('MyLabel')
+    })
+
+    it('should provide export completions after # in path with dir/index resolution', () => {
+      const searchStr = '/components/views/CustomView#CustomView'
+      const pos = findStringPosition(content, searchStr)
+      const hashOffset = searchStr.indexOf('#')
+      const cursorPos = pos + hashOffset + 1
+
+      const completions = service.getCompletionsAtPosition(TEST_CONFIG_FILE, cursorPos, {})
+
+      expect(completions).toBeDefined()
+      const names = completions!.entries.map((e) => e.name)
+      expect(names).toContain('CustomView')
+      expect(names).toContain('default')
     })
   })
 })

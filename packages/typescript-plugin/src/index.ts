@@ -13,6 +13,7 @@ function init(modules: { typescript: typeof tslib }) {
 
     const baseDirConfig: string | undefined = info.config?.baseDir
     const baseDirCache = new Map<string, string | undefined>()
+    const sys = info.serverHost || ts.sys
 
     const proxy: tslib.LanguageService = Object.create(null)
 
@@ -33,7 +34,7 @@ function init(modules: { typescript: typeof tslib }) {
         return cached
       }
 
-      const detected = findPayloadConfigDir(ts, fileName)
+      const detected = findPayloadConfigDir(sys, fileName)
       baseDirCache.set(fileName, detected)
 
       if (detected) {
@@ -73,7 +74,7 @@ function init(modules: { typescript: typeof tslib }) {
 
           if (node && ts.isStringLiteral(node)) {
             const baseDir = getBaseDir(fileName)
-            const result = getPayloadCompletions(ts, node, position, checker, program, baseDir)
+            const result = getPayloadCompletions(ts, node, position, checker, program, baseDir, sys)
             if (result) {
               return result
             }
@@ -137,12 +138,28 @@ function getPayloadDiagnostics(
       if (context?.type === 'string') {
         validateFullComponentString(ts, node, sourceFile, checker, program, diagnostics, baseDir)
       } else if (context?.type === 'path') {
-        validateModulePath(ts, node, node.text, sourceFile, program, diagnostics, baseDir)
-      } else if (context?.type === 'exportName' && context.pathValue) {
+        // Payload allows '#export' inside the path property (same as string form)
+        const parsed = parsePayloadComponentString(node.text)
+        // Sibling exportName property overrides the parsed export name
+        const exportName = context.exportNameValue ?? parsed.exportName
+        validateModulePath(ts, node, parsed.path, sourceFile, program, diagnostics, baseDir)
         validateExportName(
           ts,
           node,
-          context.pathValue,
+          parsed.path,
+          exportName,
+          sourceFile,
+          program,
+          diagnostics,
+          baseDir,
+        )
+      } else if (context?.type === 'exportName' && context.pathValue) {
+        // The sibling path property may also contain '#export'
+        const { path: cleanPath } = parsePayloadComponentString(context.pathValue)
+        validateExportName(
+          ts,
+          node,
+          cleanPath,
           node.text,
           sourceFile,
           program,
@@ -292,6 +309,7 @@ function getPayloadCompletions(
   checker: tslib.TypeChecker,
   program: tslib.Program,
   baseDir: string | undefined,
+  sys: tslib.System,
 ): tslib.CompletionInfo | undefined {
   const context = getPayloadComponentContext(ts, node, checker)
   if (!context) {
@@ -299,7 +317,7 @@ function getPayloadCompletions(
   }
 
   if (context.type === 'string') {
-    return getStringFormCompletions(ts, node, position, program, baseDir)
+    return getStringFormCompletions(ts, node, position, program, baseDir, sys)
   }
 
   if (context.type === 'exportName' && context.pathValue) {
@@ -307,7 +325,43 @@ function getPayloadCompletions(
   }
 
   if (context.type === 'path') {
-    return getPathCompletions(ts, node, position, baseDir)
+    const text = node.text
+    const offsetInString = position - node.getStart() - 1
+    const hashIndex = text.indexOf('#')
+
+    // After # in path property: suggest export names
+    if (hashIndex !== -1 && offsetInString > hashIndex) {
+      const modulePath = text.substring(0, hashIndex)
+      const resolved = resolveModulePath(
+        ts,
+        modulePath,
+        node.getSourceFile().fileName,
+        program,
+        baseDir,
+      )
+      if (!resolved) {
+        return undefined
+      }
+
+      const exports = getModuleExports(ts, resolved, program)
+
+      return {
+        entries: exports.map((name) => ({
+          name,
+          kind: ts.ScriptElementKind.constElement,
+          replacementSpan: {
+            length: text.length - hashIndex - 1,
+            start: node.getStart() + 1 + hashIndex + 1,
+          },
+          sortText: name,
+        })),
+        isGlobalCompletion: false,
+        isMemberCompletion: true,
+        isNewIdentifierLocation: false,
+      }
+    }
+
+    return getPathCompletions(sys, node, position, baseDir)
   }
 
   return undefined
@@ -319,6 +373,7 @@ function getStringFormCompletions(
   position: number,
   program: tslib.Program,
   baseDir: string | undefined,
+  sys: tslib.System,
 ): tslib.CompletionInfo | undefined {
   const text = node.text
   const offsetInString = position - node.getStart() - 1
@@ -357,7 +412,7 @@ function getStringFormCompletions(
   }
 
   // Before # (or no #): suggest file paths
-  return getPathCompletions(ts, node, position, baseDir)
+  return getPathCompletions(sys, node, position, baseDir)
 }
 
 function getExportNameCompletions(
@@ -393,7 +448,7 @@ function getExportNameCompletions(
 const COMPONENT_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js']
 
 function getPathCompletions(
-  ts: typeof tslib,
+  sys: tslib.System,
   node: tslib.StringLiteral,
   position: number,
   baseDir: string | undefined,
@@ -435,14 +490,14 @@ function getPathCompletions(
     }
   }
 
-  if (!ts.sys.directoryExists(dirPath)) {
+  if (!sys.directoryExists(dirPath)) {
     return undefined
   }
 
   const entries: tslib.CompletionEntry[] = []
 
   // Add subdirectories
-  const dirs = ts.sys.getDirectories(dirPath)
+  const dirs = sys.getDirectories(dirPath)
   for (const dir of dirs) {
     if (dir.startsWith('.') || dir === 'node_modules') {
       continue
@@ -452,7 +507,7 @@ function getPathCompletions(
     }
     entries.push({
       name: dir,
-      kind: ts.ScriptElementKind.directory,
+      kind: 'directory' as tslib.ScriptElementKind,
       replacementSpan: {
         length: prefix.length,
         start: replacementStart,
@@ -462,7 +517,7 @@ function getPathCompletions(
   }
 
   // Add files (stripping extensions for cleaner suggestions)
-  const files = ts.sys.readDirectory(dirPath, COMPONENT_EXTENSIONS, undefined, undefined, 1)
+  const files = sys.readDirectory(dirPath, COMPONENT_EXTENSIONS, undefined, undefined, 1)
   for (const file of files) {
     const fileName = file.substring(file.lastIndexOf('/') + 1)
     const nameWithoutExt = fileName.replace(/\.(?:tsx?|jsx?)$/, '')
@@ -473,7 +528,7 @@ function getPathCompletions(
 
     entries.push({
       name: fileName,
-      kind: ts.ScriptElementKind.scriptElement,
+      kind: 'script' as tslib.ScriptElementKind,
       replacementSpan: {
         length: prefix.length,
         start: replacementStart,
@@ -485,7 +540,7 @@ function getPathCompletions(
     if (nameWithoutExt !== fileName) {
       entries.push({
         name: nameWithoutExt,
-        kind: ts.ScriptElementKind.scriptElement,
+        kind: 'script' as tslib.ScriptElementKind,
         replacementSpan: {
           length: prefix.length,
           start: replacementStart,
@@ -531,10 +586,12 @@ function getPayloadDefinition(
     modulePath = parsed.path
     exportName = parsed.exportName
   } else if (context.type === 'path') {
-    modulePath = node.text
-    exportName = 'default'
+    const parsed = parsePayloadComponentString(node.text)
+    modulePath = parsed.path
+    exportName = parsed.exportName
   } else if (context.type === 'exportName' && context.pathValue) {
-    modulePath = context.pathValue
+    const { path: cleanPath } = parsePayloadComponentString(context.pathValue)
+    modulePath = cleanPath
     exportName = node.text
   } else {
     return undefined
@@ -670,14 +727,14 @@ const PAYLOAD_CONFIG_NAMES = ['payload.config.ts', 'payload.config.js', 'config.
  * Walks up from a file to find the nearest Payload config file and returns its directory.
  * This serves as the default `baseDir` when not explicitly configured.
  */
-function findPayloadConfigDir(ts: typeof tslib, fromFile: string): string | undefined {
+function findPayloadConfigDir(sys: tslib.System, fromFile: string): string | undefined {
   let dir = fromFile.includes('/') ? fromFile.substring(0, fromFile.lastIndexOf('/')) : fromFile
 
   const root = dir.startsWith('/') ? '/' : ''
 
   for (let i = 0; i < 50; i++) {
     for (const name of PAYLOAD_CONFIG_NAMES) {
-      if (ts.sys.fileExists(dir + '/' + name)) {
+      if (sys.fileExists(dir + '/' + name)) {
         return dir
       }
     }
