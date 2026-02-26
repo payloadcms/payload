@@ -306,6 +306,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     document: 'ডকুমেন্ট',
     documentIsTrashed: 'এই {{label}} ট্র্যাশ করা হয়েছে এবং এটি শুধুমাত্র পাঠনীয়।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
+    documentModified: 'নথি পরিবর্তিত হয়েছে',
+    documentOutOfDate:
+      'এই নথিটি সাম্প্রতিকভাবে অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দর্শন আপতিত।',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -397,6 +400,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
+    reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     reset: 'রিসেট করুন',

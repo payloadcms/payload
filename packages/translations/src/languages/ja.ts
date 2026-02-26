@@ -304,6 +304,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     document: 'ドキュメント',
     documentIsTrashed: 'この{{label}}は廃棄され、読み取り専用です。',
     documentLocked: 'ドキュメントがロックされました',
+    documentModified: 'ドキュメントが変更されました',
+    documentOutOfDate:
+      'このドキュメントは最近別のユーザーによって更新されました。あなたのビューは古いものです。',
     documents: 'ドキュメント',
     duplicate: '複製',
     duplicateWithoutSaving: '変更を保存せずに複製',
@@ -393,6 +396,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     previous: '前の',
     reindex: '再インデックス',
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',
+    reloadDocument: 'ドキュメントを再読み込みする',
     remove: '削除',
     rename: '名前を変更する',
     reset: 'リセット',

@@ -303,6 +303,9 @@ export const idTranslations: DefaultTranslationsObject = {
     document: 'Dokumen',
     documentIsTrashed: '{{label}} ini ada di tempat sampah dan bersifat hanya-baca.',
     documentLocked: 'Dokumen terkunci',
+    documentModified: 'Dokumen dimodifikasi',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',
@@ -393,6 +396,7 @@ export const idTranslations: DefaultTranslationsObject = {
     previous: 'Sebelumnya',
     reindex: 'Indeks Ulang',
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
+    reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
     rename: 'Ganti Nama',
     reset: 'Atur Ulang',

@@ -303,6 +303,9 @@ export const caTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: "Aquesta {{label}} s'ha eliminat i és de només lectura.",
     documentLocked: 'Document bloquejat',
+    documentModified: 'Document modificat',
+    documentOutOfDate:
+      'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
@@ -394,6 +397,7 @@ export const caTranslations: DefaultTranslationsObject = {
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',
+    reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
     rename: 'Canvia el nom',
     reset: 'Restableix',

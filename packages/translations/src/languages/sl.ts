@@ -301,6 +301,9 @@ export const slTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
     documentLocked: 'Dokument zaklenjen',
+    documentModified: 'Dokument spremenjen',
+    documentOutOfDate:
+      'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
@@ -391,6 +394,7 @@ export const slTranslations: DefaultTranslationsObject = {
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
+    reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
     rename: 'Preimenuj',
     reset: 'Ponastavi',

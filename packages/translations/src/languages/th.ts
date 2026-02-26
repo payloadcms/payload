@@ -295,6 +295,9 @@ export const thTranslations: DefaultTranslationsObject = {
     document: 'เอกสาร',
     documentIsTrashed: 'ป้ายนี้ {{label}} ถูกทำให้เป็นขยะและอ่านอย่างเดียว',
     documentLocked: 'เอกสารถูกล็อค',
+    documentModified: 'เอกสารถูกแก้ไข',
+    documentOutOfDate:
+      'เอกสารนี้ได้รับการปรับปรุงเมื่อเร็ว ๆ นี้โดยผู้ใช้คนอื่น มุมมองของคุณล้าสมัยแล้ว',
     documents: 'เอกสาร',
     duplicate: 'สำเนา',
     duplicateWithoutSaving: 'สำเนาโดยไม่บันทึกการแก้ไข',
@@ -383,6 +386,7 @@ export const thTranslations: DefaultTranslationsObject = {
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',
+    reloadDocument: 'โหลดเอกสารใหม่',
     remove: 'ลบ',
     rename: 'เปลี่ยนชื่อ',
     reset: 'รีเซ็ต',

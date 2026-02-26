@@ -300,6 +300,9 @@ export const taTranslations: DefaultTranslationsObject = {
     document: 'ஆவணம்',
     documentIsTrashed: 'இந்த {{label}} குப்பையில் உள்ளது மற்றும் வாசிப்பதற்கு மட்டும்.',
     documentLocked: 'ஆவணம் பூட்டப்பட்டுள்ளது',
+    documentModified: 'ஆவணம் மாற்றப்பட்டது',
+    documentOutOfDate:
+      'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',
@@ -390,6 +393,7 @@ export const taTranslations: DefaultTranslationsObject = {
     previous: 'முந்தையது',
     reindex: 'மறுஅட்டவணை',
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
+    reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
     reset: 'மீட்டமை',
