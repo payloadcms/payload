@@ -23,11 +23,12 @@
  */
 
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
+import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { postsCollectionSlug } from 'admin/slugs.js'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { postsCollectionSlug } from 'admin/slugs.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
@@ -36,6 +37,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Diff } from './payload-types.js'
 
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -47,13 +49,12 @@ import {
   waitForFormReady,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
 import { BASE_PATH } from './shared.js'
@@ -78,8 +79,8 @@ import {
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
-  versionCollectionSlug,
   textCollectionSlug,
+  versionCollectionSlug,
 } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -1457,6 +1458,74 @@ describe('Versions', () => {
         es: 'spanish published',
       })
     })
+
+    test('should preserve block metadata when publishing specific locale after initial save without blocks', async () => {
+      // This reproduces the bug where:
+      // 1. A doc is saved without blocks (autosave fires before blocks are added)
+      // 2. Blocks are added
+      // 3. Publishing with publishSpecificLocale drops blockType/id
+      await page.goto(url.create)
+      const textField = page.locator('#field-text')
+
+      // Step 1: Create and save a document without blocks
+      await textField.fill('english text')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const id = await page.locator('.id-label').getAttribute('title')
+
+      // Step 2: Add a block via API (simpler and more reliable than UI interaction)
+      await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Step 3: Publish specific locale (English) via API
+      const published = await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          _status: 'published',
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+          text: 'english text',
+        },
+        draft: false,
+        locale: 'en',
+        publishSpecificLocale: 'en',
+      })
+
+      // Step 4: Verify blocks survived with metadata intact
+      expect(published.blocks).toHaveLength(1)
+      expect(published.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(published.blocks![0].id).toBeDefined()
+
+      // Step 5: Verify via find (reload from DB)
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const found = data.docs[0]
+      expect(found.blocks).toHaveLength(1)
+      expect(found.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(found.blocks![0].id).toBeDefined()
+    })
   })
 
   describe('Collections with draft validation', () => {
@@ -2676,6 +2745,108 @@ describe('Versions', () => {
 
       const blocks = page.locator('[data-field-path="blocks"]')
       await expect(blocks).toBeVisible()
+    })
+
+    test('correctly renders text fields containing HTML special characters', async () => {
+      // Create a document with HTML special characters in a text field
+      const doc = await payload.create({
+        collection: diffCollectionSlug,
+        data: {
+          _status: 'published',
+          text: '<b>bold</b> & "quotes"',
+        },
+      })
+
+      // Update to create a version
+      await payload.update({
+        collection: diffCollectionSlug,
+        id: doc.id,
+        data: {
+          _status: 'published',
+          text: '<script>alert(1)</script>',
+        },
+      })
+
+      const versionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: doc.id },
+          },
+        })
+      ).docs[0] as unknown as TypeWithID
+
+      await _navigateToDiffVersionView({
+        adminRoute,
+        serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: doc.id,
+        versionID: versionDiff.id,
+        page,
+      })
+
+      const text = page.locator('[data-field-path="text"]')
+
+      // Verify that HTML characters are rendered as literal text, not interpreted as HTML
+      await expect(text.locator('.html-diff__diff-old')).toHaveText('<b>bold</b> & "quotes"')
+      await expect(text.locator('.html-diff__diff-new')).toHaveText('<script>alert(1)</script>')
+
+      // Cleanup
+      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
+    })
+
+    test('correctly renders JSON fields containing HTML special characters', async () => {
+      // Create a document with HTML special characters in a JSON field
+      const doc = await payload.create({
+        collection: diffCollectionSlug,
+        data: {
+          _status: 'published',
+          json: { html: '<div class="test">&amp;</div>' },
+        },
+      })
+
+      // Update to create a version
+      await payload.update({
+        collection: diffCollectionSlug,
+        id: doc.id,
+        data: {
+          _status: 'published',
+          json: { html: '<span onclick="alert(1)">click</span>' },
+        },
+      })
+
+      const versionDiff = (
+        await payload.findVersions({
+          collection: diffCollectionSlug,
+          depth: 0,
+          limit: 1,
+          where: {
+            parent: { equals: doc.id },
+          },
+        })
+      ).docs[0] as unknown as TypeWithID
+
+      await _navigateToDiffVersionView({
+        adminRoute,
+        serverURL,
+        collectionSlug: diffCollectionSlug,
+        docID: doc.id,
+        versionID: versionDiff.id,
+        page,
+      })
+
+      const json = page.locator('[data-field-path="json"]')
+
+      // Verify that JSON with HTML characters renders the literal text
+      await expect(json.locator('.html-diff__diff-old')).toContainText('"<div class=\\"test\\">')
+      await expect(json.locator('.html-diff__diff-new')).toContainText(
+        '"<span onclick=\\"alert(1)\\">',
+      )
+
+      // Cleanup
+      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
     })
   })
 

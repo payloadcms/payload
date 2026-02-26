@@ -312,6 +312,9 @@ export const frTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Ce {{label}} est mis à la corbeille et est en lecture seule.',
     documentLocked: 'Document verrouillé',
+    documentModified: 'Document modifié',
+    documentOutOfDate:
+      'Ce document a récemment été mis à jour par un autre utilisateur. Votre vue est obsolète.',
     documents: 'Documents',
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
@@ -402,6 +405,7 @@ export const frTranslations: DefaultTranslationsObject = {
     previous: 'Précédent',
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
+    reloadDocument: 'Recharger le document',
     remove: 'Retirer',
     rename: 'Renommer',
     reset: 'Réinitialiser',

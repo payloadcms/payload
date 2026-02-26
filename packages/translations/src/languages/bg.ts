@@ -301,6 +301,9 @@ export const bgTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Този {{label}} е изтрит и е само за четене.',
     documentLocked: 'Документът е заключен',
+    documentModified: 'Модифициран документ',
+    documentOutOfDate:
+      'Този документ беше наскоро обновен от друг потребител. Вашият изглед е неактуален.',
     documents: 'Документи',
     duplicate: 'Дупликирай',
     duplicateWithoutSaving: 'Дупликирай без да запазваш промените',
@@ -391,6 +394,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     previous: 'Предишен',
     reindex: 'Преиндексиране',
     reindexingAll: 'Преиндексиране на всички {{collections}}.',
+    reloadDocument: 'Презареди документ',
     remove: 'Премахни',
     rename: 'Преименувайте',
     reset: 'Нулиране',

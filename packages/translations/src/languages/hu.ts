@@ -306,6 +306,9 @@ export const huTranslations: DefaultTranslationsObject = {
     document: 'Dokumentum',
     documentIsTrashed: 'Ez a {{label}} szemétdobozba került, és csak olvasható.',
     documentLocked: 'A dokumentum zárolva van',
+    documentModified: 'Módosított dokumentum',
+    documentOutOfDate:
+      'Ezt a dokumentumot nemrégiben frissítette egy másik felhasználó. A megtekintése elavult.',
     documents: 'Dokumentumok',
     duplicate: 'Duplikálás',
     duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
@@ -395,6 +398,7 @@ export const huTranslations: DefaultTranslationsObject = {
     previous: 'Előző',
     reindex: 'Újraindexelés',
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
+    reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
     rename: 'Átnevez',
     reset: 'Visszaállítás',

@@ -302,6 +302,9 @@ export const svTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: '{{label}} har lagts i papperskorgen och är skrivskyddad.',
     documentLocked: 'Dokument låst',
+    documentModified: 'Dokument modifierat',
+    documentOutOfDate:
+      'Detta dokument har nyligen uppdaterats av en annan användare. Din vy är föråldrad.',
     documents: 'Dokument',
     duplicate: 'Duplicera',
     duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
@@ -392,6 +395,7 @@ export const svTranslations: DefaultTranslationsObject = {
     previous: 'Föregående',
     reindex: 'Omindexera',
     reindexingAll: 'Omindexerar alla {{collections}}...',
+    reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
     rename: 'Byt namn',
     reset: 'Återställ',

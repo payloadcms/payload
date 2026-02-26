@@ -302,6 +302,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er søppel og er skrivebeskyttet.',
     documentLocked: 'Låst dokument',
+    documentModified: 'Dokument endret',
+    documentOutOfDate:
+      'Dette dokumentet ble nylig oppdatert av en annen bruker. Visningen din er utdatert.',
     documents: 'Dokumenter',
     duplicate: 'Dupliser',
     duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
@@ -392,6 +395,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',
+    reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
     reset: 'Tilbakestill',

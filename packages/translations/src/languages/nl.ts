@@ -309,6 +309,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Dit {{label}} is verwijderd en is alleen-lezen.',
     documentLocked: 'Document vergrendeld',
+    documentModified: 'Document gewijzigd',
+    documentOutOfDate:
+      'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
@@ -399,6 +402,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
+    reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
     rename: 'Hernoemen',
     reset: 'Resetten',

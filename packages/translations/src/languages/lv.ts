@@ -303,6 +303,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     document: 'Dokuments',
     documentIsTrashed: 'Šis {{label}} ir miskastē un ir tikai lasāms.',
     documentLocked: 'Dokuments bloķēts',
+    documentModified: 'Dokuments modificēts',
+    documentOutOfDate:
+      'Šis dokuments nesen tika atjaunināts ar citu lietotāju. Jūsu skatījums ir novecojis.',
     documents: 'Dokumenti',
     duplicate: 'Dublēt',
     duplicateWithoutSaving: 'Dublēt bez izmaiņu saglabāšanas',
@@ -393,6 +396,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     previous: 'Iepriekšējais',
     reindex: 'Pārindeksēt',
     reindexingAll: 'Pārindeksē visus {{collections}}.',
+    reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
     rename: 'Pārdēvēt',
     reset: 'Atiestatīt',

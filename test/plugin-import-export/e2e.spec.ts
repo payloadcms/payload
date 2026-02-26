@@ -78,7 +78,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(exportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
 
-      const formatField = page.locator('#field-format .rs__control')
+      const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
       await page.locator('.rs__menu .rs__option:has-text("json")').click()
@@ -168,7 +168,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.export-preview')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
-      const formatField = page.locator('#field-format')
+      const formatField = page.locator('.format-field')
       await expect(formatField).toBeVisible()
 
       const formatControl = formatField.locator('.rs__control')
@@ -199,9 +199,66 @@ test.describe('Import Export Plugin', () => {
       expect(responseBody.errors[0].message).toContain('format')
     })
 
+    test('should enforce format restriction for collection without overrideCollection', async () => {
+      // This tests the dynamic config lookup for format when using the base export collection
+      // posts-exports-only has format: 'csv' but no overrideCollection, so it uses base 'exports' collection
+      const postsExportsOnlyURL = new AdminUrlUtil(serverURL, 'posts-exports-only')
+      await page.goto(postsExportsOnlyURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Verify format field is disabled and shows only CSV
+      const formatField = page.locator('.format-field')
+      await expect(formatField).toBeVisible()
+
+      const formatControl = formatField.locator('.rs__control')
+      await expect(formatControl).toHaveClass(/rs__control--is-disabled/)
+      await expect(formatField.locator('.rs__single-value')).toHaveText('CSV')
+
+      // Verify other fields are NOT disabled
+      const nameField = page.locator('input[name="name"]')
+      await expect(nameField).toBeVisible()
+      await expect(nameField).toBeEnabled()
+
+      const limitField = page.locator('input[name="limit"]')
+      await expect(limitField).toBeVisible()
+      await expect(limitField).toBeEnabled()
+
+      // Verify the collection field shows Posts Exports Only and is disabled (readonly because opened from that collection)
+      const collectionField = page.locator('#field-collectionSlug')
+      await expect(collectionField.locator('.rs__single-value')).toContainText('Posts Exports Only')
+    })
+
     test.describe('Custom ID Exports', () => {
       test('should export documents with custom IDs through UI', async () => {
         const uniqueId = Date.now()
+
+        // Clean up any pending jobs and old exports to avoid conflicts
+        await payload.delete({
+          collection: 'payload-jobs' as any,
+          where: {
+            'input.collectionSlug': { equals: 'custom-id-pages' },
+          },
+        })
+        await payload.delete({
+          collection: 'exports' as any,
+          where: {
+            collectionSlug: { equals: 'custom-id-pages' },
+          },
+        })
 
         await payload.create({
           collection: 'custom-id-pages' as any,
@@ -285,6 +342,8 @@ test.describe('Import Export Plugin', () => {
           const exportFilename = page.locator('.file-details__main-detail')
           await expect(exportFilename).toBeVisible()
           await expect(exportFilename).toContainText('.csv')
+          // Verify we're downloading from the correct collection export
+          await expect(exportFilename).toContainText('custom-id-pages')
         }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
         const downloadLink = page.locator('.file-details__main-detail a')
@@ -717,6 +776,102 @@ test.describe('Import Export Plugin', () => {
 
       expect(updatedDoc?.title).toBe('E2E Update Test Modified')
       expect(updatedDoc?.excerpt).toBe('Modified excerpt')
+    })
+
+    test('should import documents as published by default', async () => {
+      const csvContent =
+        'title,excerpt\n"E2E Published Status Test 1","Test excerpt 1"\n"E2E Published Status Test 2","Test excerpt 2"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-published-status-test.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Published Status Test')
+
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(
+        'e2e-published-status-test.csv',
+      )
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("Pages")').click()
+
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const importedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'E2E Published Status Test' },
+        },
+        draft: false,
+      })
+
+      expect(importedDocs.docs.length).toBe(2)
+      importedDocs.docs.forEach((doc) => {
+        expect(doc._status).toBe('published')
+      })
+    })
+
+    test('should respect explicit _status column values in CSV', async () => {
+      const csvContent =
+        'title,excerpt,_status\n"E2E Explicit Draft Test","Draft excerpt","draft"\n"E2E Explicit Published Test","Published excerpt","published"'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-explicit-status-test.csv')
+
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdPageTitlePatterns.push('E2E Explicit Draft Test')
+      createdPageTitlePatterns.push('E2E Explicit Published Test')
+
+      await page.goto(importsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue(
+        'e2e-explicit-status-test.csv',
+      )
+
+      const collectionField = page.locator('#field-collectionSlug')
+      await collectionField.click()
+      await page.locator('.rs__option:text-is("Pages")').click()
+
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
+
+      await saveDocAndAssert(page)
+
+      await runJobsQueue({ serverURL })
+
+      const draftDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { equals: 'E2E Explicit Draft Test' },
+        },
+        draft: true,
+      })
+
+      expect(draftDocs.docs.length).toBe(1)
+      expect(draftDocs.docs[0]?._status).toBe('draft')
+
+      const publishedDocs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { equals: 'E2E Explicit Published Test' },
+        },
+        draft: false,
+      })
+
+      expect(publishedDocs.docs.length).toBe(1)
+      expect(publishedDocs.docs[0]?._status).toBe('published')
     })
 
     test.describe('Custom ID Imports', () => {

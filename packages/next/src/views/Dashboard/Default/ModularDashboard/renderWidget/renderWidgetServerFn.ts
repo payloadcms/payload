@@ -1,14 +1,15 @@
-import type { ServerFunction, WidgetServerProps } from 'payload'
+import type { Field, ServerFunction, WidgetServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
+
+import { extractLocaleData } from '../utils/localeUtils.js'
 
 export type RenderWidgetServerFnArgs = {
   /**
    * Instance-specific data for this widget
    */
-  // TODO: widgets will support state in the future
-  // widgetData?: Record<string, unknown>
+  widgetData?: Record<string, unknown>
   /**
    * The slug of the widget to render
    */
@@ -26,7 +27,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, widgetSlug }) => {
+> = ({ cookies, locale, permissions, req, widgetData, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -57,13 +58,16 @@ export const renderWidgetHandler: ServerFunction<
   }
 
   try {
-    // Create server props for the widget
+    const localeFilteredData = widgetConfig.fields?.length
+      ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields as Field[])
+      : widgetData || {}
+
     const serverProps: WidgetServerProps = {
-      req,
-      // TODO: widgetData: widgetData || {},
       cookies,
       locale,
       permissions,
+      req,
+      widgetData: localeFilteredData,
       widgetSlug,
     }
 
