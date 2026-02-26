@@ -1,0 +1,95 @@
+# Docker Compose for PostgreSQL with PostGIS, pgvector, and Read Replica
+# This setup enables geospatial queries, vector search, and read scaling
+#
+# Architecture:
+#   - Primary (read-write): Handles all write operations and replicates to replica
+#   - Replica (read-only): Handles read operations, replicates from primary
+#
+# Usage:
+#   docker compose up -d              - Start PostgreSQL cluster
+#   docker compose down               - Stop PostgreSQL cluster
+#   docker compose down -v            - Stop and remove all data
+#
+# Connections:
+#   Primary:
+#     Host: localhost
+#     Port: 5433
+#     Database: payload
+#     User: payload
+#     Password: payload
+#     URL: postgres://payload:payload@localhost:5433/payload
+#
+#   Replica:
+#     Host: localhost
+#     Port: 5434
+#     Database: payload
+#     User: payload
+#     Password: payload
+#     URL: postgres://payload:payload@localhost:5434/payload
+
+services:
+  postgres-primary:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-payload-primary
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+      POSTGRES_INITDB_ARGS: '-A md5'
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+      - ./init-primary.sh:/docker-entrypoint-initdb.d/01-init-primary.sh:ro
+    command: |
+      postgres
+      -c wal_level=replica
+      -c hot_standby=on
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby_feedback=on
+      -c listen_addresses='*'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - postgres-cluster
+
+  postgres-replica:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-payload-replica
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ./setup-replica.sh:/docker-entrypoint-initdb.d/setup-replica.sh:ro
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - postgres-cluster
+
+volumes:
+  postgres_primary_data:
+    driver: local
+  postgres_replica_data:
+    driver: local
+
+networks:
+  postgres-cluster:
+    driver: bridge
