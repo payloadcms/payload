@@ -14,6 +14,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
+import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
@@ -67,6 +68,7 @@ export const baseConfig: Partial<Config> = {
     ArrayFields,
     OnDemandForm,
     OnDemandOutsideForm,
+    LexicalCustomCell,
   ],
   globals: [TabsWithRichText],
 
