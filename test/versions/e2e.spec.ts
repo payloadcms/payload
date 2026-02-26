@@ -1470,8 +1470,7 @@ describe('Versions', () => {
       await textField.fill('english text')
       await saveDocAndAssert(page, '#action-save-draft')
 
-      const id = page.locator('.id-label')
-      await expect(id).toHaveAttribute('title')
+      const id = await page.locator('.id-label').getAttribute('title')
 
       // Step 2: Add a block via API (simpler and more reliable than UI interaction)
       await payload.update({

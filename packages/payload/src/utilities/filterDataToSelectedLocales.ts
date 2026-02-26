@@ -76,17 +76,11 @@ export function filterDataToSelectedLocales({
                   selectedLocales,
                 })
 
-                // Preserve block metadata not in block.fields
-                // (blockType, id, blockName are set by Payload internally)
-                if (blockData.blockType) {
-                  filtered.blockType = blockData.blockType
-                }
-                if (blockData.id) {
-                  filtered.id = blockData.id
-                }
-                if (blockData.blockName !== undefined) {
-                  filtered.blockName = blockData.blockName
-                }
+                // blockType, id, blockName are set by Payload internally
+                // and not part of block.fields, so they must be preserved explicitly
+                filtered.blockType = blockData.blockType
+                filtered.id = blockData.id
+                filtered.blockName = blockData.blockName
 
                 return filtered
               }

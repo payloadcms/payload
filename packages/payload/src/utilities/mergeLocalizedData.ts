@@ -165,17 +165,11 @@ export function mergeLocalizedData({
                     selectedLocales,
                   })
 
-                  // Preserve block metadata not in block.fields
-                  // (blockType, id, blockName are set by Payload internally)
-                  if (newBlockData.blockType) {
-                    merged.blockType = newBlockData.blockType
-                  }
-                  if (newBlockData.id) {
-                    merged.id = newBlockData.id
-                  }
-                  if (newBlockData.blockName !== undefined) {
-                    merged.blockName = newBlockData.blockName
-                  }
+                  // blockType, id, blockName are set by Payload internally
+                  // and not part of block.fields, so they must be preserved explicitly
+                  merged.blockType = newBlockData.blockType
+                  merged.id = newBlockData.id
+                  merged.blockName = newBlockData.blockName
 
                   return merged
                 }
