@@ -13,7 +13,7 @@ import { ACCURACY_THRESHOLD } from '../thresholds.js'
 import { caseFailureMessage, failureMessage } from '../utils/index.js'
 
 export function registerNegativeSuite(options: SuiteOptions = {}) {
-  const { labelSuffix = '', runnerModel } = options
+  const { labelSuffix = '', runnerModel, systemPromptKey } = options
 
   describe(`Negative Tests${labelSuffix}`, () => {
     it('should detect errors in deliberately broken configs', async () => {
@@ -28,7 +28,10 @@ export function registerNegativeSuite(options: SuiteOptions = {}) {
     describe.concurrent(`Correction: Codegen${labelSuffix}`, () => {
       for (const testCase of negativeCorrectionCodegenDataset) {
         it(`${testCase.fixturePath}`, async () => {
-          const result = await runCodegenCase(testCase, 'Negative: Correction', { runnerModel })
+          const result = await runCodegenCase(testCase, 'Negative: Correction', {
+            runnerModel,
+            systemPromptKey,
+          })
           assert(result.pass, caseFailureMessage(result))
         })
       }
@@ -39,6 +42,7 @@ export function registerNegativeSuite(options: SuiteOptions = {}) {
         it(`should fail: ${testCase.fixturePath}`, async () => {
           const result = await runCodegenCase(testCase, 'Negative: Invalid Instruction', {
             runnerModel,
+            systemPromptKey,
           })
           assert(
             !result.pass,

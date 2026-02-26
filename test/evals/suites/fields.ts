@@ -25,7 +25,10 @@ export function registerFieldsSuite(options: SuiteOptions = {}) {
     describe.concurrent(`Codegen${labelSuffix}`, () => {
       for (const testCase of fieldsCodegenDataset) {
         it(`${testCase.fixturePath}`, async () => {
-          const result = await runCodegenCase(testCase, 'Fields: Codegen', { runnerModel })
+          const result = await runCodegenCase(testCase, 'Fields: Codegen', {
+            runnerModel,
+            systemPromptKey,
+          })
           assert(result.pass, caseFailureMessage(result))
         })
       }

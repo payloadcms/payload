@@ -563,7 +563,7 @@ export function ResultsTable({ entries }: Props) {
               alignItems: 'center',
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '8px',
+              gap: '20px',
             }}
           >
             <div style={{ display: 'flex', gap: '4px' }}>
@@ -578,6 +578,17 @@ export function ResultsTable({ entries }: Props) {
               ))}
             </div>
 
+            <span
+              aria-hidden="true"
+              style={{
+                background: 'var(--theme-elevation-250)',
+                borderRadius: '1px',
+                display: 'inline-block',
+                height: '18px',
+                width: '1px',
+              }}
+            />
+
             <div style={{ display: 'flex', gap: '4px' }}>
               {(['all', 'qa', 'codegen'] as FilterType[]).map((t) => (
                 <button
@@ -585,10 +596,21 @@ export function ResultsTable({ entries }: Props) {
                   onClick={() => setTypeFilter(t)}
                   style={filterBtnStyle(typeFilter === t)}
                 >
-                  {t === 'all' ? 'QA + Codegen' : t === 'qa' ? 'QA only' : 'Codegen only'}
+                  {t === 'all' ? 'All' : t === 'qa' ? 'QA' : 'Codegen'}
                 </button>
               ))}
             </div>
+
+            <span
+              aria-hidden="true"
+              style={{
+                background: 'var(--theme-elevation-250)',
+                borderRadius: '1px',
+                display: 'inline-block',
+                height: '18px',
+                width: '1px',
+              }}
+            />
 
             <select
               onChange={(e) => setCategoryFilter(e.target.value)}

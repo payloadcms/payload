@@ -27,7 +27,11 @@ export async function runCodegenCase(
   label: string,
   options: RunCodegenDatasetOptions = {},
 ): Promise<EvalResult> {
-  const { runnerModel = DEFAULT_RUNNER_MODEL, scorerModel = DEFAULT_SCORER_MODEL } = options
+  const {
+    runnerModel = DEFAULT_RUNNER_MODEL,
+    scorerModel = DEFAULT_SCORER_MODEL,
+    systemPromptKey = 'qaWithSkill',
+  } = options
 
   const m = runnerModel as { modelId?: string; provider?: string }
   const runnerModelId = `${m.provider ?? 'unknown'}/${m.modelId ?? 'unknown'}`
@@ -42,13 +46,20 @@ export async function runCodegenCase(
     fixtureContent: starterConfig,
     input: testCase.input,
     modelId: runnerModelId,
+    systemPromptKey,
   })
 
   const bypassCache = isCacheBypassed()
   const cached = !bypassCache && getCachedResult(key)
   if (cached) {
-    const needsBackfill = !cached.modelId
-    const taggedResult = needsBackfill ? { ...cached, modelId: runnerModelId } : cached
+    const needsBackfill = !cached.modelId || !cached.systemPromptKey
+    const taggedResult = needsBackfill
+      ? {
+          ...cached,
+          modelId: cached.modelId ?? runnerModelId,
+          systemPromptKey: cached.systemPromptKey ?? systemPromptKey,
+        }
+      : cached
     if (needsBackfill) {
       setCachedResult(key, taggedResult)
     }
@@ -67,6 +78,7 @@ export async function runCodegenCase(
     usage: runnerUsage,
   } = await runCodegenEval(testCase.input, starterConfig, {
     model: runnerModel,
+    systemPromptKey,
   })
 
   const { errors: tscErrors, valid } = await validateConfigTypes(
@@ -82,6 +94,7 @@ export async function runCodegenCase(
       modelId: runnerModelId,
       pass: false,
       question: testCase.input,
+      systemPromptKey,
       reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
       tscErrors,
       usage: {
@@ -135,6 +148,7 @@ export async function runCodegenCase(
     modelId: runnerModelId,
     pass,
     question: testCase.input,
+    systemPromptKey,
     reasoning,
     score,
     usage: {

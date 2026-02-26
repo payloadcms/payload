@@ -7,22 +7,42 @@ dotenv.config()
 const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
 const SKILL_CONTEXT = fs.readFileSync(skillPath, 'utf-8')
 
+const CODEGEN_RULES = `Rules:
+- Output ONLY the full TypeScript file content — no prose, no markdown code fences, no explanation
+- Preserve all existing imports, collections, fields, and settings unless the task requires changing them
+- This is Payload CMS v3. Always import types from "payload" — never from "payload/types" (that is the old v2 path)
+- Use correct Payload types: CollectionConfig, Plugin, Config from "payload"
+- Field types: text, textarea, number, checkbox, select, relationship, richText, array, group, blocks, date, email, upload
+- Access control functions receive ({ req }) and return boolean or Promise<boolean>
+- Hooks live in a hooks object with arrays: beforeChange, afterRead, beforeDelete, etc.
+- Plugins are functions that receive a Config and must return a Config — always cast the return value: \`return { ...incomingConfig, ... } as Config\`
+- Localization uses a localization key with locales, defaultLocale, and fallback`
+
+function buildCodegenPrompt(withSkill: boolean): string {
+  const preamble = `You are an expert Payload CMS developer.
+You will be given a task and a starter payload.config.ts file.
+Apply the requested change to the config and output the complete modified TypeScript file.`
+
+  return withSkill
+    ? `${preamble}\n\n${SKILL_CONTEXT}\n\n${CODEGEN_RULES}`
+    : `${preamble}\n\n${CODEGEN_RULES}`
+}
+
+function buildQAPrompt(withSkill: boolean): string {
+  return withSkill
+    ? `You are an expert Payload CMS developer.\nAnswer questions accurately and concisely based on the following skill document:\n\n${SKILL_CONTEXT}`
+    : `You are an expert Payload CMS developer.\nAnswer questions accurately and concisely.`
+}
+
 export const SYSTEM_PROMPTS = {
   /**
-   * For Q&A evals about Payload CMS development — with SKILL.md injected as passive context.
-   * Use this to measure the skill's contribution vs qaNoSkill.
+   * For Q&A evals — with SKILL.md injected as passive context.
+   * Pair with qaNoSkill to measure how much SKILL.md improves answers.
    */
-  qaWithSkill: `You are an expert Payload CMS developer.
-Answer questions accurately and concisely based on the following skill document:
+  qaWithSkill: buildQAPrompt(true),
 
-${SKILL_CONTEXT}`,
-
-  /**
-   * Baseline: no skill document injected.
-   * Pair with qaWithSkill to measure how much SKILL.md improves answers.
-   */
-  qaNoSkill: `You are an expert Payload CMS developer.
-Answer questions accurately and concisely.`,
+  /** Baseline Q&A: no skill document injected. */
+  qaNoSkill: buildQAPrompt(false),
 
   /**
    * For config-review evals: given a broken payload.config.ts, identify and explain the errors.
@@ -36,21 +56,11 @@ Access control functions must return a boolean or a Payload where-constraint obj
 Hook functions in beforeChange must explicitly return the data object, otherwise changes are silently discarded.`,
 
   /**
-   * For config-modification evals: given a starter payload.config.ts, apply a specific change.
-   * Must output the complete modified file — no prose, no markdown fences.
+   * For config-modification evals — with SKILL.md injected as passive context.
+   * Pair with codegenNoSkill to measure how much SKILL.md improves code generation.
    */
-  configModify: `You are an expert Payload CMS developer.
-You will be given a task and a starter payload.config.ts file.
-Apply the requested change to the config and output the complete modified TypeScript file.
+  codegenWithSkill: buildCodegenPrompt(true),
 
-Rules:
-- Output ONLY the full TypeScript file content — no prose, no markdown code fences, no explanation
-- Preserve all existing imports, collections, fields, and settings unless the task requires changing them
-- This is Payload CMS v3. Always import types from "payload" — never from "payload/types" (that is the old v2 path)
-- Use correct Payload types: CollectionConfig, Plugin, Config from "payload"
-- Field types: text, textarea, number, checkbox, select, relationship, richText, array, group, blocks, date, email, upload
-- Access control functions receive ({ req }) and return boolean or Promise<boolean>
-- Hooks live in a hooks object with arrays: beforeChange, afterRead, beforeDelete, etc.
-- Plugins are functions that receive a Config and must return a Config — always cast the return value: \`return { ...incomingConfig, ... } as Config\`
-- Localization uses a localization key with locales, defaultLocale, and fallback`,
+  /** Baseline codegen: no skill document injected. */
+  codegenNoSkill: buildCodegenPrompt(false),
 }

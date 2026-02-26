@@ -57,7 +57,12 @@ export type EvalUsage = {
 }
 
 // Runner
-export type SystemPromptKey = 'configModify' | 'configReview' | 'qaNoSkill' | 'qaWithSkill'
+export type SystemPromptKey =
+  | 'codegenNoSkill'
+  | 'codegenWithSkill'
+  | 'configReview'
+  | 'qaNoSkill'
+  | 'qaWithSkill'
 export type RunnerResult = {
   answer: string
   confidence: number
@@ -74,6 +79,7 @@ export type RunEvalOptions = {
 }
 export type RunCodegenEvalOptions = {
   model?: LanguageModel
+  systemPromptKey?: SystemPromptKey
 }
 
 // Scorer
@@ -134,6 +140,7 @@ export type RunDatasetOptions = {
 export type RunCodegenDatasetOptions = {
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel
+  systemPromptKey?: SystemPromptKey
 }
 
 // Validate

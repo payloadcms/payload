@@ -82,16 +82,16 @@ export function qaKey(params: {
 
 /**
  * Generates a cache key for a codegen eval case.
- * Keyed on: instruction input, expected outcome, fixture *content* (not path), and model ID.
- * Using content instead of path means the cache is automatically invalidated when a fixture changes.
- * systemPromptKey is intentionally excluded — codegen always uses configModify regardless of
- * which suite variant (qaWithSkill / qaNoSkill) triggered it, so the result is shared.
+ * Keyed on: instruction input, expected outcome, fixture *content* (not path), model ID,
+ * and systemPromptKey. Using content instead of path means the cache is automatically
+ * invalidated when a fixture changes. systemPromptKey distinguishes skill vs baseline runs.
  */
 export function codegenKey(params: {
   expected: string
   fixtureContent: string
   input: string
   modelId: string
+  systemPromptKey: string
 }): string {
   return hashKey({
     type: 'codegen',
@@ -99,5 +99,6 @@ export function codegenKey(params: {
     expected: params.expected,
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
+    systemPromptKey: params.systemPromptKey,
   })
 }

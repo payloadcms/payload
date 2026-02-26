@@ -11,12 +11,16 @@ export async function runCodegenEval(
   starterConfig: string,
   options: RunCodegenEvalOptions = {},
 ): Promise<CodegenRunnerResult> {
-  const { model = DEFAULT_RUNNER_MODEL } = options
+  const { model = DEFAULT_RUNNER_MODEL, systemPromptKey = 'qaWithSkill' } = options
+  const system =
+    systemPromptKey === 'qaNoSkill'
+      ? SYSTEM_PROMPTS.codegenNoSkill
+      : SYSTEM_PROMPTS.codegenWithSkill
 
   const { output, usage } = await generateText({
     model,
     output: Output.object({ schema: ModifiedConfigSchema }),
-    system: SYSTEM_PROMPTS.configModify,
+    system,
     prompt: `Task: ${instruction}
 
 Starter payload.config.ts:
