@@ -1,10 +1,10 @@
 'use client'
 import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
+  AdminConfig,
   ClientConfig,
   LanguageOptions,
   Locale,
-  RscAdminConfig,
   SanitizedPermissions,
   ServerFunctionClient,
   TypedUser,
@@ -24,7 +24,7 @@ import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
 import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
-import { ClientAdminConfigProvider, RscOverridesProvider } from '../AdminConfig/index.js'
+import { AdminConfigProvider } from '../AdminConfig/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -42,6 +42,7 @@ import { TranslationProvider } from '../Translation/index.js'
 import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
+  readonly adminConfig?: AdminConfig
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
@@ -51,7 +52,6 @@ type Props = {
   readonly languageOptions: LanguageOptions
   readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
-  readonly rscOverrides?: RscAdminConfig
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
@@ -60,6 +60,7 @@ type Props = {
 }
 
 export const RootProvider: React.FC<Props> = ({
+  adminConfig,
   children,
   config,
   dateFNSKey,
@@ -69,7 +70,6 @@ export const RootProvider: React.FC<Props> = ({
   languageOptions,
   locale,
   permissions,
-  rscOverrides,
   serverFunction,
   switchLanguageServerAction,
   theme,
@@ -86,7 +86,7 @@ export const RootProvider: React.FC<Props> = ({
             cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           >
             <ConfigProvider config={config}>
-              <RscOverridesProvider overrides={rscOverrides ?? {}}>
+              <AdminConfigProvider adminConfig={adminConfig ?? {}}>
                 <ClientFunctionProvider>
                   <TranslationProvider
                     dateFNSKey={dateFNSKey}
@@ -147,7 +147,7 @@ export const RootProvider: React.FC<Props> = ({
                     </WindowInfoProvider>
                   </TranslationProvider>
                 </ClientFunctionProvider>
-              </RscOverridesProvider>
+              </AdminConfigProvider>
             </ConfigProvider>
           </RouteCache>
         </RouteTransitionProvider>

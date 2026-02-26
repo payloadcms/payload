@@ -30,6 +30,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const {
     name: fnKey,
+    adminConfig,
     args: fnArgs,
     config: configPromise,
     serverFunctions: extraServerFunctions,
@@ -42,6 +43,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
 
   const augmentedArgs: DefaultServerFunctionArgs = {
     ...fnArgs,
+    adminConfig,
     cookies,
     locale,
     permissions,

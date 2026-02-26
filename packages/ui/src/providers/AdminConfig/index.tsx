@@ -1,31 +1,15 @@
 'use client'
-import type { ClientAdminConfig, RscAdminConfig } from 'payload'
+import type { AdminConfig } from 'payload'
 
 import { createContext, use } from 'react'
 
-const ClientAdminConfigContext = createContext<ClientAdminConfig>({})
-const RscAdminConfigContext = createContext<RscAdminConfig>({})
+const AdminConfigContext = createContext<AdminConfig>({})
 
-export const ClientAdminConfigProvider: React.FC<{
+export const AdminConfigProvider: React.FC<{
+  readonly adminConfig: AdminConfig
   readonly children: React.ReactNode
-  readonly config: ClientAdminConfig
-}> = ({ children, config }) => {
-  return <ClientAdminConfigContext value={config}>{children}</ClientAdminConfigContext>
+}> = ({ adminConfig, children }) => {
+  return <AdminConfigContext value={adminConfig}>{children}</AdminConfigContext>
 }
 
-export const RscOverridesProvider: React.FC<{
-  readonly children: React.ReactNode
-  readonly overrides: RscAdminConfig
-}> = ({ children, overrides }) => {
-  return <RscAdminConfigContext value={overrides}>{children}</RscAdminConfigContext>
-}
-
-export const useClientAdminConfig = (): ClientAdminConfig => use(ClientAdminConfigContext)
-export const useRscAdminConfig = (): RscAdminConfig => use(RscAdminConfigContext)
-
-/** @deprecated Use `useClientAdminConfig` instead. */
-export const useAdminConfig = useClientAdminConfig
-/** @deprecated Use `useRscAdminConfig` instead. */
-export const useRscOverrides = useRscAdminConfig
-/** @deprecated Use `ClientAdminConfigProvider` instead. */
-export const AdminConfigProvider = ClientAdminConfigProvider
+export const useAdminConfig = (): AdminConfig => use(AdminConfigContext)

@@ -33,7 +33,7 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
-import { useAdminFieldConfig } from '../../providers/AdminConfig/useAdminFieldConfig.js'
+import { useAdminConfig } from '../../providers/AdminConfig/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -53,13 +53,13 @@ export function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
-  const { clientConfig, rscOverrides } = useAdminFieldConfig(schemaPath)
+  const adminConfig = useAdminConfig()
+  const fieldConfig = schemaPath ? adminConfig.fields?.[schemaPath] : undefined
 
-  const AdminFieldComponent = clientConfig?.components?.Field
-  const AdminLabel = clientConfig?.components?.Label ?? rscOverrides?.Label
-  const AdminDescription = clientConfig?.components?.Description ?? rscOverrides?.Description
-  const RscField = rscOverrides?.Field
-  const adminValidate = clientConfig?.validate
+  const AdminFieldComponent = fieldConfig?.components?.Field
+  const AdminLabel = fieldConfig?.components?.Label
+  const AdminDescription = fieldConfig?.components?.Description
+  const adminValidate = fieldConfig?.validate
 
   const baseFieldProps: { validate?: any } & Pick<
     ClientComponentProps,
@@ -79,11 +79,10 @@ export function RenderField({
     return <HiddenField forceRender={forceRender} path={path} schemaPath={schemaPath} />
   }
 
-  if (RscField) {
-    return RscField
-  }
-
   if (AdminFieldComponent) {
+    if (typeof AdminFieldComponent !== 'function') {
+      return AdminFieldComponent as React.ReactNode
+    }
     const FieldComp = AdminFieldComponent as React.ComponentType<any>
     return <FieldComp {...baseFieldProps} field={clientFieldConfig} path={path} />
   }

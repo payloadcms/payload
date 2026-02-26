@@ -1,10 +1,5 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type {
-  LanguageOptions,
-  RscAdminConfig,
-  SanitizedConfig,
-  ServerFunctionClient,
-} from 'payload'
+import type { AdminConfig, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
@@ -27,16 +22,16 @@ export const metadata = {
 }
 
 export const RootLayout = async ({
+  adminConfig,
   children,
   config: configPromise,
   htmlProps = {},
-  rscOverrides,
   serverFunction,
 }: {
+  readonly adminConfig?: AdminConfig
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
-  readonly rscOverrides?: RscAdminConfig
   readonly serverFunction: ServerFunctionClient
 }) => {
   checkDependencies()
@@ -108,6 +103,7 @@ export const RootLayout = async ({
       </head>
       <body>
         <RootProvider
+          adminConfig={adminConfig}
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
@@ -116,7 +112,6 @@ export const RootLayout = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
-          rscOverrides={rscOverrides}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}

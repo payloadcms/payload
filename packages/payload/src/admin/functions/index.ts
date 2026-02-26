@@ -13,6 +13,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
+import type { AdminConfig } from '../buildClientConfig.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -25,10 +26,9 @@ export type InitReqResult = {
   req: PayloadRequest
 }
 
-export type DefaultServerFunctionArgs = Pick<
-  InitReqResult,
-  'cookies' | 'locale' | 'permissions' | 'req'
->
+export type DefaultServerFunctionArgs = {
+  adminConfig?: AdminConfig
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>
@@ -54,6 +54,7 @@ export type ServerFunctionConfig = {
 
 export type ServerFunctionHandler = (
   args: {
+    adminConfig?: AdminConfig
     config: Promise<SanitizedConfig> | SanitizedConfig
     /**
      * A map of server function names to their implementations. These are

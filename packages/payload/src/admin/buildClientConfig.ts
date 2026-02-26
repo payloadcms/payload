@@ -4,36 +4,23 @@ import type { Condition, Validate } from '../fields/config/types.js'
 
 // ─── Field-level config ───
 
-export type ClientFieldComponentConfig = {
-  AfterInput?: React.ComponentType | React.ComponentType[]
-  BeforeInput?: React.ComponentType | React.ComponentType[]
-  Cell?: React.ComponentType
+export type FieldComponentConfig = {
+  AfterInput?: React.ComponentType | React.ComponentType[] | React.ReactNode
+  BeforeInput?: React.ComponentType | React.ComponentType[] | React.ReactNode
+  Cell?: React.ComponentType | React.ReactNode
   Description?: React.ComponentType | React.ReactNode
   Error?: React.ComponentType | React.ReactNode
-  Field?: React.ComponentType
-  Filter?: React.ComponentType
+  Field?: React.ComponentType | React.ReactNode
+  Filter?: React.ComponentType | React.ReactNode
   Label?: React.ComponentType | React.ReactNode
 }
 
-export type ClientFieldConfig = {
-  components?: ClientFieldComponentConfig
+export type FieldConfig = {
+  components?: FieldComponentConfig
   condition?: Condition
   defaultValue?: (() => unknown) | unknown
   filterOptions?: (options: any) => any
   validate?: Validate
-}
-
-export type RscFieldComponentConfig = {
-  AfterInput?: React.ReactNode
-  BeforeInput?: React.ReactNode
-  Description?: React.ReactNode
-  Error?: React.ReactNode
-  Field?: React.ReactNode
-  Label?: React.ReactNode
-}
-
-export type RscFieldConfig = {
-  components?: RscFieldComponentConfig
 }
 
 // ─── Admin-level config ───
@@ -110,21 +97,16 @@ export type GlobalComponentsConfig = {
   views?: Record<string, any>
 }
 
-// ─── Combined configs ───
+// ─── Combined admin config (single file, no directive) ───
 
-export type ClientAdminConfig = {
+export type AdminConfig = {
   admin?: AdminComponentsConfig
   collections?: Record<string, CollectionComponentsConfig>
-  fields?: Record<string, ClientFieldConfig>
+  fields?: Record<string, FieldConfig>
   globals?: Record<string, GlobalComponentsConfig>
 }
 
-export type RscAdminConfig = {
-  admin?: AdminComponentsConfig
-  collections?: Record<string, CollectionComponentsConfig>
-  fields?: Record<string, RscFieldConfig>
-  globals?: Record<string, GlobalComponentsConfig>
-}
+// ─── Shared config (optional, for validators that run on both client and server) ───
 
 export type SharedFieldConfig = {
   validate?: Validate
@@ -136,25 +118,10 @@ export type SharedAdminConfig = {
 
 // ─── Builder functions ───
 
-export function defineClientConfig<TConfig extends ClientAdminConfig>(config: TConfig): TConfig {
-  return config
-}
-
-export function defineRscConfig<TConfig extends RscAdminConfig>(config: TConfig): TConfig {
+export function defineAdminConfig<TConfig extends AdminConfig>(config: TConfig): TConfig {
   return config
 }
 
 export function defineSharedConfig<TConfig extends SharedAdminConfig>(config: TConfig): TConfig {
   return config
 }
-
-// ─── Deprecated aliases ───
-
-/** @deprecated Use `ClientAdminConfig` instead. */
-export type AdminConfig = ClientAdminConfig
-/** @deprecated Use `ClientFieldConfig` instead. */
-export type AdminFieldConfig = ClientFieldConfig
-/** @deprecated Use `ClientFieldComponentConfig` instead. */
-export type AdminFieldComponentConfig = ClientFieldComponentConfig
-/** @deprecated Use `defineClientConfig` instead. */
-export const buildClientConfig = defineClientConfig
