@@ -1,0 +1,14 @@
+@import '../../../scss/styles.scss';
+
+.type-filter {
+  &__count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    background-color: var(--theme-elevation-50);
+    color: var(--theme-text);
+    padding: 0px 3px;
+    border-radius: var(--style-radius-s);
+    margin-left: -4px;
+    margin-right: calc(var(--base) * 0.25);
+  }
+}

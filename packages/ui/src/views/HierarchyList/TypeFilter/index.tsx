@@ -4,9 +4,11 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'
 
+import { Button } from '../../../elements/Button/index.js'
 import { CheckboxPopup } from '../../../elements/CheckboxPopup/index.js'
-import { Pill } from '../../../elements/Pill/index.js'
-import { FilterIcon } from '../../../icons/Filter/index.js'
+import './index.scss'
+
+const baseClass = 'type-filter'
 
 type TypeFilterProps = {
   i18n: I18nClient
@@ -16,14 +18,13 @@ type TypeFilterProps = {
 }
 
 export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilterProps) {
-  const allSelected = selectedValues.length === options.length
-
   return (
     <CheckboxPopup
       Button={
-        <Pill icon={<FilterIcon />} pillStyle={allSelected ? 'light' : 'dark'}>
-          {i18n.t('general:filter')}
-        </Pill>
+        <Button buttonStyle="pill" el="div" icon="chevron" margin={false} size="small">
+          <span className={`${baseClass}__count`}>{selectedValues.length}</span>
+          {i18n.t('version:type')}
+        </Button>
       }
       onChange={({ selectedValues: newValues }) => onChange(newValues)}
       options={options}
