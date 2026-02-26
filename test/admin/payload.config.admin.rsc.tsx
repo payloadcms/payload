@@ -72,6 +72,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+
 export default defineRscConfig({
   admin: {
     actions: [AdminButton],

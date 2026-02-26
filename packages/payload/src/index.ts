@@ -216,6 +216,7 @@ export interface PayloadTypesShape {
   globalsSelect: Record<string, unknown>
   jobs: unknown
   locale: unknown
+  schemaPathMap: Record<string, string>
   user: unknown
   widgets?: Record<string, unknown>
 }
@@ -281,6 +282,7 @@ export interface UntypedPayloadTypes {
     }
   }
   locale: null | string
+  schemaPathMap: Record<string, string>
   user: UntypedUser
   widgets: {
     [slug: string]: JsonObject
@@ -293,17 +295,7 @@ export interface UntypedPayloadTypes {
  */
 export interface GeneratedTypes {}
 
-/**
- * Interface to be module-augmented by the `payload-types.ts` file.
- * Maps schema paths to their field types for type-safe admin config.
- */
-export interface GeneratedSchemaPathMap {}
-
-type IsSchemaPathMapAugmented = keyof GeneratedSchemaPathMap extends never ? false : true
-
-export type TypedSchemaPathMap = IsSchemaPathMapAugmented extends true
-  ? GeneratedSchemaPathMap
-  : Record<string, string>
+export type TypedSchemaPathMap<T extends PayloadTypesShape = PayloadTypes> = T['schemaPathMap']
 
 /**
  * Check if GeneratedTypes has been augmented (has any keys).

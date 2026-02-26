@@ -11,6 +11,7 @@ type CompArray = (React.ComponentType<any> | React.ReactNode)[]
 // ─── Per-field-type component configs ───
 
 export type BaseFieldComponents = {
+  Cell?: Comp
   Description?: Comp
   Error?: Comp
   Field?: Comp
@@ -27,7 +28,7 @@ export type ArrayFieldComponents = {
   RowLabel?: Comp
 } & InputFieldComponents
 
-export type BlocksFieldComponents = BaseFieldComponents
+export type BlocksFieldComponents = InputFieldComponents
 
 export type BlockFieldComponents = {
   Block?: Comp
@@ -35,6 +36,7 @@ export type BlockFieldComponents = {
 }
 
 export type UIFieldComponents = {
+  Cell?: Comp
   Field?: Comp
 }
 

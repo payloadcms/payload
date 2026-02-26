@@ -1,9 +1,7 @@
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
-import type { FlattenedBlock, FlattenedField } from '../fields/config/types.js'
+import type { Field, FlattenedBlock, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-
-import { fieldAffectsData } from '../fields/config/types.js'
 
 function collectFieldPaths(
   fields: FlattenedField[],
@@ -12,7 +10,7 @@ function collectFieldPaths(
   config?: SanitizedConfig,
 ): void {
   for (const field of fields) {
-    if (!fieldAffectsData(field)) {
+    if (!('name' in field) || !field.name) {
       continue
     }
 
@@ -64,6 +62,41 @@ function collectFieldPaths(
   }
 }
 
+function collectRawFieldPaths(
+  fields: Field[],
+  parentPath: string,
+  pathMap: Map<string, string>,
+): void {
+  for (const field of fields) {
+    if (field.type === 'ui' && 'name' in field && field.name) {
+      const fieldPath = parentPath ? `${parentPath}.${field.name}` : field.name
+      pathMap.set(fieldPath, 'ui')
+    }
+
+    if ('fields' in field && Array.isArray(field.fields)) {
+      const subParent =
+        'name' in field && field.name
+          ? parentPath
+            ? `${parentPath}.${field.name}`
+            : field.name
+          : parentPath
+      collectRawFieldPaths(field.fields, subParent, pathMap)
+    }
+
+    if ('tabs' in field && Array.isArray(field.tabs)) {
+      for (const tab of field.tabs) {
+        const tabParent =
+          'name' in tab && tab.name
+            ? parentPath
+              ? `${parentPath}.${tab.name}`
+              : tab.name
+            : parentPath
+        collectRawFieldPaths(tab.fields, tabParent, pathMap)
+      }
+    }
+  }
+}
+
 function collectEntityPaths(
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   pathMap: Map<string, string>,
@@ -72,6 +105,7 @@ function collectEntityPaths(
   const prefix = entity.slug
   pathMap.set(prefix, 'entity')
   collectFieldPaths(entity.flattenedFields, prefix, pathMap, config)
+  collectRawFieldPaths(entity.fields, prefix, pathMap)
 }
 
 export function generateSchemaPathType(config: SanitizedConfig): string {

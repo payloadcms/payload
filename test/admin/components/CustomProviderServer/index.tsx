@@ -2,7 +2,7 @@ import type { ServerProps } from 'payload'
 
 import React, { Fragment } from 'react'
 
-export const CustomProviderServer: React.FC<{ children: React.ReactNode } & ServerProps> = ({
+export const CustomProviderServer: React.FC<{ children?: React.ReactNode } & ServerProps> = ({
   children,
   payload,
 }) => {
