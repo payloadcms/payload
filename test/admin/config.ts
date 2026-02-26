@@ -145,7 +145,7 @@ export default buildConfigWithDefaults({
             slug: 'custom-tab',
             label: 'Folders',
             components: {
-              Icon: '/components/Icons/FolderIcon.js#FolderIcon',
+              Icon: '@payloadcms/ui#FolderIcon',
               Content: {
                 path: '/components/CustomTab.js#CustomTab',
                 clientProps: {
