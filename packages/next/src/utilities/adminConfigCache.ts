@@ -1,15 +1,11 @@
 import type { RscAdminConfig } from 'payload'
 
-import { cache } from 'react'
-
-const getAdminConfigCache = cache((): { config: RscAdminConfig } => {
-  return { config: {} }
-})
+let adminConfig: RscAdminConfig = {}
 
 export function setAdminConfig(config: RscAdminConfig): void {
-  getAdminConfigCache().config = config
+  adminConfig = config
 }
 
 export function getAdminConfig(): RscAdminConfig {
-  return getAdminConfigCache().config
+  return adminConfig
 }
