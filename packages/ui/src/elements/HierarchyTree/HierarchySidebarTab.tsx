@@ -4,10 +4,11 @@ import type { SidebarTabClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { HierarchyInitialData } from './types.js'
 
+import { HierarchySearch } from '../../elements/HierarchySearch/index.js'
 import { HydrateHierarchyProvider } from '../../elements/HydrateHierarchyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { HierarchyTree } from './index.js'
@@ -38,10 +39,23 @@ export const HierarchySidebarTab: React.FC<
       routes: { admin: adminRoute },
     },
   } = useConfig()
+  const [isSearchActive, setIsSearchActive] = useState(false)
 
   const selectedNodeId = searchParams.get('parent') ?? undefined
 
   const handleNodeClick = useCallback(
+    (id: number | string) => {
+      const url = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}?parent=${id}`,
+      })
+      router.push(url)
+      router.refresh()
+    },
+    [adminRoute, collectionSlug, router],
+  )
+
+  const handleSearchSelect = useCallback(
     (id: number | string) => {
       const url = formatAdminURL({
         adminRoute,
@@ -64,14 +78,22 @@ export const HierarchySidebarTab: React.FC<
         treeLimit={treeLimit}
       />
       <div className="hierarchy-sidebar-tab">
-        <HierarchyTree
+        <HierarchySearch
           collectionSlug={collectionSlug}
-          initialData={initialData}
-          key={collectionSlug}
-          onNodeClick={handleNodeClick}
-          selectedNodeId={selectedNodeId}
-          useAsTitle={useAsTitle}
+          isActive={isSearchActive}
+          onActiveChange={setIsSearchActive}
+          onSelect={handleSearchSelect}
         />
+        {!isSearchActive && (
+          <HierarchyTree
+            collectionSlug={collectionSlug}
+            initialData={initialData}
+            key={collectionSlug}
+            onNodeClick={handleNodeClick}
+            selectedNodeId={selectedNodeId}
+            useAsTitle={useAsTitle}
+          />
+        )}
       </div>
     </>
   )
