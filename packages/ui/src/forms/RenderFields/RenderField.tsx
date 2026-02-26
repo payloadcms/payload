@@ -121,6 +121,18 @@ export function RenderField({
       return AdminFieldComponent as React.ReactNode
     }
     const FieldComp = AdminFieldComponent as React.ComponentType<any>
+    if (AdminLabel || AdminDescription || AdminError || AdminBeforeInput || AdminAfterInput) {
+      return (
+        <div data-admin-config-field={schemaPath}>
+          {renderAdminComponent(AdminLabel)}
+          {renderAdminComponent(AdminError)}
+          {renderAdminComponentArray(AdminBeforeInput)}
+          <FieldComp {...baseFieldProps} field={clientFieldConfig} path={path} />
+          {renderAdminComponentArray(AdminAfterInput)}
+          {renderAdminComponent(AdminDescription)}
+        </div>
+      )
+    }
     return <FieldComp {...baseFieldProps} field={clientFieldConfig} path={path} />
   }
 
