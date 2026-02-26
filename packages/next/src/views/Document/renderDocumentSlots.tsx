@@ -23,6 +23,7 @@ import { ViewDescription } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { hasDraftsEnabled } from 'payload/shared'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
 export const renderDocumentSlots: (args: {
@@ -52,7 +53,17 @@ export const renderDocumentSlots: (args: {
     // TODO: Add remaining serverProps
   }
 
+  const adminConfig = getAdminConfig()
+  const adminCollectionComponents = collectionConfig
+    ? (adminConfig.collections?.[collectionConfig.slug] as any)
+    : undefined
+  const adminGlobalComponents = globalConfig
+    ? (adminConfig.globals?.[globalConfig.slug] as any)
+    : undefined
+
   const BeforeDocumentControls =
+    adminCollectionComponents?.edit?.beforeDocumentControls ||
+    adminGlobalComponents?.elements?.beforeDocumentControls ||
     collectionConfig?.admin?.components?.edit?.beforeDocumentControls ||
     globalConfig?.admin?.components?.elements?.beforeDocumentControls
 
@@ -63,7 +74,9 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
+  const EditMenuItems =
+    adminCollectionComponents?.edit?.editMenuItems ||
+    collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {
     components.EditMenuItems = RenderServerComponent({
@@ -73,6 +86,8 @@ export const renderDocumentSlots: (args: {
   }
 
   const CustomPreviewButton =
+    adminCollectionComponents?.edit?.PreviewButton ||
+    adminGlobalComponents?.elements?.PreviewButton ||
     collectionConfig?.admin?.components?.edit?.PreviewButton ||
     globalConfig?.admin?.components?.elements?.PreviewButton
 
@@ -84,6 +99,8 @@ export const renderDocumentSlots: (args: {
   }
 
   const LivePreview =
+    adminCollectionComponents?.views?.edit?.livePreview ||
+    adminGlobalComponents?.views?.edit?.livePreview ||
     collectionConfig?.admin?.components?.views?.edit?.livePreview ||
     globalConfig?.admin?.components?.views?.edit?.livePreview
 
@@ -103,6 +120,8 @@ export const renderDocumentSlots: (args: {
       : descriptionFromConfig
 
   const CustomDescription =
+    adminCollectionComponents?.Description ||
+    adminGlobalComponents?.elements?.Description ||
     collectionConfig?.admin?.components?.Description ||
     globalConfig?.admin?.components?.elements?.Description
 
@@ -122,6 +141,8 @@ export const renderDocumentSlots: (args: {
 
   if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
     const CustomStatus =
+      adminCollectionComponents?.edit?.Status ||
+      adminGlobalComponents?.elements?.Status ||
       collectionConfig?.admin?.components?.edit?.Status ||
       globalConfig?.admin?.components?.elements?.Status
 
@@ -136,6 +157,8 @@ export const renderDocumentSlots: (args: {
   if (hasSavePermission) {
     if (hasDraftsEnabled(collectionConfig || globalConfig)) {
       const CustomPublishButton =
+        adminCollectionComponents?.edit?.PublishButton ||
+        adminGlobalComponents?.elements?.PublishButton ||
         collectionConfig?.admin?.components?.edit?.PublishButton ||
         globalConfig?.admin?.components?.elements?.PublishButton
 
@@ -147,6 +170,8 @@ export const renderDocumentSlots: (args: {
       }
 
       const CustomUnpublishButton =
+        adminCollectionComponents?.edit?.UnpublishButton ||
+        adminGlobalComponents?.elements?.UnpublishButton ||
         collectionConfig?.admin?.components?.edit?.UnpublishButton ||
         globalConfig?.admin?.components?.elements?.UnpublishButton
 
@@ -158,6 +183,8 @@ export const renderDocumentSlots: (args: {
       }
 
       const CustomSaveDraftButton =
+        adminCollectionComponents?.edit?.SaveDraftButton ||
+        adminGlobalComponents?.elements?.SaveDraftButton ||
         collectionConfig?.admin?.components?.edit?.SaveDraftButton ||
         globalConfig?.admin?.components?.elements?.SaveDraftButton
 
@@ -171,6 +198,8 @@ export const renderDocumentSlots: (args: {
       }
     } else {
       const CustomSaveButton =
+        adminCollectionComponents?.edit?.SaveButton ||
+        adminGlobalComponents?.elements?.SaveButton ||
         collectionConfig?.admin?.components?.edit?.SaveButton ||
         globalConfig?.admin?.components?.elements?.SaveButton
 
@@ -183,11 +212,16 @@ export const renderDocumentSlots: (args: {
     }
   }
 
-  if (collectionConfig?.upload && collectionConfig?.admin?.components?.edit?.Upload) {
-    components.Upload = RenderServerComponent({
-      Component: collectionConfig.admin.components.edit.Upload,
-      serverProps,
-    })
+  if (collectionConfig?.upload) {
+    const UploadComponent =
+      adminCollectionComponents?.edit?.Upload || collectionConfig?.admin?.components?.edit?.Upload
+
+    if (UploadComponent) {
+      components.Upload = RenderServerComponent({
+        Component: UploadComponent,
+        serverProps,
+      })
+    }
   }
 
   if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {

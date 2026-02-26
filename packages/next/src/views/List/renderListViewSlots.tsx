@@ -20,6 +20,8 @@ import { Banner } from '@payloadcms/ui/elements/Banner'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
+
 type Args = {
   clientProps: ListViewSlotSharedClientProps
   collectionConfig: SanitizedCollectionConfig
@@ -39,15 +41,22 @@ export const renderListViewSlots = ({
 }: Args): ListViewSlots => {
   const result: ListViewSlots = {} as ListViewSlots
 
-  if (collectionConfig.admin.components?.afterList) {
+  const adminConfig = getAdminConfig()
+  const adminCollectionComponents = adminConfig.collections?.[collectionConfig.slug] as any
+
+  const afterList =
+    adminCollectionComponents?.afterList || collectionConfig.admin.components?.afterList
+
+  if (afterList) {
     result.AfterList = RenderServerComponent({
       clientProps: clientProps satisfies AfterListClientProps,
-      Component: collectionConfig.admin.components.afterList,
+      Component: afterList,
       serverProps: serverProps satisfies AfterListTableServerPropsOnly,
     })
   }
 
-  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+  const listMenuItems =
+    adminCollectionComponents?.listMenuItems || collectionConfig.admin.components?.listMenuItems
 
   if (Array.isArray(listMenuItems)) {
     result.listMenuItems = [
@@ -59,27 +68,36 @@ export const renderListViewSlots = ({
     ]
   }
 
-  if (collectionConfig.admin.components?.afterListTable) {
+  const afterListTable =
+    adminCollectionComponents?.afterListTable || collectionConfig.admin.components?.afterListTable
+
+  if (afterListTable) {
     result.AfterListTable = RenderServerComponent({
       clientProps: clientProps satisfies AfterListTableClientProps,
-      Component: collectionConfig.admin.components.afterListTable,
+      Component: afterListTable,
       serverProps: serverProps satisfies AfterListTableServerPropsOnly,
     })
   }
 
-  if (collectionConfig.admin.components?.beforeList) {
+  const beforeList =
+    adminCollectionComponents?.beforeList || collectionConfig.admin.components?.beforeList
+
+  if (beforeList) {
     result.BeforeList = RenderServerComponent({
       clientProps: clientProps satisfies BeforeListClientProps,
-      Component: collectionConfig.admin.components.beforeList,
+      Component: beforeList,
       serverProps: serverProps satisfies BeforeListServerPropsOnly,
     })
   }
 
   // Handle beforeListTable with optional banner
-  const existingBeforeListTable = collectionConfig.admin.components?.beforeListTable
+  const beforeListTable =
+    adminCollectionComponents?.beforeListTable || collectionConfig.admin.components?.beforeListTable
+
+  const existingBeforeListTable = beforeListTable
     ? RenderServerComponent({
         clientProps: clientProps satisfies BeforeListTableClientProps,
-        Component: collectionConfig.admin.components.beforeListTable,
+        Component: beforeListTable,
         serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
       })
     : null
@@ -101,13 +119,16 @@ export const renderListViewSlots = ({
     )
   }
 
-  if (collectionConfig.admin.components?.Description) {
+  const Description =
+    adminCollectionComponents?.Description || collectionConfig.admin.components?.Description
+
+  if (Description) {
     result.Description = RenderServerComponent({
       clientProps: {
         collectionSlug: collectionConfig.slug,
         description,
       } satisfies ViewDescriptionClientProps,
-      Component: collectionConfig.admin.components.Description,
+      Component: Description,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }

@@ -14,7 +14,7 @@ import { applyLocaleFiltering, getRscSchemaPaths } from 'payload/shared'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { setAdminConfig } from '../../utilities/adminConfigCache.js'
+import { getAdminConfig, setAdminConfig } from '../../utilities/adminConfigCache.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -100,6 +100,9 @@ export const RootLayout = async ({
 
   await applyLocaleFiltering({ clientConfig, config, req })
 
+  const adminConfigProviders = getAdminConfig().admin?.providers
+  const providers = adminConfigProviders || config.admin?.components?.providers
+
   return (
     <html
       data-theme={theme}
@@ -130,10 +133,9 @@ export const RootLayout = async ({
           user={req.user}
         >
           <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
+          {Array.isArray(providers) && providers.length > 0 ? (
             <NestProviders
-              providers={config.admin?.components?.providers}
+              providers={providers}
               serverProps={{
                 i18n: req.i18n,
                 payload: req.payload,

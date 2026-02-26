@@ -6,6 +6,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
@@ -39,13 +40,15 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     return null
   }
 
-  const {
-    admin: {
-      components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, logout, settingsMenu },
-    },
-    collections,
-    globals,
-  } = payload.config
+  const { collections, globals } = payload.config
+
+  const adminConfig = getAdminConfig()
+  const beforeNav = adminConfig.admin?.beforeNav as any
+  const afterNav = adminConfig.admin?.afterNav as any
+  const beforeNavLinks = adminConfig.admin?.beforeNavLinks as any
+  const afterNavLinks = adminConfig.admin?.afterNavLinks as any
+  const logout = adminConfig.admin?.logout as any
+  const settingsMenu = adminConfig.admin?.settingsMenu as any
 
   const groups = groupNavItems(
     [

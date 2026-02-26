@@ -16,6 +16,7 @@ import type React from 'react'
 import { parseDocumentID } from 'payload'
 import { formatAdminURL, isNumber } from 'payload/shared'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { AccountView } from '../Account/index.js'
 import { BrowseByFolder } from '../BrowseByFolder/index.js'
 import { CollectionFolderView } from '../CollectionFolders/index.js'
@@ -136,7 +137,12 @@ export const getRouteData = ({
       }, [])) ||
     []
 
-  const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
+  const adminConfig = getAdminConfig()
+  const viewActions: CustomComponent[] = [
+    ...((adminConfig.admin?.actions as CustomComponent[]) ||
+      config?.admin?.components?.actions ||
+      []),
+  ]
 
   switch (segments.length) {
     case 0: {
@@ -276,7 +282,11 @@ export const getRouteData = ({
           viewType = 'list'
         }
 
-        viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+        viewActions.push(
+          ...((adminConfig.collections?.[collectionConfig.slug] as any)?.views?.list?.actions ||
+            collectionConfig.admin.components?.views?.list?.actions ||
+            []),
+        )
       } else if (globalConfig) {
         // --> /globals/:globalSlug
         routeParams.global = globalConfig.slug
@@ -292,7 +302,9 @@ export const getRouteData = ({
         // add default view actions
         viewActions.push(
           ...getViewActions({
-            editConfig: globalConfig.admin?.components?.views?.edit,
+            editConfig:
+              (adminConfig.globals?.[globalConfig.slug] as any)?.views?.edit ||
+              globalConfig.admin?.components?.views?.edit,
             viewKey: 'default',
           }),
         )
@@ -337,6 +349,8 @@ export const getRouteData = ({
 
           viewActions.push(
             ...getSubViewActions({
+              adminEditConfig: (adminConfig.collections?.[collectionConfig.slug] as any)?.views
+                ?.edit,
               collectionOrGlobal: collectionConfig,
               viewKeyArg: documentSubViewType,
             }),
@@ -351,7 +365,11 @@ export const getRouteData = ({
           templateType = 'default'
           viewType = 'trash'
 
-          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+          viewActions.push(
+            ...((adminConfig.collections?.[collectionConfig.slug] as any)?.views?.list?.actions ||
+              collectionConfig.admin.components?.views?.list?.actions ||
+              []),
+          )
         } else {
           if (config.folders && segmentThree === config.folders.slug && collectionConfig.folders) {
             // Collection Folder Views
@@ -368,7 +386,11 @@ export const getRouteData = ({
             templateType = 'default'
             viewType = 'collection-folders'
 
-            viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+            viewActions.push(
+              ...((adminConfig.collections?.[collectionConfig.slug] as any)?.views?.list?.actions ||
+                collectionConfig.admin.components?.views?.list?.actions ||
+                []),
+            )
           } else {
             // Collection Edit Views
             // --> /collections/:collectionSlug/create
@@ -392,6 +414,8 @@ export const getRouteData = ({
 
             viewActions.push(
               ...getSubViewActions({
+                adminEditConfig: (adminConfig.collections?.[collectionConfig.slug] as any)?.views
+                  ?.edit,
                 collectionOrGlobal: collectionConfig,
                 viewKeyArg: documentSubViewType,
               }),
@@ -419,6 +443,7 @@ export const getRouteData = ({
 
         viewActions.push(
           ...getSubViewActions({
+            adminEditConfig: (adminConfig.globals?.[globalConfig.slug] as any)?.views?.edit,
             collectionOrGlobal: globalConfig,
             viewKeyArg: documentSubViewType,
           }),

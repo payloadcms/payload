@@ -5,6 +5,7 @@ import { Gutter } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
+import { getAdminConfig } from '../../../utilities/adminConfigCache.js'
 import { ModularDashboard } from './ModularDashboard/index.js'
 
 const baseClass = 'dashboard'
@@ -41,7 +42,10 @@ export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewS
 
 export function DefaultDashboard(props: DashboardViewServerProps) {
   const { i18n, locale, params, payload, permissions, searchParams, user } = props
-  const { afterDashboard, beforeDashboard } = payload.config.admin.components
+
+  const adminConfig = getAdminConfig()
+  const beforeDashboard = adminConfig.admin?.beforeDashboard as any
+  const afterDashboard = adminConfig.admin?.afterDashboard as any
 
   return (
     <Gutter className={baseClass}>

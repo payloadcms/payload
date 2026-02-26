@@ -7,6 +7,7 @@ import React, { Fragment } from 'react'
 
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { DefaultDashboard } from './Default/index.js'
 
 export async function DashboardView(props: AdminViewServerProps) {
@@ -26,6 +27,8 @@ export async function DashboardView(props: AdminViewServerProps) {
   const globalData = await getGlobalData(req)
   const navGroups = getNavGroups(permissions, visibleEntities, config, i18n)
 
+  const adminConfig = getAdminConfig()
+
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
@@ -34,7 +37,7 @@ export async function DashboardView(props: AdminViewServerProps) {
         clientProps: {
           locale,
         } satisfies DashboardViewClientProps,
-        Component: config.admin?.components?.views?.dashboard?.Component,
+        Component: adminConfig.admin?.views?.dashboard?.Component as any,
         Fallback: DefaultDashboard,
         serverProps: {
           ...props,

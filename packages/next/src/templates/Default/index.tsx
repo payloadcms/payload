@@ -21,6 +21,7 @@ import './index.scss'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import { getAdminConfig } from '../../utilities/adminConfigCache.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -58,16 +59,11 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   viewType,
   visibleEntities,
 }) => {
-  const {
-    admin: {
-      avatar,
-      components,
-      components: { header: CustomHeader, Nav: CustomNav } = {
-        header: undefined,
-        Nav: undefined,
-      },
-    } = {},
-  } = payload.config || {}
+  const { admin: { avatar } = {} } = payload.config || {}
+
+  const adminConfig = getAdminConfig()
+  const CustomNav = adminConfig.admin?.Nav as any
+  const CustomHeader = adminConfig.admin?.header as any
 
   const clientProps = {
     documentSubViewType,
@@ -144,9 +140,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                       : undefined
                   }
                   CustomIcon={
-                    components?.graphics?.Icon
+                    adminConfig.admin?.graphics?.Icon
                       ? RenderServerComponent({
-                          Component: components.graphics.Icon,
+                          Component: adminConfig.admin.graphics.Icon as any,
                           serverProps,
                         })
                       : undefined
