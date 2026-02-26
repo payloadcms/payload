@@ -13,7 +13,6 @@ import { useHierarchySearch } from './useHierarchySearch.js'
 import './index.scss'
 
 const baseClass = 'hierarchy-search'
-const MIN_CHARS = 2
 
 export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   collectionSlug,
@@ -66,7 +65,6 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   return (
     <div className={baseClass}>
       <HierarchySearchInput
-        minChars={MIN_CHARS}
         onChange={setInputValue}
         onClear={handleClear}
         onSearch={handleSearch}

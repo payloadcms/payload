@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react'
 import type { SearchResult } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 
 type UseHierarchySearchArgs = {
   collectionSlug: string
@@ -46,6 +47,7 @@ export const useHierarchySearch = ({
       serverURL,
     },
   } = useConfig()
+  const { code: locale } = useLocale()
 
   const fetchResults = useCallback(
     async (query: string, pageToFetch: number, append: boolean) => {
@@ -56,6 +58,7 @@ export const useHierarchySearch = ({
           {
             computeHierarchyPaths: true,
             limit,
+            locale,
             page: pageToFetch,
             select: {
               [parentFieldName]: true,
@@ -102,7 +105,7 @@ export const useHierarchySearch = ({
         setIsLoading(false)
       }
     },
-    [api, collectionSlug, limit, parentFieldName, serverURL, titleField, titlePathField],
+    [api, collectionSlug, limit, locale, parentFieldName, serverURL, titleField, titlePathField],
   )
 
   const search = useCallback(

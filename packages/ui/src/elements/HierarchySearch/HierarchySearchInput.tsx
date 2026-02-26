@@ -10,7 +10,6 @@ import { XIcon } from '../../icons/X/index.js'
 const baseClass = 'hierarchy-search-input'
 
 type HierarchySearchInputProps = {
-  minChars?: number
   onChange: (value: string) => void
   onClear: () => void
   onSearch: (value: string) => void
@@ -19,7 +18,6 @@ type HierarchySearchInputProps = {
 }
 
 export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
-  minChars = 2,
   onChange,
   onClear,
   onSearch,
@@ -35,11 +33,11 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && value.length >= minChars) {
+      if (e.key === 'Enter' && value.length > 0) {
         onSearch(value)
       }
     },
-    [value, minChars, onSearch],
+    [value, onSearch],
   )
 
   const handleClear = useCallback(() => {
