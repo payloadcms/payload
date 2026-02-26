@@ -47,10 +47,18 @@ export async function runCodegenCase(
   const bypassCache = isCacheBypassed()
   const cached = !bypassCache && getCachedResult(key)
   if (cached) {
-    const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
-    console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
-    console.log(`  Task: ${cached.question}`)
-    return cached
+    const needsBackfill = !cached.modelId
+    const taggedResult = needsBackfill ? { ...cached, modelId: runnerModelId } : cached
+    if (needsBackfill) {
+      setCachedResult(key, taggedResult)
+    }
+    const cachedScore =
+      taggedResult.score != null ? `  score: ${taggedResult.score.toFixed(2)}` : ''
+    console.log(
+      `[${taggedResult.category}] ${taggedResult.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
+    )
+    console.log(`  Task: ${taggedResult.question}`)
+    return taggedResult
   }
 
   const {
@@ -71,6 +79,7 @@ export async function runCodegenCase(
       answer: modifiedConfig,
       category: testCase.category,
       confidence,
+      modelId: runnerModelId,
       pass: false,
       question: testCase.input,
       reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
@@ -123,6 +132,7 @@ export async function runCodegenCase(
     completeness,
     confidence,
     correctness,
+    modelId: runnerModelId,
     pass,
     question: testCase.input,
     reasoning,

@@ -63,12 +63,26 @@ export async function runDataset(
 
       const cached = getCachedResult(key)
       if (cached) {
-        const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
+        // Backfill systemPromptKey / modelId into entries written before these fields were added.
+        // Re-save so the cache file on disk is updated and the dashboard can pair them.
+        const needsBackfill = !cached.systemPromptKey || !cached.modelId
+        const taggedResult = needsBackfill
+          ? {
+              ...cached,
+              modelId: cached.modelId ?? runnerModelId,
+              systemPromptKey: cached.systemPromptKey ?? systemPromptKey,
+            }
+          : cached
+        if (needsBackfill) {
+          setCachedResult(key, taggedResult)
+        }
+        const cachedScore =
+          taggedResult.score != null ? `  score: ${taggedResult.score.toFixed(2)}` : ''
         console.log(
-          `[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
+          `[${taggedResult.category}] ${taggedResult.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
         )
-        console.log(`  Q: ${cached.question}`)
-        return cached
+        console.log(`  Q: ${taggedResult.question}`)
+        return taggedResult
       }
 
       const run = await runEval(prompt, { model: runnerModel, systemPromptKey })
@@ -88,10 +102,12 @@ export async function runDataset(
         completeness,
         confidence: run.confidence,
         correctness,
+        modelId: runnerModelId,
         pass,
         question: testCase.input,
         reasoning,
         score,
+        systemPromptKey,
         usage: {
           runner: run.usage,
           scorer: scorerUsage,

@@ -112,11 +112,15 @@ export type EvalResult = {
   confidence: number
   /** Scorer sub-score: factual accuracy of the answer (0–1) */
   correctness?: number
+  /** Runner model ID (e.g. "openai/gpt-5.2") — distinguishes high-power vs low-power in the dashboard */
+  modelId?: string
   pass: boolean
   question: string
   reasoning: string
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
+  /** Which system prompt variant was used — enables skill vs. baseline comparison in the dashboard */
+  systemPromptKey?: SystemPromptKey
   /** Populated when TypeScript compilation fails */
   tscErrors?: string[]
   /** Token usage across all LLM calls for this eval case */
