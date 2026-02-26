@@ -1,0 +1,111 @@
+---
+title: TypeScript Plugin (Experimental)
+label: TypeScript Plugin
+order: 30
+desc: IDE support for PayloadComponent import paths – inline validation, autocomplete, and go-to-definition.
+keywords: headless cms, typescript, documentation, ide, plugin, autocomplete, validation, import paths
+---
+
+<Banner type="warning">
+  **Experimental** — This plugin is experimental and may change in future
+  releases. Please [report any
+  issues](https://github.com/payloadcms/payload/issues) you encounter.
+</Banner>
+
+Payload ships an optional TypeScript Language Service Plugin (`@payloadcms/typescript-plugin`) that enhances your IDE experience when working with [Custom Components](../custom-components/overview). It understands Payload's `PayloadComponent` import path conventions and provides:
+
+- **Path validation** — red squigglies when a component path doesn't resolve to a real file
+- **Export validation** — errors when the named export doesn't exist in the target module, with "Did you mean?" suggestions
+- **Autocomplete** — file and directory suggestions while typing the path, and export name suggestions after `#`
+- **Go-to-definition** — Ctrl/Cmd+click on a component path string to jump to the component's source
+
+## Installation
+
+Install the plugin as a dev dependency:
+
+```bash
+pnpm add -D @payloadcms/typescript-plugin
+```
+
+Then add it to the `plugins` array in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }, { "name": "@payloadcms/typescript-plugin" }]
+  }
+}
+```
+
+Restart your TypeScript server after adding the plugin (in VS Code / Cursor: `Cmd+Shift+P` → "TypeScript: Restart TS Server").
+
+<Banner type="info">
+  TypeScript Language Service Plugins only run inside your IDE. They do not
+  affect `tsc` compilation or your build output.
+</Banner>
+
+## Supported Path Conventions
+
+The plugin supports all of Payload's component path formats:
+
+| Format                  | Example                            | Resolution                     |
+| ----------------------- | ---------------------------------- | ------------------------------ |
+| Absolute (from baseDir) | `'/components/MyField#MyField'`    | Resolved relative to `baseDir` |
+| Relative                | `'./components/MyField#MyField'`   | Resolved relative to `baseDir` |
+| tsconfig alias          | `'@/components/MyField#MyField'`   | Resolved via tsconfig `paths`  |
+| Package import          | `'@payloadcms/ui/rsc#MyComponent'` | Resolved via node_modules      |
+| Default export          | `'/components/MyField'`            | Uses `default` export          |
+
+Both the **string form** and the **object form** are supported:
+
+```ts
+// String form
+{
+  admin: {
+    components: {
+      Field: '/components/MyField#MyField',
+    }
+  }
+}
+
+// Object form
+{
+  admin: {
+    components: {
+      Field: {
+        path: '/components/MyField',
+        exportName: 'MyField',
+      }
+    }
+  }
+}
+```
+
+## Configuration
+
+### Base Directory
+
+The plugin automatically detects `baseDir` by walking up from the current file to find the nearest `payload.config.ts`. Absolute paths (starting with `/`) and relative paths (starting with `./`) are resolved relative to this directory.
+
+If your project uses a non-standard layout, you can override `baseDir` in the plugin config:
+
+```json
+{
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@payloadcms/typescript-plugin",
+        "baseDir": "./src"
+      }
+    ]
+  }
+}
+```
+
+The `baseDir` path is relative to the `tsconfig.json` location.
+
+## How It Works
+
+The plugin detects `PayloadComponent` positions by checking the contextual type of string literals in your config. Any string typed as `PayloadComponent`, `CustomComponent`, or any type that resolves to the same `false | RawPayloadComponent | string` union shape is automatically validated.
+
+This means the plugin works everywhere Payload expects a component path — collection field components, global components, admin panel components, dashboard widgets, and custom views — without needing to hardcode specific config positions.

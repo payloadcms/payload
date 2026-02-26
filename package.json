@@ -163,6 +163,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
+    "@payloadcms/typescript-plugin": "workspace:*",
     "@playwright/test": "1.58.2",
     "@sentry/nextjs": "^8.33.1",
     "@sentry/node": "^8.33.1",
