@@ -117,9 +117,9 @@ export const uploadthingStorage: UploadthingPlugin =
           ...(collOptions === true ? {} : collOptions),
 
           // Disable payload access control if the ACL is public-read or not set
-          // ...(uploadthingStorageOptions.options.acl === 'public-read'
-          //   ? { disablePayloadAccessControl: true }
-          //   : {}),
+          ...(uploadthingStorageOptions.options.acl === 'public-read'
+            ? { disablePayloadAccessControl: true }
+            : {}),
 
           adapter,
         },
