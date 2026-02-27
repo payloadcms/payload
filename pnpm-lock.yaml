@@ -1424,8 +1424,8 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
       acorn:
-        specifier: 8.12.1
-        version: 8.12.1
+        specifier: 8.16.0
+        version: 8.16.0
       bson-objectid:
         specifier: 2.0.4
         version: 2.0.4
@@ -8202,11 +8202,6 @@ packages:
   acorn-walk@8.3.5:
     resolution: {integrity: sha512-HEHNfbars9v4pgpW6SO1KSPkfoS0xVOM/9UzkJltjlsHZmJasxg8aXkuZa7SMf8vKGIBhpUsPluQSqhJFCqebw==}
     engines: {node: '>=0.4.0'}
-
-  acorn@8.12.1:
-    resolution: {integrity: sha512-tcpGyI9zbizT9JbV6oYE477V6mTlXvvi0T0G3SNIYE2apm/G5huBa1+K89VGeovbg+jycCrfhl3ADxErOuO6Jg==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
 
   acorn@8.16.0:
     resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
@@ -21225,9 +21220,7 @@ snapshots:
 
   acorn-walk@8.3.5:
     dependencies:
-      acorn: 8.12.1
-
-  acorn@8.12.1: {}
+      acorn: 8.16.0
 
   acorn@8.16.0: {}
 
@@ -27310,7 +27303,7 @@ snapshots:
   terser@5.16.9:
     dependencies:
       '@jridgewell/source-map': 0.3.11
-      acorn: 8.12.1
+      acorn: 8.16.0
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -27636,7 +27629,7 @@ snapshots:
 
   unplugin@1.0.1:
     dependencies:
-      acorn: 8.12.1
+      acorn: 8.16.0
       chokidar: 3.6.0
       webpack-sources: 3.3.4
       webpack-virtual-modules: 0.5.0
@@ -27991,7 +27984,7 @@ snapshots:
   webpack-bundle-analyzer@4.10.1(bufferutil@4.1.0):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      acorn: 8.12.1
+      acorn: 8.16.0
       acorn-walk: 8.3.5
       commander: 7.2.0
       debounce: 1.2.1
