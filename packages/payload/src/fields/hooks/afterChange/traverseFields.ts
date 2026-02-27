@@ -3,6 +3,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
+import type { ParentFieldPaths } from '../../getFieldPaths.js'
 
 import { promise } from './promise.js'
 
@@ -18,20 +19,17 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  parentIndexPath: string
   /**
    * @todo make required in v4.0
    */
   parentIsLocalized?: boolean
-  parentPath: string
-  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-}
+} & ParentFieldPaths
 
 export const traverseFields = async ({
   blockData,

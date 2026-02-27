@@ -6,7 +6,7 @@ import type {
   FieldClientComponent,
   FieldDiffClientComponent,
   FieldDiffServerComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../types.js'
@@ -17,7 +17,7 @@ type UIFieldBaseClientProps = {
   readonly path: string
 }
 
-type UIFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type UIFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type UIFieldClientProps = ClientFieldBase<UIFieldClientWithoutType> & UIFieldBaseClientProps
 

@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
+import type { ParentFieldPaths } from '../fields/getFieldPaths.js'
 
 import {
   fieldAffectsData,
@@ -28,9 +29,8 @@ const traverseArrayOrBlocksField = ({
   fillEmpty: boolean
   leavesFirst: boolean
   parentIsLocalized: boolean
-  parentPath: string
   parentRef?: unknown
-}) => {
+} & Pick<ParentFieldPaths, 'parentPath'>) => {
   if (fillEmpty) {
     if (field.type === 'array') {
       traverseFields({
@@ -101,26 +101,27 @@ const traverseArrayOrBlocksField = ({
   }
 }
 
-export type TraverseFieldsCallback = (args: {
-  /**
-   * The current field
-   */
-  field: Field | TabAsField
-  /**
-   * Function that when called will skip the current field and continue to the next
-   */
-  next?: () => void
-  parentIsLocalized: boolean
-  parentPath: string
-  /**
-   * The parent reference object
-   */
-  parentRef?: Record<string, unknown> | unknown
-  /**
-   * The current reference object
-   */
-  ref?: Record<string, unknown> | unknown
-}) => boolean | void
+export type TraverseFieldsCallback = (
+  args: {
+    /**
+     * The current field
+     */
+    field: Field | TabAsField
+    /**
+     * Function that when called will skip the current field and continue to the next
+     */
+    next?: () => void
+    parentIsLocalized: boolean
+    /**
+     * The parent reference object
+     */
+    parentRef?: Record<string, unknown> | unknown
+    /**
+     * The current reference object
+     */
+    ref?: Record<string, unknown> | unknown
+  } & Pick<ParentFieldPaths, 'parentPath'>,
+) => boolean | void
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback

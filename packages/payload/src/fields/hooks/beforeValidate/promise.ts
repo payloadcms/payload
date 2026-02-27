@@ -1,7 +1,7 @@
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { ParentFieldPaths, RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
@@ -30,10 +30,7 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  parentIndexPath: string
   parentIsLocalized: boolean
-  parentPath: string
-  parentSchemaPath: string
   req: PayloadRequest
   siblingData: JsonObject
   /**
@@ -41,7 +38,7 @@ type Args<T> = {
    */
   siblingDoc: JsonObject
   siblingFields?: (Field | TabAsField)[]
-}
+} & ParentFieldPaths
 
 // This function is responsible for the following actions, in order:
 // - Sanitize incoming data

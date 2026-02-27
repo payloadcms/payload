@@ -4,6 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
+import type { ParentFieldPaths } from '../../getFieldPaths.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { type RequestContext, validateBlocksFilterOptions } from '../../../index.js'
@@ -48,17 +49,14 @@ type Args = {
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   overrideAccess: boolean
-  parentIndexPath: string
   parentIsLocalized: boolean
-  parentPath: string
-  parentSchemaPath: string
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
   siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
-}
+} & ParentFieldPaths
 
 // This function is responsible for the following actions, in order:
 // - Run condition
