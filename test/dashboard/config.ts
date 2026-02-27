@@ -64,7 +64,7 @@ export default buildConfigWithDefaults({
       widgets: [
         {
           slug: 'count',
-          ComponentPath: './components/Count.tsx#default',
+          Component: './components/Count.tsx#default',
           fields: [
             {
               name: 'title',
@@ -94,24 +94,24 @@ export default buildConfigWithDefaults({
         },
         {
           slug: 'private',
-          ComponentPath: './components/Private.tsx#default',
+          Component: './components/Private.tsx#default',
           label: 'Private Widget',
         },
         {
           slug: 'revenue',
-          ComponentPath: './components/Revenue.tsx#default',
+          Component: './components/Revenue.tsx#default',
           // Demonstrates function form with i18n - returns localized label via t()
           label: ({ i18n }) => (i18n.language === 'es' ? 'Gráfico de Ingresos' : 'Revenue Chart'),
           minWidth: 'medium',
         },
         {
           slug: 'page-query',
-          ComponentPath: './components/PageQuery.tsx#default',
+          Component: './components/PageQuery.tsx#default',
           label: 'Page Query Widget',
         },
         {
           slug: 'configurable',
-          ComponentPath: './components/Configurable.tsx#default',
+          Component: './components/Configurable.tsx#default',
           fields: [
             {
               name: 'title',
