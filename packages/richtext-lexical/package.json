@@ -381,7 +381,7 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "@types/uuid": "10.0.0",
-    "acorn": "8.12.1",
+    "acorn": "8.16.0",
     "bson-objectid": "2.0.4",
     "csstype": "3.1.3",
     "dequal": "2.0.3",
