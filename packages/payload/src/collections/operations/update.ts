@@ -255,7 +255,26 @@ export const updateOperation = async <
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: (() => {
+            const dataForDoc = deepCopyObjectSimple(data)
+
+            collectionConfig.fields.forEach((field) => {
+              if (
+                field.type === 'array' &&
+                dataForDoc[field.name] &&
+                Array.isArray(dataForDoc[field.name])
+              ) {
+                dataForDoc[field.name].forEach((row: Record<string, any>) => {
+                  if (row.id && typeof row.id === 'string') {
+                    delete row.id
+                  }
+                })
+              }
+            })
+
+            return dataForDoc
+          })(),
+
           depth: depth!,
           docWithLocales,
           draftArg,
