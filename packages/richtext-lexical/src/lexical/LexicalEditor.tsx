@@ -20,6 +20,7 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin/ind
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin/index.js'
 import { InsertParagraphAtEndPlugin } from './plugins/InsertParagraphAtEnd/index.js'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut/index.js'
+import { NodeFieldsSyncPlugin } from './plugins/NodeFieldsSync/index.js'
 import { NormalizeSelectionPlugin } from './plugins/NormalizeSelection/index.js'
 import { SelectAllPlugin } from './plugins/SelectAllPlugin/index.js'
 import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
@@ -112,6 +113,7 @@ export const LexicalEditor: React.FC<
           ErrorBoundary={LexicalErrorBoundary}
         />
         <NormalizeSelectionPlugin />
+        <NodeFieldsSyncPlugin />
         {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />
         <ClipboardPlugin />
@@ -133,6 +135,7 @@ export const LexicalEditor: React.FC<
             }}
           />
         )}
+
         {floatingAnchorElem && (
           <React.Fragment>
             {!isSmallWidthViewport && isEditable && (

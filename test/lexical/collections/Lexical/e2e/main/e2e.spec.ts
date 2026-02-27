@@ -237,11 +237,12 @@ describe('lexicalMain', () => {
 
     await wait(500)
 
-    await saveDocHotkeyAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
+    await saveDocHotkeyAndAssert(page, false) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
     await wait(500)
     // Keep writing after save, assuming the cursor position is still at the end of the span
     await page.keyboard.type('text')
     await expect(spanInEditor).toHaveText('Upload Node:moretext')
+    await closeAllToasts(page)
     await wait(500)
     await saveDocAndAssert(page) // Use hotkey to save, as clicking the save button will obviously remove focus from the richtext field
 
@@ -456,6 +457,9 @@ describe('lexicalMain', () => {
       const popoverOption3BoundingBox = await popoverOption3.boundingBox()
       expect(popoverOption3BoundingBox).not.toBeNull()
       expect(popoverOption3BoundingBox).not.toBeUndefined()
+      if (!popoverOption3BoundingBox) {
+        throw new Error('popoverOption3BoundingBox is null')
+      }
       expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
       expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
 
@@ -903,7 +907,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
 
@@ -1010,7 +1014,12 @@ describe('lexicalMain', () => {
     await expect(linkDrawer).toBeVisible()
     await wait(500)
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+    const urlInput = linkDrawer.locator(`#field-lexicalRootEditor__${linkId}__url`)
+
     // Click on the input to focus it
     await urlInput.click()
     // should be https:// value
@@ -1045,7 +1054,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
@@ -1117,6 +1126,11 @@ describe('lexicalMain', () => {
     // Check if has text "Internal Link"
     await expect(linkDrawer.locator('.radio-input').nth(1)).toContainText('Internal Link')
 
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+
     // Get radio button for internal link with text "Internal Link"
     const radioInternalLink = linkDrawer
       .locator('.radio-input')
@@ -1126,17 +1140,17 @@ describe('lexicalMain', () => {
     await radioInternalLink.click()
     await wait(200)
 
-    const internalLinkSelect = linkDrawer
-      .locator('#field-doc .rs__control .value-container')
+    const docRelationshipInput = linkDrawer
+      .locator(`#field-lexicalRootEditor__${linkId}__doc`)
       .first()
-    await internalLinkSelect.click()
+    await docRelationshipInput.click()
     await wait(200)
 
     await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
     await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
     await linkDrawer.locator('.rs__option').nth(0).click()
 
-    await expect(internalLinkSelect).toContainText('Rich Text')
+    await expect(docRelationshipInput).toContainText('Rich Text')
     await wait(1000)
 
     await linkDrawer.locator('button').getByText('Save').first().click()
@@ -1242,7 +1256,11 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
     await expect(linkDrawer).toBeVisible()
 
-    const urlInput = linkDrawer.locator('#field-url').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .last()
+      .getAttribute('data-link-id')
+    const urlInput = linkDrawer.locator(`#field-richText__${linkId}__url`).first()
 
     await expect(urlInput).toBeVisible()
   })
@@ -1268,7 +1286,11 @@ describe('lexicalMain', () => {
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first()
     await expect(linkDrawer).toBeVisible()
 
-    const blockTextInput = linkDrawer.locator('#field-blocks__0__text').first()
+    const linkId = await richTextField
+      .locator('.LexicalEditorTheme__link')
+      .first()
+      .getAttribute('data-link-id')
+    const blockTextInput = linkDrawer.locator(`#field-richText__${linkId}__blocks__0__text`).first()
 
     await expect(blockTextInput).toBeVisible()
     await expect(blockTextInput).toBeEditable()
@@ -1385,7 +1407,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       const firstParagraph: SerializedParagraphNode = lexicalField.root
         .children[0] as SerializedParagraphNode
@@ -1428,7 +1450,7 @@ describe('lexicalMain', () => {
     const htmlContent = `<p style='text-align: center;'>paragraph centered</p><h1 style='text-align: right;'>Heading right</h1><p>paragraph without indent</p><p style='padding-inline-start: 40px;'>paragraph indent 1</p><h2 style='padding-inline-start: 80px;'>heading indent 2</h2><blockquote style='padding-inline-start: 120px;'>quote indent 3</blockquote>`
     await page.evaluate(
       async ([htmlContent]) => {
-        const blob = new Blob([htmlContent], { type: 'text/html' })
+        const blob = new Blob([htmlContent!], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },
@@ -1513,7 +1535,14 @@ describe('lexicalMain', () => {
     await richTextField.locator('.slash-menu-popup button').getByText('My Block').click()
 
     await expect(richTextField.locator('.LexicalEditorTheme__block')).toHaveCount(1)
-    await richTextField.locator('#field-someTextRequired').first().fill('test')
+    const blockId = await richTextField
+      .locator('.LexicalEditorTheme__block')
+      .first()
+      .getAttribute('data-block-id')
+    await richTextField
+      .locator(`#field-lexicalRootEditor__${blockId}__someTextRequired`)
+      .first()
+      .fill('test')
 
     await saveDocAndAssert(page)
 
@@ -1531,7 +1560,7 @@ describe('lexicalMain', () => {
         })
       ).docs[0] as never
 
-      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor
+      const lexicalField: SerializedEditorState = lexicalDoc.lexicalRootEditor!
 
       // @ts-expect-error no need to type this
       expect(lexicalField?.root?.children[0].fields.someTextRequired).toEqual('test')
@@ -1563,7 +1592,6 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
     await user.click()
@@ -1573,10 +1601,9 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    page.getByRole('heading', { name: 'Users' })
+
     const button = page.getByLabel('Add new User')
     await button.click()
-    page.getByText('Creating new User')
   })
 
   test('ensure custom Description component is rendered only once', async () => {
@@ -1625,7 +1652,7 @@ describe('lexicalMain', () => {
     const link = '<a href="https://www.google.com">Google</a>'
     await page.evaluate(
       async ([link]) => {
-        const blob = new Blob([link], { type: 'text/html' })
+        const blob = new Blob([link!], { type: 'text/html' })
         const clipboardItem = new ClipboardItem({ 'text/html': blob })
         await navigator.clipboard.write([clipboardItem])
       },
@@ -1719,7 +1746,20 @@ describe('lexicalMain', () => {
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
-    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
+    // Clicking on a field label will focus the input field (assuming htmlFor is correct), which should not
+    // select the decorator node
+    await expect(decoratorLocator).toBeHidden()
+
+    // Focus on block node again for delete test
+    const blockWithText2 = page
+      .locator('.LexicalEditorTheme__block', {
+        hasText: 'Text2',
+      })
+      .first()
+
+    await blockWithText2.click()
+    await expect(decoratorLocator).toBeVisible()
+    await expect(blockWithText2).toHaveClass('LexicalEditorTheme__block decorator-selected')
 
     // TEST DELETE!
     await page.keyboard.press('Backspace')

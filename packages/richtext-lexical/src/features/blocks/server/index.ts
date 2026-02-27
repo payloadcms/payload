@@ -5,6 +5,7 @@ import type {
   Config,
   FieldSchemaMap,
   FlattenedBlocksField,
+  PayloadComponent,
   UIFieldClientProps,
   UIFieldServerProps,
 } from 'payload'
@@ -153,21 +154,34 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           for (const block of blockConfigs) {
             const blockFields = [...block.fields]
 
+            // Lexical blocks aren't rows of a blocks field, so the normal renderFieldFn pipeline
+            // that attaches custom components to row metadata doesn't run. This synthetic UI field
+            // piggybacks on iterateFields → renderFieldFn to get RSC components into form state.
             if (block?.admin?.components) {
-              blockFields.unshift({
-                name: `_components`,
-                type: 'ui',
-                admin: {
-                  components: {
-                    Block: block.admin?.components?.Block,
-                    BlockLabel: block.admin?.components?.Label,
+              const uiComponents: Record<string, PayloadComponent | undefined> = {}
+              if (block.admin.components.Block) {
+                uiComponents.Block = block.admin.components.Block
+              }
+              if (block.admin.components.Label) {
+                uiComponents.BlockLabel = block.admin.components.Label
+              }
+
+              if (Object.keys(uiComponents).length > 0) {
+                blockFields.unshift({
+                  name: `_components`,
+                  type: 'ui',
+                  admin: {
+                    components: uiComponents,
                   },
-                },
-              })
+                })
+              }
             }
+            // Flat field list for iterateFields / RenderFields
             schemaMap.set(`lexical_blocks.${block.slug}.fields`, {
               fields: blockFields,
             })
+            // Synthetic blocks-type entry so that we have access to the ClientBlock
+            // in order to get the labels
             schemaMap.set(`lexical_blocks.${block.slug}`, {
               name: `lexical_blocks_${block.slug}`,
               type: 'blocks',
@@ -177,21 +191,28 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         }
 
         if (inlineBlockConfigs?.length) {
-          // To generate block schemaMap which generates things like the componentMap for admin.Label
           for (const block of inlineBlockConfigs) {
             const blockFields = [...block.fields]
 
+            // Same synthetic UI field pattern as regular blocks above
             if (block?.admin?.components) {
-              blockFields.unshift({
-                name: `_components`,
-                type: 'ui',
-                admin: {
-                  components: {
-                    Block: block.admin?.components?.Block,
-                    BlockLabel: block.admin?.components?.Label,
+              const uiComponents: Record<string, PayloadComponent | undefined> = {}
+              if (block.admin.components.Block) {
+                uiComponents.Block = block.admin.components.Block
+              }
+              if (block.admin.components.Label) {
+                uiComponents.BlockLabel = block.admin.components.Label
+              }
+
+              if (Object.keys(uiComponents).length > 0) {
+                blockFields.unshift({
+                  name: `_components`,
+                  type: 'ui',
+                  admin: {
+                    components: uiComponents,
                   },
-                },
-              })
+                })
+              }
             }
 
             schemaMap.set(`lexical_inline_blocks.${block.slug}.fields`, {
@@ -216,7 +237,10 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
-          // @ts-expect-error - TODO: fix this
+          getSchemaPath: ({ node }) => {
+            const blockType = node?.fields?.blockType
+            return blockType ? `lexical_blocks.${blockType}.fields` : undefined
+          },
           getSubFields: ({ node }) => {
             if (!node) {
               if (blockConfigs?.length) {
@@ -234,7 +258,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockType = node.fields.blockType
 
             const block = blockConfigs?.find((block) => block.slug === blockType)
-            return block?.fields
+            return block?.fields ?? null
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
@@ -244,7 +268,10 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
-          // @ts-expect-error - TODO: fix this
+          getSchemaPath: ({ node }) => {
+            const blockType = node?.fields?.blockType
+            return blockType ? `lexical_inline_blocks.${blockType}.fields` : undefined
+          },
           getSubFields: ({ node }) => {
             if (!node) {
               if (inlineBlockConfigs?.length) {
@@ -262,7 +289,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
             const blockType = node.fields.blockType
 
             const block = inlineBlockConfigs?.find((block) => block.slug === blockType)
-            return block?.fields
+            return block?.fields ?? null
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields

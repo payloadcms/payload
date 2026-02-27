@@ -1,4 +1,5 @@
 'use client'
+
 import type { FormState } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -8,6 +9,7 @@ import {
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
+  useForm,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
@@ -19,8 +21,15 @@ import { v4 as uuid } from 'uuid'
 import type { FieldsDrawerProps } from './Drawer.js'
 
 import { useEditorConfigContext } from '../../lexical/config/client/EditorConfigProvider.js'
+import { RenderLexicalFields } from '../RenderLexicalFields.js'
 
-export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = ({
+/**
+ * Standalone form-based drawer content for creation drawers (no nodeId).
+ * Uses its own `<Form>` with server-side form state initialization.
+ */
+const StandaloneDrawerContent: React.FC<
+  Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle' | 'nodeId' | 'nodeKey'>
+> = ({
   data,
   featureKey,
   fieldMapOverride,
@@ -48,7 +57,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     schemaFieldsPathOverride ??
     `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
 
-  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
+  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath]
 
   useEffect(() => {
     const controller = new AbortController()
@@ -138,7 +147,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     ],
   )
 
-  // cleanup effect
   useEffect(() => {
     return () => {
       abortAndIgnore(onChangeAbortControllerRef.current)
@@ -163,7 +171,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         fields={Array.isArray(fields) ? fields : []}
         forceRender
         parentIndexPath=""
-        parentPath="" // See Blocks feature path for details as for why this is empty
+        parentPath=""
         parentSchemaPath={schemaFieldsPath}
         permissions={true}
         readOnly={!isEditable}
@@ -171,4 +179,75 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
     </Form>
   )
+}
+
+/**
+ * Inline drawer content for node editing drawers (with nodeId).
+ * Fields render within the parent document form state.
+ */
+const InlineDrawerContent: React.FC<
+  {
+    nodeId: string
+  } & Omit<FieldsDrawerProps, 'data' | 'drawerSlug' | 'drawerTitle'>
+> = ({
+  featureKey,
+  fieldMapOverride,
+  handleDrawerSubmit,
+  nodeId,
+  nodeKey,
+  schemaFieldsPathOverride,
+  schemaPath,
+  schemaPathSuffix,
+}) => {
+  const { t } = useTranslation()
+  const isEditable = useLexicalEditable()
+  const { fields: formFields, getDataByPath } = useForm()
+
+  const {
+    fieldProps: { featureClientSchemaMap, path },
+  } = useEditorConfigContext()
+
+  const schemaFieldsPath =
+    schemaFieldsPathOverride ??
+    `${schemaPath}.lexical_internal_feature.${featureKey}${schemaPathSuffix ? `.${schemaPathSuffix}` : ''}`
+
+  const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath]
+
+  const parentPath = `${path}.${nodeId}`
+
+  const onClick = useCallback(() => {
+    const data = getDataByPath(parentPath) ?? {}
+    handleDrawerSubmit(formFields, data)
+  }, [parentPath, getDataByPath, formFields, handleDrawerSubmit])
+
+  const fieldProps = {
+    fields: Array.isArray(fields) ? fields : [],
+    forceRender: true as const,
+    parentIndexPath: '',
+    parentPath,
+    parentSchemaPath: schemaFieldsPath,
+    permissions: true as const,
+    readOnly: !isEditable,
+  }
+
+  return (
+    <>
+      {nodeKey ? (
+        <RenderLexicalFields {...fieldProps} nodeKey={nodeKey} />
+      ) : (
+        <RenderFields {...fieldProps} />
+      )}
+      <FormSubmit onClick={onClick}>{t('fields:saveChanges')}</FormSubmit>
+    </>
+  )
+}
+
+export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'drawerTitle'>> = (
+  props,
+) => {
+  if (props.nodeId) {
+    return <InlineDrawerContent {...props} nodeId={props.nodeId} />
+  }
+
+  return <StandaloneDrawerContent {...props} />
 }

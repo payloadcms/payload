@@ -1,6 +1,6 @@
 'use client'
 import type { ElementNode, LexicalNode } from 'lexical'
-import type { Data, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
@@ -13,6 +13,7 @@ import {
   formatDrawerSlug,
   useConfig,
   useEditDepth,
+  useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
@@ -51,9 +52,9 @@ function preventDefault(
 
 export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.ReactNode {
   const [editor] = useLexicalComposerContext()
-  // TO-DO: There are several states that should not be state, because they
-  // are derived from linkNode (linkUrl, linkLabel, stateData, isLink, isAutoLink...)
   const [linkNode, setLinkNode] = useState<LinkNode>()
+  const [linkNodeId, setLinkNodeId] = useState<string | undefined>()
+  const [linkNodeKey, setLinkNodeKey] = useState<string | undefined>()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
   const selectedNodeRectRef = useRef<DOMRect | null>(null)
@@ -61,18 +62,15 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
   const [linkLabel, setLinkLabel] = useState<null | string>(null)
 
   const {
-    fieldProps: { schemaPath },
+    fieldProps: { path: fieldPath, schemaPath },
     uuid,
   } = useEditorConfigContext()
+  const { dispatchFields } = useForm()
   const isEditable = useLexicalEditable()
 
   const { config, getEntityConfig } = useConfig()
 
   const { i18n, t } = useTranslation<object, 'lexical:link:loadingWithEllipsis'>()
-
-  const [stateData, setStateData] = useState<
-    ({ id?: string; text: string } & LinkFields) | undefined
-  >()
 
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
@@ -98,7 +96,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     setLinkUrl(null)
     setLinkLabel(null)
     setSelectedNodes([])
-    setStateData(undefined)
+    setLinkNodeId(undefined)
+    setLinkNodeKey(undefined)
   }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
 
   const $updateLinkEditor = useCallback(() => {
@@ -133,15 +132,18 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       return
     }
     setLinkNode(focusLinkParent)
+    const nodeId = focusLinkParent.getID()
+    setLinkNodeId(nodeId)
+    setLinkNodeKey(focusLinkParent.getKey())
 
     const fields = focusLinkParent.getFields()
 
-    // Initial state:
-    const data: { text: string } & LinkFields = {
-      ...fields,
-      id: focusLinkParent.getID(),
-      text: focusLinkParent.getTextContent(),
-    }
+    const basePath = `${fieldPath}.${nodeId}`
+    dispatchFields({
+      type: 'UPDATE',
+      path: `${basePath}.text`,
+      value: focusLinkParent.getTextContent(),
+    })
 
     if (fields?.linkType === 'custom') {
       setLinkUrl(fields?.url ?? null)
@@ -212,7 +214,6 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       }
     }
 
-    setStateData(data)
     setIsLink(true)
     setSelectedNodes(selection ? selection?.getNodes() : [])
 
@@ -268,6 +269,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     i18n,
     locale?.code,
     anchorElem,
+    dispatchFields,
+    fieldPath,
   ])
 
   useEffect(() => {
@@ -314,7 +317,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   useEffect(() => {
     return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
+      editor.registerUpdateListener(({ editorState, tags }) => {
+        if (tags.has('history-merge')) {
+          return
+        }
         editorState.read(() => {
           void $updateLinkEditor()
         })
@@ -411,11 +417,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       </div>
       <FieldsDrawer
         className="lexical-link-edit-drawer"
-        data={stateData}
         drawerSlug={drawerSlug}
         drawerTitle={t('fields:editLink')}
         featureKey="link"
-        handleDrawerSubmit={(fields: FormState, data: Data) => {
+        handleDrawerSubmit={(fields: FormState, data) => {
           const newLinkPayload = data as { text: string } & LinkFields
 
           const bareLinkFields: LinkFields = {
@@ -451,6 +456,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
             text: newLinkPayload.text,
           })
         }}
+        nodeId={linkNodeId}
+        nodeKey={linkNodeKey}
         schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />

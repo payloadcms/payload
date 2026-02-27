@@ -65,12 +65,15 @@ export class UploadNode extends UploadServerNode {
     if ((this.__data as Internal_UploadData).pending) {
       return <PendingUploadComponent />
     }
+    const data = this.getData()
     return (
       <RawUploadComponent
         className={config?.theme?.upload ?? 'LexicalEditorTheme__upload'}
-        data={this.__data}
         format={this.__format}
+        id={data.id}
         nodeKey={this.getKey()}
+        relationTo={data.relationTo}
+        value={data.value}
       />
     )
   }

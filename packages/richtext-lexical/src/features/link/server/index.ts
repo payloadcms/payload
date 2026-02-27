@@ -247,6 +247,9 @@ export const LinkFeature = createServerFeature<
               nodeTypes: [LinkNode.getType()],
             },
           },
+          getSchemaPath: () => {
+            return 'fields'
+          },
           getSubFields: () => {
             return sanitizedFieldsWithoutText
           },

@@ -118,6 +118,8 @@ export class LinkNode extends ElementNode {
       element.rel = manageRel(element.rel, 'add', 'noopener')
     }
 
+    element.setAttribute('data-link-id', this.__id)
+
     addClassNamesToElement(element, config.theme.link)
     return element
   }
@@ -211,6 +213,11 @@ export class LinkNode extends ElementNode {
     const writable = this.getWritable()
     writable.__id = id
     return writable
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
   }
 
   override updateDOM(prevNode: this, anchor: HTMLAnchorElement, config: EditorConfig): boolean {

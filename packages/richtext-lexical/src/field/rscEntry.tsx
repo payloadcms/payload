@@ -1,14 +1,11 @@
-import type { SerializedLexicalNode } from 'lexical'
 import type {
   ClientComponentProps,
   FieldPaths,
   RichTextFieldClient,
-  RichTextField as RichTextFieldType,
   ServerComponentProps,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { renderField } from '@payloadcms/ui/forms/renderField'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
@@ -20,7 +17,6 @@ import type {
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
-import { buildInitialState } from '../utilities/buildInitialState.js'
 import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
@@ -30,12 +26,9 @@ export const RscEntryLexicalField: React.FC<
     Pick<FieldPaths, 'path'> &
     Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
-> = async (args) => {
-  const field: RichTextFieldType = args.field as RichTextFieldType
+> = (args) => {
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
-
-  const disabled = args?.readOnly || field?.admin?.readOnly
 
   if (!(args?.clientField as RichTextFieldClient)?.name) {
     throw new Error('Initialized lexical RSC field without a field name')
@@ -50,28 +43,6 @@ export const RscEntryLexicalField: React.FC<
     sanitizedEditorConfig: args.sanitizedEditorConfig,
     schemaPath,
   })
-
-  let initialLexicalFormState = {}
-  if (args.siblingData?.[field.name]?.root?.children?.length) {
-    initialLexicalFormState = await buildInitialState({
-      context: {
-        id: args.id,
-        clientFieldSchemaMap: args.clientFieldSchemaMap,
-        collectionSlug: args.collectionSlug,
-        disabled,
-        documentData: args.data,
-        field,
-        fieldSchemaMap: args.fieldSchemaMap,
-        lexicalFieldSchemaPath: schemaPath,
-        operation: args.operation,
-        permissions: args.permissions,
-        preferences: args.preferences,
-        renderFieldFn: renderField,
-        req: args.req,
-      },
-      nodeData: args.siblingData?.[field.name]?.root?.children as SerializedLexicalNode[],
-    })
-  }
 
   const placeholderFromArgs = args.admin?.placeholder
   const placeholder = placeholderFromArgs
@@ -100,7 +71,6 @@ export const RscEntryLexicalField: React.FC<
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
-    initialLexicalFormState,
     lexicalEditorConfig: args.sanitizedEditorConfig.lexical,
     path,
     permissions: args.permissions,

@@ -1,10 +1,12 @@
 'use client'
 import type { CollapsibleProps } from '@payloadcms/ui/elements/Collapsible'
-import type { ClientField, FormState } from 'payload'
+import type { ClientField } from 'payload'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
-import { RenderFields, useFormSubmitted } from '@payloadcms/ui'
+import { useFormSubmitted } from '@payloadcms/ui'
 import React, { createContext, useMemo } from 'react'
+
+import { RenderLexicalFields } from '../../../../utilities/RenderLexicalFields.js'
 
 export type BlockCollapsibleProps = {
   /**
@@ -62,9 +64,9 @@ export type BlockContentProps = {
   EditButton: React.FC
   errorCount: number
   formSchema: ClientField[]
-  initialState: false | FormState | undefined
-
   nodeKey: string
+  parentPath: string
+  parentSchemaPath: string
   RemoveButton: React.FC
 }
 
@@ -80,22 +82,26 @@ const BlockComponentContext = createContext<BlockComponentContextType>({
   EditButton: () => null,
   errorCount: 0,
   formSchema: [],
-  initialState: false,
   nodeKey: '',
+  parentPath: '',
+  parentSchemaPath: '',
   RemoveButton: () => null,
 })
 
 export const useBlockComponentContext = () => React.use(BlockComponentContext)
 
-/**
- * The actual content of the Block. This should be INSIDE a Form component,
- * scoped to the block. All format operations in here are thus scoped to the block's form, and
- * not the whole document.
- */
 export const BlockContent: React.FC<BlockContentProps> = (props) => {
   const { Collapsible, ...contextProps } = props
 
-  const { BlockDrawer, CustomBlock, errorCount, formSchema } = contextProps
+  const {
+    BlockDrawer,
+    CustomBlock,
+    errorCount,
+    formSchema,
+    nodeKey,
+    parentPath,
+    parentSchemaPath,
+  } = contextProps
 
   const hasSubmitted = useFormSubmitted()
 
@@ -126,12 +132,13 @@ export const BlockContent: React.FC<BlockContentProps> = (props) => {
     </BlockComponentContext>
   ) : (
     <CollapsibleWithErrorProps>
-      <RenderFields
+      <RenderLexicalFields
         fields={formSchema}
         forceRender={true}
+        nodeKey={nodeKey}
         parentIndexPath=""
-        parentPath={''}
-        parentSchemaPath=""
+        parentPath={parentPath}
+        parentSchemaPath={parentSchemaPath}
         permissions={true}
         readOnly={!isEditable}
       />

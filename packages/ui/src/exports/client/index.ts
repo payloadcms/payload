@@ -260,6 +260,11 @@ export { RowLabelProvider, useRowLabel } from '../../forms/RowLabel/Context/inde
 
 export { FormSubmit } from '../../forms/Submit/index.js'
 export { WatchChildErrors } from '../../forms/WatchChildErrors/index.js'
+export {
+  FieldChangeNotifierProvider,
+  useFieldChangeNotifier,
+} from '../../forms/FieldChangeNotifier/index.js'
+export type { FieldChangeNotifier } from '../../forms/FieldChangeNotifier/index.js'
 export { FieldContext, useField } from '../../forms/useField/index.js'
 export type { FieldType, Options } from '../../forms/useField/types.js'
 

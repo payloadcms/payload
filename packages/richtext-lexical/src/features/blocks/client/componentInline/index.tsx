@@ -1,151 +1,90 @@
 'use client'
 
-import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
+import type { BlocksFieldClient, ClientBlock, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
+
+import './index.scss'
+
 import {
   Button,
   Drawer,
   EditDepthProvider,
-  Form,
   formatDrawerSlug,
-  FormSubmit,
-  RenderFields,
   ShimmerEffect,
   useConfig,
-  useDocumentForm,
-  useDocumentInfo,
   useEditDepth,
-  useServerFunctions,
+  useForm,
+  useFormFields,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui'
-import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey } from 'lexical'
-
-import './index.scss'
-
-import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
-import { v4 as uuid } from 'uuid'
-
-import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
+import { RenderLexicalFields } from '../../../../utilities/RenderLexicalFields.js'
 
 type Props = {
-  /**
-   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
-   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
-   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
-   */
-  readonly cacheBuster: number
+  readonly blockType: string
   readonly className: string
-  readonly formData: InlineBlockFields
+  readonly id: string
   readonly nodeKey: string
 }
 
 type InlineBlockComponentContextType = {
   EditButton?: React.FC
-  initialState: false | FormState | undefined
   InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
   Label?: React.FC
   nodeKey?: string
+  parentPath?: string
+  parentSchemaPath?: string
   RemoveButton?: React.FC
 }
 
-const InlineBlockComponentContext = createContext<InlineBlockComponentContextType>({
-  initialState: false,
-})
+const InlineBlockComponentContext = createContext<InlineBlockComponentContextType>({})
 
 export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+  const { id, blockType, className: baseClass, nodeKey } = props
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
-    fieldProps: { featureClientSchemaMap, initialLexicalFormState, schemaPath },
+    fieldProps: { featureClientSchemaMap, path, schemaPath },
     setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
-  const { fields: parentDocumentFields } = useDocumentForm()
 
-  const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
-    // Initial form state that was calculated server-side. May have stale values
-    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
-    if (!cachedFormState) {
-      return false
-    }
-
-    // Merge current formData values into the cached form state
-    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
-    return Object.fromEntries(
-      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
-        fieldName,
-        fieldName in formData
-          ? {
-              ...fieldState,
-              initialValue: formData[fieldName],
-              value: formData[fieldName],
-            }
-          : fieldState,
-      ]),
-    )
-  })
-
-  const hasMounted = useRef(false)
-  const prevCacheBuster = useRef(cacheBuster)
-  useEffect(() => {
-    if (hasMounted.current) {
-      if (prevCacheBuster.current !== cacheBuster) {
-        setInitialState(false)
-      }
-      prevCacheBuster.current = cacheBuster
-    } else {
-      hasMounted.current = true
-    }
-  }, [cacheBuster])
-
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
-  )
-
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
-  )
-
   const drawerSlug = formatDrawerSlug({
-    slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
+    slug: `lexical-inlineBlocks-create-${uuidFromContext}-${id}`,
     depth: editDepth,
   })
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
+  const { closeModal } = useModal()
+  const { dispatchFields } = useForm()
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
-  const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { config } = useConfig()
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
+  const blockSchemaPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${blockType}`
+  const blockFieldsSchemaPath = `${blockSchemaPath}.fields`
+  const blockFieldsPath = `${path}.${id}`
 
-  const clientSchemaMap = featureClientSchemaMap['blocks']
+  const blocksField: BlocksFieldClient | undefined = featureClientSchemaMap?.blocks?.[
+    blockSchemaPath
+  ]?.[0] as BlocksFieldClient | undefined
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
-    componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
-
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+  const clientBlock: ClientBlock | undefined = blocksField?.blockReferences
     ? typeof blocksField?.blockReferences?.[0] === 'string'
       ? config.blocksMap[blocksField?.blockReferences?.[0]]
       : blocksField?.blockReferences?.[0]
@@ -153,10 +92,24 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const clientBlockFields = clientBlock?.fields ?? []
 
-  // Open drawer on "mount"
+  const blockFormState: FormState = useFormFields(([fields]) => {
+    const data: FormState = {}
+    const prefix = `${blockFieldsPath}.`
+    for (const [key, value] of Object.entries(fields)) {
+      if (key.startsWith(prefix)) {
+        data[key.slice(prefix.length)] = value
+      }
+    }
+    return data
+  })
+
+  const isLoading = Object.keys(blockFormState).length === 0
+
+  const CustomLabel = blockFormState?.['_components']?.customComponents?.BlockLabel
+  const CustomBlock = blockFormState?.['_components']?.customComponents?.Block
+
   useEffect(() => {
     if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
-      // > 2 because they always have "id" and "blockName" fields
       if (clientBlockFields.length > 2) {
         toggleDrawer()
       }
@@ -174,171 +127,6 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const blockDisplayName = clientBlock?.labels?.singular
     ? getTranslation(clientBlock?.labels.singular, i18n)
     : clientBlock?.slug
-
-  const onChangeAbortControllerRef = useRef(new AbortController())
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${clientBlock?.slug}.fields`
-
-  // Initial state for newly created blocks
-  useEffect(() => {
-    const abortController = new AbortController()
-
-    const awaitInitialState = async () => {
-      /*
-       * This will only run if a new block is created. For all existing blocks that are loaded when the document is loaded, or when the form is saved,
-       * this is not run, as the lexical field RSC will fetch the state server-side and pass it to the client. That way, we avoid unnecessary client-side
-       * requests. Though for newly created blocks, we need to fetch the state client-side, as the server doesn't know about the block yet.
-       */
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        data: formData,
-        docPermissions: { fields: true },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        globalSlug,
-        initialBlockData: formData,
-        initialBlockFormState: formData,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: true,
-        schemaPath: schemaFieldsPath,
-        signal: abortController.signal,
-      })
-
-      if (state) {
-        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as InlineBlockFields
-
-        // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isInlineBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = formData.blockType
-
-            node.setFields(newData, true)
-          }
-        })
-
-        setInitialState(state)
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
-      }
-    }
-
-    if (formData && !initialState) {
-      void awaitInitialState()
-    }
-
-    return () => {
-      abortAndIgnore(abortController)
-    }
-  }, [
-    getFormState,
-    editor,
-    nodeKey,
-    isEditable,
-    schemaFieldsPath,
-    id,
-    formData,
-    initialState,
-    collectionSlug,
-    globalSlug,
-    getDocPreferences,
-    parentDocumentFields,
-  ])
-
-  /**
-   * HANDLE ONCHANGE
-   */
-  const onChange = useCallback(
-    async ({ formState: prevFormState, submit }: { formState: FormState; submit?: boolean }) => {
-      abortAndIgnore(onChangeAbortControllerRef.current)
-
-      const controller = new AbortController()
-      onChangeAbortControllerRef.current = controller
-
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        formState: prevFormState,
-        globalSlug,
-        initialBlockFormState: prevFormState,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: submit ? true : false,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      if (!state) {
-        return prevFormState
-      }
-
-      if (submit) {
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
-      }
-
-      return state
-    },
-    [
-      getFormState,
-      id,
-      collectionSlug,
-      getDocPreferences,
-      parentDocumentFields,
-      globalSlug,
-      isEditable,
-      schemaFieldsPath,
-    ],
-  )
-  // cleanup effect
-  useEffect(() => {
-    const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
-      return Object.keys(initialState).some(
-        (key) => initialState[key] && formData[key] !== initialState[key].value,
-      )
-    }
-
-    return () => {
-      // If the component is unmounted (either via removeInlineBlock or via lexical itself) and the form state got changed before,
-      // we need to reset the initial state to force a re-fetch of the initial state when it gets mounted again (e.g. via lexical history undo).
-      // Otherwise it would use an outdated initial state.
-      if (initialState && isStateOutOfSync(formData, initialState)) {
-        setInitialState(false)
-      }
-      abortAndIgnore(onChangeAbortControllerRef.current)
-    }
-  }, [formData, initialState])
-
-  /**
-   * HANDLE FORM SUBMIT
-   */
-  const onFormSubmit = useCallback(
-    (formState: FormState, newData: Data) => {
-      newData.blockType = formData.blockType
-
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey)
-        if (node && $isInlineBlockNode(node)) {
-          node.setFields(newData as InlineBlockFields, true)
-        }
-      })
-    },
-    [editor, nodeKey, formData],
-  )
 
   const RemoveButton = useMemo(
     () => () => (
@@ -382,7 +170,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     () =>
       ({ children, className }: { children: React.ReactNode; className?: string }) => (
         <div
-          className={[`${baseClass}__container`, baseClass + '-' + formData.blockType, className]
+          className={[`${baseClass}__container`, baseClass + '-' + blockType, className]
             .filter(Boolean)
             .join(' ')}
           ref={inlineBlockElemElemRef}
@@ -390,7 +178,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           {children}
         </div>
       ),
-    [baseClass, formData.blockType],
+    [baseClass, blockType],
   )
 
   const Label = useMemo(() => {
@@ -403,10 +191,26 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [CustomLabel, clientBlock?.labels, i18n])
 
+  const handleDrawerSave = useCallback(() => {
+    const componentsState = blockFormState['_components']
+    if (componentsState) {
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState: {
+          [`${blockFieldsPath}._components`]: {
+            ...componentsState,
+            lastRenderedPath: undefined,
+          },
+        },
+      })
+    }
+    closeModal(drawerSlug)
+  }, [blockFormState, blockFieldsPath, closeModal, dispatchFields, drawerSlug])
+
   if (!clientBlock) {
     return (
       <InlineBlockContainer className={`${baseClass}-not-found`}>
-        <span>Error: Block '{formData.blockType}' not found</span>
+        <span>Error: Block '{blockType}' not found</span>
         {isEditable ? (
           <div className={`${baseClass}__actions`}>
             <RemoveButton />
@@ -416,73 +220,61 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     )
   }
 
+  if (isLoading) {
+    return (
+      <InlineBlockContainer>
+        <ShimmerEffect height="1rem" width="4rem" />
+      </InlineBlockContainer>
+    )
+  }
+
   return (
-    <Form
-      beforeSubmit={[
-        async ({ formState }) => {
-          // This is only called when form is submitted from drawer
-          return await onChange({ formState, submit: true })
-        },
-      ]}
-      disableValidationOnSubmit
-      el="div"
-      fields={clientBlock?.fields}
-      initialState={initialState || {}}
-      onChange={[onChange]}
-      onSubmit={(formState, data) => {
-        onFormSubmit(formState, data)
-        toggleDrawer()
-      }}
-      uuid={uuid()}
-    >
+    <>
       <EditDepthProvider>
         <Drawer
-          className={''}
           slug={drawerSlug}
-          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+          title={t(`lexical:blocks:inlineBlocks:${id ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
-          {initialState ? (
-            <>
-              <RenderFields
-                fields={clientBlock?.fields}
-                forceRender
-                parentIndexPath=""
-                parentPath="" // See Blocks feature path for details as for why this is empty
-                parentSchemaPath={schemaFieldsPath}
-                permissions={true}
-                readOnly={!isEditable}
-              />
-              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
-            </>
-          ) : null}
+          <RenderLexicalFields
+            fields={clientBlock?.fields}
+            forceRender
+            nodeKey={nodeKey}
+            parentIndexPath=""
+            parentPath={blockFieldsPath}
+            parentSchemaPath={blockFieldsSchemaPath}
+            permissions={true}
+            readOnly={!isEditable}
+          />
+          <Button onClick={handleDrawerSave}>{t('fields:saveChanges')}</Button>
         </Drawer>
       </EditDepthProvider>
-      {CustomBlock ? (
-        <InlineBlockComponentContext
-          value={{
-            EditButton,
-            initialState,
-            InlineBlockContainer,
-            Label,
-            nodeKey,
-            RemoveButton,
-          }}
-        >
-          {CustomBlock}
-        </InlineBlockComponentContext>
-      ) : (
-        <InlineBlockContainer>
-          {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
-          {isEditable ? (
-            <div className={`${baseClass}__actions`}>
-              <EditButton />
-              <RemoveButton />
-            </div>
-          ) : null}
-        </InlineBlockContainer>
-      )}
-    </Form>
+      <InlineBlockComponentContext
+        value={{
+          EditButton,
+          InlineBlockContainer,
+          Label,
+          nodeKey,
+          parentPath: blockFieldsPath,
+          parentSchemaPath: blockFieldsSchemaPath,
+          RemoveButton,
+        }}
+      >
+        {CustomBlock ? (
+          CustomBlock
+        ) : (
+          <InlineBlockContainer>
+            <Label />
+            {isEditable ? (
+              <div className={`${baseClass}__actions`}>
+                <EditButton />
+                <RemoveButton />
+              </div>
+            ) : null}
+          </InlineBlockContainer>
+        )}
+      </InlineBlockComponentContext>
+    </>
   )
 }

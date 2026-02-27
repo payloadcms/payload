@@ -6,18 +6,19 @@ import {
 import { expect, type Page, test } from '@playwright/test'
 import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
 import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
-import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
-import { LexicalHelpers, type PasteMode } from '../../utils.js'
+import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
+import { blockFieldID, LexicalHelpers, type PasteMode } from '../../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -126,7 +127,6 @@ describe('Lexical Fully Featured - database', () => {
       expect(headingNode?.children?.[1]?.text).toBe('This is an image:')
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
-      // @ts-expect-error unsafe access is fine in tests
       expect(uploadNode.value?.filename).toBe('payload-1.jpg')
     })
 
@@ -134,7 +134,11 @@ describe('Lexical Fully Featured - database', () => {
       page,
     }) => {
       await lexical.slashCommand('myblock')
-      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+      const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
+      await expect(blockEl).toBeVisible()
+
+      const fieldID = await blockFieldID(blockEl, 'richText')
+      const someTextField = blockEl.locator(fieldID('someText'))
 
       /**
        * Test on create
@@ -143,7 +147,7 @@ describe('Lexical Fully Featured - database', () => {
         page,
         `/admin/collections/${lexicalFullyFeaturedSlug}`,
         async () => {
-          await lexical.editor.locator('#field-someText').first().fill('Testing 123')
+          await someTextField.first().fill('Testing 123')
         },
         {
           minimumNumberOfRequests: 2,
@@ -151,11 +155,11 @@ describe('Lexical Fully Featured - database', () => {
         },
       )
 
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(someTextField).toHaveValue('Testing 123')
       await saveDocAndAssert(page)
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(someTextField).toHaveValue('Testing 123')
       await page.reload()
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Testing 123')
+      await expect(someTextField).toHaveValue('Testing 123')
 
       /**
        * Test on update (this is where the issue appeared)
@@ -164,18 +168,18 @@ describe('Lexical Fully Featured - database', () => {
         page,
         `/admin/collections/${lexicalFullyFeaturedSlug}`,
         async () => {
-          await lexical.editor.locator('#field-someText').first().fill('Updated text')
+          await someTextField.first().fill('Updated text')
         },
         {
-          minimumNumberOfRequests: 2,
-          allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
+          allowedNumberOfRequests: 1,
         },
       )
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(someTextField).toHaveValue('Updated text')
       await saveDocAndAssert(page)
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(someTextField).toHaveValue('Updated text')
       await page.reload()
-      await expect(lexical.editor.locator('#field-someText')).toHaveValue('Updated text')
+      await expect(someTextField).toHaveValue('Updated text')
     })
   })
 
@@ -248,11 +252,29 @@ describe('Lexical Fully Featured - database', () => {
     )
   })
 
+  test('should resolve shimmer when adding array row inside block', async ({ page }) => {
+    await lexical.slashCommand('blockwitharray')
+    const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
+    await expect(blockEl).toBeVisible()
+
+    const addButton = blockEl.getByRole('button', { name: 'Add Item' })
+    await expect(addButton).toBeVisible({ timeout: EXPECT_TIMEOUT * 3 })
+    // Need the wait to reproduce bug
+    await wait(500)
+    await addButton.click()
+
+    const textInput = blockEl.locator('[id$="-items-row-0"] input[type="text"]')
+    await expect(textInput).toBeVisible({ timeout: EXPECT_TIMEOUT * 3 })
+  })
+
   test('ensure block name can be saved and loaded', async ({ page }) => {
     await lexical.slashCommand('myblock')
-    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+    const blockEl = lexical.editor.locator('.LexicalEditorTheme__block')
+    await expect(blockEl).toBeVisible()
 
-    const blockNameInput = lexical.editor.locator('#blockName')
+    const blockId = await blockEl.getAttribute('data-block-id')
+
+    const blockNameInput = lexical.editor.locator(`[name="${`richText.${blockId}.blockName`}"]`)
 
     /**
      * Test on create
@@ -285,8 +307,8 @@ describe('Lexical Fully Featured - database', () => {
         await blockNameInput.fill('Updated blockname')
       },
       {
-        minimumNumberOfRequests: 2,
-        allowedNumberOfRequests: 2,
+        minimumNumberOfRequests: 1,
+        allowedNumberOfRequests: 1,
       },
     )
     await expect(blockNameInput).toHaveValue('Updated blockname')

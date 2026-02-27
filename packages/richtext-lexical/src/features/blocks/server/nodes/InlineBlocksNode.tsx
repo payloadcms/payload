@@ -27,26 +27,15 @@ export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObje
 } & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
-  __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({
-    cacheBuster,
-    fields,
-    key,
-  }: {
-    cacheBuster?: number
-    fields: InlineBlockFields
-    key?: NodeKey
-  }) {
+  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
     super(key)
     this.__fields = fields
-    this.__cacheBuster = cacheBuster || 0
   }
 
   static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
-      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
@@ -76,6 +65,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('span')
     addClassNamesToElement(element, config?.theme?.inlineBlock)
+    element.setAttribute('data-block-id', this.__fields.id)
     return element
   }
 
@@ -100,10 +90,6 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
-  getCacheBuster(): number {
-    return this.getLatest().__cacheBuster
-  }
-
   getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
@@ -116,12 +102,14 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return true
   }
 
-  setFields(fields: InlineBlockFields, preventFormStateUpdate?: boolean): void {
+  setFields(fields: InlineBlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
-    if (!preventFormStateUpdate) {
-      writable.__cacheBuster++
-    }
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
   }
 
   override updateDOM(): boolean {

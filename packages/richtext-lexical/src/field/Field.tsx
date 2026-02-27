@@ -12,7 +12,6 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import { dequal } from 'dequal/lite'
 import { type Validate } from 'payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -26,6 +25,7 @@ import './index.scss'
 import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
+import { dequalNullable } from '../utilities/dequalNullable.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
 
 const baseClass = 'rich-text-lexical'
@@ -141,20 +141,21 @@ const RichTextComponent: React.FC<
 
   const handleInitialValueChange = useEffectEvent(
     (initialValue: SerializedEditorState | undefined) => {
-      // Object deep equality check here, as re-mounting the editor if
-      // the new value is the same as the old one is not necessary.
+      // Only compare the `root` property of the Lexical JSON. The parent form state may inject
+      // additional keys (block/inline block field data keyed by node ID) as siblings to `root`
+      // through path unflattening. These are form state artifacts, not actual editor content changes,
+      // and should not trigger an editor re-mount.
+      const prevRoot = prevValueRef.current?.root
+      const valueRoot = value?.root
+
+      const refCheck = prevRoot !== valueRoot
       // In postgres, the order of keys in JSON objects is not guaranteed to be preserved,
-      // so we need to do a deep equality check here that does not care about key order => we use dequal.
-      // If we used JSON.stringify, the editor would re-mount every time you save the document, as the order of keys changes => change detected => re-mount.
-      if (
-        prevValueRef.current !== value &&
-        !dequal(
-          prevValueRef.current != null
-            ? JSON.parse(JSON.stringify(prevValueRef.current))
-            : prevValueRef.current,
-          value,
-        )
-      ) {
+      // so we use dequal for deep equality that does not care about key order.
+      const deepCheck = !dequalNullable(
+        prevRoot != null ? JSON.parse(JSON.stringify(prevRoot)) : prevRoot,
+        valueRoot,
+      )
+      if (refCheck && deepCheck) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
         setRerenderProviderKey(new Date())

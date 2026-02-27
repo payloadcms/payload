@@ -8,12 +8,26 @@ import { DrawerContent } from './DrawerContent.js'
 
 export type FieldsDrawerProps = {
   readonly className?: string
+  /**
+   * Initial data for the drawer fields. Only used when `nodeId` is not provided,
+   * i.e. the drawer manages its own isolated form.
+   */
   readonly data?: Data
   readonly drawerSlug: string
   readonly drawerTitle?: string
   readonly featureKey: string
   readonly fieldMapOverride?: ClientField[]
   readonly handleDrawerSubmit: (fields: FormState, data: JsonObject) => void
+  /**
+   * The node ID used to derive the parent form path: `{richTextFieldPath}.{nodeId}`.
+   * When provided, nested fields render through the parent document form state.
+   */
+  readonly nodeId?: string
+  /**
+   * The Lexical runtime node key. When provided, field changes are automatically
+   * synced back into the node via `node.setSubFieldValue()`.
+   */
+  readonly nodeKey?: string
   readonly schemaFieldsPathOverride?: string
   readonly schemaPath: string
   readonly schemaPathSuffix?: string
@@ -32,13 +46,13 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
   featureKey,
   fieldMapOverride,
   handleDrawerSubmit,
+  nodeId,
+  nodeKey,
   schemaFieldsPathOverride,
   schemaPath,
   schemaPathSuffix,
 }) => {
   const { closeModal } = useModal()
-  // The Drawer only renders its children (and itself) if it's open. Thus, by extracting the main content
-  // to DrawerContent, this should be faster
   return (
     <EditDepthProvider>
       <Drawer className={className} slug={drawerSlug} title={drawerTitle ?? ''}>
@@ -52,13 +66,15 @@ export const FieldsDrawer: React.FC<FieldsDrawerProps> = ({
             closeModal(drawerSlug)
 
             // Actual drawer submit logic needs to be triggered after the drawer is closed.
-            // That's because the lexical selection / cursor restore logic that is striggerer by
+            // That's because the lexical selection / cursor restore logic that is triggered by
             // `useLexicalDrawer` neeeds to be triggered before any editor.update calls that may happen
             // in the `handleDrawerSubmit` function.
             setTimeout(() => {
               handleDrawerSubmit(args, args2)
             }, 1)
           }}
+          nodeId={nodeId}
+          nodeKey={nodeKey}
           schemaFieldsPathOverride={schemaFieldsPathOverride}
           schemaPath={schemaPath}
           schemaPathSuffix={schemaPathSuffix}

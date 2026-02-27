@@ -26,7 +26,6 @@ type Args<T> = {
   user: TypedUser
 }
 
-// TODO: Make this works for rich text subfields
 export const defaultValuePromise = async <T>({
   id,
   data,
@@ -193,6 +192,29 @@ export const defaultValuePromise = async <T>({
           select,
           selectMode,
           siblingData,
+          user,
+        })
+      }
+
+      break
+    }
+
+    case 'richText': {
+      const richTextData = siblingData[field.name]
+
+      if (
+        richTextData &&
+        field.editor &&
+        typeof field.editor === 'object' &&
+        'calculateDefaultValues' in field.editor &&
+        typeof field.editor.calculateDefaultValues === 'function'
+      ) {
+        await field.editor.calculateDefaultValues({
+          id,
+          data: richTextData,
+          iterateFields,
+          locale,
+          req,
           user,
         })
       }

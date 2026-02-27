@@ -32,20 +32,24 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
   const { languages: languagesFromProps } = args
   const languages = languagesFromProps || defaultLanguages
 
-  const { BlockCollapsible, formSchema, RemoveButton } = useBlockComponentContext()
+  const { BlockCollapsible, formSchema, parentPath, parentSchemaPath, RemoveButton } =
+    useBlockComponentContext()
   const { setModified } = useForm()
   const { t } = useTranslation()
 
+  const codePath = `${parentPath}.code`
+  const languagePath = `${parentPath}.language`
+
   const { codeField } = useFormFields(([fields]) => ({
-    codeField: fields?.code,
+    codeField: fields?.[codePath],
   }))
 
   const { selectedLanguageField, setSelectedLanguage } = useFormFields(([fields, dispatch]) => ({
-    selectedLanguageField: fields?.language,
+    selectedLanguageField: fields?.[languagePath],
     setSelectedLanguage: (language: string) => {
       dispatch({
         type: 'UPDATE',
-        path: 'language',
+        path: languagePath,
         value: language,
       })
       setModified(true)
@@ -122,8 +126,8 @@ export const CodeBlockBlockComponent: React.FC<Pick<AdditionalCodeComponentProps
         fields={formSchema}
         forceRender={true}
         parentIndexPath=""
-        parentPath={''}
-        parentSchemaPath=""
+        parentPath={parentPath}
+        parentSchemaPath={parentSchemaPath}
         permissions={true}
         readOnly={!isEditable}
       />

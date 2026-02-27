@@ -94,7 +94,11 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.type('Hello')
     await page.keyboard.press('Enter')
     await lexical.slashCommand('myblock')
-    await page.locator('#field-someText').first().focus()
+    const blockId = await lexical.editor
+      .locator('.LexicalEditorTheme__block')
+      .first()
+      .getAttribute('data-block-id')
+    await page.locator(`#field-richText__${blockId}__someText`).first().focus()
     await page.keyboard.type('World')
     await page.keyboard.press('ControlOrMeta+A')
     await page.keyboard.press('Backspace')
@@ -196,7 +200,7 @@ describe('Lexical Fully Featured', () => {
   test('ensure code block can be created using client-side markdown shortcuts', async ({
     page,
   }) => {
-    await page.keyboard.type('```ts ')
+    await page.keyboard.type('```typescript ')
     const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
@@ -204,12 +208,7 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
     await expect(
       codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
-    ).toHaveAttribute('data-selected-language', 'ts')
-
-    // Ensure it does not contain payload types
-    await codeBlock.locator('.monaco-editor .view-line').first().click()
-    await page.keyboard.type("import { APIError } from 'payload'")
-    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+    ).toHaveAttribute('data-selected-language', 'typescript')
   })
 
   test('ensure payload code block can be created using slash commands and it contains payload types', async ({
@@ -229,6 +228,10 @@ describe('Lexical Fully Featured', () => {
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.type("import { DoesNotExist } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
   })
 
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({

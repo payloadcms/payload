@@ -6,15 +6,22 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { ImportMapGenerators, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
 import type {
+  Field,
   FieldAffectingData,
   RichTextField,
   RichTextFieldClient,
+  TabAsField,
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { RequestContext, TypedFallbackLocale } from '../index.js'
+import type { RequestContext, TypedFallbackLocale, TypedUser } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
+import type {
+  AddFieldStatePromiseArgs,
+  CalculateDefaultValuesIterateFieldsArgs,
+  FormStateIterateFieldsArgs,
+} from './forms/Form.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
@@ -202,6 +209,37 @@ type RichTextAdapterBase<
   AdapterProps = any,
   ExtraFieldProperties = {},
 > = {
+  /**
+   * Build form state entries for nested fields within the rich text value (e.g. blocks, links, uploads).
+   *
+   * The adapter owns the iteration: it walks the rich text data, finds nodes with nested fields,
+   * and calls the provided `iterateFields` function for each. This mirrors how `generateSchemaMap`
+   * works — the adapter receives tools and handles traversal internally.
+   *
+   * Nested field paths use the node ID as a bridge: `{path}.{nodeId}.{fieldName}`.
+   * The node ID flattens the freeform tree — the form state doesn't care about tree depth or position.
+   */
+  buildFormState?: (
+    args: {
+      iterateFields: (args: FormStateIterateFieldsArgs) => Promise<void>
+    } & AddFieldStatePromiseArgs<RichTextField>,
+  ) => Promise<void>
+  /**
+   * Apply default values to nested fields within the rich text value (e.g. blocks, inline blocks).
+   *
+   * Called during `calculateDefaultValues` before form state is built. The adapter walks its
+   * data tree, finds nodes with sub-fields, and calls `iterateFields` to apply defaults.
+   * This ensures that newly created nodes (e.g. a code block) get their field defaults
+   * (e.g. `language: 'typescript'`) applied before form state is populated.
+   */
+  calculateDefaultValues?: (args: {
+    data: any
+    id?: number | string
+    iterateFields: (args: CalculateDefaultValuesIterateFieldsArgs<any>) => Promise<void>
+    locale: string | undefined
+    req: PayloadRequest
+    user: TypedUser
+  }) => Promise<void>
   /**
    * Provide a function that can be used to add items to the import map. This is useful for
    * making modules available to the client.

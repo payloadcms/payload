@@ -37,28 +37,23 @@ export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = 
 } & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
 
 export class ServerBlockNode extends DecoratorBlockNode {
-  __cacheBuster: number
   __fields: BlockFields
 
   constructor({
-    cacheBuster,
     fields,
     format,
     key,
   }: {
-    cacheBuster?: number
     fields: BlockFields
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
     this.__fields = fields
-    this.__cacheBuster = cacheBuster || 0
   }
 
   static override clone(node: ServerBlockNode): ServerBlockNode {
     return new this({
-      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       format: node.__format,
       key: node.__key,
@@ -96,6 +91,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('div')
     addClassNamesToElement(element, config?.theme?.block)
+    element.setAttribute('data-block-id', this.__fields.id)
     return element
   }
 
@@ -120,10 +116,6 @@ export class ServerBlockNode extends DecoratorBlockNode {
     }
   }
 
-  getCacheBuster(): number {
-    return this.getLatest().__cacheBuster
-  }
-
   getFields(): BlockFields {
     return this.getLatest().__fields
   }
@@ -132,12 +124,14 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return `Block Field`
   }
 
-  setFields(fields: BlockFields, preventFormStateUpdate?: boolean): void {
+  setFields(fields: BlockFields): void {
     const writable = this.getWritable()
     writable.__fields = fields
-    if (!preventFormStateUpdate) {
-      writable.__cacheBuster++
-    }
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__fields = { ...writable.__fields, [path]: value }
   }
 }
 

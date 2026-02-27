@@ -232,6 +232,18 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
   /**
+   * For nodes with sub-fields: given a node, return the schema path suffix that locates this
+   * node's fields entry in the schema map. The full schema path is constructed as
+   * `{richTextSchemaPath}.lexical_internal_feature.{featureKey}.{returnedSuffix}`.
+   *
+   * Must align with the keys used in `generateSchemaMap`.
+   *
+   * Example for blocks: `(node) => 'lexical_blocks.' + node.fields.blockType + '.fields'`
+   */
+  getSchemaPath?: (args: {
+    node: ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>
+  }) => string | undefined
+  /**
    * If a node includes sub-fields (e.g. block and link nodes), passing those subFields here will make payload
    * automatically populate, run hooks, and generate component import maps for them
    */
@@ -394,6 +406,7 @@ export type SanitizedServerFeatures = {
   }
   /**  The node types mapped to their hooks */
 
+  getSchemaPath?: Map<string, (args: { node: SerializedLexicalNode }) => string | undefined>
   getSubFields?: Map<
     string,
     (args: { node: SerializedLexicalNode; req: PayloadRequest }) => Field[] | null
@@ -411,6 +424,8 @@ export type SanitizedServerFeatures = {
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
+  /** Maps node types to their owning feature key, for constructing schema paths */
+  nodeTypeToFeatureKey?: Map<string, string>
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 } & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>>

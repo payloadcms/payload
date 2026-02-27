@@ -6,12 +6,14 @@ import {
   BlockCollapsible,
   BlockEditButton,
   BlockRemoveButton,
+  useBlockComponentContext,
 } from '@payloadcms/richtext-lexical/client'
 import { useFormFields } from '@payloadcms/ui'
 import React from 'react'
 
 export const BlockComponent: React.FC<LexicalBlockClientProps> = () => {
-  const key = useFormFields(([fields]) => fields.key)
+  const { parentPath } = useBlockComponentContext()
+  const key = useFormFields(([fields]) => fields[`${parentPath}.key`])
 
   return (
     <BlockCollapsible>

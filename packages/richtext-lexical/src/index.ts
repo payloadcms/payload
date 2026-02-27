@@ -9,7 +9,6 @@ import {
   beforeValidateTraverseFields,
   checkDependencies,
   deepMergeSimple,
-  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 
@@ -20,6 +19,8 @@ import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider }
 import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { getGetBuildFormState } from './utilities/buildFormState.js'
+import { getGetCalculateDefaultValues } from './utilities/calculateDefaultValues.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
@@ -97,6 +98,12 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
     config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
     return {
+      buildFormState: getGetBuildFormState({
+        features: finalSanitizedEditorConfig.features,
+      }),
+      calculateDefaultValues: getGetCalculateDefaultValues({
+        features: finalSanitizedEditorConfig.features,
+      }),
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
       DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
@@ -271,7 +278,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     operation,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     previousDoc,
                     previousSiblingDoc: { ...nodePreviousSiblingDoc },
@@ -374,6 +381,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeId = nodeSiblingData?.id ?? (node as any).id
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
@@ -394,7 +402,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: nodeId ? [...path, String(nodeId)].join('.') : path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     populate,
                     populationPromises: populationPromises!,
@@ -564,7 +572,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
                     siblingData: nodeSiblingData,
@@ -631,6 +639,35 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             } = args
 
             let { value } = args
+
+            // Merge flat node field data back into the tree before validation.
+            // After reduceFieldsToValues + unflatten, value may contain:
+            //   { root: { children: [...] }, abc123: { text: "current" }, ... }
+            // Merge each nodeId entry back into the corresponding node and remove it.
+            if (value && typeof value === 'object' && value.root?.children) {
+              const flatMergeNodeIDMap: Record<string, SerializedLexicalNode> = {}
+              recurseNodeTree({ nodeIDMap: flatMergeNodeIDMap, nodes: value.root.children })
+
+              for (const [key, nodeData] of Object.entries(value)) {
+                if (key === 'root') {
+                  continue
+                }
+                if (typeof nodeData === 'object' && nodeData !== null && flatMergeNodeIDMap[key]) {
+                  const node = flatMergeNodeIDMap[key]
+                  const getSubFieldsDataFn =
+                    finalSanitizedEditorConfig.features.getSubFieldsData?.get(node.type)
+
+                  if (getSubFieldsDataFn) {
+                    const existingFields = getSubFieldsDataFn({ node, req })
+                    if (existingFields && typeof existingFields === 'object') {
+                      Object.assign(existingFields, nodeData)
+                    }
+                  }
+                  delete (value as Record<string, unknown>)[key]
+                }
+              }
+            }
+
             if (finalSanitizedEditorConfig?.features?.hooks?.beforeValidate?.length) {
               for (const hook of finalSanitizedEditorConfig.features.hooks.beforeValidate) {
                 value = await hook(args)
@@ -694,7 +731,10 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             /**
              * Now that the maps for all hooks are set up, we can run the validate hook
              */
-            if (!finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size) {
+            if (
+              !finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate?.size &&
+              !finalSanitizedEditorConfig.features.getSubFields?.size
+            ) {
               return value
             }
             const nodeIDMap: {
@@ -709,7 +749,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             // eslint-disable-next-line prefer-const
             for (let [id, node] of Object.entries(nodeIDMap)) {
               const beforeValidateHooks =
-                finalSanitizedEditorConfig.features.nodeHooks.beforeValidate
+                finalSanitizedEditorConfig.features.nodeHooks?.beforeValidate
               const beforeValidateHooksForNode = beforeValidateHooks?.get(node.type)
               if (beforeValidateHooksForNode) {
                 for (const hook of beforeValidateHooksForNode) {
@@ -761,7 +801,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
                     parentIsLocalized: parentIsLocalized || field.localized || false,
-                    parentPath: path.join('.'),
+                    parentPath: [...path, id].join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
                     siblingData: nodeSiblingData,

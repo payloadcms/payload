@@ -73,7 +73,8 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
   typescript,
   validate,
 }) => {
-  const languageField = useFormFields(([fields]) => fields['language'])
+  const languagePath = `${path.substring(0, path.lastIndexOf('.'))}.language`
+  const languageField = useFormFields(([fields]) => fields[languagePath])
 
   const language: string =
     (languageField?.value as string) || (languageField?.initialValue as string) || 'typescript'

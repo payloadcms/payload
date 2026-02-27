@@ -149,6 +149,7 @@ export class UploadServerNode extends DecoratorBlockNode {
   override createDOM(config?: EditorConfig): HTMLElement {
     const element = document.createElement('div')
     addClassNamesToElement(element, config?.theme?.upload)
+    element.setAttribute('data-upload-id', this.__data.id)
     return element
   }
 
@@ -186,6 +187,14 @@ export class UploadServerNode extends DecoratorBlockNode {
   setData(data: UploadData): void {
     const writable = this.getWritable()
     writable.__data = data
+  }
+
+  setSubFieldValue({ path, value }: { path: string; value: unknown }): void {
+    const writable = this.getWritable()
+    writable.__data = {
+      ...writable.__data,
+      fields: { ...(writable.__data.fields as Record<string, unknown>), [path]: value },
+    }
   }
 
   override updateDOM(): false {
