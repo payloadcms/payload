@@ -38,6 +38,7 @@ export const PriceInput: React.FC<Props> = (args) => {
       label={label}
       path={path}
       readOnly={readOnly}
+      required={field.required}
       supportedCurrencies={currenciesConfig?.supportedCurrencies}
     />
   )
