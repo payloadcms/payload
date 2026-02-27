@@ -37,7 +37,22 @@ Then add it to the `plugins` array in your `tsconfig.json`:
 }
 ```
 
-Restart your TypeScript server after adding the plugin (in VS Code / Cursor: `Cmd+Shift+P` → "TypeScript: Restart TS Server").
+### VS Code / Cursor Setup
+
+TypeScript language service plugins only load when the editor uses the **workspace version** of TypeScript (the one installed in your project's `node_modules`). By default, VS Code uses its own bundled version which won't load the plugin.
+
+To switch: open the command palette (`Cmd+Shift+P`) and run **"TypeScript: Select TypeScript Version"**, then choose **"Use Workspace Version"**.
+
+For teams, add the following to `.vscode/settings.json` so everyone is prompted to switch:
+
+```json
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
+```
+
+After selecting the workspace version, restart the TypeScript server (`Cmd+Shift+P` → "TypeScript: Restart TS Server").
 
 <Banner type="info">
   TypeScript Language Service Plugins only run inside your IDE. They do not
