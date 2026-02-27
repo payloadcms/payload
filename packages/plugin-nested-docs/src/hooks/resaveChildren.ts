@@ -16,22 +16,6 @@ export const resaveChildren =
 
     const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
 
-    const initialDraftChildren = await req.payload.find({
-      collection: collection.slug,
-      depth: 0,
-      draft: true,
-      limit: 0,
-      locale: req.locale,
-      req,
-      where: {
-        [parentSlug]: {
-          equals: doc.id,
-        },
-      },
-    })
-
-    const draftChildren = initialDraftChildren.docs.filter((child) => child._status === 'draft')
-
     const publishedChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
@@ -46,28 +30,45 @@ export const resaveChildren =
       },
     })
 
-    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce<
-      Record<string, JsonObject[]>
-    >((acc, child) => {
-      acc[child.id] = acc[child.id] || []
-      acc[child.id]!.push(child)
-      return acc
-    }, {})
+    const publishedChildIds = new Set<string>(publishedChildren.docs.map((child) => child.id))
 
-    const sortedChildren = Object.values(childrenById).flatMap((group: JsonObject[]) => {
-      return group.sort((a, b) => {
-        if (a.updatedAt !== b.updatedAt) {
-          return a.updatedAt > b.updatedAt ? 1 : -1
-        }
-        return a._status === 'published' ? 1 : -1
+    // For versioned collections, find draft-only children (those that have
+    // never been published). Children that have both a published and a draft
+    // version must only have their published version updated — updating both
+    // causes `createVersion` to set `latest = false` on the published version,
+    // making it inaccessible on the live site.
+    const draftOnlyChildren: JsonObject[] = []
+
+    if (collection?.versions?.drafts) {
+      const allDraftChildren = await req.payload.find({
+        collection: collection.slug,
+        depth: 0,
+        draft: true,
+        limit: 0,
+        locale: req.locale,
+        req,
+        where: {
+          [parentSlug]: {
+            equals: doc.id,
+          },
+        },
       })
-    })
 
-    if (sortedChildren.length) {
+      for (const child of allDraftChildren.docs) {
+        if (child._status === 'draft' && !publishedChildIds.has(child.id)) {
+          draftOnlyChildren.push(child)
+        }
+      }
+    }
+
+    const children: Array<{ doc: JsonObject; isDraft: boolean }> = [
+      ...publishedChildren.docs.map((doc) => ({ doc, isDraft: false })),
+      ...draftOnlyChildren.map((doc) => ({ doc, isDraft: true })),
+    ]
+
+    if (children.length) {
       try {
-        for (const child of sortedChildren) {
-          const isDraft = child._status !== 'published'
-
+        for (const { doc: child, isDraft } of children) {
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
