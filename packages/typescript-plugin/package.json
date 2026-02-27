@@ -37,8 +37,7 @@
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepublishOnly": "pnpm clean && pnpm turbo build",
-    "test": "vitest run"
+    "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "devDependencies": {
     "typescript": "5.7.3",
