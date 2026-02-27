@@ -6,6 +6,7 @@ import pluginInit from '../../dist/index.js'
 
 const FIXTURES_DIR = path.resolve(import.meta.dirname, 'fixtures')
 const TEST_CONFIG_FILE = path.join(FIXTURES_DIR, 'test-config.ts')
+const TEST_PATHS_FILE = path.join(FIXTURES_DIR, 'test-paths.ts')
 
 function discoverFiles(dir: string, extensions: string[]): string[] {
   const results: string[] = []
@@ -22,7 +23,10 @@ function discoverFiles(dir: string, extensions: string[]): string[] {
   return results
 }
 
-function createLanguageService(rootFiles: string[]): ts.LanguageService {
+function createLanguageService(
+  rootFiles: string[],
+  extraOptions?: ts.CompilerOptions,
+): ts.LanguageService {
   const compilerOptions: ts.CompilerOptions = {
     target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.NodeNext,
@@ -31,6 +35,7 @@ function createLanguageService(rootFiles: string[]): ts.LanguageService {
     strict: true,
     skipLibCheck: true,
     allowJs: true,
+    ...extraOptions,
   }
 
   const fileVersions = new Map<string, number>()
@@ -287,6 +292,18 @@ describe('@payloadcms/typescript-plugin', () => {
       expect(names).toContain('views')
       expect(names).toContain('MyField.tsx')
     })
+
+    it('should provide path completions for bare / prefix', () => {
+      const searchStr = "Field: '/'"
+      const pos = findStringPosition(content, searchStr)
+      const cursorPos = pos + "Field: '".length
+
+      const completions = service.getCompletionsAtPosition(TEST_CONFIG_FILE, cursorPos, {})
+
+      expect(completions).toBeDefined()
+      const names = completions!.entries.map((e) => e.name)
+      expect(names).toContain('components')
+    })
   })
 
   describe('go-to-definition', () => {
@@ -381,6 +398,246 @@ describe('@payloadcms/typescript-plugin', () => {
       const names = completions!.entries.map((e) => e.name)
       expect(names).toContain('CustomView')
       expect(names).toContain('default')
+    })
+  })
+
+  describe('tsconfig paths support (@/ aliases)', () => {
+    let service: ts.LanguageService
+    let content: string
+
+    beforeAll(() => {
+      const allFiles = [...discoverFiles(FIXTURES_DIR, ['.ts', '.tsx', '.d.ts'])]
+      service = createLanguageService(allFiles, {
+        baseUrl: FIXTURES_DIR,
+        paths: {
+          '@/*': ['./src/*'],
+        },
+      })
+      content = ts.sys.readFile(TEST_PATHS_FILE)!
+    })
+
+    afterAll(() => {
+      service.dispose()
+    })
+
+    describe('diagnostics', () => {
+      it('should not error for valid @/ alias with named export', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const pluginDiags = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+        const validStrings = ['@/components/NavIcon#NavIcon', '@/components/NavIcon#NavIconSmall']
+
+        for (const str of validStrings) {
+          const matching = pluginDiags.filter((d) => {
+            const text = content.substring(d.start!, d.start! + d.length!)
+            return text === str
+          })
+          expect(matching, `Expected no errors for "${str}"`).toHaveLength(0)
+        }
+      })
+
+      it('should not error for @/ alias in object form with exportName', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const pluginDiags = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+        // { exportName: 'Badge', path: '@/components/ui/Badge' } should be valid
+        const matching = pluginDiags.filter((d) => {
+          const text = content.substring(d.start!, d.start! + d.length!)
+          return text === 'Badge' || text === '@/components/ui/Badge'
+        })
+
+        // The only error on '@/components/ui/Badge' should NOT come from the objectForm with exportName
+        // (it has a valid sibling exportName: 'Badge')
+        for (const d of matching) {
+          const msg = typeof d.messageText === 'string' ? d.messageText : d.messageText.messageText
+          expect(msg).not.toContain("'Badge'")
+        }
+      })
+
+      it('should not error for @/ alias in object form with # in path', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const pluginDiags = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+        const matching = pluginDiags.filter((d) => {
+          const text = content.substring(d.start!, d.start! + d.length!)
+          return text === '@/components/NavIcon#NavIcon'
+        })
+        expect(matching, '{ path: "@/...#export" } should not error').toHaveLength(0)
+      })
+
+      it('should error for @/ alias with wrong export (code 71002)', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const exportErrors = diagnostics.filter((d) => d.code === 71002)
+
+        const messages = exportErrors.map((d) =>
+          typeof d.messageText === 'string' ? d.messageText : d.messageText.messageText,
+        )
+        expect(messages.some((m) => m.includes("'DoesNotExist'"))).toBe(true)
+      })
+
+      it('should error for @/ alias to non-existent file (code 71001)', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const pathErrors = diagnostics.filter((d) => d.code === 71001)
+
+        const messages = pathErrors.map((d) =>
+          typeof d.messageText === 'string' ? d.messageText : d.messageText.messageText,
+        )
+        expect(messages.some((m) => m.includes('NotAFile'))).toBe(true)
+      })
+
+      it('should error for @/ alias without # when module has no default export', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const exportErrors = diagnostics.filter((d) => d.code === 71002)
+
+        const matching = exportErrors.filter((d) => {
+          const text = content.substring(d.start!, d.start! + d.length!)
+          return text === '@/components/NavIcon'
+        })
+        expect(
+          matching.length,
+          '@/components/NavIcon has no default export',
+        ).toBeGreaterThanOrEqual(1)
+      })
+
+      it('should error for @/ alias in object form with wrong exportName', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const exportErrors = diagnostics.filter((d) => d.code === 71002)
+
+        const matching = exportErrors.filter((d) => {
+          const text = content.substring(d.start!, d.start! + d.length!)
+          return text === 'Fake'
+        })
+        expect(matching.length, "exportName: 'Fake' should error").toBeGreaterThanOrEqual(1)
+      })
+
+      it('should not error for @/ alias in array context', () => {
+        const diagnostics = service.getSemanticDiagnostics(TEST_PATHS_FILE)
+        const pluginDiags = diagnostics.filter((d) => d.code === 71001 || d.code === 71002)
+
+        const matching = pluginDiags.filter((d) => {
+          const text = content.substring(d.start!, d.start! + d.length!)
+          return text === '@/components/ui/Badge#Badge'
+        })
+        expect(matching, '@/ alias in Nav should not error').toHaveLength(0)
+      })
+    })
+
+    describe('completions', () => {
+      it('should provide export completions after # with @/ alias', () => {
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr)
+        const cursorPos = pos + searchStr.indexOf('#') + 1
+
+        const completions = service.getCompletionsAtPosition(TEST_PATHS_FILE, cursorPos, {})
+
+        expect(completions).toBeDefined()
+        const names = completions!.entries.map((e) => e.name)
+        expect(names).toContain('NavIcon')
+        expect(names).toContain('NavIconSmall')
+      })
+
+      it('should provide export completions for @/ alias in object form with #', () => {
+        // 2nd occurrence of this string is in the object form (aliasObjectHash)
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr, 2)
+        const cursorPos = pos + searchStr.indexOf('#') + 1
+
+        const completions = service.getCompletionsAtPosition(TEST_PATHS_FILE, cursorPos, {})
+
+        expect(completions).toBeDefined()
+        const names = completions!.entries.map((e) => e.name)
+        expect(names).toContain('NavIcon')
+        expect(names).toContain('NavIconSmall')
+      })
+
+      it('should provide path completions for @/ alias', () => {
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr)
+        // Cursor right after '@/components/' — before 'NavIcon'
+        const cursorPos = pos + '@/components/'.length - 1
+
+        const completions = service.getCompletionsAtPosition(TEST_PATHS_FILE, cursorPos, {})
+
+        expect(completions).toBeDefined()
+        const names = completions!.entries.map((e) => e.name)
+        expect(names).toContain('NavIcon.tsx')
+        expect(names).toContain('ui')
+      })
+
+      it('should provide path completions for @/ alias at top level', () => {
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr)
+        // Cursor right after '@/' — before 'components'
+        const cursorPos = pos + '@/'.length
+
+        const completions = service.getCompletionsAtPosition(TEST_PATHS_FILE, cursorPos, {})
+
+        expect(completions).toBeDefined()
+        const names = completions!.entries.map((e) => e.name)
+        expect(names).toContain('components')
+      })
+
+      it('should provide export completions for @/ alias exportName property', () => {
+        const searchStr = "'Fake'"
+        const pos = findStringPosition(content, searchStr)
+
+        const completions = service.getCompletionsAtPosition(TEST_PATHS_FILE, pos, {})
+
+        expect(completions).toBeDefined()
+        const names = completions!.entries.map((e) => e.name)
+        expect(names).toContain('Badge')
+        expect(names).toContain('BadgeIcon')
+        expect(names).toContain('default')
+      })
+    })
+
+    describe('go-to-definition', () => {
+      it('should navigate to definition for @/ alias string form', () => {
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr)
+
+        const definition = service.getDefinitionAndBoundSpan(TEST_PATHS_FILE, pos)
+
+        expect(definition).toBeDefined()
+        expect(definition!.definitions).toBeDefined()
+        expect(definition!.definitions!.length).toBeGreaterThan(0)
+        expect(definition!.definitions![0]!.fileName).toContain('NavIcon.tsx')
+        expect(definition!.definitions![0]!.name).toBe('NavIcon')
+      })
+
+      it('should navigate to definition for @/ alias with nested path', () => {
+        const searchStr = '@/components/ui/Badge#Badge'
+        const pos = findStringPosition(content, searchStr)
+
+        const definition = service.getDefinitionAndBoundSpan(TEST_PATHS_FILE, pos)
+
+        expect(definition).toBeDefined()
+        expect(definition!.definitions).toBeDefined()
+        expect(definition!.definitions![0]!.fileName).toContain('ui/Badge.tsx')
+        expect(definition!.definitions![0]!.name).toBe('Badge')
+      })
+
+      it('should navigate to definition for @/ alias default export', () => {
+        const searchStr = "@/components/ui/Badge'"
+        const pos = findStringPosition(content, searchStr)
+
+        const definition = service.getDefinitionAndBoundSpan(TEST_PATHS_FILE, pos)
+
+        expect(definition).toBeDefined()
+        expect(definition!.definitions).toBeDefined()
+        expect(definition!.definitions![0]!.fileName).toContain('ui/Badge.tsx')
+      })
+
+      it('should navigate to definition for @/ alias in object form', () => {
+        const searchStr = '@/components/NavIcon#NavIcon'
+        const pos = findStringPosition(content, searchStr, 2)
+
+        const definition = service.getDefinitionAndBoundSpan(TEST_PATHS_FILE, pos)
+
+        expect(definition).toBeDefined()
+        expect(definition!.definitions).toBeDefined()
+        expect(definition!.definitions![0]!.fileName).toContain('NavIcon.tsx')
+      })
     })
   })
 })

@@ -127,6 +127,16 @@ const objectFormWithExportName: FieldConfig = {
   },
 }
 
+const slashOnly: FieldConfig = {
+  name: 'slashOnly',
+  type: 'text',
+  admin: {
+    components: {
+      Field: '/',
+    },
+  },
+}
+
 const adminConfig: AdminConfig = {
   components: {
     actions: ['/components/MyField.tsx#MyField'],

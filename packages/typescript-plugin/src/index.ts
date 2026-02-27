@@ -336,7 +336,7 @@ function getPayloadCompletions(
     )
   }
 
-  return getPathCompletions(sys, node, position, baseDir)
+  return getPathCompletions(ts, sys, node, position, baseDir, program)
 }
 
 function buildExportCompletions(
@@ -380,15 +380,13 @@ function buildExportCompletions(
 const COMPONENT_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js']
 
 function getPathCompletions(
+  ts: typeof tslib,
   sys: tslib.System,
   node: tslib.StringLiteral,
   position: number,
   baseDir: string | undefined,
+  program?: tslib.Program,
 ): tslib.CompletionInfo | undefined {
-  if (!baseDir) {
-    return undefined
-  }
-
   const text = node.text
   const offsetInString = position - node.getStart() - 1
   const hashIndex = text.indexOf('#')
@@ -397,7 +395,7 @@ function getPathCompletions(
   const pathPortion = text.substring(0, endOffset)
   const lastSlash = pathPortion.lastIndexOf('/')
 
-  let dirPath: string
+  let dirPath: string | undefined
   let prefix: string
   let replacementStart: number
 
@@ -410,13 +408,28 @@ function getPathCompletions(
     prefix = pathPortion.substring(lastSlash + 1)
     replacementStart = node.getStart() + 1 + lastSlash + 1
 
-    if (dirPortion.startsWith('/')) {
+    if (
+      (dirPortion.startsWith('/') || (dirPortion === '' && pathPortion.startsWith('/'))) &&
+      baseDir
+    ) {
       dirPath = baseDir + dirPortion
-    } else if (dirPortion.startsWith('./')) {
+    } else if (
+      (dirPortion.startsWith('./') || (dirPortion === '' && pathPortion.startsWith('./'))) &&
+      baseDir
+    ) {
       dirPath = baseDir + '/' + dirPortion.substring(2)
-    } else {
-      dirPath = baseDir + '/' + dirPortion
+    } else if (program) {
+      dirPath = resolveToDir(
+        ts,
+        dirPortion,
+        node.getSourceFile().fileName,
+        program.getCompilerOptions(),
+      )
     }
+  }
+
+  if (!dirPath) {
+    return undefined
   }
 
   if (!sys.directoryExists(dirPath)) {
@@ -565,6 +578,35 @@ function getPayloadDefinition(
     ],
     textSpan,
   }
+}
+
+/**
+ * Uses TypeScript's module resolution to determine the absolute directory a
+ * module specifier maps to. Works for tsconfig `paths`, `node_modules`, or
+ * any other resolution strategy TypeScript supports.
+ */
+function resolveToDir(
+  ts: typeof tslib,
+  modulePath: string,
+  containingFile: string,
+  compilerOptions: tslib.CompilerOptions,
+): string | undefined {
+  const sentinel = '__payload_resolve_dir'
+  const result = ts.resolveModuleName(
+    modulePath + '/' + sentinel,
+    containingFile,
+    compilerOptions,
+    ts.sys,
+  ) as { failedLookupLocations?: string[] }
+
+  for (const loc of result.failedLookupLocations ?? []) {
+    const idx = loc.indexOf(sentinel)
+    if (idx > 0) {
+      return loc.substring(0, idx - 1)
+    }
+  }
+
+  return undefined
 }
 
 // -------------------------------------------------------------------
