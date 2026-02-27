@@ -338,7 +338,8 @@ describe('Localization', () => {
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
-      await page.fill('#field-nav__layout__0__text', 'test')
+      await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
+      await page.locator('#field-nav__layout__0__text').fill('test')
       await expect(page.locator('#field-nav__layout__0__text')).toHaveValue('test')
       await saveDocAndAssert(page)
       const originalID = await page.locator('.id-label').innerText()
@@ -496,8 +497,8 @@ describe('Localization', () => {
       const overwriteCheckbox = page.locator('#field-overwriteExisting')
       await overwriteCheckbox.click()
       await runCopy({ page, toLocale: spanishLocale })
+      await page.locator('#field-title').waitFor({ state: 'visible' })
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
-      await changeLocale(page, defaultLocale)
     })
 
     test('should not include current locale in toLocale options', async () => {
