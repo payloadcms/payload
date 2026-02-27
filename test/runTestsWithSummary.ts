@@ -54,6 +54,7 @@ const TEST_SUITES = [
   'plugins',
   'query-presets',
   'queues',
+  'relationship-dependencies',
   'relationships',
   'sdk',
   // 'select', // this suite is slow. Also see this: https://figma.slack.com/archives/C097Z32TW4V/p1767978110705459
@@ -163,10 +164,10 @@ function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
     name: suiteName,
+    duration: 0,
+    failed: false,
     passed: 0,
     total: 0,
-    failed: false,
-    duration: 0,
   }
 
   try {
