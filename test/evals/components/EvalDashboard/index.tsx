@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url'
 import React from 'react'
 
 import type { EvalResult, SystemPromptKey } from '../../types.js'
+import type { Audience } from './audience.js'
 
+import { getAudience } from './audience.js'
 import { ResultsTable } from './ResultsTable.js'
 
 const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
@@ -22,6 +24,7 @@ type CacheEntry = {
 }
 
 export type EvalEntry = {
+  audience: Audience[]
   category: string
   createdAt: string
   hash: string
@@ -50,6 +53,7 @@ function readCacheEntries(): EvalEntry[] {
       const isCodegen = result.changeDescription !== undefined || Boolean(result.tscErrors?.length)
       entries.push({
         type: isCodegen ? 'codegen' : 'qa',
+        audience: getAudience(result.category),
         category: result.category,
         createdAt: entry.createdAt,
         hash: file.replace('.json', ''),

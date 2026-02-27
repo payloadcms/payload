@@ -2,19 +2,49 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { Audience } from './audience.js'
 import type { EvalEntry } from './index.js'
+
+import { AUDIENCE_CONFIG, getAudience } from './audience.js'
 
 type Props = {
   entries: EvalEntry[]
 }
 
 type ComparePair = {
+  audience: Audience[]
   baseline?: EvalEntry
   category: string
   lowPower?: EvalEntry
   question: string
   skill?: EvalEntry
   type: 'codegen' | 'qa'
+}
+
+function AudienceBadges({ audiences }: { audiences: Audience[] }) {
+  return (
+    <span style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+      {audiences.map((a) => {
+        const { bg, color, label } = AUDIENCE_CONFIG[a]
+        return (
+          <span
+            key={a}
+            style={{
+              background: bg,
+              borderRadius: '4px',
+              color,
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              padding: '2px 5px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </span>
+        )
+      })}
+    </span>
+  )
 }
 
 function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
@@ -43,7 +73,7 @@ function isHighPower(modelId: string | undefined): boolean {
   return modelId.includes('gpt-5') || modelId.includes('o3') || modelId.includes('claude-3-5')
 }
 
-type SortKey = 'category' | 'delta' | 'question' | 'type'
+type SortKey = 'audience' | 'category' | 'delta' | 'question' | 'type'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -298,7 +328,12 @@ export function CompareTable({ entries }: Props) {
     for (const entry of entries) {
       const key = entry.result.question
       if (!byQuestion.has(key)) {
-        byQuestion.set(key, { type: entry.type, category: entry.category, question: key })
+        byQuestion.set(key, {
+          type: entry.type,
+          audience: entry.audience ?? getAudience(entry.category),
+          category: entry.category,
+          question: key,
+        })
       }
       const pair = byQuestion.get(key)!
       const variant = entry.systemPromptKey ?? 'qaWithSkill'
@@ -339,6 +374,10 @@ export function CompareTable({ entries }: Props) {
         cmp = a.question.localeCompare(b.question)
       } else if (sortKey === 'type') {
         cmp = a.type.localeCompare(b.type) || a.question.localeCompare(b.question)
+      } else if (sortKey === 'audience') {
+        const aStr = [...a.audience].sort().join(',')
+        const bStr = [...b.audience].sort().join(',')
+        cmp = aStr.localeCompare(bStr) || a.question.localeCompare(b.question)
       } else if (sortKey === 'delta') {
         const da = scoreDelta(a) ?? -Infinity
         const db = scoreDelta(b) ?? -Infinity
@@ -595,7 +634,7 @@ export function CompareTable({ entries }: Props) {
             borderBottom: '1px solid var(--theme-elevation-150)',
             display: 'grid',
             gap: '0 12px',
-            gridTemplateColumns: '1fr 80px 60px 130px 130px 130px 90px 32px',
+            gridTemplateColumns: '1fr 80px 60px 110px 130px 130px 130px 90px 32px',
             padding: '8px 12px',
           }}
         >
@@ -625,6 +664,15 @@ export function CompareTable({ entries }: Props) {
             tabIndex={0}
           >
             Type{sortIndicator('type')}
+          </span>
+          <span
+            onClick={() => handleSort('audience')}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort('audience')}
+            role="button"
+            style={colHeaderStyle('audience')}
+            tabIndex={0}
+          >
+            Audience{sortIndicator('audience')}
           </span>
           <span
             style={{
@@ -716,7 +764,7 @@ export function CompareTable({ entries }: Props) {
                     cursor: 'pointer',
                     display: 'grid',
                     gap: '0 12px',
-                    gridTemplateColumns: '1fr 80px 60px 130px 130px 130px 90px 32px',
+                    gridTemplateColumns: '1fr 80px 60px 110px 130px 130px 130px 90px 32px',
                     padding: '10px 12px',
                     transition: 'background 0.1s',
                   }}
@@ -752,6 +800,9 @@ export function CompareTable({ entries }: Props) {
                   </span>
                   <span>
                     <TypeBadge type={pair.type} />
+                  </span>
+                  <span>
+                    <AudienceBadges audiences={pair.audience} />
                   </span>
                   <ResultCell entry={pair.lowPower} />
                   <ResultCell borderLeft entry={pair.baseline} />

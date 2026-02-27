@@ -2,8 +2,10 @@
 
 import React, { useMemo, useState } from 'react'
 
+import type { Audience } from './audience.js'
 import type { EvalEntry } from './index.js'
 
+import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
 type Variant = 'baseline' | 'low-power' | 'skill'
@@ -61,6 +63,7 @@ type ViewMode = 'compare' | 'list'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
 type FilterType = 'all' | 'codegen' | 'qa'
+type FilterAudience = 'all' | Audience
 
 function ScoreBadge({ pass, score }: { pass: boolean; score?: number }) {
   const color = pass ? 'var(--theme-success-500)' : 'var(--theme-error-500)'
@@ -119,6 +122,32 @@ function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
       }}
     >
       {type === 'codegen' ? 'Codegen' : 'QA'}
+    </span>
+  )
+}
+
+function AudienceBadges({ audiences }: { audiences: Audience[] }) {
+  return (
+    <span style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+      {audiences.map((a) => {
+        const { bg, color, label } = AUDIENCE_CONFIG[a]
+        return (
+          <span
+            key={a}
+            style={{
+              background: bg,
+              borderRadius: '4px',
+              color,
+              fontSize: '0.68rem',
+              fontWeight: 600,
+              padding: '2px 5px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {label}
+          </span>
+        )
+      })}
     </span>
   )
 }
@@ -296,7 +325,7 @@ function ExpandedRow({ entry }: { entry: EvalEntry }) {
   )
 }
 
-type SortKey = 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
+type SortKey = 'audience' | 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -313,6 +342,7 @@ export function ResultsTable({ entries }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
+  const [audienceFilter, setAudienceFilter] = useState<FilterAudience>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -369,6 +399,9 @@ export function ResultsTable({ entries }: Props) {
       if (typeFilter !== 'all' && e.type !== typeFilter) {
         return false
       }
+      if (audienceFilter !== 'all' && !e.audience.includes(audienceFilter)) {
+        return false
+      }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
         return false
       }
@@ -389,6 +422,9 @@ export function ResultsTable({ entries }: Props) {
       } else if (sortKey === 'category') {
         aVal = a.category.toLowerCase()
         bVal = b.category.toLowerCase()
+      } else if (sortKey === 'audience') {
+        aVal = [...a.audience].sort().join(',')
+        bVal = [...b.audience].sort().join(',')
       } else if (sortKey === 'type') {
         aVal = a.type
         bVal = b.type
@@ -405,7 +441,7 @@ export function ResultsTable({ entries }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, categoryFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, audienceFilter, categoryFilter, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -466,7 +502,11 @@ export function ResultsTable({ entries }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--base)' }}>
       {/* View mode toggle */}
       <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
-        <button onClick={() => setViewMode('list')} style={viewBtnStyle(viewMode === 'list')}>
+        <button
+          onClick={() => setViewMode('list')}
+          style={viewBtnStyle(viewMode === 'list')}
+          type="button"
+        >
           All Results
         </button>
         <button
@@ -477,6 +517,7 @@ export function ResultsTable({ entries }: Props) {
             display: 'inline-flex',
             gap: '6px',
           }}
+          type="button"
         >
           Compare Results
         </button>
@@ -572,6 +613,7 @@ export function ResultsTable({ entries }: Props) {
                   key={s}
                   onClick={() => setStatusFilter(s)}
                   style={filterBtnStyle(statusFilter === s)}
+                  type="button"
                 >
                   {s === 'all' ? 'All' : s === 'pass' ? '✓ Passed' : '✗ Failed'}
                 </button>
@@ -595,8 +637,48 @@ export function ResultsTable({ entries }: Props) {
                   key={t}
                   onClick={() => setTypeFilter(t)}
                   style={filterBtnStyle(typeFilter === t)}
+                  type="button"
                 >
                   {t === 'all' ? 'All' : t === 'qa' ? 'QA' : 'Codegen'}
+                </button>
+              ))}
+            </div>
+
+            <span
+              aria-hidden="true"
+              style={{
+                background: 'var(--theme-elevation-250)',
+                borderRadius: '1px',
+                display: 'inline-block',
+                height: '18px',
+                width: '1px',
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: '4px' }}>
+              {(['all', 'users', 'admins', 'maintainers'] as FilterAudience[]).map((a) => (
+                <button
+                  key={a}
+                  onClick={() => setAudienceFilter(a)}
+                  style={
+                    audienceFilter === a && a !== 'all'
+                      ? {
+                          ...filterBtnStyle(true),
+                          background: AUDIENCE_CONFIG[a].bg,
+                          border: `1px solid ${AUDIENCE_CONFIG[a].color}`,
+                          color: AUDIENCE_CONFIG[a].color,
+                        }
+                      : filterBtnStyle(audienceFilter === a)
+                  }
+                  type="button"
+                >
+                  {a === 'all'
+                    ? 'All'
+                    : a === 'users'
+                      ? 'Users'
+                      : a === 'admins'
+                        ? 'Admins'
+                        : 'Maintainers'}
                 </button>
               ))}
             </div>
@@ -650,38 +732,44 @@ export function ResultsTable({ entries }: Props) {
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 gap: '0 12px',
-                gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
                 letterSpacing: '0.05em',
                 padding: '8px 12px',
                 textTransform: 'uppercase',
               }}
             >
-              {(['question', 'category', 'type', 'variant', 'result', 'tokens'] as SortKey[]).map(
-                (key) => (
-                  <span
-                    key={key}
-                    onClick={() => handleSort(key)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
-                    role="button"
-                    style={{
-                      alignItems: 'center',
-                      color:
-                        sortKey === key
-                          ? 'var(--theme-elevation-800)'
-                          : 'var(--theme-elevation-500)',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      userSelect: 'none',
-                    }}
-                    tabIndex={0}
-                  >
-                    {key === 'question'
-                      ? 'Question / Task'
-                      : key.charAt(0).toUpperCase() + key.slice(1)}
-                    {sortIndicator(key)}
-                  </span>
-                ),
-              )}
+              {(
+                [
+                  'question',
+                  'category',
+                  'audience',
+                  'type',
+                  'variant',
+                  'result',
+                  'tokens',
+                ] as SortKey[]
+              ).map((key) => (
+                <span
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
+                  role="button"
+                  style={{
+                    alignItems: 'center',
+                    color:
+                      sortKey === key ? 'var(--theme-elevation-800)' : 'var(--theme-elevation-500)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    userSelect: 'none',
+                  }}
+                  tabIndex={0}
+                >
+                  {key === 'question'
+                    ? 'Question / Task'
+                    : key.charAt(0).toUpperCase() + key.slice(1)}
+                  {sortIndicator(key)}
+                </span>
+              ))}
               <span />
             </div>
 
@@ -730,7 +818,7 @@ export function ResultsTable({ entries }: Props) {
                         cursor: 'pointer',
                         display: 'grid',
                         gap: '0 12px',
-                        gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                        gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
                         padding: '10px 12px',
                         transition: 'background 0.1s',
                       }}
@@ -750,6 +838,9 @@ export function ResultsTable({ entries }: Props) {
                       </span>
                       <span>
                         <CategoryBadge category={entry.category} />
+                      </span>
+                      <span>
+                        <AudienceBadges audiences={entry.audience} />
                       </span>
                       <span>
                         <TypeBadge type={entry.type} />
