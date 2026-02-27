@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/typescript-plugin",
-  "version": "3.77.0",
+  "version": "3.78.0",
   "description": "TypeScript Language Service Plugin for Payload CMS - validates PayloadComponent import paths and provides autocomplete",
   "homepage": "https://payloadcms.com",
   "repository": {
