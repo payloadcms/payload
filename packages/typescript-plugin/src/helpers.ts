@@ -31,34 +31,12 @@ export function getPayloadComponentContext(
 
     if (objectContextualType && isRawPayloadComponentType(ts, objectContextualType)) {
       if (propName === 'path') {
-        const exportNameProp = objectLiteral.properties.find(
-          (p): p is tslib.PropertyAssignment =>
-            ts.isPropertyAssignment(p) &&
-            ts.isIdentifier(p.name) &&
-            p.name.text === 'exportName' &&
-            ts.isStringLiteral(p.initializer),
-        )
-        const exportNameValue =
-          exportNameProp && ts.isStringLiteral(exportNameProp.initializer)
-            ? exportNameProp.initializer.text
-            : undefined
-
+        const exportNameValue = findSiblingStringProp(ts, objectLiteral, 'exportName')
         return { type: 'path', exportNameValue, node }
       }
 
       if (propName === 'exportName') {
-        const pathProp = objectLiteral.properties.find(
-          (p): p is tslib.PropertyAssignment =>
-            ts.isPropertyAssignment(p) &&
-            ts.isIdentifier(p.name) &&
-            p.name.text === 'path' &&
-            ts.isStringLiteral(p.initializer),
-        )
-        const pathValue =
-          pathProp && ts.isStringLiteral(pathProp.initializer)
-            ? pathProp.initializer.text
-            : undefined
-
+        const pathValue = findSiblingStringProp(ts, objectLiteral, 'path')
         return { type: 'exportName', node, pathValue }
       }
     }
@@ -67,12 +45,26 @@ export function getPayloadComponentContext(
   return undefined
 }
 
+function findSiblingStringProp(
+  ts: typeof tslib,
+  objectLiteral: tslib.ObjectLiteralExpression,
+  name: string,
+): string | undefined {
+  const prop = objectLiteral.properties.find(
+    (p): p is tslib.PropertyAssignment =>
+      ts.isPropertyAssignment(p) &&
+      ts.isIdentifier(p.name) &&
+      p.name.text === name &&
+      ts.isStringLiteral(p.initializer),
+  )
+  return prop && ts.isStringLiteral(prop.initializer) ? prop.initializer.text : undefined
+}
+
 /**
  * Checks whether a type is `PayloadComponent` (the union `false | RawPayloadComponent<...> | string`).
  *
- * Uses a structural check: a union type that contains both a `string` member and an
- * object member with a `path` property. This matches `PayloadComponent`, `CustomComponent`,
- * and any other alias that resolves to the same shape.
+ * Uses both alias name matching and a structural check so this catches `PayloadComponent`,
+ * `CustomComponent`, and any other alias that resolves to the same shape.
  */
 function isPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean {
   const aliasName = type.aliasSymbol?.name
@@ -96,11 +88,8 @@ function isPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean {
       hasString = true
     }
 
-    if (member.flags & ts.TypeFlags.Object) {
-      const pathProp = member.getProperty('path')
-      if (pathProp) {
-        hasComponentShape = true
-      }
+    if (member.flags & ts.TypeFlags.Object && member.getProperty('path')) {
+      hasComponentShape = true
     }
   }
 
@@ -110,9 +99,6 @@ function isPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean {
 /**
  * Checks whether a type is `RawPayloadComponent` (an object with `path: string`
  * and optional `exportName: string`).
- *
- * Handles the case where the contextual type of an object literal is the
- * `RawPayloadComponent` member extracted from the `PayloadComponent` union.
  */
 function isRawPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean {
   const aliasName = type.aliasSymbol?.name
@@ -121,21 +107,16 @@ function isRawPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean 
   }
 
   if (type.flags & ts.TypeFlags.Object) {
-    const pathProp = type.getProperty('path')
-    const exportNameProp = type.getProperty('exportName')
-    return Boolean(pathProp && exportNameProp)
+    return Boolean(type.getProperty('path') && type.getProperty('exportName'))
   }
 
   if (type.isUnion()) {
-    for (const member of type.types) {
-      if (member.flags & ts.TypeFlags.Object) {
-        const pathProp = member.getProperty('path')
-        const exportNameProp = member.getProperty('exportName')
-        if (pathProp && exportNameProp) {
-          return true
-        }
-      }
-    }
+    return type.types.some(
+      (member) =>
+        member.flags & ts.TypeFlags.Object &&
+        member.getProperty('path') &&
+        member.getProperty('exportName'),
+    )
   }
 
   return false
@@ -145,7 +126,6 @@ function isRawPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean 
  * Finds the most specific AST node at a given position in the source file.
  */
 export function findNodeAtPosition(
-  _ts: typeof tslib,
   sourceFile: tslib.SourceFile,
   position: number,
 ): tslib.Node | undefined {

@@ -1,5 +1,7 @@
 import type tslib from 'typescript/lib/tsserverlibrary'
 
+import type { PayloadComponentContext } from './helpers.js'
+
 import { findNodeAtPosition, getPayloadComponentContext } from './helpers.js'
 
 function init(modules: { typescript: typeof tslib }) {
@@ -70,7 +72,7 @@ function init(modules: { typescript: typeof tslib }) {
         const sourceFile = program.getSourceFile(fileName)
         if (sourceFile) {
           const checker = program.getTypeChecker()
-          const node = findNodeAtPosition(ts, sourceFile, position)
+          const node = findNodeAtPosition(sourceFile, position)
 
           if (node && ts.isStringLiteral(node)) {
             const baseDir = getBaseDir(fileName)
@@ -96,7 +98,7 @@ function init(modules: { typescript: typeof tslib }) {
         const sourceFile = program.getSourceFile(fileName)
         if (sourceFile) {
           const checker = program.getTypeChecker()
-          const node = findNodeAtPosition(ts, sourceFile, position)
+          const node = findNodeAtPosition(sourceFile, position)
 
           if (node && ts.isStringLiteral(node)) {
             const baseDir = getBaseDir(fileName)
@@ -119,6 +121,91 @@ function init(modules: { typescript: typeof tslib }) {
 }
 
 // -------------------------------------------------------------------
+// Shared utilities
+// -------------------------------------------------------------------
+
+function parsePayloadComponentString(value: string): { exportName: string; path: string } {
+  if (value.includes('#')) {
+    const [path, exportName] = value.split('#', 2) as [string, string]
+    return { exportName: exportName || 'default', path }
+  }
+
+  return { exportName: 'default', path: value }
+}
+
+/**
+ * Extracts the module path and export name from any PayloadComponent context,
+ * accounting for `#export` syntax and sibling `exportName`/`path` properties.
+ */
+function resolveComponentRef(
+  context: PayloadComponentContext,
+  nodeText: string,
+): { exportName: string; path: string } | undefined {
+  if (context.type === 'string' || context.type === 'path') {
+    const parsed = parsePayloadComponentString(nodeText)
+    if (context.type === 'path' && context.exportNameValue) {
+      parsed.exportName = context.exportNameValue
+    }
+    return parsed
+  }
+
+  if (context.type === 'exportName' && context.pathValue) {
+    const { path } = parsePayloadComponentString(context.pathValue)
+    return { exportName: nodeText, path }
+  }
+
+  return undefined
+}
+
+function resolveModulePath(
+  ts: typeof tslib,
+  modulePath: string,
+  containingFile: string,
+  program: tslib.Program,
+  baseDir: string | undefined,
+): tslib.ResolvedModuleFull | undefined {
+  const compilerOptions = program.getCompilerOptions()
+
+  let pathToResolve = modulePath
+  let resolveFrom = containingFile
+
+  // Payload convention: '/' and './' paths are relative to baseDir.
+  // Resolve from a synthetic file inside baseDir so TypeScript uses it as the base.
+  if (modulePath.startsWith('/') || modulePath.startsWith('./')) {
+    if (baseDir) {
+      resolveFrom = baseDir + '/_.ts'
+    }
+
+    if (modulePath.startsWith('/')) {
+      pathToResolve = '.' + modulePath
+    }
+  }
+
+  // Delegate entirely to TypeScript's module resolution -- respects the project's
+  // moduleResolution, paths, allowImportingTsExtensions, etc.
+  const result = ts.resolveModuleName(pathToResolve, resolveFrom, compilerOptions, ts.sys)
+  return result.resolvedModule
+}
+
+function getModuleExports(
+  resolvedModule: tslib.ResolvedModuleFull,
+  program: tslib.Program,
+): string[] {
+  const sourceFile = program.getSourceFile(resolvedModule.resolvedFileName)
+  if (!sourceFile) {
+    return []
+  }
+
+  const checker = program.getTypeChecker()
+  const moduleSymbol = checker.getSymbolAtLocation(sourceFile)
+  if (!moduleSymbol) {
+    return []
+  }
+
+  return checker.getExportsOfModule(moduleSymbol).map((e) => e.name)
+}
+
+// -------------------------------------------------------------------
 // Diagnostics
 // -------------------------------------------------------------------
 
@@ -134,38 +221,53 @@ function getPayloadDiagnostics(
   function visit(node: tslib.Node) {
     if (ts.isStringLiteral(node) && node.text.length > 0) {
       const context = getPayloadComponentContext(ts, node, checker)
+      if (!context) {
+        ts.forEachChild(node, visit)
+        return
+      }
 
-      if (context?.type === 'string') {
-        validateFullComponentString(ts, node, sourceFile, checker, program, diagnostics, baseDir)
-      } else if (context?.type === 'path') {
-        // Payload allows '#export' inside the path property (same as string form)
-        const parsed = parsePayloadComponentString(node.text)
-        // Sibling exportName property overrides the parsed export name
-        const exportName = context.exportNameValue ?? parsed.exportName
-        validateModulePath(ts, node, parsed.path, sourceFile, program, diagnostics, baseDir)
-        validateExportName(
-          ts,
-          node,
-          parsed.path,
-          exportName,
-          sourceFile,
-          program,
-          diagnostics,
-          baseDir,
-        )
-      } else if (context?.type === 'exportName' && context.pathValue) {
-        // The sibling path property may also contain '#export'
-        const { path: cleanPath } = parsePayloadComponentString(context.pathValue)
-        validateExportName(
-          ts,
-          node,
-          cleanPath,
-          node.text,
-          sourceFile,
-          program,
-          diagnostics,
-          baseDir,
-        )
+      const ref = resolveComponentRef(context, node.text)
+      if (!ref?.path) {
+        ts.forEachChild(node, visit)
+        return
+      }
+
+      const { exportName, path: modulePath } = ref
+
+      const resolved = resolveModulePath(ts, modulePath, sourceFile.fileName, program, baseDir)
+
+      if (!resolved) {
+        diagnostics.push({
+          category: ts.DiagnosticCategory.Error,
+          code: 71001,
+          file: sourceFile,
+          length: node.text.length,
+          messageText: `Cannot find module '${modulePath}'. Ensure the file exists and the path is correct.`,
+          start: node.getStart() + 1,
+        })
+      } else {
+        const exports = getModuleExports(resolved, program)
+        if (!exports.includes(exportName)) {
+          let message = `Module '${modulePath}' has no exported member '${exportName}'.`
+
+          const suggestion = findClosestMatch(exportName, exports)
+          if (suggestion) {
+            message += ` Did you mean '${suggestion}'?`
+          }
+
+          if (exports.length > 0) {
+            message += ` Available exports: ${exports.join(', ')}.`
+          }
+
+          diagnostics.push({
+            category: ts.DiagnosticCategory.Error,
+            code: 71002,
+            file: sourceFile,
+            length: node.text.length,
+            messageText: message,
+            start: node.getStart() + 1,
+          })
+        }
       }
     }
 
@@ -174,128 +276,6 @@ function getPayloadDiagnostics(
 
   visit(sourceFile)
   return diagnostics
-}
-
-function validateFullComponentString(
-  ts: typeof tslib,
-  node: tslib.StringLiteral,
-  sourceFile: tslib.SourceFile,
-  _checker: tslib.TypeChecker,
-  program: tslib.Program,
-  diagnostics: tslib.Diagnostic[],
-  baseDir: string | undefined,
-) {
-  const { exportName, path } = parsePayloadComponentString(node.text)
-
-  if (!path) {
-    return
-  }
-
-  const resolved = resolveModulePath(ts, path, sourceFile.fileName, program, baseDir)
-
-  if (!resolved) {
-    diagnostics.push({
-      category: ts.DiagnosticCategory.Error,
-      code: 71001,
-      file: sourceFile,
-      length: node.text.length,
-      messageText: `Cannot find module '${path}'. Ensure the file exists and the path is correct.`,
-      start: node.getStart() + 1,
-    })
-    return
-  }
-
-  const exports = getModuleExports(ts, resolved, program)
-
-  if (!exports.includes(exportName)) {
-    let message = `Module '${path}' has no exported member '${exportName}'.`
-
-    const suggestion = findClosestMatch(exportName, exports)
-    if (suggestion) {
-      message += ` Did you mean '${suggestion}'?`
-    }
-
-    if (exports.length > 0) {
-      message += ` Available exports: ${exports.join(', ')}.`
-    }
-
-    diagnostics.push({
-      category: ts.DiagnosticCategory.Error,
-      code: 71002,
-      file: sourceFile,
-      length: node.text.length,
-      messageText: message,
-      start: node.getStart() + 1,
-    })
-  }
-}
-
-function validateModulePath(
-  ts: typeof tslib,
-  node: tslib.StringLiteral,
-  path: string,
-  sourceFile: tslib.SourceFile,
-  program: tslib.Program,
-  diagnostics: tslib.Diagnostic[],
-  baseDir: string | undefined,
-) {
-  if (!path) {
-    return
-  }
-
-  const resolved = resolveModulePath(ts, path, sourceFile.fileName, program, baseDir)
-
-  if (!resolved) {
-    diagnostics.push({
-      category: ts.DiagnosticCategory.Error,
-      code: 71001,
-      file: sourceFile,
-      length: node.text.length,
-      messageText: `Cannot find module '${path}'. Ensure the file exists and the path is correct.`,
-      start: node.getStart() + 1,
-    })
-  }
-}
-
-function validateExportName(
-  ts: typeof tslib,
-  node: tslib.StringLiteral,
-  path: string,
-  exportName: string,
-  sourceFile: tslib.SourceFile,
-  program: tslib.Program,
-  diagnostics: tslib.Diagnostic[],
-  baseDir: string | undefined,
-) {
-  const resolved = resolveModulePath(ts, path, sourceFile.fileName, program, baseDir)
-
-  if (!resolved) {
-    return
-  }
-
-  const exports = getModuleExports(ts, resolved, program)
-
-  if (!exports.includes(exportName)) {
-    let message = `Module '${path}' has no exported member '${exportName}'.`
-
-    const suggestion = findClosestMatch(exportName, exports)
-    if (suggestion) {
-      message += ` Did you mean '${suggestion}'?`
-    }
-
-    if (exports.length > 0) {
-      message += ` Available exports: ${exports.join(', ')}.`
-    }
-
-    diagnostics.push({
-      category: ts.DiagnosticCategory.Error,
-      code: 71002,
-      file: sourceFile,
-      length: node.text.length,
-      messageText: message,
-      start: node.getStart() + 1,
-    })
-  }
 }
 
 // -------------------------------------------------------------------
@@ -316,126 +296,64 @@ function getPayloadCompletions(
     return undefined
   }
 
-  if (context.type === 'string') {
-    return getStringFormCompletions(ts, node, position, program, baseDir, sys)
-  }
-
-  if (context.type === 'exportName' && context.pathValue) {
-    return getExportNameCompletions(ts, node, context.pathValue, program, baseDir)
-  }
-
-  if (context.type === 'path') {
-    const text = node.text
-    const offsetInString = position - node.getStart() - 1
-    const hashIndex = text.indexOf('#')
-
-    // After # in path property: suggest export names
-    if (hashIndex !== -1 && offsetInString > hashIndex) {
-      const modulePath = text.substring(0, hashIndex)
-      const resolved = resolveModulePath(
-        ts,
-        modulePath,
-        node.getSourceFile().fileName,
-        program,
-        baseDir,
-      )
-      if (!resolved) {
-        return undefined
-      }
-
-      const exports = getModuleExports(ts, resolved, program)
-
-      return {
-        entries: exports.map((name) => ({
-          name,
-          kind: ts.ScriptElementKind.constElement,
-          replacementSpan: {
-            length: text.length - hashIndex - 1,
-            start: node.getStart() + 1 + hashIndex + 1,
-          },
-          sortText: name,
-        })),
-        isGlobalCompletion: false,
-        isMemberCompletion: true,
-        isNewIdentifierLocation: false,
-      }
+  if (context.type === 'exportName') {
+    const ref = resolveComponentRef(context, node.text)
+    if (!ref) {
+      return undefined
     }
-
-    return getPathCompletions(sys, node, position, baseDir)
+    return buildExportCompletions(ts, node, ref.path, node.text.length, program, baseDir)
   }
 
-  return undefined
-}
-
-function getStringFormCompletions(
-  ts: typeof tslib,
-  node: tslib.StringLiteral,
-  position: number,
-  program: tslib.Program,
-  baseDir: string | undefined,
-  sys: tslib.System,
-): tslib.CompletionInfo | undefined {
+  // Both 'string' and 'path' contexts: check if cursor is after #
   const text = node.text
   const offsetInString = position - node.getStart() - 1
   const hashIndex = text.indexOf('#')
 
-  // After #: suggest export names
   if (hashIndex !== -1 && offsetInString > hashIndex) {
     const modulePath = text.substring(0, hashIndex)
-    const resolved = resolveModulePath(
+    return buildExportCompletions(
       ts,
+      node,
       modulePath,
-      node.getSourceFile().fileName,
+      text.length - hashIndex - 1,
       program,
       baseDir,
+      node.getStart() + 1 + hashIndex + 1,
     )
-    if (!resolved) {
-      return undefined
-    }
-
-    const exports = getModuleExports(ts, resolved, program)
-
-    return {
-      entries: exports.map((name) => ({
-        name,
-        kind: ts.ScriptElementKind.constElement,
-        replacementSpan: {
-          length: text.length - hashIndex - 1,
-          start: node.getStart() + 1 + hashIndex + 1,
-        },
-        sortText: name,
-      })),
-      isGlobalCompletion: false,
-      isMemberCompletion: true,
-      isNewIdentifierLocation: false,
-    }
   }
 
-  // Before # (or no #): suggest file paths
   return getPathCompletions(sys, node, position, baseDir)
 }
 
-function getExportNameCompletions(
+function buildExportCompletions(
   ts: typeof tslib,
   node: tslib.StringLiteral,
-  pathValue: string,
+  modulePath: string,
+  replacementLength: number,
   program: tslib.Program,
   baseDir: string | undefined,
+  replacementStart?: number,
 ): tslib.CompletionInfo | undefined {
-  const resolved = resolveModulePath(ts, pathValue, node.getSourceFile().fileName, program, baseDir)
+  const resolved = resolveModulePath(
+    ts,
+    modulePath,
+    node.getSourceFile().fileName,
+    program,
+    baseDir,
+  )
   if (!resolved) {
     return undefined
   }
 
-  const exports = getModuleExports(ts, resolved, program)
+  const exports = getModuleExports(resolved, program)
 
   return {
     entries: exports.map((name) => ({
       name,
       kind: ts.ScriptElementKind.constElement,
       replacementSpan: {
-        length: node.text.length,
-        start: node.getStart() + 1,
+        length: replacementLength,
+        start: replacementStart ?? node.getStart() + 1,
       },
       sortText: name,
     })),
@@ -461,12 +379,10 @@ function getPathCompletions(
   const offsetInString = position - node.getStart() - 1
   const hashIndex = text.indexOf('#')
 
-  // Complete up to the cursor position, but never past the #
   const endOffset = hashIndex !== -1 ? Math.min(offsetInString, hashIndex) : offsetInString
   const pathPortion = text.substring(0, endOffset)
   const lastSlash = pathPortion.lastIndexOf('/')
 
-  // Directory to list entries from, and the partial segment being typed
   let dirPath: string
   let prefix: string
   let replacementStart: number
@@ -480,7 +396,6 @@ function getPathCompletions(
     prefix = pathPortion.substring(lastSlash + 1)
     replacementStart = node.getStart() + 1 + lastSlash + 1
 
-    // Resolve directory: '/' paths are relative to baseDir
     if (dirPortion.startsWith('/')) {
       dirPath = baseDir + dirPortion
     } else if (dirPortion.startsWith('./')) {
@@ -495,56 +410,44 @@ function getPathCompletions(
   }
 
   const entries: tslib.CompletionEntry[] = []
+  const prefixLower = prefix.toLowerCase()
 
-  // Add subdirectories
-  const dirs = sys.getDirectories(dirPath)
-  for (const dir of dirs) {
+  for (const dir of sys.getDirectories(dirPath)) {
     if (dir.startsWith('.') || dir === 'node_modules') {
       continue
     }
-    if (prefix && !dir.toLowerCase().startsWith(prefix.toLowerCase())) {
+    if (prefix && !dir.toLowerCase().startsWith(prefixLower)) {
       continue
     }
     entries.push({
       name: dir,
       kind: 'directory' as tslib.ScriptElementKind,
-      replacementSpan: {
-        length: prefix.length,
-        start: replacementStart,
-      },
+      replacementSpan: { length: prefix.length, start: replacementStart },
       sortText: '0' + dir,
     })
   }
 
-  // Add files (stripping extensions for cleaner suggestions)
   const files = sys.readDirectory(dirPath, COMPONENT_EXTENSIONS, undefined, undefined, 1)
   for (const file of files) {
     const fileName = file.substring(file.lastIndexOf('/') + 1)
     const nameWithoutExt = fileName.replace(/\.(?:tsx?|jsx?)$/, '')
 
-    if (prefix && !fileName.toLowerCase().startsWith(prefix.toLowerCase())) {
+    if (prefix && !fileName.toLowerCase().startsWith(prefixLower)) {
       continue
     }
 
     entries.push({
       name: fileName,
       kind: 'script' as tslib.ScriptElementKind,
-      replacementSpan: {
-        length: prefix.length,
-        start: replacementStart,
-      },
+      replacementSpan: { length: prefix.length, start: replacementStart },
       sortText: '1' + fileName,
     })
 
-    // Also suggest without extension if it differs from the filename
     if (nameWithoutExt !== fileName) {
       entries.push({
         name: nameWithoutExt,
         kind: 'script' as tslib.ScriptElementKind,
-        replacementSpan: {
-          length: prefix.length,
-          start: replacementStart,
-        },
+        replacementSpan: { length: prefix.length, start: replacementStart },
         sortText: '1' + nameWithoutExt,
       })
     }
@@ -578,28 +481,12 @@ function getPayloadDefinition(
     return undefined
   }
 
-  let modulePath: string
-  let exportName: string
-
-  if (context.type === 'string') {
-    const parsed = parsePayloadComponentString(node.text)
-    modulePath = parsed.path
-    exportName = parsed.exportName
-  } else if (context.type === 'path') {
-    const parsed = parsePayloadComponentString(node.text)
-    modulePath = parsed.path
-    exportName = parsed.exportName
-  } else if (context.type === 'exportName' && context.pathValue) {
-    const { path: cleanPath } = parsePayloadComponentString(context.pathValue)
-    modulePath = cleanPath
-    exportName = node.text
-  } else {
+  const ref = resolveComponentRef(context, node.text)
+  if (!ref?.path) {
     return undefined
   }
 
-  if (!modulePath) {
-    return undefined
-  }
+  const { exportName, path: modulePath } = ref
 
   const resolved = resolveModulePath(
     ts,
@@ -667,69 +554,13 @@ function getPayloadDefinition(
 }
 
 // -------------------------------------------------------------------
-// Resolution utilities
+// baseDir detection
 // -------------------------------------------------------------------
-
-function parsePayloadComponentString(value: string): { exportName: string; path: string } {
-  if (value.includes('#')) {
-    const [path, exportName] = value.split('#', 2) as [string, string]
-    return { exportName: exportName || 'default', path }
-  }
-
-  return { exportName: 'default', path: value }
-}
-
-function resolveModulePath(
-  ts: typeof tslib,
-  modulePath: string,
-  containingFile: string,
-  program: tslib.Program,
-  baseDir: string | undefined,
-): tslib.ResolvedModuleFull | undefined {
-  const compilerOptions = program.getCompilerOptions()
-
-  let pathToResolve = modulePath
-  let resolveFrom = containingFile
-
-  if (modulePath.startsWith('/') || modulePath.startsWith('./')) {
-    // Payload convention: '/' and './' paths are relative to baseDir.
-    // Create a synthetic "containing file" inside baseDir so TypeScript's
-    // module resolution resolves relative to it.
-    if (baseDir) {
-      resolveFrom = baseDir + '/_.ts'
-    }
-
-    if (modulePath.startsWith('/')) {
-      pathToResolve = '.' + modulePath
-    }
-  }
-
-  const result = ts.resolveModuleName(pathToResolve, resolveFrom, compilerOptions, ts.sys)
-
-  if (result.resolvedModule) {
-    return result.resolvedModule
-  }
-
-  // Fallback: if the path has a .js/.jsx extension, try without it.
-  // Payload allows '/components/Foo.js' where the file is actually .tsx/.ts.
-  if (pathToResolve.endsWith('.js') || pathToResolve.endsWith('.jsx')) {
-    const withoutExt = pathToResolve.replace(/\.jsx?$/, '')
-    const retry = ts.resolveModuleName(withoutExt, resolveFrom, compilerOptions, ts.sys)
-    return retry.resolvedModule
-  }
-
-  return undefined
-}
 
 const PAYLOAD_CONFIG_NAMES = ['payload.config.ts', 'payload.config.js', 'config.ts']
 
-/**
- * Walks up from a file to find the nearest Payload config file and returns its directory.
- * This serves as the default `baseDir` when not explicitly configured.
- */
 function findPayloadConfigDir(sys: tslib.System, fromFile: string): string | undefined {
   let dir = fromFile.includes('/') ? fromFile.substring(0, fromFile.lastIndexOf('/')) : fromFile
-
   const root = dir.startsWith('/') ? '/' : ''
 
   for (let i = 0; i < 50; i++) {
@@ -749,25 +580,9 @@ function findPayloadConfigDir(sys: tslib.System, fromFile: string): string | und
   return undefined
 }
 
-function getModuleExports(
-  ts: typeof tslib,
-  resolvedModule: tslib.ResolvedModuleFull,
-  program: tslib.Program,
-): string[] {
-  const sourceFile = program.getSourceFile(resolvedModule.resolvedFileName)
-  if (!sourceFile) {
-    return []
-  }
-
-  const checker = program.getTypeChecker()
-  const moduleSymbol = checker.getSymbolAtLocation(sourceFile)
-  if (!moduleSymbol) {
-    return []
-  }
-
-  const exports = checker.getExportsOfModule(moduleSymbol)
-  return exports.map((e) => e.name)
-}
+// -------------------------------------------------------------------
+// String matching
+// -------------------------------------------------------------------
 
 function findClosestMatch(target: string, candidates: string[]): string | undefined {
   if (candidates.length === 0) {
@@ -775,7 +590,6 @@ function findClosestMatch(target: string, candidates: string[]): string | undefi
   }
 
   const targetLower = target.toLowerCase()
-
   let bestMatch: string | undefined
   let bestDistance = Infinity
 
@@ -791,28 +605,25 @@ function findClosestMatch(target: string, candidates: string[]): string | undefi
 }
 
 function levenshteinDistance(a: string, b: string): number {
-  const matrix: number[][] = []
-
-  for (let i = 0; i <= b.length; i++) {
-    matrix[i] = [i]
+  if (a.length === 0) {
+    return b.length
+  }
+  if (b.length === 0) {
+    return a.length
   }
 
-  for (let j = 0; j <= a.length; j++) {
-    matrix[0]![j] = j
-  }
+  let prev = Array.from({ length: a.length + 1 }, (_, i) => i)
 
   for (let i = 1; i <= b.length; i++) {
+    const curr = [i]
     for (let j = 1; j <= a.length; j++) {
       const cost = b[i - 1] === a[j - 1] ? 0 : 1
-      matrix[i]![j] = Math.min(
-        matrix[i - 1]![j]! + 1,
-        matrix[i]![j - 1]! + 1,
-        matrix[i - 1]![j - 1]! + cost,
-      )
+      curr[j] = Math.min(prev[j]! + 1, curr[j - 1]! + 1, prev[j - 1]! + cost)
     }
+    prev = curr
   }
 
-  return matrix[b.length]![a.length]!
+  return prev[a.length]!
 }
 
 export = init
