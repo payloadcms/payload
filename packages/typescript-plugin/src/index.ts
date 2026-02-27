@@ -72,7 +72,7 @@ function init(modules: { typescript: typeof tslib }) {
         const sourceFile = program.getSourceFile(fileName)
         if (sourceFile) {
           const checker = program.getTypeChecker()
-          const node = findNodeAtPosition(sourceFile, position)
+          const node = findNodeAtPosition(ts, sourceFile, position)
 
           if (node && ts.isStringLiteral(node)) {
             const baseDir = getBaseDir(fileName)
@@ -98,7 +98,7 @@ function init(modules: { typescript: typeof tslib }) {
         const sourceFile = program.getSourceFile(fileName)
         if (sourceFile) {
           const checker = program.getTypeChecker()
-          const node = findNodeAtPosition(sourceFile, position)
+          const node = findNodeAtPosition(ts, sourceFile, position)
 
           if (node && ts.isStringLiteral(node)) {
             const baseDir = getBaseDir(fileName)
@@ -124,37 +124,44 @@ function init(modules: { typescript: typeof tslib }) {
 // Shared utilities
 // -------------------------------------------------------------------
 
-function parsePayloadComponentString(value: string): { exportName: string; path: string } {
-  if (value.includes('#')) {
-    const [path, exportName] = value.split('#', 2) as [string, string]
-    return { exportName: exportName || 'default', path }
-  }
-
-  return { exportName: 'default', path: value }
-}
-
 /**
- * Extracts the module path and export name from any PayloadComponent context,
- * accounting for `#export` syntax and sibling `exportName`/`path` properties.
+ * Extracts the module path and export name from any PayloadComponent context.
+ * Mirrors the logic of `parsePayloadComponent` in payload core:
+ * splits `#` for the export name, and respects sibling `exportName`/`path` overrides.
  */
-function resolveComponentRef(
+function parsePayloadComponent(
   context: PayloadComponentContext,
   nodeText: string,
 ): { exportName: string; path: string } | undefined {
+  let pathAndMaybeExport: string
+  let exportNameOverride: string | undefined
+
   if (context.type === 'string' || context.type === 'path') {
-    const parsed = parsePayloadComponentString(nodeText)
-    if (context.type === 'path' && context.exportNameValue) {
-      parsed.exportName = context.exportNameValue
-    }
-    return parsed
+    pathAndMaybeExport = nodeText
+    exportNameOverride = context.type === 'path' ? context.exportNameValue : undefined
+  } else if (context.type === 'exportName' && context.pathValue) {
+    pathAndMaybeExport = context.pathValue
+    exportNameOverride = nodeText
+  } else {
+    return undefined
   }
 
-  if (context.type === 'exportName' && context.pathValue) {
-    const { path } = parsePayloadComponentString(context.pathValue)
-    return { exportName: nodeText, path }
+  let path: string
+  let exportName: string
+
+  if (pathAndMaybeExport.includes('#')) {
+    ;[path, exportName] = pathAndMaybeExport.split('#', 2) as [string, string]
+    exportName = exportName || 'default'
+  } else {
+    path = pathAndMaybeExport
+    exportName = 'default'
   }
 
-  return undefined
+  if (exportNameOverride) {
+    exportName = exportNameOverride
+  }
+
+  return { exportName, path }
 }
 
 function resolveModulePath(
@@ -226,13 +233,13 @@ function getPayloadDiagnostics(
         return
       }
 
-      const ref = resolveComponentRef(context, node.text)
-      if (!ref?.path) {
+      const component = parsePayloadComponent(context, node.text)
+      if (!component?.path) {
         ts.forEachChild(node, visit)
         return
       }
 
-      const { exportName, path: modulePath } = ref
+      const { exportName, path: modulePath } = component
 
       const resolved = resolveModulePath(ts, modulePath, sourceFile.fileName, program, baseDir)
 
@@ -250,12 +257,19 @@ function getPayloadDiagnostics(
         if (!exports.includes(exportName)) {
           let message = `Module '${modulePath}' has no exported member '${exportName}'.`
 
-          const suggestion = findClosestMatch(exportName, exports)
+          const getSpellingSuggestion = (
+            ts as unknown as {
+              getSpellingSuggestion: (
+                name: string,
+                candidates: string[],
+                getName: (c: string) => string,
+              ) => string | undefined
+            }
+          ).getSpellingSuggestion
+          const suggestion = getSpellingSuggestion?.(exportName, exports, (e) => e)
           if (suggestion) {
             message += ` Did you mean '${suggestion}'?`
-          }
-
-          if (exports.length > 0) {
+          } else if (exports.length > 0) {
             message += ` Available exports: ${exports.join(', ')}.`
           }
 
@@ -297,11 +311,11 @@ function getPayloadCompletions(
   }
 
   if (context.type === 'exportName') {
-    const ref = resolveComponentRef(context, node.text)
-    if (!ref) {
+    const component = parsePayloadComponent(context, node.text)
+    if (!component) {
       return undefined
     }
-    return buildExportCompletions(ts, node, ref.path, node.text.length, program, baseDir)
+    return buildExportCompletions(ts, node, component.path, node.text.length, program, baseDir)
   }
 
   // Both 'string' and 'path' contexts: check if cursor is after #
@@ -481,12 +495,12 @@ function getPayloadDefinition(
     return undefined
   }
 
-  const ref = resolveComponentRef(context, node.text)
-  if (!ref?.path) {
+  const component = parsePayloadComponent(context, node.text)
+  if (!component?.path) {
     return undefined
   }
 
-  const { exportName, path: modulePath } = ref
+  const { exportName, path: modulePath } = component
 
   const resolved = resolveModulePath(
     ts,
@@ -578,52 +592,6 @@ function findPayloadConfigDir(sys: tslib.System, fromFile: string): string | und
   }
 
   return undefined
-}
-
-// -------------------------------------------------------------------
-// String matching
-// -------------------------------------------------------------------
-
-function findClosestMatch(target: string, candidates: string[]): string | undefined {
-  if (candidates.length === 0) {
-    return undefined
-  }
-
-  const targetLower = target.toLowerCase()
-  let bestMatch: string | undefined
-  let bestDistance = Infinity
-
-  for (const candidate of candidates) {
-    const distance = levenshteinDistance(targetLower, candidate.toLowerCase())
-    if (distance < bestDistance && distance <= Math.max(target.length, candidate.length) * 0.5) {
-      bestDistance = distance
-      bestMatch = candidate
-    }
-  }
-
-  return bestMatch
-}
-
-function levenshteinDistance(a: string, b: string): number {
-  if (a.length === 0) {
-    return b.length
-  }
-  if (b.length === 0) {
-    return a.length
-  }
-
-  let prev = Array.from({ length: a.length + 1 }, (_, i) => i)
-
-  for (let i = 1; i <= b.length; i++) {
-    const curr = [i]
-    for (let j = 1; j <= a.length; j++) {
-      const cost = b[i - 1] === a[j - 1] ? 0 : 1
-      curr[j] = Math.min(prev[j]! + 1, curr[j - 1]! + 1, prev[j - 1]! + cost)
-    }
-    prev = curr
-  }
-
-  return prev[a.length]!
 }
 
 export = init

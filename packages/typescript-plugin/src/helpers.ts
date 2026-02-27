@@ -123,12 +123,24 @@ function isRawPayloadComponentType(ts: typeof tslib, type: tslib.Type): boolean 
 }
 
 /**
- * Finds the most specific AST node at a given position in the source file.
+ * Returns the deepest token at a given position, reusing TypeScript's internal traversal.
  */
 export function findNodeAtPosition(
+  ts: typeof tslib,
   sourceFile: tslib.SourceFile,
   position: number,
 ): tslib.Node | undefined {
+  const getTokenAtPosition = (
+    ts as unknown as {
+      getTokenAtPosition: (sf: tslib.SourceFile, pos: number) => tslib.Node
+    }
+  ).getTokenAtPosition
+
+  if (getTokenAtPosition) {
+    return getTokenAtPosition(sourceFile, position)
+  }
+
+  // Fallback if the internal API is removed in a future TS version
   function find(node: tslib.Node): tslib.Node | undefined {
     if (position >= node.getStart() && position < node.getEnd()) {
       let found: tslib.Node | undefined
