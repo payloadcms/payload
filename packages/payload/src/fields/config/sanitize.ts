@@ -209,6 +209,28 @@ export const sanitizeFields = async ({
             throw new InvalidFieldRelationship(field, relationship)
           }
         })
+
+        if (Array.isArray(collectionConfig?.admin?.listSearchableFields)) {
+          const listSearchableIndex = collectionConfig.admin.listSearchableFields?.indexOf(
+            `${joinPath ? joinPath + '.' : ''}${field.name}`,
+          )
+          if (listSearchableIndex !== -1 && typeof field.relationTo === 'string') {
+            const relatedCollection = config.collections.find(
+              (collection) => collection.slug === field.relationTo,
+            )
+            const searchableRelationFields = relatedCollection?.admin?.listSearchableFields || [
+              relatedCollection?.admin?.useAsTitle ? relatedCollection.admin.useAsTitle : 'id',
+            ]
+            collectionConfig.admin.listSearchableFields.splice(
+              listSearchableIndex,
+              1,
+              ...searchableRelationFields.map(
+                (relationFieldName) =>
+                  `${joinPath ? joinPath + '.' : ''}${field.name}.${relationFieldName}`,
+              ),
+            )
+          }
+        }
       }
 
       if (field.min && !field.minRows) {
