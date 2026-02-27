@@ -1142,9 +1142,10 @@ export const getPayload = async (
     alreadyCachedSameConfig = true
   }
 
-  if (alreadyCachedSameConfig) {
+  if (alreadyCachedSameConfig && cached.payload) {
     // alreadyCachedSameConfig => already called onInit once, but same config => no need to call onInit again.
     // calling onInit again would only make sense if a different config was passed.
+    // check cached.payload ensures onInit runs on successful retry after previous failed attempts.
     options.disableOnInit = true
   }
 
