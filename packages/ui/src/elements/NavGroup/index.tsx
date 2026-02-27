@@ -15,7 +15,7 @@ const baseClass = 'nav-group'
 type Props = {
   children: React.ReactNode
   isOpen?: boolean
-  label: string
+  label: string | React.ReactNode
 }
 
 export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, label }) => {
