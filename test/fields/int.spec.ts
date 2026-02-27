@@ -4150,21 +4150,16 @@ describe('Fields', () => {
         expect(noMatchDocIDs).not.toContain(relDoc2.id)
       })
 
-      it('should not throw when querying hasMany relationship with equals array on SQL adapters', async () => {
+      it('should not throw when querying hasMany relationship with equals array', async () => {
         const text1 = await payload.create({
           collection: 'text-fields',
           data: { text: 'Text 1' },
         })
 
-        const text2 = await payload.create({
-          collection: 'text-fields',
-          data: { text: 'Text 2' },
-        })
-
         const relDoc = await payload.create({
           collection: 'relationship-fields',
           data: {
-            relationshipHasMany: [text1.id, text2.id],
+            relationshipHasMany: [text1.id],
             relationship: { relationTo: 'text-fields', value: text1.id },
           },
         })
@@ -4190,7 +4185,7 @@ describe('Fields', () => {
           },
         })
 
-        expect(notEqualsResult.docs).toBeDefined()
+        expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
       })
     })
   })
