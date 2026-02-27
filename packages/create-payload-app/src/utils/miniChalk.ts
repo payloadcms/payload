@@ -2,7 +2,19 @@
  * Lightweight chalk replacement using ANSI escape codes.
  * Uses specific SGR close codes (not \x1b[0m) so nested calls
  * preserve outer styles — matching chalk's nesting behavior.
+ *
+ * Note: This implementation uses specific SGR close codes (e.g. \x1b[39m
+ * for fg default) instead of the full reset (\x1b[0m) used by the existing
+ * miniChalk utilities in packages/payload and packages/plugin-multi-tenant.
+ * This is intentional — full reset breaks nested calls like
+ * bold(`${green('text')} more`) by resetting bold when green closes.
  */
+
+const supportsColor =
+  !('NO_COLOR' in process.env) &&
+  process.env.FORCE_COLOR !== '0' &&
+  (process.env.FORCE_COLOR !== undefined || (process.stdout?.isTTY ?? false))
+
 const styles: Record<string, { close: string; open: string }> = {
   // modifiers
   bold: { close: '\x1b[22m', open: '\x1b[1m' },
@@ -28,6 +40,7 @@ const styles: Record<string, { close: string; open: string }> = {
 }
 
 function colorize(str: string, style: keyof typeof styles) {
+  if (!supportsColor) return str
   const { close, open } = styles[style]!
   return `${open}${str}${close}`
 }
