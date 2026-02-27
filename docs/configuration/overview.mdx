@@ -285,19 +285,24 @@ Example for `pnpm payload seed`:
 Step 1: create `seed.ts` file in the same folder with `payload.config.ts` with:
 
 ```ts
-import type { SanitizedConfig } from 'payload'
+import type { BinScript } from 'payload'
 
-import payload from 'payload'
+import { getPayload } from 'payload'
 
 // Script must define a "script" function export that accepts the sanitized config
-export const script = async (config: SanitizedConfig) => {
-  await payload.init({ config })
+export const script: BinScript = async (config) => {
+  const payload = await getPayload({ config })
+
   await payload.create({
     collection: 'pages',
     data: { title: 'my title' },
   })
+
   payload.logger.info('Successfully seeded!')
-  process.exit(0)
+
+  // Return the Payload instance so cleanup can be done, e.g. close database connections
+  // Can also include an 'exitCode' property to set the process exit code
+  return { payload }
 }
 ```
 

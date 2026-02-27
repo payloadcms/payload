@@ -50,11 +50,11 @@ export const bin = async () => {
 
     return
   } else {
-    const { payload } = await runBinScript({ args, script })
+    const { exitCode, payload } = await runBinScript({ args, script })
     if (payload) {
       await payload.destroy() // close database connections after running jobs so process can exit cleanly
     }
-    process.exit(0)
+    process.exit(exitCode ?? 0)
   }
 }
 
@@ -69,6 +69,7 @@ async function runBinScript({
    * Scripts can return a payload instance if it exists. The bin script runner can then safely
    * shut off the instance, depending on if it's running in a cron job or not.
    */
+  exitCode?: number
   payload?: Payload
 }> {
   if (script === 'info') {
@@ -114,6 +115,8 @@ async function runBinScript({
     : false
 
   if (userBinScript) {
+    let exitCode: number | undefined
+    let payload: Payload | undefined
     try {
       const module = await import(pathToFileURL(userBinScript.scriptPath).toString())
 
@@ -121,18 +124,21 @@ async function runBinScript({
         console.error(
           `Could not find "script" function export for script ${userBinScript.key} in ${userBinScript.scriptPath}`,
         )
+        exitCode = 1
       } else {
-        await module.script(config).catch((err: unknown) => {
+        ({ exitCode, payload } = await module.script(config).catch((err: unknown) => {
           console.log(`Script ${userBinScript.key} failed, details:`)
           console.error(err)
-        })
+          return { exitCode: 1 }
+        }) ?? {})
       }
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
       console.error(err)
+      exitCode = 1
     }
 
-    return {}
+    return { exitCode, payload }
   }
 
   if (script.startsWith('migrate')) {
