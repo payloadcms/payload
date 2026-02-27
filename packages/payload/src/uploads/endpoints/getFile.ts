@@ -6,6 +6,8 @@ import { status as httpStatus } from 'http-status'
 import path from 'path'
 
 import type { PayloadHandler } from '../../config/types.js'
+import type { Collection, PayloadRequest } from '../../index.js'
+import type { File } from '../types.js'
 
 import { APIError } from '../../errors/APIError.js'
 import { checkFileAccess } from '../../uploads/checkFileAccess.js'
@@ -15,11 +17,11 @@ import { parseRangeHeader } from '../../uploads/parseRangeHeader.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 
-export const getFileHandler: PayloadHandler = async (req) => {
-  const collection = getRequestCollection(req)
-
-  const filename = req.routeParams?.filename as string
-
+export const getFileResponse = async (
+  req: PayloadRequest,
+  collection: Collection,
+  filename: string,
+): Promise<Response> => {
   if (!collection.config.upload) {
     throw new APIError(
       `This collection is not an upload collection: ${collection.config.slug}`,
@@ -161,4 +163,27 @@ export const getFileHandler: PayloadHandler = async (req) => {
     }),
     status,
   })
+}
+
+export const getFile = async (
+  req: PayloadRequest,
+  collection: Collection,
+  filename: string,
+): Promise<File> => {
+  const res = await getFileResponse(req, collection, filename)
+  const buffer = Buffer.from(await res.arrayBuffer())
+
+  return {
+    name: filename,
+    data: buffer,
+    mimetype: res.headers.get('content-type') || undefined!,
+    size: Number(res.headers.get('content-length')) || 0,
+  }
+}
+
+export const getFileHandler: PayloadHandler = async (req) => {
+  const collection = getRequestCollection(req)
+  const filename = req.routeParams?.filename as string
+
+  return getFileResponse(req, collection, filename)
 }

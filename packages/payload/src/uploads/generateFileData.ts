@@ -14,6 +14,7 @@ import { isNumber } from '../utilities/isNumber.js'
 import { canResizeImage } from './canResizeImage.js'
 import { checkFileRestrictions } from './checkFileRestrictions.js'
 import { cropImage } from './cropImage.js'
+import { getFile } from './endpoints/getFile.js'
 import { getExternalFile } from './getExternalFile.js'
 import { getFileByPath } from './getFileByPath.js'
 import { getImageSize } from './getImageSize.js'
@@ -66,7 +67,7 @@ const shouldReupload = (
 }
 
 export const generateFileData = async <T>({
-  collection: { config: collectionConfig },
+  collection,
   data,
   isDuplicating,
   operation,
@@ -75,6 +76,8 @@ export const generateFileData = async <T>({
   req,
   throwOnMissingFile,
 }: Args<T>): Result<T> => {
+  const { config: collectionConfig } = collection
+
   if (!collectionConfig.upload) {
     return {
       data,
@@ -131,6 +134,8 @@ export const generateFileData = async <T>({
         const response = await getFileByPath(filePath)
         file = response
         overwriteExistingFiles = true
+      } else if (filename && operation === 'update') {
+        file = await getFile(req, collection, filename)
       } else if (filename && url) {
         // File is remote
         file = await getExternalFile({
