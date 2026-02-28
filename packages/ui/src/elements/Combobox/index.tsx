@@ -114,6 +114,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
               return (
                 <div
                   className={`${baseClass}__entry`}
+                  data-popup-prevent-close
                   key={`${entry.name}-${index}`}
                   onClick={handleClick}
                   onKeyDown={(e) => {
