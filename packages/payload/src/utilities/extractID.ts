@@ -5,5 +5,5 @@ export const extractID = <IDType extends number | string>(
     return objectOrID
   }
 
-  return objectOrID.id
+  return objectOrID?.id
 }
