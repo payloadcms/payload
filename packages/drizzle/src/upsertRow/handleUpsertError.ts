@@ -80,7 +80,7 @@ export const handleUpsertError = ({
       '_blockPath' in caughtError &&
       typeof caughtError._blockPath === 'string'
     ) {
-      path = `${caughtError._blockPath}${path}`
+      path = `${caughtError._blockPath}.${path}`
     }
 
     throw new ValidationError(
