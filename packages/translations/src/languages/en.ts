@@ -303,6 +303,9 @@ export const enTranslations = {
     document: 'Document',
     documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
+    documentModified: 'Document modified',
+    documentOutOfDate:
+      'This document was recently updated by another user. Your view is out of date.',
     documents: 'Documents',
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
@@ -368,6 +371,8 @@ export const enTranslations = {
     noOptions: 'No options',
     noResults:
       "No {{label}} found. Either no {{label}} exist yet or none match the filters you've specified above.",
+    noResultsDescription: "Either none exist or none match the filters you've specified above.",
+    noResultsFound: 'No Results.',
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
     noTrashResults: 'No {{label}} in trash.',
@@ -390,6 +395,7 @@ export const enTranslations = {
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',
+    reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',

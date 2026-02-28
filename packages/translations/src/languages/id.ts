@@ -303,6 +303,9 @@ export const idTranslations: DefaultTranslationsObject = {
     document: 'Dokumen',
     documentIsTrashed: '{{label}} ini ada di tempat sampah dan bersifat hanya-baca.',
     documentLocked: 'Dokumen terkunci',
+    documentModified: 'Dokumen dimodifikasi',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',
@@ -368,6 +371,9 @@ export const idTranslations: DefaultTranslationsObject = {
     noOptions: 'Tidak ada opsi',
     noResults:
       'Tidak ada {{label}} yang ditemukan. Entah belum ada {{label}} atau tidak ada yang cocok dengan filter yang Anda tentukan di atas.',
+    noResultsDescription:
+      'Baik tidak ada yang ada atau tidak ada yang cocok dengan filter yang telah Anda tentukan di atas.',
+    noResultsFound: 'Tidak Ada Hasil.',
     notFound: 'Tidak Ditemukan',
     nothingFound: 'Tidak ada yang ditemukan',
     noTrashResults: 'Tidak ada {{label}} di tempat sampah.',
@@ -390,6 +396,7 @@ export const idTranslations: DefaultTranslationsObject = {
     previous: 'Sebelumnya',
     reindex: 'Indeks Ulang',
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
+    reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
     rename: 'Ganti Nama',
     reset: 'Atur Ulang',

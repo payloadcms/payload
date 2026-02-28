@@ -302,6 +302,9 @@ export const svTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: '{{label}} har lagts i papperskorgen och är skrivskyddad.',
     documentLocked: 'Dokument låst',
+    documentModified: 'Dokument modifierat',
+    documentOutOfDate:
+      'Detta dokument har nyligen uppdaterats av en annan användare. Din vy är föråldrad.',
     documents: 'Dokument',
     duplicate: 'Duplicera',
     duplicateWithoutSaving: 'Duplicera utan att spara ändringar',
@@ -367,6 +370,9 @@ export const svTranslations: DefaultTranslationsObject = {
     noOptions: 'Inga alternativ',
     noResults:
       'Inga {{label}} hittades. Antingen finns inga {{label}} ännu eller så matchar inga filtren du har angett ovan.',
+    noResultsDescription:
+      'Antingen finns ingen eller ingen matchar de filter du har specificerat ovan.',
+    noResultsFound: 'Inga resultat.',
     notFound: 'Hittades inte',
     nothingFound: 'Inget hittades',
     noTrashResults: 'Inget {{label}} i papperskorgen.',
@@ -389,6 +395,7 @@ export const svTranslations: DefaultTranslationsObject = {
     previous: 'Föregående',
     reindex: 'Omindexera',
     reindexingAll: 'Omindexerar alla {{collections}}...',
+    reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
     rename: 'Byt namn',
     reset: 'Återställ',

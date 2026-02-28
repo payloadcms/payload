@@ -305,6 +305,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     document: 'Dokumentas',
     documentIsTrashed: 'Šis {{label}} yra ištrintas ir yra tik skaitymui.',
     documentLocked: 'Dokumentas užrakintas',
+    documentModified: 'Dokumentas modifikuotas',
+    documentOutOfDate:
+      'Šis dokumentas neseniai buvo atnaujintas kitos naudotojo. Jūsų vaizdas yra pasenusi.',
     documents: 'Dokumentai',
     duplicate: 'Dublikatas',
     duplicateWithoutSaving: 'Dubliuoti be įrašytų pakeitimų',
@@ -370,6 +373,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     noOptions: 'Jokių variantų',
     noResults:
       'Nerasta jokių {{label}}. Arba dar nėra sukurtų {{label}}, arba jie neatitinka nurodytų filtrų aukščiau.',
+    noResultsDescription: 'Arba jų nėra, arba jie neatitinka viršuje nurodytų filtrų.',
+    noResultsFound: 'Nėra rezultatų.',
     notFound: 'Nerasta',
     nothingFound: 'Nieko nerasta',
     noTrashResults: 'Nėra {{label}} šiukšliadėžėje.',
@@ -392,6 +397,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',
+    reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
     rename: 'Pervadinti',
     reset: 'Atstatyti',

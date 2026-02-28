@@ -301,6 +301,9 @@ export const viTranslations: DefaultTranslationsObject = {
     document: 'Tài liệu',
     documentIsTrashed: '{{label}} này đã bị xóa và chỉ có thể xem.',
     documentLocked: 'Tài liệu bị khóa',
+    documentModified: 'Tài liệu đã được sửa đổi',
+    documentOutOfDate:
+      'Tài liệu này đã được cập nhật gần đây bởi một người dùng khác. Chế độ xem của bạn đã lỗi thời.',
     documents: 'Tài liệu',
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
@@ -366,6 +369,9 @@ export const viTranslations: DefaultTranslationsObject = {
     noOptions: 'Không có lựa chọn',
     noResults:
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
+    noResultsDescription:
+      'Hoặc là không có hoặc không có gì phù hợp với các bộ lọc bạn đã chỉ định ở trên.',
+    noResultsFound: 'Không có kết quả.',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
     noTrashResults: 'Không có {{label}} trong thùng rác.',
@@ -388,6 +394,7 @@ export const viTranslations: DefaultTranslationsObject = {
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
+    reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
     rename: 'Đổi tên',
     reset: 'Đặt lại',

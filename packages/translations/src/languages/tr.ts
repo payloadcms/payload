@@ -305,6 +305,9 @@ export const trTranslations: DefaultTranslationsObject = {
     document: 'Belge',
     documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
     documentLocked: 'Belge kilitlendi',
+    documentModified: 'Belge değiştirildi',
+    documentOutOfDate:
+      'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
@@ -370,6 +373,9 @@ export const trTranslations: DefaultTranslationsObject = {
     noOptions: 'Seçenek yok',
     noResults:
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
+    noResultsDescription:
+      'Ya hiçbiri mevcut değil ya da belirttiğiniz filtrelerle eşleşen hiçbiri yok.',
+    noResultsFound: 'Sonuç Yok.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',
@@ -392,6 +398,7 @@ export const trTranslations: DefaultTranslationsObject = {
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
+    reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     reset: 'Sıfırla',

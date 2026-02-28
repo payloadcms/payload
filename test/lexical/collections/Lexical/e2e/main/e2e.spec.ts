@@ -20,14 +20,15 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-  throttleTest,
+  waitForFormReady,
 } from '../../../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
 import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalCustomCellSlug, lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -54,13 +55,12 @@ async function navigateToLexicalFields(
     await page.goto(url.list)
   }
 
-  const linkToDoc = page.locator('tbody tr:first-child a').first()
-  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-  const linkDocHref = await linkToDoc.getAttribute('href')
+  // Wait for table to be fully loaded
+  await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-  await linkToDoc.click()
-
-  await page.waitForURL(`**${linkDocHref}`)
+  // Navigate to first document
+  await goToFirstCell(page, serverURL)
+  await waitForFormReady(page)
 
   if (collectionSlug === 'lexical-fields') {
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second
@@ -607,10 +607,12 @@ describe('lexicalMain', () => {
     )
 
     // Click on button with class lexical-upload__upload-drawer-toggler
-    await newUploadNode
+    const drawerToggler = newUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()
-      .click()
+    await drawerToggler.waitFor({ state: 'visible' })
+    await drawerToggler.scrollIntoViewIfNeeded()
+    await drawerToggler.click()
 
     const uploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -649,10 +651,12 @@ describe('lexicalMain', () => {
     await reloadedUploadNode.click() // Focus the upload node
     await reloadedUploadNode.hover()
 
-    await reloadedUploadNode
+    const reloadedDrawerToggler = reloadedUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()
-      .click()
+    await reloadedDrawerToggler.waitFor({ state: 'visible' })
+    await reloadedDrawerToggler.scrollIntoViewIfNeeded()
+    await reloadedDrawerToggler.click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
       .first()
@@ -1409,7 +1413,14 @@ describe('lexicalMain', () => {
   // https://github.com/payloadcms/payload/issues/5146
   test('Preserve indent and text-align when converting Lexical <-> HTML', async () => {
     await page.goto('http://localhost:3000/admin/collections/rich-text-fields?limit=10')
-    await page.getByLabel('Create new Rich Text Field').click()
+
+    await expect(page.locator('tbody tr').first()).toBeVisible()
+
+    const createButton = page.getByLabel('Create new Rich Text Field')
+    await expect(createButton).toBeEnabled()
+    const href = await createButton.getAttribute('href')
+    await page.goto(`${serverURL}${href}`)
+    await waitForFormReady(page)
     await page.getByLabel('Title*').click()
     await page.getByLabel('Title*').fill('Indent and Text-align')
     await page.getByRole('paragraph').nth(1).click()
@@ -1438,8 +1449,12 @@ describe('lexicalMain', () => {
     // Previously, we had the issue that the lexical field values did not update when moving blocks, as the MOVE_ROW form action did not request
     // re-rendering of server components
     await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
-    await page.locator('.cell-id a').first().click()
-    await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+    // Wait for table to be fully loaded
+    await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+    await goToFirstCell(page, serverURL)
+    await waitForFormReady(page)
 
     await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('1')
     await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('1') // block name
@@ -1797,5 +1812,41 @@ describe('lexicalMain', () => {
     // TODO: It would be nice to add tests with lists and nested lists
     // before and after decoratorNodes and paragraphs. Tested manually,
     // but these are complex cases.
+  })
+
+  test('should render custom Cell component for richText fields in list view', async () => {
+    const doc = await payload.create({
+      collection: lexicalCustomCellSlug,
+      data: {
+        title: 'Test Custom Cell',
+        richTextField: {
+          root: {
+            children: [
+              {
+                children: [{ text: 'Hello', type: 'text', version: 1 }],
+                direction: null,
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+      },
+    })
+
+    const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)
+    await page.goto(url.list)
+
+    const customCells = page.locator('#custom-richtext-cell')
+    await expect(customCells.first()).toBeVisible()
+    // Both title (text) and richTextField (richText) should render the custom cell
+    await expect(customCells).toHaveCount(2)
   })
 })
