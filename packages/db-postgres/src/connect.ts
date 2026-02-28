@@ -33,7 +33,7 @@ const connectWithReconnect = async function ({
   if (!result) {
     return
   }
-  result.prependListener('error', (err) => {
+  result.prependListener('error', (err: any) => {
     try {
       if (err.code === 'ECONNRESET') {
         void connectWithReconnect({ adapter, pool, reconnect: true })
@@ -53,29 +53,60 @@ export const connect: Connect = async function connect(
   const { hotReload } = options
 
   try {
-    if (!this.pool) {
-      this.pool = new this.pg.Pool(this.poolOptions)
-      await connectWithReconnect({ adapter: this, pool: this.pool })
-    }
-
     const logger = this.logger || false
-    this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
 
-    if (this.readReplicaOptions) {
-      const readReplicas = this.readReplicaOptions.map((connectionString) => {
-        const options = {
-          ...this.poolOptions,
-          connectionString,
+    // @ts-expect-error
+    if (typeof Bun !== 'undefined') {
+      const { drizzle: drizzleBun } = await import('drizzle-orm/bun-sql')
+      // @ts-expect-error
+      const { SQL } = await import('bun')
+
+      if (!this.pool) {
+        if (this.poolOptions.connectionString) {
+          this.pool = new SQL(this.poolOptions.connectionString)
+        } else {
+          this.pool = new SQL({
+            ...this.poolOptions,
+            hostname: this.poolOptions.host,
+            username: this.poolOptions.user,
+          })
         }
-        const pool = new this.pg.Pool(options)
-        void connectWithReconnect({
-          adapter: this,
-          pool,
+      }
+
+      this.drizzle = drizzleBun({ client: this.pool, logger, schema: this.schema })
+
+      if (this.readReplicaOptions) {
+        const readReplicas = this.readReplicaOptions.map((connectionString) => {
+          const pool = new SQL(connectionString)
+          return drizzleBun({ client: pool, logger, schema: this.schema })
         })
-        return drizzle({ client: pool, logger, schema: this.schema })
-      })
-      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
-      this.drizzle = myReplicas
+        const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+        this.drizzle = myReplicas
+      }
+    } else {
+      if (!this.pool) {
+        this.pool = new this.pg.Pool(this.poolOptions)
+        await connectWithReconnect({ adapter: this, pool: this.pool })
+      }
+
+      this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
+
+      if (this.readReplicaOptions) {
+        const readReplicas = this.readReplicaOptions.map((connectionString) => {
+          const options = {
+            ...this.poolOptions,
+            connectionString,
+          }
+          const pool = new this.pg.Pool(options)
+          void connectWithReconnect({
+            adapter: this,
+            pool,
+          })
+          return drizzle({ client: pool, logger, schema: this.schema })
+        })
+        const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+        this.drizzle = myReplicas
+      }
     }
 
     if (!hotReload) {

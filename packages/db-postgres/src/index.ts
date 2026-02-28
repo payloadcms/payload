@@ -124,7 +124,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       enums: {},
       extensions,
@@ -148,7 +147,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       operators: operatorMap,
       pg: args.pg || pgDependency,
       pgSchema: adapterSchema,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
