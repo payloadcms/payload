@@ -302,6 +302,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ova {{label}} je u smeću i dostupna je samo za čitanje.',
     documentLocked: 'Dokument je zaključan',
+    documentModified: 'Dokument izmijenjen',
+    documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastario.',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
@@ -367,6 +369,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoje ili se nijedan ne podudara s filterima koje ste gore odredili.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u smeću.',
@@ -389,6 +394,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
+    reloadDocument: 'Ponovno učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovno postavi',

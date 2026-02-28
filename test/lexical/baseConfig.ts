@@ -14,6 +14,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
+import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
@@ -21,6 +22,11 @@ import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalListsFeature } from './collections/LexicalListsFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
+import {
+  BlockWithBlockRef,
+  LexicalNestedBlocks,
+  NestedBlock,
+} from './collections/LexicalNestedBlocks/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
 import { OnDemandForm } from './collections/OnDemandForm/index.js'
@@ -36,6 +42,7 @@ const dirname = path.dirname(filename)
 
 export const baseConfig: Partial<Config> = {
   // ...extend config here
+  blocks: [NestedBlock, BlockWithBlockRef],
   collections: [
     LexicalFullyFeatured,
     LexicalAutosave,
@@ -53,6 +60,7 @@ export const baseConfig: Partial<Config> = {
     LexicalInBlock,
     LexicalAccessControl,
     LexicalRelationshipsFields,
+    LexicalNestedBlocks,
     RichTextFields,
     TextFields,
     Uploads,
@@ -60,6 +68,7 @@ export const baseConfig: Partial<Config> = {
     ArrayFields,
     OnDemandForm,
     OnDemandOutsideForm,
+    LexicalCustomCell,
   ],
   globals: [TabsWithRichText],
 

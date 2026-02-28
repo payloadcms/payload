@@ -303,6 +303,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ova {{label}} je odbačena i može se samo čitati.',
     documentLocked: 'Dokument je zaključan',
+    documentModified: 'Dokument izmenjen',
+    documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pregled je zastareo.',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Ponovi bez čuvanja promena',
@@ -368,6 +370,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nema pronađenih {{label}}. Moguće da {{label}} još uvek ne postoji ili nema rezultata u skladu sa postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoji nijedan ili nijedan ne odgovara filterima koje ste naveli iznad.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u otpadu.',
@@ -390,6 +395,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     previous: 'Prethodni',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
+    reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovo postavi',

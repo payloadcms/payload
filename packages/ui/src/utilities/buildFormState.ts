@@ -18,11 +18,17 @@ import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 import { handleLivePreview } from './handleLivePreview.js'
 import { handlePreview } from './handlePreview.js'
+import { handleStaleDataCheck } from './handleStaleDataCheck.js'
 
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
   user?: ClientUser | number | string
+}
+
+export type StaleDataState = {
+  currentUpdatedAt: string
+  isStale: boolean
 }
 
 type BuildFormStateSuccessResult = {
@@ -32,6 +38,7 @@ type BuildFormStateSuccessResult = {
   livePreviewURL?: string
   lockedState?: LockedState
   previewURL?: string
+  staleDataState?: StaleDataState
   state: FormState
 }
 
@@ -39,6 +46,7 @@ type BuildFormStateErrorResult = {
   livePreviewURL?: never
   lockedState?: never
   previewURL?: never
+  staleDataState?: never
   state?: never
 } & (
   | {
@@ -82,6 +90,7 @@ export const buildFormState = async (
 ): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
+    checkForStaleData,
     collectionSlug,
     data: incomingData,
     docPermissions,
@@ -93,6 +102,7 @@ export const buildFormState = async (
     initialBlockFormState,
     mockRSCs,
     operation,
+    originalUpdatedAt,
     readOnly,
     renderAllFields,
     req,
@@ -104,7 +114,8 @@ export const buildFormState = async (
     returnLivePreviewURL,
     returnLockStatus,
     returnPreviewURL,
-    schemaPath = collectionSlug || globalSlug,
+    widgetSlug,
+    schemaPath = collectionSlug || globalSlug || widgetSlug,
     select,
     skipClientConfigAuth,
     skipValidation,
@@ -113,8 +124,8 @@ export const buildFormState = async (
 
   const selectMode = select ? getSelectMode(select) : undefined
 
-  if (!collectionSlug && !globalSlug) {
-    throw new Error('Either collectionSlug or globalSlug must be provided')
+  if (!collectionSlug && !globalSlug && !widgetSlug) {
+    throw new Error('Either collectionSlug, globalSlug, or widgetSlug must be provided')
   }
 
   const schemaMap = getSchemaMap({
@@ -122,6 +133,7 @@ export const buildFormState = async (
     config,
     globalSlug,
     i18n,
+    widgetSlug,
   })
 
   const clientSchemaMap = getClientSchemaMap({
@@ -136,6 +148,7 @@ export const buildFormState = async (
     i18n,
     payload,
     schemaMap,
+    widgetSlug,
   })
 
   const id = collectionSlug ? idFromArgs : undefined
@@ -225,7 +238,7 @@ export const buildFormState = async (
     }
   }
 
-  let lockedStateResult
+  let lockedStateResult: LockedState | undefined
 
   if (returnLockStatus) {
     lockedStateResult = await handleFormStateLocking({
@@ -237,8 +250,21 @@ export const buildFormState = async (
     })
   }
 
+  let staleDataStateResult: StaleDataState | undefined
+
+  if (checkForStaleData && originalUpdatedAt && ((collectionSlug && id) || globalSlug)) {
+    staleDataStateResult = await handleStaleDataCheck({
+      id,
+      collectionSlug,
+      globalSlug,
+      originalUpdatedAt,
+      req,
+    })
+  }
+
   const res: BuildFormStateSuccessResult = {
     lockedState: lockedStateResult,
+    staleDataState: staleDataStateResult,
     state: formStateResult,
   }
 

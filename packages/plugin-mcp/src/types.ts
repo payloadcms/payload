@@ -343,16 +343,25 @@ export type MCPHandlerOptions = {
    */
   basePath?: string
   /**
+   * If true, disables the SSE endpoint. Only Streamable HTTP will be available.
+   * @default true
+   */
+  disableSse?: boolean
+  /**
    * Set the maximum duration of the MCP handler. This is the maximum duration that the MCP handler will run for.
    * @default 60
    */
   maxDuration?: number
   /**
+   * Callback function that receives MCP events.
+   * This can be used to track analytics, debug issues, or implement custom behaviors.
+   */
+  onEvent?: (event: unknown) => void
+  /**
    * Set the Redis URL for the MCP handler. This is the URL that will be used to access the Redis server.
    * @default process.env.REDIS_URL
-   * INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
    */
-  // redisUrl?: string
+  redisUrl?: string
   /**
    * Set verbose logging.
    * @default false

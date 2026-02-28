@@ -295,6 +295,8 @@ export const faTranslations: DefaultTranslationsObject = {
     document: 'صفحه',
     documentIsTrashed: 'این {{label}} به سطل زباله منتقل شده و فقط قابل خواندن است.',
     documentLocked: 'این صفحه قفل است',
+    documentModified: 'سند تغییر یافته',
+    documentOutOfDate: 'این سند اخیراً توسط کاربر دیگری به روز شده است. نمایش شما به روز نیست.',
     documents: 'اسناد',
     duplicate: 'ایجاد کپی',
     duplicateWithoutSaving: 'ایجاد کپی بدون ذخیره تغییرات',
@@ -359,6 +361,9 @@ export const faTranslations: DefaultTranslationsObject = {
     noOptions: 'گزینه‌ای وجود ندارد',
     noResults:
       'هیچ موردی برای "{{label}}" یافت نشد. یا موردی ایجاد نشده یا با فیلترهای شما مطابقت ندارد.',
+    noResultsDescription:
+      'هیچ کدام وجود ندارند یا هیچ کدام با فیلترهایی که در بالا مشخص کرده اید مطابقت ندارند.',
+    noResultsFound: 'نتیجه‌ای یافت نشد.',
     notFound: 'یافت نشد',
     nothingFound: 'موردی یافت نشد',
     noTrashResults: 'هیچ {{label}} در سطل زباله وجود ندارد.',
@@ -381,6 +386,7 @@ export const faTranslations: DefaultTranslationsObject = {
     previous: 'قبلی',
     reindex: 'ایندکس مجدد',
     reindexingAll: 'در حال ایندکس مجدد همه {{collections}}...',
+    reloadDocument: 'بارگذاری مجدد سند',
     remove: 'حذف',
     rename: 'تغییر نام',
     reset: 'بازنشانی',

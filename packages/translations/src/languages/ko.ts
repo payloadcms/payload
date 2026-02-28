@@ -299,6 +299,9 @@ export const koTranslations: DefaultTranslationsObject = {
     document: '문서',
     documentIsTrashed: '이 {{label}}은 휴지통에 있으며 읽기 전용입니다.',
     documentLocked: '문서가 잠겼습니다',
+    documentModified: '문서가 수정되었습니다',
+    documentOutOfDate:
+      '이 문서는 최근에 다른 사용자에 의해 업데이트되었습니다. 귀하의 보기는 낡았습니다.',
     documents: '문서들',
     duplicate: '복제',
     duplicateWithoutSaving: '변경 사항 저장 없이 복제',
@@ -364,6 +367,8 @@ export const koTranslations: DefaultTranslationsObject = {
     noOptions: '옵션 없음',
     noResults:
       '{{label}}를 찾을 수 없습니다. 아직 {{label}}이 없거나 설정한 필터와 일치하는 것이 없습니다.',
+    noResultsDescription: '존재하지 않거나 지정한 필터와 일치하는 것이 없습니다.',
+    noResultsFound: '결과 없음.',
     notFound: '찾을 수 없음',
     nothingFound: '찾을 수 없습니다',
     noTrashResults: '휴지통에 {{label}}이 없습니다.',
@@ -387,6 +392,7 @@ export const koTranslations: DefaultTranslationsObject = {
     previous: '이전',
     reindex: '재인덱싱',
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',
+    reloadDocument: '문서 다시 불러오기',
     remove: '제거',
     rename: '이름 변경',
     reset: '초기화',

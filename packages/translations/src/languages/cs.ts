@@ -300,6 +300,9 @@ export const csTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Tento {{label}} je v koši a je pouze pro čtení.',
     documentLocked: 'Dokument je uzamčen',
+    documentModified: 'Dokument upraven',
+    documentOutOfDate:
+      'Tento dokument byl nedávno aktualizován jiným uživatelem. Váš pohled je zastaralý.',
     documents: 'Dokumenty',
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',
@@ -365,6 +368,9 @@ export const csTranslations: DefaultTranslationsObject = {
     noOptions: 'Žádné možnosti',
     noResults:
       'Nebyly nalezeny žádné {{label}}. Buď ještě neexistují žádné {{label}}, nebo žádné nesplňují filtry, které jste zadali výše.',
+    noResultsDescription:
+      'Buď žádné neexistují, nebo žádné neodpovídají filtrům, které jste výše specifikovali.',
+    noResultsFound: 'Žádné výsledky.',
     notFound: 'Nenalezeno',
     nothingFound: 'Nic nenalezeno',
     noTrashResults: 'Žádný {{label}} v koši.',
@@ -387,6 +393,7 @@ export const csTranslations: DefaultTranslationsObject = {
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',
+    reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
     rename: 'Přejmenovat',
     reset: 'Resetovat',

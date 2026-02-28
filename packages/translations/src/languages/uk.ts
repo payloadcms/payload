@@ -301,6 +301,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Цей {{label}} видалено та доступний лише для читання.',
     documentLocked: 'Документ заблоковано',
+    documentModified: 'Документ змінено',
+    documentOutOfDate: 'Цей документ нещодавно оновив інший користувач. Ваш перегляд застарів.',
     documents: 'Документи',
     duplicate: 'Дублювати',
     duplicateWithoutSaving: 'Дублювання без збереження змін',
@@ -366,6 +368,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     noOptions: 'Немає варіантів',
     noResults:
       'Жодного {{label}} не знайдено. Або {{label}} ще не існує, або жоден з них не відповідає фільтрам, що ви задали више.',
+    noResultsDescription:
+      'Або жодних не існує, або жодні не відповідають фільтрам, які ви вказали вище.',
+    noResultsFound: 'Результатів не знайдено.',
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
     noTrashResults: 'Немає {{label}} у смітнику.',
@@ -388,6 +393,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     previous: 'Попередній',
     reindex: 'Повторне індексування',
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',
+    reloadDocument: 'Перезавантажити документ',
     remove: 'Видалити',
     rename: 'Перейменувати',
     reset: 'Скидання',

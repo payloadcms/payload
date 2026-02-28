@@ -307,6 +307,9 @@ export const roTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Acest {{label}} este la gunoi și poate fi doar citit.',
     documentLocked: 'Document blocat',
+    documentModified: 'Document modificat',
+    documentOutOfDate:
+      'Acest document a fost actualizat recent de un alt utilizator. Vizualizarea dvs. este depășită.',
     documents: 'Documente',
     duplicate: 'Duplicați',
     duplicateWithoutSaving: 'Duplicați fără salvarea modificărilor',
@@ -372,6 +375,9 @@ export const roTranslations: DefaultTranslationsObject = {
     noOptions: 'Fără opțiuni',
     noResults:
       'Nici un {{label}} găsit. Fie nu există încă niciun {{label}}, fie niciunul nu se potrivește cu filtrele pe care le-ați specificat mai sus..',
+    noResultsDescription:
+      'Fie că nu există, fie că niciunul nu se potrivește cu filtrele pe care le-ați specificat mai sus.',
+    noResultsFound: 'Fără rezultate.',
     notFound: 'Nu a fost găsit',
     nothingFound: 'Nimic găsit',
     noTrashResults: 'Niciun {{label}} în coșul de gunoi.',
@@ -394,6 +400,7 @@ export const roTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexare',
     reindexingAll: 'Reindexarea tuturor {{collections}}.',
+    reloadDocument: 'Reîncarcă documentul',
     remove: 'Eliminați',
     rename: 'Redenumire',
     reset: 'Resetare',

@@ -304,6 +304,9 @@ export const azTranslations: DefaultTranslationsObject = {
     document: 'Sənəd',
     documentIsTrashed: 'Bu {{label}} zibil qutusuna atılıb və yalnız oxuna bilər.',
     documentLocked: 'Sənəd kilidləndi',
+    documentModified: 'Sənəd dəyişdirildi',
+    documentOutOfDate:
+      'Bu sənəd yeni başqa bir istifadəçi tərəfindən yenilənib. Sizin baxışınız köhnədir.',
     documents: 'Sənədlər',
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
@@ -369,6 +372,9 @@ export const azTranslations: DefaultTranslationsObject = {
     noOptions: 'Heç bir seçim yoxdur',
     noResults:
       'Heç bir {{label}} tapılmadı. Ya hələ {{label}} yoxdur, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsDescription:
+      'Ya heç biri mövcud deyil, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsFound: 'Nəticə yoxdur.',
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
@@ -391,6 +397,7 @@ export const azTranslations: DefaultTranslationsObject = {
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
+    reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
     rename: 'Yenidən adlandırın',
     reset: 'Yenidən başlat',

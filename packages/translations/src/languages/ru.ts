@@ -304,6 +304,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Этот {{label}} находится в корзине и доступен только для чтения.',
     documentLocked: 'Документ заблокирован',
+    documentModified: 'Документ изменен',
+    documentOutOfDate:
+      'Этот документ недавно был обновлен другим пользователем. Ваш просмотр устарел.',
     documents: 'Документы',
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',
@@ -369,6 +372,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     noOptions: 'Нет вариантов',
     noResults:
       'Ничего не найдено. Возможно, {{label}} еще не существует или не соответствует указанным фильтрам.',
+    noResultsDescription:
+      'Либо они не существуют, либо не соответствуют указанным вами фильтрам выше.',
+    noResultsFound: 'Результатов не найдено.',
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noTrashResults: 'Нет {{label}} в корзине.',
@@ -391,6 +397,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',
+    reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
     rename: 'Переименовать',
     reset: 'Сброс',
