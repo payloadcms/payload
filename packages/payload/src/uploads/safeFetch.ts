@@ -89,22 +89,15 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
     })
   } catch (error) {
     if (error instanceof Error) {
-      if (error.cause instanceof Error && error.cause.message.includes('unsafe')) {
-        // Errors thrown from within interceptors always have 'fetch error' as the message
-        // The desired message we want to bubble up is in the cause
-        throw new Error(error.cause.message)
-      } else {
-        let stringifiedUrl: string | undefined = undefined
-        if (typeof unverifiedUrl === 'string') {
-          stringifiedUrl = unverifiedUrl
-        } else if (unverifiedUrl instanceof URL) {
-          stringifiedUrl = unverifiedUrl.toString()
-        } else if (unverifiedUrl instanceof Request) {
-          stringifiedUrl = unverifiedUrl.url
-        }
-
-        throw new Error(`Failed to fetch from ${stringifiedUrl}, ${error.message}`)
+      let stringifiedUrl: string | undefined = undefined
+      if (typeof unverifiedUrl === 'string') {
+        stringifiedUrl = unverifiedUrl
+      } else if (unverifiedUrl instanceof URL) {
+        stringifiedUrl = unverifiedUrl.toString()
+      } else if (unverifiedUrl instanceof Request) {
+        stringifiedUrl = unverifiedUrl.url
       }
+      error.message += ` (safeFetch: ${stringifiedUrl})`
     }
     throw error
   }
