@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { createFolderField } from 'payload'
+
 import { postSlug } from '../../shared.js'
 
 export const Posts: CollectionConfig = {
@@ -7,11 +9,11 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
-  folders: true,
   fields: [
     {
       name: 'title',
       type: 'text',
     },
+    createFolderField({ relationTo: 'folders' }),
   ],
 }

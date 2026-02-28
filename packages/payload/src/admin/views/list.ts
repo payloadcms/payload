@@ -4,11 +4,28 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
+import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
+import type { RelatedDocumentsGrouped } from './hierarchyList.js'
+
+export type HierarchyViewData = {
+  /** Breadcrumb trail to the current parent */
+  breadcrumbs: Array<{ id: number | string; title: string }>
+  /** Children of the current parent (same collection) */
+  childrenData: PaginatedDocs
+  /** The parent field name for building queries */
+  parentFieldName: string
+  /** The parent ID being viewed */
+  parentId: null | number | string
+  /** Related documents grouped by collection */
+  relatedDocumentsByCollection: RelatedDocumentsGrouped
+  /** The selected parent item (for display) */
+  selectedItem: null | Record<string, unknown>
+}
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -47,6 +64,14 @@ export type ListViewClientProps = {
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
   hasTrashPermission?: boolean
+  /**
+   * Hierarchy view data - present when viewing a hierarchy collection with a parent selected
+   */
+  hierarchyData?: HierarchyViewData
+  /**
+   * Resolved icon component for hierarchy collections
+   */
+  HierarchyIcon?: React.ReactNode
   /**
    * @deprecated
    */

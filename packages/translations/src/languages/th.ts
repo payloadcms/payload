@@ -186,32 +186,6 @@ export const thTranslations: DefaultTranslationsObject = {
     toggleBlock: 'เปิด/ปิด Block',
     uploadNewLabel: 'อัปโหลด {{label}} ใหม่',
   },
-  folder: {
-    browseByFolder: 'เรียกดูตามโฟลเดอร์',
-    byFolder: 'ตามโฟลเดอร์',
-    deleteFolder: 'ลบโฟลเดอร์',
-    folderName: 'ชื่อโฟลเดอร์',
-    folders: 'โฟลเดอร์',
-    folderTypeDescription: 'เลือกประเภทของเอกสารคอลเลกชันที่ควรอนุญาตในโฟลเดอร์นี้',
-    itemHasBeenMoved: '{{title}} ได้ถูกย้ายไปที่ {{folderName}}',
-    itemHasBeenMovedToRoot: '"{{title}}" ได้ถูกย้ายไปยังโฟลเดอร์ราก',
-    itemsMovedToFolder: '{{title}} ถูกย้ายไปยัง {{folderName}}',
-    itemsMovedToRoot: '{{title}} ถูกย้ายไปยังโฟลเดอร์ราก',
-    moveFolder: 'ย้ายโฟลเดอร์',
-    moveItemsToFolderConfirmation:
-      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยัง <2>{{toFolder}}</2> แน่ใจไหม?',
-    moveItemsToRootConfirmation:
-      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังโฟลเดอร์ราก คุณแน่ใจหรือไม่?',
-    moveItemToFolderConfirmation:
-      'คุณกำลังจะย้าย <1>{{title}}</1> ไปยัง <2>{{toFolder}}</2> คุณแน่ใจหรือไม่?',
-    moveItemToRootConfirmation: 'คุณกำลังจะย้าย <1>{{title}}</1> ไปยังโฟลเดอร์ราก คุณแน่ใจหรือไม่?',
-    movingFromFolder: 'ย้าย {{title}} จาก {{fromFolder}}',
-    newFolder: 'โฟลเดอร์ใหม่',
-    noFolder: 'ไม่มีโฟลเดอร์',
-    renameFolder: 'เปลี่ยนชื่อโฟลเดอร์',
-    searchByNameInFolder: 'ค้นหาด้วยชื่อใน {{folderName}}',
-    selectFolderForItem: 'เลือกโฟลเดอร์สำหรับ {{title}}',
-  },
   general: {
     name: 'ชื่อ',
     aboutToDelete: 'คุณกำลังจะลบ {{label}} <1>{{title}}</1> ต้องการดำเนินการต่อหรือไม่?',
@@ -247,6 +221,7 @@ export const thTranslations: DefaultTranslationsObject = {
     clearAll: 'ล้างทั้งหมด',
     close: 'ปิด',
     collapse: 'ยุบ',
+    collection: 'คอลเลกชัน',
     collections: 'Collections',
     columns: 'คอลัมน์',
     columnToSort: 'คอลัมน์ที่ต้องการเรียง',
@@ -456,6 +431,16 @@ export const thTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'ดูในโหมดอ่านอย่างเดียว',
     welcome: 'ยินดีต้อนรับ',
     yes: 'ใช่',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} ย้ายไปที่ {{destination}}',
+    itemsMovedToRoot: '{{title}} ถูกย้ายไปยังราก',
+    moveItemsToRootConfirmation:
+      'คุณกำลังจะย้าย <1>{{count}} {{label}}</1> ไปยังรูท คุณแน่ใจหรือไม่?',
+    moveToRoot: 'ย้ายไปที่ราก',
+    noParent: 'ไม่มีผู้ปกครอง',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'ค้นหา {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'ไม่สามารถคัดลอกไปยังตำแหน่งที่ตั้งเดียวกัน',

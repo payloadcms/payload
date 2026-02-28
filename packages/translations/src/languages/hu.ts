@@ -191,34 +191,6 @@ export const huTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blokk kinyitása',
     uploadNewLabel: 'Új {{label}} feltöltése',
   },
-  folder: {
-    browseByFolder: 'Mappa szerint böngészés',
-    byFolder: 'Mappánként',
-    deleteFolder: 'Mappa törlése',
-    folderName: 'Mappa neve',
-    folders: 'Mappák',
-    folderTypeDescription:
-      'Válassza ki, hogy milyen típusú dokumentumokat engedélyez ebben a mappában.',
-    itemHasBeenMoved: '{{title}} át lett helyezve a {{folderName}} nevű mappába.',
-    itemHasBeenMovedToRoot: 'A(z) {{title}} át lett helyezve a gyökérmappába.',
-    itemsMovedToFolder: '{{title}} áthelyezve a(z) {{folderName}} mappába',
-    itemsMovedToRoot: 'A {{title}} átkerült a gyökérmappába',
-    moveFolder: 'Mappa áthelyezése',
-    moveItemsToFolderConfirmation:
-      'Ön <1>{{count}} {{label}}</1>-t készül áthelyezni a <2>{{toFolder}}</2> mappába. Biztos benne?',
-    moveItemsToRootConfirmation:
-      'Ön éppen azért készül, hogy <1>{{count}} {{label}}</1>-t a gyökérmappába helyezzen át. Biztos benne?',
-    moveItemToFolderConfirmation:
-      'Ön készül áthelyezni <1>{{title}}</1>-t <2>{{toFolder}}</2>-be. Biztos benne?',
-    moveItemToRootConfirmation:
-      'Arra készül, hogy a <1>{{title}}</1> elemet a gyökérmappába helyezi. Biztos benne?',
-    movingFromFolder: '{{title}} áthelyezése a(z) {{fromFolder}} mappából',
-    newFolder: 'Új Mappa',
-    noFolder: 'Nincs mappa',
-    renameFolder: 'Mappa átnevezése',
-    searchByNameInFolder: 'Keresés név alapján a(z) {{folderName}} mappában',
-    selectFolderForItem: 'Válassz mappát a {{title}} számára',
-  },
   general: {
     name: 'Név',
     aboutToDelete: 'A {{label}} <1>{{title}}</1> törlésére készül. Biztos benne?',
@@ -258,6 +230,7 @@ export const huTranslations: DefaultTranslationsObject = {
     clearAll: 'Törölj mindent',
     close: 'Bezárás',
     collapse: 'Összecsukás',
+    collection: 'Gyűjtemény',
     collections: 'Gyűjtemények',
     columns: 'Oszlopok',
     columnToSort: 'Rendezendő oszlop',
@@ -469,6 +442,16 @@ export const huTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Csak olvasható nézet',
     welcome: 'Üdvözöljük',
     yes: 'Igen',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} átkerült ide: {{destination}}',
+    itemsMovedToRoot: '{{title}} áthelyezve a gyökérbe',
+    moveItemsToRootConfirmation:
+      'Ön éppen <1>{{count}} {{label}}</1> áthelyezésére készül a gyökérhez. Biztos benne?',
+    moveToRoot: 'Áthelyezés a gyökérhez',
+    noParent: 'Nincs Szülő',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Keresés {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nem lehet ugyanarra a helyre másolni',

@@ -191,34 +191,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blok togglen',
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
-  folder: {
-    browseByFolder: 'Bladeren op Map',
-    byFolder: 'Op Map',
-    deleteFolder: 'Verwijder map',
-    folderName: 'Mapnaam',
-    folders: 'Mappen',
-    folderTypeDescription:
-      'Selecteer welk type verzameldocumenten toegestaan zou moeten zijn in deze map.',
-    itemHasBeenMoved: '{{title}} is verplaatst naar {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} is verplaatst naar de hoofdmap',
-    itemsMovedToFolder: '{{title}} verplaatst naar {{folderName}}',
-    itemsMovedToRoot: '{{title}} verplaatst naar de hoofdmap',
-    moveFolder: 'Verplaats Map',
-    moveItemsToFolderConfirmation:
-      'U staat op het punt om <1>{{count}} {{label}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
-    moveItemsToRootConfirmation:
-      'U staat op het punt om <1>{{count}} {{label}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
-    moveItemToFolderConfirmation:
-      'U staat op het punt om <1>{{title}}</1> te verplaatsen naar <2>{{toFolder}}</2>. Weet u het zeker?',
-    moveItemToRootConfirmation:
-      'U staat op het punt om <1>{{title}}</1> naar de hoofdmap te verplaatsen. Weet u het zeker?',
-    movingFromFolder: 'Verplaatsen van {{title}} uit {{fromFolder}}',
-    newFolder: 'Nieuwe Map',
-    noFolder: 'Geen Map',
-    renameFolder: 'Hernoem Map',
-    searchByNameInFolder: 'Zoeken op naam in {{folderName}}',
-    selectFolderForItem: 'Selecteer map voor {{title}}',
-  },
   general: {
     name: 'Naam',
     aboutToDelete:
@@ -261,6 +233,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     clearAll: 'Alles wissen',
     close: 'Sluiten',
     collapse: 'Samenvouwen',
+    collection: 'Collectie',
     collections: 'Collecties',
     columns: 'Kolommen',
     columnToSort: 'Kolom om te sorteren',
@@ -473,6 +446,16 @@ export const nlTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Alleen-lezen weergave',
     welcome: 'Welkom',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} verplaatst naar {{destination}}',
+    itemsMovedToRoot: '{{title}} verplaatst naar root',
+    moveItemsToRootConfirmation:
+      'U staat op het punt om <1>{{count}} {{label}}</1> naar de root te verplaatsen. Weet u het zeker?',
+    moveToRoot: 'Verplaats naar Root',
+    noParent: 'Geen Ouder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Zoek {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan niet naar dezelfde taal kopiëren',

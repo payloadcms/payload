@@ -1,11 +1,11 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { createFolderField, createFoldersCollection } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
-import { FolderPoly1 } from './collections/FolderPoly1.js'
-import { FolderPoly2 } from './collections/FolderPoly2.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
 import { SelfJoins } from './collections/SelfJoins.js'
@@ -22,6 +22,8 @@ import {
   restrictedCategoriesSlug,
   restrictedPostsSlug,
 } from './shared.js'
+
+const joinsTestFoldersSlug = 'joins-test-folders'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -277,38 +279,31 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    {
-      slug: 'folders',
+    createFoldersCollection({
+      slug: joinsTestFoldersSlug,
+      useAsTitle: 'name',
+      admin: {
+        group: 'Joins Test',
+      },
+      hierarchy: {
+        admin: {
+          enableSidebarTab: false,
+        },
+        collectionSpecific: { fieldName: 'folderType' },
+        joinField: { fieldName: 'documentsAndFolders' },
+      },
       fields: [
         {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
-        {
-          name: 'title',
+          name: 'name',
           type: 'text',
         },
-        {
-          type: 'join',
-          name: 'children',
-          collection: ['folders', 'example-pages', 'example-posts'],
-          on: 'folder',
-          admin: {
-            defaultColumns: ['title', 'name', 'description'],
-          },
-        },
       ],
-    },
+    }),
     {
       slug: 'example-pages',
       admin: { useAsTitle: 'title' },
       fields: [
-        {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
+        createFolderField({ relationTo: joinsTestFoldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -323,11 +318,7 @@ export default buildConfigWithDefaults({
       slug: 'example-posts',
       admin: { useAsTitle: 'title' },
       fields: [
-        {
-          type: 'relationship',
-          relationTo: 'folders',
-          name: 'folder',
-        },
+        createFolderField({ relationTo: joinsTestFoldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -338,8 +329,26 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    FolderPoly1,
-    FolderPoly2,
+    {
+      slug: 'folderPoly1',
+      fields: [
+        {
+          name: 'folderPoly1Title',
+          type: 'text',
+        },
+        createFolderField({ relationTo: joinsTestFoldersSlug }),
+      ],
+    },
+    {
+      slug: 'folderPoly2',
+      fields: [
+        {
+          name: 'folderPoly2Title',
+          type: 'text',
+        },
+        createFolderField({ relationTo: joinsTestFoldersSlug }),
+      ],
+    },
   ],
   localization: {
     locales: [

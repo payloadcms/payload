@@ -125,6 +125,27 @@
         --hover-color: var(--color);
       }
     }
+
+    &--style-muted-text {
+      padding: 0;
+      --color: var(--theme-elevation-500);
+      --bg-color: transparent;
+      --hover-color: var(--theme-elevation-700);
+      --hover-bg: transparent;
+      --margin-block: 0;
+
+      &:hover,
+      &:focus-visible,
+      &:focus,
+      &:active {
+        text-decoration: underline;
+      }
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-300);
+        --hover-color: var(--color);
+      }
+    }
   }
 
   .popup--active .btn {
@@ -178,6 +199,13 @@
       color: var(--hover-color);
       background-color: var(--hover-bg);
       border: var(--hover-btn-border, var(--btn-border, 1px solid transparent));
+
+      .btn__icon .stroke {
+        stroke: var(--hover-color, currentColor);
+      }
+      .btn__icon .fill {
+        fill: var(--hover-color, currentColor);
+      }
     }
   }
 
@@ -212,7 +240,7 @@
     transition: border, color, background, var(--btn-base-transition);
     padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
       var(--btn-padding-block-end) var(--btn-padding-inline-start);
-    color: var(--color, inherit);
+    color: var(--color, currentColor);
     background-color: var(--bg-color, transparent);
 
     &__icon {
@@ -222,10 +250,12 @@
       .stroke {
         stroke: var(--color, currentColor);
         fill: none;
+        transition: stroke var(--btn-base-transition);
       }
 
       .fill {
         fill: var(--color, currentColor);
+        transition: fill var(--btn-base-transition);
       }
     }
 
@@ -244,8 +274,7 @@
       border: 1px solid var(--btn-icon-border-color);
       border-radius: 100%;
       padding: var(--btn-icon-padding);
-      color: inherit;
-
+      color: currentColor;
       svg {
         width: 100%;
         height: 100%;
@@ -282,7 +311,7 @@
     }
 
     &--size-small {
-      --btn-icon-size: calc(var(--base) * 0.9);
+      --btn-icon-size: var(--base);
       // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: 0;
@@ -304,7 +333,7 @@
     }
 
     &--size-xsmall {
-      --btn-icon-size: calc(var(--base) * 0.8);
+      --btn-icon-size: var(--base);
       // --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: 0;

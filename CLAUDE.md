@@ -62,6 +62,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
 - Commenting Guidelines
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
@@ -232,3 +233,61 @@ Examples:
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
 - pnpm version: ^10.27.0
+
+## Admin Panel
+
+The admin panel is made up of both client and server react components.
+
+### Patterns
+
+ALWAYS use `formatAdminURL` when formatting api and admin routes.
+
+**Building API URLs with query parameters:** Use `qs-esm` to build query strings with proper object syntax instead of manual string concatenation.
+
+Incorrect:
+
+```typescript
+const whereClause = parentId
+  ? `where[${parentFieldName}][equals]=${parentId}`
+  : `where[or][0][${parentFieldName}][exists]=false&where[or][1][${parentFieldName}][equals]=`
+
+const url = `${serverURL}${api}/${collectionSlug}?${whereClause}&limit=${limit}&page=${page}`
+```
+
+Correct:
+
+```typescript
+import { formatAdminURL } from 'payload/shared'
+import * as qs from 'qs-esm'
+
+const where = parentId
+  ? { [parentFieldName]: { equals: parentId } }
+  : {
+      or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
+    }
+
+const queryString = qs.stringify({ limit, page, where }, { addQueryPrefix: true })
+const url = formatAdminURL({ apiRoute: api, path: `/${collectionSlug}${queryString}`, serverURL })
+```
+
+**Building server functions, views, or endpoints:** Always use `overrideAccess: false` and pass the `user` to payload operations. Without these, the operation runs with access control disabled, which is a security vulnerability.
+
+Incorrect:
+
+```typescript
+// INSECURE - runs with full access, bypassing all access control
+const docs = await payload.find({
+  collection: 'posts',
+})
+```
+
+Correct:
+
+```typescript
+// SECURE - respects access control for the current user
+const docs = await payload.find({
+  collection: 'posts',
+  overrideAccess: false,
+  user,
+})
+```

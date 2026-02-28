@@ -1,7 +1,8 @@
 export { FieldDiffContainer } from '../../elements/FieldDiffContainer/index.js'
 export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
-export { FolderTableCell } from '../../elements/FolderView/Cell/index.server.js'
-export { FolderField } from '../../elements/FolderView/FolderField/index.server.js'
+export { HierarchyButton } from '../../elements/HierarchyButton/index.server.js'
+export { HierarchyField } from '../../elements/HierarchyField/index.server.js'
+export { HierarchySidebarTabServer } from '../../elements/HierarchyTree/HierarchySidebarTab.server.js'
 export {
   escapeDiffHTML,
   getHTMLDiffComponents,
@@ -12,7 +13,6 @@ export { File } from '../../graphics/File/index.js'
 export { CheckIcon } from '../../icons/Check/index.js'
 export { copyDataFromLocaleHandler } from '../../utilities/copyDataFromLocale.js'
 export { getColumns } from '../../utilities/getColumns.js'
-export { getFolderResultsComponentAndData } from '../../utilities/getFolderResultsComponentAndData.js'
 export { handleLivePreview } from '../../utilities/handleLivePreview.js'
 export { handlePreview } from '../../utilities/handlePreview.js'
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'

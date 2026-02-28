@@ -1864,7 +1864,7 @@ describe('Collections - Uploads', () => {
     })
 
     it('should not allow infinite redirect loops', async () => {
-      let redirectServerPort: number
+      let redirectServerPort: number = 3000
 
       const redirectServer = createServer((req, res) => {
         res.writeHead(302, { Location: `http://127.0.0.1:${redirectServerPort}/loop` })

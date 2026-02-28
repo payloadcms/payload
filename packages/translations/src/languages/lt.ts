@@ -191,34 +191,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Perjungti bloką',
     uploadNewLabel: 'Įkelti naują {{label}}',
   },
-  folder: {
-    browseByFolder: 'Naršyti pagal aplanką',
-    byFolder: 'Pagal aplanką',
-    deleteFolder: 'Ištrinti aplanką',
-    folderName: 'Aplanko pavadinimas',
-    folders: 'Aplankai',
-    folderTypeDescription:
-      'Pasirinkite, kokio tipo rinkinio dokumentai turėtų būti leidžiami šiame aplanke.',
-    itemHasBeenMoved: '{{title}} buvo perkeltas į {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} buvo perkeltas į pagrindinį katalogą',
-    itemsMovedToFolder: '{{title}} perkeltas į {{folderName}}',
-    itemsMovedToRoot: '{{title}} perkeltas į šakninį aplanką',
-    moveFolder: 'Perkelti aplanką',
-    moveItemsToFolderConfirmation:
-      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į <2>{{toFolder}}</2>. Ar esate tikri?',
-    moveItemsToRootConfirmation:
-      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į šakninį aplanką. Ar esate tikri?',
-    moveItemToFolderConfirmation:
-      'Jūs ketinate perkelti <1>{{title}}</1> į <2>{{toFolder}}</2>. Ar esate įsitikinęs?',
-    moveItemToRootConfirmation:
-      'Jūs ketinate perkelti <1>{{title}}</1> į pagrindinį aplanką. Ar esate tikras?',
-    movingFromFolder: 'Perkeliamas {{title}} iš {{fromFolder}}',
-    newFolder: 'Naujas aplankas',
-    noFolder: 'Nėra aplanko',
-    renameFolder: 'Pervadinti aplanką',
-    searchByNameInFolder: 'Ieškoti pagal vardą {{folderName}}',
-    selectFolderForItem: 'Pasirinkite aplanką skirtą {{title}}',
-  },
   general: {
     name: 'Vardas',
     aboutToDelete: 'Jūs ketinate ištrinti {{label}} <1>{{title}}</1>. Ar esate tikri?',
@@ -257,6 +229,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     clearAll: 'Išvalyti viską',
     close: 'Uždaryti',
     collapse: 'Susikolimas',
+    collection: 'Kolekcija',
     collections: 'Kolekcijos',
     columns: 'Stulpeliai',
     columnToSort: 'Rūšiuoti stulpelį',
@@ -466,6 +439,16 @@ export const ltTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Peržiūrėti tik skaitymui',
     welcome: 'Sveiki',
     yes: 'Taip',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} perkeltas į {{destination}}',
+    itemsMovedToRoot: '{{title}} perkeltas į šaknį',
+    moveItemsToRootConfirmation:
+      'Jūs ketinate perkelti <1>{{count}} {{label}}</1> į šaknį. Ar esate įsitikinęs?',
+    moveToRoot: 'Perkelti į šaknį',
+    noParent: 'Be tėvų',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Ieškoti {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Negalima kopijuoti į tą pačią vietovę',

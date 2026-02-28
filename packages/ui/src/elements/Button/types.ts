@@ -13,6 +13,7 @@ export type Props = {
     | 'dashed'
     | 'error'
     | 'icon-label'
+    | 'muted-text'
     | 'none'
     | 'pill'
     | 'primary'

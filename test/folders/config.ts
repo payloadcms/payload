@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { createFoldersCollection, createTagsCollection } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Autosave } from './collections/Autosave/index.js'
@@ -10,7 +10,11 @@ import { Media } from './collections/Media/index.js'
 import { OmittedFromBrowseBy } from './collections/OmittedFromBrowseBy/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { TranslatedLabels } from './collections/TranslatedLabels/index.js'
-// import { seed } from './seed/index.js'
+import { seed } from './seed.js'
+import { categoriesSlug, folderSlug } from './shared.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   admin: {
@@ -18,19 +22,43 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  folders: {
-    // debug: true,
-    collectionOverrides: [
-      ({ collection }) => {
-        collection.fields.push({
-          name: 'folderSlug',
-          type: 'text',
-        })
-        return collection
+  collections: [
+    createFoldersCollection({
+      slug: folderSlug,
+      useAsTitle: 'name',
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'folderSlug', type: 'text' },
+      ],
+      hierarchy: {
+        collectionSpecific: { fieldName: 'folderType' },
+        joinField: { fieldName: 'documentsAndFolders' },
+        parentFieldName: 'folder',
       },
-    ],
-  },
-  collections: [Posts, Media, Drafts, Autosave, OmittedFromBrowseBy, TranslatedLabels],
+    }),
+    createTagsCollection({
+      slug: categoriesSlug,
+      useAsTitle: 'name',
+      fields: [{ name: 'name', type: 'text', required: true }],
+      labels: {
+        singular: 'Category',
+        plural: 'Categories',
+      },
+      hierarchy: {
+        admin: {
+          components: {
+            Icon: './components/CategoriesTabIcon.js#CategoriesTabIcon',
+          },
+        },
+      },
+    }),
+    Posts,
+    Media,
+    Drafts,
+    Autosave,
+    OmittedFromBrowseBy,
+    TranslatedLabels,
+  ],
   globals: [
     {
       slug: 'global',
@@ -50,7 +78,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
-    // await seed(payload)
+    await seed(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

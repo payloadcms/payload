@@ -185,32 +185,6 @@ export const faTranslations: DefaultTranslationsObject = {
     toggleBlock: 'تغییر وضعیت بلاک',
     uploadNewLabel: 'آپلود {{label}} جدید',
   },
-  folder: {
-    browseByFolder: 'مرور بر اساس پوشه',
-    byFolder: 'بر اساس پوشه',
-    deleteFolder: 'حذف پوشه',
-    folderName: 'نام پوشه',
-    folders: 'پوشه‌ها',
-    folderTypeDescription: 'انتخاب کنید چه نوع اسنادی می‌توانند در این پوشه قرار بگیرند.',
-    itemHasBeenMoved: '"{{title}}" به پوشه "{{folderName}}" منتقل شد.',
-    itemHasBeenMovedToRoot: '"{{title}}" به پوشه اصلی منتقل شد.',
-    itemsMovedToFolder: '{{count}} مورد به پوشه "{{folderName}}" منتقل شد.',
-    itemsMovedToRoot: '{{count}} مورد به پوشه اصلی منتقل شد.',
-    moveFolder: 'انتقال پوشه',
-    moveItemsToFolderConfirmation:
-      'آیا از انتقال <1>{{count}} {{label}}</1> به پوشه <2>{{toFolder}}</2> مطمئن هستید؟',
-    moveItemsToRootConfirmation:
-      'آیا از انتقال <1>{{count}} {{label}}</1> به پوشه اصلی مطمئن هستید؟',
-    moveItemToFolderConfirmation:
-      'آیا از انتقال <1>{{title}}</1> به پوشه <2>{{toFolder}}</2> مطمئن هستید؟',
-    moveItemToRootConfirmation: 'آیا از انتقال <1>{{title}}</1> به پوشه اصلی مطمئن هستید؟',
-    movingFromFolder: 'انتقال "{{title}}" از پوشه {{fromFolder}}',
-    newFolder: 'پوشه جدید',
-    noFolder: 'بدون پوشه',
-    renameFolder: 'تغییر نام پوشه',
-    searchByNameInFolder: 'جستجو بر اساس نام در "{{folderName}}"',
-    selectFolderForItem: 'انتخاب پوشه برای "{{title}}"',
-  },
   general: {
     name: 'نام',
     aboutToDelete: 'آیا از حذف {{label}} "{{title}}" مطمئن هستید؟',
@@ -247,6 +221,7 @@ export const faTranslations: DefaultTranslationsObject = {
     clearAll: 'پاک کردن همه',
     close: 'بستن',
     collapse: 'بستن',
+    collection: 'مجموعه',
     collections: 'مجموعه‌ها',
     columns: 'ستون‌ها',
     columnToSort: 'ستون برای مرتب‌سازی',
@@ -456,6 +431,16 @@ export const faTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'مشاهده (فقط خواندنی)',
     welcome: 'خوش آمدید',
     yes: 'بله',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} به {{destination}} منتقل شد.',
+    itemsMovedToRoot: '{{title}} به ریشه منتقل شد',
+    moveItemsToRootConfirmation:
+      'شما در حال حاضر در مرحله انتقال <1>{{count}} {{label}}</1> به ریشه هستید. آیا مطمئن هستید؟',
+    moveToRoot: 'انتقال به ریشه',
+    noParent: 'بدون والد',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'جستجو {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'امکان کپی کردن اطلاعات به همان زبان وجود ندارد.',

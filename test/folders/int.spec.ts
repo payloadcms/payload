@@ -226,7 +226,7 @@ describe('folders', () => {
   })
 
   describe('hooks', () => {
-    it('reparentChildFolder should change the child after updating the parent', async () => {
+    it('should prevent moving a folder into its own subfolder', async () => {
       const parentFolder = await payload.create({
         collection: 'payload-folders',
         data: {
@@ -244,24 +244,13 @@ describe('folders', () => {
         },
       })
 
-      await payload.update({
-        collection: 'payload-folders',
-        data: { folder: childFolder },
-        id: parentFolder.id,
-      })
-
-      const parentAfter = await payload.findByID({
-        collection: 'payload-folders',
-        id: parentFolder.id,
-        depth: 0,
-      })
-      const childAfter = await payload.findByID({
-        collection: 'payload-folders',
-        id: childFolder.id,
-        depth: 0,
-      })
-      expect(childAfter.folder).toBeFalsy()
-      expect(parentAfter.folder).toBe(childFolder.id)
+      await expect(
+        payload.update({
+          collection: 'payload-folders',
+          data: { folder: childFolder },
+          id: parentFolder.id,
+        }),
+      ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
     it('dissasociateAfterDelete should delete _folder value in children after deleting the folder', async () => {
@@ -345,6 +334,7 @@ describe('folders', () => {
 
           expect(updatedFolder).not.toBeDefined()
         } catch (e: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
             'The folder "Posts and Drafts Folder" contains documents that still belong to the following collections: Drafts',
           )
@@ -379,6 +369,7 @@ describe('folders', () => {
 
           expect(scopedFolder).not.toBeDefined()
         } catch (e: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
             'The folder "Anything Goes" contains documents that still belong to the following collections: Posts',
           )
@@ -414,6 +405,7 @@ describe('folders', () => {
 
           expect(updatedParent).not.toBeDefined()
         } catch (e: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
             'The folder "Parent Folder" contains folders that still belong to the following collections: Drafts',
           )
@@ -450,6 +442,7 @@ describe('folders', () => {
 
           expect(level2UnscopedFolder).not.toBeDefined()
         } catch (e: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
             'The folder "Level 2 Folder" must have folder-type set since its parent folder "Level 1 Folder" has a folder-type set.',
           )

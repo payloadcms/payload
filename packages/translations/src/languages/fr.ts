@@ -195,34 +195,6 @@ export const frTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloc bascule',
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
-  folder: {
-    browseByFolder: 'Parcourir par Dossier',
-    byFolder: 'Par Dossier',
-    deleteFolder: 'Supprimer le dossier',
-    folderName: 'Nom du dossier',
-    folders: 'Dossiers',
-    folderTypeDescription:
-      'Sélectionnez le type de documents de collection qui devraient être autorisés dans ce dossier.',
-    itemHasBeenMoved: '{{title}} a été déplacé vers {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} a été déplacé dans le dossier racine',
-    itemsMovedToFolder: '{{title}} déplacé vers {{folderName}}',
-    itemsMovedToRoot: '{{title}} déplacé vers le dossier racine',
-    moveFolder: 'Déplacer le dossier',
-    moveItemsToFolderConfirmation:
-      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers <2>{{toFolder}}</2>. Êtes-vous sûr ?',
-    moveItemsToRootConfirmation:
-      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> vers le dossier racine. Êtes-vous sûr ?',
-    moveItemToFolderConfirmation:
-      'Vous êtes sur le point de déplacer <1>{{title}}</1> dans <2>{{toFolder}}</2>. Êtes-vous sûr ?',
-    moveItemToRootConfirmation:
-      'Vous êtes sur le point de déplacer <1>{{title}}</1> vers le dossier racine. Êtes-vous sûr ?',
-    movingFromFolder: 'Déplacement de {{title}} de {{fromFolder}}',
-    newFolder: 'Nouveau Dossier',
-    noFolder: 'Pas de dossier',
-    renameFolder: 'Renommer le dossier',
-    searchByNameInFolder: 'Recherche par nom dans {{folderName}}',
-    selectFolderForItem: 'Sélectionnez le dossier pour {{title}}',
-  },
   general: {
     name: 'Nom',
     aboutToDelete:
@@ -264,6 +236,7 @@ export const frTranslations: DefaultTranslationsObject = {
     clearAll: 'Tout effacer',
     close: 'Fermer',
     collapse: 'Réduire',
+    collection: 'Collection',
     collections: 'Collections',
     columns: 'Colonnes',
     columnToSort: 'Colonne à trier',
@@ -477,6 +450,16 @@ export const frTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Afficher en lecture seule',
     welcome: 'Bienvenue',
     yes: 'Oui',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} déplacé vers {{destination}}',
+    itemsMovedToRoot: '{{title}} déplacé à la racine',
+    moveItemsToRootConfirmation:
+      'Vous êtes sur le point de déplacer <1>{{count}} {{label}}</1> à la racine. Êtes-vous sûr ?',
+    moveToRoot: 'Déplacer vers la Racine',
+    noParent: 'Aucun parent',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Recherche {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Impossible de copier dans le même endroit',

@@ -1,0 +1,138 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .hierarchy-table {
+    margin-top: calc(var(--base) * 1.5);
+
+    // Name cell with icon
+    &__name-cell {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.5);
+
+      svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        color: var(--theme-elevation-500);
+      }
+    }
+
+    &__name-link {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.5);
+      color: var(--theme-text);
+      text-decoration: none;
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+      text-align: left;
+
+      &:hover {
+        color: var(--theme-elevation-800);
+        text-decoration: underline;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        color: var(--theme-elevation-500);
+      }
+
+      &--locked {
+        cursor: default;
+        color: var(--theme-elevation-500);
+
+        &:hover {
+          text-decoration: none;
+          color: var(--theme-elevation-500);
+        }
+
+        .locked {
+          flex-shrink: 0;
+        }
+      }
+    }
+
+    &__thumbnail {
+      display: inline-block;
+      max-width: var(--base);
+      height: var(--base);
+      border-radius: var(--style-radius-s);
+      flex-shrink: 0;
+    }
+
+    &__name-icon {
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    &__name-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__chevron {
+      margin-inline-start: auto;
+      padding-inline-start: calc(var(--base) * 0.5);
+
+      svg {
+        width: 12px;
+        height: 12px;
+        color: var(--theme-elevation-400);
+      }
+    }
+
+    // Column widths
+    &__col-name {
+      width: auto;
+      min-width: 200px;
+    }
+
+    &__col-collection {
+      width: 140px;
+      min-width: 100px;
+    }
+
+    &__col-date {
+      width: 150px;
+      min-width: 120px;
+    }
+
+    &__col-type {
+      width: 120px;
+      min-width: 100px;
+      &:not(.slot-table__th) {
+        color: var(--theme-elevation-600);
+      }
+    }
+
+    // Section title within collapsible header
+    &__section-title {
+      margin: 0;
+      font-weight: 500;
+      color: var(--theme-text);
+    }
+
+    &__load-more-wrap {
+      padding: calc(var(--base) * 0.5);
+      padding-left: calc(var(--base) * 0.8);
+      padding-top: calc(var(--base) * 0.2);
+    }
+
+    &__group-label {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.75);
+      padding: calc(var(--base) * 0.75) 0;
+      line-height: 1;
+      color: var(--theme-text);
+      @extend %h3;
+    }
+  }
+}

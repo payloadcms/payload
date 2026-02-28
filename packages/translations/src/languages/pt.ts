@@ -189,34 +189,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alternar bloco',
     uploadNewLabel: 'Carregar novo(a) {{label}}',
   },
-  folder: {
-    browseByFolder: 'Navegar por Pasta',
-    byFolder: 'Por Pasta',
-    deleteFolder: 'Apagar Pasta',
-    folderName: 'Nome da Pasta',
-    folders: 'Pastas',
-    folderTypeDescription:
-      'Selecione qual tipo de documentos da coleção devem ser permitidos nesta pasta.',
-    itemHasBeenMoved: '{{title}} foi movido para {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} foi movido para a pasta raiz',
-    itemsMovedToFolder: '{{title}} movido para {{folderName}}',
-    itemsMovedToRoot: '{{title}} foi movido para a pasta raiz',
-    moveFolder: 'Mover Pasta',
-    moveItemsToFolderConfirmation:
-      'Você está prestes a mover <1>{{count}} {{label}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
-    moveItemsToRootConfirmation:
-      'Você está prestes a mover <1>{{count}} {{label}}</1> para a pasta raiz. Tem certeza?',
-    moveItemToFolderConfirmation:
-      'Você está prestes a mover <1>{{title}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
-    moveItemToRootConfirmation:
-      'Você está prestes a mover <1>{{title}}</1> para a pasta raiz. Tem certeza disso?',
-    movingFromFolder: 'Movendo {{title}} de {{fromFolder}}',
-    newFolder: 'Nova Pasta',
-    noFolder: 'Sem Pasta',
-    renameFolder: 'Renomear Pasta',
-    searchByNameInFolder: 'Pesquisar por Nome em {{folderName}}',
-    selectFolderForItem: 'Selecione a pasta para {{title}}',
-  },
   general: {
     name: 'Nome',
     aboutToDelete: 'Você está prestes a excluir o/a {{label}} <1>{{title}}</1>. Tem certeza?',
@@ -255,6 +227,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',
+    collection: 'Coleção',
     collections: 'Coleções',
     columns: 'Colunas',
     columnToSort: 'Coluna para Ordenar',
@@ -467,6 +440,16 @@ export const ptTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visualizar somente leitura',
     welcome: 'Boas vindas',
     yes: 'Sim',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} foi movido para {{destination}}',
+    itemsMovedToRoot: '{{title}} movido para a raiz',
+    moveItemsToRootConfirmation:
+      'Você está prestes a mover <1>{{count}} {{label}}</1> para a raiz. Tem certeza?',
+    moveToRoot: 'Mover para Raiz',
+    noParent: 'Sem Parentesco',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pesquisar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

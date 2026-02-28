@@ -189,34 +189,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Превключи блок',
     uploadNewLabel: 'Качи нов {{label}}',
   },
-  folder: {
-    browseByFolder: 'Прегледай по папки',
-    byFolder: 'По папка',
-    deleteFolder: 'Изтрий папка',
-    folderName: 'Име на папка',
-    folders: 'Папки',
-    folderTypeDescription:
-      'Изберете кой тип документи от колекциите трябва да се допускат в тази папка.',
-    itemHasBeenMoved: '{{title}} е преместен в {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} беше преместено в основната папка',
-    itemsMovedToFolder: '{{title}} беше преместен в {{folderName}}',
-    itemsMovedToRoot: '{{title}} е преместен в основната папка.',
-    moveFolder: 'Премести папка',
-    moveItemsToFolderConfirmation:
-      'Предстои да преместите <1>{{count}} {{label}}</1> в <2>{{toFolder}}</2>. Сигурни ли сте?',
-    moveItemsToRootConfirmation:
-      'Предстои да преместите <1>{{count}} {{label}}</1> в основната папка. Сигурни ли сте?',
-    moveItemToFolderConfirmation:
-      'Предстои да преместите <1>{{title}}</1> в <2>{{toFolder}}</2>. Сигурни ли сте?',
-    moveItemToRootConfirmation:
-      'Предстои да преместите <1>{{title}}</1> в основната папка. Сигурни ли сте?',
-    movingFromFolder: 'Преместване на {{title}} от {{fromFolder}}',
-    newFolder: 'Нова папка',
-    noFolder: 'Няма папка',
-    renameFolder: 'Преименувай папка',
-    searchByNameInFolder: 'Търсене по име в {{folderName}}',
-    selectFolderForItem: 'Изберете папка за {{title}}',
-  },
   general: {
     name: 'Име',
     aboutToDelete: 'На път си да изтриеш {{label}} <1>{{title}}</1>. Сигурен ли си?',
@@ -253,6 +225,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     clearAll: 'Изчисти всичко',
     close: 'Затвори',
     collapse: 'Свий',
+    collection: 'Колекция',
     collections: 'Колекции',
     columns: 'Колони',
     columnToSort: 'Колона за сортиране',
@@ -464,6 +437,16 @@ export const bgTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Преглед само за четене',
     welcome: 'Добре дошъл',
     yes: 'Да',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} беше преместен в {{destination}}',
+    itemsMovedToRoot: '{{title}} преместен към корена',
+    moveItemsToRootConfirmation:
+      'Предстои да преместите <1>{{count}} {{label}}</1> към основната директория. Сигурен ли сте?',
+    moveToRoot: 'Преместване към Корена',
+    noParent: 'Без родител',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Търсене {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Не може да се копира в същата локация',

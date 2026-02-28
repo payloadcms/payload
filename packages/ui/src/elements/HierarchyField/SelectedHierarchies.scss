@@ -1,0 +1,78 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .selected-hierarchies {
+    &__pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: calc(var(--base) * 0.5);
+    }
+
+    &__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.25);
+      align-items: center;
+      background-color: var(--theme-elevation-50);
+      border: 1px solid var(--theme-elevation-150);
+      padding-inline-end: calc(var(--base) * 0.2);
+
+      .pill__label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    &__pill-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    &__pill-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: none;
+      border-radius: $style-radius-s;
+      color: inherit;
+      position: relative;
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+
+      &:hover {
+        background: var(--theme-elevation-200);
+      }
+
+      .icon {
+        width: calc(var(--base) * 0.8);
+        height: calc(var(--base) * 0.8);
+        color: var(--theme-elevation-500);
+      }
+    }
+
+    &__pill-tooltip {
+      white-space: nowrap;
+    }
+
+    &__empty {
+      color: var(--theme-elevation-500);
+      font-style: italic;
+      padding: calc(var(--base) * 0.25) 0;
+      height: 26px;
+    }
+
+    &__loading {
+      color: var(--theme-elevation-500);
+      padding: calc(var(--base) * 0.25) 0;
+      height: 26px;
+    }
+  }
+}

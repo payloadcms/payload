@@ -189,33 +189,6 @@ export const isTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Fletta blokk',
     uploadNewLabel: 'Hlaða upp nýju {{label}}',
   },
-  folder: {
-    browseByFolder: 'Flakka eftir möppu',
-    byFolder: 'Eftir möppu',
-    deleteFolder: 'Eyða möppu',
-    folderName: 'Möppunafn',
-    folders: 'Möppurnar',
-    folderTypeDescription: 'Veldu hvaða tegund safnskjala ætti að vera leyfð í þessari möppu.',
-    itemHasBeenMoved: '{{title}} hefur verið færð í {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} hefur verið færð í rótarmöppuna',
-    itemsMovedToFolder: '{{title}} færð í {{folderName}}',
-    itemsMovedToRoot: '{{title}} færð í rótarmöppuna',
-    moveFolder: 'Færa möppu',
-    moveItemsToFolderConfirmation:
-      'Þú ert að fara að færa <1>{{count}} {{label}}</1> í <2>{{toFolder}}</2>. Ertu viss?',
-    moveItemsToRootConfirmation:
-      'Þú ert að fara að færa <1>{{count}} {{label}}</1> í rótarmöppuna. Ertu viss?',
-    moveItemToFolderConfirmation:
-      'Þú ert að fara að færa <1>{{title}}</1> í <2>{{toFolder}}</2>. Ertu viss?',
-    moveItemToRootConfirmation:
-      'Þú ert að fara að færa <1>{{title}}</1> í rótarmöppuna. Ertu viss?',
-    movingFromFolder: 'Færi {{title}} úr {{fromFolder}}',
-    newFolder: 'Ný mappa',
-    noFolder: 'Engin mappa',
-    renameFolder: 'Endurnefna möppu',
-    searchByNameInFolder: 'Leita eftir nafni í {{folderName}}',
-    selectFolderForItem: 'Veldu möppu fyrir {{title}}',
-  },
   general: {
     name: 'Nafn',
     aboutToDelete: 'Þú ert að fara að eyða {{label}} <1>{{title}}</1>. Ertu viss?',
@@ -253,6 +226,7 @@ export const isTranslations: DefaultTranslationsObject = {
     clearAll: 'Hreinsa allt',
     close: 'Loka',
     collapse: 'Fella saman',
+    collection: 'Safn',
     collections: 'Söfn',
     columns: 'Dálkar',
     columnToSort: 'Dálkur til að raða',
@@ -462,6 +436,16 @@ export const isTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Skoða sem skrifvarið',
     welcome: 'Velkomin',
     yes: 'Já',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flutt til {{destination}}',
+    itemsMovedToRoot: '{{title}} flutt til rót',
+    moveItemsToRootConfirmation:
+      'Þú ert um það bil að færa <1>{{count}} {{label}}</1> í rót. Ertu viss?',
+    moveToRoot: 'Færa í rót',
+    noParent: 'Engin foreldri',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Leita {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ekki hægt að afrita í sömu staðfærslu',

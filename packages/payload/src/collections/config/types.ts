@@ -41,7 +41,7 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -403,6 +403,10 @@ export type CollectionAdminOptions = {
        */
       beforeDocumentControls?: CustomComponent[]
       /**
+       * Inject custom components before the document metadata (left of status/timestamps)
+       */
+      BeforeDocumentMeta?: CustomComponent[]
+      /**
        * Inject custom components within the 3-dot menu dropdown
        */
       editMenuItems?: CustomComponent[]
@@ -617,10 +621,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Enables folders for this collection
-   */
-  folders?: boolean | CollectionFoldersConfiguration
-  /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
   forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
@@ -637,6 +637,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         singularName?: string
       }
     | false
+  /**
+   * Enable hierarchical tree structure for this collection
+   *
+   * Use `true` to enable with defaults (auto-detects parent field)
+   * or provide configuration object
+   *
+   * @example
+   * // Enable with defaults
+   * hierarchy: true
+   *
+   * @example
+   * // Customize field names and slugify function
+   * hierarchy: {
+   *   parentFieldName: 'parent',
+   *   slugify: (text) => customSlugify(text),
+   *   slugPathFieldName: '_breadcrumbPath'
+   * }
+   */
+  hierarchy?: boolean | HierarchyConfig
   /**
    * Hooks to modify Payload functionality
    */
@@ -779,7 +798,16 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
+    | 'admin'
+    | 'auth'
+    | 'endpoints'
+    | 'fields'
+    | 'folder'
+    | 'folders'
+    | 'hierarchy'
+    | 'slug'
+    | 'upload'
+    | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -791,11 +819,13 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
+   * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
+   */
+  hierarchy: false | SanitizedHierarchyConfig
+  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
-
   /**
    * List of all polymorphic join fields
    */
@@ -804,6 +834,7 @@ export interface SanitizedCollectionConfig
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
+
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

@@ -190,34 +190,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ব্লক টগল করুন',
     uploadNewLabel: 'নতুন {{label}} আপলোড করুন',
   },
-  folder: {
-    browseByFolder: 'ফোল্ডার দ্বারা ব্রাউজ করুন',
-    byFolder: 'ফোল্ডার দ্বারা',
-    deleteFolder: 'ফোল্ডার মুছুন',
-    folderName: 'ফোল্ডারের নাম',
-    folders: 'ফোল্ডারগুলি',
-    folderTypeDescription:
-      'এই ফোল্ডারে কোন ধরণের কালেকশন ডকুমেন্টস অনুমতি দেওয়া উচিত তা নির্বাচন করুন।',
-    itemHasBeenMoved: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
-    itemHasBeenMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
-    itemsMovedToFolder: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
-    itemsMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
-    moveFolder: 'ফোল্ডার সরান',
-    moveItemsToFolderConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে <2>{{toFolder}}</2> এ সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemsToRootConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে মূল ফোল্ডারে সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemToFolderConfirmation:
-      'আপনি <1>{{title}}</1> কে <2>{{toFolder}}</2> এ সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemToRootConfirmation:
-      'আপনি <1>{{title}}</1> কে মূল ফোল্ডারে সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    movingFromFolder: '{{title}} কে {{fromFolder}} থেকে সরানো হচ্ছে',
-    newFolder: 'নতুন ফোল্ডার',
-    noFolder: 'কোনো ফোল্ডার নেই',
-    renameFolder: 'ফোল্ডারের নাম পরিবর্তন করুন',
-    searchByNameInFolder: '{{folderName}} এ নাম দ্বারা অনুসন্ধান করুন',
-    selectFolderForItem: '{{title}} এর জন্য ফোল্ডার নির্বাচন করুন',
-  },
   general: {
     name: 'নাম',
     aboutToDelete: 'আপনি {{label}} <1>{{title}}</1> মুছতে চলেছেন। আপনি কি নিশ্চিত?',
@@ -257,6 +229,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
+    collection: 'সংগ্রহ',
     collections: 'সংগ্রহগুলি',
     columns: 'কলামগুলি',
     columnToSort: 'সাজানোর জন্য কলাম',
@@ -471,6 +444,16 @@ export const bnInTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'শুধুমাত্র পড়ার জন্য দেখুন',
     welcome: 'স্বাগতম',
     yes: 'হ্যাঁ',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} টি {{destination}} এ সরিয়ে নেওয়া হলো।',
+    itemsMovedToRoot: '{{title}} মূলে সরিয়ে নেওয়া হয়েছে',
+    moveItemsToRootConfirmation:
+      'আপনি <1>{{count}} {{label}}</1> কে রুট এ সরিয়ে দিতে চলেছেন। আপনি কি নিশ্চিত?',
+    moveToRoot: 'রুটে সরান',
+    noParent: 'কোন মাতা-পিতা নেই',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} অনুসন্ধান করুন',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

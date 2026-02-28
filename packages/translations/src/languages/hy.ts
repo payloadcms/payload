@@ -189,34 +189,6 @@ export const hyTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Միացնել/անջատել բլոկը',
     uploadNewLabel: 'Վերբեռնել նոր {{label}}',
   },
-  folder: {
-    browseByFolder: 'Թվարկել թղթապանակներով',
-    byFolder: 'ըստ թղթապանակի',
-    deleteFolder: 'Ջնջել թղթապանակը',
-    folderName: 'Տեսակավորման անվանում',
-    folders: 'Պատուհաններ',
-    folderTypeDescription:
-      'Ընտրեք, թե որն է հավաքածուի փաստաթղթերը, որոնք պետք է թույլատրվեն այս պանակում:',
-    itemHasBeenMoved: '{{title}}-ը տեղափոխվել է {{folderName}}-ում',
-    itemHasBeenMovedToRoot: '«{{title}}» տեղափոխվել է արմատային պանակ։',
-    itemsMovedToFolder: '{{title}} տեղափոխվեց {{folderName}}',
-    itemsMovedToRoot: '{{title}} տեղափոխվել է արմատ թղթապանակին',
-    moveFolder: 'Տեղափոխել թղթապանակը',
-    moveItemsToFolderConfirmation:
-      'Դուք պատրաստ եք <1>{{count}} {{label}}</1> տեղափոխել <2>{{toFolder}}</2>։ Ամբողջականում համոզված եք:',
-    moveItemsToRootConfirmation:
-      'Դուք պատրաստված եք տեղափոխել <1>{{count}} {{label}}</1> արմատ թղթապանակի. Համոզվա՞ծ եք:',
-    moveItemToFolderConfirmation:
-      'Դուք պատրաստ եք տեղափոխել <1>{{title}}</1> <2>{{toFolder}}</2>։ Վստահ եք:',
-    moveItemToRootConfirmation:
-      'Դուք պատրաստ եք <1>{{title}}</1> տեղափոխել արմատային պանակի մեջ։ Վստահ եք։',
-    movingFromFolder: '{{title}}-ի տեղափոխում {{fromFolder}}-ից',
-    newFolder: 'Նոր թղթապանակ',
-    noFolder: 'Ոչ մի թղթապանակ',
-    renameFolder: 'Վերանվանել թղթապանակը',
-    searchByNameInFolder: 'Փնտրել ըստ անվանումի {{folderName}} թղթապանակում',
-    selectFolderForItem: 'Ընտրեք թղթապանակ {{title}}-ի համար',
-  },
   general: {
     name: 'Անուն',
     aboutToDelete: 'Դուք պատրաստվում եք ջնջել {{label}} <1>{{title}}</1>-ը։ Համոզվա՞ծ եք։',
@@ -255,6 +227,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     clearAll: 'Մաքրել բոլորը',
     close: 'Փակել',
     collapse: 'Փակել',
+    collection: 'Հավաքածու',
     collections: 'Հավաքածուներ',
     columns: 'Սյունակներ',
     columnToSort: 'Սյունակ՝ տեսակավորման համար',
@@ -469,6 +442,16 @@ export const hyTranslations: DefaultTranslationsObject = {
     viewReadOnly: '«Միայն կարդալու» ռեժիմ',
     welcome: 'Բարի գալուստ',
     yes: 'Այո',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} տեղափոխվեց {{destination}}։',
+    itemsMovedToRoot: '"{{title}}" տեղափոխվել է արմատը',
+    moveItemsToRootConfirmation:
+      'Դուք պատրաստ եք տեղափոխել <1>{{count}} {{label}}</1> արմատ. Հաստատում եք:',
+    moveToRoot: 'Տեղափոխվեք արմատ՝',
+    noParent: 'Ոչ ծնող',
+    noResults: '«{{query}}»-ի համար արդյունքներ չկան',
+    searchLabel: 'Որոնել {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Հնարավոր չէ պատճենել նույն լոկալին',

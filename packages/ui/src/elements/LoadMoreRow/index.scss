@@ -1,0 +1,42 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .load-more-row {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    &__connector {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 16px;
+      margin-right: 0px;
+      margin-top: 0px;
+      transform: translateY(-25%);
+
+      svg {
+        color: var(--theme-elevation-400);
+      }
+    }
+
+    &__text {
+      margin: 0;
+      color: var(--theme-elevation-400);
+      white-space: nowrap;
+      @extend %small;
+    }
+
+    &__button {
+      padding: 0;
+      color: var(--theme-text);
+      font-size: inherit;
+      text-decoration: underline;
+
+      &:hover {
+        color: var(--theme-elevation-800);
+      }
+    }
+  }
+}

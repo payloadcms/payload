@@ -27,6 +27,7 @@ import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
+import { HierarchyProvider } from '../Hierarchy/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
@@ -105,29 +106,31 @@ export const RootProvider: React.FC<Props> = ({
                           <CloseModalOnRouteChange />
                           <AuthProvider permissions={permissions} user={user}>
                             <PreferencesProvider>
-                              <ThemeProvider theme={theme}>
-                                <ParamsProvider>
-                                  <LocaleProvider locale={locale}>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ParamsProvider>
-                              </ThemeProvider>
+                              <HierarchyProvider>
+                                <ThemeProvider theme={theme}>
+                                  <ParamsProvider>
+                                    <LocaleProvider locale={locale}>
+                                      <StepNavProvider>
+                                        <LoadingOverlayProvider>
+                                          <DocumentEventsProvider>
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              <UploadHandlersProvider>
+                                                <DndContext
+                                                  collisionDetection={pointerWithin}
+                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                  id={dndContextID}
+                                                >
+                                                  {children}
+                                                </DndContext>
+                                              </UploadHandlersProvider>
+                                            </NavProvider>
+                                          </DocumentEventsProvider>
+                                        </LoadingOverlayProvider>
+                                      </StepNavProvider>
+                                    </LocaleProvider>
+                                  </ParamsProvider>
+                                </ThemeProvider>
+                              </HierarchyProvider>
                             </PreferencesProvider>
                             <ModalContainer />
                             <StayLoggedInModal />

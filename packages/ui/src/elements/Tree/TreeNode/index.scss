@@ -1,0 +1,102 @@
+@import '../../../scss/styles.scss';
+
+.tree-node {
+  .tree-node {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  // Variables are inherited from parent .tree
+
+  &__indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 16px;
+    background-color: transparent;
+    border-start-end-radius: 2px;
+    border-end-end-radius: 2px;
+    left: calc(var(--nav-padding-inline-start) * -1);
+    top: 50%;
+    bottom: 50%;
+    transform: translateY(-50%);
+  }
+
+  &__content--selected {
+    font-weight: 600;
+
+    & > .tree-node__indicator {
+      background-color: var(--theme-text);
+    }
+
+    & > .tree-node__title {
+      color: var(--theme-text);
+    }
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    padding: var(--tree-node-padding-y) 0px;
+    padding-left: calc(var(--tree-depth, 0) * var(--tree-indent));
+    user-select: none;
+    transition: background-color 100ms ease;
+    font-size: var(--tree-font-size);
+    line-height: var(--tree-node-content-height);
+    height: var(--tree-node-content-height);
+    position: relative;
+    margin-bottom: var(--tree-row-gap);
+    border-radius: var(--style-radius-s);
+  }
+
+  &__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    margin-right: var(--tree-chevron-spacing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    color: var(--theme-elevation-400);
+    width: var(--tree-chevron-width);
+    height: var(--tree-chevron-width);
+    flex-shrink: 0;
+    border-radius: var(--style-radius-m);
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-400);
+    }
+  }
+
+  &__toggle-spacer {
+    width: calc(var(--tree-chevron-width) + var(--tree-chevron-spacing));
+    flex-shrink: 0;
+  }
+
+  &__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--tree-font-size);
+    color: var(--theme-elevation-650);
+    color: var(--theme-text);
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+      color: var(--theme-text);
+    }
+  }
+
+  &__loading {
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__children {
+    /* Children are rendered with depth variable set */
+  }
+}

@@ -176,8 +176,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
-      field.admin.disableRowTypes,
+      field.admin?.defaultColumns,
+      field.admin?.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,

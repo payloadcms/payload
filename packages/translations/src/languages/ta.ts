@@ -188,34 +188,6 @@ export const taTranslations: DefaultTranslationsObject = {
     toggleBlock: 'தொகுதியை மாற்றவும்',
     uploadNewLabel: 'புதிய {{label}} பதிவேற்றவும்',
   },
-  folder: {
-    browseByFolder: 'கோப்புறைகளில் உலாவவும்',
-    byFolder: 'கோப்புறை அடிப்படையில்',
-    deleteFolder: 'கோப்புறையை நீக்கவும்',
-    folderName: 'கோப்புறை பெயர்',
-    folders: 'கோப்புறைகள்',
-    folderTypeDescription:
-      'இந்த கோப்புறையில் எந்த வகை தொகுப்பின் ஆவணங்கள் அனுமதிக்கப்பட வேண்டும் என்பதைக் தேர்வு செய்யவும்.',
-    itemHasBeenMoved: '{{title}} "{{folderName}}" கோப்புறைக்கு நகர்த்தப்பட்டது.',
-    itemHasBeenMovedToRoot: '{{title}} மூல (root) கோப்புறைக்கு நகர்த்தப்பட்டது.',
-    itemsMovedToFolder: '{{title}} "{{folderName}}" கோப்புறைக்கு நகர்த்தப்பட்டது.',
-    itemsMovedToRoot: '{{title}} மூல (root) கோப்புறைக்கு நகர்த்தப்பட்டது.',
-    moveFolder: 'கோப்புறையை நகர்த்தவும்',
-    moveItemsToFolderConfirmation:
-      'நீங்கள் <1>{{count}} {{label}}</1>-ஐ <2>{{toFolder}}</2>-க்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
-    moveItemsToRootConfirmation:
-      'நீங்கள் <1>{{count}} {{label}}</1>-ஐ மூல (root) கோப்புறைக்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
-    moveItemToFolderConfirmation:
-      'நீங்கள் <1>{{title}}</1>-ஐ <2>{{toFolder}}</2>-க்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
-    moveItemToRootConfirmation:
-      'நீங்கள் <1>{{title}}</1>-ஐ மூல (root) கோப்புறைக்கு நகர்த்தவிருக்கிறீர்கள். தொடர விரும்புகிறீர்களா?',
-    movingFromFolder: '{{fromFolder}}-இருந்து {{title}} நகர்த்தப்படுகிறது',
-    newFolder: 'புதிய கோப்புறை',
-    noFolder: 'கோப்புறை இல்லை',
-    renameFolder: 'கோப்புறை பெயரை மாற்றவும்',
-    searchByNameInFolder: '{{folderName}}-இல் பெயரால் தேடவும்',
-    selectFolderForItem: '{{title}}-க்கான கோப்புறையை தேர்வு செய்யவும்',
-  },
   general: {
     name: 'பெயர்',
     aboutToDelete: '{{label}} <1>{{title}}</1>-ஐ நீக்கவிருக்கிறீர்கள். உறுதியாகவா?',
@@ -252,6 +224,7 @@ export const taTranslations: DefaultTranslationsObject = {
     clearAll: 'அனைத்தையும் அழிக்கவும்',
     close: 'மூடவும்',
     collapse: 'சுருக்கவும்',
+    collection: 'தொகுப்பு',
     collections: 'தொகுப்புகள்',
     columns: 'நெடுவரிசைகள்',
     columnToSort: 'வரிசைப்படுத்த வேண்டிய நெடுவரிசை',
@@ -464,6 +437,16 @@ export const taTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'வாசிப்பதற்கே காட்டு',
     welcome: 'வரவேற்பு',
     yes: 'ஆம்',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} ஐ {{destination}} க்கு நகர்த்தினோம்',
+    itemsMovedToRoot: '{{title}} மூலத்திற்கு நகர்த்தப்பட்டது',
+    moveItemsToRootConfirmation:
+      'நீங்கள் மூலத்துக்கு <1>{{count}} {{label}}</1> பேரை நகர்த்த உள்ளீர்கள். உங்கள் சரிபார்வை உறுதிசெய்யப்பட்டதா?',
+    moveToRoot: 'ரூட்டிற்கு நகருங்கள்',
+    noParent: 'பெற்றோர் இல்லை',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}} ஐ தேடு',
   },
   localization: {
     cannotCopySameLocale: 'அதே மொழி அமைவுக்கு நகலெடுக்க முடியாது',

@@ -190,34 +190,6 @@ export const caTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alterna el bloc',
     uploadNewLabel: 'Puja un nou {{label}}',
   },
-  folder: {
-    browseByFolder: 'Navega per carpeta',
-    byFolder: 'Per Carpeta',
-    deleteFolder: 'Esborra la carpeta',
-    folderName: 'Nom de la Carpeta',
-    folders: 'Carpetes',
-    folderTypeDescription:
-      'Seleccioneu quin tipus de documents de la col·lecció haurien de ser permesos en aquesta carpeta.',
-    itemHasBeenMoved: "{{title}} s'ha traslladat a {{folderName}}",
-    itemHasBeenMovedToRoot: "{{title}} s'ha mogut a la carpeta arrel",
-    itemsMovedToFolder: "{{title}} s'ha traslladat a {{folderName}}",
-    itemsMovedToRoot: "{{title}} s'ha traslladat a la carpeta arrel",
-    moveFolder: 'Mou la carpeta',
-    moveItemsToFolderConfirmation:
-      "Estàs a punt de moure <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. N'estàs segur?",
-    moveItemsToRootConfirmation:
-      'Estàs a punt de moure <1>{{count}} {{label}}</1> a la carpeta arrel. Estàs segur?',
-    moveItemToFolderConfirmation:
-      "Estàs a punt de moure <1>{{title}}</1> a <2>{{toFolder}}</2>. N'estàs segur?",
-    moveItemToRootConfirmation:
-      "Estàs a punt de moure <1>{{title}}</1> a la carpeta arrel. N'estàs segur?",
-    movingFromFolder: 'Movent {{title}} de {{fromFolder}}',
-    newFolder: 'Nova carpeta',
-    noFolder: 'No hi ha carpeta',
-    renameFolder: 'Anomena carpeta',
-    searchByNameInFolder: 'Cerca per Nom en {{folderName}}',
-    selectFolderForItem: 'Selecciona la carpeta per a {{title}}',
-  },
   general: {
     name: 'Nom',
     aboutToDelete: 'Estas apunt de eliminar {{label}} <1>{{title}}</1>. Estas segur?',
@@ -255,6 +227,7 @@ export const caTranslations: DefaultTranslationsObject = {
     clearAll: 'Esborra-ho tot',
     close: 'Tanca',
     collapse: 'Replegar',
+    collection: 'Col·lecció',
     collections: 'Col·leccions',
     columns: 'Columnes',
     columnToSort: 'Columna per ordenar',
@@ -467,6 +440,16 @@ export const caTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Veure només de lectura',
     welcome: 'Benvingut',
     yes: 'Sí',
+  },
+  hierarchy: {
+    itemsMovedTo: "{{title}} s'ha traslladat a {{destination}}",
+    itemsMovedToRoot: "{{title}} s'ha traslladat a l'arrel",
+    moveItemsToRootConfirmation:
+      "Esteu a punt de moure <1>{{count}} {{label}}</1> a l'arrel. N'esteu segur?",
+    moveToRoot: "Mou a l'arrel",
+    noParent: 'Sense Pare',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cerca {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'No es pot copiar al mateix idioma',

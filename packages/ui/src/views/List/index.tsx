@@ -23,12 +23,15 @@ import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from '../../views/List/ListSelection/index.js'
+import { DocumentListSelection } from '../HierarchyList/DocumentListSelection/index.js'
+import { HierarchyTable } from '../HierarchyList/HierarchyTable/index.js'
 import { CollectionListHeader } from './ListHeader/index.js'
 import './index.scss'
 
@@ -51,6 +54,7 @@ export function DefaultListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hasDeletePermission,
     hasTrashPermission,
+    hierarchyData,
     listMenuItems,
     newDocumentURL,
     queryPreset,
@@ -96,6 +100,8 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { i18n } = useTranslation()
 
+  const collectionLabel = getTranslation(labels?.plural, i18n)
+
   const { setStepNav } = useStepNav()
 
   const {
@@ -124,22 +130,43 @@ export function DefaultListView(props: ListViewClientProps) {
   useEffect(() => {
     if (!isInDrawer) {
       const baseLabel = {
-        label: getTranslation(labels?.plural, i18n),
+        label: collectionLabel,
         url:
           isTrashEnabled && viewType === 'trash'
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
               })
-            : undefined,
+            : hierarchyData
+              ? formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}`,
+                })
+              : undefined,
       }
 
       const trashLabel = {
         label: i18n.t('general:trash'),
       }
 
-      const navItems =
-        isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+      let navItems = isTrashEnabled && viewType === 'trash' ? [baseLabel, trashLabel] : [baseLabel]
+
+      // Add hierarchy breadcrumbs
+      if (hierarchyData?.breadcrumbs) {
+        const hierarchyBreadcrumbs = hierarchyData.breadcrumbs.map((crumb, index) => {
+          const isLast = index === hierarchyData.breadcrumbs.length - 1
+          return {
+            label: crumb.title,
+            url: isLast
+              ? undefined
+              : formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+                }),
+          }
+        })
+        navItems = [...navItems, ...hierarchyBreadcrumbs]
+      }
 
       setStepNav(navItems)
     }
@@ -153,6 +180,8 @@ export function DefaultListView(props: ListViewClientProps) {
     viewType,
     i18n,
     collectionSlug,
+    hierarchyData,
+    collectionLabel,
   ])
 
   return (
@@ -212,11 +241,43 @@ export function DefaultListView(props: ListViewClientProps) {
                 resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
-              {docs?.length > 0 && (
+              {hierarchyData ? (
+                <DocumentSelectionProvider
+                  collectionData={{
+                    [collectionSlug]: { docs: hierarchyData.childrenData.docs },
+                    ...Object.fromEntries(
+                      Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                        ([slug, related]) => [slug, { docs: related.result.docs }],
+                      ),
+                    ),
+                  }}
+                >
+                  <HierarchyTable
+                    childrenData={hierarchyData.childrenData}
+                    collectionSlug={collectionSlug}
+                    hierarchyLabel={collectionLabel}
+                    key={hierarchyData.parentId}
+                    parentId={hierarchyData.parentId}
+                    relatedGroups={Object.entries(hierarchyData.relatedDocumentsByCollection).map(
+                      ([slug, related]) => ({
+                        collectionSlug: slug,
+                        data: related.result,
+                        hasMany: related.hasMany,
+                        label: related.label,
+                      }),
+                    )}
+                    useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  />
+                  <DocumentListSelection
+                    disableBulkDelete={disableBulkDelete}
+                    disableBulkEdit={disableBulkEdit}
+                  />
+                </DocumentSelectionProvider>
+              ) : docs?.length > 0 ? (
                 <div className={`${baseClass}__tables`}>
                   <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
-              )}
+              ) : null}
               {docs?.length === 0 && (
                 <NoListResults
                   Actions={
@@ -268,7 +329,7 @@ export function DefaultListView(props: ListViewClientProps) {
                           collectionConfig={collectionConfig}
                           disableBulkDelete={disableBulkDelete}
                           disableBulkEdit={disableBulkEdit}
-                          label={getTranslation(collectionConfig.labels.plural, i18n)}
+                          label={collectionLabel}
                           showSelectAllAcrossPages={!isGroupingBy}
                         />
                         <div className={`${baseClass}__list-selection-actions`}>

@@ -2,7 +2,6 @@ import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
-import { foldersSlug, parentFolderFieldName } from '../folders/constants.js'
 import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
 
 /**
@@ -25,7 +24,6 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     routes: {
       account: '/account',
-      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -104,7 +102,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
     routes: {
       account: '/account',
-      browseByFolder: '/browse-by-folder',
       createFirstUser: '/create-first-user',
       forgot: '/forgot',
       inactivity: '/logout-inactivity',
@@ -173,22 +170,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
 
   if (config.kv?.kvCollection) {
     config.collections.push(config.kv.kvCollection)
-  }
-
-  if (
-    config.folders !== false &&
-    config.collections.some((collection) => Boolean(collection.folders))
-  ) {
-    config.folders = {
-      slug: config.folders?.slug ?? foldersSlug,
-      browseByFolder: config.folders?.browseByFolder ?? true,
-      collectionOverrides: config.folders?.collectionOverrides || undefined,
-      collectionSpecific: config.folders?.collectionSpecific ?? true,
-      debug: config.folders?.debug ?? false,
-      fieldName: config.folders?.fieldName ?? parentFolderFieldName,
-    }
-  } else {
-    config.folders = false
   }
 
   return config

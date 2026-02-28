@@ -190,34 +190,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prebaci blok',
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
-  folder: {
-    browseByFolder: 'Pregledaj po Folderu',
-    byFolder: 'Po fascikli',
-    deleteFolder: 'Obriši mapu',
-    folderName: 'Naziv fascikle',
-    folders: 'Fascikle',
-    folderTypeDescription:
-      'Odaberite koja vrsta dokumenta iz kolekcije bi trebala biti dozvoljena u ovoj fascikli.',
-    itemHasBeenMoved: '{{title}} je premesten u {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je premešten u osnovnu fasciklu',
-    itemsMovedToFolder: '{{title}} premešteno u {{folderName}}',
-    itemsMovedToRoot: '{{title}} je premješten u glavnu fasciklu',
-    moveFolder: 'Premesti folder',
-    moveItemsToFolderConfirmation:
-      'Na korak ste da premestite <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
-    moveItemsToRootConfirmation:
-      'Uskoro ćete premestiti <1>{{count}} {{label}}</1> u koreni direktorijum. Da li ste sigurni?',
-    moveItemToFolderConfirmation:
-      'Upravo ćete premestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Da li ste sigurni?',
-    moveItemToRootConfirmation:
-      'Upravo ćete premestiti <1>{{title}}</1> u glavnu fasciklu. Da li ste sigurni?',
-    movingFromFolder: 'Premestanje {{title}} iz {{fromFolder}}',
-    newFolder: 'Novi Folder',
-    noFolder: 'Nema foldera',
-    renameFolder: 'Preimenuj folder',
-    searchByNameInFolder: 'Pretraga po imenu u {{folderName}}',
-    selectFolderForItem: 'Izaberite fasciklu za {{title}}',
-  },
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisaćete {{label}} <1>{{title}}</1>. Da li ste sigurni?',
@@ -255,6 +227,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     clearAll: 'Očisti sve',
     close: 'Zatvori',
     collapse: 'Skupi',
+    collection: 'Kolekcija',
     collections: 'Kolekcije',
     columns: 'Kolone',
     columnToSort: 'Kolona za sortiranje',
@@ -465,6 +438,16 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Pregledaj samo za čitanje',
     welcome: 'Dobrodošli',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} premešten u {{destination}}',
+    itemsMovedToRoot: '{{title}} premešteno u koren',
+    moveItemsToRootConfirmation:
+      'Na korak ste da premestite <1>{{count}} {{label}}</1> u korenu. Jeste li sigurni?',
+    moveToRoot: 'Premesti se na koren',
+    noParent: 'Bez roditelja',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pretraga {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

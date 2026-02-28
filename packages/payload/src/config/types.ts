@@ -39,7 +39,6 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
@@ -810,6 +809,28 @@ export type SanitizedDashboardConfig = {
   widgets: Array<Omit<Widget, 'ComponentPath'>>
 }
 
+export type SidebarTab = {
+  /** Tab components */
+  components: {
+    /** Component to render as tab content */
+    Content: CustomComponent
+    /** Component to render as tab icon */
+    Icon: PayloadComponent
+  }
+  /** Disable this tab */
+  disabled?: boolean
+  /** Make this tab active by default */
+  isDefaultActive?: boolean
+  /**
+   * Label for accessibility and tab display.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the slug will be used as fallback.
+   */
+  label?: LabelFunction | StaticLabel
+  /** Unique identifier for override/disable */
+  slug: string
+}
+
 /**
  * This is the central configuration
  *
@@ -922,6 +943,11 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /** Sidebar configuration */
+      sidebar?: {
+        /** Extensible tab system */
+        tabs?: SidebarTab[]
+      }
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
@@ -996,11 +1022,6 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
-      /** The route for the browse by folder view.
-       *
-       * @default '/browse-by-folder'
-       */
-      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -1191,12 +1212,6 @@ export type Config = {
      */
     localizeStatus?: boolean
   }
-  /**
-   * Options for folder view within the admin panel
-   *
-   * @experimental This feature may change in minor versions until it is fully stable
-   */
-  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
