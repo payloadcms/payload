@@ -1,6 +1,6 @@
 import { isReactComponentOrFunction } from './isReactComponent.js'
 
-export function isPlainObject(o: any): boolean {
+export function isPlainObject(o: any): any {
   // Is this a React component?
   if (isReactComponentOrFunction(o)) {
     return false
