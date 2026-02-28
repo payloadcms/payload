@@ -143,6 +143,7 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
+    const isPathnamePreDecoded = path !== undefined
     const pathname = path ?? new URL(req.url!).pathname
     const baseAPIPath = formatAdminURL({
       apiRoute: config.routes.api,
@@ -219,7 +220,17 @@ export const handleEndpoints = async ({
         return false
       }
 
-      const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
+      // Default delimiter "/#?" causes :param to exclude # and ? from matches.
+      // Since pathname never contains literal # or ? (stripped by URL parsing,
+      // or decoded from %23/%3F by the caller), "/" is the only real delimiter.
+      //
+      // When `path` is provided (e.g. Next.js decoded catch-all slugs), values
+      // are already decoded — skip decoding. Otherwise decode percent-encoding
+      // from new URL(req.url).pathname.
+      const pathMatchFn = match(endpoint.path, {
+        decode: isPathnamePreDecoded ? (value) => value : decodeURIComponent,
+        delimiter: '/',
+      })
 
       const matchResult = pathMatchFn(adjustedPathname)
 
