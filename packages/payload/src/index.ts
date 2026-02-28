@@ -1260,6 +1260,74 @@ export const getPayload = async (
   return cached.payload
 }
 
+/**
+ * Clears the cached Payload instance from the global singleton cache.
+ *
+ * This function is useful when you need to force Payload to reinitialize,
+ * such as when application locale changes in internationalized applications
+ * or when configuration needs to be refreshed during development.
+ *
+ * The function will:
+ * - Properly destroy database connections to prevent connection leaks
+ * - Close WebSocket connections (used for HMR in development)
+ * - Remove the cached instance from the global `_payload` Map
+ *
+ * After calling this function, the next call to `getPayload()` will create
+ * a fresh Payload instance with the current configuration.
+ *
+ * @example
+ * ```ts
+ * import { clearPayloadCache, getPayload } from 'payload'
+ * import config from '@payload-config'
+ * import { getLocale } from 'next-intl/server'
+ *
+ * let lastLocale: string | null = null
+ *
+ * export async function getPayloadClient() {
+ *   const currentLocale = await getLocale()
+ *
+ *   // Clear cache if locale changed
+ *   if (lastLocale !== null && lastLocale !== currentLocale) {
+ *     await clearPayloadCache()
+ *   }
+ *
+ *   lastLocale = currentLocale
+ *
+ *   return await getPayload({ config })
+ * }
+ * ```
+ *
+ * @returns Promise that resolves when the cache has been cleared
+ */
+export const clearPayloadCache = async (): Promise<void> => {
+  if (!(global as any)._payload) {
+    return
+  }
+
+  const globalPayloadMap = (global as any)._payload as Map<string, any>
+
+  if (globalPayloadMap && globalPayloadMap.has('default')) {
+    const cached = globalPayloadMap.get('default')
+
+    // Close WebSocket connection if exists (HMR)
+    if (cached?.ws) {
+      try {
+        cached.ws.close()
+      } catch (error) {
+        // Silently ignore WebSocket close errors
+      }
+
+      // Destroy the payload instance properly
+      if (cached?.payload) {
+        await cached.payload.destroy?.()
+      }
+
+      // Clear from the map
+      globalPayloadMap.delete('default')
+    }
+  }
+}
+
 type Payload = BasePayload
 
 interface RequestContext {
