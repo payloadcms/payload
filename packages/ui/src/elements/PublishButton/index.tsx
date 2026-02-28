@@ -235,10 +235,22 @@ export function PublishButton({
       })
 
       if (result) {
+        setUnpublishedVersionCount(0)
+        setMostRecentVersionIsAutosaved(false)
         setHasPublishedDoc(true)
       }
     },
-    [api, collectionSlug, globalSlug, id, setHasPublishedDoc, submit, uploadStatus],
+    [
+      api,
+      collectionSlug,
+      globalSlug,
+      id,
+      setHasPublishedDoc,
+      setMostRecentVersionIsAutosaved,
+      setUnpublishedVersionCount,
+      submit,
+      uploadStatus,
+    ],
   )
 
   // Publish to all locales unless there are localized fields AND defaultLocalePublishOption is 'active'
