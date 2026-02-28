@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
@@ -450,9 +450,49 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
-      formattedValue = {
-        $options: 'i',
-        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      if (
+        'hasMany' in field &&
+        field.hasMany &&
+        ['number', 'select', 'text'].includes(field.type)
+      ) {
+        // For array fields, we need to use $elemMatch to search within array elements
+        if (typeof formattedValue === 'string') {
+          // Search for documents where any array element contains this string
+          const escapedValue = escapeRegExp(formattedValue)
+          return {
+            rawQuery: {
+              [path]: {
+                $elemMatch: {
+                  $options: 'i',
+                  $regex: escapedValue,
+                },
+              },
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          // Search for documents where any array element contains any of the search values
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => {
+                const escapedValue = escapeRegExp(String(val))
+                return {
+                  [path]: {
+                    $elemMatch: {
+                      $options: 'i',
+                      $regex: escapedValue,
+                    },
+                  },
+                }
+              }),
+            },
+          }
+        }
+      } else {
+        // Regular (non-hasMany) text field
+        formattedValue = {
+          $options: 'i',
+          $regex: escapeRegExp(formattedValue),
+        }
       }
     }
 

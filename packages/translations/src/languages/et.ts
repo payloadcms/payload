@@ -299,6 +299,9 @@ export const etTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'See {{label}} on prügikastis ja on ainult loetav.',
     documentLocked: 'Dokument lukustatud',
+    documentModified: 'Dokumenti muudetud',
+    documentOutOfDate:
+      'Seda dokumenti on hiljuti värskendanud teine kasutaja. Teie vaade on aegunud.',
     documents: 'Dokumendid',
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
@@ -363,6 +366,9 @@ export const etTranslations: DefaultTranslationsObject = {
     noOptions: 'Valikud puuduvad',
     noResults:
       '{{label}} ei leitud. Kas ühtegi {{label}} pole veel olemas või ükski ei vasta ülal määratud filtritele.',
+    noResultsDescription:
+      'Kas neid ei eksisteeri või ükski neist ei vasta filtritele, mille olete ülal määranud.',
+    noResultsFound: 'Tulemusi ei ole.',
     notFound: 'Ei leitud',
     nothingFound: 'Midagi ei leitud',
     noTrashResults: 'Pole {{label}} prügikastis.',
@@ -385,6 +391,7 @@ export const etTranslations: DefaultTranslationsObject = {
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
+    reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
     rename: 'Nimeta ümber',
     reset: 'Lähtesta',

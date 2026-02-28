@@ -304,6 +304,9 @@ export const myTranslations: DefaultTranslationsObject = {
     document: 'စာရွက်စာတမ်း',
     documentIsTrashed: 'Ini {{label}} telah dibuang dan hanya boleh dibaca sahaja.',
     documentLocked: 'စာရွက်စာတမ်းကိုပိတ်ထားသည်',
+    documentModified: 'Dokumen diubah',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini dikemas kini oleh pengguna lain. Pandangan anda adalah ketinggalan zaman.',
     documents: 'စာရွက်စာတမ်းများ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
@@ -369,6 +372,9 @@ export const myTranslations: DefaultTranslationsObject = {
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
     noResults:
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
+    noResultsDescription:
+      'Sama ada tiada yang wujud atau tiada yang sepadan dengan penapis yang anda tentukan di atas.',
+    noResultsFound: 'ရလဒ်မရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'Tiada {{label}} dalam tong sampah.',
@@ -392,6 +398,7 @@ export const myTranslations: DefaultTranslationsObject = {
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
+    reloadDocument: 'Muat semula dokumen',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',

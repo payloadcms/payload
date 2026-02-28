@@ -10,11 +10,6 @@ Trash (also known as soft delete) allows documents to be marked as deleted witho
 
 Soft delete is a safer way to manage content lifecycle, giving editors a chance to review and recover documents that may have been deleted by mistake.
 
-<Banner type="warning">
-  **Note:** The Trash feature is currently in beta and may be subject to change
-  in minor version updates.
-</Banner>
-
 ## Collection Configuration
 
 To enable soft deleting for a collection, set the `trash` property to `true`:
@@ -183,11 +178,84 @@ query {
 
 ## Access Control
 
-All trash-related actions (delete, permanent delete) respect the `delete` access control defined in your collection config.
+All trash-related actions (soft delete, permanent delete, restore) respect the `delete` access control defined in your collection config.
 
 This means:
 
 - If a user is denied delete access, they cannot soft delete or permanently delete documents
+
+### Differentiating Between Trash and Permanent Delete
+
+You can configure access control to allow some users to trash documents while restricting permanent deletion to admins only. This is useful when you want editors to be able to "delete" content (move to trash) but only allow administrators to permanently remove data.
+
+The `delete` access control function receives a `data` argument that contains the document data being set during the operation:
+
+- **When trashing:** `data.deletedAt` will be set to a timestamp
+- **When permanently deleting:** `data` will be `undefined`
+
+This pattern is similar to how `publish` access control works with `data._status`.
+
+#### Example: Allow All Users to Trash, Only Admins to Permanently Delete
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  trash: true,
+  access: {
+    delete: ({ req: { user }, data }) => {
+      // Not logged in - no access
+      if (!user) {
+        return false
+      }
+
+      // Admins can do anything (trash or permanently delete)
+      if (user.roles?.includes('admin')) {
+        return true
+      }
+
+      // Regular users: check what operation they're attempting
+      // If data.deletedAt is being set, it's a trash operation - allow it
+      if (data?.deletedAt) {
+        return true
+      }
+
+      // Otherwise it's a permanent delete - deny for non-admins
+      return false
+    },
+  },
+  fields: [
+    // ...
+  ],
+}
+```
+
+#### Example: Only Admins Can Delete (Both Trash and Permanent)
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const SensitiveData: CollectionConfig = {
+  slug: 'sensitive-data',
+  trash: true,
+  access: {
+    delete: ({ req: { user } }) => {
+      // Only allow admins to trash or permanently delete
+      return Boolean(user?.roles?.includes('admin'))
+    },
+  },
+  fields: [
+    // ...
+  ],
+}
+```
+
+In the Admin Panel, when a user has permission to trash but not permanently delete:
+
+- The delete button will be visible
+- The "Delete permanently" checkbox in the confirmation modal will be hidden
+- The user can only move documents to trash
 
 ## Versions and Trash
 

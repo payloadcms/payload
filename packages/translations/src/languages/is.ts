@@ -300,6 +300,8 @@ export const isTranslations: DefaultTranslationsObject = {
     document: 'Færsla',
     documentIsTrashed: 'Þetta {{label}} er í ruslinu og er skrifvarið.',
     documentLocked: 'Færsla læst',
+    documentModified: 'Skjal breytt',
+    documentOutOfDate: 'Þetta skjal var nýlega uppfært af öðrum notanda. Yfirlitið þitt er úrelt.',
     documents: 'Færslur',
     duplicate: 'Tvöfalda',
     duplicateWithoutSaving: 'Tvöfalda án þess að vista breytingar',
@@ -364,6 +366,9 @@ export const isTranslations: DefaultTranslationsObject = {
     noOptions: 'Engir valkostir',
     noResults:
       'Engar {{label}} fundust. Annað hvort er engin {{label}} til eða ekkert passar við síu sem þú hefur valið fyrir ofan.',
+    noResultsDescription:
+      'Það eru hvorki neinar til eða neinar sem passa við síurnar sem þú skilgreindir að ofan.',
+    noResultsFound: 'Engin niðurstöður.',
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
@@ -386,6 +391,7 @@ export const isTranslations: DefaultTranslationsObject = {
     previous: 'Fyrri',
     reindex: 'Endursetja leitargrunn',
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',
+    reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
     rename: 'Endurnefna',
     reset: 'Endurstilla',

@@ -301,6 +301,9 @@ export const plTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'To {{label}} jest w koszu i jest tylko do odczytu.',
     documentLocked: 'Dokument zablokowany',
+    documentModified: 'Dokument zmodyfikowany',
+    documentOutOfDate:
+      'Ten dokument został niedawno zaktualizowany przez innego użytkownika. Twoja wersja jest nieaktualna.',
     documents: 'Dokumenty',
     duplicate: 'Zduplikuj',
     duplicateWithoutSaving: 'Zduplikuj bez zapisywania zmian',
@@ -366,6 +369,9 @@ export const plTranslations: DefaultTranslationsObject = {
     noOptions: 'Brak opcji',
     noResults:
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
+    noResultsDescription:
+      'Albo żadne nie istnieją, albo żadne nie spełniają filtrów, które określiłeś powyżej.',
+    noResultsFound: 'Brak wyników.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',
@@ -388,6 +394,7 @@ export const plTranslations: DefaultTranslationsObject = {
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',
     reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',
+    reloadDocument: 'Przeładuj dokument',
     remove: 'Usuń',
     rename: 'Zmień nazwę',
     reset: 'Zresetuj',

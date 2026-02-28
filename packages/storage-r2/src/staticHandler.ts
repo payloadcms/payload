@@ -46,7 +46,7 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
       // Get object with range if needed
       // Due to https://github.com/cloudflare/workers-sdk/issues/6047
       // We cannot send a Headers instance to Miniflare
-      const obj: R2ObjectBody =
+      const obj =
         rangeResult.type === 'partial' && !isMiniflare
           ? await bucket?.get(key, {
               range: {
@@ -56,7 +56,7 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
             })
           : await bucket?.get(key)
 
-      if (obj?.body == undefined) {
+      if (!obj || obj.body == undefined) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 

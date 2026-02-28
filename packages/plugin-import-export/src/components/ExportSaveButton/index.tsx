@@ -6,6 +6,7 @@ import {
   toast,
   Translation,
   useConfig,
+  useField,
   useForm,
   useFormModified,
   useTranslation,
@@ -30,11 +31,19 @@ export const ExportSaveButton: React.FC = () => {
   const { getData, setModified } = useForm()
   const modified = useFormModified()
 
+  const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
+
+  const targetCollectionConfig = getEntityConfig({ collectionSlug: targetCollectionSlug })
+  const targetPluginConfig = targetCollectionConfig?.admin?.custom?.['plugin-import-export']
+
   const exportsCollectionConfig = getEntityConfig({ collectionSlug: 'exports' })
 
-  const disableSave = exportsCollectionConfig?.admin?.custom?.disableSave === true
+  const disableSave =
+    targetPluginConfig?.disableSave ?? exportsCollectionConfig?.admin?.custom?.disableSave === true
 
-  const disableDownload = exportsCollectionConfig?.admin?.custom?.disableDownload === true
+  const disableDownload =
+    targetPluginConfig?.disableDownload ??
+    exportsCollectionConfig?.admin?.custom?.disableDownload === true
 
   const label = t('general:save')
 
@@ -43,7 +52,7 @@ export const ExportSaveButton: React.FC = () => {
     let toastID: null | number | string = null
 
     try {
-      setModified(false) // Reset modified state
+      setModified(false)
       const data = getData()
 
       // Set a timeout to show toast if the request takes longer than 200ms
@@ -68,12 +77,10 @@ export const ExportSaveButton: React.FC = () => {
         },
       )
 
-      // Clear the timeout if fetch completes quickly
       if (timeoutID) {
         clearTimeout(timeoutID)
       }
 
-      // Dismiss the toast if it was shown
       if (toastID) {
         toast.dismiss(toastID)
       }

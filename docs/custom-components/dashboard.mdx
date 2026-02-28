@@ -28,20 +28,23 @@ Define widgets in your Payload config using the `admin.dashboard.widgets` proper
 import { buildConfig } from 'payload'
 
 export default buildConfig({
-  // ...
   admin: {
     dashboard: {
       widgets: [
         {
-          slug: 'user-stats',
-          ComponentPath: './components/UserStats.tsx#default',
-          minWidth: 'medium',
-          maxWidth: 'full',
-        },
-        {
-          slug: 'revenue-chart',
-          ComponentPath: './components/RevenueChart.tsx#default',
+          slug: 'sales-summary',
+          ComponentPath: './components/SalesSummary.tsx#default',
+          fields: [
+            { name: 'title', type: 'text' },
+            {
+              name: 'timeframe',
+              type: 'select',
+              options: ['daily', 'weekly', 'monthly', 'yearly'],
+            },
+            { name: 'showTrend', type: 'checkbox' },
+          ],
           minWidth: 'small',
+          maxWidth: 'medium',
         },
       ],
     },
@@ -55,6 +58,7 @@ export default buildConfig({
 | ------------------ | ------------- | -------------------------------------------------------------------- |
 | `slug` \*          | `string`      | Unique identifier for the widget                                     |
 | `ComponentPath` \* | `string`      | Path to the widget component (supports `#` syntax for named exports) |
+| `fields`           | `Field[]`     | Optional widget-specific form fields shown in the edit drawer        |
 | `minWidth`         | `WidgetWidth` | Minimum width the widget can be resized to (default: `'x-small'`)    |
 | `maxWidth`         | `WidgetWidth` | Maximum width the widget can be resized to (default: `'full'`)       |
 
@@ -103,6 +107,14 @@ export default buildConfig({
 
         return [
           { widgetSlug: 'collections', width: 'full' },
+          {
+            widgetSlug: 'sales-summary',
+            data: {
+              timeframe: 'monthly',
+              title: 'Revenue Overview',
+            },
+            width: isAdmin ? 'medium' : 'small',
+          },
           { widgetSlug: 'user-stats', width: isAdmin ? 'medium' : 'full' },
           { widgetSlug: 'revenue-chart', width: 'full' },
         ]
@@ -117,12 +129,38 @@ export default buildConfig({
 
 The `defaultLayout` function receives the request object and should return an array of `WidgetInstance` objects.
 
+If your widget has `fields`, you can type `widgetData` with generated widget types:
+
+```tsx
+import type { WidgetServerProps } from 'payload'
+
+import type { SalesSummaryWidget } from '../payload-types'
+
+export default async function SalesSummaryWidgetComponent({
+  widgetData,
+}: WidgetServerProps<SalesSummaryWidget>) {
+  const title = widgetData?.title ?? 'Sales Summary'
+  const timeframe = widgetData?.timeframe ?? 'monthly'
+
+  return (
+    <div className="card">
+      <h3>
+        {title} ({timeframe})
+      </h3>
+    </div>
+  )
+}
+```
+
 #### WidgetInstance Type
 
-| Property        | Type          | Description                                     |
-| --------------- | ------------- | ----------------------------------------------- |
-| `widgetSlug` \* | `string`      | Slug of the widget to display                   |
-| `width`         | `WidgetWidth` | Initial width of the widget (default: minWidth) |
+| Property        | Type          | Description                                          |
+| --------------- | ------------- | ---------------------------------------------------- |
+| `widgetSlug` \* | `string`      | Slug of the widget to display                        |
+| `data`          | `object`      | Optional widget-specific data passed to `widgetData` |
+| `width`         | `WidgetWidth` | Initial width of the widget (default: minWidth)      |
+
+`width` is constrained by each widget's `minWidth` and `maxWidth` when types are generated.
 
 <Banner type="success">
   **Tip:** Users can customize their dashboard layout, which is saved to their
@@ -145,9 +183,10 @@ Users can customize their dashboard by:
 1. Clicking the dashboard dropdown in the breadcrumb
 2. Selecting "Edit Dashboard"
 3. Adding widgets via the "Add +" button
-4. Resizing widgets using the width dropdown on each widget
-5. Reordering widgets via drag-and-drop
-6. Deleting widgets using the delete button
-7. Saving changes or canceling to revert
+4. Editing widget data (for widgets with `fields`) via the edit button
+5. Resizing widgets using the width dropdown on each widget (if multiple widths are allowed)
+6. Reordering widgets via drag-and-drop
+7. Deleting widgets using the delete button
+8. Saving changes or canceling to revert
 
 Users can also reset their dashboard to the default layout using the "Reset Layout" option.

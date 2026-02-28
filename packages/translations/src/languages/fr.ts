@@ -312,6 +312,9 @@ export const frTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Ce {{label}} est mis à la corbeille et est en lecture seule.',
     documentLocked: 'Document verrouillé',
+    documentModified: 'Document modifié',
+    documentOutOfDate:
+      'Ce document a récemment été mis à jour par un autre utilisateur. Votre vue est obsolète.',
     documents: 'Documents',
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
@@ -377,6 +380,9 @@ export const frTranslations: DefaultTranslationsObject = {
     noOptions: 'Aucune option',
     noResults:
       'Aucun(e) {{label}} trouvé(e). Soit aucun(e) {{label}} n’existe encore, soit aucun(e) ne correspond aux filtres que vous avez spécifiés ci-dessus',
+    noResultsDescription:
+      "Soit il n'en existe aucun, soit aucun ne correspond aux filtres que vous avez spécifiés ci-dessus.",
+    noResultsFound: 'Aucun résultat.',
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
     noTrashResults: 'Aucun {{label}} dans la corbeille.',
@@ -399,6 +405,7 @@ export const frTranslations: DefaultTranslationsObject = {
     previous: 'Précédent',
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
+    reloadDocument: 'Recharger le document',
     remove: 'Retirer',
     rename: 'Renommer',
     reset: 'Réinitialiser',

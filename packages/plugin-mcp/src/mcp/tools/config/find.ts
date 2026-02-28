@@ -115,10 +115,12 @@ export const findConfigTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'findConfig',
-    toolSchemas.findConfig.description,
-    toolSchemas.findConfig.parameters.shape,
+    {
+      description: toolSchemas.findConfig.description,
+      inputSchema: toolSchemas.findConfig.parameters.shape,
+    },
     ({ includeMetadata }) => {
       return tool(includeMetadata)
     },

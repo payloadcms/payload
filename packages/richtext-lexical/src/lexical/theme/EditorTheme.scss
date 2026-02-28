@@ -1,6 +1,12 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
+  @mixin textBase {
+    font-size: base(0.8);
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+
   .LexicalEditorTheme {
     &__ltr {
       text-align: left;
@@ -11,17 +17,15 @@
     }
 
     &__paragraph {
-      font-size: base(0.8);
+      @include textBase;
       margin-bottom: 0.55em;
       position: relative;
-      line-height: 1.5;
-      letter-spacing: normal;
       color: var(--theme-text);
     }
 
     &__quote {
+      @include textBase;
       color: var(--theme-text);
-      font-size: base(0.8);
       margin-block: base(0.8);
       margin-inline: base(0.2);
       border-inline-start-color: var(--theme-elevation-150);
@@ -37,6 +41,7 @@
     &__h4,
     &__h5,
     &__h6 {
+      @include textBase;
       font-family: var(--font-body);
       line-height: 1.125;
       letter-spacing: 0;
@@ -74,6 +79,7 @@
     }
 
     &__h6 {
+      @include textBase;
       font-size: base(0.8);
       font-weight: 700;
       margin-block: 0.75em 0.4em;
@@ -241,7 +247,7 @@
     }
 
     &__listItem {
-      font-size: base(0.8);
+      @include textBase;
       margin: 0 0 0.4em 40px;
       color: var(--theme-text);
     }
