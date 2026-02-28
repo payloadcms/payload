@@ -75,7 +75,7 @@ export const esTranslations: DefaultTranslationsObject = {
     youAreInactive:
       'Has estado inactivo por un tiempo y por tu seguridad se cerrará tu sesión automáticamente en breve. ¿Deseas mantener tu sesión abierta?',
     youAreReceivingResetPassword:
-      'Estás recibiendo este correo porque tú (o alguien más) ha solicitado restablecer la contraseña de tu cuenta. Por favor haz clic en el siguiente enlace o pégalo en tu navegador para completar el proceso:',
+      'Está recibiendo este correo porque se solicitó restablecer la contraseña de tu cuenta. Por favor haz clic en el siguiente enlace o pégalo en tu navegador para completar el proceso:',
     youDidNotRequestPassword:
       'Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.',
   },
@@ -191,7 +191,8 @@ export const esTranslations: DefaultTranslationsObject = {
     swapUpload: 'Cambiar carga',
     textToDisplay: 'Texto a mostrar',
     toggleBlock: 'Alternar bloque',
-    uploadNewLabel: 'Subir nuevo {{label}}',
+    // NOTE: Unused? Removed the "nuevo" for when it is used, but should probably be reviewed
+    uploadNewLabel: 'Subir {{label}}',
   },
   folder: {
     browseByFolder: 'Explorar por Carpeta',
@@ -207,13 +208,13 @@ export const esTranslations: DefaultTranslationsObject = {
     itemsMovedToRoot: '{{title}} movido a la carpeta raíz',
     moveFolder: 'Mover Carpeta',
     moveItemsToFolderConfirmation:
-      'Estás a punto de mover <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
+      'Está a punto de mover <1>{{count}} {{label}}</1> a <2>{{toFolder}}</2>. ¿Deseas continuar?',
     moveItemsToRootConfirmation:
-      'Estás a punto de mover <1>{{count}} {{label}}</1> a la carpeta raíz. ¿Estás seguro?',
+      'Está a punto de mover <1>{{count}} {{label}}</1> a la carpeta raíz. ¿Deseas continuar?',
     moveItemToFolderConfirmation:
-      'Estás a punto de mover <1>{{title}}</1> a <2>{{toFolder}}</2>. ¿Estás seguro?',
+      'Está a punto de mover <1>{{title}}</1> a <2>{{toFolder}}</2>. ¿Deseas continuar?',
     moveItemToRootConfirmation:
-      'Estás a punto de mover <1>{{title}}</1> a la carpeta raíz. ¿Estás seguro?',
+      'Está a punto de mover <1>{{title}}</1> a la carpeta raíz. ¿Deseas continuar?',
     movingFromFolder: 'Moviendo {{title}} desde {{fromFolder}}',
     newFolder: 'Nueva Carpeta',
     noFolder: 'Sin Carpeta',
@@ -223,22 +224,24 @@ export const esTranslations: DefaultTranslationsObject = {
   },
   general: {
     name: 'Nombre',
-    aboutToDelete: 'Estás por eliminar el {{label}} <1>{{title}}</1>. ¿Estás seguro?',
-    aboutToDeleteCount_many: 'Estás a punto de eliminar {{count}} {{label}}',
-    aboutToDeleteCount_one: 'Estás a punto de eliminar {{count}} {{label}}',
-    aboutToDeleteCount_other: 'Estás a punto de eliminar {{count}} {{label}}',
+    // NOTE: All of these could be improved. I decided to go with {{title}} ({{label}}), but I'm
+    // sure there are better alternatives I haven't think about
+    aboutToDelete: 'Se eliminará <1>{{title}}</1> ({{label}}). ¿Desea continuar?',
+    aboutToDeleteCount_many: 'Está a punto de eliminar {{count}} {{label}}',
+    aboutToDeleteCount_one: 'Está a punto de eliminar {{count}} {{label}}',
+    aboutToDeleteCount_other: 'Está a punto de eliminar {{count}} {{label}}',
     aboutToPermanentlyDelete:
-      'Está a punto de eliminar permanentemente la {{label}} <1>{{title}}</1>. ¿Está seguro?',
+      'Está a punto de eliminar permanentemente <1>{{title}}</1> ({{label}}). ¿Desea continuar?',
     aboutToPermanentlyDeleteTrash:
-      'Está a punto de eliminar permanentemente <0>{{count}}</0> <1>{{label}}</1> de la basura. ¿Está seguro?',
-    aboutToRestore: 'Está a punto de restaurar la {{label}} <1>{{title}}</1>. ¿Está seguro?',
+      'Está a punto de eliminar permanentemente <0>{{count}}</0> <1>{{label}}</1> de la basura. ¿Desea continuar?',
+    aboutToRestore: 'Está a punto de restaurar <1>{{title}}</1> ({{label}}). ¿Desea continuar?',
     aboutToRestoreAsDraft:
-      'Está a punto de restaurar la {{label}} <1>{{title}}</1> como borrador. ¿Está seguro?',
-    aboutToRestoreAsDraftCount: 'Estás a punto de restaurar {{count}} {{label}} como borrador',
-    aboutToRestoreCount: 'Estás a punto de restaurar {{count}} {{label}}',
+      'Está a punto de restaurar <1>{{title}}</1> ({{label}}) como borrador. ¿Desea continuar?',
+    aboutToRestoreAsDraftCount: 'Está a punto de restaurar {{count}} {{label}} como borrador',
+    aboutToRestoreCount: 'Está a punto de restaurar {{count}} {{label}}',
     aboutToTrash:
-      'Estás a punto de mover la {{label}} <1>{{title}}</1> a la papelera. ¿Estás seguro?',
-    aboutToTrashCount: 'Estás a punto de mover {{count}} {{label}} a la papelera',
+      'Está a punto de mover <1>{{title}}</1> ({{label}}) a la papelera. ¿Desea continuar?',
+    aboutToTrashCount: 'Está a punto de mover {{count}} {{label}} a la papelera',
     addBelow: 'Añadir abajo',
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',
@@ -254,7 +257,7 @@ export const esTranslations: DefaultTranslationsObject = {
     backToDashboard: 'Volver al Panel de Control',
     cancel: 'Cancelar',
     changesNotSaved:
-      'Tus cambios no han sido guardados. Si te sales ahora, se perderán tus cambios.',
+      'Tus cambios no han sido guardados. Si sales ahora, se perderán tus cambios.',
     clear: 'Claro',
     clearAll: 'Limpiar todo',
     close: 'Cerrar',
@@ -280,14 +283,14 @@ export const esTranslations: DefaultTranslationsObject = {
     copying: 'Copiando',
     copyRow: 'Copiar fila',
     copyWarning:
-      'Estás a punto de sobrescribir {{to}} con {{from}} para {{label}} {{title}}. ¿Estás seguro?',
+      'Está a punto de sobrescribir {{to}} con {{from}} para {{label}} {{title}}. ¿Deseas continuar?',
     create: 'Crear',
     created: 'Creado',
     createdAt: 'Fecha de creación',
-    createNew: 'Crear nuevo',
-    createNewLabel: 'Crear nuevo {{label}}',
+    createNew: 'Crear',
+    createNewLabel: 'Crear {{label}}',
     creating: 'Creando',
-    creatingNewLabel: 'Creando nuevo {{label}}',
+    creatingNewLabel: 'Creando {{label}}',
     currentlyEditing:
       'está editando este documento. Si tomas el control, se le impedirá continuar editando y podría perder los cambios no guardados.',
     custom: 'Personalizado',
@@ -305,7 +308,7 @@ export const esTranslations: DefaultTranslationsObject = {
     descending: 'Descendente',
     deselectAllRows: 'Deseleccionar todas las filas',
     document: 'Documento',
-    documentIsTrashed: 'Esta {{label}} está en la papelera y es de solo lectura.',
+    documentIsTrashed: '{{label}} está en la papelera y es de solo lectura.',
     documentLocked: 'Documento bloqueado',
     documentModified: 'Documento modificado',
     documentOutOfDate:
@@ -358,12 +361,15 @@ export const esTranslations: DefaultTranslationsObject = {
     moreOptions: 'Más opciones',
     move: 'Mover',
     moveConfirm:
-      'Estás a punto de mover {{count}} {{label}} a <1>{{destination}}</1>. ¿Estás seguro?',
+      'Está a punto de mover {{count}} {{label}} a <1>{{destination}}</1>. ¿Desea continuar?',
     moveCount: 'Mover {{count}} {{label}}',
     moveDown: 'Mover abajo',
     moveUp: 'Mover arriba',
     moving: 'Moviendo',
     movingCount: 'Moviendo {{count}} {{label}}',
+    // NOTE: Could clash, but only seems to be used in QueryPresetBar with "Preset"
+    // A better option would be "Crear {{label}}" or "Agregar {{label}}" depending
+    // on the context
     newLabel: 'Nuevo {{label}}',
     newPassword: 'Nueva contraseña',
     next: 'Siguiente',
@@ -374,7 +380,7 @@ export const esTranslations: DefaultTranslationsObject = {
     none: 'Ninguna',
     noOptions: 'Sin opciones',
     noResults:
-      'No se encontró ningún {{label}}. Puede que aún no existan o que no coincidan con los filtros aplicados.',
+      'No se encontró {{label}}. Puede que aún no existan o que no coincidan con los filtros aplicados.',
     noResultsDescription:
       'O bien ninguno existe o ninguno coincide con los filtros que ha especificado anteriormente.',
     noResultsFound: 'No hay resultados.',
@@ -421,12 +427,14 @@ export const esTranslations: DefaultTranslationsObject = {
     schedulePublishFor: 'Programar publicación para {{title}}',
     searchBy: 'Buscar por {{label}}',
     select: 'Seleccionar',
-    selectAll: 'Seleccionar los {{count}} {{label}}',
+    selectAll: 'Seleccionar {{count}} {{label}}',
     selectAllRows: 'Seleccionar todas las filas',
+    // NOTE: does work because it's only used with label = ''. The user can infer that the blank label is "items"
+    // Could be improved by replacing label with "items" or "elementos"
     selectedCount: '{{count}} {{label}} seleccionados',
     selectLabel: 'Seleccionar {{label}}',
     selectValue: 'Seleccionar un valor',
-    showAllLabel: 'Mostrar todos los {{label}}',
+    showAllLabel: 'Mostrar todos los elementos de {{label}}',
     sorryNotFound: 'Lo sentimos, no hay nada que coincida con tu solicitud.',
     sort: 'Ordenar',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
@@ -435,19 +443,19 @@ export const esTranslations: DefaultTranslationsObject = {
     submit: 'Enviar',
     submitting: 'Enviando...',
     success: 'Éxito',
-    successfullyCreated: '{{label}} creado con éxito.',
-    successfullyDuplicated: '{{label}} duplicado con éxito.',
+    successfullyCreated: '{{label}} se creó correctamente.',
+    successfullyDuplicated: '{{label}} se duplicó correctamente.',
     successfullyReindexed:
       'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
     takeOver: 'Tomar el control',
     thisLanguage: 'Español',
     time: 'Hora',
     timezone: 'Zona horaria',
-    titleDeleted: '{{label}} "{{title}}" eliminado con éxito.',
-    titleRestored: '{{label}} "{{title}}" restaurado con éxito.',
-    titleTrashed: '{{label}} "{{title}}" movido a la papelera.',
+    titleDeleted: '{{label}} "{{title}}" se eliminó con éxito.',
+    titleRestored: '{{label}} "{{title}}" se restauró con éxito.',
+    titleTrashed: '{{label}} "{{title}}" se movió a la papelera.',
     trash: 'Basura',
-    trashedCountSuccessfully: '{{count}} {{label}} movido a la papelera.',
+    trashedCountSuccessfully: '{{count}} {{label}} se movió a la papelera.',
     true: 'Verdadero',
     unauthorized: 'No autorizado',
     unlock: 'Desbloquear',
@@ -456,9 +464,9 @@ export const esTranslations: DefaultTranslationsObject = {
     untitled: 'Sin título',
     upcomingEvents: 'Próximos eventos',
     updatedAt: 'Última modificación',
-    updatedCountSuccessfully: '{{count}} {{label}} actualizados con éxito.',
-    updatedLabelSuccessfully: '{{label}} actualizado con éxito.',
-    updatedSuccessfully: 'Actualizado con éxito.',
+    updatedCountSuccessfully: '{{count}} {{label}} se actualizaron con éxito.',
+    updatedLabelSuccessfully: '{{label}} se actualizaron con éxito.',
+    updatedSuccessfully: 'Se actualizó con éxito.',
     updateForEveryone: 'Actualizar para todos',
     updating: 'Actualizando',
     uploading: 'Subiendo',
@@ -469,7 +477,7 @@ export const esTranslations: DefaultTranslationsObject = {
     value: 'Valor',
     viewing: 'Visualización',
     viewReadOnly: 'Ver solo lectura',
-    welcome: 'Bienvenido',
+    welcome: 'Te damos la bienvenida',
     yes: 'Sí',
   },
   localization: {
@@ -562,17 +570,17 @@ export const esTranslations: DefaultTranslationsObject = {
   version: {
     type: 'Tipo',
     aboutToPublishSelection:
-      'Estás a punto de publicar todos los {{label}} seleccionados. ¿Estás seguro?',
+      'Se publicarán todos los elementos seleccionados de {{label}}. ¿Deseas continuar?',
     aboutToRestore:
-      'Estás a punto de restaurar este documento de {{label}} al estado en el que se encontraba el {{versionDate}}.',
+      'Está a punto de restaurar este documento de {{label}} al estado en el que se encontraba el {{versionDate}}.',
     aboutToRestoreGlobal:
-      'Estás a punto de restaurar el {{label}} global al estado en el que se encontraba el {{versionDate}}.',
+      'Está a punto de restaurar el {{label}} global al estado en el que se encontraba el {{versionDate}}.',
     aboutToRevertToPublished:
-      'Estás a punto de revertir los cambios de este documento a su estado publicado. ¿Estás seguro?',
-    aboutToUnpublish: 'Estás a punto de despublicar este documento. ¿Estás seguro?',
-    aboutToUnpublishIn: 'Está a punto de despublicar este documento en {{locale}}. ¿Está seguro?',
+      'Está a punto de revertir los cambios de este documento a su estado publicado. ¿Deseas continuar?',
+    aboutToUnpublish: 'Está a punto de despublicar este documento. ¿Deseas continuar?',
+    aboutToUnpublishIn: 'Está a punto de despublicar este documento en {{locale}}. ¿Deseas continuar?',
     aboutToUnpublishSelection:
-      'Estás a punto de despublicar todos los {{label}} seleccionados. ¿Estás seguro?',
+      'Está a punto de despublicar todos los elementos de {{label}} seleccionados. ¿Deseas continuar?',
     autosave: 'Autoguardado',
     autosavedSuccessfully: 'Guardado automáticamente con éxito.',
     autosavedVersion: 'Versión Autoguardada',
@@ -600,6 +608,7 @@ export const esTranslations: DefaultTranslationsObject = {
     noFurtherVersionsFound: 'No se encontraron más versiones',
     noLabelGroup: 'Grupo sin nombre',
     noRowsFound: 'No se encontraron {{label}}.',
+    // NOTE: could clash, but found no use of it on the codebase
     noRowsSelected: 'No se ha seleccionado ningún {{label}}.',
     preview: 'Vista previa',
     previouslyDraft: 'Previamente un Borrador',
