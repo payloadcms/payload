@@ -75,6 +75,7 @@ export const RootLayout = async ({
     const cookies = await nextCookies()
     cookies.set({
       name: `${config.cookiePrefix || 'payload'}-lng`,
+      maxAge: 60 * 60 * 24 * 365,
       path: '/',
       value: lang,
     })
