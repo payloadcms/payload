@@ -84,6 +84,7 @@ function mapPayloadEmailToResendEmail(
     attachments: mapAttachments(message.attachments),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
+    headers: message.headers,
   } as ResendSendEmailOptions
 }
 
