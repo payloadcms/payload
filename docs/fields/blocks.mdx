@@ -148,51 +148,91 @@ Blocks are defined as separate configs of their own.
   trivializes their reusability.
 </Banner>
 
-| Option                     | Description                                                                                                                                                                                                                                     |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                                                                                        |
-| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                                                                                     |
-| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.                                                                 |
-| **`imageURL`**             | Provide a custom image thumbnail URL to help editors identify this block in the Admin UI. The image will be displayed in a 3:2 aspect ratio container and cropped using `object-fit: cover` if needed. [More details](#block-image-guidelines). |
-| **`imageAltText`**         | Customize this block's image thumbnail alt text.                                                                                                                                                                                                |
-| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                             |
-| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                                                                                    |
-| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                                                                                           |
-| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                       |
+| Option                     | Description                                                                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`slug`** \*              | Identifier for this block type. Will be saved on each block as the `blockType` property.                                                                                            |
+| **`fields`** \*            | Array of fields to be stored in this block.                                                                                                                                         |
+| **`labels`**               | Customize the block labels that appear in the Admin dashboard. Auto-generated from slug if not defined. Alternatively you can use `admin.components.Label` for greater control.     |
+| **`interfaceName`**        | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). |
+| **`graphQL.singularName`** | Text to use for the GraphQL schema name. Auto-generated from slug if not defined. NOTE: this is set for deprecation, prefer `interfaceName`.                                        |
+| **`dbName`**               | Custom table name for this block type when using SQL Database Adapter ([Postgres](/docs/database/postgres)). Auto-generated from slug if not defined.                               |
+| **`custom`**               | Extension point for adding custom data (e.g. for plugins)                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
+### Admin Options
+
+Blocks are not fields, so they don’t inherit the base properties shared by all fields (not to be confused with the Blocks Field, documented above, which does). Here are their available admin options:
+
+| Option                 | Description                                                                                                                                                                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| **`components.Block`** | Custom component for replacing the Block, including the header.                                                                                                                                                                                                |
+| **`components.Label`** | Custom component for replacing the Block Label.                                                                                                                                                                                                                |
+| **`disableBlockName`** | Hide the blockName field by setting this value to `true`.                                                                                                                                                                                                      |
+| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer.                                                                                                                                                                                     |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                      |
+| **`images`**           | Custom images for the block in different UI contexts. Supports `icon` (20x20px for Lexical menus/toolbars) and `thumbnail` (3:2 ratio for block selection drawer). Each can be a URL string or `{ url, alt }` object. [More details](#block-image-guidelines). |     |
+
 ### Block Image Guidelines
 
-When providing a custom thumbnail via `imageURL`, it's important to understand how images are displayed in the Admin UI to ensure they look correct.
+The `images` property lets you provide custom images for each display context:
 
-**Aspect Ratio and Cropping**:
+- **`images.icon`** - Small icon for Lexical editor menus and toolbars (displayed at 20x20px)
+- **`images.thumbnail`** - Larger thumbnail for block selection drawer (3:2 aspect ratio)
 
-- The image container uses a **3:2 aspect ratio** (e.g., 480x320 pixels)
-- Images are scaled using `object-fit: cover`, which means:
-  - Images that don't match 3:2 will be **cropped** to fill the container
-  - The image maintains its aspect ratio while being scaled
-  - Cropping is centered, removing edges as needed
+Each can be either a plain URL string or an object `{ url: string, alt?: string }`.
 
-**Display Contexts**:
+#### Icon (`images.icon`)
 
-1. **Block Selection Drawer**: Images appear as thumbnails in a responsive grid when editors add blocks
-2. **Lexical Editor**: Images are scaled down to 20x20px icons in menus and toolbars
+Used in Lexical editor slash menus, toolbar dropdowns, and inline block menus.
+
+**Requirements**:
+
+- Displayed at **20x20 pixels**
+- **Square images** (1:1 aspect ratio) work best
+- Falls back to `images.thumbnail`, then to default block icon
 
 **Recommendations**:
 
-- Use images with a **3:2 aspect ratio** to avoid unwanted cropping (e.g., 480x320, 600x400, 900x600)
-- Keep important visual content **centered** in your image, as edges may be cropped
-- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
-- Always include `imageAltText` for accessibility
+- Use SVG for crisp rendering at small sizes
+- Keep designs simple with bold shapes
+- Provide web-optimized images (SVG, PNG with transparency)
 
-**Example**:
+#### Thumbnail (`images.thumbnail`)
+
+Used in the block selection drawer when editors add blocks to a blocks field.
+
+**Requirements**:
+
+- **3:2 aspect ratio** (e.g., 480x320, 600x400, 900x600)
+- Images are scaled using `object-fit: cover`
+- Non-matching aspect ratios will be **cropped** to fill the container
+
+**Recommendations**:
+
+- Use images with **3:2 aspect ratio** to avoid unwanted cropping
+- Keep important visual content **centered** in your image
+- Provide web-optimized images (JPEG, PNG, WebP) for faster loading
+
+#### Usage Examples
+
+**Example 1: Using both icon and thumbnail with alt text**
 
 ```ts
 const QuoteBlock: Block = {
   slug: 'quote',
-  imageURL: 'https://example.com/thumbnails/quote-block-480x320.jpg',
-  imageAltText: 'Quote block with text and attribution',
+  admin: {
+    images: {
+      icon: {
+        url: 'https://example.com/icons/quote-icon-20x20.svg',
+        alt: 'Quote icon',
+      },
+      thumbnail: {
+        url: 'https://example.com/thumbnails/quote-block-480x320.jpg',
+        alt: 'Quote block',
+      },
+    },
+  },
   fields: [
     {
       name: 'quoteText',
@@ -203,19 +243,41 @@ const QuoteBlock: Block = {
 }
 ```
 
-If no `imageURL` is provided, a default placeholder graphic is displayed automatically.
+**Example 2: Using URL strings (no alt text)**
 
-### Admin Options
+```ts
+const CallToActionBlock: Block = {
+  slug: 'cta',
+  admin: {
+    images: {
+      icon: 'https://example.com/icons/cta-20x20.svg',
+      thumbnail: 'https://example.com/thumbnails/cta-block-480x320.jpg',
+    },
+  },
+  fields: [
+    {
+      name: 'buttonText',
+      type: 'text',
+    },
+  ],
+}
+```
 
-Blocks are not fields, so they don’t inherit the base properties shared by all fields (not to be confused with the Blocks Field, documented above, which does). Here are their available admin options:
+**Example 3: Using only icon**
 
-| Option                 | Description                                                                |
-| ---------------------- | -------------------------------------------------------------------------- |
-| **`components.Block`** | Custom component for replacing the Block, including the header.            |
-| **`components.Label`** | Custom component for replacing the Block Label.                            |
-| **`disableBlockName`** | Hide the blockName field by setting this value to `true`.                  |
-| **`group`**            | Text or localization object used to group this Block in the Blocks Drawer. |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                  |
+```ts
+const DividerBlock: Block = {
+  slug: 'divider',
+  admin: {
+    images: {
+      icon: 'https://example.com/icons/divider-20x20.svg',
+    },
+  },
+  fields: [],
+}
+```
+
+If no `images` is provided, default graphics are displayed automatically in both contexts.
 
 ### blockType, blockName, and block.label
 
