@@ -10,6 +10,7 @@ export const PostsCollection: CollectionConfig = {
     useAsTitle: 'title',
     enableListViewSelectAPI: true,
   },
+  defaultSort: '-updatedAt',
   fields: [
     {
       name: 'title',
@@ -21,6 +22,14 @@ export const PostsCollection: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
+    },
+    {
+      type: 'relationship',
+      name: 'relatedArticle',
+      relationTo: 'posts',
+      admin: {
+        sortOptions: '-updatedAt',
+      },
     },
   ],
 }
