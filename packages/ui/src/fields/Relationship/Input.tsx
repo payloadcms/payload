@@ -32,6 +32,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRelationshipValueCache } from '../../providers/RelationshipValueCache/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -86,6 +87,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
+  const { clearAll, getCachedDoc, getDoc, invalidateDoc, updateDoc } =
+    useRelationshipValueCache()
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -420,67 +423,70 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation
 
-      const idsToLoad = ids.filter((id) => {
-        return !options.find((optionGroup) =>
+      const idsToLoad: (number | string)[] = []
+      const cachedDocs: Record<string, unknown>[] = []
+
+      for (const id of ids) {
+        // Check local options first (already rendered in the dropdown)
+        const existsInOptions = options.find((optionGroup) =>
           optionGroup?.options?.find(
             (option) => option.value === id && option.relationTo === relation,
           ),
         )
-      })
 
-      if (idsToLoad.length > 0) {
-        const collection = getEntityConfig({ collectionSlug: relation })
-        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
-
-        const query = {
-          depth: 0,
-          draft: true,
-          limit: idsToLoad.length,
-          locale,
-          select: {
-            [fieldToSelect]: true,
-          },
-          where: {
-            id: {
-              in: idsToLoad,
-            },
-          },
+        if (existsInOptions) {
+          continue
         }
 
-        if (!errorLoading) {
-          const response = await fetch(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/${relation}`,
-            }),
-            {
-              body: qs.stringify(query),
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Payload-HTTP-Method-Override': 'GET',
-              },
-              method: 'POST',
-            },
-          )
-          let docs = []
-
-          if (response.ok) {
-            const data = await response.json()
-            docs = data.docs
-          }
-
-          dispatchOptions({
-            type: 'ADD',
-            collection,
-            config,
-            docs,
-            i18n,
-            ids: idsToLoad,
-            sort: true,
-          })
+        // Check shared cache
+        const cached = getCachedDoc(relation, locale, id)
+        if (cached) {
+          cachedDocs.push(cached.doc)
+        } else {
+          idsToLoad.push(id)
         }
+      }
+
+      const collection = getEntityConfig({ collectionSlug: relation })
+      const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
+      // Add cached docs to options immediately
+      if (cachedDocs.length > 0) {
+        dispatchOptions({
+          type: 'ADD',
+          collection,
+          config,
+          docs: cachedDocs,
+          i18n,
+          sort: true,
+        })
+      }
+
+      // Fetch remaining via the batching provider
+      if (idsToLoad.length > 0 && !errorLoading) {
+        const fetchPromises = idsToLoad.map((id) =>
+          getDoc({
+            id,
+            collection: relation,
+            locale,
+            select: { [fieldToSelect]: true },
+          }),
+        )
+
+        const results = await Promise.all(fetchPromises)
+        const docs = results
+          .filter((r): r is NonNullable<typeof r> => r != null)
+          .map((r) => r.doc)
+
+        dispatchOptions({
+          type: 'ADD',
+          collection,
+          config,
+          docs,
+          i18n,
+          ids: idsToLoad,
+          sort: true,
+        })
       }
     }, Promise.resolve())
   })
@@ -525,6 +531,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       doc: mostRecentUpdate.doc,
       i18n,
     })
+
+    updateDoc(mostRecentUpdate.entitySlug, locale, docID, mostRecentUpdate.doc)
 
     if (hasMany) {
       const currentValue = value ? (Array.isArray(value) ? value : [value]) : []
@@ -595,6 +603,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         i18n,
       })
 
+      invalidateDoc(args.collectionConfig.slug, locale, String(args.id))
+
       if (hasMany) {
         onChange(
           value
@@ -609,7 +619,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       return
     },
-    [i18n, config, hasMany, onChange, value],
+    [i18n, config, hasMany, invalidateDoc, locale, onChange, value],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -697,9 +707,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       exemptValues: valueRef.current,
     })
 
+    clearAll()
+
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
+  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany, clearAll])
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)

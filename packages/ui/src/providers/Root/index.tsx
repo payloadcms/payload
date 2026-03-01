@@ -30,6 +30,7 @@ import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
+import { RelationshipValueCacheProvider } from '../RelationshipValueCache/index.js'
 import { RouteCache } from '../RouteCache/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
@@ -111,17 +112,22 @@ export const RootProvider: React.FC<Props> = ({
                                     <StepNavProvider>
                                       <LoadingOverlayProvider>
                                         <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
+                                          <RelationshipValueCacheProvider
+                                            apiRoute={config.routes.api}
+                                            i18nLanguage={languageCode}
+                                          >
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              <UploadHandlersProvider>
+                                                <DndContext
+                                                  collisionDetection={pointerWithin}
+                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                  id={dndContextID}
+                                                >
+                                                  {children}
+                                                </DndContext>
+                                              </UploadHandlersProvider>
+                                            </NavProvider>
+                                          </RelationshipValueCacheProvider>
                                         </DocumentEventsProvider>
                                       </LoadingOverlayProvider>
                                     </StepNavProvider>
