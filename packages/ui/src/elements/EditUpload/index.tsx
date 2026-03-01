@@ -10,6 +10,7 @@ import 'react-image-crop/dist/ReactCrop.css'
 import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateImageSrcWithCacheTag } from '../../utilities/generateCacheTagSrc.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
@@ -169,7 +170,10 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setFocalPosition({ x: xCenter, y: yCenter })
   }
 
-  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${encodeURIComponent(imageCacheTag)}` : fileSrc
+  const fileSrcToUse = generateImageSrcWithCacheTag({
+    cacheTag: imageCacheTag,
+    src: fileSrc,
+  })
 
   return (
     <div className={baseClass}>
