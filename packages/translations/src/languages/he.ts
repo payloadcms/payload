@@ -79,8 +79,17 @@ export const heTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword: 'אם לא ביקשת זאת, אנא התעלם מההודעה והסיסמה שלך תישאר ללא שינוי.',
   },
   dashboard: {
+    addButton: 'הוסף +',
     addWidget: "הוסף וידג'ט",
     deleteWidget: "מחק וידג'ט {{id}}",
+    discardConfirmLabel: 'בטל',
+    discardMessage: 'יש לך שינויים שלא נשמרו לפריסת הלוח. האם אתה בטוח שאתה רוצה להתעלם מהם?',
+    discardTitle: 'לבטל שינויים?',
+    editDashboard: 'ערוך את לוח המחוונים',
+    editingDashboard: 'עריכת לוח בקרה',
+    noItems:
+      'אין יישומונים בלוח הבקרה שלך. אתה יכול להוסיף אותם מתפריט "לוח הבקרה" שממוקם בבר העליון.',
+    resetLayout: 'איפוס תצוגה',
     searchWidgets: "חפש ווידג'טים...",
   },
   error: {
@@ -92,6 +101,8 @@ export const heTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'המסמך עם המזהה {{id}} לא נמצא. ייתכן שהוא נמחק או שלעולם לא היה, או שאין לך גישה אליו.',
     emailOrPasswordIncorrect: 'כתובת הדוא"ל או הסיסמה שסופקו אינם נכונים.',
+    failedToResetLayout: 'נכשל באיפוס הפריסה.',
+    failedToSaveLayout: 'נכשל בשמירת הפריסה.',
     followingFieldsInvalid_one: 'השדה הבא אינו תקין:',
     followingFieldsInvalid_other: 'השדות הבאים אינם תקינים:',
     incorrectCollection: 'אוסף שגוי',

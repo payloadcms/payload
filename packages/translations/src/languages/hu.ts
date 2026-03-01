@@ -82,8 +82,18 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
   dashboard: {
+    addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',
     deleteWidget: 'Törölje a(z) {{id}} widgetet',
+    discardConfirmLabel: 'Elvetés',
+    discardMessage:
+      'Mentett változtatásai vannak az irányítópult elrendezésében. Biztosan el szeretné vetni őket?',
+    discardTitle: 'Elveti a változtatásokat?',
+    editDashboard: 'Műszerfal szerkesztése',
+    editingDashboard: 'Szerkesztési irányítópult',
+    noItems:
+      'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
+    resetLayout: 'Alaphelyzet visszaállítása',
     searchWidgets: 'Keresés widgetek...',
   },
   error: {
@@ -96,6 +106,8 @@ export const huTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'A dokumentum azonosítóval {{id}} nem található. Lehet, hogy törölték, soha nem létezett, vagy Önnek nincs hozzáférése hozzá.',
     emailOrPasswordIncorrect: 'A megadott e-mail-cím vagy jelszó helytelen.',
+    failedToResetLayout: 'A felület visszaállítása sikertelen.',
+    failedToSaveLayout: 'Nem sikerült menteni az elrendezést.',
     followingFieldsInvalid_one: 'A következő mező érvénytelen:',
     followingFieldsInvalid_other: 'A következő mezők érvénytelenek:',
     incorrectCollection: 'Helytelen gyűjtemény',

@@ -80,8 +80,18 @@ export const azTranslations: DefaultTranslationsObject = {
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
   dashboard: {
+    addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',
     deleteWidget: 'Vidgeti silin {{id}}',
+    discardConfirmLabel: 'Atılma',
+    discardMessage:
+      'Sizin panel düzenlemənizdə saxlanmamış dəyişikliklər var. Onları ləğvetmək istədiyinizə əminsinizmi?',
+    discardTitle: 'Dəyişiklikləri ləğv edin?',
+    editDashboard: 'İdarə Panelini Redaktə Et',
+    editingDashboard: 'Redaktə Paneli',
+    noItems:
+      'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
+    resetLayout: 'Düzəni sıfırlama',
     searchWidgets: 'Widgetləri axtarın...',
   },
   error: {
@@ -94,6 +104,8 @@ export const azTranslations: DefaultTranslationsObject = {
     documentNotFound:
       '{{id}} ID-li sənəd tapılmadı. Bu, onun silinmiş və ya heç vaxt mövcud olmamış ola bilər və ya sizin ona giriş hüququnuz olmayabilir.',
     emailOrPasswordIncorrect: 'Təqdim olunan e-poçt və ya şifrə yanlışdır.',
+    failedToResetLayout: 'Düzeni sıfırlamaq uğursuz oldu.',
+    failedToSaveLayout: 'Dizaynı saxlamaq alınmadı.',
     followingFieldsInvalid_one: 'Aşağıdakı sahə yanlışdır:',
     followingFieldsInvalid_other: 'Aşağıdaki sahələr yanlışdır:',
     incorrectCollection: 'Yanlış Kolleksiya',

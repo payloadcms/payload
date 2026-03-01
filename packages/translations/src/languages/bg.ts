@@ -80,8 +80,18 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Ако не си заявил това, игнорирай този имейл и паролата ти ще остане непроменена.',
   },
   dashboard: {
+    addButton: 'Добавете +',
     addWidget: 'Добави джаджа',
     deleteWidget: 'Изтрийте джаджа {{id}}',
+    discardConfirmLabel: 'Отхвърляне',
+    discardMessage:
+      'Имате незапазени промени в оформлението на таблото си. Сигурни ли сте, че искате да ги отхвърлите?',
+    discardTitle: 'Отхвърляне на промените?',
+    editDashboard: 'Редактирай таблото',
+    editingDashboard: 'Редактиране на таблото',
+    noItems:
+      'Няма джаджи на таблото ви. Можете да ги добавите от менюто "Табло", което е разположено в горната лента.',
+    resetLayout: 'Рестартирай Оформлението',
     searchWidgets: 'Търсене на джаджи...',
   },
   error: {
@@ -94,6 +104,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документът с ID {{id}} не можа да бъде намерен. Възможно е да е бил изтрит или никога да не е съществувал или може би нямате достъп до него.',
     emailOrPasswordIncorrect: 'Имейлът или паролата не са правилни.',
+    failedToResetLayout: 'Неуспешно нулиране на оформлението.',
+    failedToSaveLayout: 'Неуспешно запазване на оформлението.',
     followingFieldsInvalid_one: 'Следното поле е некоректно:',
     followingFieldsInvalid_other: 'Следните полета са некоректни:',
     incorrectCollection: 'Грешна колекция',

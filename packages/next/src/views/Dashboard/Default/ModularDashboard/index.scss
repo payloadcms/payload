@@ -275,7 +275,8 @@
         position: absolute;
         top: 100%;
         left: 0;
-        min-width: 150px;
+        min-width: max-content;
+        width: max-content;
         z-index: 9999;
         border-radius: 4px;
         padding: 5px;

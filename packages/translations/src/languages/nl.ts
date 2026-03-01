@@ -81,8 +81,18 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
   dashboard: {
+    addButton: 'Voeg toe +',
     addWidget: 'Widget toevoegen',
     deleteWidget: 'Verwijder widget {{id}}',
+    discardConfirmLabel: 'Verwijderen',
+    discardMessage:
+      'U heeft niet-opgeslagen wijzigingen in de lay-out van uw dashboard. Weet u zeker dat u ze wilt verwijderen?',
+    discardTitle: 'Wijzigingen verwerpen?',
+    editDashboard: 'Dashboard bewerken',
+    editingDashboard: 'Dashboard bewerken',
+    noItems:
+      'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
+    resetLayout: 'Herstel Lay-out',
     searchWidgets: 'Zoek widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Het document met ID {{id}} kon niet worden gevonden. Het kan zijn verwijderd of heeft nooit bestaan, of u heeft mogelijk geen toegang tot het.',
     emailOrPasswordIncorrect: 'Het opgegeven e-mailadres of wachtwoord is onjuist.',
+    failedToResetLayout: 'Het opnieuw instellen van de lay-out is mislukt.',
+    failedToSaveLayout: 'Opslaan lay-out mislukt.',
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
