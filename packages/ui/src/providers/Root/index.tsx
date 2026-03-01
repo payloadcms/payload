@@ -22,7 +22,7 @@ import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
 import { StepNavProvider } from '../../elements/StepNav/index.js'
 import { ClickOutsideProvider } from '../../providers/ClickOutside/index.js'
-import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
+import { windowInfoBreakpoints, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
@@ -91,14 +91,7 @@ export const RootProvider: React.FC<Props> = ({
                   switchLanguageServerAction={switchLanguageServerAction}
                   translations={translations}
                 >
-                  <WindowInfoProvider
-                    breakpoints={{
-                      l: '(max-width: 1440px)',
-                      m: '(max-width: 1024px)',
-                      s: '(max-width: 768px)',
-                      xs: '(max-width: 400px)',
-                    }}
-                  >
+                  <WindowInfoProvider breakpoints={windowInfoBreakpoints}>
                     <ScrollInfoProvider>
                       <SearchParamsProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
