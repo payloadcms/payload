@@ -220,6 +220,18 @@ describe('parseParams', () => {
       const result = parseParams({ where })
       expect(result.where).toBe(where)
     })
+
+    it('should parse where when it is a JSON string', () => {
+      const where = { read: { equals: false } }
+      const result = parseParams({ where: JSON.stringify(where) })
+      expect(result.where).toEqual(where)
+    })
+
+    it('should leave where unchanged when it is already an object', () => {
+      const where = { read: { equals: false } }
+      const result = parseParams({ where })
+      expect(result.where).toBe(where)
+    })
   })
 
   describe('edge cases', () => {
