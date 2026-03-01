@@ -810,6 +810,25 @@ export type SanitizedDashboardConfig = {
   widgets: Array<Omit<Widget, 'ComponentPath'>>
 }
 
+export type SidebarTab = {
+  /** Component to render as tab content */
+  component: CustomComponent
+  /** Disable this tab */
+  disabled?: boolean
+  /** Component to render as tab icon */
+  icon: CustomComponent
+  /** Make this tab active by default */
+  isDefaultActive?: boolean
+  /**
+   * Label for accessibility and tab display.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the slug will be used as fallback.
+   */
+  label?: LabelFunction | StaticLabel
+  /** Unique identifier for override/disable */
+  slug: string
+}
+
 /**
  * This is the central configuration
  *
@@ -922,6 +941,11 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /** Sidebar configuration */
+      sidebar?: {
+        /** Extensible tab system */
+        tabs?: SidebarTab[]
+      }
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`

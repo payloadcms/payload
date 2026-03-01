@@ -73,6 +73,14 @@ export function iterateConfig({
 
   addToImportMap(config.admin?.components?.providers)
 
+  // Sidebar tabs
+  if (config.admin?.components?.sidebar?.tabs?.length) {
+    for (const tab of config.admin.components.sidebar.tabs) {
+      addToImportMap(tab.icon)
+      addToImportMap(tab.component)
+    }
+  }
+
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {
       for (const key in config.admin?.components?.views) {
