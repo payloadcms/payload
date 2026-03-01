@@ -1,7 +1,6 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
-import chalk from 'chalk'
 import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
