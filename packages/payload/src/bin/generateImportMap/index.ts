@@ -155,6 +155,7 @@ export async function writeImportMap({
 
   const importMapOutputFile = `${imports.join('\n')}
 
+/** @type import('payload').ImportMap */
 export const importMap = {
 ${mapKeys.join(',\n')}
 }
