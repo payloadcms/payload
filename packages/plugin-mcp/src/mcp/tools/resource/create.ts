@@ -114,7 +114,7 @@ export const createResourceTool = (
             text: `Resource created successfully in collection "${collectionSlug}"!
 Created resource:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

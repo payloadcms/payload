@@ -115,7 +115,7 @@ export const deleteResourceTool = (
               text: `Document deleted successfully from collection "${collectionSlug}"!
 Deleted document:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
             },
           ],
@@ -148,14 +148,14 @@ Errors: ${errors.length}
         if (docs.length > 0) {
           responseText += `\n\nDeleted documents:
 \`\`\`json
-${JSON.stringify(docs, null, 2)}
+${JSON.stringify(docs)}
 \`\`\``
         }
 
         if (errors.length > 0) {
           responseText += `\n\nErrors:
 \`\`\`json
-${JSON.stringify(errors, null, 2)}
+${JSON.stringify(errors)}
 \`\`\``
         }
 
