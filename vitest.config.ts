@@ -54,6 +54,16 @@ export default defineConfig({
           setupFiles: ['./test/vitest.setup.ts'],
         },
       },
+      {
+        test: {
+          include: ['test/evals/**/*.spec.ts'],
+          name: 'eval',
+          environment: 'node',
+          fileParallelism: false,
+          // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
+          testTimeout: 600000,
+        },
+      },
     ],
   },
 })
