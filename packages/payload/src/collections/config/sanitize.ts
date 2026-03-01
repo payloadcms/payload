@@ -27,6 +27,7 @@ import {
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { sanitizeHierarchy } from './sanitizeHierarchy.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
@@ -236,6 +237,8 @@ export const sanitizeCollection = async (
   } else if (sanitized.folders) {
     sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
   }
+
+  sanitizeHierarchy(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {

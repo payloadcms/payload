@@ -11,6 +11,13 @@ AGENTS.local.md
 CLAUDE.local.md
 .claude/commands/*.local.md
 .claude/artifacts
+.claude/skills/add-config-custom-component/
+.claude/skills/check-payload-patterns/
+.claude/skills/log-pattern/
+.claude/skills/payload-hooks/
+.claude/skills/payload-operations/
+.claude/skills/refactoring/
+.claude/skills/writing-scss/
 .worktrees/
 
 # Custom actions

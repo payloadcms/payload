@@ -1,0 +1,25 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .spinner {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    color: var(--theme-elevation-400);
+
+    &__circle {
+      width: 15px;
+      height: 15px;
+      border: 2px solid var(--theme-elevation-200);
+      border-top-color: var(--theme-elevation-500);
+      border-radius: 50%;
+      animation: spinner-spin 0.6s linear infinite;
+    }
+  }
+
+  @keyframes spinner-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

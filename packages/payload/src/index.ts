@@ -121,6 +121,11 @@ import {
 } from './globals/operations/local/update.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -150,18 +155,13 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-/**
- * Export of all base fields that could potentially be
- * useful as users wish to extend built-in fields with custom logic
- */
-export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
-
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
+
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
@@ -1307,11 +1307,10 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
-
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1359,9 +1358,10 @@ export type {
 } from './collections/config/types.js'
 
 export type { CompoundIndex } from './collections/config/types.js'
-export type { SanitizedCompoundIndex } from './collections/config/types.js'
 
+export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1386,8 +1386,8 @@ export {
   type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
-
 export { type OrderableEndpointBody } from './config/orderable/index.js'
+
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1511,12 +1511,10 @@ export {
 export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
 
 export { type SlugField } from './fields/baseFields/slug/index.js'
-
 export {
   createClientBlocks,
   createClientField,
@@ -1524,16 +1522,6 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
 
 export { sanitizeFields } from './fields/config/sanitize.js'
 
@@ -1645,14 +1633,24 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
+
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
@@ -1688,6 +1686,7 @@ export type {
   UsernameFieldValidation,
 } from './fields/validations.js'
 export type { FolderSortKeys } from './folders/types.js'
+
 export { getFolderData } from './folders/utils/getFolderData.js'
 export {
   type ClientGlobalConfig,
@@ -1712,13 +1711,14 @@ export { docAccessOperation as docAccessOperationGlobal } from './globals/operat
 export { findOneOperation } from './globals/operations/findOne.js'
 
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
+
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
+
 export type {
   CollapsedPreferences,
   CollectionPreferences,
