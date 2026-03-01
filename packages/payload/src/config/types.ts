@@ -39,6 +39,7 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
+import type { Slugify } from '../fields/baseFields/slug/index.js'
 import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
@@ -1459,6 +1460,13 @@ export type Config = {
    *
    */
   sharp?: SharpDependency
+  /**
+   * Provide a custom slugify function to be used as the default for all slug fields.
+   * Can be overridden at the field level by passing a `slugify` function to `slugField()`.
+   *
+   * @see https://payloadcms.com/docs/fields/text#slug-field
+   */
+  slugify?: Slugify
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */

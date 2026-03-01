@@ -39,6 +39,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'queryPresets'
   | 'secret'
   | 'sharp'
+  | 'slugify'
   | 'typescript'
 >
 
@@ -84,6 +85,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'editor',
   'plugins',
   'sharp',
+  'slugify',
   'onInit',
   'secret',
   'hooks',
