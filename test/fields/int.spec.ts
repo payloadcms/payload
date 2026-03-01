@@ -4149,6 +4149,44 @@ describe('Fields', () => {
         expect(noMatchDocIDs).toContain(relDoc1.id)
         expect(noMatchDocIDs).not.toContain(relDoc2.id)
       })
+
+      it('should not throw when querying hasMany relationship with equals array', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        const equalsResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              equals: [text1.id],
+            },
+          },
+        })
+
+        expect(equalsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(true)
+
+        const notEqualsResult = await payload.find({
+          collection: 'relationship-fields',
+          where: {
+            relationshipHasMany: {
+              not_equals: [text1.id],
+            },
+          },
+        })
+
+        expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
+      })
     })
   })
 
