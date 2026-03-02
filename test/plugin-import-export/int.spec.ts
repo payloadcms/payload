@@ -3123,6 +3123,93 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPagesEs.docs[0]?.localized).toBe('Spanish text 1')
     })
 
+    it('should import localized fields correctly regardless of CSV column order', async () => {
+      // CSV columns intentionally put 'de' before 'en' (the defaultLocale)
+      // to verify the import uses defaultLocale, not CSV column order
+      const csvContent =
+        'title,localized_de,localized_en,localized_es\n' +
+        '"Locale Order Test 1","German text 1","English text 1","Spanish text 1"\n' +
+        '"Locale Order Test 2","German text 2","English text 2","Spanish text 2"'
+
+      const csvBuffer = Buffer.from(csvContent)
+
+      let importDoc = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 'locale-order-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      await payload.jobs.run()
+
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.imported).toBe(2)
+      expect(importDoc.summary?.issues).toBe(0)
+
+      // Verify English (defaultLocale) has the correct English values, not German
+      const importedPagesEn = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'en',
+        sort: 'title',
+      })
+
+      expect(importedPagesEn.docs).toHaveLength(2)
+      expect(importedPagesEn.docs[0]?.localized).toBe('English text 1')
+      expect(importedPagesEn.docs[1]?.localized).toBe('English text 2')
+
+      // Verify German has the correct German values, not missing
+      const importedPagesDe = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'de',
+        sort: 'title',
+      })
+
+      expect(importedPagesDe.docs).toHaveLength(2)
+      expect(importedPagesDe.docs[0]?.localized).toBe('German text 1')
+      expect(importedPagesDe.docs[1]?.localized).toBe('German text 2')
+
+      // Verify Spanish has the correct Spanish values
+      const importedPagesEs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'es',
+        sort: 'title',
+      })
+
+      expect(importedPagesEs.docs).toHaveLength(2)
+      expect(importedPagesEs.docs[0]?.localized).toBe('Spanish text 1')
+      expect(importedPagesEs.docs[1]?.localized).toBe('Spanish text 2')
+
+      // Cleanup
+      await payload.delete({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+      })
+    })
+
     it('should import array fields from CSV', async () => {
       const csvContent =
         'title,array_0_field1,array_0_field2,array_1_field1,array_1_field2\n' +
