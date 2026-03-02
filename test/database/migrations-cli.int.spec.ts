@@ -136,4 +136,46 @@ describe('migrations CLI', () => {
       'Test predefined migration from payload/__testing__/predefinedMigration',
     )
   })
+
+  it('should exit without prompting when using --non-interactive with no schema changes', async () => {
+    const config = await configPromise
+
+    // First, create an initial migration to establish baseline schema
+    await migrateCLI({
+      config,
+      migrationDir,
+      parsedArgs: {
+        _: ['migrate:create', 'initial'],
+        forceAcceptWarning: true,
+      },
+    })
+
+    // Clear the migration directory after baseline
+    const initialFiles = fs
+      .readdirSync(migrationDir)
+      .filter((f) => f.endsWith('.ts') && !f.startsWith('index'))
+    expect(initialFiles.length).toBeGreaterThan(0)
+
+    // Now run migrate:create with --non-interactive when no NEW schema changes exist
+    // This should exit without prompting or creating additional files
+    const fileCountBefore = fs
+      .readdirSync(migrationDir)
+      .filter((f) => f.endsWith('.ts') && !f.startsWith('index')).length
+
+    await migrateCLI({
+      config,
+      migrationDir,
+      parsedArgs: {
+        _: ['migrate:create', 'test_migration'],
+        nonInteractive: true,
+      },
+    })
+
+    const fileCountAfter = fs
+      .readdirSync(migrationDir)
+      .filter((f) => f.endsWith('.ts') && !f.startsWith('index')).length
+
+    // Should not create new migration when no schema changes and nonInteractive is true
+    expect(fileCountAfter).toBe(fileCountBefore)
+  })
 })
