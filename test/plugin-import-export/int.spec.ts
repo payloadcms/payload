@@ -743,6 +743,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.status).toBe(200)
       expect(response.headers.get('content-type')).toMatch(/application\/json/)
 
+      const contentDisposition = response.headers.get('content-disposition')
+      expect(contentDisposition).toContain('-pages.json')
+
       const data = await response.json()
 
       expect(Array.isArray(data)).toBe(true)
@@ -2321,6 +2324,161 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(data[0].excerpt).toBe(specialCharsExcerpt)
 
         await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should preserve Hebrew characters in CSV download via streaming endpoint', async () => {
+        const hebrewTitle = 'Hebrew BOM Test'
+        const hebrewLocalized = 'בדיקה עברית'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: hebrewTitle,
+            localized: hebrewLocalized,
+            _status: 'published',
+          },
+          locale: 'he',
+        })
+
+        const response = await restClient.POST('/exports/download', {
+          body: JSON.stringify({
+            data: {
+              collectionSlug: 'pages',
+              fields: ['id', 'title', 'localized'],
+              format: 'csv',
+              locale: 'he',
+              where: { id: { equals: page.id } },
+            },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toMatch(/text\/csv/)
+        expect(response.headers.get('content-type')).toContain('charset=utf-8')
+
+        const contentDisposition = response.headers.get('content-disposition')
+        expect(contentDisposition).toContain('-pages.csv')
+
+        const buffer = Buffer.from(await response.arrayBuffer())
+
+        // Verify UTF-8 BOM is present
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew text is correctly encoded in the CSV body
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewLocalized)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should preserve Hebrew characters in job-created CSV export', async () => {
+        const hebrewTitle = 'Hebrew Jobs Test'
+        const hebrewLocalized = 'שלום עולם'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: hebrewTitle,
+            localized: hebrewLocalized,
+            _status: 'published',
+          },
+          locale: 'he',
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'localized'],
+            format: 'csv',
+            locale: 'he',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+
+        // Verify filename includes collection slug and csv extension
+        expect(doc.filename).toContain('-pages')
+        expect(doc.filename).toMatch(/\.csv$/)
+        expect(doc.mimeType).toContain('charset=utf-8')
+
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // Verify UTF-8 BOM
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew text is readable
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewLocalized)
+
+        // Verify via CSV parse
+        const data = await readCSV(csvPath)
+        expect(data[0].localized).toBe(hebrewLocalized)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should preserve Hebrew characters in hook-created CSV export (no jobs queue)', async () => {
+        const hebrewTitle = 'Hebrew Hooks Test'
+        const hebrewContent = 'טקסט בעברית'
+
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            title: hebrewTitle,
+            content: richTextData,
+            _status: 'published',
+          },
+        })
+
+        const doc = await payload.create({
+          collection: 'posts-export',
+          user,
+          data: {
+            collectionSlug: 'posts',
+            fields: ['id', 'title'],
+            format: 'csv',
+            where: { id: { equals: post.id } },
+          },
+        })
+
+        const exportDoc = await payload.findByID({
+          collection: 'posts-export',
+          id: doc.id,
+        })
+
+        // Verify filename includes collection slug and csv extension
+        expect(exportDoc.filename).toContain('-posts')
+        expect(exportDoc.filename).toMatch(/\.csv$/)
+        expect(exportDoc.mimeType).toContain('charset=utf-8')
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // Verify UTF-8 BOM
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew title is correctly encoded
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewTitle)
+
+        // Verify via CSV parse
+        const data = await readCSV(csvPath)
+        expect(data[0].title).toBe(hebrewTitle)
+
+        await payload.delete({ collection: 'posts', id: post.id })
       })
     })
 
