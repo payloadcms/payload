@@ -4,26 +4,8 @@ import type { PayloadRequest } from 'payload'
 import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
+import { removeCollectionFromConfig } from '../../helpers/config.js'
 import { toolSchemas } from '../schemas.js'
-
-// Helper function for removing collection from config
-const removeCollectionFromConfig = (configContent: string, collectionName: string): string => {
-  // Simple implementation - find and remove the collection import and reference
-  let updatedContent = configContent
-
-  // Remove import statement
-  const importRegex = new RegExp(
-    `import\\s*{\\s*${collectionName}\\s*}\\s*from\\s*['"]\\./collections/${collectionName}['"];?\\s*\\n?`,
-    'g',
-  )
-  updatedContent = updatedContent.replace(importRegex, '')
-
-  // Remove from collections array
-  const collectionsRegex = new RegExp(`\\s*${collectionName},?\\s*`, 'g')
-  updatedContent = updatedContent.replace(collectionsRegex, '')
-
-  return updatedContent
-}
 
 export const deleteCollection = (
   req: PayloadRequest,

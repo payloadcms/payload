@@ -312,6 +312,9 @@ export const daTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er smidt væk og er kun til læsning.',
     documentLocked: 'Dette dokument er låst',
+    documentModified: 'Dokument ændret',
+    documentOutOfDate:
+      'Dette dokument er for nylig blevet opdateret af en anden bruger. Din visning er forældet.',
     documents: 'Dokumenter',
     duplicate: 'Duplikér',
     duplicateWithoutSaving: 'Dupliker uden at gemme ændringer',
@@ -402,6 +405,7 @@ export const daTranslations: DefaultTranslationsObject = {
     previous: 'Tidligere',
     reindex: 'Genindekser',
     reindexingAll: 'Genindekserer alle {{collections}}.',
+    reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
     rename: 'Omdøb',
     reset: 'Nulstil',

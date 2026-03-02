@@ -293,6 +293,51 @@ describe('Lexical', () => {
     )
   })
 
+  describe('upload markdown: Lexical → Markdown (export)', () => {
+    it('exports upload node to markdown placeholder when unpopulated', async () => {
+      const newLexicalDoc = await payload.create({
+        collection: lexicalFieldsSlug,
+        depth: 0,
+        data: {
+          title: 'Lexical Upload Markdown Unpopulated',
+          lexicalWithBlocks: {
+            root: {
+              type: 'root',
+              format: '',
+              indent: 0,
+              version: 1,
+              children: [
+                {
+                  format: '',
+                  type: 'upload',
+                  version: 2,
+                  relationTo: 'uploads',
+                  value: createdJPGDocID,
+                  fields: {},
+                },
+              ],
+              direction: 'ltr',
+            },
+          },
+        },
+      })
+
+      expect(newLexicalDoc.lexicalWithBlocks_markdown).toEqual(`![uploads:${createdJPGDocID}]()`)
+    })
+
+    it('exported markdown contains upload placeholder in seeded doc', async () => {
+      const lexicalDoc = await payload.find({
+        collection: lexicalFieldsSlug,
+        depth: 0,
+        where: { title: { equals: lexicalDocData.title } },
+      })
+
+      const markdown = lexicalDoc.docs[0]?.lexicalWithBlocks_markdown as string
+      expect(markdown).toBeDefined()
+      expect(markdown).toContain(`![uploads:${createdJPGDocID}]()`)
+    })
+  })
+
   describe('converters and migrations', () => {
     it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
       const lexicalDoc: LexicalMigrateField = (

@@ -7,6 +7,10 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
+import {
+  getGlobalVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
 import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -45,6 +49,10 @@ export const updateGlobalTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${globalSlug}: ${JSON.stringify(parsedData)}`,

@@ -316,6 +316,9 @@ export const azTranslations: DefaultTranslationsObject = {
     document: 'Sənəd',
     documentIsTrashed: 'Bu {{label}} zibil qutusuna atılıb və yalnız oxuna bilər.',
     documentLocked: 'Sənəd kilidləndi',
+    documentModified: 'Sənəd dəyişdirildi',
+    documentOutOfDate:
+      'Bu sənəd yeni başqa bir istifadəçi tərəfindən yenilənib. Sizin baxışınız köhnədir.',
     documents: 'Sənədlər',
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
@@ -406,6 +409,7 @@ export const azTranslations: DefaultTranslationsObject = {
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
+    reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
     rename: 'Yenidən adlandırın',
     reset: 'Yenidən başlat',

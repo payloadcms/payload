@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-vercel-blob",
-  "version": "3.77.0",
+  "version": "3.78.0",
   "description": "Payload storage adapter for Vercel Blob Storage",
   "homepage": "https://payloadcms.com",
   "repository": {

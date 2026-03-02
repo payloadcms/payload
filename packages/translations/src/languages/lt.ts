@@ -317,6 +317,9 @@ export const ltTranslations: DefaultTranslationsObject = {
     document: 'Dokumentas',
     documentIsTrashed: 'Šis {{label}} yra ištrintas ir yra tik skaitymui.',
     documentLocked: 'Dokumentas užrakintas',
+    documentModified: 'Dokumentas modifikuotas',
+    documentOutOfDate:
+      'Šis dokumentas neseniai buvo atnaujintas kitos naudotojo. Jūsų vaizdas yra pasenusi.',
     documents: 'Dokumentai',
     duplicate: 'Dublikatas',
     duplicateWithoutSaving: 'Dubliuoti be įrašytų pakeitimų',
@@ -406,6 +409,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',
+    reloadDocument: 'Perkrauti dokumentą',
     remove: 'Pašalinti',
     rename: 'Pervadinti',
     reset: 'Atstatyti',

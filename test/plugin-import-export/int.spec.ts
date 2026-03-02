@@ -4530,7 +4530,7 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
-      it('should respect defaultVersionStatus configuration', async () => {
+      it('should respect defaultVersionStatus configuration and create published documents', async () => {
         const csvContent =
           'title,excerpt\n"Default Status Test 1","Test excerpt 1"\n"Default Status Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
@@ -4570,11 +4570,119 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         expect(publishedPages.totalDocs).toBe(2)
+        publishedPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('published')
+        })
 
         await payload.delete({
           collection: 'pages',
           where: {
             title: { contains: 'Default Status Test ' },
+          },
+        })
+      })
+
+      it('should create draft documents when explicit _status:draft is in CSV', async () => {
+        const csvContent =
+          'title,excerpt,_status\n"Explicit Draft Test 1","Test excerpt 1","draft"\n"Explicit Draft Test 2","Test excerpt 2","draft"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'explicit-draft-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const draftPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Explicit Draft Test ' },
+          },
+          draft: true,
+        })
+
+        expect(draftPages.totalDocs).toBe(2)
+        draftPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('draft')
+        })
+
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Explicit Draft Test ' },
+          },
+        })
+      })
+
+      it('should create published documents in upsert mode when document does not exist', async () => {
+        const csvContent =
+          'title,excerpt\n"Upsert New Published Test 1","Test excerpt 1"\n"Upsert New Published Test 2","Test excerpt 2"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'upsert',
+            matchField: 'title',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'upsert-new-published-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const publishedPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Upsert New Published Test ' },
+          },
+          draft: false,
+        })
+
+        expect(publishedPages.totalDocs).toBe(2)
+        publishedPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('published')
+        })
+
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Upsert New Published Test ' },
           },
         })
       })
@@ -5622,6 +5730,7 @@ describe('@payloadcms/plugin-import-export', () => {
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('failed')
@@ -5636,6 +5745,72 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         expect(importedDocs.totalDocs).toBe(0)
+      })
+
+      it('should create draft documents when defaultVersionStatus is draft in plugin config', async () => {
+        const csvContent =
+          'title,_status\n"Default Draft Config Test 1",""\n"Default Draft Config Test 2",""\n"Default Draft Config Override Test","published"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'default-draft-config-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const draftDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { contains: 'Default Draft Config Test' },
+          },
+          draft: true,
+        })
+
+        expect(draftDocs.totalDocs).toBe(2)
+        draftDocs.docs.forEach((doc) => {
+          expect(doc._status).toBe('draft')
+        })
+
+        const publishedDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { equals: 'Default Draft Config Override Test' },
+          },
+          draft: false,
+        })
+
+        expect(publishedDocs.totalDocs).toBe(1)
+        expect(publishedDocs.docs[0]?._status).toBe('published')
+
+        await payload.delete({
+          collection: 'posts-imports-only',
+          where: {
+            or: [
+              { title: { contains: 'Default Draft Config Test' } },
+              { title: { equals: 'Default Draft Config Override Test' } },
+            ],
+          },
+        })
       })
     })
   })

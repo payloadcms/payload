@@ -1,5 +1,7 @@
 import type { PayloadRequest, TypedUser } from 'payload'
 
+import { isolateObjectProperty } from 'payload'
+
 import type { ImportMode, ImportResult } from './createImport.js'
 
 import {
@@ -141,13 +143,20 @@ async function processImportBatch({
   importMode,
   matchField,
   options,
-  req,
+  req: reqFromArgs,
   user,
 }: ProcessImportBatchOptions): Promise<ImportBatchResult> {
   const result: ImportBatchResult = {
     failed: [],
     successful: [],
   }
+  // Create a request proxy that isolates the transactionID property, then clear it.
+  // This is critical because if a nested operation fails (e.g., Forbidden due to access control),
+  // Payload's error handling calls killTransaction(req), which would kill the parent's transaction
+  // if we shared the same transaction. By isolating and clearing transactionID, each nested
+  // operation either uses no transaction or starts its own, independent of the parent.
+  const req = isolateObjectProperty(reqFromArgs, 'transactionID')
+  req.transactionID = undefined
 
   const collectionEntry = req.payload.collections[collectionSlug]
 
@@ -183,6 +192,7 @@ async function processImportBatch({
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
           draftOption = !isPublished
+          createData._status = statusValue
 
           if (req.payload.config.debug) {
             req.payload.logger.info({
@@ -192,9 +202,6 @@ async function processImportBatch({
               willSetDraft: draftOption,
             })
           }
-
-          // Remove _status from data - it's controlled via draft option
-          delete createData._status
         }
 
         if (req.payload.config.debug && 'title' in createData) {
@@ -460,8 +467,7 @@ async function processImportBatch({
             const statusValue = createData._status || options.defaultVersionStatus
             const isPublished = statusValue !== 'draft'
             draftOption = !isPublished
-            // Remove _status from data - it's controlled via draft option
-            delete createData._status
+            createData._status = statusValue
           }
 
           // Check if we have multi-locale data and extract it

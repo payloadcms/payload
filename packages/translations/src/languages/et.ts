@@ -311,6 +311,9 @@ export const etTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'See {{label}} on prügikastis ja on ainult loetav.',
     documentLocked: 'Dokument lukustatud',
+    documentModified: 'Dokumenti muudetud',
+    documentOutOfDate:
+      'Seda dokumenti on hiljuti värskendanud teine kasutaja. Teie vaade on aegunud.',
     documents: 'Dokumendid',
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
@@ -400,6 +403,7 @@ export const etTranslations: DefaultTranslationsObject = {
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
+    reloadDocument: 'Laadige dokument uuesti',
     remove: 'Eemalda',
     rename: 'Nimeta ümber',
     reset: 'Lähtesta',

@@ -11,8 +11,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import {
   cleanupDocuments,
   cleanupGlobal,
@@ -1012,15 +1012,14 @@ describe('Versions', () => {
           draft: true,
         })
 
-        await expect(async () => {
-          // should not be able to publish a doc that fails validation
-          await payload.update({
+        await expect(
+          payload.update({
             id: doc.id,
             collection: draftCollectionSlug,
             data: { _status: 'published' },
             draft: true,
-          })
-        }).rejects.toThrow(ValidationError)
+          }),
+        ).rejects.toThrow(ValidationError)
 
         // succeeds but returns zero docs updated, with an error
         const updateManyResult = await payload.update({
@@ -2324,6 +2323,57 @@ describe('Versions', () => {
         expect(versions.docs[0].version.title.en).toStrictEqual(newEnglishTitle)
         expect(versions.docs[0].version.title.es).toStrictEqual(spanishTitle)
       })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
+
+      it('should have correct updatedAt timestamps for globals when saving drafts with autosave', async () => {
+        const created = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'title',
+          },
+          draft: true,
+        })
+
+        await wait(10)
+
+        const updated = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: {
+            title: 'updated title',
+          },
+          draft: true,
+          autosave: true,
+        })
+
+        const createdUpdatedAt = new Date(created.updatedAt)
+        const updatedUpdatedAt = new Date(updated.updatedAt)
+
+        expect(Number(updatedUpdatedAt)).toBeGreaterThan(Number(createdUpdatedAt))
+      })
     })
 
     describe('Restore', () => {
@@ -3371,6 +3421,69 @@ describe('Versions', () => {
 
         expect(latestVersion.text.es).toBeUndefined()
         expect(latestVersion.text.en).toStrictEqual('English publish')
+      })
+
+      it('should preserve block metadata when publishing specific locale with blocks added after initial save', async () => {
+        // Step 1: Create doc without blocks (simulates autosave before blocks are added)
+        const draft = await payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            text: 'English draft',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        // Step 2: Update with blocks
+        await payload.update({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+          data: {
+            blocks: [
+              {
+                blockType: 'block',
+                array: [],
+              },
+            ],
+            text: 'English with blocks',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        // Step 3: Publish only English locale
+        const published = await payload.update({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+          data: {
+            _status: 'published',
+            blocks: [
+              {
+                blockType: 'block',
+                array: [],
+              },
+            ],
+            text: 'English published with blocks',
+          },
+          draft: false,
+          locale: 'en',
+          publishSpecificLocale: 'en',
+        })
+
+        // Blocks should be preserved with blockType intact
+        expect(published.blocks).toHaveLength(1)
+        expect(published.blocks[0].blockType).toBe('block')
+        expect(published.blocks[0].id).toBeDefined()
+
+        // Verify via findByID as well
+        const found = await payload.findByID({
+          id: draft.id,
+          collection: localizedCollectionSlug,
+        })
+
+        expect(found.blocks).toHaveLength(1)
+        expect(found.blocks[0].blockType).toBe('block')
+        expect(found.blocks[0].id).toBeDefined()
       })
     })
 

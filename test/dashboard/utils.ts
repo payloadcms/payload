@@ -110,12 +110,12 @@ export class DashboardHelper {
     const widget = this.widgetByPos(arg.position)
     await widget.hover()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
-    await expect(widthButton).toBeVisible()
-    if (await widthButton.isDisabled()) {
+    if ((await widthButton.count()) === 0) {
       await expect(widget).toHaveAttribute('data-width', arg.min)
       await expect(widget).toHaveAttribute('data-width', arg.max)
       return
     }
+    await expect(widthButton).toBeVisible()
     await widthButton.click()
     const activePopup = this.page.locator('.popup__content:visible')
     await expect(activePopup).toBeVisible()
@@ -189,6 +189,20 @@ export class DashboardHelper {
     await widget.getByText('Delete widget').click()
     expect(await widgetDomElem?.isHidden()).toBe(true)
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
+  }
+
+  editWidget = async (position: number, title: string) => {
+    const widget = this.widgetByPos(position)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = this.page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+    const titleInput = drawer.locator('input[name="title"], input[name="data.title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill(title)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
   }
 
   cancelEditing = async () => {

@@ -313,6 +313,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     document: 'Փաստաթուղթ',
     documentIsTrashed: 'Այս {{label}}-ն աղբարկղած է և հասանելի է միայն ընթերցման համար։',
     documentLocked: 'Փաստաթուղթը կողպված է',
+    documentModified: 'Փաստաթուղթը փոփոխված է',
+    documentOutOfDate:
+      'Այս փաստաթուղթը վերջերս թարմացրել է մեկ այլ օգտագործող։ Ձեր տեսքը անթարմացած է։',
     documents: 'Փաստաթղթեր',
     duplicate: 'Կրկնօրինակել',
     duplicateWithoutSaving: 'Կրկնօրինակել առանց փոփոխությունները պահպանելու',
@@ -403,6 +406,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     previous: 'Նախորդ',
     reindex: 'Վերաինդեքսավորել',
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',
+    reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
     reset: 'Վերակայել',

@@ -315,6 +315,9 @@ export const enTranslations = {
     document: 'Document',
     documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
+    documentModified: 'Document modified',
+    documentOutOfDate:
+      'This document was recently updated by another user. Your view is out of date.',
     documents: 'Documents',
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
@@ -404,6 +407,7 @@ export const enTranslations = {
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',
+    reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',

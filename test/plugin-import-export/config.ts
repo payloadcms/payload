@@ -130,11 +130,15 @@ export default buildConfigWithDefaults({
         {
           slug: 'posts-exports-only',
           import: false,
+          export: {
+            format: 'csv',
+          },
         },
         {
           slug: 'posts-imports-only',
           export: false,
           import: {
+            defaultVersionStatus: 'draft',
             disableJobsQueue: true,
           },
         },

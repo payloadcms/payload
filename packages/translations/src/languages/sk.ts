@@ -315,6 +315,9 @@ export const skTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Táto {{label}} je v koši a je iba na čítanie.',
     documentLocked: 'Dokument je zamknutý',
+    documentModified: 'Dokument bol upravený',
+    documentOutOfDate:
+      'Tento dokument bol nedávno aktualizovaný iným používateľom. Váš pohľad je zastaraný.',
     documents: 'Dokumenty',
     duplicate: 'Duplikovať',
     duplicateWithoutSaving: 'Duplikovať bez uloženia zmien',
@@ -403,6 +406,7 @@ export const skTranslations: DefaultTranslationsObject = {
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',
+    reloadDocument: 'Obnoviť dokument',
     remove: 'Odstrániť',
     rename: 'Premenovať',
     reset: 'Resetovať',
