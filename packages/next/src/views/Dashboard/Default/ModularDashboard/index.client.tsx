@@ -143,10 +143,7 @@ export function ModularDashboardClient({
         >
           {currentLayout?.length === 0 && (
             <div className="modular-dashboard__empty">
-              <p>
-                There are no widgets on your dashboard. You can add them from the "Dashboard" menu
-                located in the top bar.
-              </p>
+              <p>{t('dashboard:noItems')}</p>
             </div>
           )}
           {currentLayout?.map((widget, _index) => (

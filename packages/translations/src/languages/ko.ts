@@ -80,8 +80,17 @@ export const koTranslations: DefaultTranslationsObject = {
       '비밀번호 초기화를 요청하지 않았다면 이 이메일을 무시하시고 비밀번호를 변경하지 마세요.',
   },
   dashboard: {
+    addButton: '더하다',
     addWidget: '위젯 추가',
     deleteWidget: '위젯 {{id}} 삭제',
+    discardConfirmLabel: '버리다',
+    discardMessage:
+      '대시보드 레이아웃에 저장되지 않은 변경 사항이 있습니다. 정말로 이를 버리시겠습니까?',
+    discardTitle: '변경 사항을 취소하시겠습니까?',
+    editDashboard: '대시보드 편집',
+    editingDashboard: '대시보드 편집',
+    noItems: '대시보드에 위젯이 없습니다. 상단 바에 위치한 "대시보드" 메뉴에서 추가할 수 있습니다.',
+    resetLayout: '레이아웃 재설정',
     searchWidgets: '위젯 검색...',
   },
   error: {
@@ -94,6 +103,8 @@ export const koTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID가 {{id}}인 문서를 찾을 수 없습니다. 이 문서는 삭제되었거나 존재하지 않았거나, 당신이 접근 권한이 없을 수 있습니다.',
     emailOrPasswordIncorrect: '입력한 이메일 또는 비밀번호가 올바르지 않습니다.',
+    failedToResetLayout: '레이아웃 리셋에 실패하였습니다.',
+    failedToSaveLayout: '레이아웃 저장에 실패했습니다.',
     followingFieldsInvalid_one: '다음 입력란이 유효하지 않습니다:',
     followingFieldsInvalid_other: '다음 입력란이 유효하지 않습니다:',
     incorrectCollection: '잘못된 컬렉션',
