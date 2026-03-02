@@ -30,6 +30,7 @@ export function iterateCollections({
     })
 
     addToImportMap(collection.admin?.components?.afterList)
+    addToImportMap(collection.admin?.components?.listSelectionItems)
     addToImportMap(collection.admin?.components?.listMenuItems)
     addToImportMap(collection.admin?.components?.afterListTable)
     addToImportMap(collection.admin?.components?.beforeList)
